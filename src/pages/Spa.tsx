@@ -1,12 +1,19 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useBusinessByType } from "@/hooks/useBusinesses";
-import { NextAvailableWidget, WaitlistCTA } from "@/components/booking";
+import { NextAvailableWidget, WaitlistCTA, SpaBookingForm } from "@/components/booking";
 import { Sparkles, Clock, Users, Heart } from "lucide-react";
 
 export default function Spa() {
   const { data: business } = useBusinessByType("spa");
+  const [showBookingForm, setShowBookingForm] = useState(false);
+
+  const handleBookingSuccess = (bookingId: string) => {
+    setShowBookingForm(false);
+  };
 
   return (
     <div className="min-h-screen">
@@ -21,14 +28,22 @@ export default function Spa() {
               {business?.description || "Luxury recovery and restoration services"}
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" asChild>
-                <Link to="/booking?business=spa">
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Book Service
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/booking?business=spa">View Menu</Link>
+              <Dialog open={showBookingForm} onOpenChange={setShowBookingForm}>
+                <DialogTrigger asChild>
+                  <Button size="lg">
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    Book Service
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Book Your Spa Experience</DialogTitle>
+                  </DialogHeader>
+                  <SpaBookingForm onSuccess={handleBookingSuccess} />
+                </DialogContent>
+              </Dialog>
+              <Button size="lg" variant="outline" onClick={() => setShowBookingForm(true)}>
+                View Menu
               </Button>
               {business && (
                 <WaitlistCTA
@@ -68,8 +83,8 @@ export default function Spa() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">{service.desc}</p>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/booking?business=spa">Book Now</Link>
+                <Button variant="outline" className="w-full" onClick={() => setShowBookingForm(true)}>
+                  Book Now
                 </Button>
               </CardContent>
             </Card>
@@ -84,8 +99,8 @@ export default function Spa() {
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
             Book your appointment today and experience luxury recovery services.
           </p>
-          <Button size="lg" asChild>
-            <Link to="/booking?business=spa">Find Available Times</Link>
+          <Button size="lg" onClick={() => setShowBookingForm(true)}>
+            Find Available Times
           </Button>
         </div>
       </section>
