@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, Calendar, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Calendar, ArrowRight, AlertCircle, Zap } from "lucide-react";
 import { useNextAvailable } from "@/hooks/useAvailability";
 import type { BusinessType } from "@/types";
 
@@ -25,9 +26,12 @@ export function NextAvailableWidget({
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <div className="text-sm font-medium text-muted-foreground">{title}</div>
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <Zap className="h-4 w-4" />
+          {title}
+        </div>
         {Array.from({ length: limit }).map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
+          <Skeleton key={i} className="h-14 w-full rounded-lg" />
         ))}
       </div>
     );
@@ -36,9 +40,18 @@ export function NextAvailableWidget({
   if (error || !slots || slots.length === 0) {
     return (
       <div className="space-y-3">
-        <div className="text-sm font-medium text-muted-foreground">{title}</div>
-        <div className="text-sm text-muted-foreground py-4 text-center border rounded-lg bg-muted/30">
-          No availability at this time
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <Zap className="h-4 w-4" />
+          {title}
+        </div>
+        <div className="flex flex-col items-center justify-center py-6 px-4 text-center border-2 border-dashed rounded-lg bg-muted/20">
+          <AlertCircle className="h-8 w-8 text-muted-foreground mb-2" />
+          <p className="text-sm font-medium text-muted-foreground">
+            No availability at this time
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Check back soon or try a different date
+          </p>
         </div>
       </div>
     );
@@ -48,10 +61,18 @@ export function NextAvailableWidget({
 
   return (
     <div className="space-y-3">
-      <div className="text-sm font-medium text-muted-foreground">{title}</div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <Zap className="h-4 w-4 text-primary" />
+          {title}
+        </div>
+        <Badge variant="outline" className="text-xs">
+          {slots.length}+ available
+        </Badge>
+      </div>
       
       <div className="space-y-2">
-        {displaySlots.map((slot) => {
+        {displaySlots.map((slot, index) => {
           const startDate = new Date(slot.start_time);
           const isToday = startDate.toDateString() === new Date().toDateString();
           const isTomorrow = startDate.toDateString() === new Date(Date.now() + 86400000).toDateString();
@@ -71,34 +92,32 @@ export function NextAvailableWidget({
             <button
               key={slot.id}
               onClick={() => onSlotSelect?.(slot)}
-              className="w-full flex items-center justify-between p-3 border rounded-lg hover:border-primary hover:bg-primary/5 transition-colors text-left"
+              className="w-full flex items-center justify-between p-3 border-2 rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200 text-left group"
             >
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{dateLabel}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-sm">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{timeLabel}</span>
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1.5 text-sm font-medium group-hover:text-primary transition-colors">
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>{dateLabel}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>{timeLabel}</span>
+                  </div>
                 </div>
               </div>
-              {showPrice && slot.base_price > 0 && (
-                <div className="text-sm font-semibold">
-                  ${slot.base_price.toFixed(0)}
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {showPrice && slot.base_price > 0 && (
+                  <Badge variant="secondary" className="font-semibold">
+                    ${slot.base_price.toFixed(0)}
+                  </Badge>
+                )}
+                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+              </div>
             </button>
           );
         })}
       </div>
-
-      <Button variant="outline" className="w-full" asChild>
-        <Link to={businessType ? `/${businessType}` : "/booking"}>
-          View All Availability
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Link>
-      </Button>
     </div>
   );
 }

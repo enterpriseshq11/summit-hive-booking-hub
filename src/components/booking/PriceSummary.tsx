@@ -1,9 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, Info, ChevronUp, ChevronDown, Shield, CreditCard } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PricingModifier {
   name: string;
@@ -32,6 +34,7 @@ interface PriceSummaryProps {
   guestCount?: number;
   isMember?: boolean;
   showDeposit?: boolean;
+  bookingType?: "instant" | "request";
 }
 
 export function PriceSummary({
@@ -46,7 +49,11 @@ export function PriceSummary({
   guestCount,
   isMember = false,
   showDeposit = true,
+  bookingType = "instant",
 }: PriceSummaryProps) {
+  const isMobile = useIsMobile();
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const calculations = useMemo(() => {
     let subtotal = packagePrice;
 
@@ -86,11 +93,143 @@ export function PriceSummary({
     });
   };
 
+  // Mobile sticky bottom sheet
+  if (isMobile) {
+    return (
+      <TooltipProvider>
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+          {/* Collapsed View */}
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full px-4 py-3 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="text-left">
+                <p className="text-xs text-muted-foreground">
+                  {showDeposit && depositPercent < 100 ? "Due Today" : "Total"}
+                </p>
+                <p className="text-xl font-bold">
+                  ${showDeposit && depositPercent < 100 
+                    ? calculations.depositAmount.toFixed(2) 
+                    : calculations.total.toFixed(2)}
+                </p>
+              </div>
+              {showDeposit && depositPercent < 100 && (
+                <Badge variant="secondary" className="text-xs">
+                  {depositPercent}% deposit
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {isExpanded ? (
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+              ) : (
+                <ChevronUp className="h-5 w-5 text-muted-foreground" />
+              )}
+            </div>
+          </button>
+
+          {/* Expanded View */}
+          {isExpanded && (
+            <div className="px-4 pb-4 pt-2 border-t space-y-4 max-h-[60vh] overflow-y-auto">
+              {/* Booking details */}
+              {(startDate || durationMins) && (
+                <div className="flex flex-wrap gap-4 text-sm">
+                  {startDate && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      <span>{formatDate(startDate)}</span>
+                    </div>
+                  )}
+                  {durationMins && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                      <span>{durationMins} min</span>
+                    </div>
+                  )}
+                  {isMember && (
+                    <Badge variant="secondary" className="text-xs">
+                      Member Pricing
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Line items */}
+              <div className="space-y-2">
+                {packageName && (
+                  <div className="flex justify-between text-sm">
+                    <span>{packageName}</span>
+                    <span>${packagePrice.toFixed(2)}</span>
+                  </div>
+                )}
+                {addons.map((addon, i) => (
+                  <div key={addon.addon_id || i} className="flex justify-between text-sm text-muted-foreground">
+                    <span>
+                      {addon.name || "Add-on"}
+                      {addon.quantity > 1 && ` x${addon.quantity}`}
+                    </span>
+                    <span>${addon.total_price.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Separator />
+
+              {/* Totals */}
+              <div className="space-y-2">
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span>${calculations.total.toFixed(2)}</span>
+                </div>
+
+                {showDeposit && depositPercent < 100 && (
+                  <div className="bg-primary/5 rounded-lg p-3 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium">Due Today ({depositPercent}%)</span>
+                      <span className="font-bold text-primary">
+                        ${calculations.depositAmount.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>
+                        Balance{balanceDueDate && ` by ${formatDate(balanceDueDate)}`}
+                      </span>
+                      <span>${calculations.balanceAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Booking type indicator */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
+                <Shield className="h-3 w-3" />
+                <span>
+                  {bookingType === "instant" 
+                    ? "Instant confirmation" 
+                    : "Request sent for approval (24h response)"}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+        {/* Spacer to prevent content from being hidden behind sticky footer */}
+        <div className="h-20" />
+      </TooltipProvider>
+    );
+  }
+
+  // Desktop card view
   return (
     <TooltipProvider>
       <Card className="sticky top-4">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Price Summary</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-primary" />
+            Price Summary
+          </CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -181,7 +320,7 @@ export function PriceSummary({
               <>
                 <Separator />
 
-                <div className="space-y-2 pt-2">
+                <div className="bg-primary/5 rounded-lg p-4 space-y-3">
                   <div className="flex justify-between">
                     <span className="flex items-center gap-1.5">
                       <span className="font-medium">Due Today</span>
@@ -194,7 +333,7 @@ export function PriceSummary({
                         </TooltipContent>
                       </Tooltip>
                     </span>
-                    <span className="font-semibold text-primary">
+                    <span className="font-bold text-lg text-primary">
                       ${calculations.depositAmount.toFixed(2)}
                     </span>
                   </div>
@@ -209,6 +348,16 @@ export function PriceSummary({
                 </div>
               </>
             )}
+          </div>
+
+          {/* Booking type indicator */}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
+            <Shield className="h-3 w-3" />
+            <span>
+              {bookingType === "instant" 
+                ? "Instant confirmation • Secure payment" 
+                : "Request sent for approval (24h response)"}
+            </span>
           </div>
         </CardContent>
       </Card>
