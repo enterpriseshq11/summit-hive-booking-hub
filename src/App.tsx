@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout, ProtectedRoute } from "@/components/layout";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Pages
 import Index from "./pages/Index";
@@ -36,56 +37,58 @@ import AdminAssumptions from "./pages/admin/Assumptions";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes with main layout */}
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/booking" element={<BookingHub />} />
-              <Route path="/summit" element={<Summit />} />
-              <Route path="/coworking" element={<Coworking />} />
-              <Route path="/spa" element={<Spa />} />
-              <Route path="/fitness" element={<Fitness />} />
-              <Route path="/gift-cards" element={<GiftCards />} />
-              
-              {/* Protected customer routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/account" element={<Account />} />
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes with main layout */}
+              <Route element={<MainLayout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/booking" element={<BookingHub />} />
+                <Route path="/summit" element={<Summit />} />
+                <Route path="/coworking" element={<Coworking />} />
+                <Route path="/spa" element={<Spa />} />
+                <Route path="/fitness" element={<Fitness />} />
+                <Route path="/gift-cards" element={<GiftCards />} />
+                
+                {/* Protected customer routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/account" element={<Account />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Auth routes (no layout) */}
-            <Route path="/login" element={<Login />} />
+              {/* Auth routes (no layout) */}
+              <Route path="/login" element={<Login />} />
 
-            {/* Admin routes - each with ProtectedRoute check */}
-            <Route element={<ProtectedRoute requireStaff />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/schedule" element={<AdminSchedule />} />
-              <Route path="/admin/approvals" element={<AdminApprovals />} />
-              <Route path="/admin/resources" element={<AdminResources />} />
-              <Route path="/admin/packages" element={<AdminPackages />} />
-              <Route path="/admin/pricing-rules" element={<AdminPricingRules />} />
-              <Route path="/admin/blackouts" element={<AdminBlackouts />} />
-              <Route path="/admin/documents" element={<AdminDocuments />} />
-              <Route path="/admin/reviews" element={<AdminReviews />} />
-              <Route path="/admin/leads-waitlists" element={<AdminLeadsWaitlists />} />
-              <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
-              <Route path="/admin/audit-log" element={<AdminAuditLog />} />
-              <Route path="/admin/assumptions" element={<AdminAssumptions />} />
-            </Route>
+              {/* Admin routes - each with ProtectedRoute check */}
+              <Route element={<ProtectedRoute requireStaff />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/schedule" element={<AdminSchedule />} />
+                <Route path="/admin/approvals" element={<AdminApprovals />} />
+                <Route path="/admin/resources" element={<AdminResources />} />
+                <Route path="/admin/packages" element={<AdminPackages />} />
+                <Route path="/admin/pricing-rules" element={<AdminPricingRules />} />
+                <Route path="/admin/blackouts" element={<AdminBlackouts />} />
+                <Route path="/admin/documents" element={<AdminDocuments />} />
+                <Route path="/admin/reviews" element={<AdminReviews />} />
+                <Route path="/admin/leads-waitlists" element={<AdminLeadsWaitlists />} />
+                <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
+                <Route path="/admin/audit-log" element={<AdminAuditLog />} />
+                <Route path="/admin/assumptions" element={<AdminAssumptions />} />
+              </Route>
 
-            {/* Catch-all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+              {/* Catch-all */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

@@ -30,11 +30,23 @@ export default function AdminSchedule() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "confirmed": return "bg-green-100 text-green-800";
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      case "cancelled": return "bg-red-100 text-red-800";
-      case "completed": return "bg-blue-100 text-blue-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "confirmed": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800";
+      case "pending": return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800";
+      case "cancelled": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800";
+      case "completed": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800";
+      case "no_show": return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-gray-200 dark:border-gray-800";
+      default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "confirmed": return "✓ Confirmed";
+      case "pending": return "⏳ Pending";
+      case "cancelled": return "✗ Cancelled";
+      case "completed": return "✓ Complete";
+      case "no_show": return "– No Show";
+      default: return status;
     }
   };
 
@@ -120,18 +132,19 @@ export default function AdminSchedule() {
                       <button
                         key={booking.id}
                         onClick={() => setSelectedBooking(booking)}
-                        className="w-full text-left p-2 rounded text-xs hover:bg-muted transition-colors"
+                        className={`w-full text-left p-2 rounded text-xs transition-colors border ${getStatusColor(booking.status || '')} hover:opacity-80`}
+                        aria-label={`View booking for ${booking.guest_name || 'Guest'} at ${format(new Date(booking.start_datetime), "h:mm a")}`}
                       >
                         <div className="font-medium truncate">
                           {booking.guest_name || "Guest"}
                         </div>
-                        <div className="text-muted-foreground flex items-center gap-1">
+                        <div className="flex items-center gap-1 opacity-80">
                           <Clock className="h-3 w-3" />
                           {format(new Date(booking.start_datetime), "h:mm a")}
                         </div>
-                        <Badge className={`${getStatusColor(booking.status || '')} text-xs mt-1`}>
-                          {booking.status}
-                        </Badge>
+                        <div className="text-[10px] mt-1 font-medium">
+                          {getStatusLabel(booking.status || '')}
+                        </div>
                       </button>
                     ))}
                     {dayBookings.length > 4 && (

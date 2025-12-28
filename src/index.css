@@ -125,4 +125,31 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Skip to content link for keyboard navigation */
+  .skip-link {
+    @apply absolute -top-10 left-0 bg-primary text-primary-foreground px-4 py-2 z-[100] 
+           focus:top-0 transition-all duration-200;
+  }
+
+  /* Better focus visibility for all interactive elements */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  /* Reduced motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* High contrast mode improvements */
+  @media (prefers-contrast: more) {
+    :root {
+      --border: 220 13% 60%;
+    }
+  }
 }
