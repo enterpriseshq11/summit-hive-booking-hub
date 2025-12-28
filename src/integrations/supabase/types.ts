@@ -99,6 +99,7 @@ export type Database = {
       assumptions: {
         Row: {
           assumption_text: string
+          category: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -108,6 +109,7 @@ export type Database = {
         }
         Insert: {
           assumption_text: string
+          category?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -117,6 +119,7 @@ export type Database = {
         }
         Update: {
           assumption_text?: string
+          category?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
