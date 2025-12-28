@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign } from "lucide-react";
+import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info } from "lucide-react";
 import { format } from "date-fns";
 
 export default function AdminApprovals() {
@@ -39,6 +39,21 @@ export default function AdminApprovals() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Approvals</h1>
           <p className="text-muted-foreground">Review and process pending booking requests</p>
+        </div>
+
+        {/* Helper Text */}
+        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-4 text-sm">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-blue-700 dark:text-blue-300">How approvals work</p>
+              <ul className="mt-1 text-blue-600 dark:text-blue-400 space-y-1">
+                <li>• <strong>Approve:</strong> Customer receives payment link and contract for signature</li>
+                <li>• <strong>Deny:</strong> Customer is notified with your reason (optional)</li>
+                <li>• Requests older than 48 hours should be prioritized</li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         {isLoading ? (

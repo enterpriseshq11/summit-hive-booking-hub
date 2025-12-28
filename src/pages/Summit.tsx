@@ -101,17 +101,21 @@ export default function Summit() {
       </section>
 
       {/* Event Types */}
-      <section className="py-12 container">
-        <h2 className="text-2xl font-bold mb-6">Event Types</h2>
+      <section className="py-16 container">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2">Event Types</h2>
+          <p className="text-muted-foreground">Choose your celebration style</p>
+        </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { name: "Weddings", desc: "Your perfect day deserves a perfect venue" },
-            { name: "Corporate Events", desc: "Professional settings for business gatherings" },
-            { name: "Private Parties", desc: "Celebrate life's special moments" },
+            { name: "Weddings", desc: "Your perfect day deserves a perfect venue. Full-service packages available.", capacity: "50-300 guests" },
+            { name: "Corporate Events", desc: "Professional settings for conferences, meetings, and team celebrations.", capacity: "20-200 attendees" },
+            { name: "Private Parties", desc: "Birthdays, anniversaries, and life's special moments celebrated in style.", capacity: "25-150 guests" },
           ].map((type) => (
             <Card key={type.name} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle>{type.name}</CardTitle>
+                <p className="text-xs text-muted-foreground">{type.capacity}</p>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">{type.desc}</p>

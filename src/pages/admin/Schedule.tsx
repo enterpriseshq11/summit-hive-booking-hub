@@ -51,7 +51,7 @@ export default function AdminSchedule() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
-            <p className="text-muted-foreground">View and manage all bookings</p>
+            <p className="text-muted-foreground">View and manage all bookings across businesses</p>
           </div>
           
           <div className="flex items-center gap-2">
@@ -67,6 +67,11 @@ export default function AdminSchedule() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        {/* Helper Text */}
+        <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
+          <strong>Tip:</strong> Click any booking to view details. Use the business filter to focus on specific locations. Today's date is highlighted with a blue border.
         </div>
 
         {/* Week Navigation */}
