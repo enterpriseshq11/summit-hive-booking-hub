@@ -6,6 +6,52 @@ import type { Database } from "@/integrations/supabase/types";
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
 type WaitlistEntry = Database["public"]["Tables"]["waitlist_entries"]["Row"];
 
+// Combined hook for admin page
+export function useLeadsWaitlists(businessId?: string) {
+  const leadsQuery = useQuery({
+    queryKey: ["leads", businessId],
+    queryFn: async () => {
+      let query = supabase
+        .from("leads")
+        .select("*, businesses(name, type), bookable_types(name)")
+        .order("created_at", { ascending: false });
+
+      if (businessId) {
+        query = query.eq("business_id", businessId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const waitlistsQuery = useQuery({
+    queryKey: ["waitlist_entries", businessId],
+    queryFn: async () => {
+      let query = supabase
+        .from("waitlist_entries")
+        .select("*, businesses(name, type), bookable_types(name), resources(name)")
+        .order("position", { ascending: true });
+
+      if (businessId) {
+        query = query.eq("business_id", businessId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  return {
+    leads: leadsQuery.data,
+    waitlists: waitlistsQuery.data,
+    isLoading: leadsQuery.isLoading || waitlistsQuery.isLoading,
+    error: leadsQuery.error || waitlistsQuery.error,
+  };
+}
+
 export function useLeads(businessId?: string) {
   return useQuery({
     queryKey: ["leads", businessId],
