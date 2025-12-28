@@ -104,23 +104,27 @@ export default function Coworking() {
       </section>
 
       {/* Office Options */}
-      <section className="py-12 container">
-        <h2 className="text-2xl font-bold mb-6">Office Options</h2>
+      <section className="py-16 container">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2">Workspace Options</h2>
+          <p className="text-muted-foreground">Flexible solutions for every work style</p>
+        </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { name: "Private Offices", desc: "Dedicated space for your team", price: "From $500/mo" },
-            { name: "Dedicated Desks", desc: "Your own desk in a shared space", price: "From $250/mo" },
-            { name: "Meeting Rooms", desc: "Book by the hour for meetings", price: "From $25/hr" },
+            { name: "Private Offices", desc: "Dedicated lockable space for your team. Includes furniture, utilities, and storage.", price: "From $500/mo", features: "24/7 access • Mail handling • Meeting credits" },
+            { name: "Dedicated Desks", desc: "Your own permanent desk in our open workspace. Great for solo professionals.", price: "From $250/mo", features: "Reserved desk • Locker • Community events" },
+            { name: "Meeting Rooms", desc: "Professional rooms for client meetings, interviews, or team sessions.", price: "From $25/hr", features: "A/V equipment • Whiteboard • Refreshments" },
           ].map((type) => (
             <Card key={type.name} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle>{type.name}</CardTitle>
+                <p className="text-lg font-bold text-primary">{type.price}</p>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-2">{type.desc}</p>
-                <p className="font-semibold text-primary mb-4">{type.price}</p>
+                <p className="text-muted-foreground mb-3">{type.desc}</p>
+                <p className="text-xs text-muted-foreground mb-4">{type.features}</p>
                 <Button variant="outline" className="w-full" onClick={() => setShowLeaseForm(true)}>
-                  Lease Now
+                  {type.name === "Meeting Rooms" ? "Book Now" : "Get Started"}
                 </Button>
               </CardContent>
             </Card>

@@ -68,18 +68,22 @@ export default function Spa() {
       </section>
 
       {/* Services Section */}
-      <section className="py-12 container">
-        <h2 className="text-2xl font-bold mb-6 text-foreground">Services</h2>
+      <section className="py-16 container">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2 text-foreground">Our Services</h2>
+          <p className="text-muted-foreground">Restore your body and mind</p>
+        </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { name: "Massage Therapy", icon: Heart, desc: "Deep tissue, Swedish, and sports massage" },
-            { name: "Recovery Services", icon: Clock, desc: "Cryotherapy, compression, and infrared" },
-            { name: "Wellness Packages", icon: Users, desc: "Couples and group experiences" }
+            { name: "Massage Therapy", icon: Heart, desc: "Deep tissue, Swedish, hot stone, and sports massage by certified therapists.", duration: "60-120 min", price: "From $85" },
+            { name: "Recovery Services", icon: Clock, desc: "Cryotherapy, compression therapy, infrared sauna, and cold plunge.", duration: "30-60 min", price: "From $40" },
+            { name: "Wellness Packages", icon: Users, desc: "Couples massages, spa days, and group wellness experiences.", duration: "2-4 hours", price: "From $150" }
           ].map((service) => (
             <Card key={service.name} className="hover:shadow-lg transition-shadow border-border">
               <CardHeader>
-                <service.icon className="h-8 w-8 mb-2 text-muted-foreground" />
+                <service.icon className="h-8 w-8 mb-2 text-primary" />
                 <CardTitle className="text-foreground">{service.name}</CardTitle>
+                <p className="text-sm text-primary font-medium">{service.price} • {service.duration}</p>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">{service.desc}</p>

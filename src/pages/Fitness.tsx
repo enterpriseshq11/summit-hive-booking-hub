@@ -86,32 +86,38 @@ export default function Fitness() {
       </section>
 
       {/* Membership Tiers Section */}
-      <section className="py-12 container">
-        <h2 className="text-2xl font-bold mb-6 text-foreground">Membership Tiers</h2>
+      <section className="py-16 container">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2 text-foreground">Membership Plans</h2>
+          <p className="text-muted-foreground">Choose the plan that fits your fitness goals</p>
+        </div>
         <div className="grid md:grid-cols-3 gap-6">
           {membershipTiers.map((tier, index) => (
             <Card 
               key={tier.name} 
               className={`hover:shadow-lg transition-shadow border-border ${
-                index === 1 ? "ring-2 ring-primary" : ""
+                index === 1 ? "ring-2 ring-primary relative" : ""
               }`}
             >
-              <CardHeader>
-                {index === 1 && (
-                  <div className="flex items-center gap-1 text-primary text-sm mb-2">
-                    <Star className="h-4 w-4 fill-current" />
+              {index === 1 && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-current" />
                     Most Popular
-                  </div>
-                )}
-                <CardTitle className="text-foreground">{tier.name} Membership</CardTitle>
-                <p className="text-2xl font-bold text-foreground">{tier.price}</p>
+                  </span>
+                </div>
+              )}
+              <CardHeader className={index === 1 ? "pt-8" : ""}>
+                <CardTitle className="text-foreground">{tier.name}</CardTitle>
+                <p className="text-3xl font-bold text-foreground">{tier.price}</p>
+                <p className="text-xs text-muted-foreground">Billed monthly • Cancel anytime</p>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 mb-6">
+                <ul className="space-y-3 mb-6">
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-muted-foreground">
-                      <Check className="h-4 w-4 text-primary" />
-                      {feature}
+                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="text-sm">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -120,7 +126,7 @@ export default function Fitness() {
                   className="w-full" 
                   onClick={() => setShowMembershipForm(true)}
                 >
-                  Get Started
+                  {index === 1 ? "Get Started" : "Choose Plan"}
                 </Button>
               </CardContent>
             </Card>
