@@ -65,10 +65,22 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Business accent - neutral for Phase 2
-        "business-accent": {
-          DEFAULT: "hsl(var(--business-accent))",
-          foreground: "hsl(var(--business-accent-foreground))",
+        // Business-specific accents
+        summit: {
+          DEFAULT: "hsl(var(--summit))",
+          foreground: "hsl(var(--summit-foreground))",
+        },
+        coworking: {
+          DEFAULT: "hsl(var(--coworking))",
+          foreground: "hsl(var(--coworking-foreground))",
+        },
+        spa: {
+          DEFAULT: "hsl(var(--spa))",
+          foreground: "hsl(var(--spa-foreground))",
+        },
+        fitness: {
+          DEFAULT: "hsl(var(--fitness))",
+          foreground: "hsl(var(--fitness-foreground))",
         },
       },
       borderRadius: {
@@ -121,6 +133,27 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "0 0 20px 0 hsl(var(--accent) / 0.3)" },
+          "50%": { boxShadow: "0 0 40px 10px hsl(var(--accent) / 0.5)" },
+        },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "count-up": {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "border-glow": {
+          "0%, 100%": { borderColor: "hsl(var(--accent) / 0.3)" },
+          "50%": { borderColor: "hsl(var(--accent) / 0.8)" },
+        },
+        "gradient-shift": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -134,6 +167,14 @@ export default {
         "scale-in": "scale-in 0.4s ease-out forwards",
         "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
         "float": "float 3s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "shimmer": "shimmer 2s linear infinite",
+        "count-up": "count-up 0.8s ease-out forwards",
+        "border-glow": "border-glow 2s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 3s ease infinite",
+      },
+      backgroundSize: {
+        "300%": "300%",
       },
     },
   },
