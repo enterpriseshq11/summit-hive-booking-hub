@@ -65,22 +65,10 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Business-specific colors
-        summit: {
-          DEFAULT: "hsl(var(--summit))",
-          foreground: "hsl(var(--summit-foreground))",
-        },
-        coworking: {
-          DEFAULT: "hsl(var(--coworking))",
-          foreground: "hsl(var(--coworking-foreground))",
-        },
-        spa: {
-          DEFAULT: "hsl(var(--spa))",
-          foreground: "hsl(var(--spa-foreground))",
-        },
-        fitness: {
-          DEFAULT: "hsl(var(--fitness))",
-          foreground: "hsl(var(--fitness-foreground))",
+        // Business accent - neutral for Phase 2
+        "business-accent": {
+          DEFAULT: "hsl(var(--business-accent))",
+          foreground: "hsl(var(--business-accent-foreground))",
         },
       },
       borderRadius: {

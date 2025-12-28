@@ -57,15 +57,9 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 220 26% 14%;
 
-    /* Business-specific accent colors */
-    --summit: 220 60% 50%;
-    --summit-foreground: 0 0% 100%;
-    --coworking: 280 60% 50%;
-    --coworking-foreground: 0 0% 100%;
-    --spa: 170 60% 40%;
-    --spa-foreground: 0 0% 100%;
-    --fitness: 20 90% 50%;
-    --fitness-foreground: 0 0% 100%;
+    /* Business accent - neutral for Phase 2 (branding deferred) */
+    --business-accent: 220 26% 14%;
+    --business-accent-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -112,14 +106,8 @@
     --sidebar-border: 220 13% 20%;
     --sidebar-ring: 220 60% 60%;
 
-    --summit: 220 60% 60%;
-    --summit-foreground: 0 0% 100%;
-    --coworking: 280 60% 60%;
-    --coworking-foreground: 0 0% 100%;
-    --spa: 170 60% 50%;
-    --spa-foreground: 0 0% 100%;
-    --fitness: 20 90% 55%;
-    --fitness-foreground: 0 0% 100%;
+    --business-accent: 220 14% 80%;
+    --business-accent-foreground: 220 13% 10%;
   }
 }
 
