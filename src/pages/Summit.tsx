@@ -1,16 +1,24 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useBusinessByType } from "@/hooks/useBusinesses";
-import { NextAvailableWidget, WaitlistCTA } from "@/components/booking";
+import { NextAvailableWidget, WaitlistCTA, EventRequestForm } from "@/components/booking";
 import { CalendarDays, MapPin, Users, Clock } from "lucide-react";
 
 export default function Summit() {
   const navigate = useNavigate();
   const { data: business } = useBusinessByType("summit");
+  const [showRequestForm, setShowRequestForm] = useState(false);
 
   const handleSlotSelect = (slot: any) => {
     navigate(`/booking?slot=${slot.id}&business=summit`);
+  };
+
+  const handleEventRequestSuccess = (bookingId: string) => {
+    setShowRequestForm(false);
+    navigate(`/booking/confirmation?id=${bookingId}&pending=true`);
   };
 
   return (
@@ -30,14 +38,24 @@ export default function Summit() {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild>
+                <Dialog open={showRequestForm} onOpenChange={setShowRequestForm}>
+                  <DialogTrigger asChild>
+                    <Button size="lg">
+                      <CalendarDays className="h-5 w-5 mr-2" />
+                      Request Your Event
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Request to Book Your Event</DialogTitle>
+                    </DialogHeader>
+                    <EventRequestForm onSuccess={handleEventRequestSuccess} />
+                  </DialogContent>
+                </Dialog>
+                <Button size="lg" variant="outline" asChild>
                   <Link to="/booking?business=summit">
-                    <CalendarDays className="h-5 w-5 mr-2" />
                     Check Availability
                   </Link>
-                </Button>
-                <Button size="lg" variant="outline">
-                  Request Quote
                 </Button>
               </div>
 
@@ -97,8 +115,8 @@ export default function Summit() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">{type.desc}</p>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/booking?business=summit">View Availability</Link>
+                <Button variant="outline" className="w-full" onClick={() => setShowRequestForm(true)}>
+                  Request Quote
                 </Button>
               </CardContent>
             </Card>
@@ -111,7 +129,10 @@ export default function Summit() {
         <div className="container">
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
-              <CardTitle>Request to Book</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Request to Book
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
@@ -119,10 +140,8 @@ export default function Summit() {
                 we can meet all your needs. Submit your preferred dates and details, and 
                 our team will respond within 24-48 hours.
               </p>
-              <Button asChild>
-                <Link to="/booking?business=summit&mode=request">
-                  Submit Request
-                </Link>
+              <Button onClick={() => setShowRequestForm(true)}>
+                Submit Request
               </Button>
             </CardContent>
           </Card>

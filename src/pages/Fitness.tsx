@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useBusinessByType } from "@/hooks/useBusinesses";
-import { NextAvailableWidget, WaitlistCTA } from "@/components/booking";
+import { NextAvailableWidget, WaitlistCTA, MembershipSignupForm } from "@/components/booking";
 import { Dumbbell, Check, Star, Users } from "lucide-react";
 
 export default function Fitness() {
   const { data: business } = useBusinessByType("fitness");
+  const [showMembershipForm, setShowMembershipForm] = useState(false);
 
   const membershipTiers = [
     {
@@ -26,6 +29,10 @@ export default function Fitness() {
     }
   ];
 
+  const handleMembershipSuccess = (membershipId: string) => {
+    setShowMembershipForm(false);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section - Neutral Styling */}
@@ -39,14 +46,22 @@ export default function Fitness() {
               {business?.description || "24/7 fitness and wellness center"}
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" asChild>
-                <Link to="/booking?business=fitness">
-                  <Dumbbell className="h-5 w-5 mr-2" />
-                  Join Now
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/booking?business=fitness">View Memberships</Link>
+              <Dialog open={showMembershipForm} onOpenChange={setShowMembershipForm}>
+                <DialogTrigger asChild>
+                  <Button size="lg">
+                    <Dumbbell className="h-5 w-5 mr-2" />
+                    Join Now
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Start Your Fitness Journey</DialogTitle>
+                  </DialogHeader>
+                  <MembershipSignupForm onSuccess={handleMembershipSuccess} />
+                </DialogContent>
+              </Dialog>
+              <Button size="lg" variant="outline" onClick={() => setShowMembershipForm(true)}>
+                View Memberships
               </Button>
               {business && (
                 <WaitlistCTA
@@ -100,8 +115,12 @@ export default function Fitness() {
                     </li>
                   ))}
                 </ul>
-                <Button variant={index === 1 ? "default" : "outline"} className="w-full" asChild>
-                  <Link to="/booking?business=fitness">Get Started</Link>
+                <Button 
+                  variant={index === 1 ? "default" : "outline"} 
+                  className="w-full" 
+                  onClick={() => setShowMembershipForm(true)}
+                >
+                  Get Started
                 </Button>
               </CardContent>
             </Card>
@@ -117,8 +136,8 @@ export default function Fitness() {
             Join today and get access to our state-of-the-art facilities 24/7.
           </p>
           <div className="flex justify-center gap-4">
-            <Button size="lg" asChild>
-              <Link to="/booking?business=fitness">Join Now</Link>
+            <Button size="lg" onClick={() => setShowMembershipForm(true)}>
+              Join Now
             </Button>
             <Button size="lg" variant="outline" asChild>
               <Link to="/booking?business=fitness">Schedule Tour</Link>

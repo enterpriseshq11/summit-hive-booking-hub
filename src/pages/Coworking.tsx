@@ -1,16 +1,23 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useBusinessByType } from "@/hooks/useBusinesses";
-import { NextAvailableWidget, WaitlistCTA } from "@/components/booking";
+import { NextAvailableWidget, WaitlistCTA, LeaseSignupForm } from "@/components/booking";
 import { Building2, MapPin, Wifi, Coffee, Clock } from "lucide-react";
 
 export default function Coworking() {
   const navigate = useNavigate();
   const { data: business } = useBusinessByType("coworking");
+  const [showLeaseForm, setShowLeaseForm] = useState(false);
 
   const handleSlotSelect = (slot: any) => {
     navigate(`/booking?slot=${slot.id}&business=coworking`);
+  };
+
+  const handleLeaseSuccess = (bookingId: string) => {
+    setShowLeaseForm(false);
   };
 
   return (
@@ -29,14 +36,24 @@ export default function Coworking() {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild>
+                <Dialog open={showLeaseForm} onOpenChange={setShowLeaseForm}>
+                  <DialogTrigger asChild>
+                    <Button size="lg">
+                      <Building2 className="h-5 w-5 mr-2" />
+                      Lease an Office
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Lease Your Workspace</DialogTitle>
+                    </DialogHeader>
+                    <LeaseSignupForm onSuccess={handleLeaseSuccess} />
+                  </DialogContent>
+                </Dialog>
+                <Button size="lg" variant="outline" asChild>
                   <Link to="/booking?business=coworking">
-                    <Building2 className="h-5 w-5 mr-2" />
-                    View Offices
+                    Schedule Tour
                   </Link>
-                </Button>
-                <Button size="lg" variant="outline">
-                  Schedule Tour
                 </Button>
               </div>
 
@@ -102,8 +119,8 @@ export default function Coworking() {
               <CardContent>
                 <p className="text-muted-foreground mb-2">{type.desc}</p>
                 <p className="font-semibold text-primary mb-4">{type.price}</p>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/booking?business=coworking">View Availability</Link>
+                <Button variant="outline" className="w-full" onClick={() => setShowLeaseForm(true)}>
+                  Lease Now
                 </Button>
               </CardContent>
             </Card>

@@ -6,3 +6,7 @@ export { AddonBuilder } from "./AddonBuilder";
 export { PriceSummary } from "./PriceSummary";
 export { DocumentSigning } from "./DocumentSigning";
 export { WaitlistCTA } from "./WaitlistCTA";
+export { default as EventRequestForm } from "./EventRequestForm";
+export { default as LeaseSignupForm } from "./LeaseSignupForm";
+export { default as SpaBookingForm } from "./SpaBookingForm";
+export { default as MembershipSignupForm } from "./MembershipSignupForm";
