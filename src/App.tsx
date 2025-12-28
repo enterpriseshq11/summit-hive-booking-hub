@@ -16,8 +16,22 @@ import Coworking from "./pages/Coworking";
 import Spa from "./pages/Spa";
 import Fitness from "./pages/Fitness";
 import GiftCards from "./pages/GiftCards";
-import AdminDashboard from "./pages/admin/Dashboard";
 import NotFound from "./pages/NotFound";
+
+// Admin Pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminSchedule from "./pages/admin/Schedule";
+import AdminApprovals from "./pages/admin/Approvals";
+import AdminResources from "./pages/admin/Resources";
+import AdminPackages from "./pages/admin/Packages";
+import AdminPricingRules from "./pages/admin/PricingRules";
+import AdminBlackouts from "./pages/admin/Blackouts";
+import AdminDocuments from "./pages/admin/Documents";
+import AdminReviews from "./pages/admin/Reviews";
+import AdminLeadsWaitlists from "./pages/admin/LeadsWaitlists";
+import AdminUsersRoles from "./pages/admin/UsersRoles";
+import AdminAuditLog from "./pages/admin/AuditLog";
+import AdminAssumptions from "./pages/admin/Assumptions";
 
 const queryClient = new QueryClient();
 
@@ -48,9 +62,21 @@ const App = () => (
             {/* Auth routes (no layout) */}
             <Route path="/login" element={<Login />} />
 
-            {/* Admin routes */}
+            {/* Admin routes - each with ProtectedRoute check */}
             <Route element={<ProtectedRoute requireStaff />}>
-              <Route path="/admin/*" element={<AdminDashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/schedule" element={<AdminSchedule />} />
+              <Route path="/admin/approvals" element={<AdminApprovals />} />
+              <Route path="/admin/resources" element={<AdminResources />} />
+              <Route path="/admin/packages" element={<AdminPackages />} />
+              <Route path="/admin/pricing-rules" element={<AdminPricingRules />} />
+              <Route path="/admin/blackouts" element={<AdminBlackouts />} />
+              <Route path="/admin/documents" element={<AdminDocuments />} />
+              <Route path="/admin/reviews" element={<AdminReviews />} />
+              <Route path="/admin/leads-waitlists" element={<AdminLeadsWaitlists />} />
+              <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
+              <Route path="/admin/audit-log" element={<AdminAuditLog />} />
+              <Route path="/admin/assumptions" element={<AdminAssumptions />} />
             </Route>
 
             {/* Catch-all */}
