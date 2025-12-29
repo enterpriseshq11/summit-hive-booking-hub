@@ -250,19 +250,19 @@ export function AvailabilitySearch({
           </div>
 
           {availability.slots.length === 0 ? (
-            /* Empty State */
-            <div className="bg-muted/30 rounded-xl p-8 text-center border-2 border-dashed">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                <AlertCircle className="h-8 w-8 text-muted-foreground" />
+            /* Empty State - Intentional, not broken */
+            <div className="bg-card rounded-xl p-8 text-center border border-border">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
+                <Calendar className="h-7 w-7 text-muted-foreground" />
               </div>
-              <h4 className="font-semibold text-lg mb-2">No Availability Found</h4>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                We don't have any available slots for this date. 
-                Try a different date or join our waitlist to be notified when spots open up.
+              <h4 className="font-semibold text-lg mb-2">Fully Booked for This Date</h4>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
+                All slots are taken for this day. Try the next available date, or we'll notify you if something opens up.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   variant="outline"
+                  className="border-accent/30 hover:bg-accent/10"
                   onClick={() => {
                     const nextDate = new Date(date);
                     nextDate.setDate(nextDate.getDate() + 1);
@@ -270,7 +270,8 @@ export function AvailabilitySearch({
                     handleSearch();
                   }}
                 >
-                  Try Next Day
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Check Tomorrow
                 </Button>
                 {selectedBusinessId && (
                   <WaitlistCTA
@@ -278,7 +279,7 @@ export function AvailabilitySearch({
                     bookableTypeId={bookableTypeId || undefined}
                     preferredDate={date}
                     buttonVariant="default"
-                    buttonText="Join Waitlist"
+                    buttonText="Notify Me When Available"
                   />
                 )}
               </div>
