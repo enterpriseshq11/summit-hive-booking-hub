@@ -1,19 +1,33 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useBusinessByType } from "@/hooks/useBusinesses";
+import { useProviders } from "@/hooks/useProviders";
 import { NextAvailableWidget, WaitlistCTA, SpaBookingForm } from "@/components/booking";
-import { Sparkles, Clock, Users, Heart, ArrowRight, Leaf, Star } from "lucide-react";
+import { 
+  Sparkles, Clock, Heart, ArrowRight, Leaf, Star, 
+  CheckCircle, Calendar, FileText, Quote, User,
+  RefreshCw, Zap
+} from "lucide-react";
 
 export default function Spa() {
   const { data: business } = useBusinessByType("spa");
+  const { data: providers } = useProviders(business?.id);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const handleBookingSuccess = (bookingId: string) => {
     setShowBookingForm(false);
   };
+
+  const scrollToForm = () => {
+    setShowBookingForm(true);
+  };
+
+  // Get up to 3 providers for display
+  const displayProviders = providers?.slice(0, 3) || [];
 
   return (
     <div className="min-h-screen">
@@ -22,57 +36,44 @@ export default function Spa() {
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.1)_0%,transparent_70%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--spa)/0.1)_0%,transparent_50%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
         
         <div className="container relative z-10">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-8">
               <Sparkles className="h-4 w-4" />
-              Luxury Spa & Wellness
+              The Restoration Lounge
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground">
-              The Hive Restoration Lounge
+              Recovery Designed for Results
             </h1>
-            <p className="text-xl md:text-2xl text-accent font-medium mb-4">Renew & Restore</p>
+            <p className="text-xl md:text-2xl text-accent font-medium mb-4">Expert Care. Premium Experience.</p>
             <p className="text-lg text-primary-foreground/70 mb-8 max-w-2xl">
-              {business?.description || "Luxury recovery and restoration services. Expert therapists, premium products, and a sanctuary designed for total relaxation."}
+              {business?.description || "Professional recovery and restoration services. Expert therapists, premium treatments, and a sanctuary designed for total renewal."}
             </p>
             
-            <div className="flex flex-wrap gap-4">
-              <Dialog open={showBookingForm} onOpenChange={setShowBookingForm}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all">
-                    <Sparkles className="h-5 w-5 mr-2" />
-                    Book Treatment
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Book Your Spa Experience</DialogTitle>
-                  </DialogHeader>
-                  <SpaBookingForm onSuccess={handleBookingSuccess} />
-                </DialogContent>
-              </Dialog>
-              <Button size="lg" variant="outline" onClick={() => setShowBookingForm(true)} className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground/50">
-                View Menu
+            {/* Single CTA + Trust Badge */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <Button 
+                size="lg" 
+                onClick={scrollToForm}
+                className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+              >
+                <Sparkles className="h-5 w-5 mr-2" />
+                Book Service
+                <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
-              {business && (
-                <WaitlistCTA
-                  businessId={business.id}
-                  buttonText="Join Spa Waitlist"
-                  buttonVariant="ghost"
-                  className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                />
-              )}
+              <div className="flex items-center gap-2 text-primary-foreground/70">
+                <CheckCircle className="h-5 w-5 text-accent" aria-hidden="true" />
+                <span className="text-sm">No obligation. Response within 24 hours.</span>
+              </div>
             </div>
           </div>
         </div>
         
         {/* Angled divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} />
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} aria-hidden="true" />
       </section>
 
       {/* Next Available Widget */}
@@ -88,14 +89,14 @@ export default function Spa() {
             <NextAvailableWidget
               businessType="spa"
               title="Next Available Appointments"
-              showPrice={true}
+              showPrice={false}
               limit={3}
             />
           </CardContent>
         </Card>
       </section>
 
-      {/* Services Section */}
+      {/* Services Section - No Pricing */}
       <section className="py-20 container">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Services</h2>
@@ -103,42 +104,288 @@ export default function Spa() {
         </div>
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {[
-            { name: "Massage Therapy", icon: Heart, desc: "Deep tissue, Swedish, hot stone, and sports massage by certified therapists.", duration: "60-120 min", price: "From $85" },
-            { name: "Recovery Services", icon: Leaf, desc: "Cryotherapy, compression therapy, infrared sauna, and cold plunge.", duration: "30-60 min", price: "From $40" },
-            { name: "Wellness Packages", icon: Star, desc: "Couples massages, spa days, and group wellness experiences.", duration: "2-4 hours", price: "From $150" }
+            { 
+              name: "Massage Therapy", 
+              icon: Heart, 
+              tagline: "Release tension. Restore balance.",
+              benefits: [
+                "Deep tissue, Swedish, and sports techniques",
+                "Personalized pressure and focus areas",
+                "Premium oils and heated treatments"
+              ]
+            },
+            { 
+              name: "Recovery Services", 
+              icon: Leaf, 
+              tagline: "Accelerate your body's natural healing.",
+              benefits: [
+                "Cryotherapy and compression therapy",
+                "Infrared sauna and cold plunge",
+                "Science-backed recovery protocols"
+              ]
+            },
+            { 
+              name: "Wellness Experiences", 
+              icon: Star, 
+              tagline: "Shared moments of restoration.",
+              benefits: [
+                "Couples and group sessions",
+                "Customized spa day packages",
+                "Curated multi-treatment journeys"
+              ]
+            }
           ].map((service) => (
-            <Card key={service.name} className="hover:shadow-premium-hover hover:border-accent/30 transition-all duration-300 shadow-premium group">
+            <Card 
+              key={service.name} 
+              className="hover:shadow-premium-hover hover:border-accent/30 transition-all duration-300 shadow-premium group cursor-pointer"
+              onClick={scrollToForm}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && scrollToForm()}
+            >
               <CardHeader>
                 <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent transition-colors">
                   <service.icon className="h-7 w-7 text-accent group-hover:text-primary transition-colors" />
                 </div>
                 <CardTitle className="text-xl group-hover:text-accent transition-colors">{service.name}</CardTitle>
-                <p className="text-sm font-semibold text-accent">{service.price} • {service.duration}</p>
+                <p className="text-sm text-accent font-medium">{service.tagline}</p>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-6">{service.desc}</p>
-                <Button variant="outline" className="w-full hover:bg-accent hover:text-primary hover:border-accent transition-all" onClick={() => setShowBookingForm(true)}>
-                  Book Now
-                </Button>
+                <ul className="space-y-2">
+                  {service.benefits.map((benefit, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
+                      <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                      {benefit}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-muted-foreground/70 mt-4">Click to request booking</p>
               </CardContent>
             </Card>
           ))}
         </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-primary">
-        <div className="container text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">Ready to Restore?</h2>
-          <p className="text-primary-foreground/70 mb-8 max-w-2xl mx-auto text-lg">
-            Book your appointment today and experience luxury recovery services designed to help you feel your best.
-          </p>
-          <Button size="lg" onClick={() => setShowBookingForm(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all">
-            Find Available Times
+        
+        {/* Single section CTA */}
+        <div className="text-center mt-12">
+          <Button 
+            size="lg" 
+            onClick={scrollToForm}
+            className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+          >
+            Book Service
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
+          <p className="text-sm text-muted-foreground mt-3">
+            You'll review everything before payment—no commitment required.
+          </p>
         </div>
       </section>
+
+      {/* Provider Highlights Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Expert Practitioners</h2>
+            <p className="text-muted-foreground text-lg">Skilled professionals dedicated to your recovery</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {displayProviders.length > 0 ? (
+              displayProviders.map((provider) => (
+                <Card key={provider.id} className="shadow-premium border-border text-center">
+                  <CardContent className="pt-8 pb-6">
+                    <div className="h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border-2 border-accent/30">
+                      <User className="h-10 w-10 text-accent" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-1">{provider.name}</h3>
+                    <p className="text-accent text-sm font-medium mb-3">{provider.title || "Therapist"}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {provider.bio || "Focused on personalized care and lasting results."}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              // Static placeholders if no provider data
+              [
+                { name: "Provider", title: "Massage Therapist", style: "Recovery-focused sessions" },
+                { name: "Provider", title: "Esthetician", style: "Holistic wellness approach" },
+                { name: "Provider", title: "Recovery Specialist", style: "Performance optimization" }
+              ].map((provider, idx) => (
+                <Card key={idx} className="shadow-premium border-border text-center">
+                  <CardContent className="pt-8 pb-6">
+                    <div className="h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border-2 border-accent/30">
+                      <User className="h-10 w-10 text-accent" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-1">{provider.name}</h3>
+                    <p className="text-accent text-sm font-medium mb-3">{provider.title}</p>
+                    <p className="text-muted-foreground text-sm">{provider.style}</p>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Process Timeline */}
+      <section className="py-20 container">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+          <p className="text-muted-foreground text-lg">Simple steps to your restoration</p>
+        </div>
+        <div className="max-w-2xl mx-auto">
+          <div className="relative">
+            {/* Vertical gold line */}
+            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-accent/30" aria-hidden="true" />
+            
+            {[
+              { step: 1, title: "Select Service", desc: "Choose your treatment type and any enhancements.", icon: Sparkles },
+              { step: 2, title: "Choose Time", desc: "Pick your preferred date and provider.", icon: Calendar },
+              { step: 3, title: "Confirm Details", desc: "Review everything before finalizing.", icon: FileText }
+            ].map((item, idx) => (
+              <div key={item.step} className="relative flex gap-6 pb-8 last:pb-0">
+                <div className="relative z-10 h-12 w-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                  <item.icon className="h-6 w-6 text-primary" />
+                </div>
+                <div className="pt-2">
+                  <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
+                  <p className="text-muted-foreground">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="text-center mt-8 p-4 bg-accent/5 rounded-lg border border-accent/20">
+            <p className="text-sm text-muted-foreground">
+              <span className="text-accent font-medium">No obligation.</span> You'll review everything before payment.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20 bg-primary">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">What Guests Say</h2>
+            <p className="text-primary-foreground/70 text-lg">Real experiences from our community</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {[
+              {
+                quote: "The recovery services here have become essential to my routine. Professional, relaxing, and effective.",
+                name: "Alex R.",
+                badge: "Massage Therapy"
+              },
+              {
+                quote: "Finally found a spa that understands what real recovery means. The therapists are knowledgeable and attentive.",
+                name: "Member",
+                badge: "Recovery Services"
+              }
+            ].map((testimonial, idx) => (
+              <Card key={idx} className="bg-primary-foreground/5 border-accent/20">
+                <CardContent className="pt-8 pb-6">
+                  <Quote className="h-8 w-8 text-accent mb-4" aria-hidden="true" />
+                  <p className="text-primary-foreground/90 mb-6 italic">"{testimonial.quote}"</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-primary-foreground font-medium">{testimonial.name}</span>
+                    <span className="text-xs px-3 py-1 bg-accent/20 text-accent rounded-full">{testimonial.badge}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 container">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+          <p className="text-muted-foreground text-lg">Everything you need to know</p>
+        </div>
+        <div className="max-w-3xl mx-auto">
+          <Accordion type="single" collapsible className="space-y-4">
+            <AccordionItem value="booking" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-semibold">How does booking work?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                Select your preferred service, choose a date and time that works for you, and we'll confirm your appointment. You can request a specific provider or let us match you with the best available therapist.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="after" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-semibold">What happens after I request?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                You'll receive a confirmation with all the details. We'll send you any intake forms if required for your service. On the day of your appointment, arrive a few minutes early to settle in.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="waitlist" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-semibold">Can I join a waitlist?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                Yes! If your preferred time isn't available, you can join our waitlist and we'll notify you when an opening matches your preferences. Waitlist members get priority access to cancellation openings.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="pricing" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-semibold">How does pricing work?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                Pricing varies based on service type, appointment length, and selected enhancements. You'll review everything before payment—no commitment required.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="cancellation" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-semibold">What's your cancellation policy?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                We understand plans change. You can modify or cancel your appointment with advance notice. Full details will be provided when you book.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-20 bg-primary">
+        <div className="container text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">Ready to Reset Your Body?</h2>
+          <p className="text-primary-foreground/70 mb-8 max-w-2xl mx-auto text-lg">
+            Expert care and premium treatments designed to help you feel your best.
+          </p>
+          <Button 
+            size="lg" 
+            onClick={scrollToForm}
+            className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+          >
+            Book Service
+            <ArrowRight className="h-5 w-5 ml-2" />
+          </Button>
+          <p className="text-sm text-primary-foreground/60 mt-4">
+            No obligation. Response within 24 hours.
+          </p>
+        </div>
+      </section>
+
+      {/* Booking Form Dialog */}
+      <Dialog open={showBookingForm} onOpenChange={setShowBookingForm}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Book Your Spa Experience</DialogTitle>
+          </DialogHeader>
+          <div ref={formRef}>
+            <SpaBookingForm onSuccess={handleBookingSuccess} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

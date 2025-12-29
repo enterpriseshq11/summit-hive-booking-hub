@@ -5,65 +5,89 @@
 
 ## Core Requirements
 
-- [ ] **No pricing numbers** — No $, currency symbols, /mo, /hr, or numeric pricing anywhere in UI
-- [ ] **Single CTA per section** — "Request Workspace" only, no competing actions
-- [ ] **Black & Gold only** — No teal, blue, purple, cyan accents
-- [ ] **No schema/Stripe changes** — Database and payment logic unchanged
-- [ ] **Scroll-to-form behavior intact** — All CTAs and cards scroll to LeaseSignupForm section
-- [ ] **Mobile no overflow at 375px** — No horizontal scroll, cards stack single-column
+- [x] **Brand lock** — Black background + gold accents only
+- [x] **CTA lock** — One CTA per section ("Request Workspace")
+- [x] **Pricing lock** — No pricing numbers or price ranges anywhere in UI
+- [x] **Functional lock** — Hero CTA + cards scroll to LeaseSignupForm
+- [x] **Data lock** — LeaseSignupForm behavior unchanged
+- [x] **Backend lock** — No schema/RLS/edge function changes
+- [x] **Mobile lock** — 375px no horizontal overflow, cards stack single-column
+
+## Regression Scan Patterns
+
+The following patterns must NOT appear in Coworking UI:
+- `$` followed by digits
+- `/mo`, `/hr`, `/day`, `/week`, `/year`
+- `hourly`, `per hour`, `per month`, `per day`, `per week`
+- `monthly`, `annual`, `yearly`, `weekly`
+- `price`, `prices`, `pricing` (except locked FAQ)
+- `cost`, `costs`, `fee`, `fees`, `rate`, `rates`
+- `USD`, `dollars`
+- `%`, `discount`
+- `from` adjacent to digits
 
 ## Section Verification
 
 ### Hero Section
-- [ ] Single "Request Workspace" CTA
-- [ ] Trust badge: "No obligation. Response within 24 hours."
-- [ ] Amenities strip with Lucide icons (no emojis)
-- [ ] NextAvailableWidget with skeleton loading state
+- [x] Single "Request Workspace" CTA
+- [x] Trust badge: "No obligation. Response within 24 hours."
+- [x] Amenities strip with Lucide icons (no emojis)
+- [x] NextAvailableWidget with skeleton loading state
 
 ### Workspace Options
-- [ ] 3 workspace cards (Private Office, Dedicated Desk, Day Pass)
-- [ ] No pricing numbers on any card
-- [ ] Outcome-focused taglines and benefits
-- [ ] Cards clickable → scroll to form
-- [ ] Single "Request Workspace" CTA at bottom
+- [x] 3 workspace cards (Private Office, Dedicated Desk, Day Pass)
+- [x] No pricing numbers on any card
+- [x] Outcome-focused taglines and benefits
+- [x] Cards clickable → scroll to form
+- [x] Single "Request Workspace" CTA at bottom
 
 ### Why The Hive
-- [ ] 4 benefit cards (Flexibility, Community, Productivity, Convenience)
-- [ ] Lucide icons with gold accents
-- [ ] No numeric claims
+- [x] 4 benefit cards (Flexibility, Community, Productivity, Convenience)
+- [x] Lucide icons with gold accents
+- [x] No numeric claims
 
 ### Process Timeline
-- [ ] 3 steps vertical layout
-- [ ] "No obligation to proceed" messaging
-- [ ] "You'll review everything before payment" messaging
-- [ ] Informational only (no interaction)
+- [x] 3 steps vertical layout
+- [x] "No obligation to proceed" messaging
+- [x] "You'll review everything before payment" messaging
+- [x] Informational only (no interaction)
 
 ### Testimonials
-- [ ] 2 testimonials
-- [ ] Workspace-type badges only
-- [ ] Generic names (Jordan M., Member)
-- [ ] No verifiable claims
+- [x] 2 testimonials
+- [x] Workspace-type badges only
+- [x] Generic names (Jordan M., Member)
+- [x] No verifiable claims
 
 ### FAQ
-- [ ] 4 questions
-- [ ] Accordion with gold icons
-- [ ] Pricing FAQ uses EXACT locked copy:
+- [x] 4 questions
+- [x] Accordion with gold icons
+- [x] Pricing FAQ uses EXACT locked copy:
   > "Pricing varies based on workspace type and selected services. You'll receive a personalized proposal after consultation—no commitment required."
 
 ### Final CTA
-- [ ] Single "Request Workspace" CTA
-- [ ] Trust reinforcement copy
-- [ ] No secondary actions
+- [x] Single "Request Workspace" CTA
+- [x] Trust reinforcement copy
+- [x] No secondary actions
 
 ## Accessibility
-- [ ] Keyboard navigation works
-- [ ] Gold focus rings visible
-- [ ] Decorative elements are aria-hidden
+- [x] Keyboard navigation works
+- [x] Gold focus rings visible
+- [x] Decorative elements are aria-hidden
 
 ## Edge Cases
-- [ ] Availability widget error → neutral fallback + Retry
-- [ ] Form submission failure → preserve input + error toast
-- [ ] Mobile layout verified at 375px width
+- [x] Availability widget error → neutral fallback + Retry
+- [x] Form submission failure → preserve input + error toast
+- [x] Mobile layout verified at 375px width
+
+## User-Level Interaction Tests
+
+| Test | Status |
+|------|--------|
+| Hero CTA scrolls to form | PASS |
+| Workspace cards scroll to form | PASS |
+| Form validation shows inline errors | PASS |
+| Submit success shows toast | PASS |
+| Submit failure preserves input | PASS |
 
 ---
 
