@@ -16,10 +16,9 @@ export default function GiftCards() {
 
   const handlePurchase = () => {
     if (!selectedAmount) return;
-    // Scroll to form or trigger checkout flow
-    console.log("Proceeding to checkout for:", selectedAmount);
+    // TODO: Integrate with Stripe checkout for gift card purchase
+    // This will be connected when Stripe goes live
   };
-
   return (
     <div className="min-h-screen">
       {/* Hero Section - Premium Black & Gold */}
