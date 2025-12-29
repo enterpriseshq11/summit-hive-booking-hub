@@ -6,30 +6,33 @@
 ## React Ref Warnings (Non-Critical)
 
 ### 1. FAQSection Component
-- **Warning:** `Function components cannot be given refs`
-- **Location:** `src/components/home/FAQSection.tsx`
-- **Affects:** Dev console only, no production impact
-- **Proposed Fix:** Wrap component in `forwardRef` or remove unused ref forwarding
+- **File Path:** `src/components/home/FAQSection.tsx`
+- **Warning Text:** `Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?`
+- **Root Cause:** Component receives ref prop from parent but is not wrapped in `forwardRef()`
+- **Present in Production:** Unknown (dev console only, React warnings typically stripped in prod builds)
+- **Fix Candidate:** Wrap component export in `React.forwardRef()` or remove ref prop from parent
 
 ### 2. Footer Component  
-- **Warning:** `Function components cannot be given refs`
-- **Location:** `src/components/layout/Footer.tsx`
-- **Affects:** Dev console only, no production impact
-- **Proposed Fix:** Wrap component in `forwardRef` or remove unused ref forwarding
+- **File Path:** `src/components/layout/Footer.tsx`
+- **Warning Text:** `Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?`
+- **Root Cause:** Component receives ref prop from parent but is not wrapped in `forwardRef()`
+- **Present in Production:** Unknown (dev console only, React warnings typically stripped in prod builds)
+- **Fix Candidate:** Wrap component export in `React.forwardRef()` or remove ref prop from parent
 
 ### 3. MainLayout Component
-- **Warning:** `Function components cannot be given refs`
-- **Location:** `src/components/layout/MainLayout.tsx`
-- **Affects:** Dev console only, no production impact
-- **Proposed Fix:** Wrap component in `forwardRef` or remove unused ref forwarding
+- **File Path:** `src/components/layout/MainLayout.tsx`
+- **Warning Text:** `Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?`
+- **Root Cause:** Component receives ref prop from parent but is not wrapped in `forwardRef()`
+- **Present in Production:** Unknown (dev console only, React warnings typically stripped in prod builds)
+- **Fix Candidate:** Wrap component export in `React.forwardRef()` or remove ref prop from parent
 
 ## Summary
 
-| Component | Severity | Production Impact | Priority |
-|-----------|----------|-------------------|----------|
-| FAQSection | Low | None | P3 |
-| Footer | Low | None | P3 |
-| MainLayout | Low | None | P3 |
+| Component | File Path | Severity | Production Impact | Priority | Fix Candidate |
+|-----------|-----------|----------|-------------------|----------|---------------|
+| FAQSection | src/components/home/FAQSection.tsx | Low | None | P3 | forwardRef wrap |
+| Footer | src/components/layout/Footer.tsx | Low | None | P3 | forwardRef wrap |
+| MainLayout | src/components/layout/MainLayout.tsx | Low | None | P3 | forwardRef wrap |
 
 ---
 
