@@ -108,20 +108,26 @@ export default function BookingHub() {
         
         <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-6 mb-12">
+            {/* Live Availability Indicator */}
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30">
-              <CalendarDays className="h-4 w-4" />
-              Booking Hub
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+              </span>
+              Real-Time Availability
             </div>
+            
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary-foreground">
-              What would you like to book?
+              Find Your Perfect Time
             </h1>
+            
             <p className="text-lg md:text-xl text-primary-foreground/70 max-w-2xl mx-auto">
-              Search availability across all A-Z services or choose a business below.
-              Real-time availability, transparent pricing, book in minutes.
+              Browse availability, select your slot, and book in under 2 minutes.
+              <span className="block mt-2 text-accent font-medium">You'll review everything before payment.</span>
             </p>
           </div>
 
-          {/* Step Indicator - Premium Gold Accent */}
+          {/* Step Indicator - Enhanced Clarity */}
           <div className="max-w-4xl mx-auto mb-12">
             <div className="flex items-center justify-between relative">
               {/* Progress line */}
@@ -138,15 +144,24 @@ export default function BookingHub() {
                 >
                   <div 
                     className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
-                      step.step <= activeStep 
+                      step.step < activeStep 
                         ? 'bg-accent border-accent text-primary' 
-                        : 'bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground/60'
+                        : step.step === activeStep
+                          ? 'bg-accent border-accent text-primary ring-4 ring-accent/30'
+                          : 'bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground/60'
                     }`}
                   >
-                    <step.icon className="h-5 w-5" />
+                    {step.step < activeStep ? (
+                      <CheckCircle2 className="h-5 w-5" />
+                    ) : (
+                      <step.icon className="h-5 w-5" />
+                    )}
                   </div>
                   <div className="mt-3 hidden md:block">
-                    <p className={`text-sm font-medium ${step.step <= activeStep ? 'text-accent' : 'text-primary-foreground/60'}`}>
+                    <p className={`text-sm font-medium ${
+                      step.step <= activeStep ? 'text-accent' : 'text-primary-foreground/60'
+                    }`}>
+                      {step.step === activeStep && <span className="text-xs block text-primary-foreground/50 mb-0.5">Step {step.step} of 4</span>}
                       {step.title}
                     </p>
                     <p className="text-xs text-primary-foreground/50 mt-0.5">
@@ -261,66 +276,63 @@ export default function BookingHub() {
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 text-primary-foreground">How Booking Works</h2>
+              <h2 className="text-3xl font-bold mb-4 text-primary-foreground">Clear Process. No Surprises.</h2>
               <p className="text-primary-foreground/70 text-lg">
-                Transparent pricing, easy process, no surprises
+                You'll see a complete breakdown before any payment is taken
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
-              {/* Deposit Explanation */}
+              {/* Transparent Pricing */}
               <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
                 <CardHeader className="pb-3">
                   <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
                     <CreditCard className="h-6 w-6 text-accent" />
                   </div>
-                  <CardTitle className="text-lg text-primary-foreground">Deposits & Payments</CardTitle>
+                  <CardTitle className="text-lg text-primary-foreground">No Hidden Fees</CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-primary-foreground/70 space-y-2">
                   <p>
-                    <strong className="text-primary-foreground">Events (Summit):</strong> 50% deposit secures your date. Balance due 14 days before.
+                    See your total <strong className="text-primary-foreground">before checkout</strong>. Deposits, taxes, and any add-ons are shown upfront.
                   </p>
-                  <p>
-                    <strong className="text-primary-foreground">Spa & Coworking:</strong> Full payment at booking.
-                  </p>
-                  <p>
-                    <strong className="text-primary-foreground">Gym:</strong> Monthly membership, cancel anytime.
+                  <p className="text-primary-foreground/50 text-xs">
+                    No processing fees added at the end.
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Approval Process */}
+              {/* Booking Confirmation */}
               <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
                 <CardHeader className="pb-3">
                   <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
                     <FileCheck className="h-6 w-6 text-accent" />
                   </div>
-                  <CardTitle className="text-lg text-primary-foreground">Booking Confirmation</CardTitle>
+                  <CardTitle className="text-lg text-primary-foreground">Review Before You Commit</CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-primary-foreground/70 space-y-2">
                   <p>
-                    <strong className="text-primary-foreground">Instant bookings:</strong> Spa, gym classes, and coworking are confirmed immediately.
+                    Every booking shows a <strong className="text-primary-foreground">summary screen</strong> with date, time, and total before payment.
                   </p>
-                  <p>
-                    <strong className="text-primary-foreground">Event requests:</strong> Our team reviews and confirms within 24 hours.
+                  <p className="text-primary-foreground/50 text-xs">
+                    Cancel for free up to 48 hours before.
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Help & Support */}
+              {/* Secure & Flexible */}
               <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
                 <CardHeader className="pb-3">
                   <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
                     <Shield className="h-6 w-6 text-accent" />
                   </div>
-                  <CardTitle className="text-lg text-primary-foreground">Flexible & Secure</CardTitle>
+                  <CardTitle className="text-lg text-primary-foreground">Secure Payments</CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-primary-foreground/70 space-y-2">
                   <p>
-                    <strong className="text-primary-foreground">Cancellation:</strong> Free cancellation up to 48 hours before your booking.
+                    All transactions are <strong className="text-primary-foreground">encrypted</strong> and processed through Stripe.
                   </p>
-                  <p>
-                    <strong className="text-primary-foreground">Secure payments:</strong> All transactions encrypted and protected.
+                  <p className="text-primary-foreground/50 text-xs">
+                    Your card details are never stored on our servers.
                   </p>
                 </CardContent>
               </Card>
@@ -330,12 +342,12 @@ export default function BookingHub() {
             <div className="mt-10 p-5 bg-primary-foreground/5 rounded-xl border border-primary-foreground/10 flex items-start gap-4">
               <HelpCircle className="h-5 w-5 text-accent shrink-0 mt-0.5" />
               <div className="text-sm">
-                <p className="font-semibold text-primary-foreground mb-1">Why can't I see certain times?</p>
+                <p className="font-semibold text-primary-foreground mb-1">Can't find the time you need?</p>
                 <p className="text-primary-foreground/70">
-                  Some services require approval or have limited provider availability. 
-                  If you don't see your preferred time, try a different date or{" "}
-                  <Link to="/summit" className="text-accent hover:underline font-medium">request an event quote</Link>.
-                  You can also join the waitlist to be notified when spots open up.
+                  Some services have limited availability or require approval. 
+                  Try a different date, or{" "}
+                  <Link to="/summit" className="text-accent hover:underline font-medium">submit a request</Link>{" "}
+                  for custom event bookings. We'll respond within 24 hours.
                 </p>
               </div>
             </div>
