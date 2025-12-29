@@ -192,19 +192,19 @@ export default function Index() {
 
   return (
     <div className="min-h-screen overflow-hidden">
-      {/* Hero Section - 2-Column Premium Layout */}
+      {/* Hero Section - Premium Black & Gold */}
       <section className="relative py-20 md:py-28 lg:py-36 overflow-hidden bg-primary">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--accent)/0.15)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--summit)/0.1)_0%,transparent_50%)]" />
+        {/* Solid dark background with subtle gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/95" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
         
         {/* Subtle grid pattern overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]" />
         
-        {/* Animated glow orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[100px] animate-float" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-summit/8 rounded-full blur-[120px] animate-float" style={{ animationDelay: "1.5s" }} />
+        {/* One-time gold shimmer sweep - cinematic on load */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/20 to-transparent -translate-x-full animate-[shimmer-sweep_2s_ease-out_0.5s_forwards]" />
+        </div>
         
         <div className="container relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -212,7 +212,7 @@ export default function Index() {
             <div className="text-center lg:text-left space-y-8">
               {/* Location Badge */}
               <div 
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium text-white opacity-0 animate-fade-in-down"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-sm font-medium text-white/90 opacity-0 animate-fade-in-down"
                 style={{ animationDelay: "0.1s" }}
               >
                 <MapPin className="h-4 w-4 text-accent" />
@@ -226,58 +226,55 @@ export default function Index() {
                   style={{ animationDelay: "0.2s" }}
                 >
                   <span className="block">Your Destination</span>
-                  <span className="block mt-2 bg-gradient-to-r from-white via-accent to-white bg-clip-text text-transparent bg-300% animate-gradient-shift">
+                  <span className="block mt-2 text-accent">
                     for Everything
                   </span>
                 </h1>
                 
-                <p 
-                  className="text-lg md:text-xl text-white/70 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up"
+                {/* Gold accent divider */}
+                <div 
+                  className="hidden lg:block w-24 h-1 bg-gradient-to-r from-accent to-accent/50 opacity-0 animate-fade-in"
                   style={{ animationDelay: "0.4s" }}
+                />
+                
+                <p 
+                  className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up"
+                  style={{ animationDelay: "0.5s" }}
                 >
                   Events. Workspaces. Wellness. Fitness.
-                  <span className="block mt-2 font-semibold text-white">All under one roof. Book in minutes.</span>
+                  <span className="block mt-2 font-medium text-white/80">All under one roof. Book in minutes.</span>
                 </p>
               </div>
               
-              {/* CTAs - Bold and Prominent */}
+              {/* Single Primary CTA */}
               <div 
-                className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start opacity-0 animate-fade-in-up"
-                style={{ animationDelay: "0.6s" }}
+                className="flex justify-center lg:justify-start opacity-0 animate-fade-in-up"
+                style={{ animationDelay: "0.7s" }}
               >
                 <Button 
                   size="lg" 
-                  className="text-lg px-10 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/40 hover:shadow-accent/60 transition-all duration-300 hover:-translate-y-1 hover:scale-105 animate-glow-pulse" 
+                  className="text-lg px-12 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-1" 
                   asChild
                 >
-                  <Link to="/booking">
+                  <Link to="/book">
                     <CalendarDays className="h-5 w-5 mr-2" />
-                    Start Booking
+                    Book Now
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Link>
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="text-lg px-10 py-7 border-2 border-white/30 text-white bg-white/5 hover:bg-white/10 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
-                  onClick={scrollToExperiences}
-                >
-                  Explore Experiences
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
               </div>
 
-              {/* Proof Chips */}
+              {/* Proof Chips - Subtle */}
               <div 
                 className="flex flex-wrap justify-center lg:justify-start gap-3 pt-4 opacity-0 animate-fade-in"
-                style={{ animationDelay: "0.8s" }}
+                style={{ animationDelay: "0.9s" }}
               >
                 {proofChips.map((chip, index) => (
                   <div 
                     key={index}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/80 backdrop-blur-sm"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70"
                   >
-                    <chip.icon className="h-4 w-4 text-accent" />
+                    <chip.icon className="h-4 w-4 text-accent/80" />
                     <span>{chip.text}</span>
                   </div>
                 ))}
@@ -288,11 +285,11 @@ export default function Index() {
                 className="flex flex-wrap justify-center lg:justify-start gap-4 opacity-0 animate-fade-in"
                 style={{ animationDelay: "1s" }}
               >
-                <div className="flex items-center gap-2 text-sm text-white/60">
+                <div className="flex items-center gap-2 text-sm text-white/50">
                   <Phone className="h-4 w-4" />
                   <span>(419) 555-0100</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-white/60">
+                <div className="flex items-center gap-2 text-sm text-white/50">
                   <Clock className="h-4 w-4" />
                   <span>Open 7 Days</span>
                 </div>
@@ -361,67 +358,65 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Business Cards - Product-Style */}
+      {/* Business Cards - Premium Black & Gold */}
       <section className="py-12 pb-24 container">
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {businesses.map((business, index) => (
             <Card 
               key={business.href} 
-              className={`group relative overflow-hidden border-2 ${business.borderHover} transition-all duration-500 hover:shadow-2xl ${business.glowColor} hover:-translate-y-2 opacity-0 animate-fade-in-up bg-card`}
+              className="group relative overflow-hidden border border-border bg-card hover:border-accent/40 transition-all duration-500 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 opacity-0 animate-fade-in-up"
               style={{ animationDelay: `${0.1 * (index + 1)}s` }}
             >
-              {/* Gradient accent background on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${business.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              
-              {/* Pattern overlay */}
-              <div className={`absolute inset-0 ${business.pattern} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              
-              {/* Spotlight effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_50%_0%,hsl(var(--accent)/0.1)_0%,transparent_50%)]" />
+              {/* Subtle gold glow on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               <CardContent className="relative p-8">
                 <div className="flex flex-col h-full">
                   {/* Icon and Title Row */}
                   <div className="flex items-start gap-4 mb-4">
-                    <div className={`h-16 w-16 rounded-2xl bg-muted flex items-center justify-center ${business.iconBg} group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-xl`}>
-                      <business.icon className="h-8 w-8 text-foreground group-hover:text-white transition-colors duration-300" />
+                    <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center group-hover:bg-accent/10 transition-all duration-300">
+                      <business.icon className="h-7 w-7 text-muted-foreground group-hover:text-accent transition-colors duration-300" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold tracking-tight">
-                        {business.name}
-                      </h3>
-                      <p className={`font-semibold text-sm mt-1 text-${business.colorClass}`}>
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className="text-xl font-bold tracking-tight text-foreground">
+                          {business.name}
+                        </h3>
+                        {/* Next Available Badge - Gold text on black */}
+                        <span className="text-xs font-medium text-accent bg-primary px-2 py-0.5 rounded">
+                          Available Today
+                        </span>
+                      </div>
+                      <p className="font-medium text-sm text-accent/80">
                         {business.tagline}
                       </p>
                     </div>
                   </div>
 
-                  {/* Best For Tag */}
-                  <div className="mb-3">
-                    <span className={`text-xs font-semibold bg-${business.colorClass}/10 text-${business.colorClass} px-3 py-1.5 rounded-full`}>
-                      Best for: {business.bestFor}
-                    </span>
-                  </div>
-
                   {/* Description */}
-                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                  <p className="text-muted-foreground mb-4 leading-relaxed text-sm">
                     {business.description}
                   </p>
 
                   {/* 3 Bullet Highlights */}
-                  <ul className="space-y-2 mb-6">
+                  <ul className="space-y-2 mb-4">
                     {business.bullets.map((bullet, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className={`h-4 w-4 text-${business.colorClass} shrink-0`} />
+                        <Check className="h-4 w-4 text-accent shrink-0" />
                         <span>{bullet}</span>
                       </li>
                     ))}
                   </ul>
 
-                  {/* CTA Button - Bold */}
+                  {/* Pricing placeholder */}
+                  <p className="text-xs text-muted-foreground mb-4 italic">
+                    Pricing varies by experience
+                  </p>
+
+                  {/* CTA Button */}
                   <Button 
                     asChild 
-                    className={`w-full mt-auto font-semibold transition-all duration-300 shadow-lg group-hover:shadow-xl bg-primary text-primary-foreground hover:bg-primary/90`}
+                    className="w-full mt-auto font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-primary transition-all duration-300"
                     size="lg"
                   >
                     <Link to={business.href} className="flex items-center justify-center gap-2">
@@ -437,7 +432,7 @@ export default function Index() {
 
         {/* Gift Cards CTA */}
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg" asChild className="font-semibold">
+          <Button variant="outline" size="lg" asChild className="font-semibold border-accent/30 text-accent hover:bg-accent hover:text-primary transition-all duration-300">
             <Link to="/gift-cards" className="flex items-center gap-2">
               <Gift className="h-5 w-5" />
               Give the Gift of Experience
@@ -498,62 +493,35 @@ export default function Index() {
       {/* FAQ Section */}
       <FAQSection />
 
-      {/* Final CTA Section - Maximum Impact */}
+      {/* Final CTA Section - Decision Point */}
       <section className="relative py-28 overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-accent via-accent to-accent/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--primary)/0.2)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--primary)/0.15)_0%,transparent_50%)]" />
+        {/* Premium gold gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-accent via-accent/95 to-accent/90" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--primary)/0.15)_0%,transparent_50%)]" />
         
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        {/* Subtle pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
         
         <div className="container relative z-10">
-          <div className="max-w-3xl mx-auto text-center text-primary">
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-              Ready to Experience More?
+          <div className="max-w-2xl mx-auto text-center text-primary">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
+              One Place. Every Experience.
             </h2>
-            <p className="text-xl text-primary/70 mb-8 max-w-xl mx-auto">
+            <p className="text-lg text-primary/70 mb-10 max-w-xl mx-auto">
               Your next event, workspace, treatment, or workout is just a few clicks away.
             </p>
-            
-            {/* Trust line */}
-            <div className="flex flex-wrap justify-center gap-6 mb-10 text-sm text-primary/60">
-              <span className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Secure checkout
-              </span>
-              <span className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Real-time availability
-              </span>
-              <span className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Local destination
-              </span>
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="text-lg px-12 py-7 bg-primary text-primary-foreground font-bold shadow-2xl hover:shadow-3xl hover:-translate-y-1 hover:scale-105 transition-all duration-300"
-                asChild
-              >
-                <Link to="/booking">
-                  <CalendarDays className="h-5 w-5 mr-2" />
-                  Start Booking Now
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Link>
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-12 py-7 border-2 border-primary/30 text-primary bg-transparent hover:bg-primary/10 transition-all duration-300 font-semibold"
-                onClick={scrollToExperiences}
-              >
-                Explore Experiences
-              </Button>
-            </div>
+            <Button 
+              size="lg" 
+              className="text-lg px-14 py-7 bg-primary text-primary-foreground font-bold shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300"
+              asChild
+            >
+              <Link to="/book">
+                <CalendarDays className="h-5 w-5 mr-2" />
+                Book Now
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
