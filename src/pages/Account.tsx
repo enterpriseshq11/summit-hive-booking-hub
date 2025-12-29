@@ -11,7 +11,12 @@ import {
   Users, 
   Gift,
   Clock,
-  Settings
+  Settings,
+  ArrowRight,
+  Sparkles,
+  Building2,
+  Heart,
+  Dumbbell
 } from "lucide-react";
 
 export default function Account() {
@@ -30,27 +35,27 @@ export default function Account() {
 
         <Tabs defaultValue="bookings" className="space-y-8">
           <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 lg:w-auto lg:inline-grid bg-card border border-border">
-            <TabsTrigger value="bookings" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="bookings" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-primary">
               <CalendarDays className="h-4 w-4" />
               <span className="hidden sm:inline">Bookings</span>
             </TabsTrigger>
-            <TabsTrigger value="payments" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="payments" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-primary">
               <CreditCard className="h-4 w-4" />
               <span className="hidden sm:inline">Payments</span>
             </TabsTrigger>
-            <TabsTrigger value="documents" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="documents" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-primary">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Documents</span>
             </TabsTrigger>
-            <TabsTrigger value="wallet" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="wallet" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-primary">
               <Wallet className="h-4 w-4" />
               <span className="hidden sm:inline">Wallet</span>
             </TabsTrigger>
-            <TabsTrigger value="membership" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="membership" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-primary">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Membership</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="settings" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-primary">
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline">Settings</span>
             </TabsTrigger>
@@ -60,7 +65,7 @@ export default function Account() {
           <TabsContent value="bookings" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-foreground">My Bookings</h2>
-              <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button asChild className="bg-accent text-primary hover:bg-accent/90">
                 <Link to="/book">New Booking</Link>
               </Button>
             </div>
@@ -71,12 +76,34 @@ export default function Account() {
                 <CardTitle className="text-lg text-foreground">Upcoming</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <CalendarDays className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No upcoming bookings</p>
-                  <Button asChild variant="link" className="mt-2 text-primary">
-                    <Link to="/book">Book your first experience</Link>
-                  </Button>
+                <div className="text-center py-8">
+                  <div className="h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                    <CalendarDays className="h-8 w-8 text-accent" />
+                  </div>
+                  <p className="text-muted-foreground mb-4">No upcoming bookings</p>
+                  <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                    Ready to book your next experience? Explore our venues, spa, or fitness classes.
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <Button asChild variant="outline" size="sm" className="border-accent/30 hover:border-accent hover:bg-accent/10">
+                      <Link to="/summit" className="gap-2">
+                        <Building2 className="h-4 w-4" />
+                        Events
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm" className="border-accent/30 hover:border-accent hover:bg-accent/10">
+                      <Link to="/spa" className="gap-2">
+                        <Heart className="h-4 w-4" />
+                        Spa
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm" className="border-accent/30 hover:border-accent hover:bg-accent/10">
+                      <Link to="/fitness" className="gap-2">
+                        <Dumbbell className="h-4 w-4" />
+                        Fitness
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -87,9 +114,14 @@ export default function Account() {
                 <CardTitle className="text-lg text-foreground">Past Bookings</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No past bookings</p>
+                <div className="text-center py-8">
+                  <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                    <Clock className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground">No past bookings</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Your booking history will appear here
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -106,8 +138,12 @@ export default function Account() {
                   <CardDescription>Payments due for your bookings</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No outstanding balances</p>
+                  <div className="text-center py-8">
+                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+                      <Sparkles className="h-6 w-6 text-green-500" />
+                    </div>
+                    <p className="text-muted-foreground">No outstanding balances</p>
+                    <p className="text-sm text-muted-foreground mt-2">You're all caught up!</p>
                   </div>
                 </CardContent>
               </Card>
@@ -118,8 +154,14 @@ export default function Account() {
                   <CardDescription>Your recent transactions</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No payment history</p>
+                  <div className="text-center py-8">
+                    <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                      <CreditCard className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-muted-foreground">No payment history</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Transactions will appear after your first booking
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -137,9 +179,12 @@ export default function Account() {
                   <CardDescription>Documents requiring your signature</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No pending documents</p>
+                  <div className="text-center py-8">
+                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+                      <Sparkles className="h-6 w-6 text-green-500" />
+                    </div>
+                    <p className="text-muted-foreground">No pending documents</p>
+                    <p className="text-sm text-muted-foreground mt-2">You're all set!</p>
                   </div>
                 </CardContent>
               </Card>
@@ -150,8 +195,14 @@ export default function Account() {
                   <CardDescription>Your completed agreements</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No signed documents</p>
+                  <div className="text-center py-8">
+                    <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                      <FileText className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-muted-foreground">No signed documents</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Contracts and waivers will appear here
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -169,8 +220,8 @@ export default function Account() {
                   <CardDescription>Credits and gift card balances</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-primary">$0.00</div>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <div className="text-4xl font-bold text-accent mb-2">$0.00</div>
+                  <p className="text-sm text-muted-foreground">
                     Available for any A-Z service
                   </p>
                 </CardContent>
@@ -178,16 +229,19 @@ export default function Account() {
 
               <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-lg text-foreground">Redeem Gift Card</CardTitle>
-                  <CardDescription>Add a gift card to your wallet</CardDescription>
+                  <CardTitle className="text-lg text-foreground">Add to Wallet</CardTitle>
+                  <CardDescription>Redeem a gift card or add credits</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Button asChild variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                    <Link to="/gift-cards">
-                      <Gift className="h-4 w-4 mr-2" />
+                <CardContent className="space-y-3">
+                  <Button asChild variant="outline" className="w-full border-accent/30 hover:border-accent hover:bg-accent/10">
+                    <Link to="/gift-cards" className="gap-2">
+                      <Gift className="h-4 w-4" />
                       Redeem Gift Card
                     </Link>
                   </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Have a gift card code? Enter it to add funds to your wallet.
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -203,11 +257,19 @@ export default function Account() {
                 <CardDescription>Manage your membership and benefits</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="mb-4">You don't have an active membership</p>
-                  <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Link to="/fitness">View Membership Options</Link>
+                <div className="text-center py-8">
+                  <div className="h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-8 w-8 text-accent" />
+                  </div>
+                  <p className="text-muted-foreground mb-2">You don't have an active membership</p>
+                  <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                    Join Total Fitness for exclusive access to classes, equipment, and member benefits.
+                  </p>
+                  <Button asChild className="bg-accent text-primary hover:bg-accent/90">
+                    <Link to="/fitness" className="gap-2">
+                      Explore Membership
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
@@ -227,31 +289,31 @@ export default function Account() {
                 <CardContent className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-foreground">First Name</label>
-                      <p className="text-muted-foreground">
+                      <label className="text-sm font-medium text-muted-foreground">First Name</label>
+                      <p className="text-foreground">
                         {authUser?.profile?.first_name || "Not set"}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Last Name</label>
-                      <p className="text-muted-foreground">
+                      <label className="text-sm font-medium text-muted-foreground">Last Name</label>
+                      <p className="text-foreground">
                         {authUser?.profile?.last_name || "Not set"}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Email</label>
-                      <p className="text-muted-foreground">
+                      <label className="text-sm font-medium text-muted-foreground">Email</label>
+                      <p className="text-foreground">
                         {authUser?.email || "Not set"}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Phone</label>
-                      <p className="text-muted-foreground">
+                      <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                      <p className="text-foreground">
                         {authUser?.profile?.phone || "Not set"}
                       </p>
                     </div>
                   </div>
-                  <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                  <Button variant="outline" className="border-accent/30 hover:border-accent hover:bg-accent/10">
                     Edit Profile
                   </Button>
                 </CardContent>
@@ -271,7 +333,7 @@ export default function Account() {
                           Booking confirmations and reminders
                         </p>
                       </div>
-                      <span className="text-sm text-primary font-medium">Enabled</span>
+                      <span className="text-sm text-accent font-medium">Enabled</span>
                     </div>
                     <div className="flex items-center justify-between py-2 border-b border-border">
                       <div>
@@ -288,7 +350,7 @@ export default function Account() {
                       <div>
                         <p className="font-medium text-foreground">Marketing emails</p>
                         <p className="text-sm text-muted-foreground">
-                          Promotions and special offers
+                          News and updates from A-Z Enterprises
                         </p>
                       </div>
                       <span className="text-sm text-muted-foreground">
