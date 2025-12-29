@@ -17,7 +17,6 @@ import {
   Gift,
   User,
   LogOut,
-  Settings,
   LayoutDashboard,
   Menu,
   X
@@ -25,7 +24,7 @@ import {
 import { useState } from "react";
 
 const navItems = [
-  { label: "Booking Hub", href: "/booking", icon: CalendarDays, primary: true },
+  { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
   { label: "Summit", href: "/summit", icon: Building2 },
   { label: "Coworking", href: "/coworking", icon: Building2 },
   { label: "Spa", href: "/spa", icon: Sparkles },
@@ -39,11 +38,11 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold">A-Z Enterprises</span>
+          <span className="text-xl font-bold text-gold-gradient">A-Z Enterprises</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -57,10 +56,10 @@ export function Header() {
                 className={cn(
                   "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
                   isActive
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-accent text-primary"
                     : item.primary
-                    ? "bg-primary/10 text-primary hover:bg-primary/20"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    ? "bg-accent/20 text-accent hover:bg-accent/30"
+                    : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -75,7 +74,7 @@ export function Header() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2">
+                <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground hover:bg-primary-foreground/10">
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">
                     {authUser?.profile?.first_name || "Account"}
@@ -105,7 +104,7 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild size="sm">
+            <Button asChild size="sm" className="bg-accent hover:bg-accent/90 text-primary font-semibold">
               <Link to="/login">Login</Link>
             </Button>
           )}
@@ -114,7 +113,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden text-primary-foreground hover:bg-primary-foreground/10"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -124,7 +123,7 @@ export function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <nav className="md:hidden border-t bg-background p-4 space-y-2 animate-fade-in">
+        <nav className="md:hidden border-t border-primary-foreground/10 bg-primary p-4 space-y-2 animate-fade-in">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
@@ -135,8 +134,8 @@ export function Header() {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors",
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    ? "bg-accent text-primary"
+                    : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                 )}
               >
                 <item.icon className="h-5 w-5" />
