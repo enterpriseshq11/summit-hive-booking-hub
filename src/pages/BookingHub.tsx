@@ -1,26 +1,28 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBusinesses } from "@/hooks/useBusinesses";
-import { AvailabilitySearch, NextAvailableWidget, WaitlistCTA } from "@/components/booking";
+import { useNextAvailable } from "@/hooks/useAvailability";
+import { 
+  AvailabilitySearch, 
+  NextAvailableWidget, 
+  WaitlistCTA,
+  LiveAvailabilityIndicator,
+  BookingStepIndicator,
+  AvailabilityHelpModal,
+} from "@/components/booking";
 import { 
   Building2, 
   Sparkles, 
   Dumbbell, 
-  CalendarDays, 
   ArrowRight, 
-  CheckCircle2,
-  Clock,
   CreditCard,
   FileCheck,
-  HelpCircle,
+  Shield,
   Gift,
   User,
-  Zap,
-  Shield
 } from "lucide-react";
 import type { BusinessType } from "@/types";
 
@@ -52,38 +54,14 @@ const businessDescriptions: Record<BusinessType, string> = {
   fitness: "Gym, classes & training",
 };
 
-// Booking flow steps - visual only
-const bookingSteps = [
-  { 
-    step: 1, 
-    title: "Choose Experience", 
-    description: "Select business & service",
-    icon: Building2,
-  },
-  { 
-    step: 2, 
-    title: "Pick Date & Time", 
-    description: "View real-time availability",
-    icon: CalendarDays,
-  },
-  { 
-    step: 3, 
-    title: "Review Pricing", 
-    description: "See total & deposit",
-    icon: CreditCard,
-  },
-  { 
-    step: 4, 
-    title: "Confirm & Book", 
-    description: "Complete your reservation",
-    icon: CheckCircle2,
-  },
-];
-
 export default function BookingHub() {
   const navigate = useNavigate();
   const { data: businesses, isLoading } = useBusinesses();
-  const [activeStep] = useState(1); // Visual indicator only
+  const [currentStep] = useState(1);
+  const [completedSteps] = useState<number[]>([]);
+
+  // Get availability status for the indicator
+  const { isLoading: isAvailabilityLoading, isError: isAvailabilityError, refetch } = useNextAvailable();
 
   const handleSlotSelect = (slot: any) => {
     const businessType = slot.bookable_type_name?.toLowerCase().includes("summit") 
@@ -95,6 +73,16 @@ export default function BookingHub() {
           : "coworking";
     navigate(`/${businessType}?slot=${slot.id}`);
   };
+
+  const handleRetryAvailability = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  // Reset filters handler for the help modal
+  const handleResetFilters = useCallback(() => {
+    // This will be passed to AvailabilitySearch component
+    window.location.reload(); // Simple reset - reload the page to clear all filters
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -108,70 +96,34 @@ export default function BookingHub() {
         
         <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-6 mb-12">
-            {/* Live Availability Indicator */}
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
-              </span>
-              Real-Time Availability
-            </div>
+            {/* Live Availability Indicator - Proper States */}
+            <LiveAvailabilityIndicator 
+              isLoading={isAvailabilityLoading}
+              isError={isAvailabilityError}
+              onRetry={handleRetryAvailability}
+            />
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary-foreground">
+            {/* H1 - Single line desktop, max 2 lines mobile */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary-foreground leading-tight">
               Find Your Perfect Time
             </h1>
             
+            {/* Subtext - Platform value */}
             <p className="text-lg md:text-xl text-primary-foreground/70 max-w-2xl mx-auto">
-              Browse availability, select your slot, and book in under 2 minutes.
-              <span className="block mt-2 text-accent font-medium">You'll review everything before payment.</span>
+              Book Summit • Coworking • Spa • Fitness in minutes.
+            </p>
+            
+            {/* Trust line - appears ONCE */}
+            <p className="text-accent font-medium text-sm">
+              You'll review everything before payment.
             </p>
           </div>
 
-          {/* Step Indicator - Enhanced Clarity */}
-          <div className="max-w-4xl mx-auto mb-12">
-            <div className="flex items-center justify-between relative">
-              {/* Progress line */}
-              <div className="absolute top-6 left-0 right-0 h-0.5 bg-primary-foreground/20 hidden md:block" />
-              <div 
-                className="absolute top-6 left-0 h-0.5 bg-accent transition-all hidden md:block" 
-                style={{ width: `${((activeStep - 1) / (bookingSteps.length - 1)) * 100}%` }}
-              />
-              
-              {bookingSteps.map((step, index) => (
-                <div 
-                  key={step.step}
-                  className="relative flex flex-col items-center text-center z-10 flex-1"
-                >
-                  <div 
-                    className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
-                      step.step < activeStep 
-                        ? 'bg-accent border-accent text-primary' 
-                        : step.step === activeStep
-                          ? 'bg-accent border-accent text-primary ring-4 ring-accent/30'
-                          : 'bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground/60'
-                    }`}
-                  >
-                    {step.step < activeStep ? (
-                      <CheckCircle2 className="h-5 w-5" />
-                    ) : (
-                      <step.icon className="h-5 w-5" />
-                    )}
-                  </div>
-                  <div className="mt-3 hidden md:block">
-                    <p className={`text-sm font-medium ${
-                      step.step <= activeStep ? 'text-accent' : 'text-primary-foreground/60'
-                    }`}>
-                      {step.step === activeStep && <span className="text-xs block text-primary-foreground/50 mb-0.5">Step {step.step} of 4</span>}
-                      {step.title}
-                    </p>
-                    <p className="text-xs text-primary-foreground/50 mt-0.5">
-                      {step.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Step Indicator - Enhanced with Accessibility */}
+          <BookingStepIndicator
+            currentStep={currentStep}
+            completedSteps={completedSteps}
+          />
 
           {/* Global Availability Search */}
           <div className="max-w-4xl mx-auto">
@@ -180,6 +132,11 @@ export default function BookingHub() {
                 showPartySize={false}
                 onSlotSelect={handleSlotSelect}
               />
+              
+              {/* Help link - under search */}
+              <div className="mt-4 flex justify-center">
+                <AvailabilityHelpModal onResetFilters={handleResetFilters} />
+              </div>
             </div>
           </div>
         </div>
@@ -245,21 +202,21 @@ export default function BookingHub() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Next Available Widget */}
+                    {/* Next Available Widget with proper states */}
                     <NextAvailableWidget 
                       businessType={business.type}
-                      showPrice={true}
+                      showPrice={false}
                       limit={2}
                       onSlotSelect={handleSlotSelect}
                     />
 
                     <Button 
                       asChild 
-                      className="w-full bg-primary hover:bg-accent hover:text-primary transition-all font-semibold"
+                      className="w-full bg-primary hover:bg-accent hover:text-primary transition-all font-semibold focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                       size="lg"
                     >
                       <Link to={route} className="flex items-center justify-center gap-2">
-                        View All Options
+                        View Times
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </Link>
                     </Button>
@@ -271,37 +228,19 @@ export default function BookingHub() {
         </div>
       </section>
 
-      {/* Pricing & Process Clarity Section */}
+      {/* Pricing & Process Clarity Section - NO DUPLICATE TRUST LINE */}
       <section className="py-16 md:py-20 bg-primary">
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4 text-primary-foreground">Clear Process. No Surprises.</h2>
               <p className="text-primary-foreground/70 text-lg">
-                You'll see a complete breakdown before any payment is taken
+                See a complete breakdown before any payment is taken
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
-              {/* Transparent Pricing */}
-              <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
-                <CardHeader className="pb-3">
-                  <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
-                    <CreditCard className="h-6 w-6 text-accent" />
-                  </div>
-                  <CardTitle className="text-lg text-primary-foreground">No Hidden Fees</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-primary-foreground/70 space-y-2">
-                  <p>
-                    See your total <strong className="text-primary-foreground">before checkout</strong>. Deposits, taxes, and any add-ons are shown upfront.
-                  </p>
-                  <p className="text-primary-foreground/50 text-xs">
-                    No processing fees added at the end.
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Booking Confirmation */}
+              {/* Review Before You Commit */}
               <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
                 <CardHeader className="pb-3">
                   <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
@@ -309,47 +248,42 @@ export default function BookingHub() {
                   </div>
                   <CardTitle className="text-lg text-primary-foreground">Review Before You Commit</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-primary-foreground/70 space-y-2">
+                <CardContent className="text-sm text-primary-foreground/70">
                   <p>
                     Every booking shows a <strong className="text-primary-foreground">summary screen</strong> with date, time, and total before payment.
-                  </p>
-                  <p className="text-primary-foreground/50 text-xs">
-                    Cancel for free up to 48 hours before.
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Secure & Flexible */}
+              {/* No Hidden Fees */}
+              <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
+                <CardHeader className="pb-3">
+                  <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
+                    <CreditCard className="h-6 w-6 text-accent" />
+                  </div>
+                  <CardTitle className="text-lg text-primary-foreground">No Hidden Fees</CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-primary-foreground/70">
+                  <p>
+                    See your total <strong className="text-primary-foreground">before checkout</strong>. Taxes and any add-ons are shown upfront.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Secure Checkout */}
               <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
                 <CardHeader className="pb-3">
                   <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
                     <Shield className="h-6 w-6 text-accent" />
                   </div>
-                  <CardTitle className="text-lg text-primary-foreground">Secure Payments</CardTitle>
+                  <CardTitle className="text-lg text-primary-foreground">Secure Checkout</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-primary-foreground/70 space-y-2">
+                <CardContent className="text-sm text-primary-foreground/70">
                   <p>
-                    All transactions are <strong className="text-primary-foreground">encrypted</strong> and processed through Stripe.
-                  </p>
-                  <p className="text-primary-foreground/50 text-xs">
-                    Your card details are never stored on our servers.
+                    All transactions are <strong className="text-primary-foreground">encrypted</strong> and securely processed.
                   </p>
                 </CardContent>
               </Card>
-            </div>
-
-            {/* Availability Help Text */}
-            <div className="mt-10 p-5 bg-primary-foreground/5 rounded-xl border border-primary-foreground/10 flex items-start gap-4">
-              <HelpCircle className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-semibold text-primary-foreground mb-1">Can't find the time you need?</p>
-                <p className="text-primary-foreground/70">
-                  Some services have limited availability or require approval. 
-                  Try a different date, or{" "}
-                  <Link to="/summit" className="text-accent hover:underline font-medium">submit a request</Link>{" "}
-                  for custom event bookings. We'll respond within 24 hours.
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -363,7 +297,7 @@ export default function BookingHub() {
             <Button 
               asChild 
               variant="outline" 
-              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover"
+              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               <Link to="/gift-cards">
                 <Gift className="h-8 w-8 text-accent" />
@@ -373,7 +307,7 @@ export default function BookingHub() {
             <Button 
               asChild 
               variant="outline" 
-              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover"
+              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               <Link to="/account">
                 <User className="h-8 w-8 text-accent" />
@@ -383,7 +317,7 @@ export default function BookingHub() {
             <Button 
               asChild 
               variant="outline" 
-              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover"
+              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               <Link to="/fitness">
                 <Dumbbell className="h-8 w-8 text-accent" />
@@ -393,7 +327,7 @@ export default function BookingHub() {
             <Button 
               asChild 
               variant="outline" 
-              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover"
+              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               <Link to="/spa">
                 <Sparkles className="h-8 w-8 text-accent" />
