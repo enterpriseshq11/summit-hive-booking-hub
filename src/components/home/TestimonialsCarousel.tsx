@@ -9,7 +9,7 @@ const testimonials = [
     name: "Sarah M.",
     experience: "The Summit",
     rating: 5,
-    quote: "Our wedding was absolutely perfect. The team handled every detail flawlessly. Booked in minutes, stress-free for months.",
+    quote: "Best event space we've ever used. Every detail handled flawlessly — our guests are still talking about it.",
     tag: "Wedding Reception",
   },
   {
@@ -17,7 +17,7 @@ const testimonials = [
     name: "Michael R.",
     experience: "The Hive Coworking",
     rating: 5,
-    quote: "Finally found my productive space. The 24/7 access and community vibe have transformed how I work remotely.",
+    quote: "Easiest booking process in town. 24/7 access, fast WiFi, and I closed three deals in my first month here.",
     tag: "Private Office",
   },
   {
@@ -25,7 +25,7 @@ const testimonials = [
     name: "Jennifer L.",
     experience: "Restoration Lounge",
     rating: 5,
-    quote: "Best massage I've ever had. The atmosphere is so calming, and booking online made it effortless.",
+    quote: "Felt like a private retreat, not a spa. Walked out renewed and already booked my next visit.",
     tag: "Deep Tissue Massage",
   },
   {
@@ -33,7 +33,7 @@ const testimonials = [
     name: "David K.",
     experience: "Total Fitness",
     rating: 5,
-    quote: "The gym has everything I need and the trainers actually care about your progress. Great local facility!",
+    quote: "Felt like a private club, not a gym. Clean, modern, and trainers who actually remember your goals.",
     tag: "Membership",
   },
   {
@@ -41,7 +41,7 @@ const testimonials = [
     name: "Amanda T.",
     experience: "The Summit",
     rating: 5,
-    quote: "Hosted our company retreat here. Professional, beautiful venue, and the booking process was seamless.",
+    quote: "Our company retreat was seamless. Professional venue, responsive team, and everyone left impressed.",
     tag: "Corporate Event",
   },
   {
@@ -49,24 +49,8 @@ const testimonials = [
     name: "Chris B.",
     experience: "Restoration Lounge",
     rating: 5,
-    quote: "I schedule monthly treatments now. The online booking shows real availability — no phone tag needed.",
+    quote: "No phone tag needed — saw real availability online and booked in under two minutes.",
     tag: "Facial Treatment",
-  },
-  {
-    id: 7,
-    name: "Lauren H.",
-    experience: "The Hive Coworking",
-    rating: 5,
-    quote: "Meeting rooms are always clean and available when I need them. Love being able to book same-day.",
-    tag: "Meeting Room",
-  },
-  {
-    id: 8,
-    name: "Tom P.",
-    experience: "Total Fitness",
-    rating: 5,
-    quote: "Best gym in Wapakoneta, hands down. Clean, modern equipment, and the group classes are excellent.",
-    tag: "Group Classes",
   },
 ];
 
@@ -121,38 +105,33 @@ export function TestimonialsCarousel() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Desktop: 3-card carousel */}
-      <div className="hidden md:grid md:grid-cols-3 gap-6">
-        {getVisibleTestimonials().map((testimonial, idx) => (
+      {/* Desktop: Show 2 testimonials at a time for cleaner look */}
+      <div className="hidden md:grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        {getVisibleTestimonials().slice(0, 2).map((testimonial, idx) => (
           <Card 
             key={`${testimonial.id}-${idx}`}
-            className={`bg-card border-2 transition-all duration-500 ${
-              idx === 1 ? 'scale-105 shadow-xl border-accent/30' : 'opacity-90'
-            }`}
+            className="bg-card border border-border hover:border-accent/30 transition-all duration-300"
           >
             <CardContent className="p-6">
-              <div className="flex items-center gap-1 mb-3">
-                {Array.from({ length: testimonial.rating }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-accent text-accent" />
-                ))}
-              </div>
+              {/* Gold decorative quote */}
+              <Quote className="h-8 w-8 text-accent/40 mb-4" />
               
-              <Quote className="h-8 w-8 text-muted-foreground/30 mb-2" />
-              
-              <p className="text-foreground mb-4 leading-relaxed">
+              <p className="text-foreground mb-6 leading-relaxed text-lg">
                 "{testimonial.quote}"
               </p>
               
-              <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex items-center justify-between pt-4 border-t border-border">
                 <div>
                   <p className="font-semibold text-foreground">{testimonial.name}</p>
-                  <p className={`text-sm font-medium ${experienceColors[testimonial.experience]}`}>
+                  <p className="text-sm font-medium text-accent/80">
                     {testimonial.experience}
                   </p>
                 </div>
-                <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
-                  {testimonial.tag}
-                </span>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: testimonial.rating }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-accent text-accent" />
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>

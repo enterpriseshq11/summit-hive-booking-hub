@@ -8,6 +8,14 @@ import { HelpCircle } from "lucide-react";
 
 const faqs = [
   {
+    question: "How does booking work?",
+    answer: "Browse our experiences, select your preferred date and time, and confirm your booking online. You'll receive instant confirmation and can manage your booking from your account. Most bookings take less than 2 minutes.",
+  },
+  {
+    question: "Do I need a membership?",
+    answer: "No membership is required for most experiences. The Summit, Restoration Lounge, and Coworking day passes are open to everyone. Total Fitness offers flexible membership options, but you can also purchase single-visit passes.",
+  },
+  {
     question: "How do deposits work?",
     answer: "Some bookings may require a deposit to secure your reservation. The deposit amount varies by service and is clearly shown before you confirm. The remaining balance is typically due before or at the time of your appointment or event.",
   },
@@ -16,20 +24,12 @@ const faqs = [
     answer: "If your preferred time isn't available, you can join our waitlist. We'll notify you immediately if a spot opens up. You can also try adjusting your date or time preferences to see more options.",
   },
   {
-    question: "How does the event approval process work?",
-    answer: "For The Summit event venue, larger events may require approval to ensure we can accommodate your needs properly. After submitting your request, our events team will review the details and contact you within 24-48 hours to confirm or discuss your booking.",
-  },
-  {
     question: "How do coworking memberships and office leases work?",
     answer: "We offer flexible options from day passes to monthly memberships and private office leases. Memberships include 24/7 access, and you can upgrade or change your plan anytime. Contact us to discuss the best option for your needs.",
   },
   {
     question: "What should I bring to my spa appointment?",
     answer: "Just bring yourself! We provide robes, slippers, and all necessary amenities. Arrive 10-15 minutes early to check in and relax. For certain treatments, you may be asked to complete a brief intake form.",
-  },
-  {
-    question: "How do gym memberships work?",
-    answer: "Total Fitness memberships provide 24/7 access to all equipment and group classes. Sign up online or in person, and you'll receive your access credentials immediately. We offer month-to-month flexibility with no long-term contracts required.",
   },
 ];
 
@@ -53,9 +53,9 @@ export function FAQSection() {
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
-                className="bg-card border-2 rounded-xl px-6 data-[state=open]:border-accent/30"
+                className="bg-card border border-border rounded-xl px-6 data-[state=open]:border-accent/40"
               >
-                <AccordionTrigger className="text-left font-semibold hover:no-underline py-5">
+                <AccordionTrigger className="text-left font-semibold hover:no-underline py-5 text-foreground [&>svg]:text-accent">
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
