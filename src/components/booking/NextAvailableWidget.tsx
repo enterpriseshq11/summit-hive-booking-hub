@@ -12,6 +12,8 @@ interface NextAvailableWidgetProps {
   limit?: number;
   onSlotSelect?: (slot: any) => void;
   lookAheadDays?: number;
+  emptyMessage?: string;
+  emptySubMessage?: string;
 }
 
 export function NextAvailableWidget({
@@ -21,6 +23,8 @@ export function NextAvailableWidget({
   limit = 3,
   onSlotSelect,
   lookAheadDays = 14,
+  emptyMessage,
+  emptySubMessage,
 }: NextAvailableWidgetProps) {
   const { data: slots, isLoading, error, refetch, isFetching } = useNextAvailable(businessType);
 
@@ -83,10 +87,10 @@ export function NextAvailableWidget({
             <Calendar className="h-6 w-6 text-accent" />
           </div>
           <p className="text-sm font-medium text-foreground">
-            No openings in the next {lookAheadDays} days
+            {emptyMessage || `No openings in the next ${lookAheadDays} days`}
           </p>
           <p className="text-xs text-muted-foreground mt-1 mb-3">
-            Join the waitlist and we'll notify you first.
+            {emptySubMessage || "Join the waitlist and we'll notify you first."}
           </p>
           <div className="flex gap-2 text-xs">
             <button 
