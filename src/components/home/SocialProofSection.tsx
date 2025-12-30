@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { Shield, RefreshCw, HeartHandshake, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { TestimonialsCarousel } from "./TestimonialsCarousel";
 
 const guarantees = [
   {
     icon: Shield,
-    title: "Transparent Pricing",
-    description: "No hidden fees. See the full breakdown before you book.",
+    title: "Transparent Process",
+    description: "You'll review everything before payment—no surprises.",
   },
   {
     icon: RefreshCw,
@@ -20,52 +22,64 @@ const guarantees = [
   },
 ];
 
-const partnerLogos = [
-  "Local Chamber",
-  "Visit Ohio",
-  "AAA Approved",
-  "Better Business",
-  "Community Trust",
-  "Local Awards",
-];
+const experienceFilters = ["All", "Events", "Coworking", "Spa", "Fitness"] as const;
+type ExperienceFilter = typeof experienceFilters[number];
 
 export function SocialProofSection() {
+  const [activeFilter, setActiveFilter] = useState<ExperienceFilter>("All");
+
   return (
     <section className="py-24 bg-background">
       <div className="container">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-sm font-semibold text-accent mb-6">
             <Award className="h-4 w-4" />
             Trusted by Locals
           </div>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
-            Real Experiences, Real Results
+            The Experience People Talk About
           </h2>
           <p className="text-lg text-muted-foreground">
-            Join thousands of satisfied customers who've discovered their destination.
+            Join satisfied customers who've discovered their destination.
           </p>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap justify-center gap-2 mb-10">
+          {experienceFilters.map((filter) => (
+            <Button
+              key={filter}
+              variant={activeFilter === filter ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveFilter(filter)}
+              className={activeFilter === filter 
+                ? "bg-accent text-primary hover:bg-accent/90" 
+                : "border-border hover:border-accent/30"
+              }
+            >
+              {filter}
+            </Button>
+          ))}
         </div>
 
         {/* Testimonials Carousel */}
         <div className="mb-20">
-          <TestimonialsCarousel />
+          <TestimonialsCarousel filter={activeFilter} />
         </div>
 
-        {/* Partner Logos Row */}
-        <div className="mb-20">
-          <p className="text-center text-sm font-medium text-muted-foreground mb-8 uppercase tracking-wider">
-            Local Partners & Recognition
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-12">
-            {partnerLogos.map((logo, index) => (
-              <div
-                key={index}
-                className="px-6 py-3 rounded-full bg-muted/50 border text-sm font-medium text-muted-foreground"
-              >
-                {logo}
-              </div>
-            ))}
+        {/* Trust Strip - Replaces partner logos */}
+        <div className="mb-16">
+          <div className="flex flex-wrap justify-center items-center gap-3 text-sm text-muted-foreground">
+            <span className="px-4 py-2 rounded-full bg-muted/50 border font-medium">
+              ✓ Trusted locally
+            </span>
+            <span className="px-4 py-2 rounded-full bg-muted/50 border font-medium">
+              ✓ High satisfaction
+            </span>
+            <span className="px-4 py-2 rounded-full bg-muted/50 border font-medium">
+              ✓ 4 experiences under one roof
+            </span>
           </div>
         </div>
 

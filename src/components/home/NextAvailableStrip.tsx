@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Building2, Sparkles, Dumbbell, Zap, ArrowRight, Clock, AlertCircle, Users } from "lucide-react";
+import { Building2, Sparkles, Dumbbell, Zap, ArrowRight, Clock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -56,41 +56,52 @@ function AvailabilityWidget({ business }: { business: BusinessConfig }) {
 
   if (isLoading) {
     return (
-      <Card className="border-2 hover:border-accent/30 transition-all duration-300">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className={`h-10 w-10 rounded-xl ${business.iconBg} flex items-center justify-center`}>
-              <Icon className={`h-5 w-5 text-${business.colorClass}`} />
+      <Link 
+        to={business.href}
+        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl"
+        role="link"
+        aria-label={`View ${business.name} availability`}
+      >
+        <Card className="border-2 hover:border-accent/30 transition-all duration-300 cursor-pointer">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`h-10 w-10 rounded-xl ${business.iconBg} flex items-center justify-center`}>
+                <Icon className={`h-5 w-5 text-${business.colorClass}`} />
+              </div>
+              <div>
+                <Skeleton className="h-4 w-24 mb-1" />
+                <Skeleton className="h-3 w-16" />
+              </div>
             </div>
-            <div>
-              <Skeleton className="h-4 w-24 mb-1" />
-              <Skeleton className="h-3 w-16" />
-            </div>
-          </div>
-          <Skeleton className="h-8 w-full" />
-        </CardContent>
-      </Card>
+            <Skeleton className="h-4 w-20" />
+          </CardContent>
+        </Card>
+      </Link>
     );
   }
 
   if (error) {
     return (
-      <Card className="border-2 hover:border-accent/30 transition-all duration-300">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className={`h-10 w-10 rounded-xl ${business.iconBg} flex items-center justify-center`}>
-              <Icon className={`h-5 w-5 text-${business.colorClass}`} />
+      <Link 
+        to={business.href}
+        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl"
+        role="link"
+        aria-label={`View ${business.name}`}
+      >
+        <Card className="border-2 hover:border-accent/30 transition-all duration-300 cursor-pointer">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className={`h-10 w-10 rounded-xl ${business.iconBg} flex items-center justify-center`}>
+                <Icon className={`h-5 w-5 text-${business.colorClass}`} />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{business.name}</p>
+                <p className="text-xs text-muted-foreground">Check availability</p>
+              </div>
             </div>
-            <div>
-              <p className="font-semibold text-sm">{business.name}</p>
-              <p className="text-xs text-muted-foreground">Temporarily unavailable</p>
-            </div>
-          </div>
-          <Button variant="outline" size="sm" className="w-full" asChild>
-            <Link to="/booking">Go to Booking Hub</Link>
-          </Button>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </Link>
     );
   }
 
@@ -98,65 +109,61 @@ function AvailabilityWidget({ business }: { business: BusinessConfig }) {
   const nextSlot = hasSlots ? slots[0] : null;
 
   return (
-    <Card className={`border-2 hover:border-${business.colorClass}/50 hover:shadow-lg transition-all duration-300 group`}>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <div className={`h-10 w-10 rounded-xl ${business.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-            <Icon className={`h-5 w-5 text-${business.colorClass}`} />
+    <Link 
+      to={business.href}
+      className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl"
+      role="link"
+      aria-label={`View ${business.name} - ${hasSlots ? `Next available ${new Date(nextSlot!.start_time).toLocaleDateString()}` : 'Fully booked for now'}`}
+    >
+      <Card className={`border-2 hover:border-${business.colorClass}/50 hover:shadow-lg transition-all duration-300 group cursor-pointer`}>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className={`h-10 w-10 rounded-xl ${business.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+              <Icon className={`h-5 w-5 text-${business.colorClass}`} />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-sm">{business.name}</p>
+              {hasSlots && nextSlot ? (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>
+                    {new Date(nextSlot.start_time).toLocaleDateString(undefined, { 
+                      weekday: 'short', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Users className="h-3 w-3" />
+                  <span>Fully booked for now</span>
+                </div>
+              )}
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
           </div>
-          <div>
-            <p className="font-semibold text-sm">{business.name}</p>
-            {hasSlots && nextSlot ? (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                <span>
-                  {new Date(nextSlot.start_time).toLocaleDateString(undefined, { 
-                    weekday: 'short', 
-                    month: 'short', 
-                    day: 'numeric' 
-                  })}
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Users className="h-3 w-3" />
-                <span>Join waitlist</span>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        <Button 
-          variant={hasSlots ? "default" : "outline"} 
-          size="sm" 
-          className="w-full group/btn" 
-          asChild
-        >
-          <Link to={business.href} className="flex items-center justify-center gap-2">
-            {hasSlots ? "View Times" : "Join Waitlist"}
-            <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
 export function NextAvailableStrip() {
   return (
-    <section className="py-8 bg-muted/30 border-y">
+    <section id="availability" className="py-12 bg-muted/50 border-y scroll-mt-20">
       <div className="container">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center">
-              <Zap className="h-4 w-4 text-accent" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-accent" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Next Available</h3>
-              <p className="text-xs text-muted-foreground">Real-time availability</p>
+              <h3 className="font-bold text-xl">Next Openings (Real-Time)</h3>
+              <p className="text-sm text-muted-foreground">Real-time availability</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" asChild className="text-accent hover:text-accent/80">
             <Link to="/booking" className="flex items-center gap-1">
               View All
               <ArrowRight className="h-4 w-4" />
@@ -168,6 +175,16 @@ export function NextAvailableStrip() {
           {businesses.map((business) => (
             <AvailabilityWidget key={business.type} business={business} />
           ))}
+        </div>
+
+        {/* Single section CTA */}
+        <div className="text-center mt-8">
+          <Button asChild className="bg-accent hover:bg-accent/90 text-primary font-semibold">
+            <Link to="/booking" className="flex items-center gap-2">
+              View Availability
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +19,9 @@ import {
   LogOut,
   LayoutDashboard,
   Menu,
-  X
+  X,
+  Phone,
+  Clock
 } from "lucide-react";
 import { useState } from "react";
 
@@ -34,11 +36,25 @@ const navItems = [
 
 export function Header() {
   const { user, authUser, signOut } = useAuth();
-  const location = useLocation();
+  const location = window.location;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground">
+      {/* Desktop micro-trust line */}
+      <div className="hidden lg:block border-b border-primary-foreground/10 bg-primary/95">
+        <div className="container flex items-center justify-end gap-6 h-8 text-xs text-primary-foreground/70">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3 w-3" />
+            <span>Open 7 Days</span>
+          </div>
+          <a href="tel:+14195550100" className="flex items-center gap-1.5 hover:text-primary-foreground transition-colors">
+            <Phone className="h-3 w-3" />
+            <span>(419) 555-0100</span>
+          </a>
+        </div>
+      </div>
+
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">

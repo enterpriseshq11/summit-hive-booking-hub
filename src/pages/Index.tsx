@@ -1,92 +1,63 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useState, useRef } from "react";
 import { 
   ArrowRight, 
   CalendarDays, 
   Building2, 
   Sparkles, 
   Dumbbell, 
-  Gift, 
   MapPin, 
   Phone, 
   Clock,
-  CheckCircle2,
+  Check,
   Star,
-  Users,
   Zap,
   Shield,
-  Heart,
-  TrendingUp,
-  Check
+  Heart
 } from "lucide-react";
-import { NextAvailableStrip, ExperiencePreviewPanel, SocialProofSection, FAQSection } from "@/components/home";
+import { NextAvailableStrip, ExperiencePreviewPanel, SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip } from "@/components/home";
 
 const businesses = [
   {
     name: "The Summit",
-    tagline: "Elevate Every Event",
+    tagline: "Premium Event Venue",
     description: "Premier event venue for weddings, corporate events, and celebrations that leave lasting impressions.",
     bestFor: "Weddings • Galas • Corporate",
     bullets: ["Up to 300 guests", "Full catering options", "AV & lighting included"],
     icon: Building2,
     href: "/summit",
-    cta: "Plan Your Event",
     colorClass: "summit",
-    gradient: "from-summit/20 via-summit/10 to-transparent",
-    borderHover: "hover:border-summit/50",
-    iconBg: "group-hover:bg-summit",
-    glowColor: "group-hover:shadow-summit/30",
-    pattern: "bg-[radial-gradient(circle_at_80%_20%,hsl(var(--summit)/0.08)_0%,transparent_50%)]",
   },
   {
     name: "The Hive Coworking",
-    tagline: "Where Work Thrives",
+    tagline: "Private Offices + Coworking",
     description: "Modern workspaces and private offices with 24/7 access. Your productivity headquarters.",
     bestFor: "Remote Work • Startups • Meetings",
     bullets: ["24/7 access", "High-speed WiFi", "Meeting rooms available"],
     icon: Building2,
     href: "/coworking",
-    cta: "Find Your Space",
     colorClass: "coworking",
-    gradient: "from-coworking/20 via-coworking/10 to-transparent",
-    borderHover: "hover:border-coworking/50",
-    iconBg: "group-hover:bg-coworking",
-    glowColor: "group-hover:shadow-coworking/30",
-    pattern: "bg-[radial-gradient(circle_at_20%_80%,hsl(var(--coworking)/0.08)_0%,transparent_50%)]",
   },
   {
     name: "Restoration Lounge",
-    tagline: "Renew & Restore",
+    tagline: "Recovery + Spa Treatments",
     description: "Luxury spa treatments and massage therapy. Escape the everyday and rediscover balance.",
     bestFor: "Massage • Facials • Recovery",
     bullets: ["Licensed therapists", "Premium products", "Private suites"],
     icon: Sparkles,
     href: "/spa",
-    cta: "Book Treatment",
     colorClass: "spa",
-    gradient: "from-spa/20 via-spa/10 to-transparent",
-    borderHover: "hover:border-spa/50",
-    iconBg: "group-hover:bg-spa",
-    glowColor: "group-hover:shadow-spa/30",
-    pattern: "bg-[radial-gradient(circle_at_80%_80%,hsl(var(--spa)/0.08)_0%,transparent_50%)]",
   },
   {
     name: "Total Fitness",
-    tagline: "Your Journey Starts Here",
+    tagline: "24/7 Gym + Coaching",
     description: "24/7 gym access with group classes and personal training. Transform your potential.",
     bestFor: "Strength • Cardio • Classes",
     bullets: ["Modern equipment", "Group classes", "Personal training"],
     icon: Dumbbell,
     href: "/fitness",
-    cta: "Start Membership",
     colorClass: "fitness",
-    gradient: "from-fitness/20 via-fitness/10 to-transparent",
-    borderHover: "hover:border-fitness/50",
-    iconBg: "group-hover:bg-fitness",
-    glowColor: "group-hover:shadow-fitness/30",
-    pattern: "bg-[radial-gradient(circle_at_20%_20%,hsl(var(--fitness)/0.08)_0%,transparent_50%)]",
   },
 ];
 
@@ -117,89 +88,32 @@ const steps = [
   },
 ];
 
-const stats = [
-  { value: 2500, suffix: "+", label: "Happy Customers" },
-  { value: 150, suffix: "+", label: "Events Hosted" },
-  { value: 98, suffix: "%", label: "Satisfaction Rate" },
-  { value: 4, suffix: "", label: "Unique Experiences" },
-];
-
 const proofChips = [
   { icon: Zap, text: "Book in Minutes" },
   { icon: Clock, text: "Real-Time Availability" },
   { icon: MapPin, text: "Local Destination" },
-  { icon: Shield, text: "Secure Checkout" },
+  { icon: Shield, text: "Secure Booking" },
 ];
 
-function AnimatedCounter({ value, suffix, delay }: { value: number; suffix: string; delay: number }) {
-  const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !isVisible) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.3 }
-    );
-    
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-    
-    return () => observer.disconnect();
-  }, [isVisible]);
-
-  useEffect(() => {
-    if (!isVisible) return;
-    
-    const timer = setTimeout(() => {
-      const duration = 1500;
-      const steps = 60;
-      const increment = value / steps;
-      let current = 0;
-      
-      const counter = setInterval(() => {
-        current += increment;
-        if (current >= value) {
-          setCount(value);
-          clearInterval(counter);
-        } else {
-          setCount(Math.floor(current));
-        }
-      }, duration / steps);
-      
-      return () => clearInterval(counter);
-    }, delay);
-    
-    return () => clearTimeout(timer);
-  }, [isVisible, value, delay]);
-
-  return (
-    <div ref={ref} className="text-4xl md:text-5xl font-bold text-foreground">
-      {count.toLocaleString()}{suffix}
-    </div>
-  );
-}
-
 export default function Index() {
-  const scrollToExperiences = () => {
-    document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen overflow-hidden">
       {/* Hero Section - Premium Black & Gold */}
       <section className="relative py-20 md:py-28 lg:py-36 overflow-hidden bg-primary">
-        {/* Solid dark background with subtle gradient */}
+        {/* Solid dark background with radial spotlight behind H1 */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/95" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--accent)/0.08)_0%,transparent_60%)]" />
         
-        {/* Subtle grid pattern overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        {/* Reduced intensity grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        
+        {/* Faint grain texture */}
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }} />
         
         {/* One-time gold shimmer sweep - cinematic on load */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -210,24 +124,25 @@ export default function Index() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Column - Content */}
             <div className="text-center lg:text-left space-y-8">
-              {/* Location Badge */}
+              {/* Location Badge - Updated copy */}
               <div 
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-sm font-medium text-white/90 opacity-0 animate-fade-in-down"
                 style={{ animationDelay: "0.1s" }}
               >
                 <MapPin className="h-4 w-4 text-accent" />
-                Proudly Serving Wapakoneta, Ohio
+                Wapakoneta, Ohio • Local team • Premium experiences
               </div>
               
-              {/* Main Headline */}
+              {/* Main Headline - Updated copy with tighter line-height */}
               <div className="space-y-6">
                 <h1 
-                  className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up"
+                  className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]"
                   style={{ animationDelay: "0.2s" }}
                 >
-                  <span className="block">Your Destination</span>
-                  <span className="block mt-2 text-accent">
-                    for Everything
+                  <span className="block">Wapakoneta's Premium</span>
+                  <span className="block mt-1">Destination for</span>
+                  <span className="block mt-1 text-accent">
+                    Events, Work, Wellness & Fitness
                   </span>
                 </h1>
                 
@@ -237,29 +152,57 @@ export default function Index() {
                   style={{ animationDelay: "0.4s" }}
                 />
                 
+                {/* Updated subheadline */}
                 <p 
                   className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up"
                   style={{ animationDelay: "0.5s" }}
                 >
-                  Events. Workspaces. Wellness. Fitness.
-                  <span className="block mt-2 font-medium text-white/80">All under one roof. Book in minutes.</span>
+                  Book in minutes. Confirm details before payment.
+                  <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
                 </p>
               </div>
               
-              {/* Single Primary CTA */}
+              {/* Section anchor chips */}
+              <div 
+                className="flex flex-wrap justify-center lg:justify-start gap-2 opacity-0 animate-fade-in-up"
+                style={{ animationDelay: "0.6s" }}
+              >
+                <button 
+                  onClick={() => scrollToSection('availability')}
+                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  Availability
+                </button>
+                <button 
+                  onClick={() => scrollToSection('experiences')}
+                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  Experiences
+                </button>
+                <button 
+                  onClick={() => scrollToSection('faq')}
+                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  FAQ
+                </button>
+              </div>
+              
+              {/* Single Primary CTA - Enhanced styling */}
               <div 
                 className="flex justify-center lg:justify-start opacity-0 animate-fade-in-up"
                 style={{ animationDelay: "0.7s" }}
               >
                 <Button 
                   size="lg" 
-                  className="text-lg px-12 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-1" 
+                  className="text-lg px-12 py-8 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group" 
                   asChild
                 >
-                  <Link to="/book">
-                    <CalendarDays className="h-5 w-5 mr-2" />
-                    Book Now
-                    <ArrowRight className="h-5 w-5 ml-2" />
+                  <Link to="/booking">
+                    {/* Inner highlight */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <CalendarDays className="h-5 w-5 mr-2 relative z-10" />
+                    <span className="relative z-10">Book Now</span>
+                    <ArrowRight className="h-5 w-5 ml-2 relative z-10" />
                   </Link>
                 </Button>
               </div>
@@ -285,10 +228,10 @@ export default function Index() {
                 className="flex flex-wrap justify-center lg:justify-start gap-4 opacity-0 animate-fade-in"
                 style={{ animationDelay: "1s" }}
               >
-                <div className="flex items-center gap-2 text-sm text-white/50">
+                <a href="tel:+14195550100" className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
                   <Phone className="h-4 w-4" />
                   <span>(419) 555-0100</span>
-                </div>
+                </a>
                 <div className="flex items-center gap-2 text-sm text-white/50">
                   <Clock className="h-4 w-4" />
                   <span>Open 7 Days</span>
@@ -313,24 +256,34 @@ export default function Index() {
       {/* Next Available Strip - Live Availability */}
       <NextAvailableStrip />
 
-      {/* Stats Section - The "WOW" Moment */}
-      <section className="py-16 bg-muted/30">
+      {/* Trust Strip - Replaces numeric stats */}
+      <section className="py-12 bg-muted/30">
         <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-            {stats.map((stat, index) => (
-              <div 
-                key={index}
-                className="text-center space-y-2"
-              >
-                <AnimatedCounter value={stat.value} suffix={stat.suffix} delay={index * 150} />
-                <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
-              </div>
-            ))}
+          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 max-w-4xl mx-auto text-center">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Check className="h-5 w-5 text-accent" />
+              <span className="font-medium">Trusted locally</span>
+            </div>
+            <div className="hidden md:block w-1 h-1 rounded-full bg-muted-foreground/30" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Check className="h-5 w-5 text-accent" />
+              <span className="font-medium">Bookings every week</span>
+            </div>
+            <div className="hidden md:block w-1 h-1 rounded-full bg-muted-foreground/30" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Check className="h-5 w-5 text-accent" />
+              <span className="font-medium">High satisfaction</span>
+            </div>
+            <div className="hidden md:block w-1 h-1 rounded-full bg-muted-foreground/30" />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Check className="h-5 w-5 text-accent" />
+              <span className="font-medium">4 experiences under one roof</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Social Proof Section - Testimonials, Partners, Guarantees */}
+      {/* Social Proof Section - Testimonials, Trust Strip, Guarantees */}
       <SocialProofSection />
 
       {/* Experience Section Header */}
@@ -358,89 +311,84 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Business Cards - Premium Black & Gold */}
-      <section className="py-12 pb-24 container">
+      {/* Business Cards - Clickable cards, single section CTA */}
+      <section className="py-12 pb-16 container">
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {businesses.map((business, index) => (
-            <Card 
-              key={business.href} 
-              className="group relative overflow-hidden border border-border bg-card hover:border-accent/40 transition-all duration-500 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 opacity-0 animate-fade-in-up"
-              style={{ animationDelay: `${0.1 * (index + 1)}s` }}
+            <Link 
+              key={business.href}
+              to={business.href}
+              className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl"
+              role="link"
+              aria-label={`Learn more about ${business.name} - ${business.tagline}`}
             >
-              {/* Subtle gold glow on hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <CardContent className="relative p-8">
-                <div className="flex flex-col h-full">
-                  {/* Icon and Title Row */}
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center group-hover:bg-accent/10 transition-all duration-300">
-                      <business.icon className="h-7 w-7 text-muted-foreground group-hover:text-accent transition-colors duration-300" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-xl font-bold tracking-tight text-foreground">
-                          {business.name}
-                        </h3>
-                        {/* Next Available Badge - Gold text on black */}
-                        <span className="text-xs font-medium text-accent bg-primary px-2 py-0.5 rounded">
-                          Available Today
-                        </span>
+              <Card 
+                className="relative overflow-hidden border border-border bg-card hover:border-accent/40 transition-all duration-500 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 opacity-0 animate-fade-in-up h-full"
+                style={{ animationDelay: `${0.1 * (index + 1)}s` }}
+              >
+                {/* Subtle gold glow on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <CardContent className="relative p-8">
+                  <div className="flex flex-col h-full">
+                    {/* Icon and Title Row */}
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center group-hover:bg-accent/10 transition-all duration-300">
+                        <business.icon className="h-7 w-7 text-muted-foreground group-hover:text-accent transition-colors duration-300" />
                       </div>
-                      <p className="font-medium text-sm text-accent/80">
-                        {business.tagline}
-                      </p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="text-xl font-bold tracking-tight text-foreground">
+                            {business.name}
+                          </h3>
+                        </div>
+                        <p className="font-medium text-sm text-accent/80">
+                          {business.tagline}
+                        </p>
+                      </div>
+                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all shrink-0" />
                     </div>
+
+                    {/* Description */}
+                    <p className="text-muted-foreground mb-4 leading-relaxed text-sm">
+                      {business.description}
+                    </p>
+
+                    {/* 3 Bullet Highlights */}
+                    <ul className="space-y-2 mb-4">
+                      {business.bullets.map((bullet, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Check className="h-4 w-4 text-accent shrink-0" />
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Best for line */}
+                    <p className="text-xs text-muted-foreground mt-auto">
+                      Best for: {business.bestFor}
+                    </p>
                   </div>
-
-                  {/* Description */}
-                  <p className="text-muted-foreground mb-4 leading-relaxed text-sm">
-                    {business.description}
-                  </p>
-
-                  {/* 3 Bullet Highlights */}
-                  <ul className="space-y-2 mb-4">
-                    {business.bullets.map((bullet, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className="h-4 w-4 text-accent shrink-0" />
-                        <span>{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Pricing placeholder */}
-                  <p className="text-xs text-muted-foreground mb-4 italic">
-                    Pricing varies by experience
-                  </p>
-
-                  {/* CTA Button */}
-                  <Button 
-                    asChild 
-                    className="w-full mt-auto font-semibold bg-primary text-primary-foreground hover:bg-accent hover:text-primary transition-all duration-300"
-                    size="lg"
-                  >
-                    <Link to={business.href} className="flex items-center justify-center gap-2">
-                      {business.cta}
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 
-        {/* Gift Cards CTA */}
+        {/* Single section CTA */}
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg" asChild className="font-semibold border-accent/30 text-accent hover:bg-accent hover:text-primary transition-all duration-300">
-            <Link to="/gift-cards" className="flex items-center gap-2">
-              <Gift className="h-5 w-5" />
-              Give the Gift of Experience
+          <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-primary font-semibold">
+            <Link to="/booking" className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5" />
+              Book Now
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
       </section>
+
+      {/* Gift Cards Strip */}
+      <GiftCardStrip />
 
       {/* How It Works Section */}
       <section className="py-28 relative overflow-hidden">
@@ -491,9 +439,11 @@ export default function Index() {
       </section>
 
       {/* FAQ Section */}
-      <FAQSection />
+      <div id="faq" className="scroll-mt-20">
+        <FAQSection />
+      </div>
 
-      {/* Final CTA Section - Decision Point */}
+      {/* Final CTA Section - Updated copy */}
       <section className="relative py-28 overflow-hidden">
         {/* Premium gold gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-accent via-accent/95 to-accent/90" />
@@ -505,10 +455,10 @@ export default function Index() {
         <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center text-primary">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
-              One Place. Every Experience.
+              Your Next Booking Starts Here.
             </h2>
             <p className="text-lg text-primary/70 mb-10 max-w-xl mx-auto">
-              Your next event, workspace, treatment, or workout is just a few clicks away.
+              Your event, workspace, treatment, or workout is a few clicks away.
             </p>
 
             <Button 
@@ -516,7 +466,7 @@ export default function Index() {
               className="text-lg px-14 py-7 bg-primary text-primary-foreground font-bold shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300"
               asChild
             >
-              <Link to="/book">
+              <Link to="/booking">
                 <CalendarDays className="h-5 w-5 mr-2" />
                 Book Now
                 <ArrowRight className="h-5 w-5 ml-2" />
@@ -526,7 +476,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Footer Info */}
+      {/* Footer Info - Enhanced contrast and clickable links */}
       <section className="py-20 bg-primary text-primary-foreground">
         <div className="container">
           <div className="grid md:grid-cols-3 gap-12 max-w-4xl mx-auto">
@@ -534,8 +484,8 @@ export default function Index() {
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 mb-4">
                 <MapPin className="h-6 w-6 text-accent" />
               </div>
-              <h3 className="font-bold mb-2 text-lg">Location</h3>
-              <p className="text-sm text-white/70">
+              <h3 className="font-bold mb-3 text-lg">Location</h3>
+              <p className="text-sm text-white/80 leading-relaxed">
                 123 Main Street<br />
                 Wapakoneta, OH 45895
               </p>
@@ -544,20 +494,24 @@ export default function Index() {
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 mb-4">
                 <Phone className="h-6 w-6 text-accent" />
               </div>
-              <h3 className="font-bold mb-2 text-lg">Contact</h3>
-              <p className="text-sm text-white/70">
-                (419) 555-0100<br />
-                info@azbookinghub.com
-              </p>
+              <h3 className="font-bold mb-3 text-lg">Contact</h3>
+              <div className="space-y-1">
+                <a href="tel:+14195550100" className="block text-sm text-white/80 hover:text-accent transition-colors font-medium">
+                  (419) 555-0100
+                </a>
+                <a href="mailto:info@azbookinghub.com" className="block text-sm text-white/80 hover:text-accent transition-colors">
+                  info@azbookinghub.com
+                </a>
+              </div>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 mb-4">
                 <Clock className="h-6 w-6 text-accent" />
               </div>
-              <h3 className="font-bold mb-2 text-lg">Hours</h3>
-              <p className="text-sm text-white/70">
-                Monday - Sunday<br />
-                6:00 AM - 10:00 PM
+              <h3 className="font-bold mb-3 text-lg">Hours</h3>
+              <p className="text-sm text-white/80 leading-relaxed">
+                Open 7 Days<br />
+                6:00 AM – 10:00 PM
               </p>
             </div>
           </div>
@@ -569,6 +523,9 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* Floating Help CTA */}
+      <FloatingHelpCTA />
     </div>
   );
 }
