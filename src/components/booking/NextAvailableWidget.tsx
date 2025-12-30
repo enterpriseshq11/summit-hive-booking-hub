@@ -14,6 +14,9 @@ interface NextAvailableWidgetProps {
   lookAheadDays?: number;
   emptyMessage?: string;
   emptySubMessage?: string;
+  onJoinWaitlist?: () => void;
+  onRequestTour?: () => void;
+  onAskDayPass?: () => void;
 }
 
 export function NextAvailableWidget({
@@ -25,6 +28,9 @@ export function NextAvailableWidget({
   lookAheadDays = 14,
   emptyMessage,
   emptySubMessage,
+  onJoinWaitlist,
+  onRequestTour,
+  onAskDayPass,
 }: NextAvailableWidgetProps) {
   const { data: slots, isLoading, error, refetch, isFetching } = useNextAvailable(businessType);
 
@@ -74,7 +80,7 @@ export function NextAvailableWidget({
     );
   }
 
-  // STATE 3: Fully Booked (no slots) - Enhanced empty state
+  // STATE 3: Fully Booked (no slots) - Enhanced empty state with recovery actions
   if (!slots || slots.length === 0) {
     return (
       <div className="space-y-3">
@@ -89,25 +95,63 @@ export function NextAvailableWidget({
           <p className="text-sm font-medium text-foreground">
             {emptyMessage || `No openings in the next ${lookAheadDays} days`}
           </p>
-          <p className="text-xs text-muted-foreground mt-1 mb-3">
+          <p className="text-xs text-muted-foreground mt-1 mb-4">
             {emptySubMessage || "Join the waitlist and we'll notify you first."}
           </p>
-          <div className="flex gap-2 text-xs">
-            <button 
-              className="text-accent hover:underline"
-              onClick={() => onSlotSelect?.({ action: 'try_another_date' })}
-              data-event="booking_try_another_date"
-            >
-              Try another date
-            </button>
-            <span className="text-muted-foreground">•</span>
-            <button 
-              className="text-accent hover:underline"
-              data-event="booking_waitlist_click"
-            >
-              Join waitlist
-            </button>
+          
+          {/* Recovery Actions */}
+          <div className="w-full space-y-2">
+            {onJoinWaitlist && (
+              <Button 
+                onClick={onJoinWaitlist}
+                className="w-full bg-accent hover:bg-accent/90 text-primary"
+                size="sm"
+                data-event="booking_waitlist_click"
+              >
+                Join Waitlist
+              </Button>
+            )}
+            {onRequestTour && (
+              <Button 
+                variant="outline"
+                onClick={onRequestTour}
+                className="w-full"
+                size="sm"
+                data-event="booking_request_tour_click"
+              >
+                Request a Tour
+              </Button>
+            )}
+            {onAskDayPass && (
+              <button 
+                onClick={onAskDayPass}
+                className="w-full text-sm text-accent hover:underline py-1"
+                data-event="booking_ask_day_pass_click"
+              >
+                Ask about day passes
+              </button>
+            )}
           </div>
+          
+          {/* Fallback if no recovery actions provided */}
+          {!onJoinWaitlist && !onRequestTour && !onAskDayPass && (
+            <div className="flex gap-2 text-xs">
+              <button 
+                className="text-accent hover:underline"
+                onClick={() => onSlotSelect?.({ action: 'try_another_date' })}
+                data-event="booking_try_another_date"
+              >
+                Try another date
+              </button>
+              <span className="text-muted-foreground">•</span>
+              <button 
+                className="text-accent hover:underline"
+                data-event="booking_waitlist_click"
+              >
+                Join waitlist
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
