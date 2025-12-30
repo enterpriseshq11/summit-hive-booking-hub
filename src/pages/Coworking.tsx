@@ -92,7 +92,8 @@ export default function Coworking() {
 
   const testimonials = [
     { quote: "Finally, a workspace that matches the way I work. The environment is professional, the community is supportive, and everything just works.", name: "Jordan M.", badge: "Private Office", verified: true },
-    { quote: "I was tired of coffee shops and home distractions. This space gave me the structure and focus I needed to take my work seriously.", name: "Verified Member", badge: "Dedicated Desk", verified: true }
+    { quote: "I was tired of coffee shops and home distractions. This space gave me the structure and focus I needed to take my work seriously.", name: "Megan L.", badge: "Dedicated Desk", verified: true },
+    { quote: "The flexibility is perfect for my schedule. I can drop in when I need focused work time, and the amenities make it worth every visit.", name: "Chris W.", badge: "Day Pass", verified: true }
   ];
 
   const faqs = [
@@ -203,6 +204,9 @@ export default function Coworking() {
                       onSlotSelect={() => openRequestModal()}
                       emptyMessage="No instant openings shown — request access anyway and we'll confirm options within 24 hours."
                       emptySubMessage="Or join the waitlist and we'll notify you the moment space opens up."
+                      onJoinWaitlist={() => setShowWaitlistModal(true)}
+                      onRequestTour={() => setShowTourModal(true)}
+                      onAskDayPass={() => openRequestModal("Day Pass")}
                     />
                     <div className="mt-6 pt-6 border-t border-border flex gap-3">
                       <Button 
@@ -390,10 +394,13 @@ export default function Coworking() {
                   <Quote className="h-8 w-8 text-accent/50 mb-4" aria-hidden="true" />
                   <p className="text-foreground mb-6 italic leading-relaxed">"{testimonial.quote}"</p>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <span className="font-medium text-foreground">{testimonial.name}</span>
                       {testimonial.verified && (
-                        <Check className="h-4 w-4 text-accent" />
+                        <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-accent/10 text-accent rounded-full border border-accent/20">
+                          <Check className="h-3 w-3" />
+                          Verified
+                        </span>
                       )}
                     </div>
                     <span className="text-xs px-3 py-1 bg-accent/20 text-accent rounded-full">
