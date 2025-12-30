@@ -1,8 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { useBusinesses } from "@/hooks/useBusinesses";
 import { useNextAvailable } from "@/hooks/useAvailability";
 import { 
@@ -12,6 +13,10 @@ import {
   LiveAvailabilityIndicator,
   BookingStepIndicator,
   AvailabilityHelpModal,
+  StickyBookingBar,
+  BusinessFilterTabs,
+  BookingSectionAnchor,
+  QuickActionCard,
 } from "@/components/booking";
 import { 
   Building2, 
@@ -23,7 +28,11 @@ import {
   Shield,
   Gift,
   User,
+  Calendar,
+  Phone,
+  Mail,
 } from "lucide-react";
+import { FloatingHelpCTA } from "@/components/home";
 import type { BusinessType } from "@/types";
 
 const businessIcons: Record<BusinessType, React.ComponentType<{ className?: string }>> = {
@@ -48,17 +57,28 @@ const businessLabels: Record<BusinessType, string> = {
 };
 
 const businessDescriptions: Record<BusinessType, string> = {
-  summit: "Events, weddings & celebrations",
-  coworking: "Workspaces & meeting rooms",
-  spa: "Massage, facials & recovery",
-  fitness: "Gym, classes & training",
+  summit: "Premium Event Venue",
+  coworking: "Private Offices + Coworking",
+  spa: "Recovery + Spa Treatments",
+  fitness: "24/7 Gym + Coaching",
+};
+
+const businessTags: Record<BusinessType, string[]> = {
+  summit: ["Weddings", "Corporate", "Celebrations"],
+  coworking: ["Focus Work", "Meetings"],
+  spa: ["Recovery", "Reset"],
+  fitness: ["Training", "Performance"],
 };
 
 export default function BookingHub() {
   const navigate = useNavigate();
+  const heroRef = useRef<HTMLElement>(null);
   const { data: businesses, isLoading } = useBusinesses();
   const [currentStep] = useState(1);
   const [completedSteps] = useState<number[]>([]);
+  const [businessFilter, setBusinessFilter] = useState<BusinessType | "all">("all");
+  const [selectedBusiness, setSelectedBusiness] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
 
   // Get availability status for the indicator
   const { isLoading: isAvailabilityLoading, isError: isAvailabilityError, refetch } = useNextAvailable();
@@ -78,21 +98,51 @@ export default function BookingHub() {
     refetch();
   }, [refetch]);
 
-  // Reset filters handler for the help modal
   const handleResetFilters = useCallback(() => {
-    // This will be passed to AvailabilitySearch component
-    window.location.reload(); // Simple reset - reload the page to clear all filters
+    window.location.reload();
+  }, []);
+
+  const scrollToHero = useCallback(() => {
+    heroRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  // Filter businesses based on selected filter
+  const filteredBusinesses = businesses?.filter(
+    (b) => businessFilter === "all" || b.type === businessFilter
+  );
+
+  // Keyboard handler for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        // Close any open modals/drawers handled by their own components
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   return (
     <div className="min-h-screen">
+      {/* Sticky Mini Booking Bar */}
+      <StickyBookingBar
+        selectedBusiness={selectedBusiness}
+        selectedDate={selectedDate}
+        onSearchClick={scrollToHero}
+        heroRef={heroRef}
+      />
+
       {/* Hero Section - Premium Black & Gold */}
-      <section className="relative py-16 md:py-24 overflow-hidden bg-primary">
-        {/* Background effects */}
+      <section ref={heroRef} id="availability" className="relative py-16 md:py-24 overflow-hidden bg-primary">
+        {/* Background effects - Enhanced with vignette and spotlight */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--accent)/0.08)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--accent)/0.08)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--accent)/0.06)_0%,transparent_50%)]" />
+        {/* Reduced grid visibility */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        {/* Vignette effect */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,hsl(var(--primary))_100%)]" />
         
         <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-6 mb-12">
@@ -103,20 +153,23 @@ export default function BookingHub() {
               onRetry={handleRetryAvailability}
             />
             
-            {/* H1 - Single line desktop, max 2 lines mobile */}
+            {/* H1 - Updated copy */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary-foreground leading-tight">
-              Find Your Perfect Time
+              Book in Minutes.<br className="hidden sm:block" /> Arrive to Excellence.
             </h1>
             
-            {/* Subtext - Platform value */}
+            {/* Subtext - Updated copy */}
             <p className="text-lg md:text-xl text-primary-foreground/70 max-w-2xl mx-auto">
-              Book Summit • Coworking • Spa • Fitness in minutes.
+              Choose your experience, see live availability, and confirm in a few clicks.
             </p>
             
-            {/* Trust line - appears ONCE */}
+            {/* Trust line - Gold accent */}
             <p className="text-accent font-medium text-sm">
-              You'll review everything before payment.
+              Review everything before payment — no surprises.
             </p>
+
+            {/* Section Anchor Chips */}
+            <BookingSectionAnchor className="mt-4" />
           </div>
 
           {/* Step Indicator - Enhanced with Accessibility */}
@@ -125,34 +178,59 @@ export default function BookingHub() {
             completedSteps={completedSteps}
           />
 
-          {/* Global Availability Search */}
+          {/* Global Availability Search - Premium card styling */}
           <div className="max-w-4xl mx-auto">
-            <div className="bg-card rounded-xl p-6 shadow-2xl border border-border">
-              <AvailabilitySearch 
-                showPartySize={false}
-                onSlotSelect={handleSlotSelect}
-              />
+            <div className="bg-card rounded-xl p-6 shadow-2xl border border-accent/10 relative">
+              {/* Subtle inner glow */}
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
               
-              {/* Help link - under search */}
-              <div className="mt-4 flex justify-center">
-                <AvailabilityHelpModal onResetFilters={handleResetFilters} />
+              <div className="relative">
+                <AvailabilitySearch 
+                  showPartySize={false}
+                  onSlotSelect={handleSlotSelect}
+                />
+                
+                {/* Trust microline inside card */}
+                <div className="mt-4 pt-4 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <p className="text-xs text-muted-foreground flex items-center gap-2">
+                    <Shield className="h-3.5 w-3.5 text-accent" />
+                    Secure checkout • Review before payment
+                  </p>
+                  <AvailabilityHelpModal onResetFilters={handleResetFilters} />
+                </div>
               </div>
             </div>
           </div>
         </div>
         
-        {/* Angled divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} />
+        {/* Gradient transition divider */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* Business Cards with Next Available */}
-      <section className="py-16 md:py-20 container">
-        <div className="text-center mb-12">
+      <section id="businesses" className="py-16 md:py-20 container">
+        <div className="text-center mb-8">
+          {/* Header with branded treatment */}
+          <div className="inline-flex items-center gap-2 mb-4">
+            <div className="h-px w-8 bg-accent/50" />
+            <Building2 className="h-5 w-5 text-accent" />
+            <div className="h-px w-8 bg-accent/50" />
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Browse by Business</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto text-lg">
-            Select a business to see available times and services
+          <p className="text-muted-foreground max-w-xl mx-auto text-lg mb-2">
+            Start with the experience you want — we'll show the best times available.
+          </p>
+          {/* Helper line */}
+          <p className="text-sm text-muted-foreground/70 max-w-lg mx-auto">
+            Not sure what to pick? Start with Spa for wellness, Summit for events, Hive for work, Fitness for training.
           </p>
         </div>
+
+        {/* Business Filter Tabs */}
+        <BusinessFilterTabs 
+          activeFilter={businessFilter}
+          onFilterChange={setBusinessFilter}
+        />
         
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {isLoading ? (
@@ -175,21 +253,26 @@ export default function BookingHub() {
               </Card>
             ))
           ) : (
-            businesses?.map((business) => {
+            filteredBusinesses?.map((business) => {
               const Icon = businessIcons[business.type];
               const route = businessRoutes[business.type];
               const label = businessLabels[business.type];
               const description = businessDescriptions[business.type];
+              const tags = businessTags[business.type];
 
               return (
                 <Card 
                   key={business.id} 
-                  className="group hover:shadow-premium-hover hover:border-accent/30 transition-all duration-300 overflow-hidden shadow-premium"
+                  className="group hover:shadow-premium-hover hover:border-accent/30 transition-all duration-300 overflow-hidden shadow-premium focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2"
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4">
-                      <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-accent group-hover:scale-105 transition-all">
-                        <Icon className="h-7 w-7 text-primary group-hover:text-primary transition-colors" />
+                      {/* Icon with gold accent line */}
+                      <div className="relative">
+                        <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-accent group-hover:scale-105 transition-all">
+                          <Icon className="h-7 w-7 text-primary group-hover:text-primary transition-colors" />
+                        </div>
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-accent/50 rounded-full" />
                       </div>
                       <div className="flex-1">
                         <CardTitle className="text-xl group-hover:text-accent transition-colors">
@@ -198,6 +281,18 @@ export default function BookingHub() {
                         <CardDescription className="text-sm mt-1">
                           {description}
                         </CardDescription>
+                        {/* Best for tags */}
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {tags.map((tag) => (
+                            <Badge 
+                              key={tag} 
+                              variant="outline" 
+                              className="text-xs bg-accent/5 border-accent/20 text-muted-foreground"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </CardHeader>
@@ -214,6 +309,7 @@ export default function BookingHub() {
                       asChild 
                       className="w-full bg-primary hover:bg-accent hover:text-primary transition-all font-semibold focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                       size="lg"
+                      data-event="booking_view_times_click"
                     >
                       <Link to={route} className="flex items-center justify-center gap-2">
                         View Times
@@ -228,27 +324,27 @@ export default function BookingHub() {
         </div>
       </section>
 
-      {/* Pricing & Process Clarity Section - NO DUPLICATE TRUST LINE */}
-      <section className="py-16 md:py-20 bg-primary">
+      {/* Pricing & Process Clarity Section */}
+      <section id="trust" className="py-12 md:py-16 bg-primary">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 text-primary-foreground">Clear Process. No Surprises.</h2>
-              <p className="text-primary-foreground/70 text-lg">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3 text-primary-foreground">Clear Process. No Surprises.</h2>
+              <p className="text-primary-foreground/70 text-base">
                 See a complete breakdown before any payment is taken
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-4">
               {/* Review Before You Commit */}
               <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
-                <CardHeader className="pb-3">
-                  <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
-                    <FileCheck className="h-6 w-6 text-accent" />
+                <CardHeader className="pb-2 pt-5">
+                  <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center mb-2">
+                    <FileCheck className="h-5 w-5 text-accent" />
                   </div>
-                  <CardTitle className="text-lg text-primary-foreground">Review Before You Commit</CardTitle>
+                  <CardTitle className="text-base text-primary-foreground">Review Before You Commit</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-primary-foreground/70">
+                <CardContent className="text-sm text-primary-foreground/70 pt-0">
                   <p>
                     Every booking shows a <strong className="text-primary-foreground">summary screen</strong> with date, time, and total before payment.
                   </p>
@@ -257,13 +353,13 @@ export default function BookingHub() {
 
               {/* No Hidden Fees */}
               <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
-                <CardHeader className="pb-3">
-                  <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
-                    <CreditCard className="h-6 w-6 text-accent" />
+                <CardHeader className="pb-2 pt-5">
+                  <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center mb-2">
+                    <CreditCard className="h-5 w-5 text-accent" />
                   </div>
-                  <CardTitle className="text-lg text-primary-foreground">No Hidden Fees</CardTitle>
+                  <CardTitle className="text-base text-primary-foreground">No Hidden Fees</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-primary-foreground/70">
+                <CardContent className="text-sm text-primary-foreground/70 pt-0">
                   <p>
                     See your total <strong className="text-primary-foreground">before checkout</strong>. Taxes and any add-ons are shown upfront.
                   </p>
@@ -272,13 +368,13 @@ export default function BookingHub() {
 
               {/* Secure Checkout */}
               <Card className="bg-primary-foreground/5 border-primary-foreground/10 backdrop-blur">
-                <CardHeader className="pb-3">
-                  <div className="h-12 w-12 rounded-xl bg-accent/20 flex items-center justify-center mb-3">
-                    <Shield className="h-6 w-6 text-accent" />
+                <CardHeader className="pb-2 pt-5">
+                  <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center mb-2">
+                    <Shield className="h-5 w-5 text-accent" />
                   </div>
-                  <CardTitle className="text-lg text-primary-foreground">Secure Checkout</CardTitle>
+                  <CardTitle className="text-base text-primary-foreground">Secure Checkout</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm text-primary-foreground/70">
+                <CardContent className="text-sm text-primary-foreground/70 pt-0">
                   <p>
                     All transactions are <strong className="text-primary-foreground">encrypted</strong> and securely processed.
                   </p>
@@ -289,54 +385,69 @@ export default function BookingHub() {
         </div>
       </section>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Premium shortcut cards */}
       <section className="py-16 md:py-20 container">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8 text-center">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <Button 
-              asChild 
-              variant="outline" 
-              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-            >
-              <Link to="/gift-cards">
-                <Gift className="h-8 w-8 text-accent" />
-                <span className="text-base font-semibold">Gift Cards</span>
-              </Link>
+          <h2 className="text-2xl font-bold mb-8 text-center">Popular Next Steps</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <QuickActionCard
+              to="/gift-cards"
+              icon={Gift}
+              title="Gift Cards"
+              description="Give the gift of experience"
+              dataEvent="booking_quick_action_gift"
+            />
+            <QuickActionCard
+              to="/account"
+              icon={User}
+              title="My Bookings"
+              description="View and manage reservations"
+              dataEvent="booking_quick_action_bookings"
+            />
+            <QuickActionCard
+              to="/fitness"
+              icon={Dumbbell}
+              title="Memberships"
+              description="Unlimited gym access"
+              dataEvent="booking_quick_action_membership"
+            />
+            <QuickActionCard
+              to="/spa"
+              icon={Sparkles}
+              title="Spa Services"
+              description="Recovery and wellness"
+              dataEvent="booking_quick_action_spa"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section Placeholder */}
+      <section id="faq" className="py-12 container">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-2xl font-bold mb-4">Questions?</h2>
+          <p className="text-muted-foreground mb-6">
+            Our team is here to help. Reach out anytime.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button variant="outline" asChild className="border-accent/30 hover:bg-accent/10">
+              <a href="tel:+14195551234" className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                (419) 555-1234
+              </a>
             </Button>
-            <Button 
-              asChild 
-              variant="outline" 
-              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-            >
-              <Link to="/account">
-                <User className="h-8 w-8 text-accent" />
-                <span className="text-base font-semibold">My Bookings</span>
-              </Link>
-            </Button>
-            <Button 
-              asChild 
-              variant="outline" 
-              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-            >
-              <Link to="/fitness">
-                <Dumbbell className="h-8 w-8 text-accent" />
-                <span className="text-base font-semibold">Memberships</span>
-              </Link>
-            </Button>
-            <Button 
-              asChild 
-              variant="outline" 
-              className="h-auto py-8 flex-col gap-4 hover:border-accent hover:bg-accent/5 transition-all shadow-premium hover:shadow-premium-hover focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-            >
-              <Link to="/spa">
-                <Sparkles className="h-8 w-8 text-accent" />
-                <span className="text-base font-semibold">Spa Services</span>
-              </Link>
+            <Button variant="outline" asChild className="border-accent/30 hover:bg-accent/10">
+              <a href="mailto:hello@az-enterprises.com" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                hello@az-enterprises.com
+              </a>
             </Button>
           </div>
         </div>
       </section>
+
+      {/* Floating Help CTA */}
+      <FloatingHelpCTA />
     </div>
   );
 }

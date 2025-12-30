@@ -118,16 +118,22 @@ export function AvailabilitySearch({
   // Get business ID for waitlist
   const selectedBusinessId = businesses?.find((b) => b.type === businessType)?.id;
 
+  // Check if form is valid for search
+  const isFormValid = !!businessType && !!date;
+
   return (
     <div className="space-y-6">
       {/* Search Form */}
-      <div className="bg-card border rounded-xl p-6 shadow-sm">
+      <div className="bg-card border border-accent/10 rounded-xl p-6 shadow-lg">
         <div className="grid md:grid-cols-4 gap-4">
           {/* Business/Type Selector */}
           <div className="space-y-2">
             <label className="text-sm font-medium">What are you booking?</label>
-            <Select value={businessType} onValueChange={(v) => setBusinessType(v as BusinessType)}>
-              <SelectTrigger>
+            <Select 
+              value={businessType} 
+              onValueChange={(v) => setBusinessType(v as BusinessType)}
+            >
+              <SelectTrigger data-event="booking_service_select">
                 <SelectValue placeholder="Select a service" />
               </SelectTrigger>
               <SelectContent>
@@ -170,8 +176,10 @@ export function AvailabilitySearch({
                 onChange={(e) => setDate(e.target.value)}
                 className="pl-10"
                 min={new Date().toISOString().split("T")[0]}
+                data-event="booking_date_change"
               />
             </div>
+            <p className="text-xs text-muted-foreground">Times shown in local Wapakoneta time.</p>
           </div>
 
           {/* Party Size (Summit only) */}
@@ -193,8 +201,14 @@ export function AvailabilitySearch({
           )}
 
           {/* Search Button */}
-          <div className="flex items-end">
-            <Button onClick={handleSearch} className="w-full" size="lg" disabled={isLoading}>
+          <div className="flex flex-col justify-end">
+            <Button 
+              onClick={handleSearch} 
+              className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold shadow-md hover:shadow-lg transition-all h-11" 
+              size="lg" 
+              disabled={isLoading || !isFormValid}
+              data-event="booking_search_click"
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -207,6 +221,11 @@ export function AvailabilitySearch({
                 </>
               )}
             </Button>
+            {!isFormValid && (
+              <p className="text-xs text-muted-foreground mt-1.5 text-center">
+                Select a service and date to search
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -250,16 +269,16 @@ export function AvailabilitySearch({
           </div>
 
           {availability.slots.length === 0 ? (
-            /* Empty State - Intentional, not broken */
+            /* Empty State - Enhanced with recovery actions */
             <div className="bg-card rounded-xl p-8 text-center border border-border">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
-                <Calendar className="h-7 w-7 text-muted-foreground" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
+                <Calendar className="h-8 w-8 text-accent" />
               </div>
-              <h4 className="font-semibold text-lg mb-2">Fully Booked for This Date</h4>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto text-sm">
-                All slots are taken for this day. Try the next available date, or we'll notify you if something opens up.
+              <h4 className="font-semibold text-lg mb-2">No Openings Available</h4>
+              <p className="text-muted-foreground mb-2 max-w-md mx-auto text-sm">
+                No openings in the next 14 days — join the waitlist and we'll notify you first.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
                 <Button
                   variant="outline"
                   className="border-accent/30 hover:bg-accent/10"
@@ -269,9 +288,24 @@ export function AvailabilitySearch({
                     setDate(nextDate.toISOString().split("T")[0]);
                     handleSearch();
                   }}
+                  data-event="booking_try_another_date"
                 >
                   <Calendar className="h-4 w-4 mr-2" />
-                  Check Tomorrow
+                  Try Another Date
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-accent/30 hover:bg-accent/10"
+                  onClick={() => {
+                    const nextWeek = new Date(date);
+                    nextWeek.setDate(nextWeek.getDate() + 7);
+                    setDate(nextWeek.toISOString().split("T")[0]);
+                    handleSearch();
+                  }}
+                  data-event="booking_try_next_week"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Try Next Week
                 </Button>
                 {selectedBusinessId && (
                   <WaitlistCTA
@@ -279,7 +313,8 @@ export function AvailabilitySearch({
                     bookableTypeId={bookableTypeId || undefined}
                     preferredDate={date}
                     buttonVariant="default"
-                    buttonText="Notify Me When Available"
+                    buttonText="Join Waitlist"
+                    data-event="booking_waitlist_click"
                   />
                 )}
               </div>

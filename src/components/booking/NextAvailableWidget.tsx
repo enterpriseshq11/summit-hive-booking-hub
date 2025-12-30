@@ -70,7 +70,7 @@ export function NextAvailableWidget({
     );
   }
 
-  // STATE 3: Fully Booked (no slots)
+  // STATE 3: Fully Booked (no slots) - Enhanced empty state
   if (!slots || slots.length === 0) {
     return (
       <div className="space-y-3">
@@ -78,14 +78,32 @@ export function NextAvailableWidget({
           <Clock className="h-4 w-4" />
           {title}
         </div>
-        <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-border rounded-lg bg-muted/10">
-          <Calendar className="h-6 w-6 text-muted-foreground mb-2" />
+        <div className="flex flex-col items-center justify-center py-6 px-4 text-center border border-border rounded-lg bg-muted/5">
+          <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center mb-3">
+            <Calendar className="h-6 w-6 text-accent" />
+          </div>
           <p className="text-sm font-medium text-foreground">
             No openings in the next {lookAheadDays} days
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Join the waitlist to be notified
+          <p className="text-xs text-muted-foreground mt-1 mb-3">
+            Join the waitlist and we'll notify you first.
           </p>
+          <div className="flex gap-2 text-xs">
+            <button 
+              className="text-accent hover:underline"
+              onClick={() => onSlotSelect?.({ action: 'try_another_date' })}
+              data-event="booking_try_another_date"
+            >
+              Try another date
+            </button>
+            <span className="text-muted-foreground">•</span>
+            <button 
+              className="text-accent hover:underline"
+              data-event="booking_waitlist_click"
+            >
+              Join waitlist
+            </button>
+          </div>
         </div>
       </div>
     );

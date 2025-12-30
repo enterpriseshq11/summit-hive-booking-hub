@@ -29,23 +29,23 @@ export function AvailabilityHelpModal({
   const reasons = [
     {
       icon: Filter,
-      title: "Filters too narrow",
-      description: "Try broadening your search by selecting 'All types' or a wider date range.",
-    },
-    {
-      icon: Clock,
-      title: "Outside business hours",
-      description: "Some services are only available during specific hours. Check back during operating times.",
-    },
-    {
-      icon: CalendarX,
-      title: "Blackout dates",
-      description: "Certain dates may be blocked for holidays, private events, or maintenance.",
+      title: "Missing selection",
+      description: "Make sure you've selected both a service and a date before searching.",
     },
     {
       icon: CalendarOff,
-      title: "Fully booked",
-      description: "High-demand times fill up quickly. Try a different day or join our waitlist.",
+      title: "No availability",
+      description: "All slots may be booked for this date. Try a different day or join the waitlist.",
+    },
+    {
+      icon: CalendarX,
+      title: "Date out of range",
+      description: "Bookings may only be available within a certain advance window. Check a closer date.",
+    },
+    {
+      icon: Clock,
+      title: "Business closed",
+      description: "Some services are only available during specific hours or may be closed on certain days.",
     },
   ];
 

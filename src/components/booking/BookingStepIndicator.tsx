@@ -6,26 +6,26 @@ import { toast } from "sonner";
 const bookingSteps = [
   { 
     step: 1, 
-    title: "Choose Experience", 
-    description: "Select business & service",
+    title: "Choose Your Experience", 
+    description: "Pick a business and the service you want.",
     icon: Building2,
   },
   { 
     step: 2, 
     title: "Select Package", 
-    description: "Pick options & add-ons",
+    description: "Select your package — add upgrades later if you want.",
     icon: CreditCard,
   },
   { 
     step: 3, 
     title: "Choose Date & Time", 
-    description: "View real-time availability",
+    description: "Pick the time that works best for you.",
     icon: CalendarDays,
   },
   { 
     step: 4, 
     title: "Details & Review", 
-    description: "Complete your reservation",
+    description: "Confirm details and review before checkout.",
     icon: CheckCircle2,
   },
 ];
@@ -64,11 +64,11 @@ export function BookingStepIndicator({
       <div className="max-w-4xl mx-auto mb-12" role="navigation" aria-label="Booking progress">
         <div className="flex items-center justify-between relative">
           {/* Progress line - background */}
-          <div className="absolute top-6 left-0 right-0 h-0.5 bg-primary-foreground/20 hidden md:block" aria-hidden="true" />
+          <div className="absolute top-6 left-0 right-0 h-0.5 bg-primary-foreground/10 hidden md:block" aria-hidden="true" />
           
-          {/* Progress line - filled */}
+          {/* Progress line - filled with glow */}
           <div 
-            className="absolute top-6 left-0 h-0.5 bg-accent transition-all hidden md:block" 
+            className="absolute top-6 left-0 h-0.5 bg-accent transition-all hidden md:block shadow-[0_0_8px_hsl(var(--accent)/0.5)]" 
             style={{ width: `${((currentStep - 1) / (bookingSteps.length - 1)) * 100}%` }}
             aria-hidden="true"
           />
@@ -96,10 +96,10 @@ export function BookingStepIndicator({
                       tabIndex={0}
                       className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary ${
                         isCompleted
-                          ? 'bg-accent border-accent text-primary cursor-pointer hover:scale-105' 
+                          ? 'bg-accent border-accent text-primary cursor-pointer hover:scale-105 shadow-[0_0_12px_hsl(var(--accent)/0.4)]' 
                           : isCurrent
-                            ? 'bg-accent border-accent text-primary ring-4 ring-accent/30'
-                            : 'bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground/60 cursor-not-allowed opacity-60'
+                            ? 'bg-accent border-accent text-primary ring-4 ring-accent/40 shadow-[0_0_16px_hsl(var(--accent)/0.5)]'
+                            : 'bg-primary-foreground/5 border-primary-foreground/20 text-primary-foreground/50 cursor-not-allowed'
                       }`}
                     >
                       {isCompleted ? (
@@ -116,8 +116,8 @@ export function BookingStepIndicator({
                           Step {step.step} of 4
                         </span>
                       )}
-                      <p className={`text-sm font-medium ${
-                        isCompleted || isCurrent ? 'text-accent' : 'text-primary-foreground/60'
+                      <p className={`text-sm transition-all ${
+                        isCompleted || isCurrent ? 'text-accent font-semibold' : 'text-primary-foreground/50 font-medium'
                       }`}>
                         {step.title}
                       </p>
