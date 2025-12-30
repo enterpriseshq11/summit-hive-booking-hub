@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Accordion,
   AccordionContent,
@@ -10,148 +9,104 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useBusinessByType } from "@/hooks/useBusinesses";
-import { NextAvailableWidget, WaitlistCTA, LeaseSignupForm } from "@/components/booking";
+import { 
+  NextAvailableWidget, 
+  CoworkingRequestModal,
+  ScheduleTourModal,
+  HiveWaitlistModal,
+  StickyMobileHiveCTA,
+  CoworkingAnchorChips,
+  PlanComparisonTable,
+  AmenitiesAccordion,
+  LocalProofStrip,
+  FloatingHelpDrawer,
+} from "@/components/booking";
 import { 
   Building2, Wifi, Coffee, Users, MapPin, ArrowRight, Check, 
   RefreshCw, Quote, Clock, Zap, Shield, Heart, Briefcase,
-  MessageSquare, CalendarCheck, Rocket, AlertCircle
+  MessageSquare, CalendarCheck, Rocket, AlertCircle, Calendar
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Coworking() {
   const navigate = useNavigate();
   const { data: business, isLoading: businessLoading } = useBusinessByType("coworking");
-  const [showLeaseForm, setShowLeaseForm] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showTourModal, setShowTourModal] = useState(false);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [selectedWorkspaceType, setSelectedWorkspaceType] = useState<string | null>(null);
 
-  const scrollToRequest = () => {
-    setShowLeaseForm(true);
-  };
-
-  const handleCardClick = (workspaceType: string) => {
-    setSelectedWorkspaceType(workspaceType);
-    setShowLeaseForm(true);
-  };
-
-  const handleLeaseSuccess = () => {
-    setShowLeaseForm(false);
-    setSelectedWorkspaceType(null);
+  const openRequestModal = (workspaceType?: string) => {
+    setSelectedWorkspaceType(workspaceType || null);
+    setShowRequestModal(true);
   };
 
   const workspaceOptions = [
     { 
       name: "Private Office", 
       icon: Building2,
-      tagline: "Your own space to lead, create, and grow.",
+      tagline: "A lockable, professional office for teams and founders who need focus and credibility.",
+      bestFor: "Best for Teams",
       benefits: [
         "Secure, lockable workspace",
         "Professional business address",
         "Priority booking for meeting rooms"
       ],
-      trustLine: "Simple request → quick confirmation."
     },
     { 
       name: "Dedicated Desk", 
       icon: Briefcase,
-      tagline: "A permanent home for your most focused work.",
+      tagline: "Your reserved desk in a high-performing environment — show up and get to work.",
+      bestFor: "Best Value",
       benefits: [
         "Reserved spot in collaborative space",
         "Personal storage included",
         "Community networking events"
       ],
-      trustLine: "Simple request → quick confirmation."
     },
     { 
       name: "Day Pass", 
       icon: Zap,
-      tagline: "Drop in when inspiration strikes.",
+      tagline: "Work here for the day — faster Wi-Fi, quieter space, better results.",
+      bestFor: "Most Flexible",
       benefits: [
         "Flexible access on your schedule",
         "All amenities included",
         "No long-term commitment"
       ],
-      trustLine: "Simple request → quick confirmation."
     }
   ];
 
   const whyTheHiveCards = [
-    {
-      icon: Zap,
-      title: "Flexibility",
-      copy: "Work on your terms. Scale up or down as your needs change—no rigid contracts."
-    },
-    {
-      icon: Users,
-      title: "Community",
-      copy: "Surround yourself with driven professionals. Collaboration happens naturally here."
-    },
-    {
-      icon: Shield,
-      title: "Productivity",
-      copy: "Purpose-built environments that eliminate distractions and amplify your output."
-    },
-    {
-      icon: Heart,
-      title: "Convenience",
-      copy: "Everything handled for you. Just show up, plug in, and get to work."
-    }
+    { icon: Zap, title: "Flexibility", copy: "Work on your terms. Scale up or down as your needs change—no rigid contracts." },
+    { icon: Users, title: "Community", copy: "Surround yourself with driven professionals. Collaboration happens naturally here." },
+    { icon: Shield, title: "Productivity", copy: "Purpose-built environments that eliminate distractions and amplify your output." },
+    { icon: Heart, title: "Convenience", copy: "Everything handled for you. Just show up, plug in, and get to work." }
   ];
 
   const processSteps = [
-    {
-      icon: MessageSquare,
-      title: "Request Your Workspace",
-      description: "Tell us what you need. Private office, dedicated desk, or flexible access—we'll take it from there."
-    },
-    {
-      icon: CalendarCheck,
-      title: "We Confirm Options",
-      description: "We'll review availability and send you a personalized proposal. You'll review everything before payment."
-    },
-    {
-      icon: Rocket,
-      title: "Start Working",
-      description: "Once confirmed, you're in. No obligation to proceed until you're ready."
-    }
+    { icon: MessageSquare, title: "Request Your Workspace", description: "Tell us what you need. Private office, dedicated desk, or flexible access—we'll take it from there." },
+    { icon: CalendarCheck, title: "We Confirm Options", description: "We'll review availability and send you a personalized proposal. You'll review everything before payment." },
+    { icon: Rocket, title: "Start Working", description: "Once confirmed, you're in. No obligation to proceed until you're ready." }
   ];
 
   const testimonials = [
-    {
-      quote: "Finally, a workspace that matches the way I work. The environment is professional, the community is supportive, and everything just works.",
-      name: "Jordan M.",
-      badge: "Private Office"
-    },
-    {
-      quote: "I was tired of coffee shops and home distractions. This space gave me the structure and focus I needed to take my work seriously.",
-      name: "Member",
-      badge: "Dedicated Desk"
-    }
+    { quote: "Finally, a workspace that matches the way I work. The environment is professional, the community is supportive, and everything just works.", name: "Jordan M.", badge: "Private Office", verified: true },
+    { quote: "I was tired of coffee shops and home distractions. This space gave me the structure and focus I needed to take my work seriously.", name: "Verified Member", badge: "Dedicated Desk", verified: true }
   ];
 
   const faqs = [
-    {
-      question: "How does requesting a workspace work?",
-      answer: "Simply click 'Request Workspace' and tell us what you're looking for. We'll review your request and get back to you within 24 hours with availability and options."
-    },
-    {
-      question: "Do I have to commit right away?",
-      answer: "Not at all. You'll receive a personalized proposal first, and you can take your time to decide. There's no obligation until you're ready to move forward."
-    },
-    {
-      question: "What's included?",
-      answer: "All workspaces include high-speed internet, access to common areas, coffee and refreshments, and professional amenities. Specific inclusions vary by workspace type and will be detailed in your proposal."
-    },
-    {
-      question: "How does pricing work?",
-      answer: "Pricing varies based on workspace type and selected services. You'll receive a personalized proposal after consultation—no commitment required."
-    }
+    { question: "How does requesting a workspace work?", answer: "Simply click 'Request Workspace' and tell us what you're looking for. We'll review your request and get back to you within 24 hours with availability and options. There's no commitment until you decide to proceed." },
+    { question: "Do I have to commit right away?", answer: "Not at all. You'll receive a personalized proposal first, and you can take your time to decide. There's no obligation until you're ready to move forward. You'll review everything before any payment is required." },
+    { question: "What about guests and meeting room access?", answer: "All members can bring guests and book meeting rooms. Private office members get priority booking, while dedicated desk and day pass holders have standard access. Guest policies vary by membership type." },
+    { question: "How does pricing work?", answer: "Pricing varies based on workspace type and selected services. You'll receive a personalized proposal after consultation—no commitment required." },
+    { question: "What if I need to cancel or change my plan?", answer: "We understand needs change. Our team will work with you on transitions. Specific terms depend on your agreement type and will be clearly outlined in your proposal." }
   ];
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20 md:py-28 overflow-hidden bg-primary">
-        {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.08)_0%,transparent_50%)]" />
@@ -167,66 +122,73 @@ export default function Coworking() {
               
               <div>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground leading-tight">
-                  A Premium Workspace Built for Focus
+                  Private Offices & Flexible Workspaces in Wapakoneta
                 </h1>
                 <p className="text-lg text-primary-foreground/70 max-w-xl">
-                  Private offices, desks, and day passes—request in minutes.
+                  Private offices, dedicated desks, and day passes — request access in under 2 minutes.
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4 items-start">
+              {/* CTA Row with Secondary */}
+              <div className="flex flex-col sm:flex-row gap-3 items-start">
                 <Button 
                   size="lg" 
-                  onClick={scrollToRequest}
+                  onClick={() => openRequestModal()}
                   className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+                  data-event="hive_request_workspace_click"
                 >
                   Request Workspace
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
-                <div className="flex items-center gap-2 px-4 py-2 text-sm text-primary-foreground/80" aria-hidden="true">
-                  <Check className="h-4 w-4 text-accent" />
-                  No obligation. Response within 24 hours.
-                </div>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => setShowTourModal(true)}
+                  className="border-accent/50 text-primary-foreground hover:bg-accent/10 hover:border-accent"
+                  data-event="hive_schedule_tour_click"
+                >
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Schedule a Tour
+                </Button>
               </div>
 
-              {/* Amenities Strip */}
-              <div className="flex flex-wrap gap-6 text-sm text-primary-foreground/70">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-accent/20 rounded">
-                    <Wifi className="h-4 w-4 text-accent" />
+              {/* Trust Chip */}
+              <div className="flex items-center gap-2 px-4 py-2 text-sm text-primary-foreground/80" aria-hidden="true">
+                <Check className="h-4 w-4 text-accent" />
+                No obligation. Local team response within 24 hours. No payment until confirmed.
+              </div>
+
+              {/* Amenities Strip - Enhanced Pills */}
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { icon: Wifi, label: "High-Speed Internet" },
+                  { icon: Coffee, label: "Coffee Bar" },
+                  { icon: Clock, label: "Flexible Access" },
+                  { icon: MapPin, label: "Prime Location" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2 px-4 py-2.5 bg-primary-foreground/10 rounded-full border border-primary-foreground/20">
+                    <item.icon className="h-4 w-4 text-accent" />
+                    <span className="text-sm text-primary-foreground/90">{item.label}</span>
                   </div>
-                  <span>High-Speed Internet</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-accent/20 rounded">
-                    <Coffee className="h-4 w-4 text-accent" />
-                  </div>
-                  <span>Coffee Bar</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-accent/20 rounded">
-                    <Clock className="h-4 w-4 text-accent" />
-                  </div>
-                  <span>Flexible Access</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-accent/20 rounded">
-                    <MapPin className="h-4 w-4 text-accent" />
-                  </div>
-                  <span>Prime Location</span>
-                </div>
+                ))}
+              </div>
+
+              {/* Anchor Chips */}
+              <div className="pt-4">
+                <CoworkingAnchorChips />
               </div>
             </div>
 
-            {/* Next Available Widget */}
-            <Card className="bg-card shadow-2xl border-border">
-              <CardHeader className="border-b border-border">
-                <CardTitle className="flex items-center gap-2">
+            {/* Availability Card - Premium Styled */}
+            <Card className="bg-card/95 shadow-2xl border-accent/20 overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-accent via-accent/80 to-accent" />
+              <CardHeader className="border-b border-border p-6">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
                   <Zap className="h-5 w-5 text-accent" />
                   Availability
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6">
+              <CardContent className="p-6">
                 {businessLoading ? (
                   <div className="space-y-3">
                     <Skeleton className="h-4 w-3/4" />
@@ -238,15 +200,24 @@ export default function Coworking() {
                     <NextAvailableWidget 
                       businessType="coworking"
                       title="Available Spaces"
-                      onSlotSelect={() => scrollToRequest()}
+                      onSlotSelect={() => openRequestModal()}
+                      emptyMessage="No instant openings shown — request access anyway and we'll confirm options within 24 hours."
+                      emptySubMessage="Or join the waitlist and we'll notify you the moment space opens up."
                     />
-                    <div className="mt-6 pt-6 border-t border-border">
-                      <WaitlistCTA 
-                        businessId={business.id}
-                        buttonText="Notify me when available"
-                        buttonVariant="outline"
-                        className="w-full"
-                      />
+                    <div className="mt-6 pt-6 border-t border-border flex gap-3">
+                      <Button 
+                        onClick={() => openRequestModal()}
+                        className="flex-1 bg-accent hover:bg-accent/90 text-primary"
+                      >
+                        Request Access
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => setShowWaitlistModal(true)}
+                        className="flex-1"
+                      >
+                        Join Waitlist
+                      </Button>
                     </div>
                   </>
                 ) : (
@@ -255,12 +226,7 @@ export default function Coworking() {
                       <AlertCircle className="h-4 w-4" />
                       <span>Availability temporarily unavailable</span>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.location.reload()}
-                      className="gap-2"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => window.location.reload()} className="gap-2">
                       <RefreshCw className="h-4 w-4" />
                       Retry
                     </Button>
@@ -271,15 +237,17 @@ export default function Coworking() {
           </div>
         </div>
         
-        {/* Angled divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} />
+        {/* Section Transition */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* Workspace Options Section */}
       <section className="py-20 container" id="workspaces">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Workspace Options</h2>
-          <p className="text-muted-foreground text-lg">Flexible solutions for every work style</p>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Choose your setup — all options include high-speed Wi-Fi, coffee bar access, and a professional environment.
+          </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {workspaceOptions.map((workspace) => {
@@ -287,21 +255,27 @@ export default function Coworking() {
             return (
               <Card 
                 key={workspace.name} 
-                onClick={() => handleCardClick(workspace.name)}
-                className="cursor-pointer hover:shadow-premium-hover hover:border-accent/30 transition-all duration-300 shadow-premium group"
+                onClick={() => openRequestModal(workspace.name)}
+                className="cursor-pointer hover:shadow-premium-hover hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group relative overflow-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && handleCardClick(workspace.name)}
+                onKeyDown={(e) => e.key === 'Enter' && openRequestModal(workspace.name)}
               >
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center mb-4 group-hover:bg-accent/30 transition-colors">
-                    <IconComponent className="h-6 w-6 text-accent" aria-hidden="true" />
+                {/* Best For Tag */}
+                <div className="absolute top-4 right-4">
+                  <span className="text-xs px-2 py-1 bg-accent/20 text-accent rounded-full font-medium">
+                    {workspace.bestFor}
+                  </span>
+                </div>
+                <CardHeader className="pt-8">
+                  <div className="w-14 h-14 rounded-xl bg-accent/20 flex items-center justify-center mb-4 group-hover:bg-accent/30 group-hover:shadow-gold transition-all">
+                    <IconComponent className="h-7 w-7 text-accent" aria-hidden="true" />
                   </div>
                   <CardTitle className="text-xl group-hover:text-accent transition-colors">{workspace.name}</CardTitle>
-                  <p className="text-accent font-medium">{workspace.tagline}</p>
+                  <p className="text-muted-foreground text-sm mt-2">{workspace.tagline}</p>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2 mb-6">
+                  <ul className="space-y-2 mb-4">
                     {workspace.benefits.map((benefit) => (
                       <li key={benefit} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Check className="h-4 w-4 text-accent flex-shrink-0" aria-hidden="true" />
@@ -309,31 +283,26 @@ export default function Coworking() {
                       </li>
                     ))}
                   </ul>
-                  <p className="text-xs text-muted-foreground/70 italic">{workspace.trustLine}</p>
+                  <div className="flex items-center gap-1 text-sm text-accent font-medium group-hover:gap-2 transition-all">
+                    Select <ArrowRight className="h-4 w-4" />
+                  </div>
                 </CardContent>
               </Card>
             );
           })}
         </div>
-        
-        {/* Section CTA */}
-        <div className="text-center mt-12">
-          <Button 
-            size="lg"
-            onClick={scrollToRequest}
-            className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-          >
-            Request Workspace
-            <ArrowRight className="h-5 w-5 ml-2" />
-          </Button>
-          <p className="text-sm text-muted-foreground mt-3">
-            We'll confirm availability and options before payment.
-          </p>
+
+        {/* Plan Comparison Table */}
+        <div className="max-w-4xl mx-auto mt-12">
+          <PlanComparisonTable />
         </div>
       </section>
 
+      {/* Section Transition */}
+      <div className="h-16 bg-gradient-to-b from-background to-muted/30" />
+
       {/* Why The Hive Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-muted/30" id="why-hive">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why The Hive</h2>
@@ -358,31 +327,43 @@ export default function Coworking() {
         </div>
       </section>
 
-      {/* Process Timeline Section */}
+      {/* Amenities Section */}
       <section className="py-20 container">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
+          <p className="text-muted-foreground text-lg">A complete work environment, ready when you are.</p>
+        </div>
+        <div className="max-w-2xl mx-auto">
+          <AmenitiesAccordion onBookMeetingRoom={() => navigate('/booking?business=coworking')} />
+        </div>
+      </section>
+
+      {/* Section Transition */}
+      <div className="h-16 bg-gradient-to-b from-background to-background" />
+
+      {/* Process Timeline Section */}
+      <section className="py-20 container" id="how-it-works">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
           <p className="text-muted-foreground text-lg">Three simple steps to your new workspace.</p>
         </div>
         <div className="max-w-2xl mx-auto">
           <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-6 top-0 bottom-0 w-px bg-accent/30" aria-hidden="true" />
-            
-            <div className="space-y-8">
+            <div className="absolute left-7 top-0 bottom-0 w-px bg-accent/30" aria-hidden="true" />
+            <div className="space-y-10">
               {processSteps.map((step, index) => {
                 const IconComponent = step.icon;
                 return (
                   <div key={step.title} className="relative flex gap-6">
-                    <div className="relative z-10 flex-shrink-0 w-12 h-12 rounded-full bg-accent flex items-center justify-center shadow-gold">
-                      <IconComponent className="h-5 w-5 text-primary" aria-hidden="true" />
+                    <div className="relative z-10 flex-shrink-0 w-14 h-14 rounded-full bg-accent flex items-center justify-center shadow-gold">
+                      <IconComponent className="h-6 w-6 text-primary" aria-hidden="true" />
                     </div>
-                    <div className="flex-1 pt-1">
-                      <h3 className="font-semibold text-lg mb-1">
+                    <div className="flex-1 pt-2">
+                      <h3 className="font-semibold text-lg mb-2">
                         <span className="text-accent mr-2">{index + 1}.</span>
                         {step.title}
                       </h3>
-                      <p className="text-muted-foreground">{step.description}</p>
+                      <p className="text-muted-foreground leading-relaxed max-w-lg">{step.description}</p>
                     </div>
                   </div>
                 );
@@ -392,20 +373,29 @@ export default function Coworking() {
         </div>
       </section>
 
+      {/* Section Transition to Dark */}
+      <div className="h-16 bg-gradient-to-b from-background to-primary" />
+
       {/* Testimonials Section */}
-      <section className="py-20 bg-primary">
+      <section className="py-20 bg-primary" id="testimonials">
         <div className="container">
-          <div className="text-center mb-12">
+          <LocalProofStrip />
+          <div className="text-center mb-12 mt-8">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">What Members Say</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-card border-border">
+              <Card key={index} className="bg-card border-border shadow-lg">
                 <CardContent className="pt-6">
-                  <Quote className="h-8 w-8 text-accent mb-4" aria-hidden="true" />
-                  <p className="text-foreground mb-4 italic">"{testimonial.quote}"</p>
+                  <Quote className="h-8 w-8 text-accent/50 mb-4" aria-hidden="true" />
+                  <p className="text-foreground mb-6 italic leading-relaxed">"{testimonial.quote}"</p>
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-foreground">{testimonial.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-foreground">{testimonial.name}</span>
+                      {testimonial.verified && (
+                        <Check className="h-4 w-4 text-accent" />
+                      )}
+                    </div>
                     <span className="text-xs px-3 py-1 bg-accent/20 text-accent rounded-full">
                       {testimonial.badge}
                     </span>
@@ -417,60 +407,78 @@ export default function Coworking() {
         </div>
       </section>
 
+      {/* Section Transition */}
+      <div className="h-16 bg-gradient-to-b from-primary to-background" />
+
       {/* FAQ Section */}
-      <section className="py-20 container">
+      <section className="py-20 container" id="faq">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
         </div>
         <div className="max-w-2xl mx-auto">
-          <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
-              <AccordionItem 
-                key={index} 
-                value={`faq-${index}`}
-                className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50"
-              >
-                <AccordionTrigger className="hover:no-underline py-4 [&[data-state=open]>svg]:text-accent">
-                  <span className="text-left font-medium">{faq.question}</span>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-4">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          <Card className="p-6 shadow-lg">
+            <Accordion type="single" collapsible className="space-y-3">
+              {faqs.map((faq, index) => (
+                <AccordionItem 
+                  key={index} 
+                  value={`faq-${index}`}
+                  className="border border-border rounded-lg px-4 data-[state=open]:border-accent/50 bg-background"
+                >
+                  <AccordionTrigger className="hover:no-underline py-4 text-base [&[data-state=open]>svg]:text-accent">
+                    <span className="text-left font-medium">{faq.question}</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4 leading-relaxed">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </Card>
         </div>
       </section>
 
       {/* Final CTA Section */}
       <section className="py-20 bg-primary">
         <div className="container text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-primary-foreground">
-            Ready for a better place to work?
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">
+            Get Access to The Hive — We'll Confirm Options Within 24 Hours
           </h2>
           <Button 
             size="lg"
-            onClick={scrollToRequest}
+            onClick={() => openRequestModal()}
             className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+            data-event="hive_final_cta_click"
           >
             Request Workspace
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
-          <p className="text-primary-foreground/70 mt-4">
-            No obligation. Response within 24 hours.
+          <p className="text-primary-foreground/70 mt-4 text-sm">
+            No obligation • Local team response within 24 hours • No payment until confirmed
           </p>
         </div>
       </section>
 
-      {/* Lease Form Dialog */}
-      <Dialog open={showLeaseForm} onOpenChange={setShowLeaseForm}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Request Your Workspace</DialogTitle>
-          </DialogHeader>
-          <LeaseSignupForm onSuccess={handleLeaseSuccess} />
-        </DialogContent>
-      </Dialog>
+      {/* Modals */}
+      <CoworkingRequestModal 
+        open={showRequestModal} 
+        onOpenChange={setShowRequestModal}
+        preselectedType={selectedWorkspaceType || undefined}
+      />
+      <ScheduleTourModal 
+        open={showTourModal} 
+        onOpenChange={setShowTourModal}
+        businessType="coworking"
+      />
+      <HiveWaitlistModal 
+        open={showWaitlistModal} 
+        onOpenChange={setShowWaitlistModal}
+      />
+
+      {/* Sticky Mobile CTA */}
+      <StickyMobileHiveCTA onRequestClick={() => openRequestModal()} />
+
+      {/* Floating Help */}
+      <FloatingHelpDrawer businessType="coworking" />
     </div>
   );
 }
