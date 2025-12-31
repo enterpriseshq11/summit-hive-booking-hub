@@ -23,6 +23,10 @@ export interface UserPromotion {
     slug: string;
     category: string;
     short_description: string;
+    type?: string;
+    benefits?: unknown;
+    primary_cta_label?: string;
+    progress_target?: number;
   };
 }
 
@@ -34,14 +38,20 @@ export function useUserPromotions() {
     queryFn: async (): Promise<UserPromotion[]> => {
       if (!authUser?.id) return [];
 
-      const { data, error } = await supabase
-        .from("user_promotions")
-        .select("*")
+      const { data, error } = await (supabase
+        .from("user_promotions" as any)
+        .select(`
+          *,
+          promotions:promotion_id (
+            id, title, slug, category, short_description,
+            type, benefits, primary_cta_label, progress_target
+          )
+        `)
         .eq("user_id", authUser.id)
-        .order("updated_at", { ascending: false });
+        .order("updated_at", { ascending: false }) as any);
 
       if (error) throw error;
-      return (data || []) as unknown as UserPromotion[];
+      return (data || []) as UserPromotion[];
     },
     enabled: !!authUser?.id,
   });
@@ -55,16 +65,16 @@ export function useStartPromotion() {
     mutationFn: async (promotionId: string) => {
       if (!authUser?.id) throw new Error("Must be logged in");
 
-      const { data, error } = await supabase
-        .from("user_promotions")
+      const { data, error } = await (supabase
+        .from("user_promotions" as any)
         .upsert({
           user_id: authUser.id,
           promotion_id: promotionId,
           status: "in_progress",
           progress: 0,
-        } as Record<string, unknown>)
+        })
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data;
@@ -88,17 +98,17 @@ export function useClaimPromotion() {
     mutationFn: async (promotionId: string) => {
       if (!authUser?.id) throw new Error("Must be logged in");
 
-      const { data, error } = await supabase
-        .from("user_promotions")
+      const { data, error } = await (supabase
+        .from("user_promotions" as any)
         .update({
           status: "active",
           activated_at: new Date().toISOString(),
           claimed_at: new Date().toISOString(),
-        } as Record<string, unknown>)
+        })
         .eq("user_id", authUser.id)
         .eq("promotion_id", promotionId)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data;
