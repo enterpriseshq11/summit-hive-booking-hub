@@ -34,6 +34,7 @@ import AdminLeadsWaitlists from "./pages/admin/LeadsWaitlists";
 import AdminUsersRoles from "./pages/admin/UsersRoles";
 import AdminAuditLog from "./pages/admin/AuditLog";
 import AdminAssumptions from "./pages/admin/Assumptions";
+import AdminPromotions from "./pages/admin/Promotions";
 
 const queryClient = new QueryClient();
 
