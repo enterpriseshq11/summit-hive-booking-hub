@@ -17,20 +17,21 @@ export function GiftCardAnchorChips() {
   };
 
   return (
-    <div className="flex flex-wrap justify-center gap-2 py-4">
+    <nav className="flex flex-wrap justify-center gap-2 py-4" aria-label="Page sections">
       {anchorItems.map((item) => (
         <Button
           key={item.id}
           variant="outline"
           size="sm"
           onClick={() => scrollToSection(item.id)}
-          className="rounded-full border-accent/30 hover:border-accent hover:bg-accent/10 gap-2"
+          className="rounded-full border-accent/30 hover:border-accent hover:bg-accent/10 gap-2 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           data-event={`giftcard_anchor_${item.id}`}
+          aria-label={`Jump to ${item.label} section`}
         >
-          <item.icon className="h-3.5 w-3.5 text-accent" />
+          <item.icon className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
           {item.label}
         </Button>
       ))}
-    </div>
+    </nav>
   );
 }

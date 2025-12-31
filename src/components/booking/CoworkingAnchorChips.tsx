@@ -20,18 +20,19 @@ export function CoworkingAnchorChips() {
   };
 
   return (
-    <div className="flex flex-wrap gap-2 justify-center">
+    <nav className="flex flex-wrap gap-2 justify-center" aria-label="Page sections">
       {sections.map((section) => (
         <Button
           key={section.id}
           variant="outline"
           size="sm"
           onClick={() => scrollToSection(section.id)}
-          className="rounded-full border-primary-foreground/30 text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground hover:border-accent/50 transition-all"
+          className="rounded-full border-primary-foreground/30 text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground hover:border-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          aria-label={`Jump to ${section.label} section`}
         >
           {section.label}
         </Button>
       ))}
-    </div>
+    </nav>
   );
 }

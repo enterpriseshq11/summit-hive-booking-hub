@@ -16,7 +16,7 @@ export function StickyMobileGiftCardCTA({ onBuyClick, selectedAmount }: StickyMo
       setIsVisible(scrollPercentage > 30);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

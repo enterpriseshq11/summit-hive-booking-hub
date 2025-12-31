@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin } from "lucide-react";
 
@@ -15,7 +16,7 @@ const footerLinks = {
   ],
 };
 
-export function Footer() {
+export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
   return (
     <footer className="border-t border-border bg-primary text-primary-foreground">
       <div className="container py-12">
@@ -95,4 +96,4 @@ export function Footer() {
       </div>
     </footer>
   );
-}
+});

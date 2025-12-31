@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { HelpCircle, Phone, Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function FloatingHelpCTA() {
+export const FloatingHelpCTA = forwardRef<HTMLDivElement>(function FloatingHelpCTA(_, ref) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -54,4 +54,4 @@ export function FloatingHelpCTA() {
       )}
     </div>
   );
-}
+});
