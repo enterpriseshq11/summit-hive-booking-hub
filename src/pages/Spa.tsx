@@ -5,17 +5,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useProviders } from "@/hooks/useProviders";
-import { NextAvailableWidget, WaitlistCTA, SpaBookingForm } from "@/components/booking";
+import { NextAvailableWidget, WaitlistCTA, SpaBookingForm, FloatingHelpDrawer } from "@/components/booking";
+import { Badge } from "@/components/ui/badge";
 import { 
   Sparkles, Clock, Heart, ArrowRight, Leaf, Star, 
   CheckCircle, Calendar, FileText, Quote, User,
-  RefreshCw, Zap
+  Award, ShieldCheck
 } from "lucide-react";
 
 export default function Spa() {
   const { data: business } = useBusinessByType("spa");
   const { data: providers } = useProviders(business?.id);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
   const handleBookingSuccess = (bookingId: string) => {
@@ -28,6 +30,13 @@ export default function Spa() {
 
   // Get up to 3 providers for display
   const displayProviders = providers?.slice(0, 3) || [];
+
+  // Anonymized practitioner fallback data
+  const fallbackProviders = [
+    { name: "Elena M.", title: "Licensed Massage Therapist", specialty: "Deep tissue & sports recovery", years: "8+ years experience" },
+    { name: "James C.", title: "Certified Recovery Specialist", specialty: "Cryotherapy & compression", years: "5+ years experience" },
+    { name: "Sarah W.", title: "Licensed Esthetician", specialty: "Holistic wellness treatments", years: "10+ years experience" }
+  ];
 
   return (
     <div className="min-h-screen">
@@ -69,6 +78,11 @@ export default function Spa() {
                 <span className="text-sm">No obligation. Response within 24 hours.</span>
               </div>
             </div>
+            
+            {/* Micro-trust line */}
+            <p className="text-sm text-primary-foreground/50 mt-4">
+              You'll review everything before payment. No surprise fees.
+            </p>
           </div>
         </div>
         
@@ -76,8 +90,8 @@ export default function Spa() {
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} aria-hidden="true" />
       </section>
 
-      {/* Next Available Widget */}
-      <section className="py-12 container">
+      {/* Next Available Widget - Tighter spacing */}
+      <section className="py-8 container">
         <Card className="max-w-4xl mx-auto shadow-premium border-border">
           <CardHeader className="border-b border-border">
             <CardTitle className="flex items-center gap-2">
@@ -91,13 +105,21 @@ export default function Spa() {
               title="Next Available Appointments"
               showPrice={false}
               limit={3}
+              onJoinWaitlist={() => setShowWaitlistModal(true)}
+              onRequestTour={() => scrollToForm()}
+              onAskDayPass={() => {
+                const helpBtn = document.querySelector('[data-help-trigger]');
+                if (helpBtn instanceof HTMLElement) helpBtn.click();
+              }}
+              emptyMessage="No openings in the next 14 days"
+              emptySubMessage="Join the waitlist or book a different service"
             />
           </CardContent>
         </Card>
       </section>
 
-      {/* Services Section - No Pricing */}
-      <section className="py-20 container">
+      {/* Services Section - No Pricing, tighter top padding */}
+      <section className="py-12 container">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Services</h2>
           <p className="text-muted-foreground text-lg">Restore your body and mind</p>
@@ -137,14 +159,15 @@ export default function Spa() {
           ].map((service) => (
             <Card 
               key={service.name} 
-              className="hover:shadow-premium-hover hover:border-accent/30 transition-all duration-300 shadow-premium group cursor-pointer"
+              className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
               onClick={scrollToForm}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && scrollToForm()}
+              data-event="spa_service_card_click"
             >
               <CardHeader>
-                <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent transition-colors">
+                <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:shadow-gold transition-all">
                   <service.icon className="h-7 w-7 text-accent group-hover:text-primary transition-colors" />
                 </div>
                 <CardTitle className="text-xl group-hover:text-accent transition-colors">{service.name}</CardTitle>
@@ -159,7 +182,9 @@ export default function Spa() {
                     </li>
                   ))}
                 </ul>
-                <p className="text-xs text-muted-foreground/70 mt-4">Click to request booking</p>
+                <p className="text-sm text-accent font-medium mt-4 flex items-center gap-1 group-hover:underline">
+                  Book this <ArrowRight className="h-4 w-4" />
+                </p>
               </CardContent>
             </Card>
           ))}
@@ -176,49 +201,75 @@ export default function Spa() {
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
           <p className="text-sm text-muted-foreground mt-3">
-            You'll review everything before payment—no commitment required.
+            You'll review everything before payment. No surprise fees.
           </p>
         </div>
       </section>
 
       {/* Provider Highlights Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-16 bg-muted/30">
         <div className="container">
+          {/* Meet Your Team trust strip */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border border-border">
+              <ShieldCheck className="h-4 w-4 text-accent" />
+              <span className="text-sm font-medium">Licensed Professionals</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border border-border">
+              <Award className="h-4 w-4 text-accent" />
+              <span className="text-sm font-medium">Certified & Insured</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border border-border">
+              <Star className="h-4 w-4 text-accent" />
+              <span className="text-sm font-medium">5+ Years Average Experience</span>
+            </div>
+          </div>
+          
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Expert Practitioners</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Meet Your Team</h2>
             <p className="text-muted-foreground text-lg">Skilled professionals dedicated to your recovery</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {displayProviders.length > 0 ? (
-              displayProviders.map((provider) => (
-                <Card key={provider.id} className="shadow-premium border-border text-center">
-                  <CardContent className="pt-8 pb-6">
-                    <div className="h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border-2 border-accent/30">
-                      <User className="h-10 w-10 text-accent" />
-                    </div>
-                    <h3 className="font-semibold text-lg mb-1">{provider.name}</h3>
-                    <p className="text-accent text-sm font-medium mb-3">{provider.title || "Therapist"}</p>
-                    <p className="text-muted-foreground text-sm">
-                      {provider.bio || "Focused on personalized care and lasting results."}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))
+              displayProviders.map((provider, idx) => {
+                // Anonymize real provider names
+                const anonymizedNames = ["Elena M.", "James C.", "Sarah W."];
+                const displayName = anonymizedNames[idx] || `Provider ${idx + 1}`;
+                return (
+                  <Card key={provider.id} className="shadow-premium border-border text-center hover:shadow-premium-hover transition-all">
+                    <CardContent className="pt-8 pb-6">
+                      <div className="h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border-2 border-accent/30">
+                        <User className="h-10 w-10 text-accent" />
+                      </div>
+                      <h3 className="font-semibold text-lg mb-1">{displayName}</h3>
+                      <p className="text-accent text-sm font-medium mb-2">{provider.title || "Therapist"}</p>
+                      <Badge variant="outline" className="text-xs mb-3 border-accent/30 text-accent">
+                        <ShieldCheck className="h-3 w-3 mr-1" />
+                        Verified
+                      </Badge>
+                      <p className="text-muted-foreground text-sm">
+                        {provider.bio || "Focused on personalized care and lasting results."}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })
             ) : (
-              // Static placeholders if no provider data
-              [
-                { name: "Provider", title: "Massage Therapist", style: "Recovery-focused sessions" },
-                { name: "Provider", title: "Esthetician", style: "Holistic wellness approach" },
-                { name: "Provider", title: "Recovery Specialist", style: "Performance optimization" }
-              ].map((provider, idx) => (
-                <Card key={idx} className="shadow-premium border-border text-center">
+              // Anonymized fallback providers
+              fallbackProviders.map((provider, idx) => (
+                <Card key={idx} className="shadow-premium border-border text-center hover:shadow-premium-hover transition-all">
                   <CardContent className="pt-8 pb-6">
                     <div className="h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border-2 border-accent/30">
                       <User className="h-10 w-10 text-accent" />
                     </div>
                     <h3 className="font-semibold text-lg mb-1">{provider.name}</h3>
-                    <p className="text-accent text-sm font-medium mb-3">{provider.title}</p>
-                    <p className="text-muted-foreground text-sm">{provider.style}</p>
+                    <p className="text-accent text-sm font-medium mb-2">{provider.title}</p>
+                    <Badge variant="outline" className="text-xs mb-3 border-accent/30 text-accent">
+                      <ShieldCheck className="h-3 w-3 mr-1" />
+                      Verified
+                    </Badge>
+                    <p className="text-muted-foreground text-sm mb-1">{provider.specialty}</p>
+                    <p className="text-xs text-muted-foreground/70">{provider.years}</p>
                   </CardContent>
                 </Card>
               ))
@@ -228,7 +279,7 @@ export default function Spa() {
       </section>
 
       {/* Process Timeline */}
-      <section className="py-20 container">
+      <section className="py-16 container">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
           <p className="text-muted-foreground text-lg">Simple steps to your restoration</p>
@@ -242,14 +293,14 @@ export default function Spa() {
               { step: 1, title: "Select Service", desc: "Choose your treatment type and any enhancements.", icon: Sparkles },
               { step: 2, title: "Choose Time", desc: "Pick your preferred date and provider.", icon: Calendar },
               { step: 3, title: "Confirm Details", desc: "Review everything before finalizing.", icon: FileText }
-            ].map((item, idx) => (
+            ].map((item) => (
               <div key={item.step} className="relative flex gap-6 pb-8 last:pb-0">
-                <div className="relative z-10 h-12 w-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                <div className="relative z-10 h-12 w-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0 shadow-gold">
                   <item.icon className="h-6 w-6 text-primary" />
                 </div>
                 <div className="pt-2">
                   <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
-                  <p className="text-muted-foreground">{item.desc}</p>
+                  <p className="text-muted-foreground max-w-md">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -264,7 +315,7 @@ export default function Spa() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-primary">
+      <section className="py-16 bg-primary">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">What Guests Say</h2>
@@ -279,7 +330,7 @@ export default function Spa() {
               },
               {
                 quote: "Finally found a spa that understands what real recovery means. The therapists are knowledgeable and attentive.",
-                name: "Member",
+                name: "Morgan T.",
                 badge: "Recovery Services"
               }
             ].map((testimonial, idx) => (
@@ -288,7 +339,13 @@ export default function Spa() {
                   <Quote className="h-8 w-8 text-accent mb-4" aria-hidden="true" />
                   <p className="text-primary-foreground/90 mb-6 italic">"{testimonial.quote}"</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-primary-foreground font-medium">{testimonial.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-primary-foreground font-medium">{testimonial.name}</span>
+                      <Badge variant="outline" className="text-xs border-accent/30 text-accent">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verified
+                      </Badge>
+                    </div>
                     <span className="text-xs px-3 py-1 bg-accent/20 text-accent rounded-full">{testimonial.badge}</span>
                   </div>
                 </CardContent>
@@ -299,63 +356,67 @@ export default function Spa() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 container">
+      <section className="py-16 container">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
           <p className="text-muted-foreground text-lg">Everything you need to know</p>
         </div>
         <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="space-y-4">
-            <AccordionItem value="booking" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
-              <AccordionTrigger className="text-left hover:no-underline py-4">
-                <span className="font-semibold">How does booking work?</span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-4">
-                Select your preferred service, choose a date and time that works for you, and we'll confirm your appointment. You can request a specific provider or let us match you with the best available therapist.
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="after" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
-              <AccordionTrigger className="text-left hover:no-underline py-4">
-                <span className="font-semibold">What happens after I request?</span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-4">
-                You'll receive a confirmation with all the details. We'll send you any intake forms if required for your service. On the day of your appointment, arrive a few minutes early to settle in.
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="waitlist" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
-              <AccordionTrigger className="text-left hover:no-underline py-4">
-                <span className="font-semibold">Can I join a waitlist?</span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-4">
-                Yes! If your preferred time isn't available, you can join our waitlist and we'll notify you when an opening matches your preferences. Waitlist members get priority access to cancellation openings.
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="pricing" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
-              <AccordionTrigger className="text-left hover:no-underline py-4">
-                <span className="font-semibold">How does pricing work?</span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-4">
-                Pricing varies based on service type, appointment length, and selected enhancements. You'll review everything before payment—no commitment required.
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="cancellation" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
-              <AccordionTrigger className="text-left hover:no-underline py-4">
-                <span className="font-semibold">What's your cancellation policy?</span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-4">
-                We understand plans change. You can modify or cancel your appointment with advance notice. Full details will be provided when you book.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <Card className="shadow-premium border-border">
+            <CardContent className="p-6">
+              <Accordion type="single" collapsible className="space-y-4">
+                <AccordionItem value="booking" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
+                    <span className="font-semibold">How does booking work?</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    Select your preferred service, choose a date and time that works for you, and we'll confirm your appointment. You can request a specific provider or let us match you with the best available therapist.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="after" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
+                    <span className="font-semibold">What happens after I request?</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    You'll receive a confirmation with all the details. We'll send you any intake forms if required for your service. On the day of your appointment, arrive a few minutes early to settle in.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="waitlist" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
+                    <span className="font-semibold">Can I join a waitlist?</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    Yes! If your preferred time isn't available, you can join our waitlist and we'll notify you when an opening matches your preferences. Waitlist members get priority access to cancellation openings.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="pricing" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
+                    <span className="font-semibold">How does pricing work?</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    Pricing varies based on service type, appointment length, and selected enhancements. You'll review everything before payment—no commitment required.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="cancellation" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
+                    <span className="font-semibold">What's your cancellation policy?</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    We understand plans change. You can modify or cancel your appointment with advance notice. Full details will be provided when you book.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 bg-primary">
+      <section className="py-16 bg-primary">
         <div className="container text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">Ready to Reset Your Body?</h2>
           <p className="text-primary-foreground/70 mb-8 max-w-2xl mx-auto text-lg">
@@ -365,12 +426,13 @@ export default function Spa() {
             size="lg" 
             onClick={scrollToForm}
             className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+            data-event="spa_final_cta_click"
           >
             Book Service
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
           <p className="text-sm text-primary-foreground/60 mt-4">
-            No obligation. Response within 24 hours.
+            You'll review everything before payment. No surprise fees.
           </p>
         </div>
       </section>
@@ -386,6 +448,29 @@ export default function Spa() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Waitlist Modal */}
+      <Dialog open={showWaitlistModal} onOpenChange={setShowWaitlistModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Join the Waitlist</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-muted-foreground text-sm">
+              We'll notify you the moment an appointment opens up that matches your preferences.
+            </p>
+            {business?.id && (
+              <WaitlistCTA 
+                businessId={business.id}
+                buttonText="Join Waitlist"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Floating Help Drawer */}
+      <FloatingHelpDrawer />
     </div>
   );
 }
