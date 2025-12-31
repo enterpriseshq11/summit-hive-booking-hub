@@ -32,6 +32,7 @@ const navItems = [
   { label: "Spa", href: "/spa", icon: Sparkles },
   { label: "Fitness", href: "/fitness", icon: Dumbbell },
   { label: "Gift Cards", href: "/gift-cards", icon: Gift },
+  { label: "Member Exclusives", href: "/promotions", icon: Sparkles },
 ];
 
 export function Header() {
