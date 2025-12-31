@@ -1,8 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import { Gift, Sparkles, Check, ArrowRight, Clock, Shield, BadgeCheck, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MainLayout } from "@/components/layout";
 import {
   PromotionCard,
   PromotionDetailModal,
@@ -84,7 +83,7 @@ export default function Promotions() {
   };
 
   return (
-    <MainLayout>
+    <>
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-background">
         <div className="absolute inset-0">
@@ -276,6 +275,6 @@ export default function Promotions() {
       />
 
       <StickyMobilePromotionsCTA onOpenOffers={scrollToOffers} />
-    </MainLayout>
+    </>
   );
 }

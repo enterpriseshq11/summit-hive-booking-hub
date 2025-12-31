@@ -125,7 +125,7 @@ export function usePromotionLeads(filters?: {
         .order("created_at", { ascending: false });
 
       if (filters?.status) {
-        query = query.eq("status", filters.status);
+        query = query.eq("status", filters.status as "new" | "contacted" | "closed" | "archived");
       }
       if (filters?.offerId) {
         query = query.eq("offer_id", filters.offerId);
