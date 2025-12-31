@@ -1727,9 +1727,12 @@ export type Database = {
           id: string
           limits_fine_print: string | null
           long_description: string | null
+          primary_business_id: string | null
           primary_cta_action: Database["public"]["Enums"]["promotion_cta_action"]
           primary_cta_label: string
           primary_cta_target: string | null
+          progress_target: number | null
+          progress_window_days: number | null
           short_description: string
           slug: string
           sort_order: number | null
@@ -1737,7 +1740,9 @@ export type Database = {
           status: Database["public"]["Enums"]["promotion_status"]
           tags: string[] | null
           title: string
+          type: Database["public"]["Enums"]["promotion_type"] | null
           updated_at: string
+          visibility: string | null
         }
         Insert: {
           badge?: string | null
@@ -1749,9 +1754,12 @@ export type Database = {
           id?: string
           limits_fine_print?: string | null
           long_description?: string | null
+          primary_business_id?: string | null
           primary_cta_action?: Database["public"]["Enums"]["promotion_cta_action"]
           primary_cta_label?: string
           primary_cta_target?: string | null
+          progress_target?: number | null
+          progress_window_days?: number | null
           short_description: string
           slug: string
           sort_order?: number | null
@@ -1759,7 +1767,9 @@ export type Database = {
           status?: Database["public"]["Enums"]["promotion_status"]
           tags?: string[] | null
           title: string
+          type?: Database["public"]["Enums"]["promotion_type"] | null
           updated_at?: string
+          visibility?: string | null
         }
         Update: {
           badge?: string | null
@@ -1771,9 +1781,12 @@ export type Database = {
           id?: string
           limits_fine_print?: string | null
           long_description?: string | null
+          primary_business_id?: string | null
           primary_cta_action?: Database["public"]["Enums"]["promotion_cta_action"]
           primary_cta_label?: string
           primary_cta_target?: string | null
+          progress_target?: number | null
+          progress_window_days?: number | null
           short_description?: string
           slug?: string
           sort_order?: number | null
@@ -1781,9 +1794,19 @@ export type Database = {
           status?: Database["public"]["Enums"]["promotion_status"]
           tags?: string[] | null
           title?: string
+          type?: Database["public"]["Enums"]["promotion_type"] | null
           updated_at?: string
+          visibility?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "promotions_primary_business_id_fkey"
+            columns: ["primary_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       provider_schedules: {
         Row: {
@@ -2477,6 +2500,12 @@ export type Database = {
       promotion_cta_action: "open_modal" | "scroll_to_form" | "route_to_page"
       promotion_lead_status: "new" | "contacted" | "closed" | "archived"
       promotion_status: "active" | "paused" | "expired"
+      promotion_type:
+        | "cross_bundle"
+        | "volume_incentive"
+        | "seasonal"
+        | "role_based"
+        | "manual_special"
       resource_type:
         | "room"
         | "office"
@@ -2665,6 +2694,13 @@ export const Constants = {
       promotion_cta_action: ["open_modal", "scroll_to_form", "route_to_page"],
       promotion_lead_status: ["new", "contacted", "closed", "archived"],
       promotion_status: ["active", "paused", "expired"],
+      promotion_type: [
+        "cross_bundle",
+        "volume_incentive",
+        "seasonal",
+        "role_based",
+        "manual_special",
+      ],
       resource_type: [
         "room",
         "office",
