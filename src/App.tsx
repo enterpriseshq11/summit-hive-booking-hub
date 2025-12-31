@@ -17,6 +17,7 @@ import Coworking from "./pages/Coworking";
 import Spa from "./pages/Spa";
 import Fitness from "./pages/Fitness";
 import GiftCards from "./pages/GiftCards";
+import Promotions from "./pages/Promotions";
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="/spa" element={<Spa />} />
                 <Route path="/fitness" element={<Fitness />} />
                 <Route path="/gift-cards" element={<GiftCards />} />
+                <Route path="/promotions" element={<Promotions />} />
                 
                 {/* Protected customer routes */}
                 <Route element={<ProtectedRoute />}>
@@ -79,6 +81,7 @@ const App = () => (
                 <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
                 <Route path="/admin/audit-log" element={<AdminAuditLog />} />
                 <Route path="/admin/assumptions" element={<AdminAssumptions />} />
+                <Route path="/admin/promotions" element={<AdminPromotions />} />
               </Route>
 
               {/* Catch-all */}

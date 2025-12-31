@@ -1654,6 +1654,137 @@ export type Database = {
         }
         Relationships: []
       }
+      promotion_leads: {
+        Row: {
+          business_interest: string[] | null
+          created_at: string
+          email: string
+          id: string
+          lead_type: string | null
+          metadata: Json | null
+          name: string
+          notes: string | null
+          offer_id: string | null
+          offer_title_snapshot: string | null
+          phone: string | null
+          preferred_contact_method: string | null
+          source_page: string | null
+          status: Database["public"]["Enums"]["promotion_lead_status"]
+          updated_at: string
+        }
+        Insert: {
+          business_interest?: string[] | null
+          created_at?: string
+          email: string
+          id?: string
+          lead_type?: string | null
+          metadata?: Json | null
+          name: string
+          notes?: string | null
+          offer_id?: string | null
+          offer_title_snapshot?: string | null
+          phone?: string | null
+          preferred_contact_method?: string | null
+          source_page?: string | null
+          status?: Database["public"]["Enums"]["promotion_lead_status"]
+          updated_at?: string
+        }
+        Update: {
+          business_interest?: string[] | null
+          created_at?: string
+          email?: string
+          id?: string
+          lead_type?: string | null
+          metadata?: Json | null
+          name?: string
+          notes?: string | null
+          offer_id?: string | null
+          offer_title_snapshot?: string | null
+          phone?: string | null
+          preferred_contact_method?: string | null
+          source_page?: string | null
+          status?: Database["public"]["Enums"]["promotion_lead_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_leads_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotions: {
+        Row: {
+          badge: string | null
+          benefits: Json | null
+          category: Database["public"]["Enums"]["promotion_category"]
+          created_at: string
+          eligibility_rules: Json | null
+          end_date: string | null
+          id: string
+          limits_fine_print: string | null
+          long_description: string | null
+          primary_cta_action: Database["public"]["Enums"]["promotion_cta_action"]
+          primary_cta_label: string
+          primary_cta_target: string | null
+          short_description: string
+          slug: string
+          sort_order: number | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["promotion_status"]
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          benefits?: Json | null
+          category?: Database["public"]["Enums"]["promotion_category"]
+          created_at?: string
+          eligibility_rules?: Json | null
+          end_date?: string | null
+          id?: string
+          limits_fine_print?: string | null
+          long_description?: string | null
+          primary_cta_action?: Database["public"]["Enums"]["promotion_cta_action"]
+          primary_cta_label?: string
+          primary_cta_target?: string | null
+          short_description: string
+          slug: string
+          sort_order?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["promotion_status"]
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          benefits?: Json | null
+          category?: Database["public"]["Enums"]["promotion_category"]
+          created_at?: string
+          eligibility_rules?: Json | null
+          end_date?: string | null
+          id?: string
+          limits_fine_print?: string | null
+          long_description?: string | null
+          primary_cta_action?: Database["public"]["Enums"]["promotion_cta_action"]
+          primary_cta_label?: string
+          primary_cta_target?: string | null
+          short_description?: string
+          slug?: string
+          sort_order?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["promotion_status"]
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       provider_schedules: {
         Row: {
           created_at: string
@@ -2342,6 +2473,10 @@ export type Database = {
         | "refunded"
         | "partial_refund"
       pricing_modifier_type: "percentage" | "fixed_amount"
+      promotion_category: "signature" | "monthly" | "vault"
+      promotion_cta_action: "open_modal" | "scroll_to_form" | "route_to_page"
+      promotion_lead_status: "new" | "contacted" | "closed" | "archived"
+      promotion_status: "active" | "paused" | "expired"
       resource_type:
         | "room"
         | "office"
@@ -2526,6 +2661,10 @@ export const Constants = {
         "partial_refund",
       ],
       pricing_modifier_type: ["percentage", "fixed_amount"],
+      promotion_category: ["signature", "monthly", "vault"],
+      promotion_cta_action: ["open_modal", "scroll_to_form", "route_to_page"],
+      promotion_lead_status: ["new", "contacted", "closed", "archived"],
+      promotion_status: ["active", "paused", "expired"],
       resource_type: [
         "room",
         "office",
