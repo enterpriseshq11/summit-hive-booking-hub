@@ -16,6 +16,7 @@ import beamProImg from "@/assets/beam-pro.jpg";
 import beamCompactImg from "@/assets/beam-compact.jpg";
 import beamUltraImg from "@/assets/beam-ultra.jpg";
 
+
 const benefits = [
   {
     icon: Eye,
