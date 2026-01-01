@@ -7,8 +7,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// VIP Dopamine Club price - $2.99/month
-const VIP_PRICE_ID = Deno.env.get("VIP_PRICE_ID") || "price_vip_dopamine_club";
+// VIP Dopamine Club price - $2.99/month (Stripe price ID)
+const VIP_PRICE_ID = "price_1SkqpQPFNT8K72RIwLP5skz4";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
