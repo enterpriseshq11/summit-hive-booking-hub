@@ -30,11 +30,17 @@ export default function DopamineDrop() {
   const [showVipLockedModal, setShowVipLockedModal] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Check for VIP success
+  // Check for VIP success from checkout
   useEffect(() => {
-    if (searchParams.get("vip") === "success") {
-      toast.success("Welcome to VIP! You now have 2 spins per day and access to exclusive prizes.");
+    const vipParam = searchParams.get("vip");
+    if (vipParam === "success" || vipParam === "active") {
+      toast.success("Welcome to VIP! You now have 2 spins per day and access to exclusive prizes.", {
+        duration: 5000,
+        icon: "🎉"
+      });
       fetchStatus();
+      // Clean up URL
+      window.history.replaceState({}, "", "/dopamine-drop");
     }
   }, [searchParams]);
 
@@ -227,8 +233,11 @@ export default function DopamineDrop() {
                   
                   <div className="flex justify-between items-center py-2 border-b border-border">
                     <span className="text-muted-foreground">Account</span>
-                    <Badge variant={status?.is_vip ? "default" : "secondary"}>
-                      {status?.is_vip ? "VIP Member" : "Free"}
+                    <Badge 
+                      variant={status?.is_vip ? "default" : "secondary"}
+                      className={status?.is_vip ? "bg-primary text-primary-foreground" : ""}
+                    >
+                      {status?.is_vip ? "✨ VIP Active" : "Free"}
                     </Badge>
                   </div>
                   

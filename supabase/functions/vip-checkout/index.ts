@@ -7,9 +7,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// VIP Dopamine Club price - fetched from app_config table
-// Fallback to hardcoded value if config not found
-const DEFAULT_VIP_PRICE_ID = "price_1SkqpQPFNT8K72RIwLP5skz4";
+// Fallback for non-production environments only
+const DEV_FALLBACK_PRICE_ID = "price_1SkqpQPFNT8K72RIwLP5skz4";
+
+// Detect production environment
+const isProduction = () => {
+  const url = Deno.env.get("SUPABASE_URL") || "";
+  // Production if not localhost and Stripe key starts with sk_live
+  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY") || "";
+  return stripeKey.startsWith("sk_live_");
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -46,15 +53,36 @@ serve(async (req) => {
     const user = userData.user;
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Get VIP price from config table
-    const { data: configData } = await supabaseClient
+    // Get VIP price from config table (REQUIRED in production)
+    const { data: configData, error: configError } = await supabaseClient
       .from("app_config")
       .select("value")
       .eq("key", "VIP_PRICE_ID")
       .single();
     
-    const vipPriceId = configData?.value || DEFAULT_VIP_PRICE_ID;
-    console.log("Using VIP price ID:", vipPriceId);
+    let vipPriceId: string;
+    
+    if (!configData?.value) {
+      if (isProduction()) {
+        // PRODUCTION: Fail loudly if config is missing
+        console.error("CRITICAL: VIP_PRICE_ID not found in app_config. Cannot proceed in production.");
+        return new Response(JSON.stringify({ 
+          error: "VIP checkout configuration error. Please contact support.",
+          code: "CONFIG_MISSING"
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        });
+      } else {
+        // NON-PRODUCTION: Allow fallback with warning
+        console.warn("VIP_PRICE_ID not in app_config, using dev fallback:", DEV_FALLBACK_PRICE_ID);
+        vipPriceId = DEV_FALLBACK_PRICE_ID;
+      }
+    } else {
+      vipPriceId = configData.value;
+    }
+    
+    console.log("VIP checkout using price ID:", vipPriceId, "| Production:", isProduction());
 
     // Check if already VIP
     const { data: vipData } = await supabaseClient
@@ -101,7 +129,7 @@ serve(async (req) => {
       customer: customerId,
       line_items: [{ price: vipPriceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `${origin}/dopamine-drop?vip=success`,
+      success_url: `${origin}/dopamine-drop?vip=active`,
       cancel_url: `${origin}/dopamine-drop?vip=canceled`,
       metadata: { user_id: user.id }
     });
