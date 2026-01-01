@@ -11,6 +11,14 @@ interface LoginPromptModalProps {
 export function LoginPromptModal({ open, onOpenChange }: LoginPromptModalProps) {
   const navigate = useNavigate();
 
+  const handleNavigate = (isSignUp: boolean) => {
+    onOpenChange(false);
+    // Navigate to login with return URL to come back to dopamine-drop
+    navigate("/login", { 
+      state: { from: { pathname: "/dopamine-drop" } }
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -34,20 +42,14 @@ export function LoginPromptModal({ open, onOpenChange }: LoginPromptModalProps) 
           <div className="flex gap-2">
             <Button 
               className="flex-1"
-              onClick={() => {
-                onOpenChange(false);
-                navigate("/login");
-              }}
+              onClick={() => handleNavigate(false)}
             >
               Log in
             </Button>
             <Button 
               variant="outline"
               className="flex-1"
-              onClick={() => {
-                onOpenChange(false);
-                navigate("/login?signup=true");
-              }}
+              onClick={() => handleNavigate(true)}
             >
               Create account
             </Button>

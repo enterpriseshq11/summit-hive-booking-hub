@@ -188,7 +188,11 @@ export default function DopamineDrop() {
                   ) : (
                     <User className="w-5 h-5 mr-2" />
                   )}
-                  {authUser ? "Spin the Wheel" : "Log in to Spin"}
+                  {authUser 
+                    ? (status?.is_vip 
+                        ? `Spin the Wheel (${status?.spins_remaining ?? 0} left)` 
+                        : "Spin the Wheel")
+                    : "Log in to Spin"}
                 </Button>
                 
                 <Button 
@@ -201,6 +205,13 @@ export default function DopamineDrop() {
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
+              
+              {/* Microcopy for logged-out users */}
+              {!authUser && (
+                <p className="text-sm text-zinc-400 mt-3">
+                  Free to play. Login required to spin.
+                </p>
+              )}
             </motion.div>
           </div>
         </section>
