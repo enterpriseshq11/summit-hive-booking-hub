@@ -7,8 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// VIP Dopamine Club price - $2.99/month (Stripe price ID)
-const VIP_PRICE_ID = "price_1SkqpQPFNT8K72RIwLP5skz4";
+// VIP Dopamine Club price - fetched from app_config table
+// Fallback to hardcoded value if config not found
+const DEFAULT_VIP_PRICE_ID = "price_1SkqpQPFNT8K72RIwLP5skz4";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -44,6 +45,16 @@ serve(async (req) => {
 
     const user = userData.user;
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+    // Get VIP price from config table
+    const { data: configData } = await supabaseClient
+      .from("app_config")
+      .select("value")
+      .eq("key", "VIP_PRICE_ID")
+      .single();
+    
+    const vipPriceId = configData?.value || DEFAULT_VIP_PRICE_ID;
+    console.log("Using VIP price ID:", vipPriceId);
 
     // Check if already VIP
     const { data: vipData } = await supabaseClient
@@ -88,7 +99,7 @@ serve(async (req) => {
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      line_items: [{ price: VIP_PRICE_ID, quantity: 1 }],
+      line_items: [{ price: vipPriceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${origin}/dopamine-drop?vip=success`,
       cancel_url: `${origin}/dopamine-drop?vip=canceled`,

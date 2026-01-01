@@ -96,9 +96,28 @@ serve(async (req) => {
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
+        const attemptCount = invoice.attempt_count || 1;
 
-        console.log(`Payment failed for customer ${customerId}`);
-        // Could send notification email here
+        console.log(`Payment failed for customer ${customerId}, attempt ${attemptCount}`);
+
+        // After 3 failed attempts, mark VIP as inactive but preserve expires_at
+        // This allows grace period based on original expiration
+        if (attemptCount >= 3) {
+          const { data: vipRecord } = await supabaseClient
+            .from("vip_subscriptions")
+            .select("user_id")
+            .eq("stripe_customer_id", customerId)
+            .single();
+
+          if (vipRecord) {
+            await supabaseClient
+              .from("vip_subscriptions")
+              .update({ is_active: false })
+              .eq("user_id", vipRecord.user_id);
+
+            console.log(`VIP deactivated due to payment failure for user ${vipRecord.user_id}`);
+          }
+        }
         break;
       }
     }
