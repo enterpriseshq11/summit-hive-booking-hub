@@ -769,6 +769,56 @@ export type Database = {
           },
         ]
       }
+      claims: {
+        Row: {
+          admin_notes: string | null
+          claim_code: string
+          consent_timestamp: string | null
+          created_at: string | null
+          id: string
+          interested_in: string | null
+          redemption_deadline: string | null
+          spin_id: string
+          status: Database["public"]["Enums"]["claim_status"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          claim_code: string
+          consent_timestamp?: string | null
+          created_at?: string | null
+          id?: string
+          interested_in?: string | null
+          redemption_deadline?: string | null
+          spin_id: string
+          status?: Database["public"]["Enums"]["claim_status"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          claim_code?: string
+          consent_timestamp?: string | null
+          created_at?: string | null
+          id?: string
+          interested_in?: string | null
+          redemption_deadline?: string | null
+          spin_id?: string
+          status?: Database["public"]["Enums"]["claim_status"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_spin_id_fkey"
+            columns: ["spin_id"]
+            isOneToOne: false
+            referencedRelation: "spins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_wallets: {
         Row: {
           balance: number | null
@@ -789,6 +839,30 @@ export type Database = {
           created_at?: string
           id?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      daily_spin_counts: {
+        Row: {
+          created_at: string | null
+          id: string
+          spin_count: number | null
+          spin_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          spin_count?: number | null
+          spin_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          spin_count?: number | null
+          spin_date?: string
           user_id?: string
         }
         Relationships: []
@@ -900,6 +974,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      giveaway_tickets: {
+        Row: {
+          created_at: string | null
+          id: string
+          multiplier: number | null
+          pool: Database["public"]["Enums"]["giveaway_pool"]
+          source: Database["public"]["Enums"]["ticket_source"]
+          spin_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          multiplier?: number | null
+          pool?: Database["public"]["Enums"]["giveaway_pool"]
+          source?: Database["public"]["Enums"]["ticket_source"]
+          spin_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          multiplier?: number | null
+          pool?: Database["public"]["Enums"]["giveaway_pool"]
+          source?: Database["public"]["Enums"]["ticket_source"]
+          spin_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_tickets_spin_id_fkey"
+            columns: ["spin_id"]
+            isOneToOne: false
+            referencedRelation: "spins"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       guest_passes: {
         Row: {
@@ -1542,6 +1654,98 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      prize_cap_tracking: {
+        Row: {
+          created_at: string | null
+          daily_count: number | null
+          id: string
+          prize_id: string
+          tracking_date: string
+          week_start: string | null
+          weekly_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          daily_count?: number | null
+          id?: string
+          prize_id: string
+          tracking_date?: string
+          week_start?: string | null
+          weekly_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          daily_count?: number | null
+          id?: string
+          prize_id?: string
+          tracking_date?: string
+          week_start?: string | null
+          weekly_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prize_cap_tracking_prize_id_fkey"
+            columns: ["prize_id"]
+            isOneToOne: false
+            referencedRelation: "prizes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prizes: {
+        Row: {
+          access_level: Database["public"]["Enums"]["prize_access_level"]
+          active: boolean | null
+          booking_url: string | null
+          created_at: string | null
+          daily_cap: number | null
+          description: string | null
+          expiry_days: number | null
+          free_weight: number
+          id: string
+          instructions: string | null
+          name: string
+          requires_manual_approval: boolean | null
+          updated_at: string | null
+          vip_weight: number
+          weekly_cap: number | null
+        }
+        Insert: {
+          access_level?: Database["public"]["Enums"]["prize_access_level"]
+          active?: boolean | null
+          booking_url?: string | null
+          created_at?: string | null
+          daily_cap?: number | null
+          description?: string | null
+          expiry_days?: number | null
+          free_weight?: number
+          id?: string
+          instructions?: string | null
+          name: string
+          requires_manual_approval?: boolean | null
+          updated_at?: string | null
+          vip_weight?: number
+          weekly_cap?: number | null
+        }
+        Update: {
+          access_level?: Database["public"]["Enums"]["prize_access_level"]
+          active?: boolean | null
+          booking_url?: string | null
+          created_at?: string | null
+          daily_cap?: number | null
+          description?: string | null
+          expiry_days?: number | null
+          free_weight?: number
+          id?: string
+          instructions?: string | null
+          name?: string
+          requires_manual_approval?: boolean | null
+          updated_at?: string | null
+          vip_weight?: number
+          weekly_cap?: number | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -2247,6 +2451,50 @@ export type Database = {
           },
         ]
       }
+      spins: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_address: unknown
+          is_vip_locked_hit: boolean | null
+          prize_id: string | null
+          result_token: string | null
+          segment_index: number
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_vip_locked_hit?: boolean | null
+          prize_id?: string | null
+          result_token?: string | null
+          segment_index: number
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_vip_locked_hit?: boolean | null
+          prize_id?: string | null
+          result_token?: string | null
+          segment_index?: number
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spins_prize_id_fkey"
+            columns: ["prize_id"]
+            isOneToOne: false
+            referencedRelation: "prizes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2270,6 +2518,42 @@ export type Database = {
           department?: Database["public"]["Enums"]["business_type"] | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vip_subscriptions: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          is_comp: boolean | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_comp?: boolean | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_comp?: boolean | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -2427,6 +2711,38 @@ export type Database = {
           },
         ]
       }
+      wheel_segments: {
+        Row: {
+          created_at: string | null
+          id: string
+          prize_id: string | null
+          segment_index: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          prize_id?: string | null
+          segment_index: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          prize_id?: string | null
+          segment_index?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wheel_segments_prize_id_fkey"
+            columns: ["prize_id"]
+            isOneToOne: false
+            referencedRelation: "prizes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -2472,7 +2788,14 @@ export type Database = {
         | "cancelled"
         | "no_show"
       business_type: "summit" | "coworking" | "spa" | "fitness"
+      claim_status:
+        | "pending"
+        | "verified"
+        | "redeemed"
+        | "expired"
+        | "disqualified"
       document_type: "contract" | "waiver" | "policy" | "intake_form"
+      giveaway_pool: "standard" | "vip"
       lead_status:
         | "new"
         | "contacted"
@@ -2496,6 +2819,7 @@ export type Database = {
         | "refunded"
         | "partial_refund"
       pricing_modifier_type: "percentage" | "fixed_amount"
+      prize_access_level: "public" | "vip"
       promotion_category: "signature" | "monthly" | "vault"
       promotion_cta_action: "open_modal" | "scroll_to_form" | "route_to_page"
       promotion_lead_status: "new" | "contacted" | "closed" | "archived"
@@ -2513,6 +2837,7 @@ export type Database = {
         | "equipment"
         | "provider"
         | "amenity"
+      ticket_source: "spin" | "prize" | "bonus"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2663,7 +2988,15 @@ export const Constants = {
         "no_show",
       ],
       business_type: ["summit", "coworking", "spa", "fitness"],
+      claim_status: [
+        "pending",
+        "verified",
+        "redeemed",
+        "expired",
+        "disqualified",
+      ],
       document_type: ["contract", "waiver", "policy", "intake_form"],
+      giveaway_pool: ["standard", "vip"],
       lead_status: [
         "new",
         "contacted",
@@ -2690,6 +3023,7 @@ export const Constants = {
         "partial_refund",
       ],
       pricing_modifier_type: ["percentage", "fixed_amount"],
+      prize_access_level: ["public", "vip"],
       promotion_category: ["signature", "monthly", "vault"],
       promotion_cta_action: ["open_modal", "scroll_to_form", "route_to_page"],
       promotion_lead_status: ["new", "contacted", "closed", "archived"],
@@ -2709,6 +3043,7 @@ export const Constants = {
         "provider",
         "amenity",
       ],
+      ticket_source: ["spin", "prize", "bonus"],
     },
   },
 } as const
