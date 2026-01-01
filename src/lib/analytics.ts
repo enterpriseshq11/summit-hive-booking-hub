@@ -7,20 +7,20 @@ type AnalyticsEvent = {
   event: string;
   timestamp: number;
   path: string;
-  element?: string;
+  properties?: Record<string, unknown>;
 };
 
 const isDev = import.meta.env.DEV;
 
 /**
- * Track a custom event
+ * Track a custom event with optional properties
  */
-export function trackEvent(eventName: string, element?: HTMLElement) {
+export function trackEvent(eventName: string, properties?: Record<string, unknown>) {
   const event: AnalyticsEvent = {
     event: eventName,
     timestamp: Date.now(),
     path: window.location.pathname,
-    element: element?.tagName?.toLowerCase(),
+    properties,
   };
 
   if (isDev) {
@@ -28,8 +28,8 @@ export function trackEvent(eventName: string, element?: HTMLElement) {
   }
 
   // Ready for external SDK integration:
-  // window.gtag?.('event', eventName, { path: event.path });
-  // window.posthog?.capture(eventName, event);
+  // window.gtag?.('event', eventName, { path: event.path, ...properties });
+  // window.posthog?.capture(eventName, { ...event, ...properties });
 }
 
 /**
@@ -44,7 +44,7 @@ export function initDataEventTracking() {
     if (eventElement) {
       const eventName = eventElement.getAttribute('data-event');
       if (eventName) {
-        trackEvent(eventName, eventElement);
+        trackEvent(eventName, { element: eventElement.tagName?.toLowerCase() });
       }
     }
   }, { passive: true });
