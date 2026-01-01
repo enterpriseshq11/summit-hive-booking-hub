@@ -100,6 +100,7 @@ export default function BeamLights() {
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-3"
+              data-event="cta_click_beam_hero"
             >
               Shop Beam Lights
               <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -184,7 +185,8 @@ export default function BeamLights() {
                 <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden">
                   <img 
                     src={product.image} 
-                    alt={product.name}
+                    alt={`${product.name} flashlight product image`}
+                    loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
@@ -212,6 +214,7 @@ export default function BeamLights() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"
+                data-event="cta_click_beam_collection"
               >
                 View Full Collection
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -259,6 +262,7 @@ export default function BeamLights() {
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-3"
+              data-event="cta_click_beam_footer"
             >
               Shop Beam Lights
               <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
