@@ -122,25 +122,14 @@ serve(async (req) => {
     const capMap = new Map(capData?.map(c => [c.prize_id, c]) || []);
 
     // Build eligible prizes with weights
+    // VIP prizes ARE eligible for free users (with free_weight) - they just can't claim them
     const eligibleSegments: { segment_index: number; prize_id: string; weight: number; prize: any }[] = [];
 
     for (const seg of segments) {
       const prize = seg.prizes as any;
       if (!prize || !prize.active) continue;
 
-      // VIP-only prizes are not eligible for free users
-      if (prize.access_level === "vip" && !isVip) {
-        // Still add to segments but with 0 weight (for locked hit detection)
-        eligibleSegments.push({
-          segment_index: seg.segment_index,
-          prize_id: prize.id,
-          weight: 0,
-          prize
-        });
-        continue;
-      }
-
-      // Check caps
+      // Check caps (skip if prize is capped out)
       const caps = capMap.get(prize.id);
       const dailyCount = caps?.daily_count || 0;
       const weeklyCount = caps?.weekly_count || 0;
@@ -148,6 +137,7 @@ serve(async (req) => {
       if (prize.daily_cap && dailyCount >= prize.daily_cap) continue;
       if (prize.weekly_cap && weeklyCount >= prize.weekly_cap) continue;
 
+      // Use appropriate weight based on VIP status
       const weight = isVip ? prize.vip_weight : prize.free_weight;
       if (weight > 0) {
         eligibleSegments.push({

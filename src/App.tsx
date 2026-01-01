@@ -18,6 +18,9 @@ import Spa from "./pages/Spa";
 import Fitness from "./pages/Fitness";
 import GiftCards from "./pages/GiftCards";
 import Promotions from "./pages/Promotions";
+import DopamineDrop from "./pages/DopamineDrop";
+import Vip from "./pages/Vip";
+import DopamineDropTerms from "./pages/DopamineDropTerms";
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -35,6 +38,7 @@ import AdminUsersRoles from "./pages/admin/UsersRoles";
 import AdminAuditLog from "./pages/admin/AuditLog";
 import AdminAssumptions from "./pages/admin/Assumptions";
 import AdminPromotions from "./pages/admin/Promotions";
+import AdminDopamineDrop from "./pages/admin/DopamineDrop";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +61,9 @@ const App = () => (
                 <Route path="/fitness" element={<Fitness />} />
                 <Route path="/gift-cards" element={<GiftCards />} />
                 <Route path="/promotions" element={<Promotions />} />
+                <Route path="/dopamine-drop" element={<DopamineDrop />} />
+                <Route path="/vip" element={<Vip />} />
+                <Route path="/terms/dopamine-drop" element={<DopamineDropTerms />} />
                 
                 {/* Protected customer routes */}
                 <Route element={<ProtectedRoute />}>
@@ -83,6 +90,7 @@ const App = () => (
                 <Route path="/admin/audit-log" element={<AdminAuditLog />} />
                 <Route path="/admin/assumptions" element={<AdminAssumptions />} />
                 <Route path="/admin/promotions" element={<AdminPromotions />} />
+                <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
               </Route>
 
               {/* Catch-all */}
