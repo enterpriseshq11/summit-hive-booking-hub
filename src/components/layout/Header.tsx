@@ -16,6 +16,7 @@ import {
   Dumbbell, 
   Gift,
   CircleDot,
+  ShoppingBag,
   User,
   LogOut,
   LayoutDashboard,
@@ -30,6 +31,7 @@ import { useState } from "react";
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
   { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, highlight: true },
+  { label: "Shop", href: "/shop", icon: ShoppingBag },
   { label: "Summit", href: "/summit", icon: Building2 },
   { label: "Coworking", href: "/coworking", icon: Building2 },
   { label: "Spa", href: "/spa", icon: Sparkles },
