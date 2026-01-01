@@ -21,6 +21,8 @@ import Promotions from "./pages/Promotions";
 import DopamineDrop from "./pages/DopamineDrop";
 import Vip from "./pages/Vip";
 import DopamineDropTerms from "./pages/DopamineDropTerms";
+import Shop from "./pages/Shop";
+import BeamLights from "./pages/BeamLights";
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -64,6 +66,8 @@ const App = () => (
                 <Route path="/dopamine-drop" element={<DopamineDrop />} />
                 <Route path="/vip" element={<Vip />} />
                 <Route path="/terms/dopamine-drop" element={<DopamineDropTerms />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/shop/beam-lights" element={<BeamLights />} />
                 
                 {/* Protected customer routes */}
                 <Route element={<ProtectedRoute />}>
