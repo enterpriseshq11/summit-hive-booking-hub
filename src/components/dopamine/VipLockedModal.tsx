@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Lock, Sparkles, Crown } from "lucide-react";
+import { Lock, Sparkles, Crown, DollarSign } from "lucide-react";
 
 interface VipLockedModalProps {
   open: boolean;
@@ -43,6 +43,16 @@ export function VipLockedModal({ open, onOpenChange, onUpgrade }: VipLockedModal
                 10x giveaway entries on mega prize
               </li>
             </ul>
+          </div>
+
+          {/* Value Stack */}
+          <div className="p-3 bg-accent/50 border border-accent rounded-lg">
+            <div className="flex items-center gap-2 text-sm">
+              <DollarSign className="w-4 h-4 text-primary" />
+              <span className="font-medium">VIP is $2.99/mo</span>
+              <span className="text-muted-foreground">—</span>
+              <span className="text-primary font-semibold">one VIP prize is worth $100+</span>
+            </div>
           </div>
 
           <div className="flex gap-2">
