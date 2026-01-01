@@ -15,6 +15,7 @@ import {
   Sparkles, 
   Dumbbell, 
   Gift,
+  CircleDot,
   User,
   LogOut,
   LayoutDashboard,
@@ -28,6 +29,7 @@ import { useState } from "react";
 
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
+  { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, highlight: true },
   { label: "Summit", href: "/summit", icon: Building2 },
   { label: "Coworking", href: "/coworking", icon: Building2 },
   { label: "Spa", href: "/spa", icon: Sparkles },
@@ -77,6 +79,8 @@ export function Header() {
                     ? "bg-accent text-primary"
                     : item.primary
                     ? "bg-accent/20 text-accent hover:bg-accent/30"
+                    : item.highlight
+                    ? "text-accent hover:text-accent hover:bg-accent/10 animate-pulse"
                     : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                 )}
               >
