@@ -56,7 +56,7 @@ serve(async (req) => {
       });
     }
 
-    // Verify spin belongs to user and hasn't been claimed
+    // Verify spin belongs to user, hasn't been claimed, and is awardable
     const { data: spin, error: spinError } = await supabaseClient
       .from("spins")
       .select(`
@@ -70,13 +70,15 @@ serve(async (req) => {
           instructions,
           expiry_days,
           booking_url,
-          requires_manual_approval
+          requires_manual_approval,
+          access_level
         )
       `)
       .eq("id", spin_id)
       .single();
 
     if (spinError || !spin) {
+      console.log("Spin not found:", spin_id);
       return new Response(JSON.stringify({ error: "Spin not found" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
@@ -84,17 +86,39 @@ serve(async (req) => {
     }
 
     if (spin.user_id !== userId) {
+      console.log("Unauthorized claim attempt:", { spin_user: spin.user_id, auth_user: userId });
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 403,
       });
     }
 
+    // Check if spin was a VIP locked hit (free user landed on VIP prize)
     if (spin.is_vip_locked_hit) {
-      return new Response(JSON.stringify({ error: "Cannot claim VIP-locked prize" }), {
+      console.log("Attempt to claim VIP-locked spin:", spin_id);
+      return new Response(JSON.stringify({ error: "Cannot claim VIP-locked prize. Upgrade to VIP to win these prizes." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
+    }
+
+    // Double-check: if prize is VIP-only, verify user is VIP
+    const prize = spin.prizes as any;
+    if (prize?.access_level === "vip") {
+      const { data: vipData } = await supabaseClient
+        .from("vip_subscriptions")
+        .select("is_active, expires_at")
+        .eq("user_id", userId)
+        .single();
+
+      const isVip = vipData?.is_active && (!vipData.expires_at || new Date(vipData.expires_at) > new Date());
+      if (!isVip) {
+        console.log("Non-VIP user attempting to claim VIP prize:", userId);
+        return new Response(JSON.stringify({ error: "VIP membership required to claim this prize" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 403,
+        });
+      }
     }
 
     // Check if already claimed
@@ -111,7 +135,7 @@ serve(async (req) => {
       });
     }
 
-    const prize = spin.prizes as any;
+    // prize already declared above (line 106)
     const claimCode = generateClaimCode();
     const expiryDays = prize?.expiry_days || 30;
     const redemptionDeadline = new Date();
