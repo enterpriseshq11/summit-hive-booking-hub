@@ -519,7 +519,7 @@ export default function AdminDopamineDrop() {
           {/* Claims */}
           <TabsContent value="claims" className="space-y-4">
             <div className="flex items-center gap-4">
-              <Select value={claimFilter} onValueChange={setClaimFilter}>
+              <Select value={claimFilter} onValueChange={(v) => setClaimFilter(v as typeof claimFilter)}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Filter status" />
                 </SelectTrigger>
@@ -570,7 +570,7 @@ export default function AdminDopamineDrop() {
                       <TableCell>
                         <Select 
                           value={claim.status} 
-                          onValueChange={(v) => updateClaimMutation.mutate({ id: claim.id, status: v })}
+                          onValueChange={(v) => updateClaimMutation.mutate({ id: claim.id, status: v as "pending" | "verified" | "redeemed" | "expired" | "disqualified" })}
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue />
