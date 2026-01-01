@@ -164,7 +164,10 @@ export default function DopamineDrop() {
                 Grand Giveaway: {GIVEAWAY_DATE}
               </Badge>
               
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-4" data-event="dopamine_drop_view">
+              <h1 
+                className="text-4xl md:text-6xl font-bold text-white mb-4" 
+                data-event={authUser ? "dopamine_drop_view" : "view_dopamine_drop_logged_out"}
+              >
                 SPIN THE WHEEL.
                 <span className="block text-primary">WIN SOMETHING REAL.</span>
               </h1>
