@@ -187,6 +187,8 @@ export default function BeamLights() {
                     src={product.image} 
                     alt={`${product.name} flashlight product image`}
                     loading="lazy"
+                    width={768}
+                    height={768}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
