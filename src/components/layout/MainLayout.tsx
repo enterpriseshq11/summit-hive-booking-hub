@@ -1,8 +1,13 @@
+import { ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 
-export function MainLayout() {
+interface MainLayoutProps {
+  children?: ReactNode;
+}
+
+export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Skip to content link for keyboard users */}
@@ -15,7 +20,7 @@ export function MainLayout() {
       </a>
       <Header />
       <main id="main-content" className="flex-1" role="main">
-        <Outlet />
+        {children ?? <Outlet />}
       </main>
       <Footer />
     </div>
