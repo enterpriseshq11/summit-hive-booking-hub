@@ -11,6 +11,11 @@ import {
   ArrowRight
 } from "lucide-react";
 
+// Product images
+import beamProImg from "@/assets/beam-pro.jpg";
+import beamCompactImg from "@/assets/beam-compact.jpg";
+import beamUltraImg from "@/assets/beam-ultra.jpg";
+
 const benefits = [
   {
     icon: Eye,
@@ -43,22 +48,22 @@ const products = [
   {
     name: "Beam Pro",
     tagline: "Our flagship tactical light",
-    image: null
+    image: beamProImg
   },
   {
     name: "Beam Compact",
     tagline: "Everyday carry perfection",
-    image: null
+    image: beamCompactImg
   },
   {
     name: "Beam Ultra",
     tagline: "Maximum power, zero compromise",
-    image: null
+    image: beamUltraImg
   }
 ];
 
 export default function BeamLights() {
-  const beamUrl = "https://beeamhq.com/";
+  const beamUrl = "https://beeamhq.com/?utm_source=main_site&utm_medium=referral&utm_campaign=shop_hub";
   
   return (
     <div className="min-h-screen">
@@ -175,11 +180,13 @@ export default function BeamLights() {
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {products.map((product) => (
               <Card key={product.name} className="overflow-hidden border border-border/50 bg-card group hover:shadow-xl transition-shadow duration-300">
-                {/* Product Image Placeholder */}
-                <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-                  <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center">
-                    <Zap className="w-10 h-10 text-accent/50" />
-                  </div>
+                {/* Product Image */}
+                <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden">
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                 </div>
                 <CardContent className="p-6 text-center">
                   <h3 className="text-xl font-semibold text-foreground mb-1">
