@@ -65,6 +65,23 @@ serve(async (req) => {
     const today = now.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
     const monthKey = getMonthKey(now);
 
+    // Check if draw is locked - block spins during locked state
+    const { data: drawData } = await supabaseClient
+      .from("giveaway_draws")
+      .select("status")
+      .eq("month_key", monthKey)
+      .single();
+
+    if (drawData?.status === "locked" || drawData?.status === "drawn") {
+      return new Response(JSON.stringify({ 
+        error: "Entries are locked for the monthly draw. Spins will resume after winners are announced.",
+        draw_locked: true
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 423, // Locked status code
+      });
+    }
+
     // Check daily spin count
     const { data: spinCount } = await supabaseClient
       .from("daily_spin_counts")

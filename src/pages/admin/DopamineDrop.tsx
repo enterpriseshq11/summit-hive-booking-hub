@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
-  Gift, Trophy, Users, Settings, AlertTriangle, 
-  Download, CheckCircle, XCircle, Clock, RefreshCw,
-  Crown, Ticket, TrendingUp, Edit, Save, X
+  Gift, Trophy, Users, Settings, Download, 
+  CheckCircle, Lock, Play, Eye, EyeOff,
+  Crown, Ticket, TrendingUp, Edit, Save, X, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,93 +17,141 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AdminLayout } from "@/components/admin";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, endOfMonth } from "date-fns";
+
+interface WheelSegment {
+  id: string;
+  segment_index: number;
+  label: string;
+  outcome_type: string;
+  entry_type: string | null;
+  entry_quantity: number;
+  icon: string;
+  free_weight: number;
+  vip_weight: number;
+  is_active: boolean;
+}
+
+interface Draw {
+  id: string;
+  month_key: string;
+  draw_date: string;
+  status: string;
+  created_at: string;
+}
+
+interface Winner {
+  id: string;
+  draw_id: string;
+  entry_type: string;
+  user_id: string;
+  winner_name_public: string | null;
+  announced_at: string | null;
+  notes: string | null;
+  profiles?: { first_name: string; last_name: string; email: string };
+}
 
 export default function AdminDopamineDrop() {
   const queryClient = useQueryClient();
-  const [editingPrize, setEditingPrize] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<any>({});
-  const [claimFilter, setClaimFilter] = useState<"all" | "pending" | "verified" | "redeemed" | "expired" | "disqualified">("all");
-
-  // Fetch prizes
-  const { data: prizes, isLoading: prizesLoading } = useQuery({
-    queryKey: ["admin-prizes"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("prizes")
-        .select("*")
-        .order("id");
-      if (error) throw error;
-      return data;
-    }
+  const [editingSegment, setEditingSegment] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<WheelSegment>>({});
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
 
-  // Fetch wheel segments
-  const { data: segments } = useQuery({
-    queryKey: ["admin-segments"],
+  // Fetch wheel config
+  const { data: wheelConfig, isLoading: wheelLoading } = useQuery({
+    queryKey: ["admin-wheel-config"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("wheel_segments")
-        .select(`*, prizes(name)`)
+        .from("wheel_config")
+        .select("*")
         .order("segment_index");
       if (error) throw error;
-      return data;
+      return data as WheelSegment[];
     }
   });
 
-  // Fetch claims
-  const { data: claims, isLoading: claimsLoading } = useQuery({
-    queryKey: ["admin-claims", claimFilter],
-    queryFn: async () => {
-      let query = supabase
-        .from("claims")
-        .select(`
-          *,
-          spins(prize_id, prizes(name)),
-          profiles:user_id(first_name, last_name, email)
-        `)
-        .order("created_at", { ascending: false })
-        .limit(100);
-      
-      if (claimFilter !== "all") {
-        query = query.eq("status", claimFilter);
-      }
-      
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  // Fetch giveaway stats
-  const { data: giveawayStats } = useQuery({
-    queryKey: ["admin-giveaway-stats"],
-    queryFn: async () => {
-      const { data: tickets, error } = await supabase
-        .from("giveaway_tickets")
-        .select("pool, multiplier");
-      if (error) throw error;
-      
-      const standard = tickets?.filter(t => t.pool === "standard")
-        .reduce((sum, t) => sum + (t.multiplier || 1), 0) || 0;
-      const vip = tickets?.filter(t => t.pool === "vip")
-        .reduce((sum, t) => sum + (t.multiplier || 1), 0) || 0;
-      
-      return { standard, vip, total: standard + vip };
-    }
-  });
-
-  // Fetch VIP members
-  const { data: vipMembers } = useQuery({
-    queryKey: ["admin-vip-members"],
+  // Fetch app config for entry rules
+  const { data: appConfig } = useQuery({
+    queryKey: ["admin-app-config"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("vip_subscriptions")
-        .select(`*, profiles:user_id(first_name, last_name, email)`)
-        .order("created_at", { ascending: false });
+        .from("app_config")
+        .select("*");
       if (error) throw error;
-      return data;
+      return Object.fromEntries(data.map(c => [c.key, c.value]));
     }
+  });
+
+  // Fetch draws
+  const { data: draws } = useQuery({
+    queryKey: ["admin-draws"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("giveaway_draws")
+        .select("*")
+        .order("month_key", { ascending: false });
+      if (error) throw error;
+      return data as Draw[];
+    }
+  });
+
+  // Fetch entries for selected month
+  const { data: monthEntries } = useQuery({
+    queryKey: ["admin-entries", selectedMonth],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("giveaway_entries")
+        .select("entry_type, quantity, user_id, source, created_at")
+        .eq("month_key", selectedMonth);
+      if (error) throw error;
+      
+      // Aggregate by type
+      const totals = { general: 0, massage: 0, pt: 0 };
+      const uniqueUsers = new Set<string>();
+      
+      data?.forEach(e => {
+        if (e.entry_type === "general") totals.general += e.quantity;
+        else if (e.entry_type === "massage") totals.massage += e.quantity;
+        else if (e.entry_type === "pt") totals.pt += e.quantity;
+        uniqueUsers.add(e.user_id);
+      });
+      
+      return { totals, userCount: uniqueUsers.size, raw: data };
+    }
+  });
+
+  // Fetch winners for selected month
+  const { data: winners } = useQuery({
+    queryKey: ["admin-winners", selectedMonth],
+    queryFn: async () => {
+      const draw = draws?.find(d => d.month_key === selectedMonth);
+      if (!draw) return [];
+      
+      const { data: winnersData, error } = await supabase
+        .from("giveaway_winners")
+        .select("*")
+        .eq("draw_id", draw.id);
+      if (error) throw error;
+      
+      // Fetch profiles separately
+      if (!winnersData?.length) return [];
+      const userIds = winnersData.map(w => w.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email")
+        .in("id", userIds);
+      
+      const profileMap = Object.fromEntries(profiles?.map(p => [p.id, p]) || []);
+      
+      return winnersData.map(w => ({
+        ...w,
+        profiles: profileMap[w.user_id] || { first_name: "", last_name: "", email: "" }
+      })) as Winner[];
+    },
+    enabled: !!draws
   });
 
   // Fetch today's stats
@@ -113,78 +160,254 @@ export default function AdminDopamineDrop() {
     queryFn: async () => {
       const today = new Date().toISOString().split("T")[0];
       
-      const [spinsResult, claimsResult, vipResult] = await Promise.all([
-        supabase.from("spins").select("id", { count: "exact" })
-          .gte("created_at", today),
-        supabase.from("claims").select("id", { count: "exact" })
-          .gte("created_at", today),
-        supabase.from("vip_subscriptions").select("id", { count: "exact" })
-          .gte("created_at", today)
+      const [spinsResult, entriesResult, vipResult] = await Promise.all([
+        supabase.from("spins").select("id", { count: "exact" }).gte("created_at", today),
+        supabase.from("giveaway_entries").select("quantity").gte("created_at", today),
+        supabase.from("vip_subscriptions").select("id", { count: "exact" }).gte("created_at", today)
       ]);
+      
+      const totalEntries = entriesResult.data?.reduce((sum, e) => sum + e.quantity, 0) || 0;
       
       return {
         spins: spinsResult.count || 0,
-        claims: claimsResult.count || 0,
+        entries: totalEntries,
         vipSignups: vipResult.count || 0
       };
     }
   });
 
-  // Update prize mutation
-  const updatePrizeMutation = useMutation({
-    mutationFn: async (data: { id: string; updates: any }) => {
+  // Update wheel segment mutation
+  const updateSegmentMutation = useMutation({
+    mutationFn: async (data: { id: string; updates: Partial<WheelSegment> }) => {
       const { error } = await supabase
-        .from("prizes")
+        .from("wheel_config")
         .update(data.updates)
         .eq("id", data.id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-prizes"] });
-      toast.success("Prize updated");
-      setEditingPrize(null);
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "Failed to update prize");
-    }
-  });
-
-  // Update segment mutation
-  const updateSegmentMutation = useMutation({
-    mutationFn: async (data: { segment_index: number; prize_id: string }) => {
-      const { error } = await supabase
-        .from("wheel_segments")
-        .update({ prize_id: data.prize_id })
-        .eq("segment_index", data.segment_index);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-segments"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-wheel-config"] });
       toast.success("Segment updated");
+      setEditingSegment(null);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update segment");
     }
   });
 
-  // Update claim status mutation
-  const updateClaimMutation = useMutation({
-    mutationFn: async (data: { id: string; status: "pending" | "verified" | "redeemed" | "expired" | "disqualified"; admin_notes?: string }) => {
+  // Update app config mutation
+  const updateConfigMutation = useMutation({
+    mutationFn: async (data: { key: string; value: string }) => {
       const { error } = await supabase
-        .from("claims")
-        .update({ status: data.status, admin_notes: data.admin_notes })
-        .eq("id", data.id);
+        .from("app_config")
+        .update({ value: data.value, updated_at: new Date().toISOString() })
+        .eq("key", data.key);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-claims"] });
-      toast.success("Claim updated");
+      queryClient.invalidateQueries({ queryKey: ["admin-app-config"] });
+      toast.success("Config updated");
     }
   });
 
-  // Export giveaway CSV
-  const exportGiveawayCSV = async (pool: "standard" | "vip") => {
+  // Create/get draw for month
+  const ensureDrawMutation = useMutation({
+    mutationFn: async (monthKey: string) => {
+      const existing = draws?.find(d => d.month_key === monthKey);
+      if (existing) return existing;
+      
+      // Create new draw
+      const [year, month] = monthKey.split("-").map(Number);
+      const drawDate = endOfMonth(new Date(year, month - 1));
+      
+      const { data, error } = await supabase
+        .from("giveaway_draws")
+        .insert({
+          month_key: monthKey,
+          draw_date: drawDate.toISOString(),
+          status: "scheduled"
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-draws"] });
+    }
+  });
+
+  // Lock entries mutation
+  const lockEntriesMutation = useMutation({
+    mutationFn: async (drawId: string) => {
+      const { error } = await supabase
+        .from("giveaway_draws")
+        .update({ status: "locked" })
+        .eq("id", drawId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-draws"] });
+      toast.success("Entries locked for this draw");
+    }
+  });
+
+  // Run draw mutation (pick random winner)
+  const runDrawMutation = useMutation({
+    mutationFn: async ({ drawId, entryType }: { drawId: string; entryType: string }) => {
+      // Get all entries for this type in the month
+      const draw = draws?.find(d => d.id === drawId);
+      if (!draw) throw new Error("Draw not found");
+      
+      const { data: entries, error: entriesError } = await supabase
+        .from("giveaway_entries")
+        .select("user_id, quantity")
+        .eq("month_key", draw.month_key)
+        .eq("entry_type", entryType);
+      if (entriesError) throw entriesError;
+      if (!entries?.length) throw new Error("No entries for this category");
+      
+      // Build weighted pool
+      const pool: string[] = [];
+      entries.forEach(e => {
+        for (let i = 0; i < e.quantity; i++) {
+          pool.push(e.user_id);
+        }
+      });
+      
+      // Pick random winner
+      const winnerUserId = pool[Math.floor(Math.random() * pool.length)];
+      
+      // Get winner profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", winnerUserId)
+        .single();
+      
+      const publicName = profile 
+        ? `${profile.first_name || ""} ${(profile.last_name || "").charAt(0)}.`.trim()
+        : "Anonymous Winner";
+      
+      // Check if winner already exists for this type
+      const { data: existingWinner } = await supabase
+        .from("giveaway_winners")
+        .select("id")
+        .eq("draw_id", drawId)
+        .eq("entry_type", entryType)
+        .single();
+      
+      if (existingWinner) {
+        // Update existing winner
+        const { error } = await supabase
+          .from("giveaway_winners")
+          .update({
+            user_id: winnerUserId,
+            winner_name_public: publicName
+          })
+          .eq("id", existingWinner.id);
+        if (error) throw error;
+      } else {
+        // Insert new winner
+        const { error } = await supabase
+          .from("giveaway_winners")
+          .insert({
+            draw_id: drawId,
+            entry_type: entryType,
+            user_id: winnerUserId,
+            winner_name_public: publicName
+          });
+        if (error) throw error;
+      }
+      
+      return { winnerUserId, publicName };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-winners"] });
+      toast.success(`Winner selected: ${data.publicName}`);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    }
+  });
+
+  // Publish winners mutation
+  const publishWinnersMutation = useMutation({
+    mutationFn: async (drawId: string) => {
+      const { error } = await supabase
+        .from("giveaway_winners")
+        .update({ announced_at: new Date().toISOString() })
+        .eq("draw_id", drawId);
+      if (error) throw error;
+      
+      // Also mark draw as published
+      await supabase
+        .from("giveaway_draws")
+        .update({ status: "published" })
+        .eq("id", drawId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-winners"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-draws"] });
+      toast.success("Winners published!");
+    }
+  });
+
+  // Export entries CSV
+  const exportEntriesCSV = async (entryType: string) => {
     const { data, error } = await supabase
-      .from("giveaway_tickets")
-      .select(`user_id, multiplier, created_at, profiles:user_id(first_name, last_name, email)`)
-      .eq("pool", pool);
+      .from("giveaway_entries")
+      .select("user_id, quantity, source, created_at")
+      .eq("month_key", selectedMonth)
+      .eq("entry_type", entryType);
+    
+    if (error) {
+      toast.error("Export failed");
+      return;
+    }
+
+    // Get user profiles
+    const userIds = [...new Set(data?.map(e => e.user_id) || [])];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name, email")
+      .in("id", userIds);
+    
+    const profileMap = Object.fromEntries(profiles?.map(p => [p.id, p]) || []);
+
+    const csv = [
+      ["User ID", "Name", "Email", "Entries", "Source", "Created At"].join(","),
+      ...(data || []).map((e) => {
+        const profile = profileMap[e.user_id];
+        return [
+          e.user_id,
+          `"${profile?.first_name || ""} ${profile?.last_name || ""}".trim()`,
+          profile?.email || "",
+          e.quantity,
+          e.source,
+          e.created_at
+        ].join(",");
+      })
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `entries-${entryType}-${selectedMonth}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Export winners CSV
+  const exportWinnersCSV = async () => {
+    const draw = draws?.find(d => d.month_key === selectedMonth);
+    if (!draw) return;
+
+    const { data, error } = await supabase
+      .from("giveaway_winners")
+      .select("*, profiles:user_id(first_name, last_name, email)")
+      .eq("draw_id", draw.id);
     
     if (error) {
       toast.error("Export failed");
@@ -192,13 +415,14 @@ export default function AdminDopamineDrop() {
     }
 
     const csv = [
-      ["User ID", "Name", "Email", "Tickets", "Created At"].join(","),
-      ...(data || []).map((t: any) => [
-        t.user_id,
-        `${t.profiles?.first_name || ""} ${t.profiles?.last_name || ""}`.trim(),
-        t.profiles?.email || "",
-        t.multiplier || 1,
-        t.created_at
+      ["Entry Type", "User ID", "Name", "Email", "Public Name", "Announced At"].join(","),
+      ...(data || []).map((w: any) => [
+        w.entry_type,
+        w.user_id,
+        `"${w.profiles?.first_name || ""} ${w.profiles?.last_name || ""}"`,
+        w.profiles?.email || "",
+        w.winner_name_public || "",
+        w.announced_at || "Not announced"
       ].join(","))
     ].join("\n");
 
@@ -206,50 +430,47 @@ export default function AdminDopamineDrop() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `giveaway-${pool}-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `winners-${selectedMonth}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
-  const startEditing = (prize: any) => {
-    setEditingPrize(prize.id);
-    setEditForm({
-      name: prize.name,
-      description: prize.description || "",
-      instructions: prize.instructions || "",
-      access_level: prize.access_level,
-      free_weight: prize.free_weight,
-      vip_weight: prize.vip_weight,
-      daily_cap: prize.daily_cap || "",
-      weekly_cap: prize.weekly_cap || "",
-      expiry_days: prize.expiry_days || 30,
-      booking_url: prize.booking_url || "",
-      requires_manual_approval: prize.requires_manual_approval || false,
-      active: prize.active
-    });
+  const startEditing = (segment: WheelSegment) => {
+    setEditingSegment(segment.id);
+    setEditForm({ ...segment });
   };
 
   const saveEditing = () => {
-    if (!editingPrize) return;
-    updatePrizeMutation.mutate({
-      id: editingPrize,
+    if (!editingSegment || !editForm) return;
+    updateSegmentMutation.mutate({
+      id: editingSegment,
       updates: {
-        ...editForm,
-        daily_cap: editForm.daily_cap ? parseInt(editForm.daily_cap) : null,
-        weekly_cap: editForm.weekly_cap ? parseInt(editForm.weekly_cap) : null,
-        free_weight: parseInt(editForm.free_weight),
-        vip_weight: parseInt(editForm.vip_weight),
-        expiry_days: parseInt(editForm.expiry_days)
+        label: editForm.label,
+        icon: editForm.icon,
+        outcome_type: editForm.outcome_type,
+        entry_type: editForm.entry_type,
+        entry_quantity: editForm.entry_quantity,
+        free_weight: editForm.free_weight,
+        vip_weight: editForm.vip_weight,
+        is_active: editForm.is_active
       }
     });
   };
+
+  const currentDraw = draws?.find(d => d.month_key === selectedMonth);
+  const isDrawLocked = currentDraw?.status === "locked" || currentDraw?.status === "drawn" || currentDraw?.status === "published";
+
+  // Calculate total weights for display
+  const totalFreeWeight = wheelConfig?.reduce((sum, s) => sum + (s.is_active ? s.free_weight : 0), 0) || 0;
+  const totalVipWeight = wheelConfig?.reduce((sum, s) => sum + (s.is_active ? s.vip_weight : 0), 0) || 0;
 
   return (
     <AdminLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Dopamine Drop Admin</h1>
-            <p className="text-muted-foreground">Manage prizes, claims, and giveaways</p>
+            <h1 className="text-3xl font-bold">Dopamine Drop V2 Admin</h1>
+            <p className="text-muted-foreground">Wheel config, entry rules, and monthly draws</p>
           </div>
         </div>
 
@@ -269,11 +490,11 @@ export default function AdminDopamineDrop() {
           <Card className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-green-500/10 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-green-500" />
+                <Ticket className="w-5 h-5 text-green-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{todayStats?.claims || 0}</p>
-                <p className="text-sm text-muted-foreground">Claims Today</p>
+                <p className="text-2xl font-bold">{todayStats?.entries || 0}</p>
+                <p className="text-sm text-muted-foreground">Entries Today</p>
               </div>
             </div>
           </Card>
@@ -291,110 +512,141 @@ export default function AdminDopamineDrop() {
           <Card className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-purple-500/10 rounded-lg">
-                <Ticket className="w-5 h-5 text-purple-500" />
+                <TrendingUp className="w-5 h-5 text-purple-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{giveawayStats?.total || 0}</p>
-                <p className="text-sm text-muted-foreground">Total Tickets</p>
+                <p className="text-2xl font-bold">{monthEntries?.userCount || 0}</p>
+                <p className="text-sm text-muted-foreground">Players This Month</p>
               </div>
             </div>
           </Card>
         </div>
 
-        <Tabs defaultValue="prizes" className="space-y-4">
+        <Tabs defaultValue="wheel" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="prizes">Prize Manager</TabsTrigger>
-            <TabsTrigger value="segments">Wheel Segments</TabsTrigger>
-            <TabsTrigger value="claims">Claims</TabsTrigger>
-            <TabsTrigger value="giveaway">Giveaway</TabsTrigger>
-            <TabsTrigger value="vip">VIP Members</TabsTrigger>
+            <TabsTrigger value="wheel">Wheel Config</TabsTrigger>
+            <TabsTrigger value="rules">Entry Rules</TabsTrigger>
+            <TabsTrigger value="draw">Monthly Draw</TabsTrigger>
+            <TabsTrigger value="export">Export</TabsTrigger>
           </TabsList>
 
-          {/* Prize Manager */}
-          <TabsContent value="prizes" className="space-y-4">
+          {/* Wheel Configuration */}
+          <TabsContent value="wheel" className="space-y-4">
             <Card className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold">Wheel Segments (8 Required)</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Total Free Weight: {totalFreeWeight} | Total VIP Weight: {totalVipWeight}
+                  </p>
+                </div>
+              </div>
+              
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Access</TableHead>
-                    <TableHead>Free Weight</TableHead>
-                    <TableHead>VIP Weight</TableHead>
-                    <TableHead>Daily Cap</TableHead>
-                    <TableHead>Weekly Cap</TableHead>
+                    <TableHead>#</TableHead>
+                    <TableHead>Icon</TableHead>
+                    <TableHead>Label</TableHead>
+                    <TableHead>Outcome</TableHead>
+                    <TableHead>Entry Type</TableHead>
+                    <TableHead>Qty</TableHead>
+                    <TableHead>Free Wt</TableHead>
+                    <TableHead>VIP Wt</TableHead>
                     <TableHead>Active</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {prizes?.map((prize) => (
-                    <TableRow key={prize.id}>
-                      {editingPrize === prize.id ? (
+                  {wheelConfig?.map((segment) => (
+                    <TableRow key={segment.id}>
+                      {editingSegment === segment.id ? (
                         <>
+                          <TableCell>{segment.segment_index}</TableCell>
                           <TableCell>
                             <Input 
-                              value={editForm.name} 
-                              onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                              className="w-40"
+                              value={editForm.icon || ""} 
+                              onChange={(e) => setEditForm({...editForm, icon: e.target.value})}
+                              className="w-16"
                             />
                           </TableCell>
                           <TableCell>
-                            <Select value={editForm.access_level} onValueChange={(v) => setEditForm({...editForm, access_level: v})}>
-                              <SelectTrigger className="w-24">
+                            <Input 
+                              value={editForm.label || ""} 
+                              onChange={(e) => setEditForm({...editForm, label: e.target.value})}
+                              className="w-32"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Select 
+                              value={editForm.outcome_type} 
+                              onValueChange={(v) => setEditForm({...editForm, outcome_type: v, entry_type: v === "miss" ? null : editForm.entry_type})}
+                            >
+                              <SelectTrigger className="w-32">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="public">Public</SelectItem>
-                                <SelectItem value="vip">VIP</SelectItem>
+                                <SelectItem value="miss">Miss</SelectItem>
+                                <SelectItem value="entry">Entry</SelectItem>
+                                <SelectItem value="category_entry">Category Entry</SelectItem>
                               </SelectContent>
                             </Select>
                           </TableCell>
                           <TableCell>
+                            {editForm.outcome_type !== "miss" && (
+                              <Select 
+                                value={editForm.entry_type || "general"} 
+                                onValueChange={(v) => setEditForm({...editForm, entry_type: v})}
+                              >
+                                <SelectTrigger className="w-24">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="general">General</SelectItem>
+                                  <SelectItem value="massage">Massage</SelectItem>
+                                  <SelectItem value="pt">PT</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {editForm.outcome_type !== "miss" && (
+                              <Input 
+                                type="number" 
+                                value={editForm.entry_quantity || 0} 
+                                onChange={(e) => setEditForm({...editForm, entry_quantity: parseInt(e.target.value) || 0})}
+                                className="w-16"
+                              />
+                            )}
+                          </TableCell>
+                          <TableCell>
                             <Input 
                               type="number" 
-                              value={editForm.free_weight} 
-                              onChange={(e) => setEditForm({...editForm, free_weight: e.target.value})}
-                              className="w-20"
+                              value={editForm.free_weight || 0} 
+                              onChange={(e) => setEditForm({...editForm, free_weight: parseInt(e.target.value) || 0})}
+                              className="w-16"
                             />
                           </TableCell>
                           <TableCell>
                             <Input 
                               type="number" 
-                              value={editForm.vip_weight} 
-                              onChange={(e) => setEditForm({...editForm, vip_weight: e.target.value})}
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              value={editForm.daily_cap} 
-                              onChange={(e) => setEditForm({...editForm, daily_cap: e.target.value})}
-                              className="w-20"
-                              placeholder="∞"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              type="number" 
-                              value={editForm.weekly_cap} 
-                              onChange={(e) => setEditForm({...editForm, weekly_cap: e.target.value})}
-                              className="w-20"
-                              placeholder="∞"
+                              value={editForm.vip_weight || 0} 
+                              onChange={(e) => setEditForm({...editForm, vip_weight: parseInt(e.target.value) || 0})}
+                              className="w-16"
                             />
                           </TableCell>
                           <TableCell>
                             <Switch 
-                              checked={editForm.active} 
-                              onCheckedChange={(v) => setEditForm({...editForm, active: v})}
+                              checked={editForm.is_active} 
+                              onCheckedChange={(v) => setEditForm({...editForm, is_active: v})}
                             />
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1">
-                              <Button size="sm" onClick={saveEditing}>
+                              <Button size="sm" onClick={saveEditing} disabled={updateSegmentMutation.isPending}>
                                 <Save className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="ghost" onClick={() => setEditingPrize(null)}>
+                              <Button size="sm" variant="ghost" onClick={() => setEditingSegment(null)}>
                                 <X className="w-4 h-4" />
                               </Button>
                             </div>
@@ -402,23 +654,25 @@ export default function AdminDopamineDrop() {
                         </>
                       ) : (
                         <>
-                          <TableCell className="font-medium">{prize.name}</TableCell>
+                          <TableCell>{segment.segment_index}</TableCell>
+                          <TableCell className="text-xl">{segment.icon}</TableCell>
+                          <TableCell className="font-medium">{segment.label}</TableCell>
                           <TableCell>
-                            <Badge variant={prize.access_level === "vip" ? "default" : "secondary"}>
-                              {prize.access_level}
+                            <Badge variant={segment.outcome_type === "miss" ? "secondary" : "default"}>
+                              {segment.outcome_type}
                             </Badge>
                           </TableCell>
-                          <TableCell>{prize.free_weight}</TableCell>
-                          <TableCell>{prize.vip_weight}</TableCell>
-                          <TableCell>{prize.daily_cap || "∞"}</TableCell>
-                          <TableCell>{prize.weekly_cap || "∞"}</TableCell>
+                          <TableCell>{segment.entry_type || "-"}</TableCell>
+                          <TableCell>{segment.outcome_type !== "miss" ? segment.entry_quantity : "-"}</TableCell>
+                          <TableCell>{segment.free_weight}</TableCell>
+                          <TableCell>{segment.vip_weight}</TableCell>
                           <TableCell>
-                            <Badge variant={prize.active ? "default" : "destructive"}>
-                              {prize.active ? "Yes" : "No"}
+                            <Badge variant={segment.is_active ? "default" : "destructive"}>
+                              {segment.is_active ? "Yes" : "No"}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Button size="sm" variant="ghost" onClick={() => startEditing(prize)}>
+                            <Button size="sm" variant="ghost" onClick={() => startEditing(segment)}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </TableCell>
@@ -429,238 +683,305 @@ export default function AdminDopamineDrop() {
                 </TableBody>
               </Table>
             </Card>
+            
+            <Card className="p-4">
+              <h3 className="font-semibold mb-2">Weight Distribution Guide</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Weights determine probability. Higher weight = more likely. Example: weight 18 out of total 100 = 18% chance.
+              </p>
+              <div className="grid md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="font-medium">Recommended Free User Distribution:</p>
+                  <ul className="list-disc list-inside text-muted-foreground">
+                    <li>Miss segments: ~72% total (4 × 18)</li>
+                    <li>+1 Entry: ~14%</li>
+                    <li>+2 Entries: ~10%</li>
+                    <li>Category entries: ~4% total (2 × 2)</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-medium">Recommended VIP Distribution:</p>
+                  <ul className="list-disc list-inside text-muted-foreground">
+                    <li>Miss segments: ~56% total (4 × 14)</li>
+                    <li>+1 Entry: ~20%</li>
+                    <li>+2 Entries: ~16%</li>
+                    <li>Category entries: ~8% total (2 × 4)</li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
 
-            {/* Edit Details Panel */}
-            {editingPrize && (
+          {/* Entry Rules */}
+          <TabsContent value="rules" className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <Card className="p-4 space-y-4">
-                <h3 className="font-semibold">Additional Details</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Textarea 
-                      value={editForm.description} 
-                      onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Redemption Instructions</Label>
-                    <Textarea 
-                      value={editForm.instructions} 
-                      onChange={(e) => setEditForm({...editForm, instructions: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Booking URL</Label>
-                    <Input 
-                      value={editForm.booking_url} 
-                      onChange={(e) => setEditForm({...editForm, booking_url: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Expiry Days</Label>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  VIP Multiplier
+                </h3>
+                <div className="space-y-2">
+                  <Label>Entry Multiplier for VIP Users</Label>
+                  <div className="flex gap-2">
                     <Input 
                       type="number"
-                      value={editForm.expiry_days} 
-                      onChange={(e) => setEditForm({...editForm, expiry_days: e.target.value})}
+                      value={appConfig?.vip_entry_multiplier || "2"}
+                      onChange={(e) => updateConfigMutation.mutate({ key: "vip_entry_multiplier", value: e.target.value })}
+                      className="w-24"
                     />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      checked={editForm.requires_manual_approval} 
-                      onCheckedChange={(v) => setEditForm({...editForm, requires_manual_approval: v})}
-                    />
-                    <Label>Requires Manual Approval</Label>
+                    <span className="text-sm text-muted-foreground self-center">
+                      x multiplier on all entry wins
+                    </span>
                   </div>
                 </div>
+              </Card>
+
+              <Card className="p-4 space-y-4">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Streak Bonuses
+                </h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Days for Streak Bonus</Label>
+                    <Input 
+                      type="number"
+                      value={appConfig?.streak_bonus_days || "3"}
+                      onChange={(e) => updateConfigMutation.mutate({ key: "streak_bonus_days", value: e.target.value })}
+                      className="w-24"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Free User Streak Bonus (entries)</Label>
+                    <Input 
+                      type="number"
+                      value={appConfig?.streak_bonus_entries || "5"}
+                      onChange={(e) => updateConfigMutation.mutate({ key: "streak_bonus_entries", value: e.target.value })}
+                      className="w-24"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>VIP Streak Bonus (entries)</Label>
+                    <Input 
+                      type="number"
+                      value={appConfig?.vip_streak_bonus_entries || "10"}
+                      onChange={(e) => updateConfigMutation.mutate({ key: "vip_streak_bonus_entries", value: e.target.value })}
+                      className="w-24"
+                    />
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <Card className="p-4">
+              <h3 className="font-semibold mb-4">Entry Quantities Per Segment</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Configure these in the Wheel Config tab. Each segment's "Qty" field determines base entries awarded.
+                VIP users receive Qty × VIP Multiplier entries.
+              </p>
+              <div className="grid md:grid-cols-3 gap-4">
+                {wheelConfig?.filter(s => s.outcome_type !== "miss").map(segment => (
+                  <div key={segment.id} className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg">{segment.icon}</span>
+                      <span className="font-medium">{segment.label}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Free: {segment.entry_quantity} entries | VIP: {segment.entry_quantity * (parseInt(appConfig?.vip_entry_multiplier || "2"))} entries
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Type: {segment.entry_type}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* Monthly Draw Management */}
+          <TabsContent value="draw" className="space-y-4">
+            <div className="flex items-center gap-4 mb-4">
+              <Label>Select Month:</Label>
+              <Input 
+                type="month" 
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="w-48"
+              />
+              <Button 
+                variant="outline" 
+                onClick={() => ensureDrawMutation.mutate(selectedMonth)}
+                disabled={!!currentDraw}
+              >
+                {currentDraw ? "Draw Exists" : "Create Draw"}
+              </Button>
+            </div>
+
+            {currentDraw && (
+              <Card className="p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold">Draw: {selectedMonth}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Date: {format(new Date(currentDraw.draw_date), "MMMM d, yyyy")}
+                    </p>
+                  </div>
+                  <Badge variant={
+                    currentDraw.status === "published" ? "default" :
+                    currentDraw.status === "locked" ? "secondary" : "outline"
+                  }>
+                    {currentDraw.status.toUpperCase()}
+                  </Badge>
+                </div>
+
+                {/* Entry Totals */}
+                <div className="grid md:grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 border rounded-lg">
+                    <p className="text-3xl font-bold text-primary">{monthEntries?.totals.general || 0}</p>
+                    <p className="text-sm text-muted-foreground">General Entries</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <p className="text-3xl font-bold text-green-500">{monthEntries?.totals.massage || 0}</p>
+                    <p className="text-sm text-muted-foreground">Massage Entries</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <p className="text-3xl font-bold text-blue-500">{monthEntries?.totals.pt || 0}</p>
+                    <p className="text-sm text-muted-foreground">PT Entries</p>
+                  </div>
+                </div>
+
+                {/* Draw Actions */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  <Button 
+                    variant="outline"
+                    onClick={() => lockEntriesMutation.mutate(currentDraw.id)}
+                    disabled={isDrawLocked || lockEntriesMutation.isPending}
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    Lock Entries
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={() => runDrawMutation.mutate({ drawId: currentDraw.id, entryType: "general" })}
+                    disabled={!isDrawLocked || currentDraw.status === "published"}
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Pick General Winner
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={() => runDrawMutation.mutate({ drawId: currentDraw.id, entryType: "massage" })}
+                    disabled={!isDrawLocked || currentDraw.status === "published"}
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Pick Massage Winner
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={() => runDrawMutation.mutate({ drawId: currentDraw.id, entryType: "pt" })}
+                    disabled={!isDrawLocked || currentDraw.status === "published"}
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Pick PT Winner
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => publishWinnersMutation.mutate(currentDraw.id)}
+                    disabled={!winners?.length || currentDraw.status === "published"}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Publish Winners
+                  </Button>
+                </div>
+
+                {/* Winners Table */}
+                {winners && winners.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Selected Winners</h4>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Winner</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Public Name</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {winners.map((winner) => (
+                          <TableRow key={winner.id}>
+                            <TableCell className="capitalize font-medium">{winner.entry_type}</TableCell>
+                            <TableCell>
+                              {(winner.profiles as any)?.first_name} {(winner.profiles as any)?.last_name}
+                            </TableCell>
+                            <TableCell>{(winner.profiles as any)?.email}</TableCell>
+                            <TableCell>{winner.winner_name_public}</TableCell>
+                            <TableCell>
+                              <Badge variant={winner.announced_at ? "default" : "secondary"}>
+                                {winner.announced_at ? "Published" : "Pending"}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+
+                {!isDrawLocked && (
+                  <p className="text-sm text-yellow-600 mt-4">
+                    ⚠️ Entries are still open. Lock entries before picking winners to prevent new spins from affecting the draw.
+                  </p>
+                )}
               </Card>
             )}
           </TabsContent>
 
-          {/* Wheel Segments */}
-          <TabsContent value="segments">
+          {/* Export */}
+          <TabsContent value="export" className="space-y-4">
             <Card className="p-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Segment #</TableHead>
-                    <TableHead>Current Prize</TableHead>
-                    <TableHead>Assign Prize</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {segments?.map((seg) => (
-                    <TableRow key={seg.segment_index}>
-                      <TableCell className="font-bold">{seg.segment_index}</TableCell>
-                      <TableCell>{(seg.prizes as any)?.name || "None"}</TableCell>
-                      <TableCell>
-                        <Select 
-                          value={seg.prize_id} 
-                          onValueChange={(v) => updateSegmentMutation.mutate({ segment_index: seg.segment_index, prize_id: v })}
-                        >
-                          <SelectTrigger className="w-64">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {prizes?.map((p) => (
-                              <SelectItem key={p.id} value={p.id}>
-                                {p.name} ({p.access_level})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          {/* Claims */}
-          <TabsContent value="claims" className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Select value={claimFilter} onValueChange={(v) => setClaimFilter(v as typeof claimFilter)}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Claims</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="verified">Verified</SelectItem>
-                  <SelectItem value="redeemed">Redeemed</SelectItem>
-                  <SelectItem value="expired">Expired</SelectItem>
-                  <SelectItem value="disqualified">Disqualified</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Card className="p-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Prize</TableHead>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {claims?.map((claim: any) => (
-                    <TableRow key={claim.id}>
-                      <TableCell>{format(new Date(claim.created_at), "MMM d, h:mm a")}</TableCell>
-                      <TableCell>
-                        {claim.profiles?.first_name} {claim.profiles?.last_name}
-                        <br />
-                        <span className="text-xs text-muted-foreground">{claim.profiles?.email}</span>
-                      </TableCell>
-                      <TableCell>{claim.spins?.prizes?.name}</TableCell>
-                      <TableCell className="font-mono">{claim.claim_code}</TableCell>
-                      <TableCell>
-                        <Badge variant={
-                          claim.status === "verified" ? "default" :
-                          claim.status === "redeemed" ? "secondary" :
-                          claim.status === "pending" ? "outline" :
-                          "destructive"
-                        }>
-                          {claim.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Select 
-                          value={claim.status} 
-                          onValueChange={(v) => updateClaimMutation.mutate({ id: claim.id, status: v as "pending" | "verified" | "redeemed" | "expired" | "disqualified" })}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="verified">Verified</SelectItem>
-                            <SelectItem value="redeemed">Redeemed</SelectItem>
-                            <SelectItem value="expired">Expired</SelectItem>
-                            <SelectItem value="disqualified">Disqualified</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          {/* Giveaway */}
-          <TabsContent value="giveaway" className="space-y-4">
-            <div className="grid md:grid-cols-3 gap-4">
-              <Card className="p-6">
-                <h3 className="font-semibold mb-2">Standard Pool</h3>
-                <p className="text-3xl font-bold text-primary">{giveawayStats?.standard || 0}</p>
-                <p className="text-sm text-muted-foreground">Total Tickets</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4 w-full"
-                  onClick={() => exportGiveawayCSV("standard")}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export CSV
-                </Button>
-              </Card>
-              <Card className="p-6">
-                <h3 className="font-semibold mb-2">VIP Pool</h3>
-                <p className="text-3xl font-bold text-yellow-500">{giveawayStats?.vip || 0}</p>
-                <p className="text-sm text-muted-foreground">Total Tickets</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4 w-full"
-                  onClick={() => exportGiveawayCSV("vip")}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export CSV
-                </Button>
-              </Card>
-              <Card className="p-6 bg-muted/50">
-                <h3 className="font-semibold mb-2">Drawing Date</h3>
-                <p className="text-2xl font-bold">March 31, 2026</p>
-                <p className="text-sm text-muted-foreground">Grand Giveaway</p>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* VIP Members */}
-          <TabsContent value="vip">
-            <Card className="p-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Expires</TableHead>
-                    <TableHead>Stripe ID</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {vipMembers?.map((member: any) => (
-                    <TableRow key={member.id}>
-                      <TableCell>
-                        {member.profiles?.first_name} {member.profiles?.last_name}
-                        <br />
-                        <span className="text-xs text-muted-foreground">{member.profiles?.email}</span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={member.is_active ? "default" : "destructive"}>
-                          {member.is_active ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {member.expires_at ? format(new Date(member.expires_at), "MMM d, yyyy") : "N/A"}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">{member.stripe_subscription_id || "—"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <h3 className="font-semibold mb-4">Export Data</h3>
+              <div className="flex items-center gap-4 mb-4">
+                <Label>Month:</Label>
+                <Input 
+                  type="month" 
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="w-48"
+                />
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Entries</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" onClick={() => exportEntriesCSV("general")}>
+                      <Download className="w-4 h-4 mr-2" />
+                      General Entries
+                    </Button>
+                    <Button variant="outline" onClick={() => exportEntriesCSV("massage")}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Massage Entries
+                    </Button>
+                    <Button variant="outline" onClick={() => exportEntriesCSV("pt")}>
+                      <Download className="w-4 h-4 mr-2" />
+                      PT Entries
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="font-medium">Winners</h4>
+                  <Button variant="outline" onClick={exportWinnersCSV}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Winners
+                  </Button>
+                </div>
+              </div>
             </Card>
           </TabsContent>
         </Tabs>
