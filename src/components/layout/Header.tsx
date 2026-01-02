@@ -27,6 +27,7 @@ import {
   Layers
 } from "lucide-react";
 import { useState } from "react";
+import azLogoIcon from "@/assets/az-logo-icon.png";
 
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
@@ -63,8 +64,9 @@ export function Header() {
 
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold text-gold-gradient">A-Z Enterprises</span>
+        <Link to="/" className="flex items-center space-x-3">
+          <img src={azLogoIcon} alt="A-Z Enterprises" className="h-10 w-10 object-contain" />
+          <span className="text-xl font-bold text-gold-gradient hidden sm:inline">A-Z Enterprises</span>
         </Link>
 
         {/* Desktop Navigation */}
