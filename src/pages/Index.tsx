@@ -17,6 +17,7 @@ import {
   Heart
 } from "lucide-react";
 import { NextAvailableStrip, ExperiencePreviewPanel, SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip } from "@/components/home";
+import azLogoIcon from "@/assets/az-logo-icon.png";
 
 const businesses = [
   {
@@ -124,6 +125,14 @@ export default function Index() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Column - Content */}
             <div className="text-center lg:text-left space-y-8">
+              {/* Logo Icon */}
+              <div 
+                className="flex justify-center lg:justify-start opacity-0 animate-fade-in-down"
+                style={{ animationDelay: "0.05s" }}
+              >
+                <img src={azLogoIcon} alt="A-Z Enterprises" className="h-20 w-20 object-contain" />
+              </div>
+              
               {/* Location Badge - Updated copy */}
               <div 
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-sm font-medium text-white/90 opacity-0 animate-fade-in-down"

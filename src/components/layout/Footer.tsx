@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin } from "lucide-react";
+import azLogoFull from "@/assets/az-logo-full.jpg";
 
 const footerLinks = {
   businesses: [
@@ -23,10 +24,10 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Column */}
           <div className="md:col-span-1">
-            <Link to="/" className="text-xl font-bold text-gold-gradient">
-              A-Z Enterprises
+            <Link to="/" className="block mb-4">
+              <img src={azLogoFull} alt="A-Z Enterprises - One Call, We Handle It All" className="h-20 w-auto object-contain" />
             </Link>
-            <p className="text-sm text-primary-foreground/60 mt-3">
+            <p className="text-sm text-primary-foreground/60">
               Your destination for events, wellness, fitness, and productivity in Wapakoneta, Ohio.
             </p>
           </div>
