@@ -1002,6 +1002,95 @@ export type Database = {
         }
         Relationships: []
       }
+      giveaway_draws: {
+        Row: {
+          created_at: string | null
+          draw_date: string | null
+          id: string
+          month_key: string
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          draw_date?: string | null
+          id?: string
+          month_key: string
+          status?: string
+        }
+        Update: {
+          created_at?: string | null
+          draw_date?: string | null
+          id?: string
+          month_key?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      giveaway_entries: {
+        Row: {
+          created_at: string | null
+          entry_type: string
+          id: string
+          month_key: string
+          quantity: number
+          source: string
+          spin_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          entry_type: string
+          id?: string
+          month_key: string
+          quantity?: number
+          source?: string
+          spin_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          entry_type?: string
+          id?: string
+          month_key?: string
+          quantity?: number
+          source?: string
+          spin_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_entries_spin_id_fkey"
+            columns: ["spin_id"]
+            isOneToOne: false
+            referencedRelation: "spins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      giveaway_entry_types: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string | null
+          id: string
+          label: string
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string | null
+          id?: string
+          label: string
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string | null
+          id?: string
+          label?: string
+        }
+        Relationships: []
+      }
       giveaway_tickets: {
         Row: {
           created_at: string | null
@@ -1036,6 +1125,47 @@ export type Database = {
             columns: ["spin_id"]
             isOneToOne: false
             referencedRelation: "spins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      giveaway_winners: {
+        Row: {
+          announced_at: string | null
+          created_at: string | null
+          draw_id: string | null
+          entry_type: string
+          id: string
+          notes: string | null
+          user_id: string
+          winner_name_public: string | null
+        }
+        Insert: {
+          announced_at?: string | null
+          created_at?: string | null
+          draw_id?: string | null
+          entry_type: string
+          id?: string
+          notes?: string | null
+          user_id: string
+          winner_name_public?: string | null
+        }
+        Update: {
+          announced_at?: string | null
+          created_at?: string | null
+          draw_id?: string | null
+          entry_type?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+          winner_name_public?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_winners_draw_id_fkey"
+            columns: ["draw_id"]
+            isOneToOne: false
+            referencedRelation: "giveaway_draws"
             referencedColumns: ["id"]
           },
         ]
@@ -2549,6 +2679,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_streaks: {
+        Row: {
+          created_at: string | null
+          current_streak: number | null
+          id: string
+          last_spin_date: string | null
+          longest_streak: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_spin_date?: string | null
+          longest_streak?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_spin_date?: string | null
+          longest_streak?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       vip_subscriptions: {
         Row: {
           created_at: string | null
@@ -2737,6 +2897,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      wheel_config: {
+        Row: {
+          created_at: string | null
+          entry_quantity: number | null
+          entry_type: string | null
+          free_weight: number
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          outcome_type: string
+          segment_index: number
+          updated_at: string | null
+          vip_weight: number
+        }
+        Insert: {
+          created_at?: string | null
+          entry_quantity?: number | null
+          entry_type?: string | null
+          free_weight?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          outcome_type: string
+          segment_index: number
+          updated_at?: string | null
+          vip_weight?: number
+        }
+        Update: {
+          created_at?: string | null
+          entry_quantity?: number | null
+          entry_type?: string | null
+          free_weight?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          outcome_type?: string
+          segment_index?: number
+          updated_at?: string | null
+          vip_weight?: number
+        }
+        Relationships: []
       }
       wheel_segments: {
         Row: {

@@ -12,12 +12,8 @@ function generateResultToken(): string {
   return crypto.randomUUID().replace(/-/g, "").substring(0, 16).toUpperCase();
 }
 
-function getWeekStart(date: Date): string {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
-  return d.toISOString().split("T")[0];
+function getMonthKey(date: Date): string {
+  return date.toLocaleDateString("en-CA", { timeZone: TIMEZONE }).substring(0, 7);
 }
 
 serve(async (req) => {
@@ -67,6 +63,7 @@ serve(async (req) => {
     // Get today's date in ET timezone
     const now = new Date();
     const today = now.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
+    const monthKey = getMonthKey(now);
 
     // Check daily spin count
     const { data: spinCount } = await supabaseClient
@@ -89,89 +86,62 @@ serve(async (req) => {
       });
     }
 
-    // Get wheel segments with prizes
-    const { data: segments, error: segmentsError } = await supabaseClient
-      .from("wheel_segments")
-      .select(`
-        segment_index,
-        prize_id,
-        prizes (
-          id,
-          name,
-          access_level,
-          free_weight,
-          vip_weight,
-          daily_cap,
-          weekly_cap,
-          active
-        )
-      `)
+    // Get VIP entry multiplier from config
+    const { data: configData } = await supabaseClient
+      .from("app_config")
+      .select("key, value")
+      .in("key", ["vip_entry_multiplier", "streak_bonus_days", "streak_bonus_entries", "vip_streak_bonus_entries"]);
+
+    const config = Object.fromEntries(configData?.map(c => [c.key, parseInt(c.value)]) || []);
+    const vipMultiplier = config.vip_entry_multiplier || 2;
+    const streakBonusDays = config.streak_bonus_days || 3;
+    const streakBonusEntries = config.streak_bonus_entries || 5;
+    const vipStreakBonusEntries = config.vip_streak_bonus_entries || 10;
+
+    // Get wheel config (new V2 system)
+    const { data: wheelConfig, error: wheelError } = await supabaseClient
+      .from("wheel_config")
+      .select("*")
+      .eq("is_active", true)
       .order("segment_index");
 
-    if (segmentsError || !segments?.length) {
+    if (wheelError || !wheelConfig?.length) {
+      console.error("Wheel config error:", wheelError);
       throw new Error("Failed to load wheel configuration");
     }
 
-    // Get prize cap tracking for today
-    const weekStart = getWeekStart(now);
-    const { data: capData } = await supabaseClient
-      .from("prize_cap_tracking")
-      .select("prize_id, daily_count, weekly_count")
-      .eq("tracking_date", today);
-
-    const capMap = new Map(capData?.map(c => [c.prize_id, c]) || []);
-
-    // Build eligible prizes with weights
-    // VIP prizes ARE eligible for free users (with free_weight) - they just can't claim them
-    const eligibleSegments: { segment_index: number; prize_id: string; weight: number; prize: any }[] = [];
-
-    for (const seg of segments) {
-      const prize = seg.prizes as any;
-      if (!prize || !prize.active) continue;
-
-      // Check caps (skip if prize is capped out)
-      const caps = capMap.get(prize.id);
-      const dailyCount = caps?.daily_count || 0;
-      const weeklyCount = caps?.weekly_count || 0;
-
-      if (prize.daily_cap && dailyCount >= prize.daily_cap) continue;
-      if (prize.weekly_cap && weeklyCount >= prize.weekly_cap) continue;
-
-      // Use appropriate weight based on VIP status
-      const weight = isVip ? prize.vip_weight : prize.free_weight;
-      if (weight > 0) {
-        eligibleSegments.push({
-          segment_index: seg.segment_index,
-          prize_id: prize.id,
-          weight,
-          prize
-        });
-      }
-    }
-
-    if (eligibleSegments.filter(s => s.weight > 0).length === 0) {
-      return new Response(JSON.stringify({ error: "No prizes available. Try again later." }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 503,
-      });
-    }
-
-    // Weighted random selection
-    const totalWeight = eligibleSegments.reduce((sum, s) => sum + s.weight, 0);
+    // Calculate weights and select segment
+    const weights = wheelConfig.map(seg => isVip ? seg.vip_weight : seg.free_weight);
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    
     let random = Math.random() * totalWeight;
-    let selectedSegment = eligibleSegments.find(s => s.weight > 0)!;
-
-    for (const seg of eligibleSegments) {
-      if (seg.weight <= 0) continue;
-      random -= seg.weight;
+    let selectedIndex = 0;
+    
+    for (let i = 0; i < weights.length; i++) {
+      random -= weights[i];
       if (random <= 0) {
-        selectedSegment = seg;
+        selectedIndex = i;
         break;
       }
     }
 
+    const selectedSegment = wheelConfig[selectedIndex];
     const resultToken = generateResultToken();
-    const isVipLockedHit = selectedSegment.prize.access_level === "vip" && !isVip;
+
+    // Calculate entries awarded
+    let entriesAwarded = 0;
+    let entryType: string | null = null;
+    const isMiss = selectedSegment.outcome_type === "miss";
+
+    if (!isMiss) {
+      entryType = selectedSegment.entry_type;
+      entriesAwarded = selectedSegment.entry_quantity;
+      
+      // Apply VIP multiplier
+      if (isVip && entriesAwarded > 0) {
+        entriesAwarded = entriesAwarded * vipMultiplier;
+      }
+    }
 
     // Record the spin
     const { data: spinData, error: spinError } = await supabaseClient
@@ -179,16 +149,19 @@ serve(async (req) => {
       .insert({
         user_id: userId,
         segment_index: selectedSegment.segment_index,
-        prize_id: selectedSegment.prize_id,
+        prize_id: null, // V2 doesn't use prize_id
         ip_address: ipAddress,
         user_agent: userAgent,
         result_token: resultToken,
-        is_vip_locked_hit: isVipLockedHit
+        is_vip_locked_hit: false // V2 doesn't have VIP-locked outcomes
       })
       .select()
       .single();
 
-    if (spinError) throw spinError;
+    if (spinError) {
+      console.error("Spin insert error:", spinError);
+      throw spinError;
+    }
 
     // Update daily spin count
     await supabaseClient
@@ -199,45 +172,118 @@ serve(async (req) => {
         spin_count: currentSpins + 1
       }, { onConflict: "user_id,spin_date" });
 
-    // Update prize cap tracking (only if not a locked hit)
-    if (!isVipLockedHit) {
+    // Award entries if not a miss
+    if (!isMiss && entriesAwarded > 0 && entryType) {
       await supabaseClient
-        .from("prize_cap_tracking")
-        .upsert({
-          prize_id: selectedSegment.prize_id,
-          tracking_date: today,
-          daily_count: (capMap.get(selectedSegment.prize_id)?.daily_count || 0) + 1,
-          weekly_count: (capMap.get(selectedSegment.prize_id)?.weekly_count || 0) + 1,
-          week_start: weekStart
-        }, { onConflict: "prize_id,tracking_date" });
-
-      // If prize is giveaway entry, create ticket
-      if (selectedSegment.prize.name.toLowerCase().includes("giveaway")) {
-        const multiplier = selectedSegment.prize.name.toLowerCase().includes("mega") ? 10 : 1;
-        const pool = selectedSegment.prize.access_level === "vip" ? "vip" : "standard";
-        
-        await supabaseClient
-          .from("giveaway_tickets")
-          .insert({
-            user_id: userId,
-            pool,
-            multiplier,
-            source: "spin",
-            spin_id: spinData.id
-          });
-      }
+        .from("giveaway_entries")
+        .insert({
+          user_id: userId,
+          month_key: monthKey,
+          entry_type: entryType,
+          quantity: entriesAwarded,
+          source: isVip ? "vip_spin" : "spin",
+          spin_id: spinData.id
+        });
     }
+
+    // Handle streak tracking
+    const { data: streakData } = await supabaseClient
+      .from("user_streaks")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
+
+    let newStreak = 1;
+    let streakBonusAwarded = 0;
+
+    if (streakData) {
+      if (streakData.last_spin_date === yesterdayStr) {
+        // Consecutive day - increment streak
+        newStreak = (streakData.current_streak || 0) + 1;
+        
+        // Check for streak bonus
+        if (newStreak > 0 && newStreak % streakBonusDays === 0) {
+          streakBonusAwarded = isVip ? vipStreakBonusEntries : streakBonusEntries;
+          
+          await supabaseClient
+            .from("giveaway_entries")
+            .insert({
+              user_id: userId,
+              month_key: monthKey,
+              entry_type: "general",
+              quantity: streakBonusAwarded,
+              source: "streak",
+              spin_id: spinData.id
+            });
+        }
+      } else if (streakData.last_spin_date === today) {
+        // Already spun today - keep current streak
+        newStreak = streakData.current_streak || 1;
+      }
+      // Else: streak broken, newStreak stays at 1
+    }
+
+    await supabaseClient
+      .from("user_streaks")
+      .upsert({
+        user_id: userId,
+        current_streak: newStreak,
+        last_spin_date: today,
+        longest_streak: Math.max(newStreak, streakData?.longest_streak || 0),
+        updated_at: new Date().toISOString()
+      }, { onConflict: "user_id" });
+
+    // Get current month entry totals
+    const { data: entryTotals } = await supabaseClient
+      .from("giveaway_entries")
+      .select("entry_type, quantity")
+      .eq("user_id", userId)
+      .eq("month_key", monthKey);
+
+    const totals = {
+      general: 0,
+      massage: 0,
+      pt: 0
+    };
+
+    entryTotals?.forEach(e => {
+      if (e.entry_type === "general") totals.general += e.quantity;
+      else if (e.entry_type === "massage") totals.massage += e.quantity;
+      else if (e.entry_type === "pt") totals.pt += e.quantity;
+    });
+
+    console.log("Spin result:", {
+      userId,
+      segment: selectedSegment.segment_index,
+      outcome: selectedSegment.outcome_type,
+      entriesAwarded,
+      entryType,
+      streak: newStreak,
+      streakBonus: streakBonusAwarded
+    });
 
     return new Response(JSON.stringify({
       success: true,
       spin_id: spinData.id,
       segment_index: selectedSegment.segment_index,
-      prize_id: selectedSegment.prize_id,
-      prize_name: selectedSegment.prize.name,
-      is_vip_locked_hit: isVipLockedHit,
+      outcome_type: selectedSegment.outcome_type,
+      label: selectedSegment.label,
+      icon: selectedSegment.icon,
+      entries_awarded: entriesAwarded,
+      entry_type: entryType,
+      is_miss: isMiss,
       result_token: resultToken,
       spins_remaining: maxSpins - currentSpins - 1,
-      is_vip: isVip
+      is_vip: isVip,
+      vip_multiplier: isVip ? vipMultiplier : 1,
+      streak: newStreak,
+      streak_bonus_awarded: streakBonusAwarded,
+      entry_totals: totals,
+      month_key: monthKey
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
