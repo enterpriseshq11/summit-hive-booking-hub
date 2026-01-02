@@ -55,9 +55,9 @@ export function Header() {
             <Clock className="h-3 w-3" />
             <span>Open 7 Days</span>
           </div>
-          <a href="tel:+14195550100" className="flex items-center gap-1.5 hover:text-primary-foreground transition-colors">
+          <a href="tel:+15673796340" className="flex items-center gap-1.5 hover:text-primary-foreground transition-colors">
             <Phone className="h-3 w-3" />
-            <span>(419) 555-0100</span>
+            <span>567-379-6340</span>
           </a>
         </div>
       </div>
