@@ -72,7 +72,7 @@ serve(async (req) => {
       .eq("month_key", monthKey)
       .single();
 
-    if (drawData?.status === "locked" || drawData?.status === "drawn") {
+    if (drawData?.status === "locked") {
       return new Response(JSON.stringify({ 
         error: "Entries are locked for the monthly draw. Spins will resume after winners are announced.",
         draw_locked: true
