@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MainLayout } from "@/components/layout";
+
 import { SpinWheel } from "@/components/dopamine/SpinWheel";
 import { PrizeGrid } from "@/components/dopamine/PrizeGrid";
 import { ClaimModal } from "@/components/dopamine/ClaimModal";
@@ -144,7 +144,6 @@ export default function DopamineDrop() {
   };
 
   return (
-    <MainLayout>
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
         <section className="relative py-16 md:py-24 bg-gradient-to-b from-black via-zinc-900 to-background overflow-hidden">
@@ -337,6 +336,5 @@ export default function DopamineDrop() {
           }}
         />
       </div>
-    </MainLayout>
   );
 }
