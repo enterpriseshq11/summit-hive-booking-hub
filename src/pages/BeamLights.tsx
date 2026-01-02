@@ -11,10 +11,9 @@ import {
   ArrowRight
 } from "lucide-react";
 
-// Product images
-import beamProImg from "@/assets/beam-pro.jpg";
-import beamCompactImg from "@/assets/beam-compact.jpg";
-import beamUltraImg from "@/assets/beam-ultra.jpg";
+// Product images - real BEEAM light installations
+import beeamLight1 from "@/assets/beeam-light-1.png";
+import beeamLight2 from "@/assets/beeam-light-2.png";
 
 
 const benefits = [
@@ -45,24 +44,6 @@ const benefits = [
   }
 ];
 
-const products = [
-  {
-    name: "Beam Pro",
-    tagline: "Our flagship tactical light",
-    image: beamProImg
-  },
-  {
-    name: "Beam Compact",
-    tagline: "Everyday carry perfection",
-    image: beamCompactImg
-  },
-  {
-    name: "Beam Ultra",
-    tagline: "Maximum power, zero compromise",
-    image: beamUltraImg
-  }
-];
-
 export default function BeamLights() {
   const beamUrl = "https://beeamhq.com/?utm_source=main_site&utm_medium=referral&utm_campaign=shop_hub";
   
@@ -85,7 +66,7 @@ export default function BeamLights() {
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-            Beam Lights
+            BEEAM Lights
           </h1>
           <p className="text-xl md:text-2xl text-primary-foreground/70 max-w-2xl mx-auto mb-10 leading-relaxed">
             Built to perform when visibility matters most.
@@ -103,7 +84,7 @@ export default function BeamLights() {
               className="flex items-center gap-3"
               data-event="cta_click_beam_hero"
             >
-              Shop Beam Lights
+              Shop BEEAM Lights
               <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </a>
           </Button>
@@ -115,15 +96,15 @@ export default function BeamLights() {
         <div className="container px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-8">
-              Why We Built Beam
+              Why We Built BEEAM
             </h2>
             <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
               <p>
-                We got tired of flashlights that failed when we needed them most. Cheap materials. 
+                We got tired of lighting that failed when we needed it most. Cheap materials. 
                 Dim output. Dead batteries at the worst possible moment.
               </p>
               <p>
-                So we built something better. Beam Lights are designed from the ground up for 
+                So we built something better. BEEAM Lights are designed from the ground up for 
                 people who depend on their gear—professionals, adventurers, and anyone who 
                 refuses to be left in the dark.
               </p>
@@ -167,42 +148,60 @@ export default function BeamLights() {
         </div>
       </section>
 
-      {/* Product Preview */}
+      {/* BEEAM Lights Gallery */}
       <section className="py-20 md:py-28 bg-background">
         <div className="container px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              The Lineup
+              BEEAM in Action
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Three lights. Three purposes. One standard of excellence.
+              Real installations showcasing the elegance and power of BEEAM lighting.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {products.map((product) => (
-              <Card key={product.name} className="overflow-hidden border border-border/50 bg-card group hover:shadow-xl transition-shadow duration-300">
-                {/* Product Image */}
-                <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden">
-                  <img 
-                    src={product.image} 
-                    alt={`${product.name} flashlight product image`}
-                    loading="lazy"
-                    width={768}
-                    height={768}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-semibold text-foreground mb-1">
-                    {product.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {product.tagline}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <Card className="overflow-hidden border border-border/50 bg-card group hover:shadow-xl transition-shadow duration-300">
+              <div className="aspect-[3/4] bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden">
+                <img 
+                  src={beeamLight1} 
+                  alt="BEEAM geometric ceiling light fixture illuminating a modern kitchen space"
+                  loading="lazy"
+                  width={768}
+                  height={1024}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <CardContent className="p-6 text-center">
+                <h3 className="text-xl font-semibold text-foreground mb-1">
+                  BEEAM Geometric Series
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Statement lighting for modern spaces
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="overflow-hidden border border-border/50 bg-card group hover:shadow-xl transition-shadow duration-300">
+              <div className="aspect-[3/4] bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden">
+                <img 
+                  src={beeamLight2} 
+                  alt="BEEAM geometric ceiling light fixture in a spacious living room"
+                  loading="lazy"
+                  width={768}
+                  height={1024}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <CardContent className="p-6 text-center">
+                <h3 className="text-xl font-semibold text-foreground mb-1">
+                  BEEAM Ambient Series
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Warm illumination for living spaces
+                </p>
+              </CardContent>
+            </Card>
           </div>
           
           <div className="text-center mt-12">
@@ -237,7 +236,7 @@ export default function BeamLights() {
               ))}
             </div>
             <blockquote className="text-xl md:text-2xl text-foreground font-medium mb-6 italic">
-              "The only flashlight I trust in the field. Beam delivers when it matters."
+              "The only lighting I trust in my space. BEEAM delivers when it matters."
             </blockquote>
             <p className="text-muted-foreground">
               — Verified Customer
@@ -267,7 +266,7 @@ export default function BeamLights() {
               className="flex items-center gap-3"
               data-event="cta_click_beam_footer"
             >
-              Shop Beam Lights
+              Shop BEEAM Lights
               <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </a>
           </Button>

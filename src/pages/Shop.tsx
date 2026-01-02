@@ -26,7 +26,7 @@ export default function Shop() {
         </div>
       </section>
 
-      {/* Featured Brand - Beam Lights */}
+      {/* Featured Brand - BEEAM Lights */}
       <section className="py-20 md:py-28 bg-background">
         <div className="container px-4">
           <div className="max-w-5xl mx-auto">
@@ -52,14 +52,14 @@ export default function Shop() {
                 {/* Content Side */}
                 <CardContent className="p-8 md:p-12 flex flex-col justify-center">
                   <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                    Beam Lights
+                    BEEAM Lights
                   </h2>
                   <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
                     Premium lighting designed for performance, visibility, and durability. Built for those who refuse to compromise.
                   </p>
                   <Button asChild size="lg" className="w-full md:w-auto bg-accent hover:bg-accent/90 text-primary font-semibold group">
                     <Link to="/shop/beam-lights" className="flex items-center justify-center gap-2">
-                      Explore Beam Lights
+                      Explore BEEAM Lights
                       <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>
