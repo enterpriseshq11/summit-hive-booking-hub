@@ -846,6 +846,412 @@ export type Database = {
           },
         ]
       }
+      commission_rules: {
+        Row: {
+          business_unit: Database["public"]["Enums"]["business_type"] | null
+          commission_percent: number
+          created_at: string | null
+          created_by: string | null
+          employee_id: string | null
+          id: string
+          is_active: boolean | null
+          max_revenue: number | null
+          min_revenue: number | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_unit?: Database["public"]["Enums"]["business_type"] | null
+          commission_percent?: number
+          created_at?: string | null
+          created_by?: string | null
+          employee_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_revenue?: number | null
+          min_revenue?: number | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_unit?: Database["public"]["Enums"]["business_type"] | null
+          commission_percent?: number
+          created_at?: string | null
+          created_by?: string | null
+          employee_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_revenue?: number | null
+          min_revenue?: number | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_rules_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_activity_events: {
+        Row: {
+          actor_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string | null
+          entity_id: string | null
+          entity_name: string | null
+          entity_type: string | null
+          event_type: Database["public"]["Enums"]["crm_activity_type"]
+          id: string
+          ip_address: unknown
+          metadata: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string | null
+          event_type: Database["public"]["Enums"]["crm_activity_type"]
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string | null
+          event_type?: Database["public"]["Enums"]["crm_activity_type"]
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_activity_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          description: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          is_dismissed: boolean | null
+          is_read: boolean | null
+          severity: string | null
+          target_roles: string[] | null
+          target_user_id: string | null
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          severity?: string | null
+          target_roles?: string[] | null
+          target_user_id?: string | null
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          severity?: string | null
+          target_roles?: string[] | null
+          target_user_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_alerts_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_commissions: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          employee_id: string
+          id: string
+          paid_at: string | null
+          revenue_event_id: string
+          rule_id: string | null
+          status: Database["public"]["Enums"]["commission_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          paid_at?: string | null
+          revenue_event_id: string
+          rule_id?: string | null
+          status?: Database["public"]["Enums"]["commission_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          paid_at?: string | null
+          revenue_event_id?: string
+          rule_id?: string | null
+          status?: Database["public"]["Enums"]["commission_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_commissions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_commissions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_commissions_revenue_event_id_fkey"
+            columns: ["revenue_event_id"]
+            isOneToOne: false
+            referencedRelation: "crm_revenue_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_commissions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "commission_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_lead_notes: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string
+          id: string
+          is_internal: boolean | null
+          lead_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by: string
+          id?: string
+          is_internal?: boolean | null
+          lead_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          is_internal?: boolean | null
+          lead_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_lead_notes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_leads: {
+        Row: {
+          assigned_employee_id: string | null
+          business_unit: Database["public"]["Enums"]["business_type"]
+          company_name: string | null
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          follow_up_due: string | null
+          id: string
+          lead_name: string
+          lost_reason: string | null
+          phone: string | null
+          revenue_attached: number | null
+          source: Database["public"]["Enums"]["crm_lead_source"] | null
+          status: Database["public"]["Enums"]["crm_lead_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_employee_id?: string | null
+          business_unit: Database["public"]["Enums"]["business_type"]
+          company_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          follow_up_due?: string | null
+          id?: string
+          lead_name: string
+          lost_reason?: string | null
+          phone?: string | null
+          revenue_attached?: number | null
+          source?: Database["public"]["Enums"]["crm_lead_source"] | null
+          status?: Database["public"]["Enums"]["crm_lead_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_employee_id?: string | null
+          business_unit?: Database["public"]["Enums"]["business_type"]
+          company_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          follow_up_due?: string | null
+          id?: string
+          lead_name?: string
+          lost_reason?: string | null
+          phone?: string | null
+          revenue_attached?: number | null
+          source?: Database["public"]["Enums"]["crm_lead_source"] | null
+          status?: Database["public"]["Enums"]["crm_lead_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_leads_assigned_employee_id_fkey"
+            columns: ["assigned_employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_revenue_events: {
+        Row: {
+          amount: number
+          business_unit: Database["public"]["Enums"]["business_type"]
+          created_at: string | null
+          description: string | null
+          employee_attributed_id: string | null
+          id: string
+          lead_id: string | null
+          recorded_by: string
+          revenue_date: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          business_unit: Database["public"]["Enums"]["business_type"]
+          created_at?: string | null
+          description?: string | null
+          employee_attributed_id?: string | null
+          id?: string
+          lead_id?: string | null
+          recorded_by: string
+          revenue_date?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          business_unit?: Database["public"]["Enums"]["business_type"]
+          created_at?: string | null
+          description?: string | null
+          employee_attributed_id?: string | null
+          id?: string
+          lead_id?: string | null
+          recorded_by?: string
+          revenue_date?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_revenue_events_employee_attributed_id_fkey"
+            columns: ["employee_attributed_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_revenue_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_revenue_events_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_wallets: {
         Row: {
           balance: number | null
@@ -950,6 +1356,48 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_notes: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string
+          employee_id: string
+          id: string
+          note_type: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by: string
+          employee_id: string
+          id?: string
+          note_type?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string
+          employee_id?: string
+          id?: string
+          note_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_notes_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2679,6 +3127,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          ended_at: string | null
+          id: string
+          ip_address: unknown
+          is_active: boolean | null
+          started_at: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_active?: boolean | null
+          started_at?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_active?: boolean | null
+          started_at?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_streaks: {
         Row: {
           created_at: string | null
@@ -3026,6 +3512,40 @@ export type Database = {
         | "redeemed"
         | "expired"
         | "disqualified"
+      commission_status: "pending" | "approved" | "queued" | "paid"
+      crm_activity_type:
+        | "login"
+        | "logout"
+        | "lead_created"
+        | "lead_updated"
+        | "lead_status_changed"
+        | "lead_assigned"
+        | "lead_note_added"
+        | "revenue_created"
+        | "commission_approved"
+        | "commission_paid"
+        | "admin_override"
+        | "setting_changed"
+        | "user_disabled"
+        | "user_enabled"
+        | "impersonation_started"
+        | "impersonation_ended"
+      crm_lead_source:
+        | "website"
+        | "referral"
+        | "walk_in"
+        | "phone"
+        | "social_media"
+        | "email"
+        | "event"
+        | "other"
+      crm_lead_status:
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "proposal_sent"
+        | "won"
+        | "lost"
       document_type: "contract" | "waiver" | "policy" | "intake_form"
       giveaway_pool: "standard" | "vip"
       lead_status:
@@ -3226,6 +3746,43 @@ export const Constants = {
         "redeemed",
         "expired",
         "disqualified",
+      ],
+      commission_status: ["pending", "approved", "queued", "paid"],
+      crm_activity_type: [
+        "login",
+        "logout",
+        "lead_created",
+        "lead_updated",
+        "lead_status_changed",
+        "lead_assigned",
+        "lead_note_added",
+        "revenue_created",
+        "commission_approved",
+        "commission_paid",
+        "admin_override",
+        "setting_changed",
+        "user_disabled",
+        "user_enabled",
+        "impersonation_started",
+        "impersonation_ended",
+      ],
+      crm_lead_source: [
+        "website",
+        "referral",
+        "walk_in",
+        "phone",
+        "social_media",
+        "email",
+        "event",
+        "other",
+      ],
+      crm_lead_status: [
+        "new",
+        "contacted",
+        "qualified",
+        "proposal_sent",
+        "won",
+        "lost",
       ],
       document_type: ["contract", "waiver", "policy", "intake_form"],
       giveaway_pool: ["standard", "vip"],
