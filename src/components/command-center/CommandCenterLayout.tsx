@@ -66,19 +66,46 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadAlerts, setUnreadAlerts] = useState(0);
 
-  // Check if user has command center access (only evaluate when roles are loaded)
-  const hasAccess = isRolesLoaded && authUser?.roles?.length 
-    ? authUser.roles.some(r => 
-        ["owner", "manager", "department_lead", "front_desk", "read_only", "spa_lead", "fitness_lead", "coworking_manager", "event_coordinator"].includes(r)
-      )
-    : false;
+  const debugEnabled = new URLSearchParams(location.search).get("debug") === "1";
 
-  const isAdmin = authUser?.roles?.some(r => ["owner", "manager"].includes(r)) ?? false;
+  // Check if user has command center access (only evaluate when roles are loaded)
+  const rolesLength = authUser?.roles?.length ?? 0;
+  const hasAccess =
+    isRolesLoaded && rolesLength
+      ? authUser!.roles.some((r) =>
+          [
+            "owner",
+            "manager",
+            "department_lead",
+            "front_desk",
+            "read_only",
+            "spa_lead",
+            "fitness_lead",
+            "coworking_manager",
+            "event_coordinator",
+          ].includes(r)
+        )
+      : false;
+
+  const isAdmin = authUser?.roles?.some((r) => ["owner", "manager"].includes(r)) ?? false;
+
+  useEffect(() => {
+    if (!debugEnabled) return;
+    // eslint-disable-next-line no-console
+    console.log("[CommandCenter debug]", {
+      pathname: location.pathname,
+      isLoading,
+      isRolesLoaded,
+      rolesLength,
+      hasAccess,
+      authUserId: authUser?.id ?? null,
+    });
+  }, [debugEnabled, location.pathname, isLoading, isRolesLoaded, rolesLength, hasAccess, authUser?.id]);
 
   useEffect(() => {
     // Wait for both auth loading AND roles to be loaded before making access decisions
     if (isLoading || !isRolesLoaded) return;
-    
+
     if (!authUser) {
       navigate("/login", { state: { from: location } });
     } else if (!hasAccess) {
@@ -110,7 +137,26 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
   }
 
   if (!hasAccess) {
-    return null;
+    // Avoid rendering the full UI for unauthorized users, but keep a debug readout if requested.
+    return debugEnabled ? (
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-xl rounded-lg border border-border bg-card p-4 text-sm text-foreground">
+          <div className="font-medium">Command Center Debug</div>
+          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
+            <div>isLoading</div>
+            <div className="text-foreground">{String(isLoading)}</div>
+            <div>isRolesLoaded</div>
+            <div className="text-foreground">{String(isRolesLoaded)}</div>
+            <div>roles.length</div>
+            <div className="text-foreground">{rolesLength}</div>
+            <div>hasAccess</div>
+            <div className="text-foreground">{String(hasAccess)}</div>
+            <div>authUser.id</div>
+            <div className="text-foreground break-all">{authUser?.id ?? "(null)"}</div>
+          </div>
+        </div>
+      </div>
+    ) : null;
   }
 
   const userInitials = authUser?.profile
@@ -119,6 +165,23 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex">
+      {debugEnabled && (
+        <div className="fixed bottom-3 left-3 z-[60] max-w-[min(520px,calc(100vw-24px))] rounded-md border border-border bg-card/95 backdrop-blur px-3 py-2 text-xs text-foreground shadow">
+          <div className="font-medium">Command Center Debug</div>
+          <div className="mt-1 grid grid-cols-[120px_1fr] gap-x-3 gap-y-0.5 text-muted-foreground">
+            <div>isLoading</div>
+            <div className="text-foreground">{String(isLoading)}</div>
+            <div>isRolesLoaded</div>
+            <div className="text-foreground">{String(isRolesLoaded)}</div>
+            <div>roles.length</div>
+            <div className="text-foreground">{rolesLength}</div>
+            <div>hasAccess</div>
+            <div className="text-foreground">{String(hasAccess)}</div>
+            <div>authUser.id</div>
+            <div className="text-foreground break-all">{authUser?.id ?? "(null)"}</div>
+          </div>
+        </div>
+      )}
       {/* Sidebar */}
       <aside
         className={cn(
