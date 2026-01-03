@@ -69,12 +69,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Get initial session - must wait for user details before clearing loading state
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserDetails(session.user.id).then(setAuthUser);
+        const details = await fetchUserDetails(session.user.id);
+        setAuthUser(details);
       }
       setIsLoading(false);
     });

@@ -66,12 +66,14 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadAlerts, setUnreadAlerts] = useState(0);
 
-  // Check if user has command center access
-  const hasAccess = authUser?.roles?.some(r => 
-    ["owner", "manager", "department_lead", "front_desk", "read_only", "spa_lead", "fitness_lead", "coworking_manager", "event_coordinator"].includes(r)
-  );
+  // Check if user has command center access (fallback to false if roles not loaded)
+  const hasAccess = authUser?.roles?.length 
+    ? authUser.roles.some(r => 
+        ["owner", "manager", "department_lead", "front_desk", "read_only", "spa_lead", "fitness_lead", "coworking_manager", "event_coordinator"].includes(r)
+      )
+    : false;
 
-  const isAdmin = authUser?.roles?.some(r => ["owner", "manager"].includes(r));
+  const isAdmin = authUser?.roles?.some(r => ["owner", "manager"].includes(r)) ?? false;
 
   useEffect(() => {
     if (!isLoading && !authUser) {
