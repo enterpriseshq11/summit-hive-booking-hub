@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading…</title>
+  </head>
+  <body>
+    <script>
+      // SPA deep-link fallback for static hosts that serve 404.html on unknown routes.
+      // Redirect to the app root with the original path encoded, then the app restores it.
+      (function () {
+        var path = window.location.pathname + window.location.search + window.location.hash;
+        var target = "/?__redirect=" + encodeURIComponent(path);
+        window.location.replace(target);
+      })();
+    </script>
+  </body>
+</html>
