@@ -57,7 +57,7 @@ const navItems = [
 ];
 
 export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
-  const { authUser, isLoading, signOut } = useAuth();
+  const { authUser, isLoading, isRolesLoaded, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
@@ -66,8 +66,8 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadAlerts, setUnreadAlerts] = useState(0);
 
-  // Check if user has command center access (fallback to false if roles not loaded)
-  const hasAccess = authUser?.roles?.length 
+  // Check if user has command center access (only evaluate when roles are loaded)
+  const hasAccess = isRolesLoaded && authUser?.roles?.length 
     ? authUser.roles.some(r => 
         ["owner", "manager", "department_lead", "front_desk", "read_only", "spa_lead", "fitness_lead", "coworking_manager", "event_coordinator"].includes(r)
       )
@@ -76,12 +76,15 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
   const isAdmin = authUser?.roles?.some(r => ["owner", "manager"].includes(r)) ?? false;
 
   useEffect(() => {
-    if (!isLoading && !authUser) {
-      navigate("/login");
-    } else if (!isLoading && authUser && !hasAccess) {
+    // Wait for both auth loading AND roles to be loaded before making access decisions
+    if (isLoading || !isRolesLoaded) return;
+    
+    if (!authUser) {
+      navigate("/login", { state: { from: location } });
+    } else if (!hasAccess) {
       navigate("/");
     }
-  }, [isLoading, authUser, hasAccess, navigate]);
+  }, [isLoading, isRolesLoaded, authUser, hasAccess, navigate, location]);
 
   // Fetch unread alerts count
   useEffect(() => {
@@ -97,7 +100,8 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
     }
   }, [authUser]);
 
-  if (isLoading) {
+  // Show loading while auth or roles are being hydrated
+  if (isLoading || !isRolesLoaded) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
