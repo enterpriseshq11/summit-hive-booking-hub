@@ -79,15 +79,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     });
 
-    // Listen for auth changes
+    // Listen for auth changes - use synchronous state updates only, defer Supabase calls
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          const details = await fetchUserDetails(session.user.id);
-          setAuthUser(details);
+          // Defer Supabase calls with setTimeout to prevent deadlock
+          setTimeout(() => {
+            fetchUserDetails(session.user.id).then(setAuthUser);
+          }, 0);
         } else {
           setAuthUser(null);
         }
