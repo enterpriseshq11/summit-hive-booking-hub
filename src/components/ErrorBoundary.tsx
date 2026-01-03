@@ -31,11 +31,6 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
-  private handleGoHome = () => {
-    // HashRouter-safe navigation (no server rewrite required)
-    window.location.hash = "#/";
-  };
-
   public render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
@@ -65,9 +60,11 @@ export class ErrorBoundary extends Component<Props, State> {
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh Page
                 </Button>
-                <Button variant="outline" onClick={this.handleGoHome} className="flex-1">
-                  <Home className="h-4 w-4 mr-2" />
-                  Go Home
+                <Button asChild variant="outline" className="flex-1">
+                  <a href="/#/" aria-label="Go to home">
+                    <Home className="h-4 w-4 mr-2" />
+                    Go Home
+                  </a>
                 </Button>
               </div>
             </CardContent>
