@@ -90,9 +90,8 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
           <p className="text-sm text-primary-foreground/50">
             © {new Date().getFullYear()} A-Z Enterprises. All rights reserved.
           </p>
-          <p className="text-sm text-primary-foreground/50">
-            Crafted with care in Ohio
-          </p>
+          <p className="text-sm text-primary-foreground/50">Build: 2026-01-03 20:12 UTC</p>
+          <p className="text-sm text-primary-foreground/50">Crafted with care in Ohio</p>
         </div>
       </div>
     </footer>
