@@ -27,6 +27,7 @@ import NotFound from "./pages/NotFound";
 
 // Debug (public, never redirects)
 import AuthDebug from "./pages/__debug/AuthDebug";
+import DebugPing from "./pages/__debug/Ping";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -72,6 +73,7 @@ const App = () => (
             <Routes>
               {/* Public debug routes (never protected) */}
               <Route path="/__debug/auth" element={<AuthDebug />} />
+              <Route path="/__debug/ping" element={<DebugPing />} />
 
               {/* Public routes with main layout */}
               <Route element={<MainLayout />}>
