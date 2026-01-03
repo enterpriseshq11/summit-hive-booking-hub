@@ -66,7 +66,8 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadAlerts, setUnreadAlerts] = useState(0);
 
-  const debugEnabled = new URLSearchParams(location.search).get("debug") === "1";
+  const debugParams = new URLSearchParams(location.search);
+  const debugMode = debugParams.get("debug") === "1" || location.search.includes("debug=1");
 
   // Check if user has command center access (only evaluate when roles are loaded)
   const rolesLength = authUser?.roles?.length ?? 0;
@@ -90,19 +91,23 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
   const isAdmin = authUser?.roles?.some((r) => ["owner", "manager"].includes(r)) ?? false;
 
   useEffect(() => {
-    if (!debugEnabled) return;
+    if (!debugMode) return;
     // eslint-disable-next-line no-console
     console.log("[CommandCenter debug]", {
       pathname: location.pathname,
+      search: location.search,
       isLoading,
       isRolesLoaded,
       rolesLength,
       hasAccess,
       authUserId: authUser?.id ?? null,
     });
-  }, [debugEnabled, location.pathname, isLoading, isRolesLoaded, rolesLength, hasAccess, authUser?.id]);
+  }, [debugMode, location.pathname, location.search, isLoading, isRolesLoaded, rolesLength, hasAccess, authUser?.id]);
 
   useEffect(() => {
+    // IMPORTANT: never auto-redirect while in debug mode.
+    if (debugMode) return;
+
     // Wait for both auth loading AND roles to be loaded before making access decisions
     if (isLoading || !isRolesLoaded) return;
 
@@ -111,7 +116,8 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
     } else if (!hasAccess) {
       navigate("/");
     }
-  }, [isLoading, isRolesLoaded, authUser, hasAccess, navigate, location]);
+  }, [debugMode, isLoading, isRolesLoaded, authUser, hasAccess, navigate, location]);
+
 
   // Fetch unread alerts count
   useEffect(() => {
@@ -138,7 +144,7 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
 
   if (!hasAccess) {
     // Avoid rendering the full UI for unauthorized users, but keep a debug readout if requested.
-    return debugEnabled ? (
+    return debugMode ? (
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-xl rounded-lg border border-border bg-card p-4 text-sm text-foreground">
           <div className="font-medium">Command Center Debug</div>
@@ -165,7 +171,7 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex">
-      {debugEnabled && (
+      {debugMode && (
         <div className="fixed bottom-3 left-3 z-[60] max-w-[min(520px,calc(100vw-24px))] rounded-md border border-border bg-card/95 backdrop-blur px-3 py-2 text-xs text-foreground shadow">
           <div className="font-medium">Command Center Debug</div>
           <div className="mt-1 grid grid-cols-[120px_1fr] gap-x-3 gap-y-0.5 text-muted-foreground">
