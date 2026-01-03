@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   authUser: AuthUser | null;
   isLoading: boolean;
+  isRolesLoaded: boolean; // Explicitly track when roles have been fetched
   signInWithOtp: (email: string) => Promise<{ error: Error | null }>;
   verifyOtp: (email: string, token: string) => Promise<{ error: Error | null }>;
   signInWithPassword: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRolesLoaded, setIsRolesLoaded] = useState(false);
 
   const fetchUserDetails = async (userId: string): Promise<AuthUser | null> => {
     try {
@@ -76,6 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         const details = await fetchUserDetails(session.user.id);
         setAuthUser(details);
+        setIsRolesLoaded(true);
+      } else {
+        setIsRolesLoaded(true); // No user = roles are "loaded" (empty)
       }
       setIsLoading(false);
     });
@@ -87,12 +92,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          // Reset roles loaded state when user changes
+          setIsRolesLoaded(false);
           // Defer Supabase calls with setTimeout to prevent deadlock
           setTimeout(() => {
-            fetchUserDetails(session.user.id).then(setAuthUser);
+            fetchUserDetails(session.user.id).then((details) => {
+              setAuthUser(details);
+              setIsRolesLoaded(true);
+            });
           }, 0);
         } else {
           setAuthUser(null);
+          setIsRolesLoaded(true);
         }
         
         setIsLoading(false);
@@ -159,6 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         authUser,
         isLoading,
+        isRolesLoaded,
         signInWithOtp,
         verifyOtp,
         signInWithPassword,
