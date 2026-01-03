@@ -32,7 +32,8 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   private handleGoHome = () => {
-    window.location.href = "/";
+    // HashRouter-safe navigation (no server rewrite required)
+    window.location.hash = "#/";
   };
 
   public render() {
