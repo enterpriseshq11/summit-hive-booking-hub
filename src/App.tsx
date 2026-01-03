@@ -54,6 +54,7 @@ import CommandCenterAlerts from "./pages/command-center/Alerts";
 import CommandCenterRevenue from "./pages/command-center/Revenue";
 import CommandCenterCommissions from "./pages/command-center/Commissions";
 import CommandCenterSettings from "./pages/command-center/Settings";
+import CommandCenterPayroll from "./pages/command-center/Payroll";
 
 const queryClient = new QueryClient();
 
@@ -123,6 +124,7 @@ const App = () => (
                 <Route path="/command-center/revenue" element={<CommandCenterRevenue />} />
                 <Route path="/command-center/commissions" element={<CommandCenterCommissions />} />
                 <Route path="/command-center/settings" element={<CommandCenterSettings />} />
+                <Route path="/command-center/payroll" element={<CommandCenterPayroll />} />
               </Route>
 
               {/* Catch-all */}
