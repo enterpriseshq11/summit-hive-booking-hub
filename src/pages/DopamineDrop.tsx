@@ -37,9 +37,15 @@ export default function DopamineDrop() {
     const vipParam = searchParams.get("vip");
     if (vipParam === "success" || vipParam === "active") {
       toast.success("Welcome to VIP! 2x spins/day + 2x entries!", { duration: 5000, icon: "🎉" });
-      window.history.replaceState({}, "", "/dopamine-drop");
+
+      // HashRouter-safe URL cleanup: remove query params without ever clobbering a command-center deep link.
+      const isCommandCenterDeepLink = window.location.hash.includes("#/command-center");
+      if (!isCommandCenterDeepLink) {
+        window.location.hash = "#/dopamine-drop";
+      }
     }
   }, [searchParams]);
+
 
   useEffect(() => {
     async function fetchWheelConfig() {

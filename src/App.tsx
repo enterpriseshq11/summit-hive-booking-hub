@@ -6,6 +6,7 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout, ProtectedRoute } from "@/components/layout";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { RouterDebugFooter } from "@/components/debug/RouterDebugFooter";
 
 // Pages
 import Index from "./pages/Index";
@@ -138,6 +139,7 @@ const App = () => (
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <RouterDebugFooter />
           </HashRouter>
         </TooltipProvider>
       </AuthProvider>
@@ -146,4 +148,5 @@ const App = () => (
 );
 
 export default App;
+
 
