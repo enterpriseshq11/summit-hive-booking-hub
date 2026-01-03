@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout";
 import { Card } from "@/components/ui/card";
 
@@ -112,7 +113,13 @@ export default function DopamineDropTerms() {
               <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                 <li>By participating, you consent to receive prize-related communications.</li>
                 <li>Marketing communications require separate opt-in consent.</li>
-                <li>Your data is handled in accordance with our <a href="/privacy" className="text-primary underline">Privacy Policy</a>.</li>
+                <li>
+                  Your data is handled in accordance with our{" "}
+                  <Link to="/privacy" className="text-primary underline">
+                    Privacy Policy
+                  </Link>
+                  .
+                </li>
                 <li>You may opt out of marketing communications at any time.</li>
               </ul>
             </section>
