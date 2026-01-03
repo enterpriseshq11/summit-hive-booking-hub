@@ -16,6 +16,7 @@ import {
   Search,
   LogOut,
   Menu,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ const navItems = [
   { title: "Activity Log", href: "/command-center/activity", icon: Activity },
   { title: "Revenue", href: "/command-center/revenue", icon: DollarSign },
   { title: "Commissions", href: "/command-center/commissions", icon: Percent },
+  { title: "Payroll", href: "/command-center/payroll", icon: Wallet, adminOnly: true },
   { title: "Alerts", href: "/command-center/alerts", icon: Bell },
   { title: "Settings", href: "/command-center/settings", icon: Settings, adminOnly: true },
 ];

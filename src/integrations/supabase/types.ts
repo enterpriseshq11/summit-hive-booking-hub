@@ -852,39 +852,51 @@ export type Database = {
           commission_percent: number
           created_at: string | null
           created_by: string | null
+          effective_from: string | null
+          effective_until: string | null
           employee_id: string | null
           id: string
           is_active: boolean | null
           max_revenue: number | null
           min_revenue: number | null
           name: string
+          parent_rule_id: string | null
           updated_at: string | null
+          version: number | null
         }
         Insert: {
           business_unit?: Database["public"]["Enums"]["business_type"] | null
           commission_percent?: number
           created_at?: string | null
           created_by?: string | null
+          effective_from?: string | null
+          effective_until?: string | null
           employee_id?: string | null
           id?: string
           is_active?: boolean | null
           max_revenue?: number | null
           min_revenue?: number | null
           name: string
+          parent_rule_id?: string | null
           updated_at?: string | null
+          version?: number | null
         }
         Update: {
           business_unit?: Database["public"]["Enums"]["business_type"] | null
           commission_percent?: number
           created_at?: string | null
           created_by?: string | null
+          effective_from?: string | null
+          effective_until?: string | null
           employee_id?: string | null
           id?: string
           is_active?: boolean | null
           max_revenue?: number | null
           min_revenue?: number | null
           name?: string
+          parent_rule_id?: string | null
           updated_at?: string | null
+          version?: number | null
         }
         Relationships: [
           {
@@ -899,6 +911,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_rules_parent_rule_id_fkey"
+            columns: ["parent_rule_id"]
+            isOneToOne: false
+            referencedRelation: "commission_rules"
             referencedColumns: ["id"]
           },
         ]
@@ -1018,6 +1037,7 @@ export type Database = {
           employee_id: string
           id: string
           paid_at: string | null
+          payroll_run_id: string | null
           revenue_event_id: string
           rule_id: string | null
           status: Database["public"]["Enums"]["commission_status"] | null
@@ -1031,6 +1051,7 @@ export type Database = {
           employee_id: string
           id?: string
           paid_at?: string | null
+          payroll_run_id?: string | null
           revenue_event_id: string
           rule_id?: string | null
           status?: Database["public"]["Enums"]["commission_status"] | null
@@ -1044,6 +1065,7 @@ export type Database = {
           employee_id?: string
           id?: string
           paid_at?: string | null
+          payroll_run_id?: string | null
           revenue_event_id?: string
           rule_id?: string | null
           status?: Database["public"]["Enums"]["commission_status"] | null
@@ -1062,6 +1084,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_commissions_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
             referencedColumns: ["id"]
           },
           {
@@ -2177,6 +2206,82 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_runs: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          commission_count: number | null
+          created_at: string | null
+          id: string
+          locked_at: string | null
+          locked_by: string | null
+          notes: string | null
+          paid_at: string | null
+          paid_by: string | null
+          period_end: string
+          period_start: string
+          status: string
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_count?: number | null
+          created_at?: string | null
+          id?: string
+          locked_at?: string | null
+          locked_by?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          period_end: string
+          period_start: string
+          status?: string
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_count?: number | null
+          created_at?: string | null
+          id?: string
+          locked_at?: string | null
+          locked_by?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          period_end?: string
+          period_start?: string
+          status?: string
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_runs_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_runs_locked_by_fkey"
+            columns: ["locked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_runs_paid_by_fkey"
+            columns: ["paid_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3530,6 +3635,10 @@ export type Database = {
         | "user_enabled"
         | "impersonation_started"
         | "impersonation_ended"
+        | "payroll_created"
+        | "payroll_locked"
+        | "payroll_approved"
+        | "payroll_paid"
       crm_lead_source:
         | "website"
         | "referral"
@@ -3765,6 +3874,10 @@ export const Constants = {
         "user_enabled",
         "impersonation_started",
         "impersonation_ended",
+        "payroll_created",
+        "payroll_locked",
+        "payroll_approved",
+        "payroll_paid",
       ],
       crm_lead_source: [
         "website",

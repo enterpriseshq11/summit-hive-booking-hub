@@ -44,6 +44,10 @@ const activityTypeLabels: Record<CrmActivityType, { label: string; color: string
   user_enabled: { label: "User Enabled", color: "bg-green-500/20 text-green-400" },
   impersonation_started: { label: "Impersonation Started", color: "bg-pink-500/20 text-pink-400" },
   impersonation_ended: { label: "Impersonation Ended", color: "bg-pink-500/20 text-pink-400" },
+  payroll_created: { label: "Payroll Created", color: "bg-indigo-500/20 text-indigo-400" },
+  payroll_locked: { label: "Payroll Locked", color: "bg-yellow-500/20 text-yellow-400" },
+  payroll_approved: { label: "Payroll Approved", color: "bg-blue-500/20 text-blue-400" },
+  payroll_paid: { label: "Payroll Paid", color: "bg-green-500/20 text-green-400" },
 };
 
 export default function CommandCenterActivity() {
