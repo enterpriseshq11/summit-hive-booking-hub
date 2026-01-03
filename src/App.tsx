@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout, ProtectedRoute } from "@/components/layout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { RouterDebugFooter } from "@/components/debug/RouterDebugFooter";
+import { RouterDebugBanner } from "@/components/debug/RouterDebugBanner";
+import { useEffect } from "react";
 
 // Pages
 import Index from "./pages/Index";
@@ -63,6 +65,88 @@ import CommandCenterPayroll from "./pages/command-center/Payroll";
 
 const queryClient = new QueryClient();
 
+function AppInner() {
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log("ROUTER_HASH", window.location.hash);
+  }, []);
+
+  return (
+    <HashRouter>
+      <RouterDebugBanner />
+      <Routes>
+        {/* Public debug routes (never protected) */}
+        <Route path="/__debug/auth" element={<AuthDebug />} />
+        <Route path="/__debug/ping" element={<DebugPing />} />
+
+        {/* Public routes with main layout */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Index />} />
+          <Route path="/booking" element={<BookingHub />} />
+          <Route path="/summit" element={<Summit />} />
+          <Route path="/coworking" element={<Coworking />} />
+          <Route path="/spa" element={<Spa />} />
+          <Route path="/fitness" element={<Fitness />} />
+          <Route path="/gift-cards" element={<GiftCards />} />
+          <Route path="/promotions" element={<Promotions />} />
+          <Route path="/dopamine-drop" element={<DopamineDrop />} />
+          <Route path="/vip" element={<Vip />} />
+          <Route path="/terms/dopamine-drop" element={<DopamineDropTerms />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/shop/beam-lights" element={<BeamLights />} />
+
+          {/* Protected customer routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/account" element={<Account />} />
+          </Route>
+        </Route>
+
+        {/* Auth routes (no layout) */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Admin routes - each with ProtectedRoute check */}
+        <Route element={<ProtectedRoute requireStaff />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/schedule" element={<AdminSchedule />} />
+          <Route path="/admin/approvals" element={<AdminApprovals />} />
+          <Route path="/admin/resources" element={<AdminResources />} />
+          <Route path="/admin/packages" element={<AdminPackages />} />
+          <Route path="/admin/pricing-rules" element={<AdminPricingRules />} />
+          <Route path="/admin/blackouts" element={<AdminBlackouts />} />
+          <Route path="/admin/documents" element={<AdminDocuments />} />
+          <Route path="/admin/reviews" element={<AdminReviews />} />
+          <Route path="/admin/leads-waitlists" element={<AdminLeadsWaitlists />} />
+          <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
+          <Route path="/admin/audit-log" element={<AdminAuditLog />} />
+          <Route path="/admin/assumptions" element={<AdminAssumptions />} />
+          <Route path="/admin/promotions" element={<AdminPromotions />} />
+          <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
+        </Route>
+
+        {/* Command Center routes */}
+        <Route element={<ProtectedRoute requireStaff />}>
+          <Route path="/command-center" element={<CommandCenterDashboard />} />
+          <Route path="/command-center/leads" element={<CommandCenterLeads />} />
+          <Route path="/command-center/leads/:id" element={<CommandCenterLeadDetail />} />
+          <Route path="/command-center/pipeline" element={<CommandCenterPipeline />} />
+          <Route path="/command-center/employees" element={<CommandCenterEmployees />} />
+          <Route path="/command-center/employees/:id" element={<CommandCenterEmployeeDetail />} />
+          <Route path="/command-center/activity" element={<CommandCenterActivity />} />
+          <Route path="/command-center/alerts" element={<CommandCenterAlerts />} />
+          <Route path="/command-center/revenue" element={<CommandCenterRevenue />} />
+          <Route path="/command-center/commissions" element={<CommandCenterCommissions />} />
+          <Route path="/command-center/settings" element={<CommandCenterSettings />} />
+          <Route path="/command-center/payroll" element={<CommandCenterPayroll />} />
+        </Route>
+
+        {/* Catch-all */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <RouterDebugFooter />
+    </HashRouter>
+  );
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -70,77 +154,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <HashRouter>
-            <Routes>
-              {/* Public debug routes (never protected) */}
-              <Route path="/__debug/auth" element={<AuthDebug />} />
-              <Route path="/__debug/ping" element={<DebugPing />} />
-
-              {/* Public routes with main layout */}
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/booking" element={<BookingHub />} />
-                <Route path="/summit" element={<Summit />} />
-                <Route path="/coworking" element={<Coworking />} />
-                <Route path="/spa" element={<Spa />} />
-                <Route path="/fitness" element={<Fitness />} />
-                <Route path="/gift-cards" element={<GiftCards />} />
-                <Route path="/promotions" element={<Promotions />} />
-                <Route path="/dopamine-drop" element={<DopamineDrop />} />
-                <Route path="/vip" element={<Vip />} />
-                <Route path="/terms/dopamine-drop" element={<DopamineDropTerms />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/shop/beam-lights" element={<BeamLights />} />
-
-                {/* Protected customer routes */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/account" element={<Account />} />
-                </Route>
-              </Route>
-
-              {/* Auth routes (no layout) */}
-              <Route path="/login" element={<Login />} />
-
-              {/* Admin routes - each with ProtectedRoute check */}
-              <Route element={<ProtectedRoute requireStaff />}>
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/schedule" element={<AdminSchedule />} />
-                <Route path="/admin/approvals" element={<AdminApprovals />} />
-                <Route path="/admin/resources" element={<AdminResources />} />
-                <Route path="/admin/packages" element={<AdminPackages />} />
-                <Route path="/admin/pricing-rules" element={<AdminPricingRules />} />
-                <Route path="/admin/blackouts" element={<AdminBlackouts />} />
-                <Route path="/admin/documents" element={<AdminDocuments />} />
-                <Route path="/admin/reviews" element={<AdminReviews />} />
-                <Route path="/admin/leads-waitlists" element={<AdminLeadsWaitlists />} />
-                <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
-                <Route path="/admin/audit-log" element={<AdminAuditLog />} />
-                <Route path="/admin/assumptions" element={<AdminAssumptions />} />
-                <Route path="/admin/promotions" element={<AdminPromotions />} />
-                <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
-              </Route>
-
-              {/* Command Center routes */}
-              <Route element={<ProtectedRoute requireStaff />}>
-                <Route path="/command-center" element={<CommandCenterDashboard />} />
-                <Route path="/command-center/leads" element={<CommandCenterLeads />} />
-                <Route path="/command-center/leads/:id" element={<CommandCenterLeadDetail />} />
-                <Route path="/command-center/pipeline" element={<CommandCenterPipeline />} />
-                <Route path="/command-center/employees" element={<CommandCenterEmployees />} />
-                <Route path="/command-center/employees/:id" element={<CommandCenterEmployeeDetail />} />
-                <Route path="/command-center/activity" element={<CommandCenterActivity />} />
-                <Route path="/command-center/alerts" element={<CommandCenterAlerts />} />
-                <Route path="/command-center/revenue" element={<CommandCenterRevenue />} />
-                <Route path="/command-center/commissions" element={<CommandCenterCommissions />} />
-                <Route path="/command-center/settings" element={<CommandCenterSettings />} />
-                <Route path="/command-center/payroll" element={<CommandCenterPayroll />} />
-              </Route>
-
-              {/* Catch-all */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <RouterDebugFooter />
-          </HashRouter>
+          <AppInner />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
