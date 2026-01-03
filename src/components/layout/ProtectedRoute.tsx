@@ -15,9 +15,10 @@ export function ProtectedRoute({
   requireAdmin = false,
   redirectTo = "/login",
 }: ProtectedRouteProps) {
-  const { user, authUser, isLoading } = useAuth();
+  const { user, authUser, isLoading, isRolesLoaded } = useAuth();
   const location = useLocation();
 
+  // Always wait for initial auth session resolution
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -26,8 +27,18 @@ export function ProtectedRoute({
     );
   }
 
+  // If this route requires auth, redirect unauthenticated users to login
   if (requireAuth && !user) {
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  }
+
+  // If staff/admin is required, wait for role hydration before deciding access
+  if ((requireStaff || requireAdmin) && user && !isRolesLoaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   if (requireStaff && !authUser?.isStaff) {
