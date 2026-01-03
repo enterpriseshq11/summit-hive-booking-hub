@@ -25,6 +25,9 @@ import Shop from "./pages/Shop";
 import BeamLights from "./pages/BeamLights";
 import NotFound from "./pages/NotFound";
 
+// Debug (public, never redirects)
+import AuthDebug from "./pages/__debug/AuthDebug";
+
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminSchedule from "./pages/admin/Schedule";
@@ -67,6 +70,9 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Public debug routes (never protected) */}
+              <Route path="/__debug/auth" element={<AuthDebug />} />
+
               {/* Public routes with main layout */}
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Index />} />
@@ -82,7 +88,7 @@ const App = () => (
                 <Route path="/terms/dopamine-drop" element={<DopamineDropTerms />} />
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/shop/beam-lights" element={<BeamLights />} />
-                
+
                 {/* Protected customer routes */}
                 <Route element={<ProtectedRoute />}>
                   <Route path="/account" element={<Account />} />
@@ -138,3 +144,4 @@ const App = () => (
 );
 
 export default App;
+
