@@ -42,6 +42,19 @@ import AdminAssumptions from "./pages/admin/Assumptions";
 import AdminPromotions from "./pages/admin/Promotions";
 import AdminDopamineDrop from "./pages/admin/DopamineDrop";
 
+// Command Center Pages
+import CommandCenterDashboard from "./pages/command-center/Dashboard";
+import CommandCenterLeads from "./pages/command-center/Leads";
+import CommandCenterLeadDetail from "./pages/command-center/LeadDetail";
+import CommandCenterPipeline from "./pages/command-center/Pipeline";
+import CommandCenterEmployees from "./pages/command-center/Employees";
+import CommandCenterEmployeeDetail from "./pages/command-center/EmployeeDetail";
+import CommandCenterActivity from "./pages/command-center/Activity";
+import CommandCenterAlerts from "./pages/command-center/Alerts";
+import CommandCenterRevenue from "./pages/command-center/Revenue";
+import CommandCenterCommissions from "./pages/command-center/Commissions";
+import CommandCenterSettings from "./pages/command-center/Settings";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -95,6 +108,21 @@ const App = () => (
                 <Route path="/admin/assumptions" element={<AdminAssumptions />} />
                 <Route path="/admin/promotions" element={<AdminPromotions />} />
                 <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
+              </Route>
+
+              {/* Command Center routes */}
+              <Route element={<ProtectedRoute requireStaff />}>
+                <Route path="/command-center" element={<CommandCenterDashboard />} />
+                <Route path="/command-center/leads" element={<CommandCenterLeads />} />
+                <Route path="/command-center/leads/:id" element={<CommandCenterLeadDetail />} />
+                <Route path="/command-center/pipeline" element={<CommandCenterPipeline />} />
+                <Route path="/command-center/employees" element={<CommandCenterEmployees />} />
+                <Route path="/command-center/employees/:id" element={<CommandCenterEmployeeDetail />} />
+                <Route path="/command-center/activity" element={<CommandCenterActivity />} />
+                <Route path="/command-center/alerts" element={<CommandCenterAlerts />} />
+                <Route path="/command-center/revenue" element={<CommandCenterRevenue />} />
+                <Route path="/command-center/commissions" element={<CommandCenterCommissions />} />
+                <Route path="/command-center/settings" element={<CommandCenterSettings />} />
               </Route>
 
               {/* Catch-all */}

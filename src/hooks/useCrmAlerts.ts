@@ -89,55 +89,149 @@ export function useCreateAlert() {
   });
 }
 
-// Hook to generate automated alerts
+// Hook to generate automated alerts with real trigger logic
 export function useGenerateAlerts() {
   const createAlert = useCreateAlert();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
       const alerts: Database["public"]["Tables"]["crm_alerts"]["Insert"][] = [];
+      const now = new Date();
 
-      // Check for leads untouched 24+ hours
-      const { data: untouchedLeads } = await supabase
+      // ===== LEAD UNTOUCHED ALERTS (24 / 48 / 72 hours) =====
+      const { data: untouchedLeads24 } = await supabase
         .from("crm_leads")
-        .select("id, lead_name")
+        .select("id, lead_name, created_at")
         .eq("status", "new")
-        .lt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+        .lt("created_at", new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString())
+        .gte("created_at", new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString());
 
-      if (untouchedLeads?.length) {
-        for (const lead of untouchedLeads) {
-          alerts.push({
-            alert_type: "lead_untouched",
-            severity: "warning",
-            title: `Lead untouched for 24+ hours`,
-            description: `${lead.lead_name} has not been contacted yet`,
-            entity_type: "lead",
-            entity_id: lead.id,
-          });
-        }
+      for (const lead of untouchedLeads24 || []) {
+        alerts.push({
+          alert_type: "lead_untouched_24h",
+          severity: "warning",
+          title: `Lead untouched for 24+ hours`,
+          description: `${lead.lead_name} has not been contacted since creation`,
+          entity_type: "lead",
+          entity_id: lead.id,
+        });
       }
 
-      // Check for overdue follow-ups
+      const { data: untouchedLeads48 } = await supabase
+        .from("crm_leads")
+        .select("id, lead_name, created_at")
+        .eq("status", "new")
+        .lt("created_at", new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString())
+        .gte("created_at", new Date(now.getTime() - 72 * 60 * 60 * 1000).toISOString());
+
+      for (const lead of untouchedLeads48 || []) {
+        alerts.push({
+          alert_type: "lead_untouched_48h",
+          severity: "warning",
+          title: `Lead untouched for 48+ hours`,
+          description: `${lead.lead_name} is still in "New" status after 48 hours`,
+          entity_type: "lead",
+          entity_id: lead.id,
+        });
+      }
+
+      const { data: untouchedLeads72 } = await supabase
+        .from("crm_leads")
+        .select("id, lead_name, created_at")
+        .eq("status", "new")
+        .lt("created_at", new Date(now.getTime() - 72 * 60 * 60 * 1000).toISOString());
+
+      for (const lead of untouchedLeads72 || []) {
+        alerts.push({
+          alert_type: "lead_untouched_72h",
+          severity: "critical",
+          title: `URGENT: Lead untouched for 72+ hours`,
+          description: `${lead.lead_name} requires immediate attention - no contact in 3+ days`,
+          entity_type: "lead",
+          entity_id: lead.id,
+        });
+      }
+
+      // ===== FOLLOW-UP OVERDUE ALERTS =====
       const { data: overdueFollowups } = await supabase
         .from("crm_leads")
-        .select("id, lead_name")
-        .lt("follow_up_due", new Date().toISOString())
+        .select("id, lead_name, follow_up_due")
+        .lt("follow_up_due", now.toISOString())
         .not("status", "in", '("won","lost")');
 
-      if (overdueFollowups?.length) {
-        for (const lead of overdueFollowups) {
+      for (const lead of overdueFollowups || []) {
+        alerts.push({
+          alert_type: "followup_overdue",
+          severity: "critical",
+          title: `Follow-up overdue`,
+          description: `Follow-up for ${lead.lead_name} was due ${lead.follow_up_due ? new Date(lead.follow_up_due).toLocaleDateString() : 'earlier'}`,
+          entity_type: "lead",
+          entity_id: lead.id,
+        });
+      }
+
+      // ===== EMPLOYEE INACTIVITY ALERTS =====
+      // Check for employees with no activity in the last 24 hours during expected work hours
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .neq("role", "read_only");
+
+      for (const roleData of roles || []) {
+        const { data: recentActivity } = await supabase
+          .from("crm_activity_events")
+          .select("id")
+          .eq("actor_id", roleData.user_id)
+          .gte("created_at", new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString())
+          .limit(1);
+
+        if (!recentActivity?.length) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("first_name, last_name")
+            .eq("id", roleData.user_id)
+            .single();
+
+          if (profile) {
+            alerts.push({
+              alert_type: "employee_inactive",
+              severity: "warning",
+              title: `Employee inactive 24+ hours`,
+              description: `${profile.first_name} ${profile.last_name} has no recorded activity in the last 24 hours`,
+              entity_type: "employee",
+              entity_id: roleData.user_id,
+            });
+          }
+        }
+      }
+
+      // ===== REVENUE MISSING COMMISSION ALERTS =====
+      const { data: revenueNoCommission } = await supabase
+        .from("crm_revenue_events")
+        .select("id, amount, employee_attributed_id")
+        .not("employee_attributed_id", "is", null);
+
+      for (const rev of revenueNoCommission || []) {
+        const { data: commission } = await supabase
+          .from("crm_commissions")
+          .select("id")
+          .eq("revenue_event_id", rev.id)
+          .limit(1);
+
+        if (!commission?.length) {
           alerts.push({
-            alert_type: "followup_overdue",
-            severity: "critical",
-            title: `Follow-up overdue`,
-            description: `Follow-up for ${lead.lead_name} is past due`,
-            entity_type: "lead",
-            entity_id: lead.id,
+            alert_type: "revenue_no_commission",
+            severity: "info",
+            title: `Revenue missing commission calculation`,
+            description: `Revenue event $${rev.amount} has no linked commission record`,
+            entity_type: "revenue",
+            entity_id: rev.id,
           });
         }
       }
 
-      // Check for pending commissions
+      // ===== PENDING COMMISSIONS ALERT =====
       const { data: pendingCommissions, count } = await supabase
         .from("crm_commissions")
         .select("id", { count: "exact", head: true })
@@ -147,14 +241,15 @@ export function useGenerateAlerts() {
         alerts.push({
           alert_type: "commission_pending",
           severity: "info",
-          title: `${count} commissions pending approval`,
-          description: `Review and approve pending commissions`,
+          title: `${count} commission${count > 1 ? 's' : ''} pending approval`,
+          description: `Review and approve pending commissions in the Commissions page`,
         });
       }
 
-      // Insert all alerts (skip duplicates based on entity)
+      // ===== INSERT ALERTS (skip duplicates) =====
+      let createdCount = 0;
       for (const alert of alerts) {
-        // Check if similar alert exists
+        // Check if similar alert already exists
         const { data: existing } = await supabase
           .from("crm_alerts")
           .select("id")
@@ -165,10 +260,31 @@ export function useGenerateAlerts() {
 
         if (!existing?.length) {
           await createAlert.mutateAsync(alert);
+          createdCount++;
         }
       }
 
-      return alerts.length;
+      // Refresh alerts
+      queryClient.invalidateQueries({ queryKey: ["crm_alerts"] });
+
+      return { total: alerts.length, created: createdCount };
+    },
+  });
+}
+
+// Hook to get alert count for badge display
+export function useAlertCount() {
+  return useQuery({
+    queryKey: ["crm_alerts_count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("crm_alerts")
+        .select("id", { count: "exact", head: true })
+        .eq("is_dismissed", false)
+        .eq("is_read", false);
+
+      if (error) throw error;
+      return count || 0;
     },
   });
 }
