@@ -6,8 +6,6 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout, ProtectedRoute } from "@/components/layout";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { RouterDebugFooter } from "@/components/debug/RouterDebugFooter";
-import { RouterDebugBanner } from "@/components/debug/RouterDebugBanner";
 import { useEffect } from "react";
 
 // Pages
@@ -73,7 +71,6 @@ function AppInner() {
 
   return (
     <HashRouter>
-      <RouterDebugBanner />
       <Routes>
         {/* Public debug routes (never protected) */}
         <Route path="/__debug/auth" element={<AuthDebug />} />
@@ -142,7 +139,6 @@ function AppInner() {
         {/* Catch-all */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <RouterDebugFooter />
     </HashRouter>
   );
 }
