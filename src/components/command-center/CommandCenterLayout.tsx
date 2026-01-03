@@ -112,11 +112,13 @@ export function CommandCenterLayout({ children }: CommandCenterLayoutProps) {
     if (isLoading || !isRolesLoaded) return;
 
     if (!authUser) {
-      navigate("/login", { state: { from: location } });
+      navigate("/login", { state: { from: location }, replace: true });
     } else if (!hasAccess) {
-      navigate("/");
+      // Never bounce command-center deep links back to home.
+      navigate("/login", { state: { from: location, reason: "unauthorized" }, replace: true });
     }
   }, [debugMode, isLoading, isRolesLoaded, authUser, hasAccess, navigate, location]);
+
 
 
   // Fetch unread alerts count

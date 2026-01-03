@@ -2,6 +2,7 @@ import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin } from "lucide-react";
 import azLogoFull from "@/assets/az-logo-full.jpg";
+import { BUILD_TIMESTAMP_UTC } from "@/lib/build";
 
 const footerLinks = {
   businesses: [
@@ -19,13 +20,17 @@ const footerLinks = {
 
 export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
   return (
-    <footer className="border-t border-border bg-primary text-primary-foreground">
+    <footer className="border-t border-border bg-primary text-primary-foreground" ref={ref}>
       <div className="container py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Column */}
           <div className="md:col-span-1">
             <Link to="/" className="block mb-4">
-              <img src={azLogoFull} alt="A-Z Enterprises - One Call, We Handle It All" className="h-20 w-auto object-contain" />
+              <img
+                src={azLogoFull}
+                alt="A-Z Enterprises - One Call, We Handle It All"
+                className="h-20 w-auto object-contain"
+              />
             </Link>
             <p className="text-sm text-primary-foreground/60">
               Your destination for events, wellness, fitness, and productivity in Wapakoneta, Ohio.
@@ -90,10 +95,11 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
           <p className="text-sm text-primary-foreground/50">
             © {new Date().getFullYear()} A-Z Enterprises. All rights reserved.
           </p>
-          <p className="text-sm text-primary-foreground/50">Build: 2026-01-03 20:39 UTC</p>
+          <p className="text-sm text-primary-foreground/50">Build: {BUILD_TIMESTAMP_UTC}</p>
           <p className="text-sm text-primary-foreground/50">Crafted with care in Ohio</p>
         </div>
       </div>
     </footer>
   );
 });
+
