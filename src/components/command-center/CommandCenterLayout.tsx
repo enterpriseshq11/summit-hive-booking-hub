@@ -17,6 +17,7 @@ import {
   LogOut,
   Menu,
   Wallet,
+  Mic,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ const navItems = [
   { title: "Employees", href: "/command-center/employees", icon: Users },
   { title: "Activity Log", href: "/command-center/activity", icon: Activity },
   { title: "Revenue", href: "/command-center/revenue", icon: DollarSign },
+  { title: "Voice Vault", href: "/admin/voice-vault", icon: Mic, adminOnly: true },
   { title: "Commissions", href: "/command-center/commissions", icon: Percent },
   { title: "Payroll", href: "/command-center/payroll", icon: Wallet, adminOnly: true },
   { title: "Alerts", href: "/command-center/alerts", icon: Bell },
