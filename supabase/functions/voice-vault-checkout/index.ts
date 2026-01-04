@@ -7,18 +7,43 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Stripe Price IDs
-const PRICE_IDS = {
-  hourly: "price_1SlvgcPFNT8K72RI8QHbSSzo", // $45/hour
-  core_series_full: "price_1SlvgdPFNT8K72RI8kAOuBeB", // $5000 one-time
-  white_glove_full: "price_1SlvgfPFNT8K72RI5wfXmIns", // $8000 one-time
-  core_series_weekly: "price_1SlvgiPFNT8K72RIv4dyS1ls", // $100/week recurring
-  white_glove_weekly: "price_1SlvgjPFNT8K72RIkabNdRx0", // $160/week recurring
-};
-
-const PACKAGE_PRICES = {
-  core_series: 5000,
-  white_glove: 8000,
+/**
+ * Voice Vault Pricing Configuration
+ * Core Series: $1,000 total ($100/week × 10 weeks)
+ * White Glove: $2,000 total ($100/week × 20 weeks OR $200/week × 10 weeks accelerated)
+ */
+const PRICING = {
+  hourly: {
+    ratePerHour: 45,
+    minimumHours: 2,
+  },
+  coreSeries: {
+    totalPrice: 1000,
+    weeklyPayment: 100,
+    termWeeks: 10,
+    stripePrices: {
+      full: "price_1SlvrPPFNT8K72RIFp9bHYT3",
+      weekly: "price_1SlvrRPFNT8K72RITmDjwzVR",
+    },
+  },
+  whiteGlove: {
+    totalPrice: 2000,
+    stripePrices: {
+      full: "price_1SlvrSPFNT8K72RI5xFYHvwY",
+    },
+    paymentOptions: {
+      standard: {
+        weeklyPayment: 100,
+        termWeeks: 20,
+        stripePriceId: "price_1SlvrUPFNT8K72RImNuQQ3R3",
+      },
+      accelerated: {
+        weeklyPayment: 200,
+        termWeeks: 10,
+        stripePriceId: "price_1SlvrWPFNT8K72RIpNAdCFHP",
+      },
+    },
+  },
 };
 
 const logStep = (step: string, details?: unknown) => {
@@ -37,6 +62,7 @@ serve(async (req) => {
     const { 
       type, // 'hourly' | 'core_series' | 'white_glove'
       payment_plan, // 'full' | 'weekly'
+      white_glove_option, // 'standard' | 'accelerated' (only for white_glove weekly)
       customer_name,
       customer_email,
       customer_phone,
@@ -47,7 +73,7 @@ serve(async (req) => {
       duration_hours,
     } = await req.json();
 
-    logStep("Request parsed", { type, payment_plan, customer_email });
+    logStep("Request parsed", { type, payment_plan, white_glove_option, customer_email });
 
     if (!type || !customer_name || !customer_email) {
       throw new Error("Missing required fields: type, customer_name, customer_email");
@@ -80,14 +106,28 @@ serve(async (req) => {
         throw new Error("Missing booking details for hourly rental");
       }
 
-      if (duration_hours < 2) {
-        throw new Error("Minimum booking is 2 hours");
+      if (duration_hours < PRICING.hourly.minimumHours) {
+        throw new Error(`Minimum booking is ${PRICING.hourly.minimumHours} hours`);
       }
 
-      const totalAmount = duration_hours * 45;
+      // Check for overlapping bookings
+      const { data: hasOverlap } = await supabaseClient.rpc(
+        "check_voice_vault_booking_overlap",
+        {
+          p_booking_date: booking_date,
+          p_start_time: start_time,
+          p_end_time: end_time,
+        }
+      );
+
+      if (hasOverlap) {
+        throw new Error("This time slot is already booked. Please choose a different time.");
+      }
+
+      const totalAmount = duration_hours * PRICING.hourly.ratePerHour;
       logStep("Creating hourly booking", { duration_hours, totalAmount });
 
-      // Create booking record first
+      // Create booking record
       const { data: booking, error: bookingError } = await supabaseClient
         .from("voice_vault_bookings")
         .insert({
@@ -98,7 +138,7 @@ serve(async (req) => {
           start_time,
           end_time,
           duration_hours,
-          hourly_rate: 45,
+          hourly_rate: PRICING.hourly.ratePerHour,
           total_amount: totalAmount,
           payment_status: "pending",
         })
@@ -134,7 +174,8 @@ serve(async (req) => {
         success_url: `${origin}/#/voice-vault?booking=success&id=${recordId}`,
         cancel_url: `${origin}/#/voice-vault?booking=cancelled`,
         metadata: {
-          type: "hourly",
+          product_type: "hourly",
+          plan_type: "one_time",
           record_id: recordId,
           customer_email,
           booking_date,
@@ -145,15 +186,37 @@ serve(async (req) => {
     } else {
       // Package purchase (core_series or white_glove)
       const plan = payment_plan || "full";
-      const packagePrice = PACKAGE_PRICES[type as keyof typeof PACKAGE_PRICES];
-      
-      if (!packagePrice) {
+      let packagePrice: number;
+      let termWeeks: number;
+      let weeklyPayment: number | null = null;
+      let priceId: string;
+
+      if (type === "core_series") {
+        packagePrice = PRICING.coreSeries.totalPrice;
+        termWeeks = PRICING.coreSeries.termWeeks;
+        weeklyPayment = PRICING.coreSeries.weeklyPayment;
+        priceId = plan === "full" 
+          ? PRICING.coreSeries.stripePrices.full 
+          : PRICING.coreSeries.stripePrices.weekly;
+      } else if (type === "white_glove") {
+        packagePrice = PRICING.whiteGlove.totalPrice;
+        if (plan === "full") {
+          priceId = PRICING.whiteGlove.stripePrices.full;
+          termWeeks = 0;
+        } else {
+          const option = white_glove_option === "accelerated" ? "accelerated" : "standard";
+          const optionConfig = PRICING.whiteGlove.paymentOptions[option];
+          priceId = optionConfig.stripePriceId;
+          termWeeks = optionConfig.termWeeks;
+          weeklyPayment = optionConfig.weeklyPayment;
+        }
+      } else {
         throw new Error(`Invalid package type: ${type}`);
       }
 
-      logStep("Creating package order", { type, plan, packagePrice });
+      logStep("Creating package order", { type, plan, packagePrice, termWeeks, weeklyPayment });
 
-      // Create package record first
+      // Create package record
       const { data: packageOrder, error: packageError } = await supabaseClient
         .from("voice_vault_packages")
         .insert({
@@ -179,12 +242,25 @@ serve(async (req) => {
       recordId = packageOrder.id;
       logStep("Package order created", { recordId });
 
+      const stripeMetadata: Record<string, string> = {
+        product_type: type,
+        plan_type: plan,
+        record_id: recordId,
+        customer_email,
+        package_price: String(packagePrice),
+        term_weeks: String(termWeeks),
+        package_name: type === "core_series" ? "Core Series" : "White Glove",
+      };
+
+      if (plan === "weekly") {
+        stripeMetadata.weekly_payment = String(weeklyPayment);
+        if (type === "white_glove") {
+          stripeMetadata.white_glove_option = white_glove_option || "standard";
+        }
+      }
+
       if (plan === "weekly") {
         // Weekly subscription
-        const priceId = type === "core_series" 
-          ? PRICE_IDS.core_series_weekly 
-          : PRICE_IDS.white_glove_weekly;
-
         session = await stripe.checkout.sessions.create({
           customer: customerId,
           customer_email: customerId ? undefined : customer_email,
@@ -192,20 +268,10 @@ serve(async (req) => {
           mode: "subscription",
           success_url: `${origin}/#/voice-vault?package=success&id=${recordId}`,
           cancel_url: `${origin}/#/voice-vault?package=cancelled`,
-          metadata: {
-            type,
-            payment_plan: "weekly",
-            record_id: recordId,
-            customer_email,
-            package_price: String(packagePrice),
-          },
+          metadata: stripeMetadata,
         });
       } else {
         // Full payment
-        const priceId = type === "core_series" 
-          ? PRICE_IDS.core_series_full 
-          : PRICE_IDS.white_glove_full;
-
         session = await stripe.checkout.sessions.create({
           customer: customerId,
           customer_email: customerId ? undefined : customer_email,
@@ -213,13 +279,7 @@ serve(async (req) => {
           mode: "payment",
           success_url: `${origin}/#/voice-vault?package=success&id=${recordId}`,
           cancel_url: `${origin}/#/voice-vault?package=cancelled`,
-          metadata: {
-            type,
-            payment_plan: "full",
-            record_id: recordId,
-            customer_email,
-            package_price: String(packagePrice),
-          },
+          metadata: stripeMetadata,
         });
       }
     }

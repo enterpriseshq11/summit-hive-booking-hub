@@ -7,6 +7,16 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[VOICE-VAULT-WEBHOOK] ${step}${detailsStr}`);
 };
 
+/**
+ * Pricing reference for payment tracking
+ * Core Series: $1,000 total ($100/week × 10 weeks)
+ * White Glove: $2,000 total ($100/week × 20 weeks OR $200/week × 10 weeks)
+ */
+const PACKAGE_PRICES = {
+  core_series: 1000,
+  white_glove: 2000,
+};
+
 serve(async (req) => {
   try {
     logStep("Webhook received");
@@ -36,12 +46,12 @@ serve(async (req) => {
         }
 
         const recordId = metadata.record_id;
-        const type = metadata.type;
-        const paymentPlan = metadata.payment_plan;
+        const productType = metadata.product_type;
+        const planType = metadata.plan_type;
 
-        logStep("Processing checkout.session.completed", { recordId, type, paymentPlan });
+        logStep("Processing checkout.session.completed", { recordId, productType, planType });
 
-        if (type === "hourly") {
+        if (productType === "hourly") {
           // Update hourly booking to paid
           await supabaseClient
             .from("voice_vault_bookings")
@@ -53,10 +63,10 @@ serve(async (req) => {
 
           logStep("Hourly booking marked as paid", { recordId });
 
-        } else if (type === "core_series" || type === "white_glove") {
-          const packagePrice = parseFloat(metadata.package_price || "0");
+        } else if (productType === "core_series" || productType === "white_glove") {
+          const packagePrice = PACKAGE_PRICES[productType as keyof typeof PACKAGE_PRICES];
           
-          if (paymentPlan === "full") {
+          if (planType === "full" || planType === "one_time") {
             // Full payment - mark as paid_in_full
             await supabaseClient
               .from("voice_vault_packages")
@@ -69,7 +79,7 @@ serve(async (req) => {
               })
               .eq("id", recordId);
 
-            logStep("Package marked as paid_in_full", { recordId });
+            logStep("Package marked as paid_in_full", { recordId, packagePrice });
 
           } else {
             // Weekly subscription - mark as active_payment
@@ -106,7 +116,8 @@ serve(async (req) => {
         if (packages) {
           const amountPaid = (invoice.amount_paid || 0) / 100;
           const newPaidAmount = packages.paid_amount + amountPaid;
-          const newBalance = packages.package_price - newPaidAmount;
+          const packagePrice = PACKAGE_PRICES[packages.product_type as keyof typeof PACKAGE_PRICES] || packages.package_price;
+          const newBalance = packagePrice - newPaidAmount;
 
           const updateData: Record<string, unknown> = {
             paid_amount: newPaidAmount,
@@ -134,7 +145,8 @@ serve(async (req) => {
             recordId: packages.id, 
             amountPaid, 
             newPaidAmount, 
-            newBalance 
+            newBalance,
+            packagePrice,
           });
         }
         break;

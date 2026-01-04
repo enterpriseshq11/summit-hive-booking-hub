@@ -3338,6 +3338,9 @@ export type Database = {
       }
       voice_vault_bookings: {
         Row: {
+          admin_override: boolean | null
+          admin_override_by: string | null
+          admin_override_reason: string | null
           booking_date: string
           created_at: string
           customer_email: string
@@ -3356,6 +3359,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_override?: boolean | null
+          admin_override_by?: string | null
+          admin_override_reason?: string | null
           booking_date: string
           created_at?: string
           customer_email: string
@@ -3374,6 +3380,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_override?: boolean | null
+          admin_override_by?: string | null
+          admin_override_reason?: string | null
           booking_date?: string
           created_at?: string
           customer_email?: string
@@ -3697,6 +3706,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_voice_vault_booking_overlap: {
+        Args: {
+          p_booking_date: string
+          p_end_time: string
+          p_exclude_id?: string
+          p_start_time: string
+        }
+        Returns: boolean
+      }
       generate_booking_number: { Args: never; Returns: string }
       has_department_access: {
         Args: {

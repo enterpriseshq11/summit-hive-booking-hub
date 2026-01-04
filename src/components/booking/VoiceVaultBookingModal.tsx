@@ -17,9 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, Clock, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Calendar, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { 
+  VOICE_VAULT_PRICING, 
+  getPackageDisplayPrice,
+  type WhiteGlovePaymentOption 
+} from "@/config/voiceVaultPricing";
 
 interface VoiceVaultBookingModalProps {
   open: boolean;
@@ -42,6 +47,7 @@ export function VoiceVaultBookingModal({
     initialType || "hourly"
   );
   const [paymentPlan, setPaymentPlan] = useState<"full" | "weekly">("weekly");
+  const [whiteGloveOption, setWhiteGloveOption] = useState<WhiteGlovePaymentOption>("standard");
 
   // Hourly booking details
   const [bookingDate, setBookingDate] = useState("");
@@ -57,6 +63,7 @@ export function VoiceVaultBookingModal({
     setStep("type");
     setBookingType(initialType || "hourly");
     setPaymentPlan("weekly");
+    setWhiteGloveOption("standard");
     setBookingDate("");
     setStartTime("09:00");
     setDurationHours("2");
@@ -93,6 +100,9 @@ export function VoiceVaultBookingModal({
         payload.duration_hours = parseInt(durationHours);
       } else {
         payload.payment_plan = paymentPlan;
+        if (bookingType === "white_glove" && paymentPlan === "weekly") {
+          payload.white_glove_option = whiteGloveOption;
+        }
       }
 
       const { data, error } = await supabase.functions.invoke("voice-vault-checkout", {
@@ -102,7 +112,6 @@ export function VoiceVaultBookingModal({
       if (error) throw error;
 
       if (data?.url) {
-        // Open Stripe checkout in new tab
         window.open(data.url, "_blank");
         toast.success("Redirecting to secure payment...");
         handleClose();
@@ -117,9 +126,11 @@ export function VoiceVaultBookingModal({
     }
   };
 
+  const { hourly, coreSeries, whiteGlove } = VOICE_VAULT_PRICING;
+
   const canProceedFromType = bookingType !== null;
   const canProceedFromDetails = bookingType === "hourly" 
-    ? bookingDate && startTime && parseInt(durationHours) >= 2
+    ? bookingDate && startTime && parseInt(durationHours) >= hourly.minimumHours
     : paymentPlan !== null;
   const canProceedFromContact = customerName && customerEmail;
 
@@ -139,9 +150,14 @@ export function VoiceVaultBookingModal({
   };
 
   const getPackagePrice = () => {
-    if (bookingType === "core_series") return paymentPlan === "full" ? "$5,000" : "$100/week";
-    if (bookingType === "white_glove") return paymentPlan === "full" ? "$8,000" : "$160/week";
-    return `$${parseInt(durationHours) * 45}`;
+    if (bookingType === "hourly") {
+      return `$${parseInt(durationHours) * hourly.ratePerHour}`;
+    }
+    return getPackageDisplayPrice(
+      bookingType, 
+      paymentPlan, 
+      bookingType === "white_glove" ? whiteGloveOption : undefined
+    );
   };
 
   return (
@@ -176,7 +192,9 @@ export function VoiceVaultBookingModal({
                 <RadioGroupItem value="hourly" className="mt-1" />
                 <div>
                   <p className="font-semibold text-foreground">Hourly Studio Rental</p>
-                  <p className="text-sm text-muted-foreground">$45/hour • 2-hour minimum</p>
+                  <p className="text-sm text-muted-foreground">
+                    ${hourly.ratePerHour}/hour • {hourly.minimumHours}-hour minimum
+                  </p>
                 </div>
               </label>
 
@@ -187,8 +205,13 @@ export function VoiceVaultBookingModal({
               >
                 <RadioGroupItem value="core_series" className="mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">Core Series Package</p>
-                  <p className="text-sm text-muted-foreground">$100/week • 10 episodes included</p>
+                  <p className="font-semibold text-foreground">{coreSeries.name} Package</p>
+                  <p className="text-sm text-muted-foreground">
+                    ${coreSeries.weeklyPayment}/week for {coreSeries.weeklyTermWeeks} weeks • {coreSeries.episodes} episodes
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    or ${coreSeries.totalPrice.toLocaleString()} paid in full
+                  </p>
                 </div>
               </label>
 
@@ -199,14 +222,19 @@ export function VoiceVaultBookingModal({
               >
                 <RadioGroupItem value="white_glove" className="mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">White Glove Package</p>
-                  <p className="text-sm text-muted-foreground">$160/week • Full production support</p>
+                  <p className="font-semibold text-foreground">{whiteGlove.name} Package</p>
+                  <p className="text-sm text-muted-foreground">
+                    ${whiteGlove.paymentOptions.standard.weeklyPayment}/week for {whiteGlove.paymentOptions.standard.termWeeks} weeks • Full production support
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    or ${whiteGlove.totalPrice.toLocaleString()} paid in full
+                  </p>
                 </div>
               </label>
             </RadioGroup>
           )}
 
-          {/* Step 2: Details */}
+          {/* Step 2: Details - Hourly */}
           {step === "details" && bookingType === "hourly" && (
             <div className="space-y-4">
               <div className="space-y-2">
@@ -238,7 +266,7 @@ export function VoiceVaultBookingModal({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="duration">Duration</Label>
+                  <Label htmlFor="duration">Duration (min {hourly.minimumHours} hours)</Label>
                   <Select value={durationHours} onValueChange={setDurationHours}>
                     <SelectTrigger>
                       <SelectValue />
@@ -257,12 +285,15 @@ export function VoiceVaultBookingModal({
               <div className="bg-secondary/50 rounded-lg p-4 border border-border">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Total</span>
-                  <span className="text-2xl font-bold text-accent">${parseInt(durationHours) * 45}</span>
+                  <span className="text-2xl font-bold text-accent">
+                    ${parseInt(durationHours) * hourly.ratePerHour}
+                  </span>
                 </div>
               </div>
             </div>
           )}
 
+          {/* Step 2: Details - Packages */}
           {step === "details" && bookingType !== "hourly" && (
             <div className="space-y-4">
               <RadioGroup
@@ -276,13 +307,55 @@ export function VoiceVaultBookingModal({
                   }`}
                 >
                   <RadioGroupItem value="weekly" className="mt-1" />
-                  <div>
+                  <div className="flex-1">
                     <p className="font-semibold text-foreground">Weekly Payment Plan</p>
                     <p className="text-sm text-muted-foreground">
-                      {bookingType === "core_series" ? "$100/week for 50 weeks" : "$160/week for 50 weeks"}
+                      {bookingType === "core_series" 
+                        ? `$${coreSeries.weeklyPayment}/week for ${coreSeries.weeklyTermWeeks} weeks`
+                        : `$${whiteGlove.paymentOptions.standard.weeklyPayment}/week for ${whiteGlove.paymentOptions.standard.termWeeks} weeks`
+                      }
                     </p>
                   </div>
                 </label>
+
+                {/* White Glove Accelerated Option */}
+                {bookingType === "white_glove" && paymentPlan === "weekly" && (
+                  <div className="ml-8 space-y-2">
+                    <Label className="text-sm text-muted-foreground">Payment Speed</Label>
+                    <RadioGroup
+                      value={whiteGloveOption}
+                      onValueChange={(v) => setWhiteGloveOption(v as WhiteGlovePaymentOption)}
+                      className="space-y-2"
+                    >
+                      <label
+                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                          whiteGloveOption === "standard" ? "border-accent/50 bg-accent/5" : "border-border"
+                        }`}
+                      >
+                        <RadioGroupItem value="standard" />
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Standard</p>
+                          <p className="text-xs text-muted-foreground">
+                            ${whiteGlove.paymentOptions.standard.weeklyPayment}/week × {whiteGlove.paymentOptions.standard.termWeeks} weeks
+                          </p>
+                        </div>
+                      </label>
+                      <label
+                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                          whiteGloveOption === "accelerated" ? "border-accent/50 bg-accent/5" : "border-border"
+                        }`}
+                      >
+                        <RadioGroupItem value="accelerated" />
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Accelerated Payoff</p>
+                          <p className="text-xs text-muted-foreground">
+                            ${whiteGlove.paymentOptions.accelerated.weeklyPayment}/week × {whiteGlove.paymentOptions.accelerated.termWeeks} weeks
+                          </p>
+                        </div>
+                      </label>
+                    </RadioGroup>
+                  </div>
+                )}
 
                 <label
                   className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
@@ -293,7 +366,10 @@ export function VoiceVaultBookingModal({
                   <div>
                     <p className="font-semibold text-foreground">Pay in Full</p>
                     <p className="text-sm text-muted-foreground">
-                      {bookingType === "core_series" ? "$5,000 one-time" : "$8,000 one-time"}
+                      {bookingType === "core_series" 
+                        ? `$${coreSeries.totalPrice.toLocaleString()} one-time`
+                        : `$${whiteGlove.totalPrice.toLocaleString()} one-time`
+                      }
                     </p>
                   </div>
                 </label>
@@ -354,8 +430,8 @@ export function VoiceVaultBookingModal({
                   <span className="text-muted-foreground">Product</span>
                   <span className="font-medium text-foreground">
                     {bookingType === "hourly" && `Studio Rental (${durationHours} hrs)`}
-                    {bookingType === "core_series" && "Core Series Package"}
-                    {bookingType === "white_glove" && "White Glove Package"}
+                    {bookingType === "core_series" && coreSeries.name}
+                    {bookingType === "white_glove" && whiteGlove.name}
                   </span>
                 </div>
                 {bookingType === "hourly" && (
@@ -370,7 +446,12 @@ export function VoiceVaultBookingModal({
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Payment Plan</span>
                     <span className="font-medium text-foreground">
-                      {paymentPlan === "weekly" ? "Weekly" : "Pay in Full"}
+                      {paymentPlan === "weekly" 
+                        ? (bookingType === "white_glove" 
+                            ? `Weekly (${whiteGloveOption === "accelerated" ? "Accelerated" : "Standard"})` 
+                            : "Weekly")
+                        : "Pay in Full"
+                      }
                     </span>
                   </div>
                 )}
@@ -383,7 +464,9 @@ export function VoiceVaultBookingModal({
                   <span className="font-medium text-foreground">{customerEmail}</span>
                 </div>
                 <div className="pt-3 border-t border-border flex justify-between">
-                  <span className="font-semibold text-foreground">Total</span>
+                  <span className="font-semibold text-foreground">
+                    {paymentPlan === "weekly" && bookingType !== "hourly" ? "Payment" : "Total"}
+                  </span>
                   <span className="text-xl font-bold text-accent">{getPackagePrice()}</span>
                 </div>
               </div>
