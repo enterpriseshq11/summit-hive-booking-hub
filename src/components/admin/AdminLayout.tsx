@@ -28,7 +28,8 @@ import {
   LayoutDashboard,
   Box,
   UserCog,
-  Loader2
+  Loader2,
+  Mic
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -46,6 +47,7 @@ const adminNavItems = [
   { title: "Documents", href: "/admin/documents", icon: FileText },
   { title: "Reviews", href: "/admin/reviews", icon: Star },
   { title: "Leads & Waitlists", href: "/admin/leads-waitlists", icon: Users },
+  { title: "Voice Vault", href: "/admin/voice-vault", icon: Mic },
   { title: "Users & Roles", href: "/admin/users-roles", icon: UserCog, ownerOnly: true },
   { title: "Audit Log", href: "/admin/audit-log", icon: Shield },
   { title: "Assumptions", href: "/admin/assumptions", icon: Lightbulb },

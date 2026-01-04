@@ -60,6 +60,36 @@ serve(async (req) => {
     }
   };
 
+  // Helper to create revenue event for Voice Vault transactions
+  const createRevenueEvent = async (
+    amount: number,
+    description: string,
+    recordId: string
+  ) => {
+    try {
+      await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/crm_revenue_events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? '',
+          'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ''}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          business_unit: 'voice_vault',
+          amount: amount,
+          description: description,
+          revenue_date: new Date().toISOString().split('T')[0],
+          recorded_by: '00000000-0000-0000-0000-000000000000', // System user placeholder
+        }),
+      });
+      
+      logStep("Revenue event created", { amount, description, recordId });
+    } catch (err) {
+      logStep("Failed to create revenue event", { error: String(err) });
+    }
+  };
+
   let eventType = "unknown";
   let stripeEventId: string | null = null;
   let recordId: string | null = null;
@@ -127,6 +157,15 @@ serve(async (req) => {
           }
 
           logStep("SUCCESS - Hourly booking marked as paid_in_full", { recordId });
+          
+          // Create revenue event for hourly booking
+          const bookingAmount = (session.amount_total || 0) / 100;
+          await createRevenueEvent(
+            bookingAmount,
+            `Voice Vault Hourly Booking`,
+            recordId || 'unknown'
+          );
+          
           await logWebhookEvent(eventType, stripeEventId, recordId, recordType, metadata, "success", "Booking updated to paid_in_full");
 
         } else if (productType === "core_series" || productType === "white_glove") {
@@ -151,6 +190,14 @@ serve(async (req) => {
             }
 
             logStep("SUCCESS - Package marked as paid_in_full", { recordId, packagePrice });
+            
+            // Create revenue event for package full payment
+            await createRevenueEvent(
+              packagePrice,
+              `Voice Vault ${productType === 'core_series' ? 'Core Series' : 'White Glove'} Package (Full)`,
+              recordId || 'unknown'
+            );
+            
             await logWebhookEvent(eventType, stripeEventId, recordId, recordType, {
               ...metadata,
               newPaymentStatus: "paid_in_full",

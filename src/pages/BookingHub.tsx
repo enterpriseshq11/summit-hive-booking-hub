@@ -40,6 +40,7 @@ const businessIcons: Record<BusinessType, React.ComponentType<{ className?: stri
   coworking: Building2,
   spa: Sparkles,
   fitness: Dumbbell,
+  voice_vault: Building2,
 };
 
 const businessRoutes: Record<BusinessType, string> = {
@@ -47,6 +48,7 @@ const businessRoutes: Record<BusinessType, string> = {
   coworking: "/coworking",
   spa: "/spa",
   fitness: "/fitness",
+  voice_vault: "/voice-vault",
 };
 
 const businessLabels: Record<BusinessType, string> = {
@@ -54,6 +56,7 @@ const businessLabels: Record<BusinessType, string> = {
   coworking: "The Hive",
   spa: "Restoration Lounge",
   fitness: "Total Fitness",
+  voice_vault: "Voice Vault",
 };
 
 const businessDescriptions: Record<BusinessType, string> = {
@@ -61,6 +64,7 @@ const businessDescriptions: Record<BusinessType, string> = {
   coworking: "Private Offices + Coworking",
   spa: "Recovery + Spa Treatments",
   fitness: "24/7 Gym + Coaching",
+  voice_vault: "Podcast Studio",
 };
 
 const businessTags: Record<BusinessType, string[]> = {
@@ -68,6 +72,7 @@ const businessTags: Record<BusinessType, string[]> = {
   coworking: ["Focus Work", "Meetings"],
   spa: ["Recovery", "Reset"],
   fitness: ["Training", "Performance"],
+  voice_vault: ["Recording", "Podcasts"],
 };
 
 export default function BookingHub() {
