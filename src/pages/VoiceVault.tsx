@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   Mic,
   Video,
@@ -33,8 +42,13 @@ import {
   Building2,
   Dumbbell,
   Gift,
+  Phone,
+  Mail,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import voiceVaultLogo from "@/assets/voice-vault-logo.png";
 
 // Placeholder images for gallery (will be replaced with real photos)
 const galleryImages = [
@@ -57,10 +71,36 @@ const studioFeatures = [
   { icon: Headphones, title: "On-Staff Editor", description: "Professional editing available" },
 ];
 
+const faqItems = [
+  {
+    question: "Do I need any experience to use the Voice Vault?",
+    answer: "Not at all! Our studio is designed for all skill levels. We provide a quick orientation before your first session, and our staff is available to help you get set up. The equipment is professional but user-friendly."
+  },
+  {
+    question: "Can I bring guests for my podcast?",
+    answer: "Yes! The Voice Vault comfortably seats up to 4 people, making it perfect for interviews, co-hosted shows, or panel discussions. All guests have access to professional microphones."
+  },
+  {
+    question: "What happens if I miss a weekly payment?",
+    answer: "We understand life happens. If you miss a payment, editing services and content delivery may pause until resolved. Your recordings remain safe, and we'll work with you to get back on track. Full content ownership transfers only after all payments are complete."
+  },
+  {
+    question: "Can I use my own equipment?",
+    answer: "You're welcome to bring your own equipment if you prefer, but our professional-grade gear is included in your booking. Most clients find our setup exceeds their needs."
+  },
+  {
+    question: "How quickly can I get started?",
+    answer: "Hourly bookings can often be scheduled within a few days, depending on availability. For podcast packages, we'll set up a brief consultation to align on your goals, then get you recording within a week."
+  },
+];
+
 export default function VoiceVault() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [termsOpen, setTermsOpen] = useState(false);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
@@ -74,13 +114,34 @@ export default function VoiceVault() {
     document.getElementById("packages")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const scrollToBooking = () => {
-    document.getElementById("hourly-rental")?.scrollIntoView({ behavior: "smooth" });
+  const handleBookingClick = () => {
+    setBookingModalOpen(true);
+  };
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    // Simulate submission
+    setTimeout(() => {
+      toast.success("Request submitted! We'll contact you within 24 hours.");
+      setContactForm({ name: "", email: "", phone: "", message: "" });
+      setSubmitting(false);
+    }, 1000);
   };
 
   // Set document title for SEO
   useEffect(() => {
     document.title = "Voice Vault by The Hive | Professional Podcast & Recording Studio";
+  }, []);
+
+  // Handle hash scroll on mount
+  useEffect(() => {
+    const hash = window.location.hash.replace("#/voice-vault", "");
+    if (hash === "#packages") {
+      setTimeout(() => {
+        document.getElementById("packages")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
   }, []);
 
   return (
@@ -96,10 +157,14 @@ export default function VoiceVault() {
 
         <div className="container relative z-10 py-20 lg:py-28">
           <div className="max-w-3xl mx-auto text-center">
-            <Badge className="mb-6 bg-accent/20 text-accent border-accent/30 hover:bg-accent/30">
-              <Mic className="w-3 h-3 mr-1" />
-              Inside The Hive Coworking
-            </Badge>
+            {/* Logo */}
+            <div className="mb-6">
+              <img 
+                src={voiceVaultLogo} 
+                alt="The Voice Vault by A-Z" 
+                className="h-32 md:h-40 mx-auto object-contain"
+              />
+            </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
               <span className="text-gold-gradient">Voice Vault</span>
@@ -120,7 +185,7 @@ export default function VoiceVault() {
               <Button
                 size="lg"
                 className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8 py-6"
-                onClick={scrollToBooking}
+                onClick={handleBookingClick}
               >
                 <Calendar className="w-5 h-5 mr-2" />
                 Book the Studio
@@ -135,6 +200,18 @@ export default function VoiceVault() {
                 Explore Podcast Packages
               </Button>
             </div>
+
+            {/* Terms agreement line */}
+            <p className="mt-6 text-sm text-primary-foreground/60">
+              By booking, you agree to the{" "}
+              <button
+                onClick={() => setTermsOpen(true)}
+                className="underline hover:text-accent transition-colors"
+              >
+                Studio & Content Terms
+              </button>
+              .
+            </p>
           </div>
         </div>
 
@@ -231,13 +308,25 @@ export default function VoiceVault() {
                     </div>
                   </div>
                   
-                  <Button
-                    size="lg"
-                    className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-                  >
-                    <Calendar className="w-5 h-5 mr-2" />
-                    Book Studio Time
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      size="lg"
+                      className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                      onClick={handleBookingClick}
+                    >
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Book Studio Time
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center">
+                      By booking, you agree to the{" "}
+                      <button
+                        onClick={() => setTermsOpen(true)}
+                        className="underline hover:text-accent transition-colors"
+                      >
+                        Studio & Content Terms
+                      </button>
+                    </p>
+                  </div>
                 </div>
 
                 <Separator className="my-6" />
@@ -342,13 +431,20 @@ export default function VoiceVault() {
                 <Button
                   size="lg"
                   className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                  onClick={handleBookingClick}
                 >
                   Start My Podcast
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
 
                 <p className="text-xs text-muted-foreground text-center">
-                  Full content ownership released after payment completion
+                  Full content ownership released after payment completion.{" "}
+                  <button
+                    onClick={() => setTermsOpen(true)}
+                    className="underline hover:text-accent transition-colors"
+                  >
+                    View Terms
+                  </button>
                 </p>
               </CardContent>
             </Card>
@@ -421,13 +517,20 @@ export default function VoiceVault() {
                   size="lg"
                   variant="outline"
                   className="w-full border-accent text-accent hover:bg-accent/10 font-semibold"
+                  onClick={handleBookingClick}
                 >
                   White-Glove Setup
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
 
                 <p className="text-xs text-muted-foreground text-center">
-                  Full content ownership released after payment completion
+                  Full content ownership released after payment completion.{" "}
+                  <button
+                    onClick={() => setTermsOpen(true)}
+                    className="underline hover:text-accent transition-colors"
+                  >
+                    View Terms
+                  </button>
                 </p>
               </CardContent>
             </Card>
@@ -492,8 +595,92 @@ export default function VoiceVault() {
         </div>
       </section>
 
+      {/* CONTACT / REQUEST CALL SECTION */}
+      <section id="contact" className="py-16 bg-secondary/30">
+        <div className="container">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+                Not Ready to Book? Let's Talk
+              </h2>
+              <p className="text-muted-foreground">
+                Have questions about our packages or studio? Request a call and we'll walk you through everything.
+              </p>
+            </div>
+
+            <Card className="bg-card border-border">
+              <CardContent className="p-6 md:p-8">
+                <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        id="name"
+                        placeholder="Your name"
+                        value={contactForm.name}
+                        onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={contactForm.email}
+                        onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone (optional)</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="(555) 123-4567"
+                      value={contactForm.phone}
+                      onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="message">What are you interested in?</Label>
+                    <Textarea
+                      id="message"
+                      placeholder="Tell us about your podcast idea or recording needs..."
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                      rows={4}
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      "Submitting..."
+                    ) : (
+                      <>
+                        <Phone className="w-5 h-5 mr-2" />
+                        Request a Call
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    We'll respond within 24 hours.
+                  </p>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* FINANCING EXPLAINER */}
-      <section className="py-16 bg-secondary/30">
+      <section className="py-16 bg-background">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
@@ -536,7 +723,7 @@ export default function VoiceVault() {
       </section>
 
       {/* CROSS-BUSINESS DISCOUNTS */}
-      <section className="py-16 bg-background">
+      <section className="py-16 bg-secondary/30">
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10">
@@ -602,7 +789,7 @@ export default function VoiceVault() {
       </section>
 
       {/* MEDIA GALLERY */}
-      <section className="py-16 bg-secondary/30">
+      <section className="py-16 bg-background">
         <div className="container">
           <div className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
@@ -633,6 +820,42 @@ export default function VoiceVault() {
                 </div>
               </button>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ SECTION */}
+      <section className="py-16 bg-secondary/30">
+        <div className="container">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <HelpCircle className="w-6 h-6 text-accent" />
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                  Frequently Asked Questions
+                </h2>
+              </div>
+              <p className="text-muted-foreground">
+                Have questions? We've got answers.
+              </p>
+            </div>
+
+            <Accordion type="single" collapsible className="space-y-4">
+              {faqItems.map((item, index) => (
+                <AccordionItem
+                  key={index}
+                  value={`faq-${index}`}
+                  className="bg-card border border-border rounded-lg px-6"
+                >
+                  <AccordionTrigger className="text-left font-medium text-foreground hover:text-accent">
+                    {item.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    {item.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </div>
         </div>
       </section>
@@ -694,7 +917,7 @@ export default function VoiceVault() {
               <Button
                 size="lg"
                 className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8 py-6"
-                onClick={scrollToBooking}
+                onClick={handleBookingClick}
               >
                 <Calendar className="w-5 h-5 mr-2" />
                 Book the Voice Vault
@@ -708,9 +931,77 @@ export default function VoiceVault() {
                 View Studio Terms
               </Button>
             </div>
+
+            <p className="mt-6 text-sm text-primary-foreground/60">
+              By booking, you agree to the{" "}
+              <button
+                onClick={() => setTermsOpen(true)}
+                className="underline hover:text-accent transition-colors"
+              >
+                Studio & Content Terms
+              </button>
+              .
+            </p>
           </div>
         </div>
       </section>
+
+      {/* BOOKING COMING SOON MODAL */}
+      <Dialog open={bookingModalOpen} onOpenChange={setBookingModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <Calendar className="w-6 h-6 text-accent" />
+              Booking Coming Soon
+            </DialogTitle>
+            <DialogDescription>
+              Our online booking system is being finalized. In the meantime, let us help you get started!
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <p className="text-sm text-muted-foreground">
+              To book studio time or discuss podcast packages:
+            </p>
+            
+            <div className="space-y-3">
+              <a
+                href="tel:+15673796340"
+                className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+              >
+                <Phone className="w-5 h-5 text-accent" />
+                <div>
+                  <p className="font-medium text-foreground">Call Us</p>
+                  <p className="text-sm text-muted-foreground">567-379-6340</p>
+                </div>
+              </a>
+              
+              <a
+                href="mailto:info@az-enterprises.com?subject=Voice Vault Booking Inquiry"
+                className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+              >
+                <Mail className="w-5 h-5 text-accent" />
+                <div>
+                  <p className="font-medium text-foreground">Email Us</p>
+                  <p className="text-sm text-muted-foreground">info@az-enterprises.com</p>
+                </div>
+              </a>
+            </div>
+
+            <div className="pt-4 border-t border-border">
+              <Button
+                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                onClick={() => {
+                  setBookingModalOpen(false);
+                  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                Request a Callback Instead
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* SERVICE TERMS MODAL */}
       <Dialog open={termsOpen} onOpenChange={setTermsOpen}>
@@ -767,22 +1058,16 @@ export default function VoiceVault() {
 
             <div>
               <h3 className="font-semibold text-foreground mb-2">5. Missed Payments</h3>
-              <p className="text-muted-foreground">If payments stop:</p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-2 mt-1">
-                <li>Editing services may pause</li>
-                <li>Content delivery may pause</li>
-                <li>Ownership rights remain with Voice Vault until resolved</li>
-              </ul>
+              <p className="text-muted-foreground">
+                If payments stop: editing services may pause, content delivery may pause, and ownership rights remain with Voice Vault until resolved.
+              </p>
             </div>
 
             <div>
               <h3 className="font-semibold text-foreground mb-2">6. Liability</h3>
-              <p className="text-muted-foreground">Voice Vault is not responsible for:</p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-2 mt-1">
-                <li>Lost data due to client error</li>
-                <li>Content quality impacted by client performance</li>
-                <li>Third-party platform issues (YouTube, Spotify, etc.)</li>
-              </ul>
+              <p className="text-muted-foreground">
+                Voice Vault is not responsible for: lost data due to client error, content quality impacted by client performance, or third-party platform issues (YouTube, Spotify, etc.).
+              </p>
             </div>
 
             <div>
@@ -794,7 +1079,10 @@ export default function VoiceVault() {
           </div>
 
           <div className="mt-6 pt-4 border-t border-border">
-            <Button onClick={() => setTermsOpen(false)} className="w-full">
+            <Button
+              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+              onClick={() => setTermsOpen(false)}
+            >
               I Understand
             </Button>
           </div>

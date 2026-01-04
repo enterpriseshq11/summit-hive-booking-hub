@@ -33,7 +33,7 @@ import azLogoIcon from "@/assets/az-logo-icon.png";
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
   { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, highlight: true },
-  { label: "Voice Vault", href: "/voice-vault", icon: Mic, highlight: true },
+  { label: "Voice Vault", href: "/voice-vault", icon: Mic, highlight: true, fullLabel: "Voice Vault by The Hive" },
   { label: "Shop", href: "/shop", icon: ShoppingBag },
   { label: "Summit", href: "/summit", icon: Building2 },
   { label: "Coworking", href: "/coworking", icon: Building2 },
