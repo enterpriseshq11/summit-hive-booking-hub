@@ -142,6 +142,26 @@ serve(async (req) => {
         logStep("Processing checkout", { recordId, productType, planType, recordType });
 
         if (productType === "hourly") {
+          // IDEMPOTENCY: Check current status before updating
+          const { data: existingBooking, error: fetchBookingError } = await supabaseClient
+            .from("voice_vault_bookings")
+            .select("payment_status")
+            .eq("id", recordId)
+            .single();
+
+          if (fetchBookingError) {
+            logStep("ERROR fetching booking", { error: fetchBookingError.message });
+            await logWebhookEvent(eventType, stripeEventId, recordId, recordType, metadata, "error", fetchBookingError.message);
+            throw fetchBookingError;
+          }
+
+          // IDEMPOTENCY: Do not upgrade canceled bookings
+          if (existingBooking?.payment_status === "canceled") {
+            logStep("SKIPPED - Booking is already canceled, ignoring late webhook", { recordId });
+            await logWebhookEvent(eventType, stripeEventId, recordId, recordType, metadata, "success", "Booking already canceled - ignored");
+            break;
+          }
+
           const { error } = await supabaseClient
             .from("voice_vault_bookings")
             .update({

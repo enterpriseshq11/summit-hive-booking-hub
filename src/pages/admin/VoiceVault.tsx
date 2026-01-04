@@ -144,10 +144,12 @@ export default function VoiceVaultAdmin() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPackage, setSelectedPackage] = useState<PackageOrder | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<HourlyBooking | null>(null);
   const [releaseModalOpen, setReleaseModalOpen] = useState(false);
   const [markPaidModalOpen, setMarkPaidModalOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [notesModalOpen, setNotesModalOpen] = useState(false);
+  const [cancelBookingModalOpen, setCancelBookingModalOpen] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState("");
   const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
 
@@ -332,6 +334,135 @@ export default function VoiceVaultAdmin() {
       fetchData();
     } catch (err) {
       toast.error("Failed to save notes");
+      console.error(err);
+    }
+  };
+
+  // Cancel pending hourly booking with audit log
+  const handleCancelBooking = async () => {
+    if (!selectedBooking) return;
+    
+    if (selectedBooking.payment_status !== "pending") {
+      toast.error("Only pending bookings can be canceled");
+      return;
+    }
+
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const adminId = userData.user?.id;
+      const adminEmail = userData.user?.email;
+      const canceledAt = new Date().toISOString();
+      
+      // Update booking to canceled
+      const { error: updateError } = await supabase
+        .from("voice_vault_bookings")
+        .update({
+          payment_status: "canceled",
+          canceled_at: canceledAt,
+        } as Record<string, unknown>)
+        .eq("id", selectedBooking.id);
+
+      if (updateError) throw updateError;
+
+      // Log to audit_log table
+      const { error: auditError } = await supabase
+        .from("audit_log")
+        .insert({
+          action_type: "cancel_booking",
+          entity_type: "voice_vault_booking",
+          entity_id: selectedBooking.id,
+          actor_user_id: adminId,
+          before_json: {
+            payment_status: selectedBooking.payment_status,
+            customer_email: selectedBooking.customer_email,
+            booking_date: selectedBooking.booking_date,
+            start_time: selectedBooking.start_time,
+          },
+          after_json: {
+            payment_status: "canceled",
+            canceled_at: canceledAt,
+            canceled_by: adminEmail,
+          },
+        });
+
+      if (auditError) {
+        console.error("Audit log error:", auditError);
+      }
+
+      toast.success("Booking canceled. Audit log recorded.");
+      setCancelBookingModalOpen(false);
+      setSelectedBooking(null);
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to cancel booking");
+      console.error(err);
+    }
+  };
+
+  // Auto-cleanup stale pending bookings (older than 30 minutes)
+  const handleCleanupStaleBookings = async () => {
+    try {
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      
+      // Find stale pending bookings
+      const { data: staleBookings, error: fetchError } = await supabase
+        .from("voice_vault_bookings")
+        .select("id, customer_email, booking_date, start_time, created_at")
+        .eq("payment_status", "pending")
+        .lt("created_at", thirtyMinutesAgo);
+
+      if (fetchError) throw fetchError;
+
+      if (!staleBookings || staleBookings.length === 0) {
+        toast.info("No stale pending bookings to cleanup");
+        return;
+      }
+
+      const { data: userData } = await supabase.auth.getUser();
+      const adminId = userData.user?.id;
+      const adminEmail = userData.user?.email;
+      const canceledAt = new Date().toISOString();
+
+      // Update all stale bookings to canceled
+      const { error: updateError } = await supabase
+        .from("voice_vault_bookings")
+        .update({
+          payment_status: "canceled",
+          canceled_at: canceledAt,
+        } as Record<string, unknown>)
+        .eq("payment_status", "pending")
+        .lt("created_at", thirtyMinutesAgo);
+
+      if (updateError) throw updateError;
+
+      // Log each cancellation to audit log
+      for (const booking of staleBookings) {
+        await supabase
+          .from("audit_log")
+          .insert({
+            action_type: "auto_cancel_stale_booking",
+            entity_type: "voice_vault_booking",
+            entity_id: booking.id,
+            actor_user_id: adminId,
+            before_json: {
+              payment_status: "pending",
+              customer_email: booking.customer_email,
+              booking_date: booking.booking_date,
+              created_at: booking.created_at,
+            },
+            after_json: {
+              payment_status: "canceled",
+              canceled_at: canceledAt,
+              reason: "Auto-canceled: pending > 30 minutes",
+              canceled_by: adminEmail,
+            },
+          });
+      }
+
+      toast.success(`Cleaned up ${staleBookings.length} stale booking(s)`);
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to cleanup stale bookings");
       console.error(err);
     }
   };
@@ -634,6 +765,20 @@ export default function VoiceVaultAdmin() {
           {/* Hourly Tab */}
           <TabsContent value="hourly">
             <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Hourly Bookings</CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCleanupStaleBookings}
+                    className="text-orange-500 border-orange-500/50 hover:bg-orange-500/10"
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    Cleanup Stale Pending
+                  </Button>
+                </div>
+              </CardHeader>
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
@@ -643,6 +788,7 @@ export default function VoiceVaultAdmin() {
                       <TableHead>Duration</TableHead>
                       <TableHead>Amount</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -678,12 +824,28 @@ export default function VoiceVaultAdmin() {
                               {paymentConfig.label}
                             </Badge>
                           </TableCell>
+                          <TableCell className="text-right">
+                            {booking.payment_status === "pending" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-500 border-red-500/50 hover:bg-red-500/10"
+                                onClick={() => {
+                                  setSelectedBooking(booking);
+                                  setCancelBookingModalOpen(true);
+                                }}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Cancel
+                              </Button>
+                            )}
+                          </TableCell>
                         </TableRow>
                       );
                     })}
                     {filteredBookings.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                           No bookings found
                         </TableCell>
                       </TableRow>
@@ -965,6 +1127,74 @@ export default function VoiceVaultAdmin() {
             </Button>
             <Button onClick={handleSaveNotes}>
               Save Notes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Booking Modal */}
+      <Dialog open={cancelBookingModalOpen} onOpenChange={setCancelBookingModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <XCircle className="w-5 h-5 text-red-500" />
+              Cancel Booking
+            </DialogTitle>
+            <DialogDescription>
+              This action will cancel the pending booking and is recorded in the audit log.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedBooking && (
+            <div className="space-y-4">
+              <div className="bg-secondary/50 rounded-lg p-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Customer</span>
+                  <span className="font-medium text-foreground">{selectedBooking.customer_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email</span>
+                  <span className="font-medium text-foreground">{selectedBooking.customer_email}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Date</span>
+                  <span className="font-medium text-foreground">{selectedBooking.booking_date}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Time</span>
+                  <span className="font-medium text-foreground">
+                    {selectedBooking.start_time} - {selectedBooking.end_time}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Amount</span>
+                  <span className="font-medium text-foreground">${selectedBooking.total_amount}</span>
+                </div>
+              </div>
+
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                <p className="text-sm text-foreground">
+                  <strong>Warning:</strong> Canceling this booking will:
+                </p>
+                <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                  <li>• Mark the booking as canceled</li>
+                  <li>• Free up the time slot for other bookings</li>
+                  <li>• Record this action in the audit log</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setCancelBookingModalOpen(false)}>
+              Keep Booking
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelBooking}
+            >
+              <XCircle className="w-4 h-4 mr-2" />
+              Cancel Booking
             </Button>
           </DialogFooter>
         </DialogContent>
