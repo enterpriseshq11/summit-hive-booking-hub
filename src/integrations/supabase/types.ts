@@ -3471,6 +3471,42 @@ export type Database = {
         }
         Relationships: []
       }
+      voice_vault_webhook_events: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          payload: Json | null
+          record_id: string | null
+          record_type: string | null
+          result: string | null
+          result_details: string | null
+          stripe_event_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          payload?: Json | null
+          record_id?: string | null
+          record_type?: string | null
+          result?: string | null
+          result_details?: string | null
+          stripe_event_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          record_id?: string | null
+          record_type?: string | null
+          result?: string | null
+          result_details?: string | null
+          stripe_event_id?: string | null
+        }
+        Relationships: []
+      }
       waitlist_entries: {
         Row: {
           bookable_type_id: string | null

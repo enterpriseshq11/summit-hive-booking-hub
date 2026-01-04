@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -36,6 +37,12 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Mic,
   Clock,
   Package,
@@ -49,10 +56,15 @@ import {
   Search,
   RefreshCw,
   FileText,
+  Activity,
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+
+// Stripe mode indicator - Change this when going live
+const STRIPE_MODE: "TEST" | "LIVE" = "TEST";
 
 type PaymentStatus = "pending" | "active_payment" | "paused_payment" | "paid_in_full" | "defaulted";
 type ContentStatus = "not_applicable" | "recording_in_progress" | "editing_in_progress" | "payment_active" | "paid_in_full" | "rights_released";
@@ -91,6 +103,17 @@ interface PackageOrder {
   created_at: string;
 }
 
+interface WebhookEvent {
+  id: string;
+  event_type: string;
+  stripe_event_id: string | null;
+  record_id: string | null;
+  record_type: string | null;
+  result: string | null;
+  result_details: string | null;
+  created_at: string;
+}
+
 const paymentStatusConfig: Record<PaymentStatus, { label: string; icon: typeof CheckCircle2; className: string }> = {
   pending: { label: "Pending", icon: Clock, className: "bg-yellow-500/10 text-yellow-500 border-yellow-500/30" },
   active_payment: { label: "Active", icon: CheckCircle2, className: "bg-green-500/10 text-green-500 border-green-500/30" },
@@ -111,6 +134,7 @@ const contentStatusConfig: Record<ContentStatus, { label: string; icon: typeof L
 export default function VoiceVaultAdmin() {
   const [hourlyBookings, setHourlyBookings] = useState<HourlyBooking[]>([]);
   const [packageOrders, setPackageOrders] = useState<PackageOrder[]>([]);
+  const [webhookEvents, setWebhookEvents] = useState<WebhookEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPackage, setSelectedPackage] = useState<PackageOrder | null>(null);
@@ -122,7 +146,7 @@ export default function VoiceVaultAdmin() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [bookingsRes, packagesRes] = await Promise.all([
+      const [bookingsRes, packagesRes, webhooksRes] = await Promise.all([
         supabase
           .from("voice_vault_bookings")
           .select("*")
@@ -131,13 +155,20 @@ export default function VoiceVaultAdmin() {
           .from("voice_vault_packages")
           .select("*")
           .order("created_at", { ascending: false }),
+        supabase
+          .from("voice_vault_webhook_events")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(50),
       ]);
 
       if (bookingsRes.error) throw bookingsRes.error;
       if (packagesRes.error) throw packagesRes.error;
-
+      // Webhooks might not exist yet, don't throw
+      
       setHourlyBookings(bookingsRes.data as unknown as HourlyBooking[]);
       setPackageOrders(packagesRes.data as unknown as PackageOrder[]);
+      setWebhookEvents((webhooksRes.data || []) as unknown as WebhookEvent[]);
     } catch (err) {
       toast.error("Failed to load data");
       console.error(err);
@@ -264,6 +295,19 @@ export default function VoiceVaultAdmin() {
   return (
     <AdminLayout>
       <div className="space-y-6">
+        {/* Stripe Mode Indicator */}
+        <Alert className={STRIPE_MODE === "TEST" ? "border-yellow-500/50 bg-yellow-500/10" : "border-green-500/50 bg-green-500/10"}>
+          <AlertTriangle className={`h-4 w-4 ${STRIPE_MODE === "TEST" ? "text-yellow-500" : "text-green-500"}`} />
+          <AlertTitle className={STRIPE_MODE === "TEST" ? "text-yellow-500" : "text-green-500"}>
+            Stripe Mode: {STRIPE_MODE}
+          </AlertTitle>
+          <AlertDescription className="text-muted-foreground">
+            {STRIPE_MODE === "TEST" 
+              ? "Using Stripe TEST keys. All transactions are simulated."
+              : "Using Stripe LIVE keys. Transactions are real."}
+          </AlertDescription>
+        </Alert>
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -342,6 +386,10 @@ export default function VoiceVaultAdmin() {
             <TabsTrigger value="hourly" className="gap-2">
               <Clock className="w-4 h-4" />
               Hourly ({hourlyBookings.length})
+            </TabsTrigger>
+            <TabsTrigger value="webhooks" className="gap-2">
+              <Activity className="w-4 h-4" />
+              Webhook Logs ({webhookEvents.length})
             </TabsTrigger>
           </TabsList>
 
@@ -518,6 +566,78 @@ export default function VoiceVaultAdmin() {
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                           No bookings found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Webhook Logs Tab */}
+          <TabsContent value="webhooks">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Activity className="w-5 h-5" />
+                  Webhook Event Log
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Event Type</TableHead>
+                      <TableHead>Record</TableHead>
+                      <TableHead>Result</TableHead>
+                      <TableHead>Details</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {webhookEvents.map((event) => (
+                      <TableRow key={event.id}>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {format(new Date(event.created_at), "MMM d, HH:mm:ss")}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="font-mono text-xs">
+                            {event.event_type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {event.record_type && (
+                            <span className="text-sm">
+                              {event.record_type}
+                              {event.record_id && (
+                                <span className="text-muted-foreground ml-1 font-mono text-xs">
+                                  ({event.record_id.slice(0, 8)}...)
+                                </span>
+                              )}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="outline" 
+                            className={event.result === "success" 
+                              ? "bg-green-500/10 text-green-500 border-green-500/30" 
+                              : "bg-red-500/10 text-red-500 border-red-500/30"
+                            }
+                          >
+                            {event.result}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
+                          {event.result_details}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {webhookEvents.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                          No webhook events recorded yet
                         </TableCell>
                       </TableRow>
                     )}
