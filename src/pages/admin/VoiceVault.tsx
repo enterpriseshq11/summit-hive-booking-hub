@@ -58,6 +58,8 @@ import {
   FileText,
   Activity,
   AlertTriangle,
+  Copy,
+  Check,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -65,6 +67,9 @@ import { format } from "date-fns";
 
 // Stripe mode indicator - Change this when going live
 const STRIPE_MODE: "TEST" | "LIVE" = "TEST";
+
+// Webhook URL for Stripe registration
+const WEBHOOK_URL = "https://epozsuimlqdeqquiryok.supabase.co/functions/v1/voice-vault-webhook";
 
 type PaymentStatus = "pending" | "active_payment" | "paused_payment" | "paid_in_full" | "defaulted" | "canceled";
 type ContentStatus = "not_applicable" | "recording_in_progress" | "editing_in_progress" | "payment_active" | "paid_in_full" | "rights_released";
@@ -144,6 +149,14 @@ export default function VoiceVaultAdmin() {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState("");
+  const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
+
+  const handleCopyWebhookUrl = () => {
+    navigator.clipboard.writeText(WEBHOOK_URL);
+    setWebhookUrlCopied(true);
+    toast.success("Webhook URL copied to clipboard");
+    setTimeout(() => setWebhookUrlCopied(false), 2000);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -361,17 +374,42 @@ export default function VoiceVaultAdmin() {
     <AdminLayout>
       <div className="space-y-6">
         {/* Stripe Mode Indicator */}
-        <Alert className={STRIPE_MODE === "TEST" ? "border-yellow-500/50 bg-yellow-500/10" : "border-green-500/50 bg-green-500/10"}>
-          <AlertTriangle className={`h-4 w-4 ${STRIPE_MODE === "TEST" ? "text-yellow-500" : "text-green-500"}`} />
-          <AlertTitle className={STRIPE_MODE === "TEST" ? "text-yellow-500" : "text-green-500"}>
-            Stripe Mode: {STRIPE_MODE}
-          </AlertTitle>
-          <AlertDescription className="text-muted-foreground">
-            {STRIPE_MODE === "TEST" 
-              ? "Using Stripe TEST keys. All transactions are simulated."
-              : "Using Stripe LIVE keys. Transactions are real."}
-          </AlertDescription>
-        </Alert>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Alert className={`flex-1 ${STRIPE_MODE === "TEST" ? "border-yellow-500/50 bg-yellow-500/10" : "border-green-500/50 bg-green-500/10"}`}>
+            <AlertTriangle className={`h-4 w-4 ${STRIPE_MODE === "TEST" ? "text-yellow-500" : "text-green-500"}`} />
+            <AlertTitle className={STRIPE_MODE === "TEST" ? "text-yellow-500" : "text-green-500"}>
+              Stripe Mode: {STRIPE_MODE}
+            </AlertTitle>
+            <AlertDescription className="text-muted-foreground">
+              {STRIPE_MODE === "TEST" 
+                ? "Using Stripe TEST keys. All transactions are simulated."
+                : "Using Stripe LIVE keys. Transactions are real."}
+            </AlertDescription>
+          </Alert>
+          
+          {/* Webhook URL Copy */}
+          <Alert className="border-accent/30 bg-accent/5">
+            <Activity className="h-4 w-4 text-accent" />
+            <AlertTitle className="text-accent">Webhook URL</AlertTitle>
+            <AlertDescription className="text-muted-foreground flex items-center gap-2 mt-1">
+              <code className="text-xs bg-muted px-2 py-1 rounded truncate max-w-[200px] sm:max-w-none">
+                {WEBHOOK_URL}
+              </code>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCopyWebhookUrl}
+                className="shrink-0 h-7 px-2"
+              >
+                {webhookUrlCopied ? (
+                  <Check className="h-3 w-3 text-green-500" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
