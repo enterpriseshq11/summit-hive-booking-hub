@@ -66,7 +66,7 @@ import { format } from "date-fns";
 // Stripe mode indicator - Change this when going live
 const STRIPE_MODE: "TEST" | "LIVE" = "TEST";
 
-type PaymentStatus = "pending" | "active_payment" | "paused_payment" | "paid_in_full" | "defaulted";
+type PaymentStatus = "pending" | "active_payment" | "paused_payment" | "paid_in_full" | "defaulted" | "canceled";
 type ContentStatus = "not_applicable" | "recording_in_progress" | "editing_in_progress" | "payment_active" | "paid_in_full" | "rights_released";
 
 interface HourlyBooking {
@@ -120,6 +120,7 @@ const paymentStatusConfig: Record<PaymentStatus, { label: string; icon: typeof C
   paused_payment: { label: "Paused", icon: PauseCircle, className: "bg-orange-500/10 text-orange-500 border-orange-500/30" },
   paid_in_full: { label: "Paid in Full", icon: CheckCircle2, className: "bg-accent/10 text-accent border-accent/30" },
   defaulted: { label: "Defaulted", icon: XCircle, className: "bg-red-500/10 text-red-500 border-red-500/30" },
+  canceled: { label: "Canceled", icon: XCircle, className: "bg-muted text-muted-foreground border-muted-foreground/30" },
 };
 
 const contentStatusConfig: Record<ContentStatus, { label: string; icon: typeof Lock }> = {
@@ -139,6 +140,7 @@ export default function VoiceVaultAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPackage, setSelectedPackage] = useState<PackageOrder | null>(null);
   const [releaseModalOpen, setReleaseModalOpen] = useState(false);
+  const [markPaidModalOpen, setMarkPaidModalOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState("");
@@ -208,6 +210,69 @@ export default function VoiceVaultAdmin() {
       fetchData();
     } catch (err) {
       toast.error("Failed to release rights");
+      console.error(err);
+    }
+  };
+
+  // Admin-only "Mark Paid in Full" with audit log
+  const handleMarkPaidInFull = async () => {
+    if (!selectedPackage) return;
+    
+    // Only allow if not already paid_in_full
+    if (selectedPackage.payment_status === "paid_in_full") {
+      toast.error("Already marked as paid in full");
+      return;
+    }
+
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const adminId = userData.user?.id;
+      const adminEmail = userData.user?.email;
+      
+      // Update package to paid_in_full
+      const { error: updateError } = await supabase
+        .from("voice_vault_packages")
+        .update({
+          payment_status: "paid_in_full",
+          content_status: "paid_in_full",
+          paid_amount: selectedPackage.package_price,
+          balance_remaining: 0,
+        } as Record<string, unknown>)
+        .eq("id", selectedPackage.id);
+
+      if (updateError) throw updateError;
+
+      // Log to audit_log table for tracking
+      const { error: auditError } = await supabase
+        .from("audit_log")
+        .insert({
+          action_type: "mark_paid_in_full",
+          entity_type: "voice_vault_package",
+          entity_id: selectedPackage.id,
+          actor_user_id: adminId,
+          before_json: {
+            payment_status: selectedPackage.payment_status,
+            paid_amount: selectedPackage.paid_amount,
+            balance_remaining: selectedPackage.balance_remaining,
+          },
+          after_json: {
+            payment_status: "paid_in_full",
+            paid_amount: selectedPackage.package_price,
+            balance_remaining: 0,
+            marked_by: adminEmail,
+          },
+        });
+
+      if (auditError) {
+        console.error("Audit log error:", auditError);
+        // Don't throw - the main action succeeded
+      }
+
+      toast.success("Package marked as Paid in Full. Audit log recorded.");
+      setMarkPaidModalOpen(false);
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to mark as paid");
       console.error(err);
     }
   };
@@ -463,7 +528,7 @@ export default function VoiceVaultAdmin() {
                             </button>
                           </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex gap-2 justify-end">
+                            <div className="flex gap-2 justify-end flex-wrap">
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -475,6 +540,22 @@ export default function VoiceVaultAdmin() {
                               >
                                 Notes
                               </Button>
+                              {/* Mark Paid in Full button - only for non-paid packages */}
+                              {pkg.payment_status !== "paid_in_full" && pkg.payment_status !== "canceled" && pkg.payment_status !== "defaulted" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-green-500/50 text-green-500 hover:bg-green-500/10"
+                                  onClick={() => {
+                                    setSelectedPackage(pkg);
+                                    setMarkPaidModalOpen(true);
+                                  }}
+                                >
+                                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                                  Mark Paid
+                                </Button>
+                              )}
+                              {/* Release Rights button - only when paid_in_full and not yet released */}
                               {pkg.payment_status === "paid_in_full" && pkg.content_status !== "rights_released" && (
                                 <Button
                                   size="sm"
@@ -747,6 +828,79 @@ export default function VoiceVaultAdmin() {
               </p>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Mark Paid in Full Modal */}
+      <Dialog open={markPaidModalOpen} onOpenChange={setMarkPaidModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
+              Mark as Paid in Full
+            </DialogTitle>
+            <DialogDescription>
+              This action will mark the package as fully paid and is recorded in the audit log.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPackage && (
+            <div className="space-y-4">
+              <div className="bg-secondary/50 rounded-lg p-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Customer</span>
+                  <span className="font-medium text-foreground">{selectedPackage.customer_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Product</span>
+                  <span className="font-medium text-foreground">
+                    {selectedPackage.product_type === "core_series" ? "Core Series" : "White Glove"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Current Status</span>
+                  <span className="font-medium text-foreground">{paymentStatusConfig[selectedPackage.payment_status].label}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Package Price</span>
+                  <span className="font-medium text-foreground">${selectedPackage.package_price}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Currently Paid</span>
+                  <span className="font-medium text-foreground">${selectedPackage.paid_amount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Balance Remaining</span>
+                  <span className="font-medium text-orange-500">${selectedPackage.balance_remaining}</span>
+                </div>
+              </div>
+
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                <p className="text-sm text-foreground">
+                  <strong>⚠️ Admin Override:</strong>
+                </p>
+                <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                  <li>• This will set paid_amount to ${selectedPackage.package_price}</li>
+                  <li>• Balance will be set to $0</li>
+                  <li>• Payment status will change to "Paid in Full"</li>
+                  <li>• This action is recorded in the audit log</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setMarkPaidModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={handleMarkPaidInFull}
+            >
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Confirm Mark as Paid
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
