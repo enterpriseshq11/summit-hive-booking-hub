@@ -3790,7 +3790,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "no_show"
-      business_type: "summit" | "coworking" | "spa" | "fitness"
+      business_type: "summit" | "coworking" | "spa" | "fitness" | "voice_vault"
       claim_status:
         | "pending"
         | "verified"
@@ -4044,7 +4044,7 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
-      business_type: ["summit", "coworking", "spa", "fitness"],
+      business_type: ["summit", "coworking", "spa", "fitness", "voice_vault"],
       claim_status: [
         "pending",
         "verified",

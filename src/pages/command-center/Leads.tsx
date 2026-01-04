@@ -70,6 +70,7 @@ const businessUnitLabels: Record<BusinessType, string> = {
   fitness: "Fitness",
   coworking: "Coworking",
   summit: "Summit",
+  voice_vault: "Voice Vault",
 };
 
 export default function CommandCenterLeads() {
