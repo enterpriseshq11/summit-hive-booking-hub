@@ -43,3 +43,4 @@ export { default as EventRequestForm } from "./EventRequestForm";
 export { default as LeaseSignupForm } from "./LeaseSignupForm";
 export { default as SpaBookingForm } from "./SpaBookingForm";
 export { default as MembershipSignupForm } from "./MembershipSignupForm";
+export { VoiceVaultBookingModal } from "./VoiceVaultBookingModal";

@@ -47,6 +47,7 @@ import AdminAuditLog from "./pages/admin/AuditLog";
 import AdminAssumptions from "./pages/admin/Assumptions";
 import AdminPromotions from "./pages/admin/Promotions";
 import AdminDopamineDrop from "./pages/admin/DopamineDrop";
+import AdminVoiceVault from "./pages/admin/VoiceVault";
 
 // Command Center Pages
 import CommandCenterDashboard from "./pages/command-center/Dashboard";
@@ -120,6 +121,7 @@ function AppInner() {
           <Route path="/admin/assumptions" element={<AdminAssumptions />} />
           <Route path="/admin/promotions" element={<AdminPromotions />} />
           <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
+          <Route path="/admin/voice-vault" element={<AdminVoiceVault />} />
         </Route>
 
         {/* Command Center routes */}
