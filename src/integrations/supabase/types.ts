@@ -3336,6 +3336,132 @@ export type Database = {
         }
         Relationships: []
       }
+      voice_vault_bookings: {
+        Row: {
+          booking_date: string
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          duration_hours: number
+          end_time: string
+          hourly_rate: number
+          id: string
+          internal_notes: string | null
+          payment_status: Database["public"]["Enums"]["voice_vault_payment_status"]
+          start_time: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          booking_date: string
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          duration_hours: number
+          end_time: string
+          hourly_rate?: number
+          id?: string
+          internal_notes?: string | null
+          payment_status?: Database["public"]["Enums"]["voice_vault_payment_status"]
+          start_time: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          booking_date?: string
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          duration_hours?: number
+          end_time?: string
+          hourly_rate?: number
+          id?: string
+          internal_notes?: string | null
+          payment_status?: Database["public"]["Enums"]["voice_vault_payment_status"]
+          start_time?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      voice_vault_packages: {
+        Row: {
+          balance_remaining: number
+          content_status: Database["public"]["Enums"]["voice_vault_content_status"]
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          internal_notes: string | null
+          next_payment_date: string | null
+          package_price: number
+          paid_amount: number
+          payment_plan: Database["public"]["Enums"]["voice_vault_payment_plan"]
+          payment_status: Database["public"]["Enums"]["voice_vault_payment_status"]
+          product_type: Database["public"]["Enums"]["voice_vault_product_type"]
+          rights_released_at: string | null
+          rights_released_by: string | null
+          stripe_checkout_session_id: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          balance_remaining: number
+          content_status?: Database["public"]["Enums"]["voice_vault_content_status"]
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          internal_notes?: string | null
+          next_payment_date?: string | null
+          package_price: number
+          paid_amount?: number
+          payment_plan: Database["public"]["Enums"]["voice_vault_payment_plan"]
+          payment_status?: Database["public"]["Enums"]["voice_vault_payment_status"]
+          product_type: Database["public"]["Enums"]["voice_vault_product_type"]
+          rights_released_at?: string | null
+          rights_released_by?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          balance_remaining?: number
+          content_status?: Database["public"]["Enums"]["voice_vault_content_status"]
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          internal_notes?: string | null
+          next_payment_date?: string | null
+          package_price?: number
+          paid_amount?: number
+          payment_plan?: Database["public"]["Enums"]["voice_vault_payment_plan"]
+          payment_status?: Database["public"]["Enums"]["voice_vault_payment_status"]
+          product_type?: Database["public"]["Enums"]["voice_vault_product_type"]
+          rights_released_at?: string | null
+          rights_released_by?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       waitlist_entries: {
         Row: {
           bookable_type_id: string | null
@@ -3699,6 +3825,21 @@ export type Database = {
         | "provider"
         | "amenity"
       ticket_source: "spin" | "prize" | "bonus"
+      voice_vault_content_status:
+        | "not_applicable"
+        | "recording_in_progress"
+        | "editing_in_progress"
+        | "payment_active"
+        | "paid_in_full"
+        | "rights_released"
+      voice_vault_payment_plan: "full" | "weekly"
+      voice_vault_payment_status:
+        | "pending"
+        | "active_payment"
+        | "paused_payment"
+        | "paid_in_full"
+        | "defaulted"
+      voice_vault_product_type: "hourly" | "core_series" | "white_glove"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3946,6 +4087,23 @@ export const Constants = {
         "amenity",
       ],
       ticket_source: ["spin", "prize", "bonus"],
+      voice_vault_content_status: [
+        "not_applicable",
+        "recording_in_progress",
+        "editing_in_progress",
+        "payment_active",
+        "paid_in_full",
+        "rights_released",
+      ],
+      voice_vault_payment_plan: ["full", "weekly"],
+      voice_vault_payment_status: [
+        "pending",
+        "active_payment",
+        "paused_payment",
+        "paid_in_full",
+        "defaulted",
+      ],
+      voice_vault_product_type: ["hourly", "core_series", "white_glove"],
     },
   },
 } as const

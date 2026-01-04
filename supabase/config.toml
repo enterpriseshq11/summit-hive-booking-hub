@@ -32,3 +32,15 @@ verify_jwt = false
 
 [functions.vip-webhook]
 verify_jwt = false
+
+[functions.voice-vault-checkout]
+verify_jwt = false
+
+[functions.voice-vault-webhook]
+verify_jwt = false
+
+[functions.generate-alerts]
+verify_jwt = false
+
+[functions.export-payroll]
+verify_jwt = false

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import voiceVaultLogo from "@/assets/voice-vault-logo.png";
+import { VoiceVaultBookingModal } from "@/components/booking/VoiceVaultBookingModal";
 
 // Gallery is currently in "Coming Soon" state - real images to be added
 const galleryComingSoon = true;
@@ -86,10 +88,24 @@ const faqItems = [
 ];
 
 export default function VoiceVault() {
+  const [searchParams] = useSearchParams();
   const [termsOpen, setTermsOpen] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [bookingType, setBookingType] = useState<"hourly" | "core_series" | "white_glove">("hourly");
   const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
+
+  // Handle success/cancelled URL params from Stripe
+  useEffect(() => {
+    const booking = searchParams.get("booking");
+    const pkg = searchParams.get("package");
+    
+    if (booking === "success" || pkg === "success") {
+      toast.success("Payment successful! We'll be in touch soon to confirm your booking.");
+    } else if (booking === "cancelled" || pkg === "cancelled") {
+      toast.info("Payment was cancelled. You can try again anytime.");
+    }
+  }, [searchParams]);
 
   const scrollToPackages = () => {
     document.getElementById("packages")?.scrollIntoView({ behavior: "smooth" });
@@ -102,9 +118,14 @@ export default function VoiceVault() {
     }, 100);
   };
 
-  const handleBookingClick = () => {
+  const openBooking = (type: "hourly" | "core_series" | "white_glove" = "hourly") => {
+    setBookingType(type);
     setBookingModalOpen(true);
   };
+
+  const handleBookingClick = () => openBooking("hourly");
+  const handleCoreSeriesClick = () => openBooking("core_series");
+  const handleWhiteGloveClick = () => openBooking("white_glove");
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -419,7 +440,7 @@ export default function VoiceVault() {
                 <Button
                   size="lg"
                   className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-                  onClick={handleBookingClick}
+                  onClick={handleCoreSeriesClick}
                 >
                   Start My Podcast
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -505,7 +526,7 @@ export default function VoiceVault() {
                   size="lg"
                   variant="outline"
                   className="w-full border-accent text-accent hover:bg-accent/10 font-semibold"
-                  onClick={handleBookingClick}
+                  onClick={handleWhiteGloveClick}
                 >
                   White-Glove Setup
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -894,62 +915,12 @@ export default function VoiceVault() {
         </div>
       </section>
 
-      {/* BOOKING COMING SOON MODAL */}
-      <Dialog open={bookingModalOpen} onOpenChange={setBookingModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-              <Calendar className="w-6 h-6 text-accent" />
-              Booking Coming Soon
-            </DialogTitle>
-            <DialogDescription>
-              Our online booking system is being finalized. In the meantime, let us help you get started!
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 mt-4">
-            <p className="text-sm text-muted-foreground">
-              To book studio time or discuss podcast packages:
-            </p>
-            
-            <div className="space-y-3">
-              <a
-                href="tel:+15673796340"
-                className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-              >
-                <Phone className="w-5 h-5 text-accent" />
-                <div>
-                  <p className="font-medium text-foreground">Call Us</p>
-                  <p className="text-sm text-muted-foreground">567-379-6340</p>
-                </div>
-              </a>
-              
-              <a
-                href="mailto:info@az-enterprises.com?subject=Voice Vault Booking Inquiry"
-                className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-              >
-                <Mail className="w-5 h-5 text-accent" />
-                <div>
-                  <p className="font-medium text-foreground">Email Us</p>
-                  <p className="text-sm text-muted-foreground">info@az-enterprises.com</p>
-                </div>
-              </a>
-            </div>
-
-            <div className="pt-4 border-t border-border">
-              <Button
-                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-                onClick={scrollToContact}
-              >
-                Request a Booking
-              </Button>
-              <p className="text-xs text-center text-muted-foreground mt-2">
-                Fill out our quick form and we'll get back to you within 24 hours.
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* BOOKING MODAL */}
+      <VoiceVaultBookingModal
+        open={bookingModalOpen}
+        onOpenChange={setBookingModalOpen}
+        initialType={bookingType}
+      />
 
       {/* SERVICE TERMS MODAL */}
       <Dialog open={termsOpen} onOpenChange={setTermsOpen}>
