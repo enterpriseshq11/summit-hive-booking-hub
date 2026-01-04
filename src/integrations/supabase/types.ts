@@ -3342,6 +3342,7 @@ export type Database = {
           admin_override_by: string | null
           admin_override_reason: string | null
           booking_date: string
+          canceled_at: string | null
           created_at: string
           customer_email: string
           customer_name: string
@@ -3363,6 +3364,7 @@ export type Database = {
           admin_override_by?: string | null
           admin_override_reason?: string | null
           booking_date: string
+          canceled_at?: string | null
           created_at?: string
           customer_email: string
           customer_name: string
@@ -3384,6 +3386,7 @@ export type Database = {
           admin_override_by?: string | null
           admin_override_reason?: string | null
           booking_date?: string
+          canceled_at?: string | null
           created_at?: string
           customer_email?: string
           customer_name?: string
