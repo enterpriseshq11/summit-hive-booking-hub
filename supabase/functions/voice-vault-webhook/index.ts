@@ -116,6 +116,22 @@ serve(async (req) => {
       livemode: event.livemode 
     });
 
+    // TRUE IDEMPOTENCY: Check if this exact Stripe event was already processed
+    const { data: existingEvent } = await supabaseClient
+      .from("voice_vault_webhook_events")
+      .select("id")
+      .eq("stripe_event_id", stripeEventId)
+      .maybeSingle();
+
+    if (existingEvent) {
+      logStep("DUPLICATE EVENT - Already processed, ignoring", { stripeEventId });
+      // Log as duplicate (won't insert due to unique constraint, but we return early)
+      return new Response(
+        JSON.stringify({ received: true, duplicate: true }),
+        { headers: { "Content-Type": "application/json" }, status: 200 }
+      );
+    }
+
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;

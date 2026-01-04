@@ -151,7 +151,8 @@ export default function VoiceVaultAdmin() {
   const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [cancelBookingModalOpen, setCancelBookingModalOpen] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState("");
-  const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
+const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
+  const [showCanceledBookings, setShowCanceledBookings] = useState(false);
 
   const handleCopyWebhookUrl = () => {
     navigator.clipboard.writeText(WEBHOOK_URL);
@@ -496,10 +497,12 @@ export default function VoiceVaultAdmin() {
     p.customer_email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredBookings = hourlyBookings.filter(b =>
-    b.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    b.customer_email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredBookings = hourlyBookings.filter(b => {
+    const matchesSearch = b.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      b.customer_email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCanceledFilter = showCanceledBookings || b.payment_status !== "canceled";
+    return matchesSearch && matchesCanceledFilter;
+  });
 
   return (
     <AdminLayout>
@@ -766,17 +769,28 @@ export default function VoiceVaultAdmin() {
           <TabsContent value="hourly">
             <Card>
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <CardTitle className="text-lg">Hourly Bookings</CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCleanupStaleBookings}
-                    className="text-orange-500 border-orange-500/50 hover:bg-orange-500/10"
-                  >
-                    <Clock className="w-4 h-4 mr-2" />
-                    Cleanup Stale Pending
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showCanceledBookings}
+                        onChange={(e) => setShowCanceledBookings(e.target.checked)}
+                        className="w-4 h-4 rounded border-border"
+                      />
+                      Show canceled
+                    </label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCleanupStaleBookings}
+                      className="text-orange-500 border-orange-500/50 hover:bg-orange-500/10"
+                    >
+                      <Clock className="w-4 h-4 mr-2" />
+                      Cancel stale pending (30+ min)
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
