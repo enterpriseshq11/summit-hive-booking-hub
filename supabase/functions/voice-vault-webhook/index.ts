@@ -297,11 +297,12 @@ serve(async (req) => {
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         const subscriptionId = invoice.subscription as string;
+        const attemptCount = invoice.attempt_count || 1;
 
         logStep("invoice.payment_failed - Invoice", {
           invoiceId: invoice.id,
           subscriptionId: subscriptionId,
-          attemptCount: invoice.attempt_count,
+          attemptCount: attemptCount,
         });
 
         if (!subscriptionId) {
@@ -310,24 +311,32 @@ serve(async (req) => {
         }
 
         // Find the package
-        const { data: pkg } = await supabaseClient
+        const { data: failedPkg, error: fetchFailedError } = await supabaseClient
           .from("voice_vault_packages")
-          .select("id")
+          .select("id, payment_status, paid_amount, balance_remaining")
           .eq("stripe_subscription_id", subscriptionId)
           .single();
 
-        if (pkg) {
-          recordId = pkg.id;
-          recordType = "package";
+        if (fetchFailedError || !failedPkg) {
+          logStep("Package not found for failed payment", { subscriptionId });
+          await logWebhookEvent(eventType, stripeEventId, null, "package", { subscriptionId }, "error", "Package not found");
+          break;
         }
 
+        recordId = failedPkg.id;
+        recordType = "package";
+        const previousStatus = failedPkg.payment_status;
+
+        // Set to paused_payment - rights remain GATED (not released)
+        // next_payment_date is cleared to indicate payment is stalled
         const { error } = await supabaseClient
           .from("voice_vault_packages")
           .update({
             payment_status: "paused_payment",
-            content_status: "payment_active", // Don't release rights
+            // Rights gating: content_status stays as-is (payment_active or editing_in_progress)
+            // Do NOT change to paid_in_full or rights_released
           })
-          .eq("stripe_subscription_id", subscriptionId);
+          .eq("id", failedPkg.id);
 
         if (error) {
           logStep("ERROR updating package (payment failed)", { error: error.message });
@@ -335,18 +344,32 @@ serve(async (req) => {
           throw error;
         }
 
-        logStep("SUCCESS - Payment failed, status set to paused_payment", { subscriptionId });
-        await logWebhookEvent(eventType, stripeEventId, recordId, recordType, { subscriptionId, attemptCount: invoice.attempt_count }, "success", "Payment failed - status set to paused_payment");
+        logStep("SUCCESS - Payment failed, status set to paused_payment", { 
+          subscriptionId, 
+          attemptCount,
+          previousStatus,
+          newStatus: "paused_payment",
+          paidAmount: failedPkg.paid_amount,
+          balanceRemaining: failedPkg.balance_remaining,
+        });
+        await logWebhookEvent(eventType, stripeEventId, recordId, recordType, { 
+          subscriptionId, 
+          attemptCount,
+          transition: `${previousStatus} → paused_payment`,
+          paidAmount: failedPkg.paid_amount,
+          balanceRemaining: failedPkg.balance_remaining,
+        }, "success", `${previousStatus} → paused_payment (attempt ${attemptCount})`);
         break;
       }
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
+        const cancelReason = subscription.cancellation_details?.reason;
         
         logStep("customer.subscription.deleted - Subscription", {
           subscriptionId: subscription.id,
           status: subscription.status,
-          cancelReason: subscription.cancellation_details?.reason,
+          cancelReason: cancelReason,
         });
 
         // Find the package
@@ -364,28 +387,47 @@ serve(async (req) => {
 
         recordId = packageData.id;
         recordType = "package";
+        const previousStatus = packageData.payment_status;
 
-        if (packageData.payment_status !== "paid_in_full") {
-          // If cancelled before fully paid, mark as defaulted
-          const { error } = await supabaseClient
-            .from("voice_vault_packages")
-            .update({
-              payment_status: "defaulted",
-            })
-            .eq("id", packageData.id);
-
-          if (error) {
-            logStep("ERROR updating package (subscription deleted)", { error: error.message });
-            await logWebhookEvent(eventType, stripeEventId, recordId, recordType, { previousStatus: packageData.payment_status }, "error", error.message);
-            throw error;
-          }
-
-          logStep("SUCCESS - Subscription cancelled before full payment - marked as defaulted", { recordId: packageData.id });
-          await logWebhookEvent(eventType, stripeEventId, recordId, recordType, { previousStatus: packageData.payment_status }, "success", "Subscription cancelled - marked as defaulted");
-        } else {
+        // Skip if already paid_in_full (subscription was canceled programmatically after final payment)
+        if (previousStatus === "paid_in_full") {
           logStep("Subscription deleted but package was already paid_in_full - no action needed", { recordId: packageData.id });
-          await logWebhookEvent(eventType, stripeEventId, recordId, recordType, { status: packageData.payment_status }, "success", "Already paid_in_full - no action needed");
+          await logWebhookEvent(eventType, stripeEventId, recordId, recordType, { 
+            previousStatus,
+            transition: "none (already paid_in_full)",
+          }, "success", "Already paid_in_full - subscription cleanup, no status change");
+          break;
         }
+
+        // Distinguish: canceled (voluntary) vs defaulted (payment failure)
+        // If previous status was paused_payment, treat as defaulted (payment failure led to cancellation)
+        // Otherwise, treat as canceled (voluntary cancellation)
+        const newStatus = previousStatus === "paused_payment" ? "defaulted" : "canceled";
+
+        const { error } = await supabaseClient
+          .from("voice_vault_packages")
+          .update({
+            payment_status: newStatus,
+          })
+          .eq("id", packageData.id);
+
+        if (error) {
+          logStep("ERROR updating package (subscription deleted)", { error: error.message });
+          await logWebhookEvent(eventType, stripeEventId, recordId, recordType, { previousStatus }, "error", error.message);
+          throw error;
+        }
+
+        logStep(`SUCCESS - Subscription deleted - marked as ${newStatus}`, { 
+          recordId: packageData.id,
+          previousStatus,
+          newStatus,
+          cancelReason,
+        });
+        await logWebhookEvent(eventType, stripeEventId, recordId, recordType, { 
+          previousStatus,
+          transition: `${previousStatus} → ${newStatus}`,
+          cancelReason,
+        }, "success", `${previousStatus} → ${newStatus} (${cancelReason || "voluntary"})`);
         break;
       }
 

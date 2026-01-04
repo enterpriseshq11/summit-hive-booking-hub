@@ -3893,6 +3893,7 @@ export type Database = {
         | "paused_payment"
         | "paid_in_full"
         | "defaulted"
+        | "canceled"
       voice_vault_product_type: "hourly" | "core_series" | "white_glove"
     }
     CompositeTypes: {
@@ -4156,6 +4157,7 @@ export const Constants = {
         "paused_payment",
         "paid_in_full",
         "defaulted",
+        "canceled",
       ],
       voice_vault_product_type: ["hourly", "core_series", "white_glove"],
     },
