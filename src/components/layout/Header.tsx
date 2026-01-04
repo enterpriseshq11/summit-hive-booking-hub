@@ -33,7 +33,7 @@ import azLogoIcon from "@/assets/az-logo-icon.png";
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
   { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, highlight: true },
-  { label: "Voice Vault", href: "/voice-vault", icon: Mic, highlight: true, fullLabel: "Voice Vault by The Hive" },
+  { label: "Voice Vault", mobileLabel: "Voice Vault", desktopLabel: "Voice Vault by The Hive", href: "/voice-vault", icon: Mic, highlight: true },
   { label: "Shop", href: "/shop", icon: ShoppingBag },
   { label: "Summit", href: "/summit", icon: Building2 },
   { label: "Coworking", href: "/coworking", icon: Building2 },
@@ -81,12 +81,13 @@ export function Header() {
         <nav className="hidden md:flex items-center space-x-1" aria-label="Primary">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
+            const displayLabel = item.desktopLabel || item.label;
             return (
               <Link
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                  "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
                   isActive
                     ? "bg-accent text-primary"
                     : item.primary
@@ -97,7 +98,7 @@ export function Header() {
                 )}
               >
                 <item.icon className="h-4 w-4" />
-                {item.label}
+                {displayLabel}
               </Link>
             );
           })}
@@ -182,6 +183,7 @@ export function Header() {
         <nav className="md:hidden border-t border-primary-foreground/10 bg-primary p-4 space-y-2 animate-fade-in" aria-label="Mobile">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
+            const displayLabel = item.mobileLabel || item.label;
             return (
               <Link
                 key={item.href}
@@ -191,11 +193,13 @@ export function Header() {
                   "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors",
                   isActive
                     ? "bg-accent text-primary"
-                    : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                    : item.highlight
+                      ? "text-accent hover:text-accent hover:bg-accent/10"
+                      : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                 )}
               >
                 <item.icon className="h-5 w-5" />
-                {item.label}
+                {displayLabel}
               </Link>
             );
           })}
