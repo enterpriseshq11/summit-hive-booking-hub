@@ -33,8 +33,6 @@ import {
   Calendar,
   Headphones,
   Sliders,
-  ChevronLeft,
-  ChevronRight,
   X,
   Sparkles,
   Zap,
@@ -50,15 +48,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import voiceVaultLogo from "@/assets/voice-vault-logo.png";
 
-// Placeholder images for gallery (will be replaced with real photos)
-const galleryImages = [
-  { id: 1, src: "/placeholder.svg", alt: "Voice Vault Studio - Main Recording Area" },
-  { id: 2, src: "/placeholder.svg", alt: "Professional Microphones & Equipment" },
-  { id: 3, src: "/placeholder.svg", alt: "Adjustable Studio Lighting Setup" },
-  { id: 4, src: "/placeholder.svg", alt: "Comfortable Seating for Guests" },
-  { id: 5, src: "/placeholder.svg", alt: "Video Recording Equipment" },
-  { id: 6, src: "/placeholder.svg", alt: "Soundproof Environment" },
-];
+// Gallery is currently in "Coming Soon" state - real images to be added
+const galleryComingSoon = true;
 
 const studioFeatures = [
   { icon: Shield, title: "Fully Soundproof", description: "Professional acoustic isolation" },
@@ -95,23 +86,20 @@ const faqItems = [
 ];
 
 export default function VoiceVault() {
-  const [galleryOpen, setGalleryOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [termsOpen, setTermsOpen] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
-  };
-
   const scrollToPackages = () => {
     document.getElementById("packages")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToContact = () => {
+    setBookingModalOpen(false);
+    setTimeout(() => {
+      document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   const handleBookingClick = () => {
@@ -596,7 +584,7 @@ export default function VoiceVault() {
       </section>
 
       {/* CONTACT / REQUEST CALL SECTION */}
-      <section id="contact" className="py-16 bg-secondary/30">
+      <section id="contact-form" className="py-16 bg-secondary/30 scroll-mt-20">
         <div className="container">
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-10">
@@ -788,7 +776,7 @@ export default function VoiceVault() {
         </div>
       </section>
 
-      {/* MEDIA GALLERY */}
+      {/* MEDIA GALLERY - COMING SOON */}
       <section className="py-16 bg-background">
         <div className="container">
           <div className="text-center mb-10">
@@ -800,26 +788,28 @@ export default function VoiceVault() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {galleryImages.map((image, index) => (
-              <button
-                key={image.id}
-                onClick={() => {
-                  setCurrentImageIndex(index);
-                  setGalleryOpen(true);
-                }}
-                className="aspect-video relative rounded-lg overflow-hidden bg-muted hover:ring-2 hover:ring-accent transition-all group"
-              >
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="text-primary-foreground font-medium text-sm">View</span>
+          <div className="max-w-3xl mx-auto">
+            <Card className="bg-card border-2 border-accent/30">
+              <CardContent className="p-8 md:p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
+                  <Video className="w-8 h-8 text-accent" />
                 </div>
-              </button>
-            ))}
+                <h3 className="text-2xl font-bold text-foreground mb-3">
+                  Gallery Coming Soon
+                </h3>
+                <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+                  We're putting the finishing touches on our studio photos and videos. Want to see the space in person?
+                </p>
+                <Button
+                  size="lg"
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                  onClick={handleBookingClick}
+                >
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Request a Tour
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -859,48 +849,6 @@ export default function VoiceVault() {
           </div>
         </div>
       </section>
-
-      {/* Gallery Modal */}
-      <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
-        <DialogContent className="max-w-4xl bg-primary border-primary-foreground/20">
-          <div className="relative">
-            <img
-              src={galleryImages[currentImageIndex].src}
-              alt={galleryImages[currentImageIndex].alt}
-              className="w-full h-auto rounded-lg"
-            />
-            <p className="text-center text-primary-foreground/80 mt-4 text-sm">
-              {galleryImages[currentImageIndex].alt}
-            </p>
-            
-            <button
-              onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 flex items-center justify-center transition-colors"
-            >
-              <ChevronLeft className="w-6 h-6 text-primary-foreground" />
-            </button>
-            <button
-              onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 flex items-center justify-center transition-colors"
-            >
-              <ChevronRight className="w-6 h-6 text-primary-foreground" />
-            </button>
-          </div>
-
-          <div className="flex justify-center gap-2 mt-4">
-            {galleryImages.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentImageIndex(index)}
-                className={cn(
-                  "w-2 h-2 rounded-full transition-colors",
-                  index === currentImageIndex ? "bg-accent" : "bg-primary-foreground/30"
-                )}
-              />
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* FINAL CTA */}
       <section className="py-20 bg-primary text-primary-foreground">
@@ -991,13 +939,13 @@ export default function VoiceVault() {
             <div className="pt-4 border-t border-border">
               <Button
                 className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-                onClick={() => {
-                  setBookingModalOpen(false);
-                  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-                }}
+                onClick={scrollToContact}
               >
-                Request a Callback Instead
+                Request a Booking
               </Button>
+              <p className="text-xs text-center text-muted-foreground mt-2">
+                Fill out our quick form and we'll get back to you within 24 hours.
+              </p>
             </div>
           </div>
         </DialogContent>
