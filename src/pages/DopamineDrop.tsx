@@ -60,10 +60,12 @@ export default function DopamineDrop() {
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
       if (data) {
+        // streak can be an object {current, longest, ...} or a number - extract the current value
+        const streakValue = typeof data.streak === 'object' ? (data.streak?.current ?? 0) : (data.streak ?? 0);
         setStatus({
           spinsRemaining: data.spins_remaining ?? 0,
           isVip: data.is_vip ?? false,
-          streak: data.streak ?? 0,
+          streak: streakValue,
           entryTotals: data.entry_totals ?? { general: 0, massage: 0, pt: 0 }
         });
       }
