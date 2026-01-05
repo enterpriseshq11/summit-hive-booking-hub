@@ -17,6 +17,11 @@ import {
   BusinessFilterTabs,
   BookingSectionAnchor,
   QuickActionCard,
+  HiveWaitlistModal,
+  ScheduleTourModal,
+  SpaWaitlistModal,
+  FitnessWaitlistModal,
+  SummitWaitlistModal,
 } from "@/components/booking";
 import { 
   Building2, 
@@ -87,6 +92,14 @@ export default function BookingHub() {
   const [selectedBusiness, setSelectedBusiness] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
 
+  // Waitlist modal states
+  const [hiveWaitlistOpen, setHiveWaitlistOpen] = useState(false);
+  const [tourModalOpen, setTourModalOpen] = useState(false);
+  const [tourBusinessType, setTourBusinessType] = useState<"coworking" | "summit">("coworking");
+  const [spaWaitlistOpen, setSpaWaitlistOpen] = useState(false);
+  const [fitnessWaitlistOpen, setFitnessWaitlistOpen] = useState(false);
+  const [summitWaitlistOpen, setSummitWaitlistOpen] = useState(false);
+
   // Get availability status for the indicator
   const { isLoading: isAvailabilityLoading, isError: isAvailabilityError, refetch } = useNextAvailable();
 
@@ -113,6 +126,32 @@ export default function BookingHub() {
     heroRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  // Waitlist handlers by business type
+  const getWaitlistHandler = (businessType: BusinessType) => {
+    switch (businessType) {
+      case "coworking":
+        return () => setHiveWaitlistOpen(true);
+      case "spa":
+        return () => setSpaWaitlistOpen(true);
+      case "fitness":
+        return () => setFitnessWaitlistOpen(true);
+      case "summit":
+        return () => setSummitWaitlistOpen(true);
+      default:
+        return undefined;
+    }
+  };
+
+  const getTourHandler = (businessType: BusinessType) => {
+    if (businessType === "coworking" || businessType === "summit") {
+      return () => {
+        setTourBusinessType(businessType);
+        setTourModalOpen(true);
+      };
+    }
+    return undefined;
+  };
+
   // Filter businesses based on selected filter
   const filteredBusinesses = businesses?.filter(
     (b) => businessFilter === "all" || b.type === businessFilter
@@ -131,6 +170,13 @@ export default function BookingHub() {
 
   return (
     <div className="min-h-screen">
+      {/* Waitlist Modals */}
+      <HiveWaitlistModal open={hiveWaitlistOpen} onOpenChange={setHiveWaitlistOpen} />
+      <ScheduleTourModal open={tourModalOpen} onOpenChange={setTourModalOpen} businessType={tourBusinessType} />
+      <SpaWaitlistModal open={spaWaitlistOpen} onOpenChange={setSpaWaitlistOpen} />
+      <FitnessWaitlistModal open={fitnessWaitlistOpen} onOpenChange={setFitnessWaitlistOpen} />
+      <SummitWaitlistModal open={summitWaitlistOpen} onOpenChange={setSummitWaitlistOpen} />
+
       {/* Sticky Mini Booking Bar */}
       <StickyBookingBar
         selectedBusiness={selectedBusiness}
@@ -304,12 +350,16 @@ export default function BookingHub() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Next Available Widget with proper states */}
+                    {/* Next Available Widget with waitlist/tour recovery actions */}
                     <NextAvailableWidget 
                       businessType={business.type}
                       showPrice={false}
                       limit={2}
                       onSlotSelect={handleSlotSelect}
+                      onJoinWaitlist={getWaitlistHandler(business.type)}
+                      onRequestTour={getTourHandler(business.type)}
+                      emptyMessage="No openings in the next 14 days"
+                      emptySubMessage="High demand! Join waitlist or request a tour to see the space."
                     />
 
                     <Button 
@@ -412,43 +462,47 @@ export default function BookingHub() {
               dataEvent="booking_quick_action_bookings"
             />
             <QuickActionCard
-              to="/fitness"
-              icon={Dumbbell}
-              title="Memberships"
-              description="Unlimited gym access"
-              dataEvent="booking_quick_action_membership"
+              to="/account?tab=wallet"
+              icon={Calendar}
+              title="Redeem Credit"
+              description="Use gift cards & credits"
+              dataEvent="booking_quick_action_credits"
             />
             <QuickActionCard
-              to="/spa"
-              icon={Sparkles}
-              title="Spa Services"
-              description="Recovery and wellness"
-              dataEvent="booking_quick_action_spa"
+              href={SITE_CONFIG.contact.phoneLink}
+              icon={Phone}
+              title="Call Us"
+              description="Speak with our team"
+              dataEvent="booking_quick_action_call"
             />
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="py-12 container">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-4">Questions?</h2>
-          <p className="text-muted-foreground mb-6">
-            Our team is here to help. Reach out anytime.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="outline" asChild className="border-accent/30 hover:bg-accent/10">
-              <a href={SITE_CONFIG.contact.phoneLink} className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                {SITE_CONFIG.contact.phone}
-              </a>
-            </Button>
-            <Button variant="outline" asChild className="border-accent/30 hover:bg-accent/10">
-              <a href={SITE_CONFIG.contact.emailLink} className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                {SITE_CONFIG.contact.email}
-              </a>
-            </Button>
+      {/* Final CTA Section */}
+      <section className="py-16 md:py-20 bg-muted/30">
+        <div className="container">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+              Need Help Finding the Right Option?
+            </h2>
+            <p className="text-muted-foreground mb-8 text-lg">
+              Our team is available {SITE_CONFIG.hours.range}. Call or email and we'll guide you to the right choice.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-primary font-semibold">
+                <a href={SITE_CONFIG.contact.phoneLink} className="flex items-center gap-2">
+                  <Phone className="h-5 w-5" />
+                  {SITE_CONFIG.contact.phone}
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" asChild className="border-accent/30 hover:border-accent hover:bg-accent/10 font-semibold">
+                <a href={`mailto:${SITE_CONFIG.contact.email}`} className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Email Us
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -456,7 +510,7 @@ export default function BookingHub() {
       {/* Floating Help CTA */}
       <FloatingHelpCTA />
 
-      {/* Scroll to Top Button */}
+      {/* Scroll to Top */}
       <ScrollToTopButton />
     </div>
   );

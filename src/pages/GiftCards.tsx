@@ -493,7 +493,7 @@ export default function GiftCards() {
       {/* Terms */}
       <section className="py-8 container max-w-4xl border-t border-border">
         <p className="text-center text-sm text-muted-foreground">
-          Gift cards are not redeemable for cash. Questions? Call <a href="tel:+14195550100" className="text-accent hover:underline">(419) 555-0100</a>.
+          Gift cards are not redeemable for cash. Questions? Call <a href={SITE_CONFIG.contact.phoneLink} className="text-accent hover:underline">{SITE_CONFIG.contact.phone}</a>.
         </p>
       </section>
 

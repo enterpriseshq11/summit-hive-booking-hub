@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,6 +100,13 @@ export function GiftCardPurchaseModal({
   const canProceedStep2 = recipientName && recipientEmail && buyerName && buyerEmail;
   const canProceedStep3 = true; // Message is optional
 
+  const navigate = useNavigate();
+
+  const handleGoToWallet = () => {
+    handleClose();
+    navigate("/account?tab=wallet");
+  };
+
   if (isComplete) {
     return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -114,13 +122,17 @@ export function GiftCardPurchaseModal({
             <div className="space-y-3">
               <Button 
                 className="w-full bg-accent hover:bg-accent/90 text-primary"
+                onClick={handleGoToWallet}
+              >
+                Manage Credits & Gift Cards
+              </Button>
+              <Button 
+                variant="ghost"
+                className="w-full"
                 onClick={handleClose}
               >
                 Done
               </Button>
-              <p className="text-xs text-muted-foreground">
-                Questions? Call (419) 555-0100
-              </p>
             </div>
           </div>
         </DialogContent>

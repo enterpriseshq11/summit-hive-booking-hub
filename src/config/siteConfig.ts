@@ -25,6 +25,7 @@ export const SITE_CONFIG = {
   hours: {
     days: "7 Days a Week",
     time: "6:00 AM – 10:00 PM",
+    range: "7 days a week, 6:00 AM – 10:00 PM",
     shortDays: "Open 7 Days",
   },
   
