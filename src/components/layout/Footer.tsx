@@ -1,8 +1,9 @@
 import { forwardRef } from "react";
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import azLogoFull from "@/assets/az-logo-full.jpg";
 import { BUILD_TIMESTAMP_UTC } from "@/lib/build";
+import { SITE_CONFIG } from "@/config/siteConfig";
 
 const footerLinks = {
   businesses: [
@@ -33,7 +34,7 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
               />
             </Link>
             <p className="text-sm text-primary-foreground/60">
-              Your destination for events, wellness, fitness, and productivity in Wapakoneta, Ohio.
+              Your destination for events, wellness, fitness, and productivity in {SITE_CONFIG.location.city}, {SITE_CONFIG.location.state}.
             </p>
           </div>
 
@@ -77,15 +78,29 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-primary-foreground/70">
                 <MapPin className="h-4 w-4 text-accent" />
-                Wapakoneta, Ohio
+                {SITE_CONFIG.location.full}
+              </li>
+              <li>
+                <a 
+                  href={SITE_CONFIG.contact.phoneLink}
+                  className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+                >
+                  <Phone className="h-4 w-4 text-accent" />
+                  {SITE_CONFIG.contact.phone}
+                </a>
+              </li>
+              <li>
+                <a 
+                  href={SITE_CONFIG.contact.emailLink}
+                  className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+                >
+                  <Mail className="h-4 w-4 text-accent" />
+                  {SITE_CONFIG.contact.email}
+                </a>
               </li>
               <li className="flex items-center gap-2 text-sm text-primary-foreground/70">
-                <Phone className="h-4 w-4 text-accent" />
-                (419) 555-0100
-              </li>
-              <li className="flex items-center gap-2 text-sm text-primary-foreground/70">
-                <Mail className="h-4 w-4 text-accent" />
-                hello@az-enterprises.com
+                <Clock className="h-4 w-4 text-accent" />
+                {SITE_CONFIG.hours.time}
               </li>
             </ul>
           </div>
@@ -93,7 +108,7 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
 
         <div className="border-t border-primary-foreground/10 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/50">
-            © {new Date().getFullYear()} A-Z Enterprises. All rights reserved.
+            {SITE_CONFIG.business.copyright}
           </p>
           <p className="text-sm text-primary-foreground/50">Build: {BUILD_TIMESTAMP_UTC}</p>
           <p className="text-sm text-primary-foreground/50">Crafted with care in Ohio</p>

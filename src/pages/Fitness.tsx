@@ -20,6 +20,8 @@ import {
   ChevronRight, Quote, Shield, CheckCircle, Calendar, Target,
   Award, ShieldCheck, Flame, User, Waves, Coffee
 } from "lucide-react";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { SITE_CONFIG } from "@/config/siteConfig";
 
 export default function Fitness() {
   const { data: business } = useBusinessByType("fitness");
@@ -660,10 +662,17 @@ export default function Fitness() {
       />
 
       {/* Floating Help Drawer */}
-      <FloatingHelpDrawer />
+      <FloatingHelpDrawer 
+        businessType="fitness"
+        phoneNumber={SITE_CONFIG.contact.phone}
+        email={SITE_CONFIG.contact.email}
+      />
 
       {/* Sticky Mobile CTA */}
       <StickyMobileFitnessCTA onJoinNow={() => openJoinModal()} />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
     </div>
   );
 }

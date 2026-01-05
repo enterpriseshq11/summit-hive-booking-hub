@@ -22,6 +22,8 @@ import {
   Award, ShieldCheck, Wifi, Coffee, Zap, Droplets,
   Sun, Wind, ThermometerSun, Users
 } from "lucide-react";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { SITE_CONFIG } from "@/config/siteConfig";
 
 export default function Spa() {
   const { data: business } = useBusinessByType("spa");
@@ -641,10 +643,17 @@ export default function Spa() {
       />
 
       {/* Floating Help Drawer */}
-      <FloatingHelpDrawer />
+      <FloatingHelpDrawer 
+        businessType="spa"
+        phoneNumber={SITE_CONFIG.contact.phone}
+        email={SITE_CONFIG.contact.email}
+      />
 
       {/* Sticky Mobile CTA */}
       <StickyMobileSpaCTA onRequestService={() => openRequestModal()} />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
     </div>
   );
 }

@@ -33,6 +33,8 @@ import {
   Mail,
 } from "lucide-react";
 import { FloatingHelpCTA } from "@/components/home";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { SITE_CONFIG } from "@/config/siteConfig";
 import type { BusinessType } from "@/types";
 
 const businessIcons: Record<BusinessType, React.ComponentType<{ className?: string }>> = {
@@ -427,7 +429,7 @@ export default function BookingHub() {
         </div>
       </section>
 
-      {/* FAQ Section Placeholder */}
+      {/* FAQ Section */}
       <section id="faq" className="py-12 container">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-bold mb-4">Questions?</h2>
@@ -436,15 +438,15 @@ export default function BookingHub() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="outline" asChild className="border-accent/30 hover:bg-accent/10">
-              <a href="tel:+14195551234" className="flex items-center gap-2">
+              <a href={SITE_CONFIG.contact.phoneLink} className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                (419) 555-1234
+                {SITE_CONFIG.contact.phone}
               </a>
             </Button>
             <Button variant="outline" asChild className="border-accent/30 hover:bg-accent/10">
-              <a href="mailto:hello@az-enterprises.com" className="flex items-center gap-2">
+              <a href={SITE_CONFIG.contact.emailLink} className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                hello@az-enterprises.com
+                {SITE_CONFIG.contact.email}
               </a>
             </Button>
           </div>
@@ -453,6 +455,9 @@ export default function BookingHub() {
 
       {/* Floating Help CTA */}
       <FloatingHelpCTA />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
     </div>
   );
 }

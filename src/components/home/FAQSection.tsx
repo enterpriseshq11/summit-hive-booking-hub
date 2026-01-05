@@ -4,7 +4,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Phone, Mail } from "lucide-react";
+import { SITE_CONFIG } from "@/config/siteConfig";
 
 const faqs = [
   {
@@ -72,11 +73,19 @@ export function FAQSection() {
               Our team is happy to help with anything not covered here.
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
-              <a href="tel:4195550100" className="flex items-center gap-2 text-accent hover:underline font-medium">
-                📞 (419) 555-0100
+              <a 
+                href={SITE_CONFIG.contact.phoneLink} 
+                className="flex items-center gap-2 text-accent hover:underline font-medium"
+              >
+                <Phone className="h-4 w-4" />
+                {SITE_CONFIG.contact.phone}
               </a>
-              <a href="mailto:info@azbookinghub.com" className="flex items-center gap-2 text-accent hover:underline font-medium">
-                ✉️ info@azbookinghub.com
+              <a 
+                href={SITE_CONFIG.contact.emailLink} 
+                className="flex items-center gap-2 text-accent hover:underline font-medium"
+              >
+                <Mail className="h-4 w-4" />
+                {SITE_CONFIG.contact.email}
               </a>
             </div>
           </div>
@@ -85,3 +94,4 @@ export function FAQSection() {
     </section>
   );
 }
+
