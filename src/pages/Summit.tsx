@@ -33,6 +33,8 @@ import {
   Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { SITE_CONFIG } from "@/config/siteConfig";
 
 export default function Summit() {
   const navigate = useNavigate();
@@ -579,6 +581,9 @@ export default function Summit() {
 
       {/* Sticky Mobile CTA */}
       <StickyMobileSummitCTA onRequestClick={() => setShowRequestModal(true)} />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
     </div>
   );
 }

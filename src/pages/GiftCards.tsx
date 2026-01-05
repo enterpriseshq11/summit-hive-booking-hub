@@ -32,6 +32,8 @@ import { GiftCardAnchorChips } from "@/components/booking/GiftCardAnchorChips";
 import { StickyMobileGiftCardCTA } from "@/components/booking/StickyMobileGiftCardCTA";
 import { GiftCardBulkOrderModal } from "@/components/booking/GiftCardBulkOrderModal";
 import { FloatingHelpDrawer } from "@/components/booking/FloatingHelpDrawer";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { SITE_CONFIG } from "@/config/siteConfig";
 
 const giftCardOptions = [
   { amount: 50, label: "Starter", description: "Perfect for a quick reset or add-on.", popular: false },
@@ -78,7 +80,7 @@ const faqItems = [
   },
   {
     question: "What if the recipient never received their email?",
-    answer: "Contact us at (419) 555-0100 and we'll resend the gift card email immediately. We can also send it to a different email address if needed."
+    answer: `Contact us at ${SITE_CONFIG.contact.phone} and we'll resend the gift card email immediately. We can also send it to a different email address if needed.`
   },
   {
     question: "Can gift cards be refunded?",
@@ -516,9 +518,12 @@ export default function GiftCards() {
       {/* Floating Help Drawer */}
       <FloatingHelpDrawer 
         businessType="spa"
-        phoneNumber="(419) 555-0100"
-        email="giftcards@azbookinghub.com"
+        phoneNumber={SITE_CONFIG.contact.phone}
+        email={SITE_CONFIG.contact.email}
       />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
     </div>
   );
 }

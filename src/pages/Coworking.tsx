@@ -27,6 +27,8 @@ import {
   MessageSquare, CalendarCheck, Rocket, AlertCircle, Calendar
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { SITE_CONFIG } from "@/config/siteConfig";
 
 export default function Coworking() {
   const navigate = useNavigate();
@@ -485,7 +487,14 @@ export default function Coworking() {
       <StickyMobileHiveCTA onRequestClick={() => openRequestModal()} />
 
       {/* Floating Help */}
-      <FloatingHelpDrawer businessType="coworking" />
+      <FloatingHelpDrawer 
+        businessType="coworking"
+        phoneNumber={SITE_CONFIG.contact.phone}
+        email={SITE_CONFIG.contact.email}
+      />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
     </div>
   );
 }

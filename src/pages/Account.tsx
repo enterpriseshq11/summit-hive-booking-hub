@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { 
   CalendarDays, 
   CreditCard, 
@@ -16,7 +19,8 @@ import {
   Sparkles,
   Building2,
   Heart,
-  Dumbbell
+  Dumbbell,
+  Plus
 } from "lucide-react";
 
 export default function Account() {
@@ -221,30 +225,58 @@ export default function Account() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-4xl font-bold text-accent mb-2">$0.00</div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground mb-4">
                     Available for any A-Z service
                   </p>
+                  <Button asChild className="bg-accent hover:bg-accent/90 text-primary">
+                    <Link to="/gift-cards" className="gap-2">
+                      <Plus className="h-4 w-4" />
+                      Add Credits
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
 
               <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-lg text-foreground">Add to Wallet</CardTitle>
-                  <CardDescription>Redeem a gift card or add credits</CardDescription>
+                  <CardTitle className="text-lg text-foreground">Redeem Gift Card</CardTitle>
+                  <CardDescription>Enter a gift card code to add funds</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button asChild variant="outline" className="w-full border-accent/30 hover:border-accent hover:bg-accent/10">
-                    <Link to="/gift-cards" className="gap-2">
-                      <Gift className="h-4 w-4" />
-                      Redeem Gift Card
-                    </Link>
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    Have a gift card code? Enter it to add funds to your wallet.
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Enter gift card code" 
+                      className="flex-1"
+                    />
+                    <Button variant="outline" className="border-accent/30 hover:border-accent hover:bg-accent/10">
+                      Redeem
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Gift card codes are 16 characters and included in your email.
                   </p>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Credit History */}
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="text-lg text-foreground">Credit History</CardTitle>
+                <CardDescription>Past gift card redemptions and credit usage</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-6">
+                  <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                    <Gift className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground">No credit history yet</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Credits and gift card usage will appear here
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Membership Tab */}
@@ -263,14 +295,23 @@ export default function Account() {
                   </div>
                   <p className="text-muted-foreground mb-2">You don't have an active membership</p>
                   <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-                    Join Total Fitness for exclusive access to classes, equipment, and member benefits.
+                    Join Total Fitness for 24/7 gym access, classes, and personal training.
                   </p>
-                  <Button asChild className="bg-accent text-primary hover:bg-accent/90">
-                    <Link to="/fitness" className="gap-2">
-                      Explore Membership
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button asChild className="bg-accent text-primary hover:bg-accent/90">
+                      <Link to="/fitness" className="gap-2">
+                        <Dumbbell className="h-4 w-4" />
+                        Gym Membership
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" className="border-accent/30 hover:border-accent hover:bg-accent/10">
+                      <Link to="/coworking" className="gap-2">
+                        <Building2 className="h-4 w-4" />
+                        Coworking Plans
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

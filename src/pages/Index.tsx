@@ -17,6 +17,8 @@ import {
   Heart
 } from "lucide-react";
 import { NextAvailableStrip, ExperiencePreviewPanel, SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip } from "@/components/home";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { SITE_CONFIG } from "@/config/siteConfig";
 import azLogoIcon from "@/assets/az-logo-icon.png";
 
 const businesses = [
@@ -139,7 +141,7 @@ export default function Index() {
                 style={{ animationDelay: "0.1s" }}
               >
                 <MapPin className="h-4 w-4 text-accent" />
-                Wapakoneta, Ohio • Local team • Premium experiences
+                {SITE_CONFIG.location.full} • Local team • Premium experiences
               </div>
               
               {/* Main Headline - Updated copy with tighter line-height */}
@@ -232,18 +234,17 @@ export default function Index() {
                 ))}
               </div>
 
-              {/* Contact Pills */}
               <div 
                 className="flex flex-wrap justify-center lg:justify-start gap-4 opacity-0 animate-fade-in"
                 style={{ animationDelay: "1s" }}
               >
-                <a href="tel:+14195550100" className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
+                <a href={SITE_CONFIG.contact.phoneLink} className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
                   <Phone className="h-4 w-4" />
-                  <span>(419) 555-0100</span>
+                  <span>{SITE_CONFIG.contact.phone}</span>
                 </a>
                 <div className="flex items-center gap-2 text-sm text-white/50">
                   <Clock className="h-4 w-4" />
-                  <span>Open 7 Days</span>
+                  <span>{SITE_CONFIG.hours.shortDays}</span>
                 </div>
               </div>
             </div>
@@ -495,8 +496,7 @@ export default function Index() {
               </div>
               <h3 className="font-bold mb-3 text-lg">Location</h3>
               <p className="text-sm text-white/80 leading-relaxed">
-                123 Main Street<br />
-                Wapakoneta, OH 45895
+                {SITE_CONFIG.location.full}
               </p>
             </div>
             <div className="text-center">
@@ -505,11 +505,11 @@ export default function Index() {
               </div>
               <h3 className="font-bold mb-3 text-lg">Contact</h3>
               <div className="space-y-1">
-                <a href="tel:+14195550100" className="block text-sm text-white/80 hover:text-accent transition-colors font-medium">
-                  (419) 555-0100
+                <a href={SITE_CONFIG.contact.phoneLink} className="block text-sm text-white/80 hover:text-accent transition-colors font-medium">
+                  {SITE_CONFIG.contact.phone}
                 </a>
-                <a href="mailto:info@azbookinghub.com" className="block text-sm text-white/80 hover:text-accent transition-colors">
-                  info@azbookinghub.com
+                <a href={SITE_CONFIG.contact.emailLink} className="block text-sm text-white/80 hover:text-accent transition-colors">
+                  {SITE_CONFIG.contact.email}
                 </a>
               </div>
             </div>
@@ -519,15 +519,15 @@ export default function Index() {
               </div>
               <h3 className="font-bold mb-3 text-lg">Hours</h3>
               <p className="text-sm text-white/80 leading-relaxed">
-                Open 7 Days<br />
-                6:00 AM – 10:00 PM
+                {SITE_CONFIG.hours.days}<br />
+                {SITE_CONFIG.hours.time}
               </p>
             </div>
           </div>
           
           <div className="mt-16 pt-8 border-t border-white/10 text-center">
             <p className="text-sm text-white/50">
-              © 2024 A-Z Enterprises. All rights reserved.
+              {SITE_CONFIG.business.copyright}
             </p>
           </div>
         </div>
@@ -535,6 +535,9 @@ export default function Index() {
 
       {/* Floating Help CTA */}
       <FloatingHelpCTA />
+      
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
     </div>
   );
 }
