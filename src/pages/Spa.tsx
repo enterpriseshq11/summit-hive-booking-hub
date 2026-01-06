@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useProviders } from "@/hooks/useProviders";
 import { 
@@ -20,10 +22,11 @@ import {
   Sparkles, Clock, Heart, ArrowRight, Leaf, Star, 
   CheckCircle, Calendar, FileText, Quote, User,
   Award, ShieldCheck, Wifi, Coffee, Zap, Droplets,
-  Sun, Wind, ThermometerSun, Users
+  Sun, Wind, ThermometerSun, Users, Activity, Target
 } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
+import restorationLoungeLogo from "@/assets/restoration-lounge-logo.jpg";
 
 export default function Spa() {
   const { data: business } = useBusinessByType("spa");
@@ -32,6 +35,7 @@ export default function Spa() {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [preselectedService, setPreselectedService] = useState<"massage" | "recovery" | "wellness" | null>(null);
+  const [bookingContact, setBookingContact] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
 
   const handleBookingSuccess = (bookingId: string) => {
@@ -47,92 +51,102 @@ export default function Spa() {
     setShowBookingForm(true);
   };
 
-  // Get up to 3 providers for display
-  const displayProviders = providers?.slice(0, 3) || [];
-
-  // Anonymized practitioner fallback data
-  const fallbackProviders = [
-    { name: "Elena M.", title: "Licensed Massage Therapist", specialty: "Deep tissue & sports recovery", years: "8+ years experience" },
-    { name: "James C.", title: "Certified Recovery Specialist", specialty: "Cryotherapy & compression", years: "5+ years experience" },
-    { name: "Sarah W.", title: "Licensed Esthetician", specialty: "Holistic wellness treatments", years: "10+ years experience" }
+  // Lindsey's specialties
+  const lindseySpecialties = [
+    { icon: Heart, label: "Deep Tissue & Therapeutic Massage" },
+    { icon: Activity, label: "Recovery & Performance-Based Bodywork" },
+    { icon: Zap, label: "Muscle Tension, Pain Relief & Mobility Support" },
+    { icon: Wind, label: "Stress Reduction & Nervous System Reset" },
+    { icon: Target, label: "Customized Recovery Plans (Not One-Size-Fits-All)" }
   ];
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Premium Black & Gold */}
-      <section className="relative py-20 md:py-28 overflow-hidden bg-primary">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.1)_0%,transparent_70%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+      {/* Hero Section - Restoration Lounge Logo Centered */}
+      <section className="relative py-16 md:py-24 overflow-hidden bg-primary min-h-[70vh] flex items-center">
+        {/* Background - dark with subtle gold radial */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary via-primary to-primary/95" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.08)_0%,transparent_60%)]" />
         
         <div className="container relative z-10">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-8">
-              <Sparkles className="h-4 w-4" />
-              The Restoration Lounge
+          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+            {/* Logo - Large, Centered, Prominent */}
+            <div className="flex-shrink-0 w-full lg:w-1/2 flex justify-center">
+              <img 
+                src={restorationLoungeLogo} 
+                alt="The Hive Restoration Lounge Logo"
+                className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl"
+                style={{ maxHeight: "clamp(280px, 40vw, 420px)" }}
+              />
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground">
-              Recovery Designed for Results
-            </h1>
-            <p className="text-xl md:text-2xl text-accent font-medium mb-4">Expert Care. Premium Experience.</p>
-            <p className="text-lg text-primary-foreground/70 mb-8 max-w-2xl">
-              Professional massage, recovery therapy, and wellness treatments — request your appointment in under 2 minutes.
-            </p>
-            
-            {/* Hero CTAs - Primary + Secondary */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-              <Button 
-                size="lg" 
-                onClick={() => openRequestModal()}
-                className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-                data-event="spa_hero_cta_click"
-              >
-                <Sparkles className="h-5 w-5 mr-2" />
-                Book Service
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => setShowWaitlistModal(true)}
-                className="border-accent/50 text-primary-foreground hover:bg-accent/10 hover:border-accent"
-                data-event="spa_hero_secondary_cta_click"
-              >
-                <Clock className="h-5 w-5 mr-2" />
-                Join Waitlist
-              </Button>
-            </div>
-            
-            {/* Trust Badge */}
-            <div className="flex items-center gap-2 text-primary-foreground/70 mb-4">
-              <CheckCircle className="h-5 w-5 text-accent" aria-hidden="true" />
-              <span className="text-sm">No obligation. Response within 24 hours.</span>
-            </div>
-            
-            {/* Micro-trust line */}
-            <p className="text-sm text-primary-foreground/50">
-              You'll review everything before payment. No surprise fees.
-            </p>
-          </div>
-          
-          {/* Hero Feature Chips */}
-          <div className="flex flex-wrap gap-3 mt-10">
-            {[
-              { icon: Heart, label: "Licensed Therapists" },
-              { icon: ThermometerSun, label: "Recovery Tech" },
-              { icon: Droplets, label: "Premium Products" },
-              { icon: Users, label: "Couples Welcome" }
-            ].map((chip) => (
-              <div 
-                key={chip.label} 
-                className="flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full text-sm text-primary-foreground border border-primary-foreground/20"
-              >
-                <chip.icon className="h-4 w-4 text-accent" />
-                {chip.label}
+            {/* Hero Copy */}
+            <div className="flex-1 text-center lg:text-left">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground">
+                Recovery Designed for Results
+              </h1>
+              <p className="text-xl md:text-2xl text-accent font-medium mb-4">
+                Expert Care. Premium Experience.
+              </p>
+              <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl">
+                Professional recovery, massage therapy, and wellness treatments—personally delivered by Lindsey.
+              </p>
+              
+              {/* Hero CTAs */}
+              <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-6">
+                <Button 
+                  size="lg" 
+                  onClick={() => openRequestModal()}
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+                  data-event="spa_hero_cta_click"
+                >
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  Book With Lindsey
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => setShowWaitlistModal(true)}
+                  className="border-accent/50 text-primary-foreground hover:bg-accent/10 hover:border-accent"
+                  data-event="spa_hero_secondary_cta_click"
+                >
+                  <Clock className="h-5 w-5 mr-2" />
+                  Join Waitlist
+                </Button>
               </div>
-            ))}
+              
+              {/* Booking Request Field */}
+              <div className="max-w-md mx-auto lg:mx-0 mb-6">
+                <div className="bg-background/10 backdrop-blur-sm rounded-lg border border-accent/30 p-4">
+                  <Label htmlFor="booking-contact" className="text-sm text-primary-foreground/80 mb-2 block">
+                    Request a Booking (Optional)
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="booking-contact"
+                      type="text"
+                      placeholder="Enter your email or phone number"
+                      value={bookingContact}
+                      onChange={(e) => setBookingContact(e.target.value)}
+                      className="bg-background/90 border-accent/30 text-foreground placeholder:text-muted-foreground"
+                    />
+                    <Button 
+                      onClick={() => openRequestModal()}
+                      className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0"
+                    >
+                      Request
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Trust Badge */}
+              <div className="flex items-center justify-center lg:justify-start gap-2 text-primary-foreground/70">
+                <CheckCircle className="h-5 w-5 text-accent" aria-hidden="true" />
+                <span className="text-sm">No obligation. Response within 24 hours.</span>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -270,7 +284,7 @@ export default function Spa() {
             className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
             data-event="spa_services_cta_click"
           >
-            Book Service
+            Book With Lindsey
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
           <p className="text-sm text-muted-foreground mt-3">
@@ -365,14 +379,14 @@ export default function Spa() {
         </div>
       </section>
 
-      {/* Provider Highlights Section */}
-      <section id="spa-providers" className="py-14 bg-muted/30">
+      {/* Meet Lindsey Section - Single Provider Feature */}
+      <section id="spa-providers" className="py-16 bg-muted/30">
         <div className="container">
-          {/* Meet Your Team trust strip */}
+          {/* Trust strip */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border border-border shadow-sm">
               <ShieldCheck className="h-4 w-4 text-accent" />
-              <span className="text-sm font-medium">Licensed Professionals</span>
+              <span className="text-sm font-medium">Licensed Professional</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border border-border shadow-sm">
               <Award className="h-4 w-4 text-accent" />
@@ -380,57 +394,77 @@ export default function Spa() {
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border border-border shadow-sm">
               <Star className="h-4 w-4 text-accent" />
-              <span className="text-sm font-medium">5+ Years Average Experience</span>
+              <span className="text-sm font-medium">Results-Driven Care</span>
             </div>
           </div>
           
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Meet Your Team</h2>
-            <p className="text-muted-foreground text-lg">Skilled professionals dedicated to your recovery</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">Meet Lindsey</h2>
+            <p className="text-accent text-lg font-medium">Your Personal Recovery & Restoration Specialist</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {displayProviders.length > 0 ? (
-              displayProviders.map((provider, idx) => {
-                const anonymizedNames = ["Elena M.", "James C.", "Sarah W."];
-                const displayName = anonymizedNames[idx] || `Provider ${idx + 1}`;
-                return (
-                  <Card key={provider.id} className="shadow-premium border-border text-center hover:shadow-gold-lg hover:border-accent/30 transition-all">
-                    <CardContent className="pt-8 pb-6">
-                      <div className="h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border-2 border-accent/30">
-                        <User className="h-10 w-10 text-accent" />
-                      </div>
-                      <h3 className="font-semibold text-lg mb-1">{displayName}</h3>
-                      <p className="text-accent text-sm font-medium mb-2">{provider.title || "Therapist"}</p>
-                      <Badge variant="outline" className="text-xs mb-3 border-accent/30 text-accent">
-                        <ShieldCheck className="h-3 w-3 mr-1" />
-                        Verified
-                      </Badge>
-                      <p className="text-muted-foreground text-sm">
-                        {provider.bio || "Focused on personalized care and lasting results."}
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              })
-            ) : (
-              fallbackProviders.map((provider, idx) => (
-                <Card key={idx} className="shadow-premium border-border text-center hover:shadow-gold-lg hover:border-accent/30 transition-all">
-                  <CardContent className="pt-8 pb-6">
-                    <div className="h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border-2 border-accent/30">
-                      <User className="h-10 w-10 text-accent" />
+
+          <div className="max-w-4xl mx-auto">
+            <Card className="shadow-premium border-border overflow-hidden">
+              <div className="grid md:grid-cols-3 gap-0">
+                {/* Photo Column */}
+                <div className="md:col-span-1 bg-accent/5 flex items-center justify-center p-8">
+                  {/* TODO: Replace with Lindsey headshot when available */}
+                  <div className="h-48 w-48 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center border-4 border-accent/30 shadow-gold">
+                    <User className="h-24 w-24 text-accent/60" />
+                  </div>
+                </div>
+
+                {/* Info Column */}
+                <div className="md:col-span-2 p-8">
+                  <div className="mb-4">
+                    <h3 className="text-2xl font-bold mb-1">Lindsey</h3>
+                    <p className="text-accent font-medium">Licensed Massage Therapist & Recovery Specialist</p>
+                    <p className="text-muted-foreground text-sm">Restoration Lounge Lead Therapist</p>
+                  </div>
+
+                  {/* Bio */}
+                  <div className="space-y-4 mb-6 text-muted-foreground leading-relaxed">
+                    <p>
+                      Lindsey is the heart of The Restoration Lounge. She specializes in results-driven recovery treatments designed to help clients move better, feel better, and perform at their highest level—whether you're an athlete, professional, or simply someone who takes recovery seriously.
+                    </p>
+                    <p>
+                      Her approach blends clinical expertise with a premium, personalized experience. Every session is intentional, customized, and focused on real outcomes—not cookie-cutter spa treatments.
+                    </p>
+                  </div>
+
+                  {/* Specialties */}
+                  <div className="mb-6">
+                    <h4 className="font-semibold mb-3 text-sm uppercase tracking-wide text-accent">Specialties</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {lindseySpecialties.map((specialty, idx) => (
+                        <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-accent/10 rounded-full text-sm border border-accent/20">
+                          <specialty.icon className="h-4 w-4 text-accent flex-shrink-0" />
+                          <span>{specialty.label}</span>
+                        </div>
+                      ))}
                     </div>
-                    <h3 className="font-semibold text-lg mb-1">{provider.name}</h3>
-                    <p className="text-accent text-sm font-medium mb-2">{provider.title}</p>
-                    <Badge variant="outline" className="text-xs mb-3 border-accent/30 text-accent">
-                      <ShieldCheck className="h-3 w-3 mr-1" />
-                      Verified
-                    </Badge>
-                    <p className="text-muted-foreground text-sm mb-1">{provider.specialty}</p>
-                    <p className="text-xs text-muted-foreground/70">{provider.years}</p>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+                  </div>
+
+                  {/* Trust paragraph */}
+                  <div className="p-4 bg-primary/5 rounded-lg border border-border mb-6">
+                    <p className="text-sm text-muted-foreground italic">
+                      Clients choose Lindsey because she listens, adapts, and delivers results. This isn't a high-volume spa model—it's focused, hands-on recovery care built around what your body actually needs.
+                    </p>
+                  </div>
+
+                  {/* CTA */}
+                  <Button 
+                    size="lg" 
+                    onClick={() => openRequestModal()}
+                    className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+                    data-event="spa_lindsey_cta_click"
+                  >
+                    Book With Lindsey
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </section>
@@ -607,7 +641,7 @@ export default function Spa() {
             className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
             data-event="spa_final_cta_click"
           >
-            Book Service
+            Book With Lindsey
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
           <p className="text-sm text-primary-foreground/60 mt-4 max-w-md mx-auto">
