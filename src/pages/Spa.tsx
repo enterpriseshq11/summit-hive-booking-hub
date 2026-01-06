@@ -69,18 +69,8 @@ export default function Spa() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.08)_0%,transparent_60%)]" />
         
         <div className="container relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
-            {/* Logo - Large, Centered, Prominent */}
-            <div className="flex-shrink-0 w-full lg:w-1/2 flex justify-center">
-              <img 
-                src={restorationLoungeLogo} 
-                alt="The Hive Restoration Lounge Logo"
-                className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl"
-                style={{ maxHeight: "clamp(280px, 40vw, 420px)" }}
-              />
-            </div>
-            
-            {/* Hero Copy */}
+          <div className="flex flex-col-reverse lg:flex-row items-center gap-10 lg:gap-16">
+            {/* Hero Copy - Left Side */}
             <div className="flex-1 text-center lg:text-left">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground">
                 Recovery Designed for Results
@@ -146,6 +136,16 @@ export default function Spa() {
                 <CheckCircle className="h-5 w-5 text-accent" aria-hidden="true" />
                 <span className="text-sm">No obligation. Response within 24 hours.</span>
               </div>
+            </div>
+            
+            {/* Logo - Right Side */}
+            <div className="flex-shrink-0 w-full lg:w-1/2 flex justify-center lg:justify-end">
+              <img 
+                src={restorationLoungeLogo} 
+                alt="The Hive Restoration Lounge Logo"
+                className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl"
+                style={{ maxHeight: "clamp(280px, 40vw, 420px)" }}
+              />
             </div>
           </div>
         </div>
