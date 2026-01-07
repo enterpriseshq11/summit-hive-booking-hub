@@ -182,7 +182,7 @@ export default function GiftCards() {
             <Button 
               size="lg" 
               variant="outline"
-              className="border-accent/50 text-primary-foreground hover:bg-accent/10 hover:border-accent font-semibold px-8 h-12 text-base"
+              className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold px-8 h-12 text-base"
               onClick={handleBuyAsGift}
               data-event="giftcard_hero_buy_as_gift"
             >

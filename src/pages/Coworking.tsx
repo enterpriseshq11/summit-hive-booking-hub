@@ -147,7 +147,7 @@ export default function Coworking() {
                   size="lg" 
                   variant="outline"
                   onClick={() => setShowTourModal(true)}
-                  className="border-accent/50 text-primary-foreground hover:bg-accent/10 hover:border-accent"
+                  className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold"
                   data-event="hive_schedule_tour_click"
                 >
                   <Calendar className="h-5 w-5 mr-2" />
