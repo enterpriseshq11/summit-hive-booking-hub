@@ -284,7 +284,7 @@ export default function Summit() {
                     <Button
                       variant="outline"
                       onClick={() => setShowRequestModal(true)}
-                      className="border-accent/50 text-accent hover:bg-accent/10"
+                      className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold"
                     >
                       Send
                     </Button>
@@ -570,7 +570,7 @@ export default function Summit() {
                     size="lg" 
                     variant="outline"
                     onClick={() => setShowRequestModal(true)}
-                    className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                    className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold"
                   >
                     Request Event Info
                   </Button>

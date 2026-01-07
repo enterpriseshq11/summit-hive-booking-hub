@@ -202,7 +202,7 @@ export default function VoiceVault() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-accent/50 text-accent hover:bg-accent/10 font-semibold text-lg px-8 py-6"
+                className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold text-lg px-8 py-6"
                 onClick={scrollToPackages}
               >
                 <Sparkles className="w-5 h-5 mr-2" />
@@ -211,11 +211,11 @@ export default function VoiceVault() {
             </div>
 
             {/* Terms agreement line */}
-            <p className="mt-6 text-sm text-primary-foreground/60">
+            <p className="mt-6 text-sm text-primary-foreground/80">
               By booking, you agree to the{" "}
               <button
                 onClick={() => setTermsOpen(true)}
-                className="underline hover:text-accent transition-colors"
+                className="underline text-accent hover:text-accent/80 transition-colors font-medium"
               >
                 Studio & Content Terms
               </button>
@@ -894,7 +894,7 @@ export default function VoiceVault() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 font-semibold text-lg px-8 py-6"
+                className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold text-lg px-8 py-6"
                 onClick={() => setTermsOpen(true)}
               >
                 View Studio Terms
