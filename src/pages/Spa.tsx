@@ -7,61 +7,54 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useProviders } from "@/hooks/useProviders";
-import { 
-  NextAvailableWidget, 
-  WaitlistCTA, 
-  SpaBookingForm, 
-  FloatingHelpDrawer,
-  SpaRequestModal,
-  SpaWaitlistModal,
-  SpaAnchorChips,
-  StickyMobileSpaCTA
-} from "@/components/booking";
+import { NextAvailableWidget, WaitlistCTA, SpaBookingForm, FloatingHelpDrawer, SpaRequestModal, SpaWaitlistModal, SpaAnchorChips, StickyMobileSpaCTA } from "@/components/booking";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Sparkles, Clock, Heart, ArrowRight, Leaf, Star, 
-  CheckCircle, Calendar, FileText, Quote, User,
-  Award, ShieldCheck, Wifi, Coffee, Zap, Droplets,
-  Sun, Wind, ThermometerSun, Users, Activity, Target
-} from "lucide-react";
+import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, FileText, Quote, User, Award, ShieldCheck, Wifi, Coffee, Zap, Droplets, Sun, Wind, ThermometerSun, Users, Activity, Target } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import restorationLoungeLogo from "@/assets/restoration-lounge-logo.jpg";
-
 export default function Spa() {
-  const { data: business } = useBusinessByType("spa");
-  const { data: providers } = useProviders(business?.id);
+  const {
+    data: business
+  } = useBusinessByType("spa");
+  const {
+    data: providers
+  } = useProviders(business?.id);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [preselectedService, setPreselectedService] = useState<"massage" | "recovery" | "wellness" | null>(null);
   const [bookingContact, setBookingContact] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
-
   const handleBookingSuccess = (bookingId: string) => {
     setShowBookingForm(false);
   };
-
   const openRequestModal = (service?: "massage" | "recovery" | "wellness") => {
     setPreselectedService(service || null);
     setShowRequestModal(true);
   };
-
   const scrollToForm = () => {
     setShowBookingForm(true);
   };
 
   // Lindsey's specialties
-  const lindseySpecialties = [
-    { icon: Heart, label: "Deep Tissue & Therapeutic Massage" },
-    { icon: Activity, label: "Recovery & Performance-Based Bodywork" },
-    { icon: Zap, label: "Muscle Tension, Pain Relief & Mobility Support" },
-    { icon: Wind, label: "Stress Reduction & Nervous System Reset" },
-    { icon: Target, label: "Customized Recovery Plans (Not One-Size-Fits-All)" }
-  ];
-
-  return (
-    <div className="min-h-screen">
+  const lindseySpecialties = [{
+    icon: Heart,
+    label: "Deep Tissue & Therapeutic Massage"
+  }, {
+    icon: Activity,
+    label: "Recovery & Performance-Based Bodywork"
+  }, {
+    icon: Zap,
+    label: "Muscle Tension, Pain Relief & Mobility Support"
+  }, {
+    icon: Wind,
+    label: "Stress Reduction & Nervous System Reset"
+  }, {
+    icon: Target,
+    label: "Customized Recovery Plans (Not One-Size-Fits-All)"
+  }];
+  return <div className="min-h-screen">
       {/* Hero Section - Restoration Lounge Logo Centered */}
       <section className="relative py-16 md:py-24 overflow-hidden bg-primary min-h-[70vh] flex items-center">
         {/* Background - dark with subtle gold radial */}
@@ -84,23 +77,12 @@ export default function Spa() {
               
               {/* Hero CTAs */}
               <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-6">
-                <Button 
-                  size="lg" 
-                  onClick={() => openRequestModal()}
-                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-                  data-event="spa_hero_cta_click"
-                >
+                <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_hero_cta_click">
                   <Sparkles className="h-5 w-5 mr-2" />
                   Book With Lindsey
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  onClick={() => setShowWaitlistModal(true)}
-                  className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold"
-                  data-event="spa_hero_secondary_cta_click"
-                >
+                <Button size="lg" variant="outline" onClick={() => setShowWaitlistModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold" data-event="spa_hero_secondary_cta_click">
                   <Clock className="h-5 w-5 mr-2" />
                   Join Waitlist
                 </Button>
@@ -113,18 +95,8 @@ export default function Spa() {
                     Request a Booking (Optional)
                   </Label>
                   <div className="flex gap-2">
-                    <Input
-                      id="booking-contact"
-                      type="text"
-                      placeholder="Enter your email or phone number"
-                      value={bookingContact}
-                      onChange={(e) => setBookingContact(e.target.value)}
-                      className="bg-background/90 border-accent/30 text-foreground placeholder:text-muted-foreground"
-                    />
-                    <Button 
-                      onClick={() => openRequestModal()}
-                      className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0"
-                    >
+                    <Input id="booking-contact" type="text" placeholder="Enter your email or phone number" value={bookingContact} onChange={e => setBookingContact(e.target.value)} className="bg-background/90 border-accent/30 text-foreground placeholder:text-muted-foreground" />
+                    <Button onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0">
                       Request
                     </Button>
                   </div>
@@ -140,18 +112,17 @@ export default function Spa() {
             
             {/* Logo - Right Side */}
             <div className="flex-shrink-0 w-full lg:w-1/2 flex justify-center lg:justify-end">
-              <img 
-                src={restorationLoungeLogo} 
-                alt="The Hive Restoration Lounge Logo"
-                className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl"
-                style={{ maxHeight: "clamp(280px, 40vw, 420px)" }}
-              />
+              <img src={restorationLoungeLogo} alt="The Hive Restoration Lounge Logo" className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl" style={{
+              maxHeight: "clamp(280px, 40vw, 420px)"
+            }} />
             </div>
           </div>
         </div>
         
         {/* Angled divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} aria-hidden="true" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{
+        clipPath: "polygon(0 100%, 100% 100%, 100% 0)"
+      }} aria-hidden="true" />
       </section>
 
       {/* Anchor Chips */}
@@ -171,20 +142,10 @@ export default function Spa() {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
-            <NextAvailableWidget
-              businessType="spa"
-              title="Next Available Appointments"
-              showPrice={false}
-              limit={3}
-              onJoinWaitlist={() => setShowWaitlistModal(true)}
-              onRequestTour={() => openRequestModal()}
-              onAskDayPass={() => {
-                const helpBtn = document.querySelector('[data-help-trigger]');
-                if (helpBtn instanceof HTMLElement) helpBtn.click();
-              }}
-              emptyMessage="No openings in the next 14 days"
-              emptySubMessage="Request anyway — we'll confirm options within 24 hours, or join the waitlist."
-            />
+            <NextAvailableWidget businessType="spa" title="Next Available Appointments" showPrice={false} limit={3} onJoinWaitlist={() => setShowWaitlistModal(true)} onRequestTour={() => openRequestModal()} onAskDayPass={() => {
+            const helpBtn = document.querySelector('[data-help-trigger]');
+            if (helpBtn instanceof HTMLElement) helpBtn.click();
+          }} emptyMessage="No openings in the next 14 days" emptySubMessage="Request anyway — we'll confirm options within 24 hours, or join the waitlist." />
           </CardContent>
         </Card>
       </section>
@@ -200,9 +161,7 @@ export default function Spa() {
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {/* Massage Therapy Card */}
-          <Card 
-            className="hover:shadow-gold-lg hover:border-accent/50 transition-all duration-300 shadow-premium group border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden"
-          >
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 transition-all duration-300 shadow-premium group border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -224,43 +183,22 @@ export default function Spa() {
                   </AccordionTrigger>
                   <AccordionContent className="pt-2">
                     <ul className="space-y-2">
-                      {[
-                        "Ayurveda Massage",
-                        "Prenatal Massage",
-                        "Relaxation Massage",
-                        "Swedish Massage",
-                        "Deep Tissue Massage",
-                        "Couples Massage",
-                        "Aromatherapy"
-                      ].map((type, idx) => (
-                        <li key={idx} className="flex items-center gap-2 text-muted-foreground text-sm">
+                      {["Ayurveda Massage", "Prenatal Massage", "Relaxation Massage", "Swedish Massage", "Deep Tissue Massage", "Couples Massage", "Aromatherapy"].map((type, idx) => <li key={idx} className="flex items-center gap-2 text-muted-foreground text-sm">
                           <CheckCircle className="h-4 w-4 text-accent flex-shrink-0" />
                           {type}
-                        </li>
-                      ))}
+                        </li>)}
                     </ul>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-              <Button 
-                onClick={() => openRequestModal("massage")}
-                className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold"
-                data-event="spa_massage_card_click"
-              >
+              <Button onClick={() => openRequestModal("massage")} className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold" data-event="spa_massage_card_click">
                 Book this <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </CardContent>
           </Card>
 
           {/* Recovery Services Card */}
-          <Card 
-            className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden"
-            onClick={() => openRequestModal("recovery")}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && openRequestModal("recovery")}
-            data-event="spa_recovery_card_click"
-          >
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={() => openRequestModal("recovery")} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openRequestModal("recovery")} data-event="spa_recovery_card_click">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -276,17 +214,10 @@ export default function Spa() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 mb-4">
-                {[
-                  "Massage Therapy",
-                  "Medical Massage",
-                  "Red Light Therapy",
-                  "Wellness Services"
-                ].map((benefit, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
+                {["Massage Therapy", "Medical Massage", "Red Light Therapy", "Wellness Services"].map((benefit, idx) => <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
                     <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
                     {benefit}
-                  </li>
-                ))}
+                  </li>)}
               </ul>
               <p className="text-sm text-accent font-medium flex items-center gap-1 group-hover:underline">
                 Book this <ArrowRight className="h-4 w-4" />
@@ -295,14 +226,7 @@ export default function Spa() {
           </Card>
 
           {/* Wellness Experiences Card */}
-          <Card 
-            className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden"
-            onClick={() => openRequestModal("wellness")}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && openRequestModal("wellness")}
-            data-event="spa_wellness_card_click"
-          >
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={() => openRequestModal("wellness")} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openRequestModal("wellness")} data-event="spa_wellness_card_click">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -318,22 +242,10 @@ export default function Spa() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 mb-4">
-                {[
-                  "Relaxation Services",
-                  "Energy Work",
-                  "Workshops & Retreats",
-                  "Guided Meditations",
-                  "Yoga",
-                  "Aerial Yoga",
-                  "Hot Yoga",
-                  "Pilates with Reformers",
-                  "Stress Reduction Sessions"
-                ].map((benefit, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
+                {["Relaxation Services", "Energy Work", "Workshops & Retreats", "Guided Meditations", "Yoga", "Aerial Yoga", "Hot Yoga", "Pilates with Reformers", "Stress Reduction Sessions"].map((benefit, idx) => <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
                     <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
                     {benefit}
-                  </li>
-                ))}
+                  </li>)}
               </ul>
               <p className="text-sm text-accent font-medium flex items-center gap-1 group-hover:underline">
                 Book this <ArrowRight className="h-4 w-4" />
@@ -344,18 +256,49 @@ export default function Spa() {
         
         {/* Single section CTA */}
         <div className="text-center mt-10">
-          <Button 
-            size="lg" 
-            onClick={() => openRequestModal()}
-            className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-            data-event="spa_services_cta_click"
-          >
+          <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_services_cta_click">
             Book With Lindsey
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
           <p className="text-sm text-muted-foreground mt-3">
             You'll review everything before payment. No surprise fees.
           </p>
+        </div>
+      </section>
+
+      {/* Assisted Stretching Section - Between Services and What's Included */}
+      <section id="spa-stretching" className="py-14 bg-muted/30">
+        <div className="container">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">ASSISTED STRETCHING</h2>
+            <p className="text-accent text-lg font-medium max-w-3xl mx-auto">
+              Recovery, performance-based assisted stretching for athletes, workers, elders - everyone. 1-on-1 or group sessions.
+            </p>
+          </div>
+          
+          <div className="max-w-3xl mx-auto">
+            <Card className="shadow-premium border-border">
+              <CardContent className="p-8">
+                <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                  1-on-1 guided stretch session where a trained practitioner helps move your body through deeper, safer stretches than you can achieve on your own. Going through range of motion designed to improve flexibility, mobility, posture, and recovery.
+                </p>
+                
+                <ul className="space-y-3 mb-8">
+                  {["Relieves muscle tension", "Increases flexibility", "Blends gentle traction, targeted stretching, and mindful breathwork", "Supports recovery, performance, and everyday posture and comfort"].map((benefit, idx) => <li key={idx} className="flex items-start gap-3 text-foreground">
+                      <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
+                      <span>{benefit}</span>
+                    </li>)}
+                </ul>
+                
+                <div className="text-center">
+                  <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
+                    Book Assisted Stretching
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
@@ -401,7 +344,7 @@ export default function Spa() {
                       <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Organic massage oils</li>
                       <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Hot towel service</li>
                       <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Complimentary refreshments</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Post-treatment care products</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" />       Recovery, performance-based assisted stretching for athletes, workers, & elders.                1-on-1 or group sessions.</li>
                     </ul>
                   </AccordionContent>
                 </AccordionItem>
@@ -440,52 +383,6 @@ export default function Spa() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* ASSISTED STRETCHING Section - Directly under Services, above Book with Lindsey */}
-      <section id="spa-stretching" className="py-14 container">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">ASSISTED STRETCHING</h2>
-          <p className="text-accent text-lg font-medium max-w-3xl mx-auto">
-            Recovery, performance-based assisted stretching for athletes, workers, elders - everyone. 1-on-1 or group sessions.
-          </p>
-        </div>
-        
-        <div className="max-w-3xl mx-auto">
-          <Card className="shadow-premium border-border">
-            <CardContent className="p-8">
-              <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                1-on-1 guided stretch session where a trained practitioner helps move your body through deeper, safer stretches than you can achieve on your own. Going through range of motion designed to improve flexibility, mobility, posture, and recovery.
-              </p>
-              
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Relieves muscle tension",
-                  "Increases flexibility",
-                  "Blends gentle traction, targeted stretching, and mindful breathwork",
-                  "Supports recovery, performance, and everyday posture and comfort"
-                ].map((benefit, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-foreground">
-                    <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                    <span>{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-              
-              <div className="text-center">
-                <Button 
-                  size="lg" 
-                  onClick={() => openRequestModal()}
-                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-                  data-event="spa_stretching_cta_click"
-                >
-                  Book Assisted Stretching
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -548,12 +445,10 @@ export default function Spa() {
                   <div className="mb-6">
                     <h4 className="font-semibold mb-3 text-sm uppercase tracking-wide text-accent">Specialties</h4>
                     <div className="flex flex-wrap gap-2">
-                      {lindseySpecialties.map((specialty, idx) => (
-                        <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-accent/10 rounded-full text-sm border border-accent/20">
+                      {lindseySpecialties.map((specialty, idx) => <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-accent/10 rounded-full text-sm border border-accent/20">
                           <specialty.icon className="h-4 w-4 text-accent flex-shrink-0" />
                           <span>{specialty.label}</span>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                   </div>
 
@@ -565,12 +460,7 @@ export default function Spa() {
                   </div>
 
                   {/* CTA */}
-                  <Button 
-                    size="lg" 
-                    onClick={() => openRequestModal()}
-                    className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-                    data-event="spa_lindsey_cta_click"
-                  >
+                  <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_lindsey_cta_click">
                     Book With Lindsey
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
@@ -595,12 +485,22 @@ export default function Spa() {
             {/* Vertical gold line */}
             <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-accent/30" aria-hidden="true" />
             
-            {[
-              { step: 1, title: "Select Your Service", desc: "Choose massage, recovery, or wellness — tell us your preferences and goals.", icon: Sparkles },
-              { step: 2, title: "Pick Your Time", desc: "Select your preferred date, time, and provider. We'll confirm within 24 hours.", icon: Calendar },
-              { step: 3, title: "Review & Confirm", desc: "See all details and pricing before confirming. No surprises, no pressure.", icon: FileText }
-            ].map((item) => (
-              <div key={item.step} className="relative flex gap-6 pb-8 last:pb-0">
+            {[{
+            step: 1,
+            title: "Select Your Service",
+            desc: "Choose massage, recovery, or wellness — tell us your preferences and goals.",
+            icon: Sparkles
+          }, {
+            step: 2,
+            title: "Pick Your Time",
+            desc: "Select your preferred date, time, and provider. We'll confirm within 24 hours.",
+            icon: Calendar
+          }, {
+            step: 3,
+            title: "Review & Confirm",
+            desc: "See all details and pricing before confirming. No surprises, no pressure.",
+            icon: FileText
+          }].map(item => <div key={item.step} className="relative flex gap-6 pb-8 last:pb-0">
                 <div className="relative z-10 h-12 w-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0 shadow-gold">
                   <item.icon className="h-6 w-6 text-primary" />
                 </div>
@@ -608,8 +508,7 @@ export default function Spa() {
                   <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
                   <p className="text-muted-foreground max-w-md leading-relaxed">{item.desc}</p>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
           
           <div className="text-center mt-8 p-4 bg-accent/5 rounded-lg border border-accent/20">
@@ -624,17 +523,9 @@ export default function Spa() {
       <section className="py-6 bg-muted/30 border-y border-border">
         <div className="container">
           <div className="flex flex-wrap justify-center gap-4">
-            {[
-              "Local Professionals",
-              "Athletes & Performers",
-              "Busy Parents",
-              "Weekend Warriors",
-              "Wellness Seekers"
-            ].map((label) => (
-              <span key={label} className="text-sm text-muted-foreground">
+            {["Local Professionals", "Athletes & Performers", "Busy Parents", "Weekend Warriors", "Wellness Seekers"].map(label => <span key={label} className="text-sm text-muted-foreground">
                 {label}
-              </span>
-            ))}
+              </span>)}
           </div>
         </div>
       </section>
@@ -647,19 +538,15 @@ export default function Spa() {
             <p className="text-primary-foreground/70 text-lg">Real experiences from our community</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {[
-              {
-                quote: "The recovery services here have become essential to my routine. Professional, relaxing, and effective.",
-                name: "Alex R.",
-                badge: "Massage Therapy"
-              },
-              {
-                quote: "Finally found a spa that understands what real recovery means. The therapists are knowledgeable and attentive.",
-                name: "Morgan T.",
-                badge: "Recovery Services"
-              }
-            ].map((testimonial, idx) => (
-              <Card key={idx} className="bg-primary-foreground/5 border-accent/20 shadow-premium">
+            {[{
+            quote: "The recovery services here have become essential to my routine. Professional, relaxing, and effective.",
+            name: "Alex R.",
+            badge: "Massage Therapy"
+          }, {
+            quote: "Finally found a spa that understands what real recovery means. The therapists are knowledgeable and attentive.",
+            name: "Morgan T.",
+            badge: "Recovery Services"
+          }].map((testimonial, idx) => <Card key={idx} className="bg-primary-foreground/5 border-accent/20 shadow-premium">
                 <CardContent className="pt-8 pb-6">
                   <Quote className="h-8 w-8 text-accent mb-4" aria-hidden="true" />
                   <p className="text-primary-foreground/90 mb-6 italic leading-relaxed">"{testimonial.quote}"</p>
@@ -674,8 +561,7 @@ export default function Spa() {
                     <span className="text-xs px-3 py-1 bg-accent/20 text-accent rounded-full">{testimonial.badge}</span>
                   </div>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -747,12 +633,7 @@ export default function Spa() {
           <p className="text-primary-foreground/70 mb-6 max-w-2xl mx-auto text-lg">
             Expert care and premium treatments — request your appointment and we'll confirm within 24 hours.
           </p>
-          <Button 
-            size="lg" 
-            onClick={() => openRequestModal()}
-            className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-            data-event="spa_final_cta_click"
-          >
+          <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_final_cta_click">
             Book With Lindsey
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
@@ -775,31 +656,18 @@ export default function Spa() {
       </Dialog>
 
       {/* Request Modal */}
-      <SpaRequestModal 
-        open={showRequestModal} 
-        onOpenChange={setShowRequestModal}
-        preselectedService={preselectedService}
-      />
+      <SpaRequestModal open={showRequestModal} onOpenChange={setShowRequestModal} preselectedService={preselectedService} />
 
       {/* Waitlist Modal */}
-      <SpaWaitlistModal 
-        open={showWaitlistModal} 
-        onOpenChange={setShowWaitlistModal}
-        preselectedService={preselectedService}
-      />
+      <SpaWaitlistModal open={showWaitlistModal} onOpenChange={setShowWaitlistModal} preselectedService={preselectedService} />
 
       {/* Floating Help Drawer */}
-      <FloatingHelpDrawer 
-        businessType="spa"
-        phoneNumber={SITE_CONFIG.contact.phone}
-        email={SITE_CONFIG.contact.email}
-      />
+      <FloatingHelpDrawer businessType="spa" phoneNumber={SITE_CONFIG.contact.phone} email={SITE_CONFIG.contact.email} />
 
       {/* Sticky Mobile CTA */}
       <StickyMobileSpaCTA onRequestService={() => openRequestModal()} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
-    </div>
-  );
+    </div>;
 }
