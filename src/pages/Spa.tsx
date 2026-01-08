@@ -359,54 +359,6 @@ export default function Spa() {
         </div>
       </section>
 
-      {/* Assisted Stretching Section - Between Services and What's Included */}
-      <section id="spa-stretching" className="py-14 bg-muted/30">
-        <div className="container">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">ASSISTED STRETCHING</h2>
-            <p className="text-accent text-lg font-medium max-w-3xl mx-auto">
-              Recovery, performance-based assisted stretching for athletes, workers, elders - everyone. 1-on-1 or group sessions.
-            </p>
-          </div>
-          
-          <div className="max-w-3xl mx-auto">
-            <Card className="shadow-premium border-border">
-              <CardContent className="p-8">
-                <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                  1-on-1 guided stretch session where a trained practitioner helps move your body through deeper, safer stretches than you can achieve on your own. Going through range of motion designed to improve flexibility, mobility, posture, and recovery.
-                </p>
-                
-                <ul className="space-y-3 mb-8">
-                  {[
-                    "Relieves muscle tension",
-                    "Increases flexibility",
-                    "Blends gentle traction, targeted stretching, and mindful breathwork",
-                    "Supports recovery, performance, and everyday posture and comfort"
-                  ].map((benefit, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-foreground">
-                      <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                      <span>{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <div className="text-center">
-                  <Button 
-                    size="lg" 
-                    onClick={() => openRequestModal()}
-                    className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-                    data-event="spa_stretching_cta_click"
-                  >
-                    Book Assisted Stretching
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       {/* Gradient Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
 
@@ -488,6 +440,52 @@ export default function Spa() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* ASSISTED STRETCHING Section - Directly under Services, above Book with Lindsey */}
+      <section id="spa-stretching" className="py-14 container">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">ASSISTED STRETCHING</h2>
+          <p className="text-accent text-lg font-medium max-w-3xl mx-auto">
+            Recovery, performance-based assisted stretching for athletes, workers, elders - everyone. 1-on-1 or group sessions.
+          </p>
+        </div>
+        
+        <div className="max-w-3xl mx-auto">
+          <Card className="shadow-premium border-border">
+            <CardContent className="p-8">
+              <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                1-on-1 guided stretch session where a trained practitioner helps move your body through deeper, safer stretches than you can achieve on your own. Going through range of motion designed to improve flexibility, mobility, posture, and recovery.
+              </p>
+              
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Relieves muscle tension",
+                  "Increases flexibility",
+                  "Blends gentle traction, targeted stretching, and mindful breathwork",
+                  "Supports recovery, performance, and everyday posture and comfort"
+                ].map((benefit, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-foreground">
+                    <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <div className="text-center">
+                <Button 
+                  size="lg" 
+                  onClick={() => openRequestModal()}
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+                  data-event="spa_stretching_cta_click"
+                >
+                  Book Assisted Stretching
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
