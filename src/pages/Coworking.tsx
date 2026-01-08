@@ -169,9 +169,9 @@ export default function Coworking() {
                   { icon: Clock, label: "Flexible Access" },
                   { icon: MapPin, label: "Prime Location" },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2 px-4 py-2.5 bg-primary-foreground/10 rounded-full border border-primary-foreground/20">
+                  <div key={item.label} className="flex items-center gap-2 px-4 py-2.5 bg-accent/10 rounded-full border border-accent/30">
                     <item.icon className="h-4 w-4 text-accent" />
-                    <span className="text-sm text-primary-foreground/90">{item.label}</span>
+                    <span className="text-sm font-medium text-accent">{item.label}</span>
                   </div>
                 ))}
               </div>
