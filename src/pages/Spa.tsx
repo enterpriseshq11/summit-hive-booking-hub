@@ -266,7 +266,7 @@ export default function Spa() {
         </div>
       </section>
 
-      {/* Assisted Stretching Section - Between Services and What's Included */}
+      {/* Assisted Stretching Section - Directly under Services */}
       <section id="spa-stretching" className="py-14 bg-muted/30">
         <div className="container">
           <div className="text-center mb-10">
@@ -275,23 +275,34 @@ export default function Spa() {
               Recovery, performance-based assisted stretching for athletes, workers, elders - everyone. 1-on-1 or group sessions.
             </p>
           </div>
-          
+
           <div className="max-w-3xl mx-auto">
             <Card className="shadow-premium border-border">
               <CardContent className="p-8">
                 <p className="text-muted-foreground text-lg leading-relaxed mb-6">
                   1-on-1 guided stretch session where a trained practitioner helps move your body through deeper, safer stretches than you can achieve on your own. Going through range of motion designed to improve flexibility, mobility, posture, and recovery.
                 </p>
-                
+
                 <ul className="space-y-3 mb-8">
-                  {["Relieves muscle tension", "Increases flexibility", "Blends gentle traction, targeted stretching, and mindful breathwork", "Supports recovery, performance, and everyday posture and comfort"].map((benefit, idx) => <li key={idx} className="flex items-start gap-3 text-foreground">
-                      <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                      <span>{benefit}</span>
-                    </li>)}
+                  {[
+                    "• Relieves muscle tension",
+                    "• Increases flexibility",
+                    "• Blends gentle traction, targeted stretching, and mindful breathwork",
+                    "• Supports recovery, performance, and everyday posture and comfort",
+                  ].map((benefit, idx) => (
+                    <li key={idx} className="text-foreground">
+                      {benefit}
+                    </li>
+                  ))}
                 </ul>
-                
+
                 <div className="text-center">
-                  <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
+                  <Button
+                    size="lg"
+                    onClick={() => openRequestModal()}
+                    className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+                    data-event="spa_stretching_cta_click"
+                  >
                     Book Assisted Stretching
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
@@ -302,91 +313,10 @@ export default function Spa() {
         </div>
       </section>
 
-      {/* Gradient Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
 
-      {/* Amenities Accordion */}
-      <section className="py-14 container">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">What's Included</h2>
-          <p className="text-muted-foreground text-lg">Premium amenities with every appointment</p>
-        </div>
-        <div className="max-w-3xl mx-auto">
-          <Card className="shadow-premium border-border">
-            <CardContent className="p-6">
-              <Accordion type="single" collapsible className="space-y-3">
-                <AccordionItem value="environment" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
-                  <AccordionTrigger className="text-left hover:no-underline py-4">
-                    <div className="flex items-center gap-3">
-                      <Sun className="h-5 w-5 text-accent" />
-                      <span className="font-semibold">Environment & Atmosphere</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-4">
-                    <ul className="space-y-2">
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Private treatment rooms</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Climate-controlled comfort</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Ambient sound systems</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Aromatherapy options</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-                
-                <AccordionItem value="products" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
-                  <AccordionTrigger className="text-left hover:no-underline py-4">
-                    <div className="flex items-center gap-3">
-                      <Droplets className="h-5 w-5 text-accent" />
-                      <span className="font-semibold">Premium Products</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-4">
-                    <ul className="space-y-2">
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Organic massage oils</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Hot towel service</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Complimentary refreshments</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" />       Recovery, performance-based assisted stretching for athletes, workers, & elders.                1-on-1 or group sessions.</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-                
-                <AccordionItem value="technology" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
-                  <AccordionTrigger className="text-left hover:no-underline py-4">
-                    <div className="flex items-center gap-3">
-                      <Zap className="h-5 w-5 text-accent" />
-                      <span className="font-semibold">Recovery Technology</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-4">
-                    <ul className="space-y-2">
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Infrared sauna access</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Compression therapy devices</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Cold plunge pool</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Cryotherapy chamber</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-                
-                <AccordionItem value="hospitality" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
-                  <AccordionTrigger className="text-left hover:no-underline py-4">
-                    <div className="flex items-center gap-3">
-                      <Coffee className="h-5 w-5 text-accent" />
-                      <span className="font-semibold">Hospitality & Comfort</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-4">
-                    <ul className="space-y-2">
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Relaxation lounge access</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Herbal tea & infused water</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Plush robes & slippers</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Secure storage lockers</li>
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+
+      {/* What's Included section moved below Meet Lindsey per spec */}
+
 
       {/* Meet Lindsey Section - Single Provider Feature */}
       <section id="spa-providers" className="py-16 bg-muted/30">
@@ -468,6 +398,91 @@ export default function Spa() {
               </div>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
+
+      {/* Amenities Accordion */}
+      <section className="py-14 container">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">What's Included</h2>
+          <p className="text-muted-foreground text-lg">Premium amenities with every appointment</p>
+        </div>
+        <div className="max-w-3xl mx-auto">
+          <Card className="shadow-premium border-border">
+            <CardContent className="p-6">
+              <Accordion type="single" collapsible className="space-y-3">
+                <AccordionItem value="environment" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
+                    <div className="flex items-center gap-3">
+                      <Sun className="h-5 w-5 text-accent" />
+                      <span className="font-semibold">Environment & Atmosphere</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    <ul className="space-y-2">
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Private treatment rooms</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Climate-controlled comfort</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Ambient sound systems</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Aromatherapy options</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="products" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
+                    <div className="flex items-center gap-3">
+                      <Droplets className="h-5 w-5 text-accent" />
+                      <span className="font-semibold">Premium Products</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    <ul className="space-y-2">
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Organic massage oils</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Hot towel service</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Complimentary refreshments</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="technology" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
+                    <div className="flex items-center gap-3">
+                      <Zap className="h-5 w-5 text-accent" />
+                      <span className="font-semibold">Recovery Technology</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    <ul className="space-y-2">
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Infrared sauna access</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Compression therapy devices</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Cold plunge pool</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Cryotherapy chamber</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="hospitality" className="border border-border rounded-lg px-6 data-[state=open]:border-accent/50">
+                  <AccordionTrigger className="text-left hover:no-underline py-4">
+                    <div className="flex items-center gap-3">
+                      <Coffee className="h-5 w-5 text-accent" />
+                      <span className="font-semibold">Hospitality & Comfort</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    <ul className="space-y-2">
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Relaxation lounge access</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Herbal tea & infused water</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Plush robes & slippers</li>
+                      <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-accent" /> Secure storage lockers</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
