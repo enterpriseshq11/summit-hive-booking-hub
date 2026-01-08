@@ -199,81 +199,147 @@ export default function Spa() {
           <p className="text-muted-foreground text-lg">Restore your body and mind — choose your path to recovery</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {[
-            { 
-              name: "Massage Therapy", 
-              icon: Heart, 
-              tagline: "Release tension. Restore balance.",
-              type: "massage" as const,
-              badge: "Most Popular",
-              benefits: [
-                "Deep tissue, Swedish, and sports techniques",
-                "Personalized pressure and focus areas",
-                "Premium oils and heated treatments"
-              ]
-            },
-            { 
-              name: "Recovery Services", 
-              icon: Leaf, 
-              tagline: "Accelerate your body's natural healing.",
-              type: "recovery" as const,
-              badge: "Best for Athletes",
-              benefits: [
-                "Cryotherapy and compression therapy",
-                "Infrared sauna and cold plunge",
-                "Science-backed recovery protocols"
-              ]
-            },
-            { 
-              name: "Wellness Experiences", 
-              icon: Star, 
-              tagline: "Shared moments of restoration.",
-              type: "wellness" as const,
-              badge: "Perfect for Couples",
-              benefits: [
-                "Couples and group sessions",
-                "Customized spa day packages",
-                "Curated multi-treatment journeys"
-              ]
-            }
-          ].map((service) => (
-            <Card 
-              key={service.name} 
-              className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden"
-              onClick={() => openRequestModal(service.type)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && openRequestModal(service.type)}
-              data-event={`spa_${service.type}_card_click`}
-            >
-              {/* Badge */}
-              <div className="absolute top-3 right-3">
-                <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
-                  {service.badge}
-                </Badge>
+          {/* Massage Therapy Card */}
+          <Card 
+            className="hover:shadow-gold-lg hover:border-accent/50 transition-all duration-300 shadow-premium group border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden"
+          >
+            {/* Badge */}
+            <div className="absolute top-3 right-3">
+              <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
+                Most Popular
+              </Badge>
+            </div>
+            <CardHeader className="pt-8">
+              <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:shadow-gold transition-all">
+                <Heart className="h-7 w-7 text-accent group-hover:text-primary transition-colors" />
               </div>
-              <CardHeader className="pt-8">
-                <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:shadow-gold transition-all">
-                  <service.icon className="h-7 w-7 text-accent group-hover:text-primary transition-colors" />
-                </div>
-                <CardTitle className="text-xl group-hover:text-accent transition-colors">{service.name}</CardTitle>
-                <p className="text-sm text-accent font-medium">{service.tagline}</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 mb-4">
-                  {service.benefits.map((benefit, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
-                      <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-sm text-accent font-medium flex items-center gap-1 group-hover:underline">
-                  Book this <ArrowRight className="h-4 w-4" />
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+              <CardTitle className="text-xl group-hover:text-accent transition-colors">Massage Therapy</CardTitle>
+              <p className="text-sm text-accent font-medium">Release tension. Restore balance.</p>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="mb-4">
+                <AccordionItem value="massage-types" className="border-0">
+                  <AccordionTrigger className="text-sm text-muted-foreground hover:no-underline py-2 px-0">
+                    View Massage Types
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-2">
+                    <ul className="space-y-2">
+                      {[
+                        "Ayurveda Massage",
+                        "Prenatal Massage",
+                        "Relaxation Massage",
+                        "Swedish Massage",
+                        "Deep Tissue Massage",
+                        "Couples Massage",
+                        "Aromatherapy"
+                      ].map((type, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <CheckCircle className="h-4 w-4 text-accent flex-shrink-0" />
+                          {type}
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+              <Button 
+                onClick={() => openRequestModal("massage")}
+                className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold"
+                data-event="spa_massage_card_click"
+              >
+                Book this <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Recovery Services Card */}
+          <Card 
+            className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden"
+            onClick={() => openRequestModal("recovery")}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && openRequestModal("recovery")}
+            data-event="spa_recovery_card_click"
+          >
+            {/* Badge */}
+            <div className="absolute top-3 right-3">
+              <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
+                Best for Athletes
+              </Badge>
+            </div>
+            <CardHeader className="pt-8">
+              <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:shadow-gold transition-all">
+                <Leaf className="h-7 w-7 text-accent group-hover:text-primary transition-colors" />
+              </div>
+              <CardTitle className="text-xl group-hover:text-accent transition-colors">Recovery Services</CardTitle>
+              <p className="text-sm text-accent font-medium">Accelerate your body's natural healing.</p>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 mb-4">
+                {[
+                  "Massage Therapy",
+                  "Medical Massage",
+                  "Red Light Therapy",
+                  "Wellness Services"
+                ].map((benefit, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
+                    <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                    {benefit}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-sm text-accent font-medium flex items-center gap-1 group-hover:underline">
+                Book this <ArrowRight className="h-4 w-4" />
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Wellness Experiences Card */}
+          <Card 
+            className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden"
+            onClick={() => openRequestModal("wellness")}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && openRequestModal("wellness")}
+            data-event="spa_wellness_card_click"
+          >
+            {/* Badge */}
+            <div className="absolute top-3 right-3">
+              <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
+                Perfect for Everyone
+              </Badge>
+            </div>
+            <CardHeader className="pt-8">
+              <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:shadow-gold transition-all">
+                <Star className="h-7 w-7 text-accent group-hover:text-primary transition-colors" />
+              </div>
+              <CardTitle className="text-xl group-hover:text-accent transition-colors">Wellness Experiences</CardTitle>
+              <p className="text-sm text-accent font-medium">Shared moments of restoration.</p>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 mb-4">
+                {[
+                  "Relaxation Services",
+                  "Energy Work",
+                  "Workshops & Retreats",
+                  "Guided Meditations",
+                  "Yoga",
+                  "Aerial Yoga",
+                  "Hot Yoga",
+                  "Pilates with Reformers",
+                  "Stress Reduction Sessions"
+                ].map((benefit, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
+                    <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                    {benefit}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-sm text-accent font-medium flex items-center gap-1 group-hover:underline">
+                Book this <ArrowRight className="h-4 w-4" />
+              </p>
+            </CardContent>
+          </Card>
         </div>
         
         {/* Single section CTA */}
@@ -290,6 +356,54 @@ export default function Spa() {
           <p className="text-sm text-muted-foreground mt-3">
             You'll review everything before payment. No surprise fees.
           </p>
+        </div>
+      </section>
+
+      {/* Assisted Stretching Section - Between Services and What's Included */}
+      <section id="spa-stretching" className="py-14 bg-muted/30">
+        <div className="container">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">ASSISTED STRETCHING</h2>
+            <p className="text-accent text-lg font-medium max-w-3xl mx-auto">
+              Recovery, performance-based assisted stretching for athletes, workers, elders - everyone. 1-on-1 or group sessions.
+            </p>
+          </div>
+          
+          <div className="max-w-3xl mx-auto">
+            <Card className="shadow-premium border-border">
+              <CardContent className="p-8">
+                <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                  1-on-1 guided stretch session where a trained practitioner helps move your body through deeper, safer stretches than you can achieve on your own. Going through range of motion designed to improve flexibility, mobility, posture, and recovery.
+                </p>
+                
+                <ul className="space-y-3 mb-8">
+                  {[
+                    "Relieves muscle tension",
+                    "Increases flexibility",
+                    "Blends gentle traction, targeted stretching, and mindful breathwork",
+                    "Supports recovery, performance, and everyday posture and comfort"
+                  ].map((benefit, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-foreground">
+                      <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+                
+                <div className="text-center">
+                  <Button 
+                    size="lg" 
+                    onClick={() => openRequestModal()}
+                    className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
+                    data-event="spa_stretching_cta_click"
+                  >
+                    Book Assisted Stretching
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
