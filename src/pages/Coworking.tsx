@@ -177,7 +177,7 @@ export default function Coworking() {
               </div>
 
               {/* Anchor Chips - Section Links */}
-              <div className="pt-1">
+              <div className="pt-1 flex justify-center sm:justify-start">
                 <CoworkingAnchorChips />
               </div>
             </div>
