@@ -20,7 +20,7 @@ export function CoworkingAnchorChips() {
   };
 
   return (
-    <nav className="flex flex-wrap gap-2 justify-center" aria-label="Page sections">
+    <nav className="flex flex-wrap gap-2 justify-center max-w-md" aria-label="Page sections">
       {sections.map((section) => (
         <Button
           key={section.id}
