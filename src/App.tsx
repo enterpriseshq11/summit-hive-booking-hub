@@ -6,6 +6,7 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout, ProtectedRoute } from "@/components/layout";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { useEffect } from "react";
 
 // Pages
@@ -73,6 +74,7 @@ function AppInner() {
 
   return (
     <HashRouter>
+      <ScrollToTop />
       <Routes>
         {/* Public debug routes (never protected) */}
         <Route path="/__debug/auth" element={<AuthDebug />} />
