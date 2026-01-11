@@ -162,7 +162,7 @@ export default function Coworking() {
               </div>
 
               {/* Amenities Strip - Enhanced Pills */}
-              <div className="grid grid-cols-2 gap-2 max-w-xs sm:max-w-none sm:inline-flex sm:flex-wrap">
+              <div className="grid grid-cols-2 gap-2 max-w-xs mx-auto sm:mx-0 sm:max-w-none sm:inline-flex sm:flex-wrap">
                 {[
                   { icon: Wifi, label: "High-Speed Internet" },
                   { icon: Coffee, label: "Coffee Bar" },
@@ -177,7 +177,7 @@ export default function Coworking() {
               </div>
 
               {/* Anchor Chips - Section Links */}
-              <div className="flex sm:justify-start">
+              <div className="-mt-2 sm:mt-0">
                 <CoworkingAnchorChips />
               </div>
             </div>
