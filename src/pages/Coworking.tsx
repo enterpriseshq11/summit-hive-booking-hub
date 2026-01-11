@@ -162,14 +162,14 @@ export default function Coworking() {
               </div>
 
               {/* Amenities Strip - Enhanced Pills */}
-              <div className="inline-flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2 max-w-xs sm:max-w-none sm:inline-flex sm:flex-wrap">
                 {[
                   { icon: Wifi, label: "High-Speed Internet" },
                   { icon: Coffee, label: "Coffee Bar" },
                   { icon: Clock, label: "Flexible Access" },
                   { icon: MapPin, label: "Prime Location" },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-accent/10 rounded-full border border-accent/30">
+                  <div key={item.label} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-accent/10 rounded-full border border-accent/30 sm:justify-start">
                     <item.icon className="h-3.5 w-3.5 text-accent flex-shrink-0" />
                     <span className="text-xs font-medium text-accent whitespace-nowrap">{item.label}</span>
                   </div>
