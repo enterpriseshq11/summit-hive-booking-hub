@@ -20,7 +20,7 @@ export function CoworkingAnchorChips() {
   };
 
   return (
-    <nav className="grid grid-cols-2 gap-2 max-w-xs sm:max-w-md sm:flex sm:flex-wrap sm:justify-center" aria-label="Page sections">
+    <nav className="grid grid-cols-2 gap-2 max-w-xs mx-auto sm:mx-0 sm:max-w-md sm:flex sm:flex-wrap sm:justify-center" aria-label="Page sections">
       {sections.map((section, index) => (
         <Button
           key={section.id}
