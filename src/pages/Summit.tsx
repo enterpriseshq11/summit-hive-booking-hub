@@ -378,7 +378,7 @@ export default function Summit() {
       </div>
 
       {/* Venue Overview */}
-      <section id="venue" className="py-20 container">
+      <section id="highlights" className="py-20 container">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Premier Event Venue</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">

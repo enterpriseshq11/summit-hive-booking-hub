@@ -25,7 +25,7 @@ export function SummitAnchorChips() {
             variant="outline"
             size="sm"
             onClick={() => scrollToSection(anchor.id)}
-            className="rounded-full border-accent/30 text-primary-foreground/80 hover:bg-accent/20 hover:text-primary-foreground hover:border-accent/50 bg-transparent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            className="rounded-full border-accent/30 bg-accent/10 text-foreground hover:bg-accent/20 hover:border-accent transition-all focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             aria-label={`Jump to ${anchor.label} section`}
           >
             <Icon className="h-3.5 w-3.5 mr-1.5 text-accent" aria-hidden="true" />
