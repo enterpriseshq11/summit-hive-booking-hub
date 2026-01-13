@@ -112,12 +112,12 @@ export default function Fitness() {
                 24/7 access, expert coaching, and a community that actually notices when you show up.
               </p>
               
-              {/* Hero CTAs - Primary + Secondary */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              {/* Hero CTAs - Primary (Dominant) + Secondary */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
                 <Button 
                   size="lg" 
                   onClick={() => openJoinModal()}
-                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all text-lg px-8 py-6"
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all text-lg px-10 py-7"
                   data-event="fitness_hero_cta_click"
                 >
                   <Dumbbell className="h-5 w-5 mr-2" />
@@ -128,7 +128,7 @@ export default function Fitness() {
                   size="lg" 
                   variant="outline"
                   onClick={() => setShowOrientationModal(true)}
-                  className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold text-lg px-8 py-6"
+                  className="border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 hover:border-primary-foreground/50 font-medium"
                   data-event="fitness_hero_orientation_click"
                 >
                   <Calendar className="h-5 w-5 mr-2" />
@@ -136,8 +136,22 @@ export default function Fitness() {
                 </Button>
               </div>
               
+              {/* Microcopy under primary CTA */}
+              <p className="text-sm text-primary-foreground/60 mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                No contracts • Cancel anytime • Local team support
+              </p>
+              
+              {/* Tertiary text link */}
+              <a 
+                href="#fitness-memberships" 
+                className="text-sm text-accent hover:underline inline-flex items-center gap-1 animate-fade-in"
+                style={{ animationDelay: '0.4s' }}
+              >
+                See Memberships <ChevronRight className="h-3 w-3" />
+              </a>
+              
               {/* Trust Chips - 3 quick badges */}
-              <div className="flex flex-wrap gap-3 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+              <div className="flex flex-wrap gap-3 mt-8 animate-fade-in" style={{ animationDelay: '0.5s' }}>
                 {[
                   { icon: Clock, label: "24/7 Access" },
                   { icon: Users, label: "Coach Support" },
@@ -210,18 +224,36 @@ export default function Fitness() {
         <FitnessAnchorChips />
       </section>
 
-      {/* Next Available Widget - Premium Card Styling */}
-      <section className="py-10 container">
+      {/* Next Available Orientations - Reframed for Demand */}
+      <section id="fitness-orientations" className="py-10 container">
         <Card className="max-w-4xl mx-auto shadow-premium border-border relative overflow-hidden">
           {/* Gold accent line */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-accent" />
           <CardHeader className="border-b border-border pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Clock className="h-5 w-5 text-accent" />
-              Next Available Orientations
-            </CardTitle>
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Clock className="h-5 w-5 text-accent" />
+                Next Available Orientations
+              </CardTitle>
+              <span className="text-xs text-muted-foreground">Updated today</span>
+            </div>
           </CardHeader>
           <CardContent className="pt-6">
+            {/* High demand banner - shown when availability is limited */}
+            <div className="flex items-center gap-3 p-4 bg-accent/10 rounded-lg border border-accent/20 mb-6">
+              <div className="flex items-center gap-2">
+                <Flame className="h-5 w-5 text-accent" />
+                <span className="font-semibold text-foreground">High demand</span>
+              </div>
+              <span className="text-muted-foreground">— orientations scheduled within 24 hours</span>
+            </div>
+            
+            {/* Reassurance line */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+              <CheckCircle className="h-4 w-4 text-accent" />
+              <span>Most members start within 1–2 days</span>
+            </div>
+            
             <NextAvailableWidget
               businessType="fitness"
               title="Next Available Orientations"
@@ -230,9 +262,24 @@ export default function Fitness() {
               onJoinWaitlist={() => setShowWaitlistModal(true)}
               onRequestTour={() => setShowOrientationModal(true)}
               onAskDayPass={() => openJoinModal()}
-              emptyMessage="No orientation slots in the next 14 days"
-              emptySubMessage="Join anyway — we'll schedule your orientation within 24 hours, or join the waitlist."
+              emptyMessage="All upcoming slots are filled"
+              emptySubMessage="High demand! Request your orientation and we'll confirm within 24 hours."
             />
+            
+            {/* Primary action for requesting orientation */}
+            <div className="mt-6 pt-6 border-t border-border">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <Button 
+                  onClick={() => setShowOrientationModal(true)}
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold"
+                  data-event="fitness_orientation_request_click"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Request Next Available Orientation
+                </Button>
+                <span className="text-sm text-muted-foreground">We'll confirm by text or email.</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </section>
