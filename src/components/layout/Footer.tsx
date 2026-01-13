@@ -72,34 +72,34 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Contact - J1: Increased line spacing, J2: Consistent gold icons */}
           <div>
             <h3 className="font-semibold text-accent mb-4">Contact</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-sm text-primary-foreground/70">
-                <MapPin className="h-4 w-4 text-accent" />
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3 text-sm text-primary-foreground/70 leading-relaxed">
+                <MapPin className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
                 {SITE_CONFIG.location.full}
               </li>
               <li>
                 <a 
                   href={SITE_CONFIG.contact.phoneLink}
-                  className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+                  className="flex items-center gap-3 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
                 >
-                  <Phone className="h-4 w-4 text-accent" />
+                  <Phone className="h-4 w-4 text-accent flex-shrink-0" />
                   {SITE_CONFIG.contact.phone}
                 </a>
               </li>
               <li>
                 <a 
                   href={SITE_CONFIG.contact.emailLink}
-                  className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+                  className="flex items-center gap-3 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
                 >
-                  <Mail className="h-4 w-4 text-accent" />
+                  <Mail className="h-4 w-4 text-accent flex-shrink-0" />
                   {SITE_CONFIG.contact.email}
                 </a>
               </li>
-              <li className="flex items-center gap-2 text-sm text-primary-foreground/70">
-                <Clock className="h-4 w-4 text-accent" />
+              <li className="flex items-center gap-3 text-sm text-primary-foreground/70">
+                <Clock className="h-4 w-4 text-accent flex-shrink-0" />
                 {SITE_CONFIG.hours.time}
               </li>
             </ul>

@@ -30,16 +30,19 @@ import {
 import { useState } from "react";
 import azLogoIcon from "@/assets/az-logo-icon.png";
 
+// B1: De-emphasized Spin & Win (removed highlight, moved lower)
+// B2: Grouped businesses under conceptual structure
+// B3: Consistent icon sizing handled in JSX
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
-  { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, highlight: true },
-  { label: "Voice Vault", mobileLabel: "Voice Vault", desktopLabel: "Voice Vault by The Hive", href: "/voice-vault", icon: Mic, highlight: true },
-  { label: "Shop", href: "/shop", icon: ShoppingBag },
   { label: "Summit", href: "/summit", icon: Building2 },
   { label: "Coworking", href: "/coworking", icon: Building2 },
   { label: "Spa", href: "/spa", icon: Sparkles },
   { label: "Fitness", href: "/fitness", icon: Dumbbell },
   { label: "Gift Cards", href: "/gift-cards", icon: Gift },
+  { label: "Voice Vault", mobileLabel: "Voice Vault", desktopLabel: "Voice Vault by The Hive", href: "/voice-vault", icon: Mic, highlight: true },
+  { label: "Shop", href: "/shop", icon: ShoppingBag },
+  { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, secondary: true },
   { label: "Promotions", href: "/promotions", icon: Layers },
 ];
 
@@ -94,10 +97,13 @@ export function Header() {
                       ? "bg-accent/20 text-accent hover:bg-accent/30"
                       : item.highlight
                         ? "text-accent hover:text-accent hover:bg-accent/10 animate-pulse"
-                        : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                        : (item as any).secondary
+                          ? "text-primary-foreground/50 hover:text-primary-foreground/80 hover:bg-primary-foreground/5"
+                          : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                 )}
               >
-                <item.icon className="h-4 w-4" />
+                {/* B3: Consistent icon sizing */}
+                <item.icon className="h-4 w-4 flex-shrink-0" />
                 {displayLabel}
               </Link>
             );

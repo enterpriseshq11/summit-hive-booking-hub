@@ -25,7 +25,10 @@ import {
   Users,
   ArrowRight,
   Calendar,
-  Phone
+  Phone,
+  PartyPopper,
+  Cake,
+  CalendarHeart
 } from "lucide-react";
 import { GiftCardPurchaseModal } from "@/components/booking/GiftCardPurchaseModal";
 import { GiftCardAnchorChips } from "@/components/booking/GiftCardAnchorChips";
@@ -36,34 +39,38 @@ import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 
 const giftCardOptions = [
-  { amount: 50, label: "Starter", description: "Perfect for a quick reset or add-on.", popular: false },
-  { amount: 100, label: "Classic", description: "Ideal for a signature service.", popular: true },
-  { amount: 200, label: "Premium", description: "Great for a deeper recovery day.", popular: false },
-  { amount: 500, label: "Ultimate", description: "Best for packages, events, or premium experiences.", popular: false },
+  { amount: 50, label: "Starter", description: "Perfect for a quick reset or add-on.", popular: false, example: "Day pass or sauna session" },
+  { amount: 100, label: "Classic", description: "Ideal for a signature service.", popular: true, example: "Massage + sauna combo" },
+  { amount: 200, label: "Premium", description: "Great for a deeper recovery day.", popular: false, example: "Spa package or personal training" },
+  { amount: 500, label: "Ultimate", description: "Best for packages, events, or premium experiences.", popular: false, example: "VIP event or full wellness day" },
 ];
 
 const redeemLocations = [
   { 
     name: "The Summit", 
-    icon: Building2, 
+    icon: Building2,
+    image: "🏛️",
     desc: "Events & Venues",
     examples: ["Event deposits", "Private dining", "Conference room rentals"]
   },
   { 
     name: "The Hive", 
-    icon: Building2, 
+    icon: Building2,
+    image: "🐝",
     desc: "Coworking",
     examples: ["Day passes", "Meeting rooms", "Virtual office credits"]
   },
   { 
     name: "Restoration Lounge", 
-    icon: Heart, 
+    icon: Heart,
+    image: "🧘",
     desc: "Spa & Wellness",
     examples: ["Massages", "Facials", "Wellness packages"]
   },
   { 
     name: "Total Fitness", 
-    icon: Dumbbell, 
+    icon: Dumbbell,
+    image: "💪",
     desc: "Gym & Classes",
     examples: ["Personal training", "Classes", "Pro shop"]
   },
@@ -144,13 +151,13 @@ export default function GiftCards() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Premium Black & Gold with grid texture + gold spotlight */}
+      {/* Hero Section - Premium Black & Gold with subtler grid */}
       <section className="relative py-24 overflow-hidden bg-primary">
         {/* Gold spotlight effect */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,hsl(var(--accent)/0.25)_0%,transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
-        {/* Grid texture */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        {/* A2: Subtler grid texture - reduced opacity */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:80px_80px]" />
         
         <div className="container max-w-4xl text-center relative z-10">
           {/* Premium icon with gold ring + glow */}
@@ -165,8 +172,14 @@ export default function GiftCards() {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground tracking-tight">
             Give the Gift of Wellness
           </h1>
-          <p className="text-lg md:text-xl text-primary-foreground/70 max-w-2xl mx-auto mb-8">
+          {/* A1: Improved subtitle contrast */}
+          <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto mb-3 font-medium">
             The easiest way to gift fitness, recovery, and unforgettable experiences—delivered instantly and redeemable across A-Z.
+          </p>
+          {/* A3: Subline text */}
+          <p className="text-base text-primary-foreground/70 max-w-xl mx-auto mb-8 flex items-center justify-center gap-2">
+            <PartyPopper className="h-4 w-4 text-accent" />
+            Perfect for birthdays, holidays, and thank-yous.
           </p>
 
           {/* Hero CTA Row */}
@@ -229,15 +242,16 @@ export default function GiftCards() {
           Pick a preset or enter a custom amount. You'll confirm delivery details before payment.
         </p>
         
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* C2: Increased gap between cards */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
           {giftCardOptions.map((option) => (
             <Card 
               key={option.amount} 
               onClick={() => handleAmountSelect(option.amount)}
-              className={`cursor-pointer transition-all text-center relative group ${
+              className={`cursor-pointer transition-all duration-200 text-center relative group ${
                 selectedAmount === option.amount && !isCustom
-                  ? "ring-2 ring-accent border-accent/30 shadow-gold-lg" 
-                  : "hover:border-accent/30 hover:shadow-gold-lg hover:-translate-y-1"
+                  ? "ring-2 ring-accent border-accent/30 shadow-gold-lg scale-[1.02]" 
+                  : "hover:border-accent/40 hover:shadow-gold-lg hover:-translate-y-1 hover:bg-accent/5"
               }`}
             >
               {/* Most Popular Badge */}
@@ -259,15 +273,17 @@ export default function GiftCards() {
                 <CardDescription className="font-medium text-muted-foreground text-sm">{option.label}</CardDescription>
                 <CardTitle className="text-5xl font-bold text-accent">${option.amount}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-2">
                 <p className="text-sm text-muted-foreground">{option.description}</p>
+                {/* C3: Example microcopy */}
+                <p className="text-xs text-accent/80 italic">e.g. {option.example}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Custom Amount Input */}
-        <div className="max-w-sm mx-auto mb-8">
+        {/* Custom Amount Input - D1, D2, D3 improvements */}
+        <div className="max-w-sm mx-auto mb-10">
           <div className="text-center text-sm text-muted-foreground mb-2">Or enter a custom amount</div>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
@@ -275,7 +291,7 @@ export default function GiftCards() {
               type="number"
               min="25"
               max="1000"
-              placeholder="25 - 1,000"
+              placeholder="e.g. 150"
               value={customAmount}
               onChange={(e) => handleCustomAmountChange(e.target.value)}
               className={`pl-8 text-center text-lg h-12 ${isCustom && customAmount ? "border-accent ring-1 ring-accent" : ""}`}
@@ -286,48 +302,52 @@ export default function GiftCards() {
           )}
         </div>
 
-        {/* Section CTA */}
+        {/* Section CTA - D2: Increased button contrast */}
         <div className="text-center">
           <Button 
             size="lg"
             disabled={!getActiveAmount()}
             onClick={handlePurchase}
-            className="bg-accent hover:bg-accent/90 text-primary font-semibold px-12 h-12 text-base"
+            className="bg-accent hover:bg-accent/90 text-primary font-bold px-12 h-14 text-lg shadow-gold-lg hover:shadow-gold transition-shadow"
             data-event="giftcard_amount_continue"
           >
             {getActiveAmount() ? (
               <>
-                Continue
-                <ChevronRight className="h-4 w-4 ml-2" />
+                Continue with ${getActiveAmount()}
+                <ChevronRight className="h-5 w-5 ml-2" />
               </>
             ) : (
               "Select an Amount"
             )}
           </Button>
-          <p className="text-sm text-muted-foreground mt-3">
-            You'll confirm details before payment
+          {/* D3: Microcopy under button */}
+          <p className="text-sm text-muted-foreground mt-3 flex items-center justify-center gap-2">
+            <Shield className="h-3.5 w-3.5 text-accent" />
+            Secure checkout • Takes under 1 minute
           </p>
         </div>
       </section>
 
-      {/* Bulk/Corporate Orders Mini-Card */}
+      {/* E1, E2: Bulk/Corporate Orders Mini-Card - Enhanced */}
       <div className="container max-w-5xl pb-8">
         <Card 
-          className="border-accent/20 bg-accent/5 cursor-pointer hover:border-accent/40 transition-all"
+          className="border-accent/30 bg-accent/5 cursor-pointer hover:border-accent/50 hover:bg-accent/10 transition-all group"
           onClick={() => setIsBulkModalOpen(true)}
           data-event="giftcard_bulk_card_click"
         >
-          <CardContent className="flex items-center justify-between p-4">
+          <CardContent className="flex items-center justify-between p-5">
             <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center">
-                <Users className="h-5 w-5 text-accent" />
+              <div className="h-12 w-12 rounded-full bg-accent/20 flex items-center justify-center group-hover:bg-accent/30 transition-colors">
+                <Users className="h-6 w-6 text-accent" />
               </div>
               <div>
-                <p className="font-medium">Buying 10+ cards?</p>
-                <p className="text-sm text-muted-foreground">Corporate & team gifting available</p>
+                <p className="font-semibold text-lg">Buying 10+ cards?</p>
+                {/* E1: Subtext */}
+                <p className="text-sm text-muted-foreground">Perfect for teams, clients, and employee gifts</p>
               </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-accent" />
+            {/* E2: Larger, more visible arrow */}
+            <ArrowRight className="h-6 w-6 text-accent group-hover:translate-x-1 transition-transform" />
           </CardContent>
         </Card>
       </div>
@@ -335,14 +355,17 @@ export default function GiftCards() {
       {/* Gradient Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
 
-      {/* Redeem Anywhere */}
-      <section id="redeem-anywhere" className="py-16 bg-muted/30">
+      {/* F1, F2, F3: Redeem Anywhere - Enhanced */}
+      <section id="redeem-anywhere" className="py-20 bg-muted/30">
         <div className="container max-w-4xl">
           <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">Redeem Anywhere</h2>
-          <p className="text-muted-foreground text-center mb-10">
+          {/* F3: Tagline */}
+          <p className="text-accent font-medium text-center mb-2">One card. Every experience.</p>
+          <p className="text-muted-foreground text-center mb-12">
             Use it at any A-Z location—choose where it fits best.
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* F2: Increased spacing */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {redeemLocations.map((location) => (
               <Card 
                 key={location.name} 
@@ -350,21 +373,24 @@ export default function GiftCards() {
                 className="text-center cursor-pointer transition-all hover:shadow-gold-lg hover:border-accent/30 hover:-translate-y-1 group"
                 data-event={`giftcard_location_${location.name.toLowerCase().replace(/\s/g, '_')}`}
               >
-                <CardContent className="pt-6">
+                {/* F1, F2: Enhanced card with image/emoji and more padding */}
+                <CardContent className="pt-8 pb-6 px-5">
+                  {/* F1: Visual icon/image */}
+                  <div className="text-4xl mb-3">{location.image}</div>
                   <div className="h-12 w-12 rounded-xl bg-accent/10 group-hover:bg-accent/20 flex items-center justify-center mx-auto mb-3 transition-colors">
                     <location.icon className="h-6 w-6 text-accent" />
                   </div>
-                  <p className="font-semibold">{location.name}</p>
+                  <p className="font-semibold text-lg">{location.name}</p>
                   <p className="text-sm text-muted-foreground mb-2">{location.desc}</p>
                   
                   {/* Expanded Examples */}
                   {expandedLocation === location.name && (
-                    <div className="mt-3 pt-3 border-t border-border">
+                    <div className="mt-4 pt-4 border-t border-border">
                       <p className="text-xs text-muted-foreground mb-2">Example uses:</p>
-                      <ul className="text-xs text-left space-y-1">
+                      <ul className="text-xs text-left space-y-1.5">
                         {location.examples.map((ex) => (
                           <li key={ex} className="flex items-center gap-2">
-                            <Check className="h-3 w-3 text-accent" />
+                            <Check className="h-3 w-3 text-accent flex-shrink-0" />
                             {ex}
                           </li>
                         ))}
@@ -372,8 +398,8 @@ export default function GiftCards() {
                     </div>
                   )}
                   
-                  <p className="text-xs text-accent mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    See example uses →
+                  <p className="text-xs text-accent mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Tap to see examples →
                   </p>
                 </CardContent>
               </Card>
@@ -385,38 +411,60 @@ export default function GiftCards() {
       {/* Gradient Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
 
-      {/* How It Works - Premium Timeline */}
-      <section id="how-it-works" className="py-16 container max-w-4xl">
+      {/* G1, G2, G3: How It Works - Enhanced */}
+      <section id="how-it-works" className="py-20 container max-w-4xl">
         <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">How It Works</h2>
-        <p className="text-muted-foreground text-center mb-12">Simple, secure, and instant</p>
+        <p className="text-muted-foreground text-center mb-14">Simple, secure, and instant</p>
         
-        {/* 3-Step Timeline */}
-        <div className="relative mb-12">
+        {/* G3: Increased spacing in timeline */}
+        <div className="relative mb-14">
           {/* Connecting line */}
-          <div className="hidden md:block absolute top-10 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-accent/50 via-accent to-accent/50" />
+          <div className="hidden md:block absolute top-12 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-accent/50 via-accent to-accent/50" />
           
-          <div className="grid md:grid-cols-3 gap-8">
+          {/* G3: Increased gap */}
+          <div className="grid md:grid-cols-3 gap-12">
             {[
-              { step: "1", title: "Choose Amount", desc: "Select a preset value or enter a custom amount between $25-$1,000", icon: Gift },
-              { step: "2", title: "Personalize", desc: "Add recipient details, a personal message, and schedule delivery", icon: Sparkles },
-              { step: "3", title: "Deliver Instantly", desc: "Gift card is delivered immediately via email—ready to use", icon: Mail },
+              { 
+                step: "1", 
+                title: "Choose Amount", 
+                desc: "Select a preset value or enter a custom amount between $25-$1,000.",
+                subdesc: "Pick what fits your budget.",
+                icon: Gift 
+              },
+              { 
+                step: "2", 
+                title: "Personalize", 
+                desc: "Add recipient details, a personal message, and schedule delivery.",
+                subdesc: "Make it meaningful.",
+                icon: Sparkles 
+              },
+              { 
+                step: "3", 
+                title: "Deliver Instantly", 
+                desc: "Gift card is delivered immediately via email—ready to use.",
+                subdesc: "They'll have it in seconds.",
+                icon: Mail 
+              },
             ].map((item) => (
               <div key={item.step} className="relative text-center">
+                {/* G2: Consistent icon sizing */}
                 <div className="relative inline-flex items-center justify-center mb-6">
                   <div className="absolute inset-0 rounded-full bg-accent/20 blur-lg" />
-                  <div className="relative h-20 w-20 rounded-full bg-accent text-primary flex items-center justify-center shadow-gold-lg">
-                    <item.icon className="h-8 w-8" />
+                  <div className="relative h-24 w-24 rounded-full bg-accent text-primary flex items-center justify-center shadow-gold-lg">
+                    <item.icon className="h-10 w-10" />
                   </div>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground max-w-[200px] mx-auto">{item.desc}</p>
+                <h3 className="font-semibold text-xl mb-3">{item.title}</h3>
+                <p className="text-sm text-muted-foreground max-w-[220px] mx-auto mb-2">{item.desc}</p>
+                {/* G1: Short description under each step */}
+                <p className="text-xs text-accent font-medium">{item.subdesc}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Trust Proof Chips */}
-        <div className="flex flex-wrap justify-center gap-3">
+        <div className="flex flex-wrap justify-center gap-4">
           {[
             { icon: Clock, label: "Never Expires" },
             { icon: MapPin, label: "Redeem Anywhere" },
@@ -424,7 +472,7 @@ export default function GiftCards() {
           ].map((chip) => (
             <div 
               key={chip.label}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent/10 border border-accent/20 text-sm font-medium"
+              className="flex items-center gap-2 px-6 py-3 rounded-full bg-accent/10 border border-accent/20 text-sm font-medium"
             >
               <chip.icon className="h-4 w-4 text-accent" />
               {chip.label}
@@ -436,21 +484,25 @@ export default function GiftCards() {
       {/* Gradient Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
 
-      {/* FAQ Section */}
-      <section id="faq" className="py-16 bg-muted/30">
+      {/* H1, H2, H3: FAQ Section - Enhanced */}
+      <section id="faq" className="py-20 bg-muted/30">
         <div className="container max-w-3xl">
           <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">Frequently Asked Questions</h2>
-          <p className="text-muted-foreground text-center mb-10">Everything you need to know about A-Z gift cards</p>
+          {/* H1: Intro line */}
+          <p className="text-muted-foreground text-center mb-12">Everything you need to know before you buy</p>
           
           <Card className="border-accent/20">
-            <CardContent className="p-0">
-              <Accordion type="single" collapsible className="w-full">
+            {/* H2: Increased padding */}
+            <CardContent className="p-2">
+              {/* H3: Auto-expand first item on desktop */}
+              <Accordion type="single" collapsible defaultValue="faq-0" className="w-full">
                 {faqItems.map((item, index) => (
                   <AccordionItem key={index} value={`faq-${index}`} className="border-b-accent/10 last:border-0">
-                    <AccordionTrigger className="px-6 hover:no-underline hover:bg-accent/5 text-left">
+                    {/* H2: More padding */}
+                    <AccordionTrigger className="px-6 py-5 hover:no-underline hover:bg-accent/5 text-left font-medium">
                       {item.question}
                     </AccordionTrigger>
-                    <AccordionContent className="px-6 pb-4 text-muted-foreground">
+                    <AccordionContent className="px-6 pb-5 text-muted-foreground leading-relaxed">
                       {item.answer}
                     </AccordionContent>
                   </AccordionItem>
@@ -464,26 +516,33 @@ export default function GiftCards() {
       {/* Gradient Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
 
-      {/* Final CTA - Deep charcoal with premium styling */}
-      <section className="py-20 bg-primary/95">
+      {/* I1, I2, I3: Final CTA - Enhanced */}
+      <section className="py-24 bg-primary/95">
         <div className="container max-w-4xl">
           <Card className="relative overflow-hidden bg-card border-accent/20">
             {/* Gold accent line */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent" />
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-accent" />
             
-            <CardContent className="p-8 md:p-12 text-center">
+            {/* I1: Increased padding */}
+            <CardContent className="p-10 md:p-14 text-center">
               <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to give the gift of wellness?</h2>
               <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
                 Instant delivery. No expiration. Redeemable across A-Z.
               </p>
+              {/* I2: Added instant delivery line */}
+              <p className="text-accent font-medium mb-6 flex items-center justify-center gap-2">
+                <Mail className="h-4 w-4" />
+                Instant email delivery
+              </p>
+              {/* I3: Subtle glow/shadow on CTA */}
               <Button 
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-primary font-semibold px-10 h-12 text-base"
+                className="bg-accent hover:bg-accent/90 text-primary font-bold px-12 h-14 text-lg shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-shadow"
                 onClick={() => document.getElementById('amounts')?.scrollIntoView({ behavior: 'smooth' })}
                 data-event="giftcard_final_cta"
               >
                 Buy a Gift Card
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </CardContent>
           </Card>
@@ -491,9 +550,9 @@ export default function GiftCards() {
       </section>
 
       {/* Terms */}
-      <section className="py-8 container max-w-4xl border-t border-border">
+      <section className="py-10 container max-w-4xl border-t border-border">
         <p className="text-center text-sm text-muted-foreground">
-          Gift cards are not redeemable for cash. Questions? Call <a href={SITE_CONFIG.contact.phoneLink} className="text-accent hover:underline">{SITE_CONFIG.contact.phone}</a>.
+          Gift cards are not redeemable for cash. Questions? Call <a href={SITE_CONFIG.contact.phoneLink} className="text-accent hover:underline font-medium">{SITE_CONFIG.contact.phone}</a>.
         </p>
       </section>
 
