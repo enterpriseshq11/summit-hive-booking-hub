@@ -89,80 +89,115 @@ export default function Fitness() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Premium Black & Gold */}
+      {/* Hero Section - 2-Column Layout with Animation */}
       <section className="relative py-20 md:py-28 overflow-hidden bg-primary">
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px] opacity-30" />
         
         <div className="container relative z-10">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-8">
-              <Dumbbell className="h-4 w-4" />
-              Total Fitness by A-Z
-            </div>
-            
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground">
-              Your Transformation Starts Here
-            </h1>
-            <p className="text-xl md:text-2xl text-accent font-medium mb-4">24/7 Access. Expert Guidance. Real Results.</p>
-            <p className="text-lg text-primary-foreground/70 mb-8 max-w-2xl">
-              State-of-the-art equipment, certified trainers, and a supportive community — join now and start training in under 2 minutes.
-            </p>
-            
-            {/* Hero CTAs - Primary + Secondary */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-              <Button 
-                size="lg" 
-                onClick={() => openJoinModal()}
-                className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-                data-event="fitness_hero_cta_click"
-              >
-                <Dumbbell className="h-5 w-5 mr-2" />
-                Join Now
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => setShowOrientationModal(true)}
-                className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold"
-                data-event="fitness_hero_orientation_click"
-              >
-                <Calendar className="h-5 w-5 mr-2" />
-                Schedule Orientation
-              </Button>
-            </div>
-            
-            {/* Trust Badge */}
-            <div className="flex items-center gap-2 text-primary-foreground/70 mb-4">
-              <Shield className="h-5 w-5 text-accent" aria-hidden="true" />
-              <span className="text-sm">No contracts. Review everything before payment.</span>
-            </div>
-            
-            {/* Micro-trust line */}
-            <p className="text-sm text-primary-foreground/50">
-              Cancel anytime • No hidden fees • Response within 24 hours
-            </p>
-          </div>
-          
-          {/* Hero Feature Chips */}
-          <div className="flex flex-wrap gap-3 mt-10">
-            {[
-              { icon: Clock, label: "24/7 Access" },
-              { icon: Award, label: "Certified Trainers" },
-              { icon: Waves, label: "Recovery Included" },
-              { icon: Shield, label: "No Contracts" }
-            ].map((chip) => (
-              <div 
-                key={chip.label} 
-                className="flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full text-sm text-primary-foreground border border-primary-foreground/20"
-              >
-                <chip.icon className="h-4 w-4 text-accent" />
-                {chip.label}
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left Column - Copy */}
+            <div className="animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-8">
+                <Dumbbell className="h-4 w-4" />
+                Total Fitness by A-Z
               </div>
-            ))}
+              
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-primary-foreground leading-tight">
+                Train on your schedule. Get real results. Feel supported every step.
+              </h1>
+              <p className="text-xl md:text-2xl text-primary-foreground/80 mb-8 max-w-xl">
+                24/7 access, expert coaching, and a community that actually notices when you show up.
+              </p>
+              
+              {/* Hero CTAs - Primary + Secondary */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                <Button 
+                  size="lg" 
+                  onClick={() => openJoinModal()}
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all text-lg px-8 py-6"
+                  data-event="fitness_hero_cta_click"
+                >
+                  <Dumbbell className="h-5 w-5 mr-2" />
+                  Join Now
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => setShowOrientationModal(true)}
+                  className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold text-lg px-8 py-6"
+                  data-event="fitness_hero_orientation_click"
+                >
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Schedule Orientation
+                </Button>
+              </div>
+              
+              {/* Trust Chips - 3 quick badges */}
+              <div className="flex flex-wrap gap-3 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                {[
+                  { icon: Clock, label: "24/7 Access" },
+                  { icon: Users, label: "Coach Support" },
+                  { icon: Shield, label: "No Contracts" }
+                ].map((chip) => (
+                  <div 
+                    key={chip.label} 
+                    className="flex items-center gap-2 px-4 py-2 bg-accent/15 rounded-full text-sm font-medium text-accent border border-accent/30"
+                  >
+                    <chip.icon className="h-4 w-4" />
+                    {chip.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Right Column - Visual */}
+            <div className="relative hidden lg:block animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              {/* Placeholder for gym photo/video - using styled container */}
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20">
+                {/* Decorative gym-themed visual */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <div className="h-24 w-24 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-6 animate-pulse">
+                      <Dumbbell className="h-12 w-12 text-accent" />
+                    </div>
+                    <p className="text-primary-foreground/60 text-lg font-medium">Your Training Journey Starts Here</p>
+                    <p className="text-accent text-sm mt-2">State-of-the-art facility</p>
+                  </div>
+                </div>
+                {/* Decorative elements */}
+                <div className="absolute top-4 right-4 h-20 w-20 rounded-full bg-accent/10 blur-xl" />
+                <div className="absolute bottom-4 left-4 h-16 w-16 rounded-full bg-accent/15 blur-lg" />
+              </div>
+              
+              {/* Floating stat cards */}
+              <div className="absolute -bottom-4 -left-4 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.5s' }}>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                    <Flame className="h-5 w-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Members Active</p>
+                    <p className="text-lg font-bold text-foreground">200+</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="absolute -top-4 -right-4 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.6s' }}>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                    <Trophy className="h-5 w-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Certified Trainers</p>
+                    <p className="text-lg font-bold text-foreground">5+</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
