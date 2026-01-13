@@ -118,6 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       options: {
         shouldCreateUser: true,
+        // Request a 6-digit OTP code instead of magic link
+        emailRedirectTo: undefined,
       },
     });
     return { error: error as Error | null };
