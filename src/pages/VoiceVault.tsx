@@ -44,11 +44,19 @@ import {
   Phone,
   Mail,
   HelpCircle,
+  Play,
+  Podcast,
+  MessageSquare,
+  Volume2,
+  Award,
+  Quote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import voiceVaultLogo from "@/assets/voice-vault-logo.png";
 import { VoiceVaultBookingModal } from "@/components/booking/VoiceVaultBookingModal";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { SITE_CONFIG } from "@/config/siteConfig";
 
 // Gallery is currently in "Coming Soon" state - real images to be added
 const galleryComingSoon = true;
@@ -62,6 +70,60 @@ const studioFeatures = [
   { icon: Users, title: "Seats Up to 4", description: "Comfortable guest seating" },
   { icon: Wifi, title: "Fast Wi-Fi", description: "Reliable high-speed internet" },
   { icon: Headphones, title: "On-Staff Editor", description: "Professional editing available" },
+];
+
+// C2: Use cases for the studio
+const useCases = [
+  { 
+    icon: Podcast, 
+    title: "Podcasts", 
+    description: "Launch or grow your podcast with pro-quality audio that stands out.",
+  },
+  { 
+    icon: MessageSquare, 
+    title: "Interviews", 
+    description: "Record professional interviews with multiple guests in comfort.",
+  },
+  { 
+    icon: Play, 
+    title: "Content Creation", 
+    description: "YouTube intros, course content, video essays, and more.",
+  },
+  { 
+    icon: Volume2, 
+    title: "Voiceovers", 
+    description: "Audio ads, narration, audiobooks, and voice acting projects.",
+  },
+];
+
+// C3: Benefits
+const studioBenefits = [
+  { icon: Award, title: "Professional Audio Quality", description: "Broadcast-ready sound that rivals top studios" },
+  { icon: Zap, title: "Easy Setup", description: "Walk in and start recording—we handle the tech" },
+  { icon: Users, title: "Comfortable Studio", description: "Private, distraction-free environment for focus" },
+  { icon: Clock, title: "Fast Booking & Support", description: "Quick scheduling and responsive local team" },
+];
+
+// D3: Testimonials
+const testimonials = [
+  {
+    name: "Marcus T.",
+    role: "Podcast Host",
+    quote: "I went from recording in my closet to sounding like a pro. The Voice Vault team made it so easy.",
+    verified: true,
+  },
+  {
+    name: "Sarah K.",
+    role: "Business Coach",
+    quote: "Finally, a studio that understands creators. Book, record, leave. They handle the rest.",
+    verified: true,
+  },
+  {
+    name: "DJ Mike",
+    role: "Content Creator",
+    quote: "The equipment is top-tier and the space is clean. Worth every dollar.",
+    verified: true,
+  },
 ];
 
 const faqItems = [
@@ -130,7 +192,6 @@ export default function VoiceVault() {
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    // Simulate submission
     setTimeout(() => {
       toast.success("Request submitted! We'll contact you within 24 hours.");
       setContactForm({ name: "", email: "", phone: "", message: "" });
@@ -154,64 +215,86 @@ export default function VoiceVault() {
   }, []);
 
   return (
-    <>
-      {/* HERO SECTION */}
-      <section className="relative min-h-[70vh] flex items-center bg-primary text-primary-foreground overflow-hidden">
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/95" />
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-accent blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/50 blur-3xl" />
-        </div>
+    <div className="min-h-screen">
+      {/* HERO SECTION - A1/A3: Improved hierarchy and depth */}
+      <section className="relative min-h-[75vh] flex items-center bg-primary text-primary-foreground overflow-hidden">
+        {/* Gold spotlight effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,hsl(var(--accent)/0.2)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
+        {/* Subtle grid texture */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:80px_80px]" />
 
         <div className="container relative z-10 py-20 lg:py-28">
           <div className="max-w-3xl mx-auto text-center">
-            {/* Logo */}
-            <div className="mb-6">
+            {/* Logo with glow */}
+            <div className="relative mb-8 inline-block">
+              <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full" />
               <img 
                 src={voiceVaultLogo} 
                 alt="The Voice Vault by A-Z" 
-                className="h-32 md:h-40 mx-auto object-contain"
+                className="relative h-32 md:h-40 mx-auto object-contain"
               />
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
+            {/* A3: Clear headline hierarchy */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
               <span className="text-gold-gradient">Voice Vault</span>
               <span className="block text-2xl md:text-3xl lg:text-4xl font-medium mt-2 text-primary-foreground/90">
                 by The Hive
               </span>
             </h1>
             
-            <p className="text-lg md:text-xl text-primary-foreground/80 mb-4 max-w-2xl mx-auto">
-              A fully soundproof, professional podcast & recording studio — designed for creators, professionals, and artists.
+            {/* C1: Clear explanation */}
+            <p className="text-lg md:text-xl text-primary-foreground/90 mb-3 max-w-2xl mx-auto font-medium">
+              A fully soundproof, professional podcast & recording studio
+            </p>
+            <p className="text-base md:text-lg text-primary-foreground/70 mb-6 max-w-xl mx-auto">
+              Designed for creators, professionals, and artists who want broadcast-quality audio without the hassle.
             </p>
             
             <p className="text-xl md:text-2xl font-semibold text-accent mb-10">
               Walk in. Record. Walk out. We handle the rest.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {/* D1: Prominent, consistent CTAs */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
               <Button
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8 py-6"
+                className="bg-accent hover:bg-accent/90 text-primary font-bold text-lg px-10 h-14 shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-shadow"
                 onClick={handleBookingClick}
               >
                 <Calendar className="w-5 h-5 mr-2" />
-                Book the Studio
+                Reserve Studio
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold text-lg px-8 py-6"
+                className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold text-lg px-8 h-14"
                 onClick={scrollToPackages}
               >
                 <Sparkles className="w-5 h-5 mr-2" />
-                Explore Podcast Packages
+                Explore Packages
               </Button>
             </div>
 
-            {/* Terms agreement line */}
-            <p className="mt-6 text-sm text-primary-foreground/80">
+            {/* Trust chips */}
+            <div className="flex flex-wrap justify-center gap-3 mb-6">
+              {[
+                { icon: Shield, label: "Soundproof Studio" },
+                { icon: Mic, label: "Pro Equipment" },
+                { icon: Clock, label: "Flexible Booking" },
+              ].map((chip) => (
+                <div 
+                  key={chip.label}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/5 border border-primary-foreground/10 text-sm text-primary-foreground/80"
+                >
+                  <chip.icon className="h-4 w-4 text-accent" />
+                  {chip.label}
+                </div>
+              ))}
+            </div>
+
+            <p className="text-sm text-primary-foreground/60">
               By booking, you agree to the{" "}
               <button
                 onClick={() => setTermsOpen(true)}
@@ -224,38 +307,151 @@ export default function VoiceVault() {
           </div>
         </div>
 
-        {/* Angled divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} />
+        {/* Gradient divider */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      {/* WHAT IS VOICE VAULT */}
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
+      {/* C1/C2: WHAT IS VOICE VAULT + WHO IT'S FOR - A2: Normalized spacing */}
       <section className="py-20 bg-background">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              Your Professional Recording Space
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Located inside The Hive coworking space, Voice Vault is a purpose-built, fully soundproof recording environment. Whether you're launching a podcast, recording interviews, creating voiceovers, or producing professional content — this is your space.
-            </p>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-accent/10 text-accent border-accent/20 font-medium">
+                Professional Recording Studio
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                Your Professional Recording Space
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Located inside The Hive coworking space, Voice Vault is a purpose-built, fully soundproof recording environment. Whether you're launching a podcast, recording interviews, creating voiceovers, or producing professional content — this is your space.
+              </p>
+            </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+            {/* C1: Who it's for */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
               {["Podcasters", "Business Owners", "Creators", "Artists", "Interviewers", "Voice Actors", "Coaches", "Educators"].map((user) => (
                 <div
                   key={user}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-secondary/50 border border-border"
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-accent/5 border border-accent/20 hover:border-accent/40 hover:bg-accent/10 transition-all"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-accent" />
+                  <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
                   <span className="text-sm font-medium text-foreground">{user}</span>
                 </div>
+              ))}
+            </div>
+
+            {/* C2: Use Cases */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {useCases.map((useCase) => (
+                <Card key={useCase.title} className="bg-card border-border hover:border-accent/40 hover:shadow-gold-lg transition-all group">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-14 h-14 rounded-xl bg-accent/10 group-hover:bg-accent/20 flex items-center justify-center mx-auto mb-4 transition-colors">
+                      <useCase.icon className="w-7 h-7 text-accent" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-2">{useCase.title}</h3>
+                    <p className="text-sm text-muted-foreground">{useCase.description}</p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* STUDIO FEATURES */}
-      <section className="py-20 bg-secondary/30">
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
+      {/* C3: BENEFITS - A2: Normalized spacing */}
+      <section className="py-20 bg-muted/30">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Why Choose Voice Vault
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">
+              Everything you need to create professional content, without the complexity.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            {studioBenefits.map((benefit) => (
+              <Card key={benefit.title} className="bg-card border-border text-center">
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                    <benefit.icon className="w-6 h-6 text-accent" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">{benefit.title}</h3>
+                  <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
+      {/* D2: MID-PAGE CONVERSION BLOCK */}
+      <section className="py-16 bg-primary text-primary-foreground">
+        <div className="container">
+          <div className="max-w-4xl mx-auto">
+            <Card className="bg-card/10 border-accent/30 backdrop-blur-sm">
+              <CardContent className="p-8 md:p-12">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-primary-foreground mb-4">
+                      Ready to Start Recording?
+                    </h2>
+                    <p className="text-primary-foreground/80 mb-6">
+                      Book your studio session today. Everything you need is included.
+                    </p>
+                    <ul className="space-y-3 mb-6">
+                      {[
+                        "Fully soundproof studio",
+                        "Professional microphones & mixers",
+                        "Video recording capability",
+                        "Seats up to 4 guests",
+                        "On-staff editing available",
+                      ].map((item) => (
+                        <li key={item} className="flex items-center gap-3 text-primary-foreground/90">
+                          <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="text-center md:text-right">
+                    <div className="inline-block bg-primary/50 rounded-2xl p-6 border border-accent/30">
+                      <p className="text-sm text-primary-foreground/70 mb-1">Starting at</p>
+                      <p className="text-5xl font-bold text-accent mb-1">$45</p>
+                      <p className="text-primary-foreground/70 mb-4">per hour</p>
+                      <Button
+                        size="lg"
+                        className="bg-accent hover:bg-accent/90 text-primary font-bold px-8 h-12 w-full shadow-gold-lg"
+                        onClick={handleBookingClick}
+                      >
+                        Reserve Studio
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </Button>
+                      <p className="text-xs text-primary-foreground/60 mt-3">2-hour minimum</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
+      {/* STUDIO FEATURES - A2: Normalized spacing */}
+      <section className="py-20 bg-background">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -266,9 +462,9 @@ export default function VoiceVault() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {studioFeatures.map((feature) => (
-              <Card key={feature.title} className="bg-card border-border hover:border-accent/50 transition-colors">
+              <Card key={feature.title} className="bg-card border-border hover:border-accent/40 transition-colors">
                 <CardContent className="p-6 text-center">
                   <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
                     <feature.icon className="w-6 h-6 text-accent" />
@@ -282,8 +478,11 @@ export default function VoiceVault() {
         </div>
       </section>
 
-      {/* HOURLY STUDIO RENTAL */}
-      <section id="hourly-rental" className="py-20 bg-background scroll-mt-20">
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
+      {/* HOURLY STUDIO RENTAL - A2: Normalized spacing */}
+      <section id="hourly-rental" className="py-20 bg-muted/30 scroll-mt-20">
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <Card className="bg-card border-2 border-accent/30 overflow-hidden">
@@ -320,11 +519,11 @@ export default function VoiceVault() {
                   <div className="flex flex-col gap-2">
                     <Button
                       size="lg"
-                      className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                      className="bg-accent hover:bg-accent/90 text-primary font-bold h-12 shadow-gold-lg"
                       onClick={handleBookingClick}
                     >
                       <Calendar className="w-5 h-5 mr-2" />
-                      Book Studio Time
+                      Reserve Studio
                     </Button>
                     <p className="text-xs text-muted-foreground text-center">
                       By booking, you agree to the{" "}
@@ -340,7 +539,7 @@ export default function VoiceVault() {
 
                 <Separator className="my-6" />
 
-                <div className="bg-secondary/50 rounded-lg p-4 border border-border">
+                <div className="bg-muted/50 rounded-lg p-4 border border-border">
                   <div className="flex items-start gap-3">
                     <Shield className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                     <p className="text-sm text-muted-foreground">
@@ -354,7 +553,7 @@ export default function VoiceVault() {
         </div>
       </section>
 
-      {/* WHY MOST PODCASTS FAIL - PRICE ANCHOR */}
+      {/* WHY MOST PODCASTS FAIL */}
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
@@ -364,7 +563,7 @@ export default function VoiceVault() {
             <p className="text-lg text-primary-foreground/80 mb-6">
               Most podcasts fail because people stop showing up. The Voice Vault is built around <span className="text-accent font-semibold">consistency</span>, not just equipment.
             </p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 border border-accent/30">
+            <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-accent/20 border border-accent/30">
               <TrendingUp className="w-5 h-5 text-accent" />
               <span className="font-medium text-accent">You don't rent gear. You commit to publishing.</span>
             </div>
@@ -372,7 +571,10 @@ export default function VoiceVault() {
         </div>
       </section>
 
-      {/* PODCAST PACKAGES */}
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
+      {/* PODCAST PACKAGES - A2: Normalized spacing */}
       <section id="packages" className="py-20 bg-background scroll-mt-20">
         <div className="container">
           <div className="text-center mb-12">
@@ -386,9 +588,9 @@ export default function VoiceVault() {
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* CORE SERIES PACKAGE */}
-            <Card className="relative bg-card border-2 border-accent/50 overflow-hidden">
+            <Card className="relative bg-card border-2 border-accent/50 overflow-hidden hover:shadow-gold-lg transition-shadow">
               <div className="absolute top-4 right-4">
-                <Badge className="bg-accent text-accent-foreground font-semibold">
+                <Badge className="bg-accent text-primary font-semibold">
                   <Star className="w-3 h-3 mr-1" />
                   Most Popular
                 </Badge>
@@ -405,324 +607,160 @@ export default function VoiceVault() {
               
               <CardContent className="space-y-6">
                 <div className="text-center py-4 border-y border-border">
-                  <div className="text-5xl font-bold text-accent">$100</div>
-                  <div className="text-lg text-muted-foreground">/ week</div>
-                  <div className="mt-2 text-sm text-foreground">
-                    10 episodes • $1,000 total
-                  </div>
+                  <div className="text-4xl font-bold text-accent mb-1">$1,000</div>
+                  <p className="text-sm text-muted-foreground">Or $100/week for 10 weeks</p>
                 </div>
 
                 <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                    <span className="text-foreground">Multi-episode podcast series</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                    <span className="text-foreground">You record independently</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                    <span className="text-foreground">Editing handled by Voice Vault</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                    <span className="text-foreground">Record while you pay</span>
-                  </li>
+                  {[
+                    "10 professionally recorded episodes",
+                    "Full studio access & equipment",
+                    "Basic editing & audio cleanup",
+                    "Episode exports ready to publish",
+                    "Weekly recording schedule",
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+                      <span className="text-foreground">{feature}</span>
+                    </li>
+                  ))}
                 </ul>
 
-                <div className="bg-secondary/50 rounded-lg p-3 border border-border">
-                  <p className="text-sm text-muted-foreground text-center">
-                    <span className="font-medium text-foreground">Financing:</span> $100/week for 10 weeks
-                  </p>
-                </div>
-
                 <Button
-                  size="lg"
-                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                  className="w-full bg-accent hover:bg-accent/90 text-primary font-bold h-12"
                   onClick={handleCoreSeriesClick}
                 >
-                  Start My Podcast
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  Get Started
+                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-
-                <p className="text-xs text-muted-foreground text-center">
-                  Full content ownership released after payment completion.{" "}
-                  <button
-                    onClick={() => setTermsOpen(true)}
-                    className="underline hover:text-accent transition-colors"
-                  >
-                    View Terms
-                  </button>
-                </p>
               </CardContent>
             </Card>
 
             {/* WHITE GLOVE PACKAGE */}
-            <Card className="relative bg-card border-2 border-border overflow-hidden">
-              <div className="absolute top-4 right-4">
-                <Badge variant="secondary" className="font-semibold">
-                  <Zap className="w-3 h-3 mr-1" />
-                  Best Value
-                </Badge>
-              </div>
-              
+            <Card className="relative bg-card border-2 border-border overflow-hidden hover:border-accent/40 hover:shadow-gold-lg transition-all">
               <CardHeader className="pb-2">
                 <CardTitle className="text-2xl font-bold text-foreground">
                   Voice Vault White Glove
                 </CardTitle>
-                <CardDescription className="text-muted-foreground font-medium text-base">
-                  We handle everything.
+                <CardDescription className="text-accent font-medium text-base">
+                  Full production support — we do it all.
                 </CardDescription>
               </CardHeader>
               
               <CardContent className="space-y-6">
                 <div className="text-center py-4 border-y border-border">
-                  <div className="text-lg text-muted-foreground mb-1">From</div>
-                  <div className="text-5xl font-bold text-foreground">$100</div>
-                  <div className="text-lg text-muted-foreground">/ week</div>
-                  <div className="mt-2 text-sm text-foreground">
-                    $2,000 total • Faster payoff options available
-                  </div>
+                  <div className="text-4xl font-bold text-accent mb-1">$2,000</div>
+                  <p className="text-sm text-muted-foreground">Or flexible weekly plans</p>
                 </div>
 
                 <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                    <span className="text-foreground">Fully done-for-you podcast experience</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                    <span className="text-foreground">Recording + editing + polish</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                    <span className="text-foreground">Zero editing stress</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                    <span className="text-foreground">Early payoff possible</span>
-                  </li>
+                  {[
+                    "Everything in Core Series",
+                    "Advanced editing & sound design",
+                    "Custom intro/outro creation",
+                    "Show notes & descriptions",
+                    "Platform upload assistance",
+                    "Marketing asset creation",
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+                      <span className="text-foreground">{feature}</span>
+                    </li>
+                  ))}
                 </ul>
 
-                <div className="bg-secondary/50 rounded-lg p-3 border border-border space-y-1">
-                  <p className="text-sm text-muted-foreground text-center">
-                    <span className="font-medium text-foreground">Flexible Financing:</span>
-                  </p>
-                  <p className="text-xs text-center text-muted-foreground">
-                    $100/week for 20 weeks <span className="mx-1">or</span> $200/week for 10 weeks
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-                  <span>Saves time</span>
-                  <span className="text-accent">•</span>
-                  <span>Zero editing</span>
-                  <span className="text-accent">•</span>
-                  <span>Zero stress</span>
-                </div>
-
                 <Button
-                  size="lg"
                   variant="outline"
-                  className="w-full border-accent text-accent hover:bg-accent/10 font-semibold"
+                  className="w-full border-accent text-accent hover:bg-accent hover:text-primary font-bold h-12"
                   onClick={handleWhiteGloveClick}
                 >
-                  White-Glove Setup
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  Learn More
+                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-
-                <p className="text-xs text-muted-foreground text-center">
-                  Full content ownership released after payment completion.{" "}
-                  <button
-                    onClick={() => setTermsOpen(true)}
-                    className="underline hover:text-accent transition-colors"
-                  >
-                    View Terms
-                  </button>
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* PRICE DECOY COMPARISON */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="bg-secondary/30 border-border opacity-75">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-muted-foreground">
-                    Traditional Podcast Setup
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <X className="w-4 h-4 text-destructive" />
-                    <span>Equipment: $2,500+</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <X className="w-4 h-4 text-destructive" />
-                    <span>Editing software: $300/year</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <X className="w-4 h-4 text-destructive" />
-                    <span>Learning curve: months</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <X className="w-4 h-4 text-destructive" />
-                    <span>Consistency: unreliable</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-accent/5 border-accent/30">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg text-accent">
-                    Voice Vault
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-foreground">
-                    <CheckCircle2 className="w-4 h-4 text-accent" />
-                    <span>One space</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-foreground">
-                    <CheckCircle2 className="w-4 h-4 text-accent" />
-                    <span>One workflow</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-foreground">
-                    <CheckCircle2 className="w-4 h-4 text-accent" />
-                    <span>One weekly commitment</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-foreground">
-                    <CheckCircle2 className="w-4 h-4 text-accent" />
-                    <span>Results guaranteed</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CONTACT / REQUEST CALL SECTION */}
-      <section id="contact-form" className="py-16 bg-secondary/30 scroll-mt-20">
-        <div className="container">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-                Not Ready to Book? Let's Talk
-              </h2>
-              <p className="text-muted-foreground">
-                Have questions about our packages or studio? Request a call and we'll walk you through everything.
-              </p>
-            </div>
-
-            <Card className="bg-card border-border">
-              <CardContent className="p-6 md:p-8">
-                <form onSubmit={handleContactSubmit} className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        placeholder="Your name"
-                        value={contactForm.name}
-                        onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={contactForm.email}
-                        onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone (optional)</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="(555) 123-4567"
-                      value={contactForm.phone}
-                      onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="message">What are you interested in?</Label>
-                    <Textarea
-                      id="message"
-                      placeholder="Tell us about your podcast idea or recording needs..."
-                      value={contactForm.message}
-                      onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                      rows={4}
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      "Submitting..."
-                    ) : (
-                      <>
-                        <Phone className="w-5 h-5 mr-2" />
-                        Request a Call
-                      </>
-                    )}
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    We'll respond within 24 hours.
-                  </p>
-                </form>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* FINANCING EXPLAINER */}
-      <section className="py-16 bg-background">
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
+      {/* D3: TESTIMONIALS */}
+      <section className="py-20 bg-muted/30">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-              Simple, Transparent Financing
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              What Creators Are Saying
             </h2>
-            <p className="text-muted-foreground mb-8">
-              We've designed our payment structure to make professional podcast production accessible — without complicated contracts or hidden fees.
+            <p className="text-muted-foreground">
+              Real feedback from real Voice Vault users.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="bg-card border-border hover:border-accent/40 transition-colors">
+                <CardContent className="p-6">
+                  <Quote className="w-8 h-8 text-accent/30 mb-4" />
+                  <p className="text-foreground mb-4 italic">"{testimonial.quote}"</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-foreground">{testimonial.name}</p>
+                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    </div>
+                    {testimonial.verified && (
+                      <Badge variant="outline" className="border-accent/30 text-accent text-xs">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        Verified
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
+      {/* WEEKLY PAYMENT EXPLAINED */}
+      <section className="py-20 bg-background">
+        <div className="container">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              How Weekly Payments Work
+            </h2>
+            <p className="text-lg text-muted-foreground mb-10">
+              We believe in making quality accessible. That's why we offer structured, transparent payment plans.
             </p>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="bg-card rounded-lg p-4 border border-border">
-                <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
-                <p className="text-sm font-medium text-foreground">Weekly payments</p>
+              <div className="bg-card rounded-lg p-5 border border-border">
+                <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-3" />
+                <p className="font-medium text-foreground">Weekly payments</p>
                 <p className="text-xs text-muted-foreground">Predictable & manageable</p>
               </div>
-              <div className="bg-card rounded-lg p-4 border border-border">
-                <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
-                <p className="text-sm font-medium text-foreground">Record while paying</p>
+              <div className="bg-card rounded-lg p-5 border border-border">
+                <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-3" />
+                <p className="font-medium text-foreground">Record while paying</p>
                 <p className="text-xs text-muted-foreground">Start creating immediately</p>
               </div>
-              <div className="bg-card rounded-lg p-4 border border-border">
-                <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
-                <p className="text-sm font-medium text-foreground">Early payoff option</p>
+              <div className="bg-card rounded-lg p-5 border border-border">
+                <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-3" />
+                <p className="font-medium text-foreground">Early payoff option</p>
                 <p className="text-xs text-muted-foreground">Finish faster if you want</p>
               </div>
-              <div className="bg-card rounded-lg p-4 border border-border">
-                <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
-                <p className="text-sm font-medium text-foreground">Rights on completion</p>
+              <div className="bg-card rounded-lg p-5 border border-border">
+                <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-3" />
+                <p className="font-medium text-foreground">Rights on completion</p>
                 <p className="text-xs text-muted-foreground">Full ownership once paid</p>
               </div>
             </div>
 
-            <div className="bg-card rounded-lg p-6 border border-accent/30">
+            <div className="bg-card rounded-lg p-6 border border-accent/30 max-w-lg mx-auto">
               <p className="text-foreground font-medium mb-2">No long-term contracts.</p>
               <p className="text-foreground font-medium mb-2">No upfront production costs.</p>
               <p className="text-foreground font-medium">You pay weekly while you record.</p>
@@ -731,11 +769,14 @@ export default function VoiceVault() {
         </div>
       </section>
 
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
       {/* CROSS-BUSINESS DISCOUNTS */}
-      <section className="py-16 bg-secondary/30">
+      <section className="py-20 bg-muted/30">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-10">
+            <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
                 Member & Partner Benefits
               </h2>
@@ -745,7 +786,7 @@ export default function VoiceVault() {
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border hover:border-accent/40 transition-colors">
                 <CardContent className="p-5 flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                     <Building2 className="w-5 h-5 text-accent" />
@@ -757,7 +798,7 @@ export default function VoiceVault() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border hover:border-accent/40 transition-colors">
                 <CardContent className="p-5 flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                     <Sparkles className="w-5 h-5 text-accent" />
@@ -769,7 +810,7 @@ export default function VoiceVault() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border hover:border-accent/40 transition-colors">
                 <CardContent className="p-5 flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                     <Dumbbell className="w-5 h-5 text-accent" />
@@ -781,7 +822,7 @@ export default function VoiceVault() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border hover:border-accent/40 transition-colors">
                 <CardContent className="p-5 flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                     <Gift className="w-5 h-5 text-accent" />
@@ -797,10 +838,13 @@ export default function VoiceVault() {
         </div>
       </section>
 
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
       {/* MEDIA GALLERY - COMING SOON */}
-      <section className="py-16 bg-background">
+      <section className="py-20 bg-background">
         <div className="container">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
               Inside the Voice Vault
             </h2>
@@ -823,7 +867,7 @@ export default function VoiceVault() {
                 </p>
                 <Button
                   size="lg"
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold"
                   onClick={handleBookingClick}
                 >
                   <Calendar className="w-5 h-5 mr-2" />
@@ -835,11 +879,14 @@ export default function VoiceVault() {
         </div>
       </section>
 
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
       {/* FAQ SECTION */}
-      <section className="py-16 bg-secondary/30">
+      <section className="py-20 bg-muted/30">
         <div className="container">
           <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
+            <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 mb-4">
                 <HelpCircle className="w-6 h-6 text-accent" />
                 <h2 className="text-2xl md:text-3xl font-bold text-foreground">
@@ -851,17 +898,17 @@ export default function VoiceVault() {
               </p>
             </div>
 
-            <Accordion type="single" collapsible className="space-y-4">
+            <Accordion type="single" collapsible defaultValue="faq-0" className="space-y-4">
               {faqItems.map((item, index) => (
                 <AccordionItem
                   key={index}
                   value={`faq-${index}`}
                   className="bg-card border border-border rounded-lg px-6"
                 >
-                  <AccordionTrigger className="text-left font-medium text-foreground hover:text-accent">
+                  <AccordionTrigger className="text-left font-medium text-foreground hover:text-accent py-5">
                     {item.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-4">
+                  <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
                     {item.answer}
                   </AccordionContent>
                 </AccordionItem>
@@ -871,8 +918,11 @@ export default function VoiceVault() {
         </div>
       </section>
 
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+
       {/* FINAL CTA */}
-      <section className="py-20 bg-primary text-primary-foreground">
+      <section className="py-24 bg-primary text-primary-foreground">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -882,26 +932,26 @@ export default function VoiceVault() {
               Book studio time or choose a package — either way, you'll be creating in no time.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
               <Button
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8 py-6"
+                className="bg-accent hover:bg-accent/90 text-primary font-bold text-lg px-10 h-14 shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-shadow"
                 onClick={handleBookingClick}
               >
                 <Calendar className="w-5 h-5 mr-2" />
-                Book the Voice Vault
+                Reserve Studio
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold text-lg px-8 py-6"
-                onClick={() => setTermsOpen(true)}
+                className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold text-lg px-8 h-14"
+                onClick={scrollToPackages}
               >
-                View Studio Terms
+                See Availability
               </Button>
             </div>
 
-            <p className="mt-6 text-sm text-primary-foreground/60">
+            <p className="text-sm text-primary-foreground/60">
               By booking, you agree to the{" "}
               <button
                 onClick={() => setTermsOpen(true)}
@@ -999,7 +1049,7 @@ export default function VoiceVault() {
 
           <div className="mt-6 pt-4 border-t border-border">
             <Button
-              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+              className="w-full bg-accent hover:bg-accent/90 text-primary font-bold"
               onClick={() => setTermsOpen(false)}
             >
               I Understand
@@ -1007,6 +1057,9 @@ export default function VoiceVault() {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
+    </div>
   );
 }
