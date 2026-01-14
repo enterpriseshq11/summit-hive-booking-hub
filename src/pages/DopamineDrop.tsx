@@ -155,11 +155,12 @@ export default function DopamineDrop() {
         </div>
       </section>
 
-      {/* Wheel Section - Directly after hero for immediate visibility */}
+      {/* Wheel Section - Centered layout with cards stacked below */}
       <section className="py-6 md:py-10 bg-gradient-to-b from-black to-zinc-900/50">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-8 max-w-xl mx-auto">
+            {/* Centered Wheel */}
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6 w-full">
               <SpinWheel 
                 segments={wheelConfig} 
                 isSpinning={isSpinning} 
@@ -192,7 +193,9 @@ export default function DopamineDrop() {
                 )}
               </div>
             </motion.div>
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="space-y-6">
+            
+            {/* Cards stacked below wheel */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="w-full space-y-6">
               <EntryTracker 
                 isAuthenticated={!!authUser} 
                 isVip={status.isVip} 
