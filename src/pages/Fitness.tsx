@@ -450,45 +450,54 @@ export default function Fitness() {
         </div>
       </section>
 
-      {/* Why Total Fitness */}
+      {/* Why Members Stay - Emotional Benefits */}
       <section id="fitness-why" className="py-14 bg-primary">
         <div className="container">
-          {/* Trust strip */}
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
-            <div className="flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full border border-primary-foreground/20">
-              <ShieldCheck className="h-4 w-4 text-accent" />
-              <span className="text-sm font-medium text-primary-foreground">Certified Trainers</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full border border-primary-foreground/20">
-              <Award className="h-4 w-4 text-accent" />
-              <span className="text-sm font-medium text-primary-foreground">10+ Years Serving Wapakoneta</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-primary-foreground/10 rounded-full border border-primary-foreground/20">
-              <Shield className="h-4 w-4 text-accent" />
-              <span className="text-sm font-medium text-primary-foreground">Clean & Safe Environment</span>
-            </div>
-          </div>
-          
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3 text-primary-foreground">Why Total Fitness</h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3 text-primary-foreground">Why Members Stay</h2>
             <p className="text-primary-foreground/70 text-lg max-w-2xl mx-auto">
-              More than a gym — a complete fitness experience designed around your goals.
+              More than equipment. It's about how you feel when you walk through our doors.
             </p>
           </div>
-          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
-              { icon: Clock, title: "24/7 Access", description: "Train on your schedule, day or night — no restrictions" },
-              { icon: Zap, title: "Modern Equipment", description: "State-of-the-art machines and full free weight section" },
-              { icon: Users, title: "Expert Staff", description: "Certified trainers ready to guide your journey" },
-              { icon: Heart, title: "Recovery Focus", description: "Sauna, steam, and integrated recovery amenities" }
+              { 
+                icon: Clock, 
+                title: "24/7 Access", 
+                headline: "Your life doesn't fit gym hours.",
+                description: "Train at 5am before work or 11pm after the kids are asleep. We're always open."
+              },
+              { 
+                icon: Users, 
+                title: "Expert Staff", 
+                headline: "You're never just another membership.",
+                description: "Our team knows your name, your goals, and what you're working toward."
+              },
+              { 
+                icon: Heart, 
+                title: "Recovery Focus", 
+                headline: "Train hard. Recover smarter.",
+                description: "Sauna, steam room, and recovery amenities to keep you performing at your best."
+              },
+              { 
+                icon: Award, 
+                title: "Community", 
+                headline: "The kind of place that notices when you show up.",
+                description: "Members cheer each other on. Staff celebrates your wins. You belong here."
+              }
             ].map((benefit) => (
               <Card key={benefit.title} className="bg-primary-foreground/5 border-primary-foreground/10 hover:border-accent/30 hover:shadow-gold transition-all">
-                <CardContent className="pt-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4 shadow-gold">
-                    <benefit.icon className="h-6 w-6 text-accent" />
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0 shadow-gold">
+                      <benefit.icon className="h-6 w-6 text-accent" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-primary-foreground text-lg">{benefit.title}</h3>
+                      <p className="text-accent font-medium mb-2">{benefit.headline}</p>
+                      <p className="text-primary-foreground/60 text-sm">{benefit.description}</p>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-primary-foreground mb-2">{benefit.title}</h3>
-                  <p className="text-primary-foreground/60 text-sm">{benefit.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -499,27 +508,77 @@ export default function Fitness() {
       {/* Gradient Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
 
-      {/* Trainer Highlights */}
+      {/* Meet Your Coaches - With Personality & Micro-CTAs */}
       <section className="py-14 container">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">Meet Your Coaches</h2>
-          <p className="text-muted-foreground text-lg">Certified professionals dedicated to your success</p>
+          <p className="text-muted-foreground text-lg">The people who'll help you reach your goals</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {trainers.map((trainer, idx) => (
-            <Card key={idx} className="shadow-premium border-border text-center hover:shadow-gold-lg hover:border-accent/30 transition-all">
-              <CardContent className="pt-8 pb-6">
-                <div className="h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border-2 border-accent/30">
-                  <User className="h-10 w-10 text-accent" />
+          {[
+            { 
+              name: "Marcus T.", 
+              title: "Head Trainer", 
+              style: "Motivating & no-nonsense",
+              specialty: ["Strength", "Conditioning", "Athletics"],
+              years: "12+ years",
+              loves: "Helping members hit PRs they didn't think possible"
+            },
+            { 
+              name: "Jessica R.", 
+              title: "Fitness Coach", 
+              style: "Supportive & form-focused",
+              specialty: ["Weight Loss", "Nutrition", "Beginners"],
+              years: "8+ years",
+              loves: "Building confidence in first-time gym members"
+            },
+            { 
+              name: "David K.", 
+              title: "Performance Coach", 
+              style: "High-energy, accountability-driven",
+              specialty: ["HIIT", "Mobility", "Endurance"],
+              years: "10+ years",
+              loves: "Designing programs that fit busy schedules"
+            }
+          ].map((coach, idx) => (
+            <Card 
+              key={idx} 
+              className="shadow-premium border-border group hover:shadow-gold-lg hover:border-accent/30 transition-all overflow-hidden"
+            >
+              <CardContent className="pt-8 pb-6 text-center">
+                {/* Photo placeholder */}
+                <div className="h-24 w-24 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4 border-2 border-accent/30 group-hover:border-accent transition-colors">
+                  <User className="h-12 w-12 text-accent" />
                 </div>
-                <h3 className="font-semibold text-lg mb-1">{trainer.name}</h3>
-                <p className="text-accent text-sm font-medium mb-2">{trainer.title}</p>
-                <Badge variant="outline" className="text-xs mb-3 border-accent/30 text-accent">
-                  <ShieldCheck className="h-3 w-3 mr-1" />
-                  Certified
-                </Badge>
-                <p className="text-muted-foreground text-sm mb-1">{trainer.specialty}</p>
-                <p className="text-xs text-muted-foreground/70">{trainer.years}</p>
+                <h3 className="font-semibold text-lg mb-1">{coach.name}</h3>
+                <p className="text-accent text-sm font-medium mb-1">{coach.title}</p>
+                <p className="text-muted-foreground text-sm italic mb-3">"{coach.style}"</p>
+                
+                {/* Specialty tags */}
+                <div className="flex flex-wrap justify-center gap-1 mb-4">
+                  {coach.specialty.map((tag) => (
+                    <Badge key={tag} variant="outline" className="text-xs border-accent/30 text-accent">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                
+                {/* Hover reveal */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity text-sm text-muted-foreground mb-4 h-0 group-hover:h-auto overflow-hidden">
+                  <p className="pt-2 border-t border-border mt-2">
+                    <span className="text-accent font-medium">What I love:</span> {coach.loves}
+                  </p>
+                </div>
+                
+                {/* Micro-CTA */}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowOrientationModal(true)}
+                  className="border-accent/30 text-accent hover:bg-accent hover:text-primary transition-colors"
+                >
+                  Ask a Coach
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -584,32 +643,56 @@ export default function Fitness() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Member Stories - Real Members, Real Results */}
       <section id="fitness-testimonials" className="py-14 bg-primary">
         <div className="container">
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3 text-primary-foreground">Member Stories</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3 text-primary-foreground">Real Members. Real Results.</h2>
             <p className="text-primary-foreground/70 text-lg max-w-2xl mx-auto">
-              Real results from real members in our community.
+              Stories from people just like you.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
               {
                 quote: "The 24/7 access completely changed my routine. I can finally work out when it fits my schedule, not the other way around.",
                 name: "Ryan M.",
-                badge: "Performance Member"
+                duration: "1 year strong",
+                goals: ["Busy Parent", "Strength"]
               },
               {
                 quote: "The staff here actually cares about your progress. They remember your name and check in on your goals regularly.",
                 name: "Sarah K.",
-                badge: "Elite Member"
+                duration: "6 months in",
+                goals: ["Weight Loss", "Confidence"]
+              },
+              {
+                quote: "I was intimidated to join a gym at 55. The coaches made me feel welcome from day one. Now I can't imagine life without it.",
+                name: "Linda T.",
+                duration: "8 months in",
+                goals: ["Mobility", "Senior Fitness"]
+              },
+              {
+                quote: "As a shift worker, finding a gym that's actually open when I need it was a game changer. Plus the sauna is perfect after a long night.",
+                name: "Marcus D.",
+                duration: "2 years strong",
+                goals: ["Shift Worker", "Recovery"]
               }
             ].map((testimonial, idx) => (
               <Card key={idx} className="bg-primary-foreground/5 border-accent/20 shadow-premium">
                 <CardContent className="pt-8 pb-6">
                   <Quote className="h-8 w-8 text-accent mb-4" aria-hidden="true" />
                   <p className="text-primary-foreground/90 mb-6 italic leading-relaxed">"{testimonial.quote}"</p>
+                  
+                  {/* Goal tags */}
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {testimonial.goals.map((goal) => (
+                      <Badge key={goal} variant="outline" className="text-xs border-accent/30 text-accent">
+                        {goal}
+                      </Badge>
+                    ))}
+                  </div>
+                  
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-primary-foreground font-medium">{testimonial.name}</span>
@@ -618,11 +701,18 @@ export default function Fitness() {
                         Verified
                       </Badge>
                     </div>
-                    <span className="text-xs px-3 py-1 bg-accent/20 text-accent rounded-full">{testimonial.badge}</span>
+                    <span className="text-xs px-3 py-1 bg-accent/20 text-accent rounded-full">{testimonial.duration}</span>
                   </div>
                 </CardContent>
               </Card>
             ))}
+          </div>
+          
+          {/* Read more link */}
+          <div className="text-center mt-8">
+            <a href="#" className="text-accent hover:underline inline-flex items-center gap-1 text-sm">
+              Read more stories <ChevronRight className="h-3 w-3" />
+            </a>
           </div>
         </div>
       </section>
@@ -689,27 +779,50 @@ export default function Fitness() {
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section className="py-14 bg-primary">
-        <div className="container text-center">
-          <Trophy className="h-12 w-12 text-accent mx-auto mb-6" aria-hidden="true" />
-          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-primary-foreground">Ready to Transform?</h2>
-          <p className="text-primary-foreground/70 mb-6 max-w-2xl mx-auto text-lg">
-            Take the first step toward your fitness goals — join now and start training within 24 hours.
-          </p>
-          <Button 
-            size="lg" 
-            onClick={() => openJoinModal()}
-            className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-            data-event="fitness_final_cta_click"
-          >
-            <Dumbbell className="h-5 w-5 mr-2" />
-            Join Now
-            <ArrowRight className="h-5 w-5 ml-2" />
-          </Button>
-          <p className="text-sm text-primary-foreground/60 mt-4 max-w-md mx-auto">
-            No contracts • Cancel anytime • Review everything before payment
-          </p>
+      {/* Strong Emotional Close - Final CTA */}
+      <section className="py-20 bg-primary relative overflow-hidden">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.08)_0%,transparent_70%)]" />
+        
+        <div className="container relative z-10 text-center">
+          <div className="max-w-2xl mx-auto">
+            <Heart className="h-12 w-12 text-accent mx-auto mb-6" aria-hidden="true" />
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">
+              This isn't just a gym. It's where habits change.
+            </h2>
+            <p className="text-primary-foreground/70 mb-8 text-lg leading-relaxed">
+              Start with a plan that fits your life — and a team that keeps you moving forward.
+            </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+              <Button 
+                size="lg" 
+                onClick={() => openJoinModal()}
+                className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all text-lg px-10 py-7"
+                data-event="fitness_final_cta_click"
+              >
+                <Dumbbell className="h-5 w-5 mr-2" />
+                Join Now
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => setShowOrientationModal(true)}
+                className="border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 hover:border-primary-foreground/50 font-medium"
+                data-event="fitness_final_orientation_click"
+              >
+                <Calendar className="h-5 w-5 mr-2" />
+                Schedule Orientation
+              </Button>
+            </div>
+            
+            {/* Trust line */}
+            <p className="text-sm text-primary-foreground/60">
+              No contracts • Cancel anytime • Local team support
+            </p>
+          </div>
         </div>
       </section>
 
