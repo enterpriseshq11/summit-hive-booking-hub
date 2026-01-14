@@ -123,7 +123,7 @@ export default function DopamineDrop() {
   return (
     <div className="min-h-screen bg-black">
       {/* Hero - Compact */}
-      <section className="relative py-8 md:py-12 bg-gradient-to-b from-black via-zinc-900 to-black overflow-hidden">
+      <section className="relative py-4 md:py-6 bg-gradient-to-b from-black via-zinc-900 to-black overflow-hidden">
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at 2px 2px, rgba(212,175,55,0.4) 1px, transparent 0)", backgroundSize: "50px 50px" }} />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
           <h1 className="text-4xl md:text-6xl font-black text-white mb-4">
@@ -156,7 +156,7 @@ export default function DopamineDrop() {
       </section>
 
       {/* Wheel Section - Centered layout with cards stacked below */}
-      <section className="py-6 md:py-10 bg-gradient-to-b from-black to-zinc-900/50">
+      <section className="py-4 md:py-6 bg-gradient-to-b from-black to-zinc-900/50">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center gap-8 max-w-xl mx-auto">
             {/* Centered Wheel */}
