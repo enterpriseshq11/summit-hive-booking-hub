@@ -88,7 +88,7 @@ export function EntryTracker({
         {/* Blur overlay */}
         <div className="absolute inset-0 backdrop-blur-[2px] bg-zinc-900/60 z-10 flex items-center justify-center">
           <div className="text-center p-6">
-            <Lock className="w-8 h-8 text-primary mx-auto mb-3" />
+            <Lock className="w-8 h-8 text-primary mx-auto mb-3 drop-shadow-[0_0_6px_rgba(212,175,55,0.8)]" strokeWidth={2.5} />
             <p className="text-white font-semibold mb-2">Track Your Entries</p>
             <p className="text-sm text-muted-foreground mb-4">Log in to spin and see your entry totals</p>
             <Button onClick={onLoginClick} className="bg-primary hover:bg-primary/90">
