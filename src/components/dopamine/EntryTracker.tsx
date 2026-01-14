@@ -91,7 +91,7 @@ export function EntryTracker({
             <Lock className="w-8 h-8 text-primary mx-auto mb-3 drop-shadow-[0_0_6px_rgba(212,175,55,0.8)]" strokeWidth={2.5} />
             <p className="text-white font-semibold mb-2">Track Your Entries</p>
             <p className="text-sm text-muted-foreground mb-4">Log in to spin and see your entry totals</p>
-            <Button onClick={onLoginClick} className="bg-primary hover:bg-primary/90">
+            <Button onClick={onLoginClick} className="bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black font-semibold">
               Log In to Play
             </Button>
           </div>
