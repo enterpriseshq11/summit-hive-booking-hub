@@ -56,7 +56,8 @@ const navItems = [
     label: "Spin & Win", 
     href: "/dopamine-drop", 
     icon: CircleDot, 
-    secondary: true,
+    highlight: true,
+    pulse: true,
     tooltip: "Monthly giveaways"
   },
   { label: "Promotions", href: "/promotions", icon: Layers },
@@ -88,10 +89,11 @@ export function Header() {
                 ? "text-accent hover:text-accent hover:bg-accent/10"
                 : (item as any).secondary
                   ? "text-primary-foreground/50 hover:text-primary-foreground/80 hover:bg-primary-foreground/5"
-                  : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                  : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10",
+          (item as any).pulse && !isActive && "animate-pulse"
         )}
       >
-        <item.icon className="h-4 w-4 flex-shrink-0" />
+        <item.icon className={cn("h-4 w-4 flex-shrink-0", (item as any).pulse && !isActive && "text-primary")} />
         {displayLabel}
       </Link>
     );
