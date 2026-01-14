@@ -11,7 +11,7 @@ interface VipBenefitsCardProps {
 export function VipBenefitsCard({ isVip, onUpgradeClick }: VipBenefitsCardProps) {
   if (isVip) {
     return (
-      <Card className="p-6 bg-gradient-to-br from-primary/20 via-yellow-500/10 to-primary/20 border-primary">
+      <Card className="p-6 bg-gradient-to-br from-primary/20 via-yellow-500/10 to-primary/20 border-primary h-full flex flex-col">
         <div className="flex items-center gap-3 mb-4">
           <Crown className="w-8 h-8 text-primary" />
           <div>
@@ -29,7 +29,7 @@ export function VipBenefitsCard({ isVip, onUpgradeClick }: VipBenefitsCardProps)
   }
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-primary/30 relative overflow-hidden">
+    <Card className="p-6 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-primary/30 relative overflow-hidden h-full flex flex-col">
       <Badge className="absolute top-3 right-3 bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black font-semibold border-0 cursor-pointer" onClick={onUpgradeClick}>
         <Lock className="w-3 h-3 mr-1" />
         UNLOCK
@@ -43,7 +43,7 @@ export function VipBenefitsCard({ isVip, onUpgradeClick }: VipBenefitsCardProps)
         </div>
       </div>
       
-      <ul className="space-y-2 text-sm text-zinc-400 mb-4">
+      <ul className="space-y-2 text-sm text-zinc-400 mb-4 flex-1">
         <li className="flex items-center gap-2"><Ticket className="w-4 h-4 text-primary/60" /> 2 spins per day (vs 1)</li>
         <li className="flex items-center gap-2"><Zap className="w-4 h-4 text-primary/60" /> 2x entry multiplier</li>
         <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary/60" /> Unlock VIP-only prizes</li>

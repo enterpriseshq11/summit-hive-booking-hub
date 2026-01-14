@@ -36,7 +36,7 @@ export function ShareReferral({ isAuthenticated }: ShareReferralProps) {
   };
 
   return (
-    <Card className="p-6 bg-zinc-900/80 border-zinc-700">
+    <Card className="p-6 bg-zinc-900/80 border-zinc-700 h-full flex flex-col">
       <div className="flex items-center gap-3 mb-4">
         <Share2 className="w-6 h-6 text-primary" />
         <div>
@@ -45,7 +45,7 @@ export function ShareReferral({ isAuthenticated }: ShareReferralProps) {
         </div>
       </div>
       
-      <p className="text-sm text-zinc-400 mb-4">
+      <p className="text-sm text-zinc-400 mb-4 flex-1">
         Share this page with friends. Future referral bonuses coming soon!
       </p>
       
