@@ -138,12 +138,16 @@ export default function DopamineDrop() {
               size="lg" 
               onClick={handleSpinClick} 
               disabled={isSpinning} 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg px-8 shadow-lg"
+              className="bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black font-bold text-lg px-8 shadow-lg"
             >
               {isSpinning ? <Sparkles className="w-5 h-5 mr-2 animate-spin" /> : authUser ? <Gift className="w-5 h-5 mr-2" /> : <User className="w-5 h-5 mr-2" />}
               {authUser ? `Spin Now (${status.spinsRemaining} left)` : "Log in to Spin"}
             </Button>
-            <Button size="lg" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => document.getElementById("prizes")?.scrollIntoView({ behavior: "smooth" })}>
+            <Button 
+              size="lg" 
+              className="border border-primary/50 bg-transparent text-primary hover:bg-primary/20 hover:border-primary" 
+              onClick={() => document.getElementById("prizes")?.scrollIntoView({ behavior: "smooth" })}
+            >
               View Prizes + Rules<ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -170,7 +174,7 @@ export default function DopamineDrop() {
                   size="lg"
                   onClick={handleSpinClick}
                   disabled={isSpinning || (!authUser) || (status.spinsRemaining <= 0)}
-                  className="px-12 py-6 text-xl font-black tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg disabled:opacity-50"
+                  className="px-12 py-6 text-xl font-black tracking-wide bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black shadow-lg disabled:bg-zinc-600 disabled:text-zinc-400"
                 >
                   {isSpinning ? (
                     <>🎰 Spinning...</>
