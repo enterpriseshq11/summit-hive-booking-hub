@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Gift, Sparkles, Calendar, ChevronRight, User, Timer } from "lucide-react";
+import { Gift, Sparkles, ChevronRight, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,40 +20,6 @@ import { CrossSellStrip } from "@/components/dopamine/CrossSellStrip";
 import { KeyRulesSummary } from "@/components/dopamine/KeyRulesSummary";
 
 const DRAW_DATE = "2026-03-31T23:59:59";
-
-// Countdown timer for hero section
-function DrawCountdown({ targetDate }: { targetDate: string }) {
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const target = new Date(targetDate).getTime();
-      const now = new Date().getTime();
-      const diff = target - now;
-      if (diff > 0) {
-        setTimeLeft({
-          days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((diff % (1000 * 60)) / 1000)
-        });
-      }
-    };
-    calculateTimeLeft();
-    const interval = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(interval);
-  }, [targetDate]);
-
-  return (
-    <div className="inline-flex items-center gap-2 bg-zinc-800/80 rounded-lg px-4 py-2 text-sm">
-      <Timer className="w-4 h-4 text-primary" />
-      <span className="text-zinc-300">Next Draw:</span>
-      <span className="font-mono font-bold text-primary">
-        {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
-      </span>
-    </div>
-  );
-}
 
 export default function DopamineDrop() {
   const { authUser, isLoading: authLoading } = useAuth();
@@ -156,13 +122,10 @@ export default function DopamineDrop() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Hero */}
-      <section className="relative py-12 md:py-20 bg-gradient-to-b from-black via-zinc-900 to-black overflow-hidden">
+      {/* Hero - Compact */}
+      <section className="relative py-8 md:py-12 bg-gradient-to-b from-black via-zinc-900 to-black overflow-hidden">
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at 2px 2px, rgba(212,175,55,0.4) 1px, transparent 0)", backgroundSize: "50px 50px" }} />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
-          <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
-            <Calendar className="w-3 h-3 mr-1" />Monthly Drawings + Grand Giveaway: March 31, 2026
-          </Badge>
           <h1 className="text-4xl md:text-6xl font-black text-white mb-4">
             SPIN. EARN ENTRIES.<span className="block text-primary">WIN BIG.</span>
           </h1>
@@ -170,17 +133,17 @@ export default function DopamineDrop() {
             Every spin earns entries into monthly prize drawings. VIP members earn 2x entries!
           </p>
           
-          {/* [SPIN-03] Next Drawing Countdown */}
-          <div className="mb-8">
-            <DrawCountdown targetDate={DRAW_DATE} />
-          </div>
-          
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={handleSpinClick} disabled={isSpinning} className="bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-400 text-black font-bold text-lg px-8">
+            <Button 
+              size="lg" 
+              onClick={handleSpinClick} 
+              disabled={isSpinning} 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg px-8 shadow-lg"
+            >
               {isSpinning ? <Sparkles className="w-5 h-5 mr-2 animate-spin" /> : authUser ? <Gift className="w-5 h-5 mr-2" /> : <User className="w-5 h-5 mr-2" />}
               {authUser ? `Spin Now (${status.spinsRemaining} left)` : "Log in to Spin"}
             </Button>
-            <Button size="lg" variant="secondary" onClick={() => document.getElementById("prizes")?.scrollIntoView({ behavior: "smooth" })}>
+            <Button size="lg" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => document.getElementById("prizes")?.scrollIntoView({ behavior: "smooth" })}>
               View Prizes + Rules<ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -188,11 +151,11 @@ export default function DopamineDrop() {
         </div>
       </section>
 
-      {/* [SPIN-01] How It Works */}
+      {/* How It Works */}
       <HowItWorks />
 
-      {/* Wheel + Tracker + VIP Benefits */}
-      <section className="py-12 md:py-20">
+      {/* Wheel + Tracker + VIP Benefits - Reduced top padding */}
+      <section className="py-6 md:py-10">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6">
@@ -204,17 +167,13 @@ export default function DopamineDrop() {
                 canSpin={!!authUser && status.spinsRemaining > 0 && !isSpinning}
               />
               
-              {/* Dedicated SPIN button below wheel for clarity */}
+              {/* Dedicated SPIN button below wheel - Yellow primary styling */}
               <div className="flex flex-col items-center gap-2">
                 <Button
                   size="lg"
                   onClick={handleSpinClick}
                   disabled={isSpinning || (!authUser) || (status.spinsRemaining <= 0)}
-                  className={`px-12 py-6 text-xl font-black tracking-wide ${
-                    isSpinning 
-                      ? 'bg-gradient-to-r from-yellow-500 to-primary animate-pulse' 
-                      : 'bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-400'
-                  } text-black`}
+                  className="px-12 py-6 text-xl font-black tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg disabled:opacity-50"
                 >
                   {isSpinning ? (
                     <>🎰 Spinning...</>
@@ -223,7 +182,7 @@ export default function DopamineDrop() {
                   ) : status.spinsRemaining <= 0 ? (
                     <>No Spins Left Today</>
                   ) : (
-                    <>🎯 SPIN THE WHEEL ({status.spinsRemaining} left)</>
+                    <>🎯 SPIN ({status.spinsRemaining} left)</>
                   )}
                 </Button>
                 {!authUser && (
