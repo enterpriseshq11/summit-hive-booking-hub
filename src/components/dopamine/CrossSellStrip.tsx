@@ -11,9 +11,9 @@ export function CrossSellStrip() {
   ];
 
   return (
-    <section className="py-10 bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 border-t border-zinc-800">
+    <section className="py-12 bg-gradient-to-r from-black via-zinc-900 to-black border-t border-primary/20">
       <div className="container mx-auto px-4">
-        <p className="text-center text-sm text-muted-foreground mb-4">
+        <p className="text-center text-lg font-semibold text-white mb-6">
           Ready to experience A-Z Enterprises?
         </p>
         <div className="flex flex-wrap justify-center gap-3">
@@ -21,8 +21,7 @@ export function CrossSellStrip() {
             <Button
               key={action.label}
               asChild
-              variant="outline"
-              className="border-primary/30 hover:bg-primary/10 hover:border-primary"
+              className="border border-primary/50 bg-primary/10 text-primary hover:bg-primary hover:text-black font-medium"
             >
               <Link to={action.href}>
                 <action.icon className="w-4 h-4 mr-2" />
