@@ -138,7 +138,7 @@ export default function DopamineDrop() {
               size="lg" 
               onClick={handleSpinClick} 
               disabled={isSpinning} 
-              className="bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black font-bold text-lg px-8 shadow-lg"
+              className="font-bold text-lg px-8 shadow-lg"
             >
               {isSpinning ? <Sparkles className="w-5 h-5 mr-2 animate-spin" /> : authUser ? <Gift className="w-5 h-5 mr-2" /> : <User className="w-5 h-5 mr-2" />}
               {authUser ? `Spin Now (${status.spinsRemaining} left)` : "Log in to Spin"}
@@ -173,18 +173,16 @@ export default function DopamineDrop() {
                 <Button
                   size="lg"
                   onClick={handleSpinClick}
-                  disabled={isSpinning || (!authUser) || (status.spinsRemaining <= 0)}
-                  className="px-12 py-6 text-xl font-black tracking-wide bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black shadow-lg disabled:bg-zinc-600 disabled:text-zinc-400"
+                  disabled={isSpinning || (authUser && status.spinsRemaining <= 0)}
+                  className="px-12 py-6 text-xl font-black tracking-wide shadow-lg disabled:opacity-75"
                 >
-                  {isSpinning ? (
-                    <>🎰 Spinning...</>
-                  ) : !authUser ? (
-                    <>Log in to Spin</>
-                  ) : status.spinsRemaining <= 0 ? (
-                    <>No Spins Left Today</>
-                  ) : (
-                    <>🎯 SPIN ({status.spinsRemaining} left)</>
-                  )}
+                  {isSpinning
+                    ? "Spinning..."
+                    : !authUser
+                      ? "Log in to Spin"
+                      : status.spinsRemaining <= 0
+                        ? "No spins remaining"
+                        : `Spin (${status.spinsRemaining} left)`}
                 </Button>
                 {!authUser && (
                   <p className="text-sm text-zinc-400">Create a free account to spin daily</p>
