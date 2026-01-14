@@ -15,15 +15,10 @@ export function ExperienceQuickSelector() {
         <Link
           key={exp.href}
           to={exp.href}
-          className={`
-            inline-flex items-center gap-2 px-4 py-2.5 rounded-full
-            bg-white/10 border border-white/20 
-            hover:bg-white/20 hover:border-accent/50 hover:scale-105
-            transition-all duration-300 group
-          `}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] border-2 border-transparent hover:border-black/20 text-black font-semibold transition-all duration-300 hover:scale-105"
         >
-          <exp.icon className={`h-4 w-4 text-${exp.color} group-hover:text-accent transition-colors`} />
-          <span className="text-sm font-medium text-white/90 group-hover:text-white">
+          <exp.icon className="h-4 w-4" />
+          <span className="text-sm">
             {exp.name}
           </span>
         </Link>
