@@ -195,7 +195,7 @@ export default function DopamineDrop() {
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex justify-center">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6">
               <SpinWheel 
                 segments={wheelConfig} 
                 isSpinning={isSpinning} 
@@ -203,6 +203,36 @@ export default function DopamineDrop() {
                 onSpinClick={handleSpinClick}
                 canSpin={!!authUser && status.spinsRemaining > 0 && !isSpinning}
               />
+              
+              {/* Dedicated SPIN button below wheel for clarity */}
+              <div className="flex flex-col items-center gap-2">
+                <Button
+                  size="lg"
+                  onClick={handleSpinClick}
+                  disabled={isSpinning || (!authUser) || (status.spinsRemaining <= 0)}
+                  className={`px-12 py-6 text-xl font-black tracking-wide ${
+                    isSpinning 
+                      ? 'bg-gradient-to-r from-yellow-500 to-primary animate-pulse' 
+                      : 'bg-gradient-to-r from-primary to-yellow-500 hover:from-primary/90 hover:to-yellow-400'
+                  } text-black`}
+                >
+                  {isSpinning ? (
+                    <>🎰 Spinning...</>
+                  ) : !authUser ? (
+                    <>Log in to Spin</>
+                  ) : status.spinsRemaining <= 0 ? (
+                    <>No Spins Left Today</>
+                  ) : (
+                    <>🎯 SPIN THE WHEEL ({status.spinsRemaining} left)</>
+                  )}
+                </Button>
+                {!authUser && (
+                  <p className="text-sm text-zinc-400">Create a free account to spin daily</p>
+                )}
+                {authUser && status.spinsRemaining <= 0 && (
+                  <p className="text-sm text-zinc-400">Come back tomorrow for more spins!</p>
+                )}
+              </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="space-y-6">
               {/* [SPIN-02] Status Box */}

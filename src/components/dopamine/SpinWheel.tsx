@@ -171,23 +171,35 @@ export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete,
           );
         })}
 
-        {/* Center hub - clickable spin button */}
-        <button
-          onClick={onSpinClick}
-          disabled={isSpinning || !canSpin}
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black border-4 border-primary flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] transition-all ${
-            !isSpinning && canSpin ? 'hover:scale-110 hover:border-yellow-400 cursor-pointer active:scale-95' : 'cursor-not-allowed'
-          }`}
-        >
-          <motion.span 
-            className="text-primary font-black text-lg tracking-widest"
-            animate={{ scale: isSpinning ? [1, 1.1, 1] : 1 }}
-            transition={{ repeat: isSpinning ? Infinity : 0, duration: 0.5 }}
-          >
-            {isSpinning ? "🎰" : "SPIN"}
-          </motion.span>
-        </button>
+        {/* Center hub visual (non-interactive, just for look) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black border-4 border-primary/50 flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] pointer-events-none">
+          <span className="text-primary/50 font-black text-xs tracking-widest">
+            {isSpinning ? "🎰" : "A-Z"}
+          </span>
+        </div>
       </motion.div>
+
+      {/* Center clickable SPIN button - OUTSIDE the rotating wheel */}
+      <button
+        onClick={onSpinClick}
+        disabled={isSpinning || !canSpin}
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-28 md:h-28 rounded-full z-20 flex items-center justify-center transition-all ${
+          isSpinning 
+            ? 'bg-gradient-to-br from-yellow-500 to-primary cursor-wait' 
+            : canSpin 
+              ? 'bg-gradient-to-br from-primary to-yellow-500 hover:scale-110 hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] cursor-pointer active:scale-95' 
+              : 'bg-zinc-700 cursor-not-allowed'
+        }`}
+        style={{ pointerEvents: 'auto' }}
+      >
+        <motion.span 
+          className={`font-black text-xl tracking-widest ${isSpinning || canSpin ? 'text-black' : 'text-zinc-400'}`}
+          animate={{ scale: isSpinning ? [1, 1.15, 1] : 1 }}
+          transition={{ repeat: isSpinning ? Infinity : 0, duration: 0.4 }}
+        >
+          {isSpinning ? "🎰" : "SPIN"}
+        </motion.span>
+      </button>
 
       {/* Spinning particles effect */}
       <AnimatePresence>
