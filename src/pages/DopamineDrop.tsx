@@ -196,7 +196,13 @@ export default function DopamineDrop() {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex justify-center">
-              <SpinWheel segments={wheelConfig} isSpinning={isSpinning} targetSegment={spinResult?.segment_index} />
+              <SpinWheel 
+                segments={wheelConfig} 
+                isSpinning={isSpinning} 
+                targetSegment={spinResult?.segment_index} 
+                onSpinClick={handleSpinClick}
+                canSpin={!!authUser && status.spinsRemaining > 0 && !isSpinning}
+              />
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="space-y-6">
               {/* [SPIN-02] Status Box */}

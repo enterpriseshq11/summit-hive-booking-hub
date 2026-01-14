@@ -13,6 +13,8 @@ interface SpinWheelProps {
   isSpinning: boolean;
   targetSegment?: number;
   onSpinComplete?: () => void;
+  onSpinClick?: () => void;
+  canSpin?: boolean;
 }
 
 const SEGMENT_COLORS = [
@@ -26,7 +28,7 @@ const SEGMENT_COLORS = [
   "hsl(0, 0%, 12%)",   // dark
 ];
 
-export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete }: SpinWheelProps) {
+export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete, onSpinClick, canSpin = true }: SpinWheelProps) {
   const [rotation, setRotation] = useState(0);
   const [showPointerGlow, setShowPointerGlow] = useState(false);
   const tickSoundRef = useRef<number>(0);
@@ -169,8 +171,14 @@ export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete 
           );
         })}
 
-        {/* Center hub */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black border-4 border-primary flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
+        {/* Center hub - clickable spin button */}
+        <button
+          onClick={onSpinClick}
+          disabled={isSpinning || !canSpin}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black border-4 border-primary flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] transition-all ${
+            !isSpinning && canSpin ? 'hover:scale-110 hover:border-yellow-400 cursor-pointer active:scale-95' : 'cursor-not-allowed'
+          }`}
+        >
           <motion.span 
             className="text-primary font-black text-lg tracking-widest"
             animate={{ scale: isSpinning ? [1, 1.1, 1] : 1 }}
@@ -178,7 +186,7 @@ export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete 
           >
             {isSpinning ? "🎰" : "SPIN"}
           </motion.span>
-        </div>
+        </button>
       </motion.div>
 
       {/* Spinning particles effect */}
