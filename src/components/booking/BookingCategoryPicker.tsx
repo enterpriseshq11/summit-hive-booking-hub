@@ -31,15 +31,15 @@ export function BookingCategoryPicker({
               onScrollToSection?.(cat.type);
             }}
             className={`
-              inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm
-              transition-all duration-300 border-2
+              inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm
+              transition-all duration-300
               ${isActive 
-                ? "bg-accent text-primary border-accent shadow-lg shadow-accent/20" 
-                : "bg-primary-foreground/10 text-primary-foreground/80 border-primary-foreground/20 hover:bg-primary-foreground/20 hover:border-accent/50"
+                ? "bg-[hsl(45,70%,50%)] text-black border-2 border-black shadow-lg shadow-[hsl(45,70%,50%)]/30" 
+                : "bg-[hsl(45,70%,50%)]/80 text-black border-2 border-transparent hover:bg-[hsl(45,70%,45%)] hover:border-black/20"
               }
             `}
           >
-            <cat.icon className={`h-4 w-4 ${isActive ? "text-primary" : ""}`} />
+            <cat.icon className="h-4 w-4" />
             <span>{cat.name}</span>
             <span className="text-xs opacity-70">({cat.label})</span>
           </button>
