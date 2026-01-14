@@ -37,7 +37,6 @@ import azLogoIcon from "@/assets/az-logo-icon.png";
 
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
-  { label: "Summit", href: "/summit", icon: Building2 },
   { 
     label: "Spin & Win", 
     href: "/dopamine-drop", 
@@ -46,6 +45,7 @@ const navItems = [
     pulse: true,
     tooltip: "Monthly giveaways"
   },
+  { label: "Summit", href: "/summit", icon: Building2 },
   { label: "Coworking", href: "/coworking", icon: Building2 },
   { label: "Spa", href: "/spa", icon: Sparkles },
   { label: "Fitness", href: "/fitness", icon: Dumbbell },
