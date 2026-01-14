@@ -4,13 +4,25 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { HelpCircle, Phone, Mail } from "lucide-react";
+import { HelpCircle, Phone, Mail, MessageSquare } from "lucide-react";
 import { SITE_CONFIG } from "@/config/siteConfig";
 
 const faqs = [
   {
     question: "How does booking work?",
     answer: "Browse our experiences, select your preferred date and time, and confirm your booking online. You'll receive instant confirmation and can manage your booking from your account. Most bookings take less than 2 minutes.",
+  },
+  {
+    question: "What is your cancellation policy?",
+    answer: "You can cancel or reschedule most bookings up to 48 hours in advance for a full refund. Event venue bookings may have different terms based on the size and complexity. Check your confirmation email for specific cancellation details.",
+  },
+  {
+    question: "Is a deposit required?",
+    answer: "Some bookings require a deposit to secure your reservation, especially for The Summit events. The deposit amount (typically 25-50%) is clearly shown before you confirm. The remaining balance is due before or at your appointment.",
+  },
+  {
+    question: "How far in advance should I book?",
+    answer: "For spa treatments and day passes, 1-2 days in advance is usually sufficient. For The Summit events, we recommend booking 2-4 weeks ahead for best availability. Popular dates (holidays, weekends) book quickly.",
   },
   {
     question: "Do I need a membership?",
@@ -44,17 +56,20 @@ export function FAQSection() {
               <HelpCircle className="h-4 w-4" />
               Common Questions
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
               Frequently Asked Questions
             </h2>
+            <p className="text-muted-foreground">
+              Everything you need to know before you book
+            </p>
           </div>
 
-          <Accordion type="single" collapsible className="space-y-4">
+          <Accordion type="single" collapsible defaultValue="item-0" className="space-y-4">
             {faqs.map((faq, index) => (
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
-                className="bg-card border border-border rounded-xl px-6 data-[state=open]:border-accent/40"
+                className="bg-card border border-border rounded-xl px-6 py-1 data-[state=open]:border-accent/40"
               >
                 <AccordionTrigger className="text-left font-semibold hover:no-underline py-5 text-foreground [&>svg]:text-accent">
                   {faq.question}
@@ -66,26 +81,33 @@ export function FAQSection() {
             ))}
           </Accordion>
 
-          {/* Need Help Block */}
-          <div className="mt-12 p-6 rounded-2xl bg-card border-2 text-center">
-            <p className="font-semibold mb-2">Still have questions?</p>
-            <p className="text-sm text-muted-foreground mb-4">
+          {/* Need Help Block with Call/Text CTA */}
+          <div className="mt-12 p-8 rounded-2xl bg-card border-2 text-center">
+            <p className="font-bold text-lg mb-2">Still have questions?</p>
+            <p className="text-sm text-muted-foreground mb-6">
               Our team is happy to help with anything not covered here.
             </p>
-            <div className="flex flex-wrap justify-center gap-4 text-sm">
+            <div className="flex flex-wrap justify-center gap-4">
               <a 
                 href={SITE_CONFIG.contact.phoneLink} 
-                className="flex items-center gap-2 text-accent hover:underline font-medium"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent/10 border border-accent/20 text-accent hover:bg-accent/20 transition-colors font-medium"
               >
                 <Phone className="h-4 w-4" />
-                {SITE_CONFIG.contact.phone}
+                Call {SITE_CONFIG.contact.phone}
+              </a>
+              <a 
+                href={`sms:+1${SITE_CONFIG.contact.phone.replace(/\D/g, '')}`} 
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent/10 border border-accent/20 text-accent hover:bg-accent/20 transition-colors font-medium"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Text Us
               </a>
               <a 
                 href={SITE_CONFIG.contact.emailLink} 
-                className="flex items-center gap-2 text-accent hover:underline font-medium"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-muted border border-border text-muted-foreground hover:text-foreground hover:border-accent/30 transition-colors font-medium"
               >
                 <Mail className="h-4 w-4" />
-                {SITE_CONFIG.contact.email}
+                Email
               </a>
             </div>
           </div>
@@ -94,4 +116,3 @@ export function FAQSection() {
     </section>
   );
 }
-

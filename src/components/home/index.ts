@@ -1,8 +1,12 @@
 export { TestimonialsCarousel } from "./TestimonialsCarousel";
 export { NextAvailableStrip } from "./NextAvailableStrip";
 export { ExperiencePreviewPanel } from "./ExperiencePreviewPanel";
+export { ExperienceQuickSelector } from "./ExperienceQuickSelector";
 export { FAQSection } from "./FAQSection";
 export { SocialProofSection } from "./SocialProofSection";
 export { FloatingHelpCTA } from "./FloatingHelpCTA";
 export { GiftCardStrip } from "./GiftCardStrip";
 export { QuickBookModal } from "./QuickBookModal";
+export { WhatsIncludedStrip } from "./WhatsIncludedStrip";
+export { ExampleBookingModal } from "./ExampleBookingModal";
+export { PreFooterCTA } from "./PreFooterCTA";

@@ -10,6 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   CalendarDays,
   Building2,
   Sparkles,
@@ -30,9 +35,6 @@ import {
 import { useState } from "react";
 import azLogoIcon from "@/assets/az-logo-icon.png";
 
-// B1: De-emphasized Spin & Win (removed highlight, moved lower)
-// B2: Grouped businesses under conceptual structure
-// B3: Consistent icon sizing handled in JSX
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
   { label: "Summit", href: "/summit", icon: Building2 },
@@ -40,9 +42,23 @@ const navItems = [
   { label: "Spa", href: "/spa", icon: Sparkles },
   { label: "Fitness", href: "/fitness", icon: Dumbbell },
   { label: "Gift Cards", href: "/gift-cards", icon: Gift },
-  { label: "Voice Vault", mobileLabel: "Voice Vault", desktopLabel: "Voice Vault by The Hive", href: "/voice-vault", icon: Mic, highlight: true },
+  { 
+    label: "Voice Vault", 
+    mobileLabel: "Voice Vault", 
+    desktopLabel: "Voice Vault", 
+    href: "/voice-vault", 
+    icon: Mic, 
+    highlight: true,
+    tooltip: "Podcast studio booking"
+  },
   { label: "Shop", href: "/shop", icon: ShoppingBag },
-  { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, secondary: true },
+  { 
+    label: "Spin & Win", 
+    href: "/dopamine-drop", 
+    icon: CircleDot, 
+    secondary: true,
+    tooltip: "Monthly giveaways"
+  },
   { label: "Promotions", href: "/promotions", icon: Layers },
 ];
 
@@ -53,6 +69,49 @@ export function Header() {
 
   const isAdminRoute = location.pathname.startsWith("/command-center");
   const showCommandCenter = !!authUser?.isStaff;
+
+  const renderNavItem = (item: typeof navItems[0]) => {
+    const isActive = location.pathname === item.href;
+    const displayLabel = (item as any).desktopLabel || item.label;
+    
+    const linkContent = (
+      <Link
+        key={item.href}
+        to={item.href}
+        className={cn(
+          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+          isActive
+            ? "bg-accent text-primary"
+            : item.primary
+              ? "bg-accent/20 text-accent hover:bg-accent/30"
+              : item.highlight
+                ? "text-accent hover:text-accent hover:bg-accent/10"
+                : (item as any).secondary
+                  ? "text-primary-foreground/50 hover:text-primary-foreground/80 hover:bg-primary-foreground/5"
+                  : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+        )}
+      >
+        <item.icon className="h-4 w-4 flex-shrink-0" />
+        {displayLabel}
+      </Link>
+    );
+
+    // Wrap with tooltip if item has tooltip text
+    if ((item as any).tooltip) {
+      return (
+        <Tooltip key={item.href}>
+          <TooltipTrigger asChild>
+            {linkContent}
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">
+            {(item as any).tooltip}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return linkContent;
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground">
@@ -82,32 +141,7 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1" aria-label="Primary">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.href;
-            const displayLabel = item.desktopLabel || item.label;
-            return (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-                  isActive
-                    ? "bg-accent text-primary"
-                    : item.primary
-                      ? "bg-accent/20 text-accent hover:bg-accent/30"
-                      : item.highlight
-                        ? "text-accent hover:text-accent hover:bg-accent/10 animate-pulse"
-                        : (item as any).secondary
-                          ? "text-primary-foreground/50 hover:text-primary-foreground/80 hover:bg-primary-foreground/5"
-                          : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                )}
-              >
-                {/* B3: Consistent icon sizing */}
-                <item.icon className="h-4 w-4 flex-shrink-0" />
-                {displayLabel}
-              </Link>
-            );
-          })}
+          {navItems.map(renderNavItem)}
 
           {showCommandCenter && (
             <Link
@@ -190,6 +224,7 @@ export function Header() {
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
             const displayLabel = item.mobileLabel || item.label;
+            const tooltip = (item as any).tooltip;
             return (
               <Link
                 key={item.href}
@@ -205,7 +240,12 @@ export function Header() {
                 )}
               >
                 <item.icon className="h-5 w-5" />
-                {displayLabel}
+                <div className="flex flex-col">
+                  <span>{displayLabel}</span>
+                  {tooltip && (
+                    <span className="text-xs text-primary-foreground/50">{tooltip}</span>
+                  )}
+                </div>
               </Link>
             );
           })}
