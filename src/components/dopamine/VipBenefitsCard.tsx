@@ -30,7 +30,7 @@ export function VipBenefitsCard({ isVip, onUpgradeClick }: VipBenefitsCardProps)
 
   return (
     <Card className="p-6 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-primary/30 relative overflow-hidden">
-      <Badge className="absolute top-3 right-3 bg-primary/20 text-primary border-primary/30">
+      <Badge className="absolute top-3 right-3 bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black font-semibold border-0 cursor-pointer" onClick={onUpgradeClick}>
         <Lock className="w-3 h-3 mr-1" />
         UNLOCK
       </Badge>
