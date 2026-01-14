@@ -51,16 +51,14 @@ export function ShareReferral({ isAuthenticated }: ShareReferralProps) {
       
       <div className="flex gap-2">
         <Button 
-          variant="outline" 
-          className="flex-1 border-primary/30 hover:bg-primary/10"
+          className="flex-1 border border-primary/40 bg-transparent text-primary hover:bg-primary/20 hover:border-primary"
           onClick={handleShare}
         >
           <Share2 className="w-4 h-4 mr-2" />
           Share
         </Button>
         <Button 
-          variant="outline" 
-          className="border-primary/30 hover:bg-primary/10"
+          className="border border-primary/40 bg-transparent text-primary hover:bg-primary/20 hover:border-primary"
           onClick={handleCopy}
         >
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
