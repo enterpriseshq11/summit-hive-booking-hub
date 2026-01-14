@@ -155,61 +155,66 @@ export default function DopamineDrop() {
         </div>
       </section>
 
-      {/* Wheel Section - Centered layout with cards stacked below */}
+      {/* Wheel Section - Centered wheel with responsive card grid below */}
       <section className="py-4 md:py-6 bg-gradient-to-b from-black to-zinc-900/50">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center gap-8 max-w-xl mx-auto">
-            {/* Centered Wheel */}
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6 w-full">
-              <SpinWheel 
-                segments={wheelConfig} 
-                isSpinning={isSpinning} 
-                targetSegment={spinResult?.segment_index} 
-                onSpinClick={handleSpinClick}
-                canSpin={!!authUser && status.spinsRemaining > 0 && !isSpinning}
-              />
-              
-              {/* Dedicated SPIN button below wheel - Yellow primary styling */}
-              <div className="flex flex-col items-center gap-2">
-                <Button
-                  size="lg"
-                  onClick={handleSpinClick}
-                  disabled={isSpinning || (authUser && status.spinsRemaining <= 0)}
-                  className="px-12 py-6 text-xl font-black tracking-wide shadow-lg bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black disabled:bg-[hsl(45,70%,50%)]/50 disabled:text-black/50"
-                >
-                  {isSpinning
-                    ? "Spinning..."
-                    : !authUser
-                      ? "Log in to Spin"
-                      : status.spinsRemaining <= 0
-                        ? "No spins remaining"
-                        : `Spin (${status.spinsRemaining} left)`}
-                </Button>
-                {!authUser && (
-                  <p className="text-sm text-zinc-400">Create a free account to spin daily</p>
-                )}
-                {authUser && status.spinsRemaining <= 0 && (
-                  <p className="text-sm text-zinc-400">Come back tomorrow for more spins!</p>
-                )}
-              </div>
-            </motion.div>
+          {/* Centered Wheel */}
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6 max-w-md mx-auto mb-8">
+            <SpinWheel 
+              segments={wheelConfig} 
+              isSpinning={isSpinning} 
+              targetSegment={spinResult?.segment_index} 
+              onSpinClick={handleSpinClick}
+              canSpin={!!authUser && status.spinsRemaining > 0 && !isSpinning}
+            />
             
-            {/* Cards stacked below wheel */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="w-full space-y-6">
-              <EntryTracker 
-                isAuthenticated={!!authUser} 
-                isVip={status.isVip} 
-                spinsRemaining={status.spinsRemaining} 
-                streak={status.streak} 
-                entryTotals={status.entryTotals} 
-                drawDate={DRAW_DATE} 
-                onUpgradeClick={handleVipUpgrade} 
-                onLoginClick={() => setShowLoginPrompt(true)} 
-              />
-              <VipBenefitsCard isVip={status.isVip} onUpgradeClick={handleVipUpgrade} />
+            {/* Dedicated SPIN button below wheel - Yellow primary styling */}
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                size="lg"
+                onClick={handleSpinClick}
+                disabled={isSpinning || (authUser && status.spinsRemaining <= 0)}
+                className="px-12 py-6 text-xl font-black tracking-wide shadow-lg bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black disabled:bg-[hsl(45,70%,50%)]/50 disabled:text-black/50"
+              >
+                {isSpinning
+                  ? "Spinning..."
+                  : !authUser
+                    ? "Log in to Spin"
+                    : status.spinsRemaining <= 0
+                      ? "No spins remaining"
+                      : `Spin (${status.spinsRemaining} left)`}
+              </Button>
+              {!authUser && (
+                <p className="text-sm text-zinc-400">Create a free account to spin daily</p>
+              )}
+              {authUser && status.spinsRemaining <= 0 && (
+                <p className="text-sm text-zinc-400">Come back tomorrow for more spins!</p>
+              )}
+            </div>
+          </motion.div>
+          
+          {/* Cards grid - 3 columns on desktop, 2 on tablet, 1 on mobile */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.2 }} 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
+          >
+            <EntryTracker 
+              isAuthenticated={!!authUser} 
+              isVip={status.isVip} 
+              spinsRemaining={status.spinsRemaining} 
+              streak={status.streak} 
+              entryTotals={status.entryTotals} 
+              drawDate={DRAW_DATE} 
+              onUpgradeClick={handleVipUpgrade} 
+              onLoginClick={() => setShowLoginPrompt(true)} 
+            />
+            <VipBenefitsCard isVip={status.isVip} onUpgradeClick={handleVipUpgrade} />
+            <div className="md:col-span-2 lg:col-span-1">
               <ShareReferral isAuthenticated={!!authUser} />
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

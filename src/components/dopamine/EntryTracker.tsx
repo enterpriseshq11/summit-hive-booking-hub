@@ -84,7 +84,7 @@ export function EntryTracker({
   // Teaser state for logged-out users
   if (!isAuthenticated) {
     return (
-      <Card className="p-6 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-primary/20 relative overflow-hidden">
+      <Card className="p-6 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-primary/20 relative overflow-hidden h-full flex flex-col">
         {/* Blur overlay */}
         <div className="absolute inset-0 backdrop-blur-[2px] bg-zinc-900/60 z-10 flex items-center justify-center">
           <div className="text-center p-6">
@@ -123,7 +123,7 @@ export function EntryTracker({
   }
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-primary/20">
+    <Card className="p-6 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-primary/20 h-full flex flex-col">
       <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-white">
         <Trophy className="w-5 h-5 text-primary" />
         Your Entry Tracker
@@ -135,7 +135,7 @@ export function EntryTracker({
         )}
       </h3>
       
-      <div className="space-y-4">
+      <div className="space-y-4 flex-1 flex flex-col">
         {/* Spins Remaining */}
         <div className="flex justify-between items-center py-2 border-b border-zinc-700">
           <span className="text-muted-foreground flex items-center gap-2">
@@ -225,7 +225,7 @@ export function EntryTracker({
 
         {/* VIP Upsell */}
         {!isVip && (
-          <div className="pt-2 space-y-3">
+          <div className="pt-2 space-y-3 mt-auto">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Lock className="w-4 h-4 text-primary" />
               VIP = 2x spins/day + 2x entries earned
