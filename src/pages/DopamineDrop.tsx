@@ -151,13 +151,10 @@ export default function DopamineDrop() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <HowItWorks />
-
-      {/* Wheel + Tracker + VIP Benefits - Reduced top padding */}
-      <section className="py-6 md:py-10">
+      {/* Wheel Section - Directly after hero for immediate visibility */}
+      <section className="py-6 md:py-10 bg-gradient-to-b from-black to-zinc-900/50">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-6">
               <SpinWheel 
                 segments={wheelConfig} 
@@ -194,7 +191,6 @@ export default function DopamineDrop() {
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="space-y-6">
-              {/* [SPIN-02] Status Box */}
               <EntryTracker 
                 isAuthenticated={!!authUser} 
                 isVip={status.isVip} 
@@ -205,16 +201,14 @@ export default function DopamineDrop() {
                 onUpgradeClick={handleVipUpgrade} 
                 onLoginClick={() => setShowLoginPrompt(true)} 
               />
-              
-              {/* [SPIN-05] VIP Benefits Card */}
               <VipBenefitsCard isVip={status.isVip} onUpgradeClick={handleVipUpgrade} />
-              
-              {/* [SPIN-09] Share/Referral */}
               <ShareReferral isAuthenticated={!!authUser} />
             </motion.div>
           </div>
         </div>
       </section>
+
+      {/* How It Works - Now below the wheel */}
 
       {/* [SPIN-06] Enhanced Prizes Section */}
       <section id="prizes" className="py-12 md:py-20 bg-zinc-900/50">

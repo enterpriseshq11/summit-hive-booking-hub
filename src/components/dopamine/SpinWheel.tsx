@@ -30,8 +30,38 @@ const SEGMENT_COLORS = [
 
 export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete, onSpinClick, canSpin = true }: SpinWheelProps) {
   const [rotation, setRotation] = useState(0);
+  const [idleRotation, setIdleRotation] = useState(0);
+  const [isIdle, setIsIdle] = useState(true);
   const [showPointerGlow, setShowPointerGlow] = useState(false);
   const tickSoundRef = useRef<number>(0);
+  const idleIntervalRef = useRef<number>(0);
+
+  // Idle auto-spin animation (slow continuous rotation)
+  useEffect(() => {
+    if (!isSpinning && isIdle) {
+      // Rotate continuously at ~1 rotation per 12 seconds
+      idleIntervalRef.current = window.setInterval(() => {
+        setIdleRotation(prev => prev + 0.5);
+      }, 16); // ~60fps
+    } else {
+      // Stop idle rotation when spinning
+      if (idleIntervalRef.current) {
+        clearInterval(idleIntervalRef.current);
+      }
+    }
+    return () => {
+      if (idleIntervalRef.current) {
+        clearInterval(idleIntervalRef.current);
+      }
+    };
+  }, [isSpinning, isIdle]);
+
+  // Stop idle when real spin starts
+  useEffect(() => {
+    if (isSpinning) {
+      setIsIdle(false);
+    }
+  }, [isSpinning]);
 
   useEffect(() => {
     if (isSpinning && targetSegment !== undefined) {
@@ -40,8 +70,11 @@ export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete,
       // Adjust for segment positioning (segment 1 at top = 0 degrees)
       const targetAngle = (8 - targetSegment + 1) * segmentAngle - segmentAngle / 2;
       const spins = 6; // 6 full rotations for drama
-      const newRotation = rotation + (spins * 360) + targetAngle + (360 - (rotation % 360));
+      // Start from current idle rotation for smooth transition
+      const baseRotation = idleRotation + rotation;
+      const newRotation = baseRotation + (spins * 360) + targetAngle + (360 - (baseRotation % 360));
       setRotation(newRotation);
+      setIdleRotation(0); // Reset idle rotation
 
       // Simulate tick sounds with glow pulses
       let tickCount = 0;
@@ -127,10 +160,10 @@ export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete,
           )`,
           boxShadow: "inset 0 0 30px rgba(0,0,0,0.5), 0 0 60px rgba(212,175,55,0.3)"
         }}
-        animate={{ rotate: rotation }}
+        animate={{ rotate: isSpinning ? rotation : (isIdle ? idleRotation : rotation) }}
         transition={{ 
-          duration: isSpinning ? 5 : 0, 
-          ease: [0.2, 0.8, 0.2, 1]
+          duration: isSpinning ? 5 : 0.016, 
+          ease: isSpinning ? [0.2, 0.8, 0.2, 1] : "linear"
         }}
       >
         {/* Segment dividers */}
