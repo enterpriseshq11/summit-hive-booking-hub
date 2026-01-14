@@ -216,7 +216,7 @@ export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete,
       <button
         onClick={onSpinClick}
         disabled={isSpinning || !canSpin}
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-28 md:h-28 rounded-full z-20 flex items-center justify-center transition-all border-4 border-black shadow-[0_0_10px_rgba(0,0,0,0.5)] ${
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-28 md:h-28 rounded-full z-20 flex items-center justify-center transition-all p-1 ${
           isSpinning 
             ? 'bg-[hsl(45,70%,50%)] cursor-wait' 
             : canSpin 
@@ -225,13 +225,16 @@ export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete,
         }`}
         style={{ pointerEvents: 'auto' }}
       >
-        <motion.span 
-          className="font-black text-xl tracking-widest text-black"
-          animate={{ scale: isSpinning ? [1, 1.15, 1] : 1 }}
-          transition={{ repeat: isSpinning ? Infinity : 0, duration: 0.4 }}
-        >
-          {isSpinning ? "🎰" : "SPIN"}
-        </motion.span>
+        {/* Inner grey circle with black border - flush against yellow */}
+        <div className="w-full h-full rounded-full bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900 border-[3px] border-black flex items-center justify-center shadow-[inset_0_0_15px_rgba(0,0,0,0.6)]">
+          <motion.span 
+            className="font-black text-xl tracking-widest text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
+            animate={{ scale: isSpinning ? [1, 1.15, 1] : 1 }}
+            transition={{ repeat: isSpinning ? Infinity : 0, duration: 0.4 }}
+          >
+            {isSpinning ? "🎰" : "SPIN"}
+          </motion.span>
+        </div>
       </button>
 
       {/* Spinning particles effect */}
