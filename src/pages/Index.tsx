@@ -205,19 +205,19 @@ export default function Index() {
               >
                 <button 
                   onClick={() => scrollToSection('availability')}
-                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-full bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] border-2 border-transparent hover:border-black/20 text-sm text-black font-semibold transition-colors"
                 >
                   Availability
                 </button>
                 <button 
                   onClick={() => scrollToSection('experiences')}
-                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-full bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] border-2 border-transparent hover:border-black/20 text-sm text-black font-semibold transition-colors"
                 >
                   Experiences
                 </button>
                 <button 
                   onClick={() => scrollToSection('faq')}
-                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-full bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] border-2 border-transparent hover:border-black/20 text-sm text-black font-semibold transition-colors"
                 >
                   FAQ
                 </button>
@@ -245,8 +245,7 @@ export default function Index() {
                 {/* Secondary CTA */}
                 <Button 
                   size="lg" 
-                  variant="outline"
-                  className="text-lg px-8 py-7 border-white/30 text-white hover:bg-white/10 hover:text-white font-semibold" 
+                  className="text-lg px-8 py-7 bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black font-semibold border-2 border-transparent hover:border-black/20" 
                   onClick={() => scrollToSection('experiences')}
                 >
                   <ExternalLink className="h-5 w-5 mr-2" />
