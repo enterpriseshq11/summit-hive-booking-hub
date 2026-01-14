@@ -218,15 +218,15 @@ export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete,
         disabled={isSpinning || !canSpin}
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-28 md:h-28 rounded-full z-20 flex items-center justify-center transition-all ${
           isSpinning 
-            ? 'bg-gradient-to-br from-yellow-500 to-primary cursor-wait' 
+            ? 'bg-[hsl(45,70%,50%)] cursor-wait' 
             : canSpin 
-              ? 'bg-gradient-to-br from-primary to-yellow-500 hover:scale-110 hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] cursor-pointer active:scale-95' 
-              : 'bg-zinc-700 cursor-not-allowed'
+              ? 'bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] hover:scale-110 hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] cursor-pointer active:scale-95' 
+              : 'bg-[hsl(45,70%,50%)]/60 cursor-not-allowed'
         }`}
         style={{ pointerEvents: 'auto' }}
       >
         <motion.span 
-          className={`font-black text-xl tracking-widest ${isSpinning || canSpin ? 'text-black' : 'text-zinc-400'}`}
+          className="font-black text-xl tracking-widest text-black"
           animate={{ scale: isSpinning ? [1, 1.15, 1] : 1 }}
           transition={{ repeat: isSpinning ? Infinity : 0, duration: 0.4 }}
         >
