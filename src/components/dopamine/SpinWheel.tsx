@@ -216,7 +216,7 @@ export function SpinWheel({ segments, isSpinning, targetSegment, onSpinComplete,
       <button
         onClick={onSpinClick}
         disabled={isSpinning || !canSpin}
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-28 md:h-28 rounded-full z-20 flex items-center justify-center transition-all ${
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-28 md:h-28 rounded-full z-20 flex items-center justify-center transition-all border-4 border-black shadow-[0_0_10px_rgba(0,0,0,0.5)] ${
           isSpinning 
             ? 'bg-[hsl(45,70%,50%)] cursor-wait' 
             : canSpin 
