@@ -14,9 +14,21 @@ import {
   Star,
   Zap,
   Shield,
-  Heart
+  Heart,
+  ExternalLink
 } from "lucide-react";
-import { NextAvailableStrip, ExperiencePreviewPanel, SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip } from "@/components/home";
+import { 
+  NextAvailableStrip, 
+  ExperiencePreviewPanel, 
+  SocialProofSection, 
+  FAQSection, 
+  FloatingHelpCTA, 
+  GiftCardStrip,
+  ExperienceQuickSelector,
+  WhatsIncludedStrip,
+  ExampleBookingModal,
+  PreFooterCTA
+} from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import azLogoIcon from "@/assets/az-logo-icon.png";
@@ -28,6 +40,7 @@ const businesses = [
     description: "Premier event venue for weddings, corporate events, and celebrations that leave lasting impressions.",
     bestFor: "Weddings • Galas • Corporate",
     bullets: ["Up to 300 guests", "Full catering options", "AV & lighting included"],
+    fastFacts: ["Holds up to 300 guests", "Average booking: 2-3 weeks ahead", "Top feature: Full-service coordination"],
     icon: Building2,
     href: "/summit",
     colorClass: "summit",
@@ -38,6 +51,7 @@ const businesses = [
     description: "Modern workspaces and private offices with 24/7 access. Your productivity headquarters.",
     bestFor: "Remote Work • Startups • Meetings",
     bullets: ["24/7 access", "High-speed WiFi", "Meeting rooms available"],
+    fastFacts: ["24/7 keycard access", "Day passes available", "Top feature: Private offices"],
     icon: Building2,
     href: "/coworking",
     colorClass: "coworking",
@@ -48,6 +62,7 @@ const businesses = [
     description: "Luxury spa treatments and massage therapy. Escape the everyday and rediscover balance.",
     bestFor: "Massage • Facials • Recovery",
     bullets: ["Licensed therapists", "Premium products", "Private suites"],
+    fastFacts: ["Licensed therapists", "Usually book 1-2 days ahead", "Top feature: Private suites"],
     icon: Sparkles,
     href: "/spa",
     colorClass: "spa",
@@ -58,6 +73,7 @@ const businesses = [
     description: "24/7 gym access with group classes and personal training. Transform your potential.",
     bestFor: "Strength • Cardio • Classes",
     bullets: ["Modern equipment", "Group classes", "Personal training"],
+    fastFacts: ["Open 24/7", "Flexible memberships", "Top feature: Personal training"],
     icon: Dumbbell,
     href: "/fitness",
     colorClass: "fitness",
@@ -172,6 +188,15 @@ export default function Index() {
                   <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
                 </p>
               </div>
+
+              {/* HOMEPAGE-02: Pick Your Experience Quick Selector */}
+              <div 
+                className="opacity-0 animate-fade-in-up"
+                style={{ animationDelay: "0.55s" }}
+              >
+                <p className="text-sm text-white/50 mb-3 text-center lg:text-left">Pick your experience:</p>
+                <ExperienceQuickSelector />
+              </div>
               
               {/* Section anchor chips */}
               <div 
@@ -198,14 +223,14 @@ export default function Index() {
                 </button>
               </div>
               
-              {/* Single Primary CTA - Enhanced styling */}
+              {/* HOMEPAGE-01: Two CTAs - Primary + Secondary */}
               <div 
-                className="flex justify-center lg:justify-start opacity-0 animate-fade-in-up"
+                className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 opacity-0 animate-fade-in-up"
                 style={{ animationDelay: "0.7s" }}
               >
                 <Button 
                   size="lg" 
-                  className="text-lg px-12 py-8 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group" 
+                  className="text-lg px-10 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group" 
                   asChild
                 >
                   <Link to="/booking">
@@ -215,6 +240,17 @@ export default function Index() {
                     <span className="relative z-10">Book Now</span>
                     <ArrowRight className="h-5 w-5 ml-2 relative z-10" />
                   </Link>
+                </Button>
+                
+                {/* Secondary CTA */}
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="text-lg px-8 py-7 border-white/30 text-white hover:bg-white/10 hover:text-white font-semibold" 
+                  onClick={() => scrollToSection('experiences')}
+                >
+                  <ExternalLink className="h-5 w-5 mr-2" />
+                  Explore All Experiences
                 </Button>
               </div>
 
@@ -263,7 +299,7 @@ export default function Index() {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} />
       </section>
 
-      {/* Next Available Strip - Live Availability */}
+      {/* HOMEPAGE-03: Next Available Strip - With Toggle */}
       <NextAvailableStrip />
 
       {/* Trust Strip - Replaces numeric stats */}
@@ -321,7 +357,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Business Cards - Clickable cards, single section CTA */}
+      {/* HOMEPAGE-04: Business Cards with Fast Facts */}
       <section className="py-12 pb-16 container">
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {businesses.map((business, index) => (
@@ -364,15 +400,18 @@ export default function Index() {
                       {business.description}
                     </p>
 
-                    {/* 3 Bullet Highlights */}
-                    <ul className="space-y-2 mb-4">
-                      {business.bullets.map((bullet, i) => (
-                        <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Check className="h-4 w-4 text-accent shrink-0" />
-                          <span>{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {/* Fast Facts - HOMEPAGE-04 */}
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border/50 mb-4">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Fast Facts</p>
+                      <ul className="space-y-1">
+                        {business.fastFacts.map((fact, i) => (
+                          <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Check className="h-3 w-3 text-accent shrink-0" />
+                            <span>{fact}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
                     {/* Best for line */}
                     <p className="text-xs text-muted-foreground mt-auto">
@@ -397,24 +436,31 @@ export default function Index() {
         </div>
       </section>
 
+      {/* HOMEPAGE-05: What's Included at A-Z Icon Row */}
+      <WhatsIncludedStrip />
+
       {/* Gift Cards Strip */}
       <GiftCardStrip />
 
-      {/* How It Works Section */}
+      {/* HOMEPAGE-08: How It Works Section with Example Modal */}
       <section className="py-28 relative overflow-hidden">
         {/* Diagonal background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/95" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.08)_0%,transparent_70%)]" />
         
         <div className="container relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-20">
+          <div className="text-center max-w-3xl mx-auto mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-semibold text-white mb-6">
               <Zap className="h-4 w-4 text-accent" />
               Simple & Seamless
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
               Book in <span className="text-accent">4 Easy Steps</span>
             </h2>
+            {/* Example Booking Modal Trigger */}
+            <div className="mt-6">
+              <ExampleBookingModal />
+            </div>
           </div>
 
           <div className="grid md:grid-cols-4 gap-8 max-w-5xl mx-auto">
@@ -448,7 +494,7 @@ export default function Index() {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 100%, 0 0)" }} />
       </section>
 
-      {/* FAQ Section */}
+      {/* HOMEPAGE-07: FAQ Section - Enhanced with high-intent questions */}
       <div id="faq" className="scroll-mt-20">
         <FAQSection />
       </div>
@@ -485,6 +531,9 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* HOMEPAGE-10: Pre-Footer CTA Strip */}
+      <PreFooterCTA />
 
       {/* Footer Info - Enhanced contrast and clickable links */}
       <section className="py-20 bg-primary text-primary-foreground">
