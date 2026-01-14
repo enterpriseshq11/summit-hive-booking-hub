@@ -245,8 +245,7 @@ export default function Index() {
                 {/* Secondary CTA */}
                 <Button 
                   size="lg" 
-                  variant="outline"
-                  className="text-lg px-8 py-7 border-white/30 text-white hover:bg-white/10 hover:text-white font-semibold" 
+                  className="text-lg px-8 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-1" 
                   onClick={() => scrollToSection('experiences')}
                 >
                   <ExternalLink className="h-5 w-5 mr-2" />
