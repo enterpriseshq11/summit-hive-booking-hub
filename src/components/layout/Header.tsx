@@ -38,6 +38,14 @@ import azLogoIcon from "@/assets/az-logo-icon.png";
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
   { label: "Summit", href: "/summit", icon: Building2 },
+  { 
+    label: "Spin & Win", 
+    href: "/dopamine-drop", 
+    icon: CircleDot, 
+    highlight: true,
+    pulse: true,
+    tooltip: "Monthly giveaways"
+  },
   { label: "Coworking", href: "/coworking", icon: Building2 },
   { label: "Spa", href: "/spa", icon: Sparkles },
   { label: "Fitness", href: "/fitness", icon: Dumbbell },
@@ -52,14 +60,6 @@ const navItems = [
     tooltip: "Podcast studio booking"
   },
   { label: "Shop", href: "/shop", icon: ShoppingBag },
-  { 
-    label: "Spin & Win", 
-    href: "/dopamine-drop", 
-    icon: CircleDot, 
-    highlight: true,
-    pulse: true,
-    tooltip: "Monthly giveaways"
-  },
   { label: "Promotions", href: "/promotions", icon: Layers },
 ];
 
