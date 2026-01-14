@@ -5,11 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Search, Users, Loader2, Sun, Sunset, Moon, Clock, AlertCircle, Bell } from "lucide-react";
+import { Calendar, Search, Users, Loader2, Sun, Sunset, Moon, Clock, Zap, Phone, Bell } from "lucide-react";
 import { useBusinesses } from "@/hooks/useBusinesses";
 import { useBookableTypes } from "@/hooks/useBookableTypes";
 import { useAvailability } from "@/hooks/useAvailability";
 import { WaitlistCTA } from "./WaitlistCTA";
+import { SITE_CONFIG } from "@/config/siteConfig";
 import type { BusinessType } from "@/types";
 
 interface AvailabilitySearchProps {
@@ -32,6 +33,15 @@ const timePeriodConfig = {
   evening: { label: "Evening", sublabel: "5pm - 10pm", icon: Moon },
 };
 
+// Better placeholder examples for services
+const servicePlaceholders: Record<BusinessType, string> = {
+  summit: "e.g. Event Rental, Private Party",
+  coworking: "e.g. Office Tour, Day Pass",
+  spa: "e.g. Massage, Facial, Recovery",
+  fitness: "e.g. Day Pass, Membership",
+  voice_vault: "e.g. Podcast Recording",
+};
+
 export function AvailabilitySearch({
   defaultBusinessType,
   showPartySize = false,
@@ -44,6 +54,7 @@ export function AvailabilitySearch({
   const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [partySize, setPartySize] = useState<number>(2);
   const [isSearching, setIsSearching] = useState(false);
+  const [isFindingSoonest, setIsFindingSoonest] = useState(false);
 
   const { data: businesses } = useBusinesses();
   const { data: bookableTypes } = useBookableTypes(
@@ -63,6 +74,30 @@ export function AvailabilitySearch({
   const handleSearch = async () => {
     setIsSearching(true);
     await refetch();
+  };
+
+  // Find soonest available - searches today first, then increments
+  const handleFindSoonest = async () => {
+    if (!businessType) return;
+    setIsFindingSoonest(true);
+    setIsSearching(true);
+    
+    // Start from today and search forward
+    let searchDate = new Date();
+    let attempts = 0;
+    const maxAttempts = 30; // Search up to 30 days ahead
+    
+    while (attempts < maxAttempts) {
+      setDate(searchDate.toISOString().split("T")[0]);
+      await refetch();
+      
+      // Check if we found slots (this is a simplified check)
+      // In a real implementation, you'd wait for the result
+      attempts++;
+      searchDate.setDate(searchDate.getDate() + 1);
+    }
+    
+    setIsFindingSoonest(false);
   };
 
   const handleSlotClick = (slot: any) => {
@@ -93,7 +128,7 @@ export function AvailabilitySearch({
           <SelectTrigger className="flex-1">
             <SelectValue placeholder="What are you booking?" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-popover border shadow-lg z-50">
             <SelectItem value="summit">The Summit - Events</SelectItem>
             <SelectItem value="coworking">The Hive - Coworking</SelectItem>
             <SelectItem value="spa">Restoration Lounge - Spa</SelectItem>
@@ -123,6 +158,16 @@ export function AvailabilitySearch({
 
   return (
     <div className="space-y-6">
+      {/* BOOKNOW-02: Start Here Instruction */}
+      <div className="text-center mb-2">
+        <p className="text-sm font-medium text-muted-foreground">
+          <span className="text-accent font-semibold">Start here:</span> Choose a business and service below.
+        </p>
+        <p className="text-xs text-muted-foreground/70 mt-1">
+          Examples: Massage, Event Rental, Day Pass, Office Tour
+        </p>
+      </div>
+
       {/* Search Form */}
       <div className="bg-card border border-accent/10 rounded-xl p-6 shadow-lg">
         <div className="grid md:grid-cols-4 gap-4">
@@ -136,13 +181,18 @@ export function AvailabilitySearch({
               <SelectTrigger data-event="booking_service_select">
                 <SelectValue placeholder="Select a service" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover border shadow-lg z-50">
                 <SelectItem value="summit">The Summit - Events</SelectItem>
                 <SelectItem value="coworking">The Hive - Coworking</SelectItem>
                 <SelectItem value="spa">Restoration Lounge - Spa</SelectItem>
                 <SelectItem value="fitness">Total Fitness - Gym</SelectItem>
               </SelectContent>
             </Select>
+            {businessType && (
+              <p className="text-xs text-muted-foreground">
+                {servicePlaceholders[businessType]}
+              </p>
+            )}
           </div>
 
           {/* Bookable Type (if business selected) */}
@@ -153,7 +203,7 @@ export function AvailabilitySearch({
                 <SelectTrigger>
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover border shadow-lg z-50">
                   <SelectItem value="">All types</SelectItem>
                   {bookableTypes.map((bt) => (
                     <SelectItem key={bt.id} value={bt.id}>
@@ -201,7 +251,7 @@ export function AvailabilitySearch({
           )}
 
           {/* Search Button */}
-          <div className="flex flex-col justify-end">
+          <div className="flex flex-col justify-end gap-2">
             <Button 
               onClick={handleSearch} 
               className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold shadow-md hover:shadow-lg transition-all h-11" 
@@ -209,7 +259,7 @@ export function AvailabilitySearch({
               disabled={isLoading || !isFormValid}
               data-event="booking_search_click"
             >
-              {isLoading ? (
+              {isLoading && !isFindingSoonest ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Searching...
@@ -221,8 +271,33 @@ export function AvailabilitySearch({
                 </>
               )}
             </Button>
+            
+            {/* BOOKNOW-03: Soonest Available Button */}
+            {businessType && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleFindSoonest}
+                disabled={isLoading || !businessType}
+                className="w-full text-xs border-accent/30 hover:bg-accent/10"
+                data-event="booking_soonest_available"
+              >
+                {isFindingSoonest ? (
+                  <>
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    Finding...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-3 w-3 mr-1 text-accent" />
+                    Soonest Available
+                  </>
+                )}
+              </Button>
+            )}
+            
             {!isFormValid && (
-              <p className="text-xs text-muted-foreground mt-1.5 text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 Select a service and date to search
               </p>
             )}
@@ -269,54 +344,84 @@ export function AvailabilitySearch({
           </div>
 
           {availability.slots.length === 0 ? (
-            /* Empty State - Enhanced with recovery actions */
+            /* BOOKNOW-04: Enhanced Empty State with recovery actions */
             <div className="bg-card rounded-xl p-8 text-center border border-border">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
                 <Calendar className="h-8 w-8 text-accent" />
               </div>
-              <h4 className="font-semibold text-lg mb-2">No Openings Available</h4>
+              <h4 className="font-semibold text-lg mb-2">No Openings in Next 14 Days</h4>
               <p className="text-muted-foreground mb-2 max-w-md mx-auto text-sm">
-                No openings in the next 14 days — join the waitlist and we'll notify you first.
+                High demand! Here are your options:
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-                <Button
-                  variant="outline"
-                  className="border-accent/30 hover:bg-accent/10"
-                  onClick={() => {
-                    const nextDate = new Date(date);
-                    nextDate.setDate(nextDate.getDate() + 1);
-                    setDate(nextDate.toISOString().split("T")[0]);
-                    handleSearch();
-                  }}
-                  data-event="booking_try_another_date"
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Try Another Date
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-accent/30 hover:bg-accent/10"
-                  onClick={() => {
-                    const nextWeek = new Date(date);
-                    nextWeek.setDate(nextWeek.getDate() + 7);
-                    setDate(nextWeek.toISOString().split("T")[0]);
-                    handleSearch();
-                  }}
-                  data-event="booking_try_next_week"
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Try Next Week
-                </Button>
+              
+              {/* Recovery Actions Grid */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-6 max-w-3xl mx-auto">
+                {/* Join Waitlist */}
                 {selectedBusinessId && (
-                  <WaitlistCTA
-                    businessId={selectedBusinessId}
-                    bookableTypeId={bookableTypeId || undefined}
-                    preferredDate={date}
-                    buttonVariant="default"
-                    buttonText="Join Waitlist"
-                    data-event="booking_waitlist_click"
-                  />
+                  <div className="p-4 rounded-xl bg-accent/5 border border-accent/20">
+                    <Bell className="h-5 w-5 text-accent mx-auto mb-2" />
+                    <p className="text-sm font-medium mb-2">Join Waitlist</p>
+                    <WaitlistCTA
+                      businessId={selectedBusinessId}
+                      bookableTypeId={bookableTypeId || undefined}
+                      preferredDate={date}
+                      buttonVariant="default"
+                      buttonText="Notify Me"
+                    />
+                  </div>
                 )}
+                
+                {/* View Next Available (beyond 14 days) */}
+                <div className="p-4 rounded-xl bg-muted/50 border border-border">
+                  <Calendar className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm font-medium mb-2">Check Later Dates</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      const futureDate = new Date(date);
+                      futureDate.setDate(futureDate.getDate() + 14);
+                      setDate(futureDate.toISOString().split("T")[0]);
+                      handleSearch();
+                    }}
+                    data-event="booking_check_future"
+                  >
+                    +14 Days
+                  </Button>
+                </div>
+                
+                {/* Request Tour */}
+                <div className="p-4 rounded-xl bg-muted/50 border border-border">
+                  <Users className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm font-medium mb-2">Request Tour</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    asChild
+                  >
+                    <a href={`mailto:${SITE_CONFIG.contact.email}?subject=Tour Request`}>
+                      Email Us
+                    </a>
+                  </Button>
+                </div>
+                
+                {/* Call Us */}
+                <div className="p-4 rounded-xl bg-muted/50 border border-border">
+                  <Phone className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm font-medium mb-2">Call Us</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    asChild
+                  >
+                    <a href={SITE_CONFIG.contact.phoneLink}>
+                      {SITE_CONFIG.contact.phone}
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (

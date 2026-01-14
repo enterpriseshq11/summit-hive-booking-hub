@@ -22,6 +22,9 @@ import {
   SpaWaitlistModal,
   FitnessWaitlistModal,
   SummitWaitlistModal,
+  BookingCategoryPicker,
+  BookingHelpSection,
+  PaymentExampleBlock,
 } from "@/components/booking";
 import { 
   Building2, 
@@ -36,6 +39,8 @@ import {
   Calendar,
   Phone,
   Mail,
+  Bell,
+  Info,
 } from "lucide-react";
 import { FloatingHelpCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
@@ -74,6 +79,15 @@ const businessDescriptions: Record<BusinessType, string> = {
   voice_vault: "Podcast Studio",
 };
 
+// BOOKNOW-06: Best For one-liners
+const businessBestFor: Record<BusinessType, string> = {
+  summit: "Best for: Weddings, corporate events, private celebrations",
+  coworking: "Best for: Remote work, startups, private offices",
+  spa: "Best for: Massage, facials, recovery treatments",
+  fitness: "Best for: Strength training, classes, personal coaching",
+  voice_vault: "Best for: Podcast recording, voiceovers, content creation",
+};
+
 const businessTags: Record<BusinessType, string[]> = {
   summit: ["Weddings", "Corporate", "Celebrations"],
   coworking: ["Focus Work", "Meetings"],
@@ -82,9 +96,19 @@ const businessTags: Record<BusinessType, string[]> = {
   voice_vault: ["Recording", "Podcasts"],
 };
 
+// BOOKNOW-07: Deposit/pricing badges
+const businessBadges: Record<BusinessType, { text: string; type: "deposit" | "info" }> = {
+  summit: { text: "Deposit required", type: "deposit" },
+  coworking: { text: "Day passes available", type: "info" },
+  spa: { text: "Deposit required", type: "deposit" },
+  fitness: { text: "Flexible memberships", type: "info" },
+  voice_vault: { text: "Hourly booking", type: "info" },
+};
+
 export default function BookingHub() {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
+  const businessSectionRef = useRef<HTMLElement>(null);
   const { data: businesses, isLoading } = useBusinesses();
   const [currentStep] = useState(1);
   const [completedSteps] = useState<number[]>([]);
@@ -124,6 +148,21 @@ export default function BookingHub() {
 
   const scrollToHero = useCallback(() => {
     heroRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const scrollToFAQ = useCallback(() => {
+    document.getElementById("booking-faq")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  // Handle category picker selection - scrolls to business section
+  const handleCategorySelect = useCallback((category: BusinessType | "all") => {
+    setBusinessFilter(category);
+    if (category !== "all") {
+      setSelectedBusiness(businessLabels[category]);
+      setTimeout(() => {
+        businessSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
   }, []);
 
   // Waitlist handlers by business type
@@ -177,12 +216,14 @@ export default function BookingHub() {
       <FitnessWaitlistModal open={fitnessWaitlistOpen} onOpenChange={setFitnessWaitlistOpen} />
       <SummitWaitlistModal open={summitWaitlistOpen} onOpenChange={setSummitWaitlistOpen} />
 
-      {/* Sticky Mini Booking Bar */}
+      {/* BOOKNOW-08: Enhanced Sticky Mini Booking Bar */}
       <StickyBookingBar
         selectedBusiness={selectedBusiness}
         selectedDate={selectedDate}
         onSearchClick={scrollToHero}
         heroRef={heroRef}
+        onBusinessChange={(b) => b && setSelectedBusiness(businessLabels[b])}
+        onDateChange={setSelectedDate}
       />
 
       {/* Hero Section - Premium Black & Gold */}
@@ -198,7 +239,7 @@ export default function BookingHub() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,hsl(var(--primary))_100%)]" />
         
         <div className="container relative z-10">
-          <div className="max-w-4xl mx-auto text-center space-y-6 mb-12">
+          <div className="max-w-4xl mx-auto text-center space-y-6 mb-8">
             {/* Live Availability Indicator - Proper States */}
             <LiveAvailabilityIndicator 
               isLoading={isAvailabilityLoading}
@@ -220,9 +261,19 @@ export default function BookingHub() {
             <p className="text-accent font-medium text-sm">
               Review everything before payment — no surprises.
             </p>
+          </div>
 
-            {/* Section Anchor Chips */}
-            <BookingSectionAnchor className="mt-4" />
+          {/* BOOKNOW-01: Quick Booking Category Picker */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <BookingCategoryPicker
+              selectedCategory={businessFilter}
+              onCategoryChange={handleCategorySelect}
+            />
+          </div>
+
+          {/* Section Anchor Chips */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <BookingSectionAnchor />
           </div>
 
           {/* Step Indicator - Enhanced with Accessibility */}
@@ -260,8 +311,8 @@ export default function BookingHub() {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      {/* Business Cards with Next Available */}
-      <section id="businesses" className="py-16 md:py-20 container">
+      {/* BOOKNOW-06: Business Cards with Best For + BOOKNOW-07: Badges */}
+      <section ref={businessSectionRef} id="businesses" className="py-16 md:py-20 container">
         <div className="text-center mb-8">
           {/* Header with branded treatment */}
           <div className="inline-flex items-center gap-2 mb-4">
@@ -312,6 +363,8 @@ export default function BookingHub() {
               const label = businessLabels[business.type];
               const description = businessDescriptions[business.type];
               const tags = businessTags[business.type];
+              const bestFor = businessBestFor[business.type];
+              const badge = businessBadges[business.type];
 
               return (
                 <Card 
@@ -328,13 +381,22 @@ export default function BookingHub() {
                         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-accent/50 rounded-full" />
                       </div>
                       <div className="flex-1">
-                        <CardTitle className="text-xl group-hover:text-accent transition-colors">
-                          {label}
-                        </CardTitle>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <CardTitle className="text-xl group-hover:text-accent transition-colors">
+                            {label}
+                          </CardTitle>
+                          {/* BOOKNOW-07: Badge */}
+                          <Badge 
+                            variant={badge.type === "deposit" ? "destructive" : "secondary"}
+                            className={`text-xs ${badge.type === "deposit" ? "bg-accent/20 text-accent border-accent/30" : ""}`}
+                          >
+                            {badge.text}
+                          </Badge>
+                        </div>
                         <CardDescription className="text-sm mt-1">
                           {description}
                         </CardDescription>
-                        {/* Best for tags */}
+                        {/* Tags */}
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {tags.map((tag) => (
                             <Badge 
@@ -348,6 +410,12 @@ export default function BookingHub() {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* BOOKNOW-06: Best For line */}
+                    <p className="text-xs text-muted-foreground mt-3 italic flex items-center gap-1">
+                      <Info className="h-3 w-3" />
+                      {bestFor}
+                    </p>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Next Available Widget with waitlist/tour recovery actions */}
@@ -381,7 +449,7 @@ export default function BookingHub() {
         </div>
       </section>
 
-      {/* Pricing & Process Clarity Section */}
+      {/* BOOKNOW-05 & BOOKNOW-09: Pricing & Process Clarity Section with Payment Example */}
       <section id="trust" className="py-12 md:py-16 bg-primary">
         <div className="container">
           <div className="max-w-4xl mx-auto">
@@ -438,6 +506,22 @@ export default function BookingHub() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* BOOKNOW-09: Payment Example Block */}
+            <PaymentExampleBlock />
+
+            {/* BOOKNOW-05: Waitlist Microcopy */}
+            <div className="mt-6 p-4 rounded-xl bg-primary-foreground/5 border border-primary-foreground/10 flex items-start gap-3">
+              <div className="h-8 w-8 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
+                <Bell className="h-4 w-4 text-accent" />
+              </div>
+              <div>
+                <p className="font-medium text-primary-foreground text-sm">Can't find an opening?</p>
+                <p className="text-xs text-primary-foreground/60 mt-1">
+                  Join the waitlist and get notified if something opens sooner. We'll reach out within 24 hours if a spot becomes available.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -479,33 +563,10 @@ export default function BookingHub() {
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section className="py-16 md:py-20 bg-muted/30">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              Need Help Finding the Right Option?
-            </h2>
-            <p className="text-muted-foreground mb-8 text-lg">
-              Our team is available {SITE_CONFIG.hours.range}. Call or email and we'll guide you to the right choice.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-primary font-semibold">
-                <a href={SITE_CONFIG.contact.phoneLink} className="flex items-center gap-2">
-                  <Phone className="h-5 w-5" />
-                  {SITE_CONFIG.contact.phone}
-                </a>
-              </Button>
-              <Button size="lg" variant="outline" asChild className="border-accent/30 hover:border-accent hover:bg-accent/10 font-semibold">
-                <a href={`mailto:${SITE_CONFIG.contact.email}`} className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
-                  Email Us
-                </a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* BOOKNOW-10: Enhanced Help/Support Section */}
+      <div id="booking-faq">
+        <BookingHelpSection onScrollToFAQ={scrollToFAQ} />
+      </div>
 
       {/* Floating Help CTA */}
       <FloatingHelpCTA />

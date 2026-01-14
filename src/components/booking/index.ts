@@ -44,3 +44,6 @@ export { default as LeaseSignupForm } from "./LeaseSignupForm";
 export { default as SpaBookingForm } from "./SpaBookingForm";
 export { default as MembershipSignupForm } from "./MembershipSignupForm";
 export { VoiceVaultBookingModal } from "./VoiceVaultBookingModal";
+export { BookingCategoryPicker } from "./BookingCategoryPicker";
+export { BookingHelpSection } from "./BookingHelpSection";
+export { PaymentExampleBlock } from "./PaymentExampleBlock";
