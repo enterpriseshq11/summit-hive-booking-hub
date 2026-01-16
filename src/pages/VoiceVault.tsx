@@ -56,7 +56,6 @@ import { toast } from "sonner";
 import voiceVaultLogo from "@/assets/voice-vault-logo.png";
 import { VoiceVaultBookingModal } from "@/components/booking/VoiceVaultBookingModal";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
-import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 
 // Gallery is currently in "Coming Soon" state - real images to be added
@@ -296,7 +295,7 @@ export default function VoiceVault() {
               ))}
             </div>
 
-            <p className="text-sm text-primary-foreground/60 mb-4">
+            <p className="text-sm text-primary-foreground/60">
               By booking, you agree to the{" "}
               <button
                 onClick={() => setTermsOpen(true)}
@@ -306,9 +305,6 @@ export default function VoiceVault() {
               </button>
               .
             </p>
-            
-            {/* Micro-Trust Row */}
-            <MicroTrustRow />
           </div>
         </div>
 

@@ -10,7 +10,6 @@ import {
   Star,
   ArrowRight
 } from "lucide-react";
-import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 
 // Product images - real BEEAM light installations
 import beeamLight1 from "@/assets/beeam-light-1.png";
@@ -89,9 +88,6 @@ export default function BeamLights() {
               <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </a>
           </Button>
-          
-          {/* Micro-Trust Row */}
-          <MicroTrustRow className="mt-8" />
         </div>
       </section>
 

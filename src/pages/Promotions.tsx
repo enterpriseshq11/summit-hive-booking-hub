@@ -18,7 +18,6 @@ import type { PromotionCategoryTab } from "@/components/promotions/PromotionCate
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
-import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 
 const TRUST_CHIPS = [
   { icon: BadgeCheck, label: "No coupons required" },
@@ -193,12 +192,9 @@ export default function Promotions() {
             </Button>
           </div>
 
-          <p className="text-sm text-primary-foreground/60 mb-4">
+          <p className="text-sm text-primary-foreground/60">
             No surprise fees. Clear eligibility. Benefits apply instantly when qualified.
           </p>
-          
-          {/* Micro-Trust Row */}
-          <MicroTrustRow />
         </div>
       </section>
 

@@ -44,7 +44,6 @@ import {
 } from "lucide-react";
 import { FloatingHelpCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
-import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import type { BusinessType } from "@/types";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
@@ -257,9 +256,6 @@ export default function BookingHub() {
             <p className="text-accent font-medium text-sm">
               Review everything before payment — no surprises.
             </p>
-            
-            {/* Micro-Trust Row */}
-            <MicroTrustRow />
           </div>
 
           {/* BOOKNOW-01: Quick Booking Category Picker */}

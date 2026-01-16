@@ -21,7 +21,6 @@ import {
   Award, ShieldCheck, Flame, User, Waves, Coffee
 } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
-import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
@@ -147,11 +146,8 @@ export default function Fitness() {
                 See Memberships <ChevronRight className="h-3 w-3" />
               </a>
               
-              {/* Micro-Trust Row */}
-              <MicroTrustRow className="mt-4 justify-start animate-fade-in" />
-              
               {/* Trust Chips - 3 quick badges */}
-              <div className="flex flex-wrap gap-3 mt-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+              <div className="flex flex-wrap gap-3 mt-8 animate-fade-in" style={{ animationDelay: '0.5s' }}>
                 {[
                   { icon: Clock, label: "24/7 Access" },
                   { icon: Users, label: "Coach Support" },
