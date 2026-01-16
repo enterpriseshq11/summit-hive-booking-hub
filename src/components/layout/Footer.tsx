@@ -30,7 +30,7 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
               <img
                 src={azLogoFull}
                 alt="A-Z Enterprises - One Call, We Handle It All"
-                className="h-20 w-auto object-contain"
+                className="h-16 w-auto object-contain"
               />
             </Link>
             <p className="text-sm text-primary-foreground/60">
