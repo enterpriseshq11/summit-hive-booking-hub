@@ -2,6 +2,40 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Helper to send email notifications
+async function sendInquiryNotification(
+  type: 'user_confirmation' | 'staff_notification',
+  inquiry: {
+    first_name: string;
+    last_name?: string | null;
+    email: string;
+    phone?: string | null;
+    company_name?: string | null;
+    workspace_type?: string | null;
+    move_in_timeframe?: string | null;
+    seats_needed?: number | null;
+    message?: string | null;
+    inquiry_type: string;
+    needs_meeting_rooms?: boolean;
+    needs_business_address?: boolean;
+  }
+) {
+  try {
+    const { data, error } = await supabase.functions.invoke('send-inquiry-notification', {
+      body: { type, inquiry }
+    });
+    if (error) {
+      console.error(`Failed to send ${type} email:`, error);
+    } else {
+      console.log(`${type} email sent successfully:`, data);
+    }
+    return { data, error };
+  } catch (err) {
+    console.error(`Error invoking send-inquiry-notification for ${type}:`, err);
+    return { data: null, error: err };
+  }
+}
+
 export type InquiryType = 'request' | 'tour' | 'waitlist' | 'question';
 export type InquiryStatus = 'new' | 'contacted' | 'scheduled' | 'completed' | 'closed';
 
@@ -124,9 +158,31 @@ export function useCreateOfficeInquiry() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["office-inquiries"] });
       toast.success("Your request has been submitted! We'll be in touch within 24 hours.");
+      
+      // Send email notifications (fire-and-forget, don't block UI)
+      const inquiryPayload = {
+        first_name: variables.first_name,
+        last_name: variables.last_name,
+        email: variables.email,
+        phone: variables.phone,
+        company_name: variables.company_name,
+        workspace_type: variables.workspace_type,
+        move_in_timeframe: variables.move_in_timeframe,
+        seats_needed: variables.seats_needed,
+        message: variables.message,
+        inquiry_type: variables.inquiry_type || 'request',
+        needs_meeting_rooms: variables.needs_meeting_rooms,
+        needs_business_address: variables.needs_business_address,
+      };
+      
+      // Send both emails in parallel
+      Promise.all([
+        sendInquiryNotification('user_confirmation', inquiryPayload),
+        sendInquiryNotification('staff_notification', inquiryPayload),
+      ]).catch(err => console.error('Email notification error:', err));
     },
     onError: (error) => {
       toast.error("Failed to submit request: " + error.message);
