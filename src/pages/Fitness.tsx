@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -114,22 +114,26 @@ export default function Fitness() {
               
               {/* Hero CTAs - Primary (Dominant) + Secondary */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                <ButtonPrimary 
+                <Button 
                   size="lg" 
                   onClick={() => openJoinModal()}
-                  icon={<Dumbbell className="h-5 w-5" />}
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all text-lg px-10 py-7"
                   data-event="fitness_hero_cta_click"
                 >
+                  <Dumbbell className="h-5 w-5 mr-2" />
                   Join Now
-                </ButtonPrimary>
-                <ButtonSecondary 
-                  size="lg"
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
                   onClick={() => setShowOrientationModal(true)}
-                  icon={<Calendar className="h-5 w-5" />}
+                  className="border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 hover:border-primary-foreground/50 font-medium"
                   data-event="fitness_hero_orientation_click"
                 >
+                  <Calendar className="h-5 w-5 mr-2" />
                   Schedule Orientation
-                </ButtonSecondary>
+                </Button>
               </div>
               
               {/* Microcopy under primary CTA */}

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Calendar, Gift, ShoppingBag, Sparkles } from "lucide-react";
-import { ButtonPrimary } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export function CrossSellStrip() {
   const actions = [
@@ -18,17 +18,16 @@ export function CrossSellStrip() {
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           {actions.map((action) => (
-            <ButtonPrimary
+            <Button
               key={action.label}
               asChild
-              size="sm"
-              showArrow={false}
+              className="bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black font-semibold shadow-md"
             >
               <Link to={action.href}>
                 <action.icon className="w-4 h-4 mr-2" />
                 {action.label}
               </Link>
-            </ButtonPrimary>
+            </Button>
           ))}
         </div>
       </div>

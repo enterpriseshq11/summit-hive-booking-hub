@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -183,22 +183,24 @@ export default function GiftCards() {
 
           {/* Hero CTA Row */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <ButtonPrimary 
-              size="lg"
+            <Button 
+              size="lg" 
+              className="bg-accent hover:bg-accent/90 text-primary font-semibold px-8 h-12 text-base"
               onClick={() => document.getElementById('amounts')?.scrollIntoView({ behavior: 'smooth' })}
-              showArrow={false}
               data-event="giftcard_hero_select_amount"
             >
               Select Amount
-            </ButtonPrimary>
-            <ButtonSecondary 
-              size="lg"
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold px-8 h-12 text-base"
               onClick={handleBuyAsGift}
-              showArrow={true}
               data-event="giftcard_hero_buy_as_gift"
             >
               Buy as a Gift
-            </ButtonSecondary>
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
           </div>
 
           {/* Trust chips */}

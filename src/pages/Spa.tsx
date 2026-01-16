@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -100,12 +100,15 @@ export default function Spa() {
               
               {/* Hero CTAs */}
               <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-6">
-                <ButtonPrimary size="lg" onClick={() => openRequestModal()} icon={<Sparkles className="h-5 w-5" />} data-event="spa_hero_cta_click">
+                <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_hero_cta_click">
+                  <Sparkles className="h-5 w-5 mr-2" />
                   Book With Lindsey
-                </ButtonPrimary>
-                <ButtonSecondary size="lg" onClick={() => setShowWaitlistModal(true)} icon={<Clock className="h-5 w-5" />} data-event="spa_hero_secondary_cta_click">
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => setShowWaitlistModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold" data-event="spa_hero_secondary_cta_click">
+                  <Clock className="h-5 w-5 mr-2" />
                   Join Waitlist
-                </ButtonSecondary>
+                </Button>
               </div>
               
               {/* Booking Request Field */}

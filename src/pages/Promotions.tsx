@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Gift, Sparkles, Check, ArrowRight, Clock, Shield, BadgeCheck, Layers, Star, Building2, Dumbbell, Mail } from "lucide-react";
-import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {

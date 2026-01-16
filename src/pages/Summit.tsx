@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -171,9 +171,11 @@ export default function Summit() {
               {/* Hero CTA Row */}
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4">
-                  <ButtonPrimary size="lg" onClick={() => setShowRequestModal(true)} icon={<CalendarDays className="h-5 w-5" />} data-event="summit_request_open">
+                  <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary" data-event="summit_request_open">
+                    <CalendarDays className="h-5 w-5 mr-2" />
                     Book with Victoria
-                  </ButtonPrimary>
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </Button>
 
                   {/* Trust Chip */}
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/5 border border-primary-foreground/20 rounded-full text-sm font-medium text-primary-foreground/70" aria-label="Response within 24 hours">
