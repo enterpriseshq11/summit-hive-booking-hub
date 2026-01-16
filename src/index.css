@@ -197,6 +197,31 @@
     text-wrap: balance;
   }
 
+  /* Premium body copy: constrained width + increased line height for readability */
+  .body-copy {
+    @apply max-w-prose leading-relaxed;
+  }
+
+  /* Centered body copy variant */
+  .body-copy-center {
+    @apply max-w-prose leading-relaxed mx-auto text-center;
+  }
+
+  /* Hero/section description copy */
+  .section-copy {
+    @apply max-w-2xl leading-relaxed text-muted-foreground;
+  }
+
+  /* Centered section copy */
+  .section-copy-center {
+    @apply max-w-2xl leading-relaxed text-muted-foreground mx-auto text-center;
+  }
+
+  /* Value phrase emphasis - use sparingly */
+  .value-phrase {
+    @apply font-semibold text-foreground;
+  }
+
   /* Gold gradient text */
   .text-gold-gradient {
     background: linear-gradient(135deg, hsl(43 74% 49%), hsl(45 80% 62%), hsl(40 70% 38%));
