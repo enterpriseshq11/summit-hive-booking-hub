@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Gift, Sparkles, ChevronRight, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,22 +137,22 @@ export default function DopamineDrop() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
+            <ButtonPrimary 
               size="lg" 
               onClick={handleSpinClick} 
-              disabled={isSpinning} 
-              className="bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black font-bold text-lg px-8 shadow-lg"
+              disabled={isSpinning}
+              showArrow={false}
             >
               {isSpinning ? <Sparkles className="w-5 h-5 mr-2 animate-spin" /> : authUser ? <Gift className="w-5 h-5 mr-2" /> : <User className="w-5 h-5 mr-2" />}
               {authUser ? `Spin Now (${status.spinsRemaining} left)` : "Log in to Spin"}
-            </Button>
-            <Button 
-              size="lg" 
-              className="border border-primary/50 bg-transparent text-primary hover:bg-primary/20 hover:border-primary" 
+            </ButtonPrimary>
+            <ButtonSecondary 
+              size="lg"
               onClick={() => document.getElementById("prizes")?.scrollIntoView({ behavior: "smooth" })}
+              showArrow={true}
             >
-              View Prizes + Rules<ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
+              View Prizes + Rules
+            </ButtonSecondary>
           </div>
           {!authUser && <p className="text-sm text-zinc-400 mt-3">Free to play. Login required. Winners drawn monthly.</p>}
         </div>
@@ -173,11 +173,12 @@ export default function DopamineDrop() {
             
             {/* Dedicated SPIN button below wheel - Yellow primary styling */}
             <div className="flex flex-col items-center gap-2">
-              <Button
+              <ButtonPrimary
                 size="lg"
                 onClick={handleSpinClick}
                 disabled={isSpinning || (authUser && status.spinsRemaining <= 0)}
-                className="px-12 py-6 text-xl font-black tracking-wide shadow-lg bg-[hsl(45,70%,50%)] hover:bg-[hsl(45,70%,45%)] text-black disabled:bg-[hsl(45,70%,50%)]/50 disabled:text-black/50"
+                showArrow={false}
+                className="px-12 py-6 text-xl font-black tracking-wide"
               >
                 {isSpinning
                   ? "Spinning..."
@@ -186,7 +187,7 @@ export default function DopamineDrop() {
                     : status.spinsRemaining <= 0
                       ? "No spins remaining"
                       : `Spin (${status.spinsRemaining} left)`}
-              </Button>
+              </ButtonPrimary>
               {!authUser && (
                 <p className="text-sm text-zinc-400">Create a free account to spin daily</p>
               )}

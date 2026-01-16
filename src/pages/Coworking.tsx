@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Accordion,
@@ -134,25 +134,21 @@ export default function Coworking() {
               
               {/* CTA Row with Secondary */}
               <div className="flex flex-col sm:flex-row gap-3 items-start">
-                <Button 
+                <ButtonPrimary 
                   size="lg" 
                   onClick={() => openRequestModal()}
-                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
                   data-event="hive_request_workspace_click"
                 >
                   Request Workspace
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
+                </ButtonPrimary>
+                <ButtonSecondary 
+                  size="lg"
                   onClick={() => setShowTourModal(true)}
-                  className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold"
+                  icon={<Calendar className="h-5 w-5" />}
                   data-event="hive_schedule_tour_click"
                 >
-                  <Calendar className="h-5 w-5 mr-2" />
                   Schedule a Tour
-                </Button>
+                </ButtonSecondary>
               </div>
 
               {/* Trust Chip */}

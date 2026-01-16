@@ -1,5 +1,5 @@
 import { Check, Crown, Gift, Sparkles, Trophy, Zap, Calendar, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MainLayout } from "@/components/layout";
@@ -94,15 +94,14 @@ export default function Vip() {
             </p>
 
             <div className="flex flex-col items-center gap-4">
-              <Button 
-                size="lg" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-10 py-6"
+              <ButtonPrimary 
+                size="lg"
                 onClick={handleSubscribe}
+                icon={<Crown className="w-5 h-5" />}
                 data-event="vip_checkout_started"
               >
-                <Crown className="w-5 h-5 mr-2" />
                 Join VIP — $2.99/month
-              </Button>
+              </ButtonPrimary>
               <p className="text-sm text-zinc-400">Cancel anytime. No long-term commitment.</p>
             </div>
           </div>
