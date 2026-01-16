@@ -922,6 +922,30 @@ export type Database = {
           },
         ]
       }
+      coworking_content: {
+        Row: {
+          content: Json
+          id: string
+          section_key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: Json
+          id?: string
+          section_key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: Json
+          id?: string
+          section_key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       crm_activity_events: {
         Row: {
           actor_id: string | null
@@ -2025,6 +2049,273 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      office_inquiries: {
+        Row: {
+          assigned_to: string | null
+          company_name: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          inquiry_type: string
+          internal_notes: string | null
+          last_name: string | null
+          message: string | null
+          move_in_timeframe: string | null
+          needs_business_address: boolean | null
+          needs_meeting_rooms: boolean | null
+          office_id: string | null
+          phone: string | null
+          preferred_tour_dates: Json | null
+          seats_needed: number | null
+          source: string | null
+          status: string | null
+          tour_type: string | null
+          updated_at: string
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          workspace_type: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          company_name?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          inquiry_type?: string
+          internal_notes?: string | null
+          last_name?: string | null
+          message?: string | null
+          move_in_timeframe?: string | null
+          needs_business_address?: boolean | null
+          needs_meeting_rooms?: boolean | null
+          office_id?: string | null
+          phone?: string | null
+          preferred_tour_dates?: Json | null
+          seats_needed?: number | null
+          source?: string | null
+          status?: string | null
+          tour_type?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          workspace_type?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          inquiry_type?: string
+          internal_notes?: string | null
+          last_name?: string | null
+          message?: string | null
+          move_in_timeframe?: string | null
+          needs_business_address?: boolean | null
+          needs_meeting_rooms?: boolean | null
+          office_id?: string | null
+          phone?: string | null
+          preferred_tour_dates?: Json | null
+          seats_needed?: number | null
+          source?: string | null
+          status?: string | null
+          tour_type?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          workspace_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "office_inquiries_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "office_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      office_listings: {
+        Row: {
+          amenities: Json | null
+          capacity: number | null
+          created_at: string
+          deposit_amount: number | null
+          description: string | null
+          floor: number
+          floor_label: string | null
+          id: string
+          ideal_use: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          monthly_rate: number | null
+          name: string
+          office_type: Database["public"]["Enums"]["office_type"]
+          price_range_text: string | null
+          pricing_visibility: Database["public"]["Enums"]["pricing_visibility"]
+          slug: string
+          sort_order: number | null
+          square_footage: number | null
+          status: Database["public"]["Enums"]["office_status"]
+          status_note: string | null
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          amenities?: Json | null
+          capacity?: number | null
+          created_at?: string
+          deposit_amount?: number | null
+          description?: string | null
+          floor?: number
+          floor_label?: string | null
+          id?: string
+          ideal_use?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          monthly_rate?: number | null
+          name: string
+          office_type?: Database["public"]["Enums"]["office_type"]
+          price_range_text?: string | null
+          pricing_visibility?: Database["public"]["Enums"]["pricing_visibility"]
+          slug: string
+          sort_order?: number | null
+          square_footage?: number | null
+          status?: Database["public"]["Enums"]["office_status"]
+          status_note?: string | null
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amenities?: Json | null
+          capacity?: number | null
+          created_at?: string
+          deposit_amount?: number | null
+          description?: string | null
+          floor?: number
+          floor_label?: string | null
+          id?: string
+          ideal_use?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          monthly_rate?: number | null
+          name?: string
+          office_type?: Database["public"]["Enums"]["office_type"]
+          price_range_text?: string | null
+          pricing_visibility?: Database["public"]["Enums"]["pricing_visibility"]
+          slug?: string
+          sort_order?: number | null
+          square_footage?: number | null
+          status?: Database["public"]["Enums"]["office_status"]
+          status_note?: string | null
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      office_photos: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          office_id: string
+          sort_order: number | null
+          url: string
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          office_id: string
+          sort_order?: number | null
+          url: string
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          office_id?: string
+          sort_order?: number | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "office_photos_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "office_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      office_promotions: {
+        Row: {
+          badge_text: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          headline: string
+          id: string
+          is_active: boolean | null
+          is_global: boolean | null
+          office_id: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          badge_text?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          headline: string
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          office_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          badge_text?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          headline?: string
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          office_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "office_promotions_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "office_listings"
             referencedColumns: ["id"]
           },
         ]
@@ -3855,6 +4146,17 @@ export type Database = {
         | "expired"
         | "pending"
       notification_channel: "email" | "sms" | "push"
+      office_status:
+        | "available"
+        | "renovating"
+        | "waitlist"
+        | "reserved"
+        | "leased"
+      office_type:
+        | "private_office"
+        | "dedicated_desk"
+        | "day_pass"
+        | "executive_suite"
       payment_status:
         | "pending"
         | "processing"
@@ -3863,6 +4165,7 @@ export type Database = {
         | "refunded"
         | "partial_refund"
       pricing_modifier_type: "percentage" | "fixed_amount"
+      pricing_visibility: "hidden" | "qualitative" | "exact"
       prize_access_level: "public" | "vip"
       promotion_category: "signature" | "monthly" | "vault"
       promotion_cta_action: "open_modal" | "scroll_to_form" | "route_to_page"
@@ -4115,6 +4418,19 @@ export const Constants = {
         "pending",
       ],
       notification_channel: ["email", "sms", "push"],
+      office_status: [
+        "available",
+        "renovating",
+        "waitlist",
+        "reserved",
+        "leased",
+      ],
+      office_type: [
+        "private_office",
+        "dedicated_desk",
+        "day_pass",
+        "executive_suite",
+      ],
       payment_status: [
         "pending",
         "processing",
@@ -4124,6 +4440,7 @@ export const Constants = {
         "partial_refund",
       ],
       pricing_modifier_type: ["percentage", "fixed_amount"],
+      pricing_visibility: ["hidden", "qualitative", "exact"],
       prize_access_level: ["public", "vip"],
       promotion_category: ["signature", "monthly", "vault"],
       promotion_cta_action: ["open_modal", "scroll_to_form", "route_to_page"],
