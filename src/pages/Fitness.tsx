@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
+import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
 export default function Fitness() {
   const { data: business } = useBusinessByType("fitness");
@@ -91,10 +92,8 @@ export default function Fitness() {
     <div className="min-h-screen">
       {/* Hero Section - 2-Column Layout with Animation */}
       <section className="relative py-20 md:py-28 overflow-hidden bg-primary">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px] opacity-30" />
+        {/* Cinematic Hero Background */}
+        <CinematicHeroBackground />
         
         <div className="container relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
