@@ -31,6 +31,7 @@ import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
+import { SectionDividerCurve, GoldDividerLine } from "@/components/ui/SectionDivider";
 
 export default function Coworking() {
   const navigate = useNavigate();
@@ -242,8 +243,8 @@ export default function Coworking() {
           </div>
         </div>
         
-        {/* Section Transition */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
+        {/* Premium curved divider with gold edge */}
+        <SectionDividerCurve fillClass="fill-background" className="absolute bottom-0 left-0 right-0" />
       </section>
 
       {/* Workspace Options Section */}
@@ -306,8 +307,8 @@ export default function Coworking() {
         </div>
       </section>
 
-      {/* Section Transition */}
-      <div className="h-16 bg-gradient-to-b from-background to-muted/30" />
+      {/* Section Transition with gold line */}
+      <GoldDividerLine className="my-4" />
 
       {/* Why The Hive Section */}
       <section className="py-20 bg-muted/30" id="why-hive">
@@ -352,8 +353,8 @@ export default function Coworking() {
         </div>
       </section>
 
-      {/* Section Transition */}
-      <div className="h-16 bg-gradient-to-b from-background to-background" />
+      {/* Section Transition with gold line */}
+      <GoldDividerLine className="my-4" />
 
       {/* Process Timeline Section */}
       <section className="py-20 container" id="how-it-works">

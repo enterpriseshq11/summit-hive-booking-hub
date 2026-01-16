@@ -24,6 +24,7 @@ import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
+import { SectionDividerCurve, GoldDividerLine } from "@/components/ui/SectionDivider";
 
 export default function Fitness() {
   const { data: business } = useBusinessByType("fitness");
@@ -215,8 +216,8 @@ export default function Fitness() {
           </div>
         </div>
         
-        {/* Angled divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} aria-hidden="true" />
+        {/* Premium curved divider with gold edge */}
+        <SectionDividerCurve fillClass="fill-background" className="absolute bottom-0 left-0 right-0" />
       </section>
 
       {/* Anchor Chips */}
@@ -284,8 +285,8 @@ export default function Fitness() {
         </Card>
       </section>
 
-      {/* Gradient Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
+      {/* Gold Divider Line */}
+      <GoldDividerLine />
 
       {/* Membership Tiers Section */}
       <section id="fitness-memberships" className="py-14 container">
@@ -367,8 +368,8 @@ export default function Fitness() {
         </div>
       </section>
 
-      {/* Gradient Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
+      {/* Gold Divider Line */}
+      <GoldDividerLine />
 
       {/* What's Included Amenities Accordion */}
       <section className="py-14 container">
