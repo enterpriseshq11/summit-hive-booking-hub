@@ -162,6 +162,23 @@ export function useCreateOfficeInquiry() {
       queryClient.invalidateQueries({ queryKey: ["office-inquiries"] });
       toast.success("Your request has been submitted! We'll be in touch within 24 hours.");
       
+      // Track analytics event for inquiry submission
+      if (typeof window !== 'undefined') {
+        const analyticsEvent = new CustomEvent('analytics:track', {
+          detail: {
+            event: 'coworking_inquiry_submitted',
+            properties: {
+              inquiry_type: variables.inquiry_type || 'request',
+              workspace_type: variables.workspace_type,
+              has_company: !!variables.company_name,
+              seats_needed: variables.seats_needed,
+              source: variables.source || 'website',
+            }
+          }
+        });
+        window.dispatchEvent(analyticsEvent);
+      }
+      
       // Send email notifications (fire-and-forget, don't block UI)
       const inquiryPayload = {
         first_name: variables.first_name,
@@ -178,11 +195,26 @@ export function useCreateOfficeInquiry() {
         needs_business_address: variables.needs_business_address,
       };
       
-      // Send both emails in parallel
+      // Send both emails in parallel and track email trigger events
       Promise.all([
         sendInquiryNotification('user_confirmation', inquiryPayload),
         sendInquiryNotification('staff_notification', inquiryPayload),
-      ]).catch(err => console.error('Email notification error:', err));
+      ]).then(() => {
+        // Track successful email dispatch
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('analytics:track', {
+            detail: { event: 'coworking_inquiry_emails_sent', properties: { inquiry_type: variables.inquiry_type || 'request' } }
+          }));
+        }
+      }).catch(err => {
+        console.error('Email notification error:', err);
+        // Track email failure for monitoring
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('analytics:track', {
+            detail: { event: 'coworking_inquiry_email_failed', properties: { error: String(err) } }
+          }));
+        }
+      });
     },
     onError: (error) => {
       toast.error("Failed to submit request: " + error.message);
