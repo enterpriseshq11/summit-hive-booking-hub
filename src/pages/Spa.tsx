@@ -130,11 +130,17 @@ export default function Spa() {
               </div>
             </div>
             
-            {/* Logo - Right Side */}
+            {/* Logo - Right Side (reduced size, backdrop blur) */}
             <div className="flex-shrink-0 w-full lg:w-1/2 flex justify-center lg:justify-end">
-              <img alt="The Hive Restoration Lounge Logo" className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl" style={{
-              maxHeight: "clamp(280px, 40vw, 420px)"
-            }} src="/lovable-uploads/5509800c-167c-43ec-a79a-bef75a2b447b.png" />
+              <div className="relative inline-flex items-center justify-center" style={{ transform: "scale(0.85)" }}>
+                <div className="absolute inset-0 -m-4 rounded-2xl backdrop-blur-sm bg-background/5 pointer-events-none" aria-hidden="true" />
+                <img 
+                  alt="The Hive Restoration Lounge Logo" 
+                  className="relative z-10 w-full max-w-sm lg:max-w-md object-contain drop-shadow-2xl" 
+                  style={{ maxHeight: "clamp(240px, 35vw, 360px)" }} 
+                  src="/lovable-uploads/5509800c-167c-43ec-a79a-bef75a2b447b.png" 
+                />
+              </div>
             </div>
           </div>
         </div>
