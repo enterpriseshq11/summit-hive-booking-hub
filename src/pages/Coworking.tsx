@@ -29,6 +29,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
+import { SEOHead, jsonLdSchemas } from "@/components/seo";
 
 export default function Coworking() {
   const navigate = useNavigate();
@@ -107,7 +108,14 @@ export default function Coworking() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <>
+      <SEOHead
+        title="Private Offices & Coworking in Wapakoneta"
+        description="The Hive by A-Z offers private offices, dedicated desks, and flexible day passes in Wapakoneta, Ohio. High-speed internet, coffee bar, and professional environment. Request workspace access today."
+        canonicalPath="/coworking"
+        jsonLd={jsonLdSchemas.coworkingSpace()}
+      />
+      <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20 md:py-28 overflow-hidden bg-primary">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
@@ -502,5 +510,6 @@ export default function Coworking() {
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
     </div>
+    </>
   );
 }
