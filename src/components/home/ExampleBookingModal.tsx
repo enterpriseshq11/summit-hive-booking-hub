@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
 import { Star, CalendarDays, Zap, Heart, Check, ArrowRight, ArrowLeft, Eye } from "lucide-react";
 
 const steps = [
@@ -63,10 +63,9 @@ export function ExampleBookingModal() {
       if (!open) setCurrentStep(0);
     }}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:text-white">
-          <Eye className="h-4 w-4 mr-2" />
+        <ButtonSecondary icon={<Eye className="h-4 w-4" />}>
           See an Example Booking
-        </Button>
+        </ButtonSecondary>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
@@ -120,15 +119,13 @@ export function ExampleBookingModal() {
           </Button>
           
           {currentStep < steps.length - 1 ? (
-            <Button onClick={handleNext} className="bg-accent hover:bg-accent/90 text-primary gap-2">
+            <ButtonPrimary onClick={handleNext} showArrow={true}>
               Next Step
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+            </ButtonPrimary>
           ) : (
-            <Button onClick={handleClose} className="bg-accent hover:bg-accent/90 text-primary gap-2">
-              <Check className="h-4 w-4" />
+            <ButtonPrimary onClick={handleClose} icon={<Check className="h-4 w-4" />} showArrow={false}>
               Got It!
-            </Button>
+            </ButtonPrimary>
           )}
         </div>
       </DialogContent>

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   ArrowRight, 
@@ -213,29 +213,22 @@ export default function Index() {
                 className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 opacity-0 animate-fade-in-up"
                 style={{ animationDelay: "0.7s" }}
               >
-                <Button 
-                  size="lg" 
-                  className="text-lg px-10 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group" 
-                  asChild
-                >
+                <ButtonPrimary size="lg" asChild>
                   <Link to="/booking">
-                    {/* Inner highlight */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <CalendarDays className="h-5 w-5 mr-2 relative z-10" />
-                    <span className="relative z-10">Book Now</span>
-                    <ArrowRight className="h-5 w-5 ml-2 relative z-10" />
+                    <CalendarDays className="h-5 w-5 mr-2" />
+                    Book Now
+                    <ArrowRight className="h-5 w-5 ml-2" />
                   </Link>
-                </Button>
+                </ButtonPrimary>
                 
                 {/* Secondary CTA */}
-                <Button 
+                <ButtonSecondary 
                   size="lg" 
-                  className="text-lg px-8 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-1" 
                   onClick={() => scrollToSection('experiences')}
+                  icon={<ExternalLink className="h-5 w-5" />}
                 >
-                  <ExternalLink className="h-5 w-5 mr-2" />
                   Explore All Experiences
-                </Button>
+                </ButtonSecondary>
               </div>
 
               {/* Proof Chips - Subtle */}
@@ -411,13 +404,13 @@ export default function Index() {
 
         {/* Single section CTA */}
         <div className="text-center mt-12">
-          <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-primary font-semibold">
-            <Link to="/booking" className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5" />
+          <ButtonPrimary size="lg" asChild>
+            <Link to="/booking">
+              <CalendarDays className="h-5 w-5 mr-2" />
               Book Now
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
-          </Button>
+          </ButtonPrimary>
         </div>
       </section>
 
@@ -502,17 +495,13 @@ export default function Index() {
               Your event, workspace, treatment, or workout is a few clicks away.
             </p>
 
-            <Button 
-              size="lg" 
-              className="text-lg px-14 py-7 bg-primary text-primary-foreground font-bold shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300"
-              asChild
-            >
+            <ButtonSecondary size="lg" asChild>
               <Link to="/booking">
                 <CalendarDays className="h-5 w-5 mr-2" />
                 Book Now
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Link>
-            </Button>
+            </ButtonSecondary>
           </div>
         </div>
       </section>
