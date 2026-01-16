@@ -148,17 +148,14 @@ export default function Index() {
                 {SITE_CONFIG.location.full} • Local team • Premium experiences
               </div>
               
-              {/* Main Headline - Updated copy with tighter line-height */}
+              {/* Main Headline - White/Gold split */}
               <div className="space-y-6">
                 <h1 
-                  className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]"
+                  className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight opacity-0 animate-fade-in-up leading-[1.1]"
                   style={{ animationDelay: "0.2s" }}
                 >
-                  <span className="block">Wapakoneta's Premium</span>
-                  <span className="block mt-1">Destination for</span>
-                  <span className="block mt-1 text-accent">
-                    Events, Work, Wellness & Fitness
-                  </span>
+                  <span className="block text-white">Wapakoneta's Premium Destination</span>
+                  <span className="block mt-1 text-accent">for Events, Work, Wellness & Fitness</span>
                 </h1>
                 
                 {/* Gold accent divider */}
@@ -333,7 +330,8 @@ export default function Index() {
             className="text-4xl md:text-6xl font-bold tracking-tight mb-6 opacity-0 animate-fade-in-up" 
             style={{ animationDelay: "0.2s" }}
           >
-            One <span className="text-accent">Destination</span>
+            <span className="block text-foreground">Four Unique Experiences</span>
+            <span className="block text-accent">One Destination</span>
           </h2>
           <p 
             className="text-lg text-muted-foreground opacity-0 animate-fade-in-up" 

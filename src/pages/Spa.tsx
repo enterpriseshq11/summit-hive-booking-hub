@@ -87,8 +87,9 @@ export default function Spa() {
           <div className="flex flex-col-reverse lg:flex-row items-center gap-10 lg:gap-16">
             {/* Hero Copy - Left Side */}
             <div className="flex-1 text-center lg:text-left">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground">
-                Recovery Designed for Results
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+                <span className="block text-white">Recovery Designed</span>
+                <span className="block text-accent">for Results</span>
               </h1>
               <p className="text-xl md:text-2xl text-accent font-medium mb-4">
                 Expert Care. Premium Experience.
@@ -178,7 +179,10 @@ export default function Spa() {
       {/* Services Section */}
       <section id="spa-services" className="py-14 container">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">Our Services</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+            <span className="block text-foreground">Our</span>
+            <span className="block text-accent">Services</span>
+          </h2>
           <p className="text-muted-foreground text-lg">Restore your body and mind — choose your path to recovery</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
