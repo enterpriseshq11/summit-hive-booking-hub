@@ -11,6 +11,7 @@ import { NextAvailableWidget, SummitRequestModal, SummitWaitlistModal, SummitAnc
 import { CalendarDays, MapPin, Users, Clock, Star, ArrowRight, Heart, Building2, PartyPopper, Utensils, Tv, Car, Quote, HelpCircle, ChevronRight, ChevronDown, Sparkles, Check, User, Phone, Mail, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import summitLogo from "@/assets/summit-logo.png";
 import e3Logo from "@/assets/e3-logo.png";
@@ -215,6 +216,9 @@ export default function Summit() {
                   <span>Up to 300 guests</span>
                 </div>
               </div>
+              
+              {/* Micro-Trust Row */}
+              <MicroTrustRow className="justify-center lg:justify-start" />
             </div>
 
             {/* Right - Summit Logo (reduced size, backdrop blur) */}

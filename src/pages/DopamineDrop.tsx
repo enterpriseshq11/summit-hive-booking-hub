@@ -19,6 +19,7 @@ import { ShareReferral } from "@/components/dopamine/ShareReferral";
 import { CrossSellStrip } from "@/components/dopamine/CrossSellStrip";
 import { KeyRulesSummary } from "@/components/dopamine/KeyRulesSummary";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
+import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 
 const DRAW_DATE = "2026-03-31T23:59:59";
 
@@ -132,9 +133,12 @@ export default function DopamineDrop() {
             <span className="block text-white">SPIN. EARN ENTRIES.</span>
             <span className="block text-accent">WIN BIG.</span>
           </h1>
-          <p className="text-lg md:text-xl text-zinc-300 mb-6">
+          <p className="text-lg md:text-xl text-zinc-300 mb-4">
             Every spin earns entries into monthly prize drawings. VIP members earn 2x entries!
           </p>
+          
+          {/* Micro-Trust Row */}
+          <MicroTrustRow className="mb-6" />
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <ButtonPrimary 

@@ -36,6 +36,7 @@ import { StickyMobileGiftCardCTA } from "@/components/booking/StickyMobileGiftCa
 import { GiftCardBulkOrderModal } from "@/components/booking/GiftCardBulkOrderModal";
 import { FloatingHelpDrawer } from "@/components/booking/FloatingHelpDrawer";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
@@ -218,6 +219,9 @@ export default function GiftCards() {
               </div>
             ))}
           </div>
+          
+          {/* Micro-Trust Row */}
+          <MicroTrustRow className="mt-6" />
         </div>
         
         {/* Gradient divider */}
