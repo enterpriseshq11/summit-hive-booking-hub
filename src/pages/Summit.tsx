@@ -251,7 +251,7 @@ export default function Summit() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex items-center justify-center gap-4 mb-6">
-              <img src={e3Logo} alt="E³ Logo" className="h-16 w-auto" />
+              
               <h2 className="text-3xl md:text-4xl font-bold">The E³ Experience</h2>
             </div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
