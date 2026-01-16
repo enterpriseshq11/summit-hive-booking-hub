@@ -231,7 +231,7 @@ export default function Summit() {
                 <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
                 <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-lg lg:max-w-xl drop-shadow-2xl object-fill opacity-100" style={{
                 maxHeight: "clamp(320px, 50vw, 500px)"
-              }} src="/lovable-uploads/6890aeef-5bfd-4aad-b38f-8fb59ba7a702.png" />
+              }} src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" />
               </div>
             </div>
           </div>
