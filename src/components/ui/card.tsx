@@ -7,6 +7,23 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
 ));
 Card.displayName = "Card";
 
+// Elevated Card variant with premium depth, inner gold glow, and consistent radius
+const CardElevated = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div 
+      ref={ref} 
+      className={cn(
+        "rounded-xl border border-border bg-card text-card-foreground",
+        "shadow-elevated hover:shadow-elevated-hover",
+        "transition-all duration-300 hover:-translate-y-0.5",
+        className
+      )} 
+      {...props} 
+    />
+  ),
+);
+CardElevated.displayName = "CardElevated";
+
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div ref={ref} className={cn("flex flex-col space-y-1.5 p-6", className)} {...props} />
@@ -40,4 +57,4 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 );
 CardFooter.displayName = "CardFooter";
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+export { Card, CardElevated, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
