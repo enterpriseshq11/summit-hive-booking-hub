@@ -24,7 +24,7 @@ import {
 import { 
   Building2, Wifi, Coffee, Users, MapPin, ArrowRight, Check, 
   RefreshCw, Quote, Clock, Zap, Shield, Heart, Briefcase,
-  MessageSquare, CalendarCheck, Rocket, AlertCircle, Calendar
+  MessageSquare, CalendarCheck, Rocket, AlertCircle, Calendar, FileX
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
@@ -151,10 +151,22 @@ export default function Coworking() {
                 </ButtonSecondary>
               </div>
 
-              {/* Trust Chip */}
-              <div className="flex items-center gap-2 px-4 py-2 text-sm text-primary-foreground/80" aria-hidden="true">
-                <Check className="h-4 w-4 text-accent" />
-                No obligation. Local team response within 24 hours. No payment until confirmed.
+              {/* Micro-Trust Row */}
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-primary-foreground/70">
+                {[
+                  { icon: MapPin, label: "Local team" },
+                  { icon: FileX, label: "No contracts" },
+                  { icon: Clock, label: "Response within 24 hours" },
+                  { icon: Wifi, label: "High-speed WiFi" },
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center gap-1.5">
+                    <item.icon className="w-3.5 h-3.5 text-accent" />
+                    <span className="flex items-center gap-1">
+                      <Check className="w-3 h-3 text-accent" />
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
               </div>
 
               {/* Amenities Strip - Enhanced Pills */}

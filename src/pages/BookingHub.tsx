@@ -41,6 +41,10 @@ import {
   Mail,
   Bell,
   Info,
+  MapPin,
+  Clock,
+  Star,
+  Check,
 } from "lucide-react";
 import { FloatingHelpCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
@@ -252,10 +256,23 @@ export default function BookingHub() {
               Choose your experience, see live availability, and confirm in a few clicks.
             </p>
             
-            {/* Trust line - Gold accent */}
-            <p className="text-accent font-medium text-sm">
-              Review everything before payment — no surprises.
-            </p>
+            {/* Micro-Trust Row */}
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-primary-foreground/70">
+              {[
+                { icon: MapPin, label: "Local team" },
+                { icon: Shield, label: "No contracts" },
+                { icon: Clock, label: "Response within 24 hours" },
+                { icon: Star, label: "Premium equipment" },
+              ].map((item, index) => (
+                <div key={index} className="flex items-center gap-1.5">
+                  <item.icon className="w-3.5 h-3.5 text-accent" />
+                  <span className="flex items-center gap-1">
+                    <Check className="w-3 h-3 text-accent" />
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* BOOKNOW-01: Quick Booking Category Picker */}
