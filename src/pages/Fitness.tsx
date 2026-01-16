@@ -104,9 +104,8 @@ export default function Fitness() {
                 Total Fitness by A-Z
               </div>
               
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                <span className="block text-white">Train on Your Schedule</span>
-                <span className="block text-accent">Get Real Results</span>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-primary-foreground leading-tight">
+                Train on your schedule. Get real results. Feel supported every step.
               </h1>
               <p className="text-xl md:text-2xl text-primary-foreground/80 mb-8 max-w-xl">
                 24/7 access, expert coaching, and a community that actually notices when you show up.
@@ -290,10 +289,7 @@ export default function Fitness() {
       {/* Membership Tiers Section */}
       <section id="fitness-memberships" className="py-14 container">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            <span className="block text-foreground">Choose Your</span>
-            <span className="block text-accent">Membership</span>
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">Membership Options</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Find the membership that fits your goals — all plans include 24/7 access and expert support.
           </p>
@@ -373,10 +369,7 @@ export default function Fitness() {
       {/* What's Included Amenities Accordion */}
       <section className="py-14 container">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            <span className="block text-foreground">What's</span>
-            <span className="block text-accent">Included</span>
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">What's Included</h2>
           <p className="text-muted-foreground text-lg">Premium amenities with every membership</p>
         </div>
         <div className="max-w-3xl mx-auto">

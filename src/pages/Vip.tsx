@@ -83,9 +83,8 @@ export default function Vip() {
               VIP Dopamine Club
             </Badge>
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              <span className="block text-white">UNLOCK THE</span>
-              <span className="block text-accent">BIGGEST PRIZES</span>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+              UNLOCK THE <span className="text-primary">BIGGEST PRIZES</span>
             </h1>
             
             <p className="text-xl text-zinc-300 mb-8 max-w-2xl mx-auto">
@@ -111,10 +110,7 @@ export default function Vip() {
         {/* Perks Grid */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              <span className="block text-foreground">VIP Member</span>
-              <span className="block text-accent">Benefits</span>
-            </h2>
+            <h2 className="text-3xl font-bold text-center mb-12">VIP Member Benefits</h2>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {VIP_PERKS.map((perk, index) => (
@@ -133,10 +129,7 @@ export default function Vip() {
         {/* Comparison */}
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">
-              <span className="block text-foreground">Free vs</span>
-              <span className="block text-accent">VIP</span>
-            </h2>
+            <h2 className="text-3xl font-bold text-center mb-12">Free vs VIP</h2>
             
             <div className="max-w-3xl mx-auto">
               <div className="grid grid-cols-3 gap-4 mb-4">

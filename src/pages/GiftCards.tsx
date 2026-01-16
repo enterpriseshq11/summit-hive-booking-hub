@@ -167,9 +167,8 @@ export default function GiftCards() {
             </div>
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
-            <span className="block text-white">Give the Gift</span>
-            <span className="block text-accent">of Wellness</span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground tracking-tight">
+            Give the Gift of Wellness
           </h1>
           {/* A1: Improved subtitle contrast */}
           <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto mb-3 font-medium">
@@ -236,10 +235,7 @@ export default function GiftCards() {
 
       {/* Gift Card Amount Selection */}
       <section id="amounts" className="py-16 container max-w-5xl">
-        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">
-          <span className="block text-foreground">Choose Your</span>
-          <span className="block text-accent">Amount</span>
-        </h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">Choose Your Amount</h2>
         <p className="text-muted-foreground text-center mb-10 max-w-xl mx-auto">
           Pick a preset or enter a custom amount. You'll confirm delivery details before payment.
         </p>
@@ -360,10 +356,7 @@ export default function GiftCards() {
       {/* F1, F2, F3: Redeem Anywhere - Enhanced */}
       <section id="redeem-anywhere" className="py-20 bg-muted/30">
         <div className="container max-w-4xl">
-          <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">
-            <span className="block text-foreground">Redeem</span>
-            <span className="block text-accent">Anywhere</span>
-          </h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">Redeem Anywhere</h2>
           {/* F3: Tagline */}
           <p className="text-accent font-medium text-center mb-2">One card. Every experience.</p>
           <p className="text-muted-foreground text-center mb-12">

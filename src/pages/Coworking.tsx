@@ -123,9 +123,8 @@ export default function Coworking() {
               </div>
               
               <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-                  <span className="block text-white">Private Offices & Flexible Workspaces</span>
-                  <span className="block text-accent">in Wapakoneta</span>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground leading-tight">
+                  Private Offices & Flexible Workspaces in Wapakoneta
                 </h1>
                 <p className="text-lg text-primary-foreground/70 max-w-xl">
                   Private offices, dedicated desks, and day passes — request access in under 2 minutes.
@@ -250,10 +249,7 @@ export default function Coworking() {
       {/* Workspace Options Section */}
       <section className="py-20 container" id="workspaces">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="block text-foreground">Choose Your</span>
-            <span className="block text-accent">Workspace</span>
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Workspace Options</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Choose your setup — all options include high-speed Wi-Fi, coffee bar access, and a professional environment.
           </p>
@@ -314,10 +310,7 @@ export default function Coworking() {
       <section className="py-20 bg-muted/30" id="why-hive">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="block text-foreground">Why Choose</span>
-              <span className="block text-accent">The Hive</span>
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why The Hive</h2>
             <p className="text-muted-foreground text-lg">Designed for people who take work seriously.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
@@ -342,10 +335,7 @@ export default function Coworking() {
       {/* Amenities Section */}
       <section className="py-20 container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="block text-foreground">Everything</span>
-            <span className="block text-accent">You Need</span>
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
           <p className="text-muted-foreground text-lg">A complete work environment, ready when you are.</p>
         </div>
         <div className="max-w-2xl mx-auto">
@@ -359,10 +349,7 @@ export default function Coworking() {
       {/* Process Timeline Section */}
       <section className="py-20 container" id="how-it-works">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="block text-foreground">How It</span>
-            <span className="block text-accent">Works</span>
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
           <p className="text-muted-foreground text-lg">Three simple steps to your new workspace.</p>
         </div>
         <div className="max-w-2xl mx-auto">

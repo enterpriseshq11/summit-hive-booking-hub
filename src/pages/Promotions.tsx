@@ -161,9 +161,8 @@ export default function Promotions() {
             Promotions
           </Badge>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            <span className="block text-white">More Value. More Results.</span>
-            <span className="block text-accent">One Ecosystem.</span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground tracking-tight mb-6">
+            <span className="text-gold-gradient">{heroHeadline}</span>
           </h1>
 
           <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-8">
