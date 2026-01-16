@@ -142,6 +142,25 @@
   }
 }
 
+@layer utilities {
+  /* Site-wide image color grade: warm highlights, slight desaturation, rich blacks */
+  .site-image-grade {
+    filter: 
+      saturate(0.9) 
+      contrast(1.08) 
+      brightness(1.02)
+      sepia(0.08);
+  }
+  
+  .site-image-grade-bg {
+    filter: 
+      saturate(0.85) 
+      contrast(1.1) 
+      brightness(0.98)
+      sepia(0.06);
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -150,6 +169,26 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  /* Apply site-wide image color grade: warm highlights, slight desaturation, rich blacks */
+  /* This creates a cohesive, branded look across all photos */
+  img:not(.no-grade):not([src*="icon"]):not([src*="logo"]):not([alt*="Logo"]):not([alt*="logo"]) {
+    filter: 
+      saturate(0.9) 
+      contrast(1.08) 
+      brightness(1.02)
+      sepia(0.08);
+    transition: filter 0.3s ease;
+  }
+
+  /* Slightly stronger treatment for background-style images */
+  img.bg-grade {
+    filter: 
+      saturate(0.85) 
+      contrast(1.1) 
+      brightness(0.98)
+      sepia(0.06);
   }
 }
 
