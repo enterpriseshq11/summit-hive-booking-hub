@@ -15,7 +15,6 @@ import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import restorationLoungeLogo from "@/assets/restoration-lounge-logo.jpg";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
-import { SectionDividerCurve, GoldDividerLine } from "@/components/ui/SectionDivider";
 export default function Spa() {
   const {
     data: business
@@ -150,8 +149,10 @@ export default function Spa() {
           </div>
         </div>
         
-        {/* Premium curved divider with gold edge */}
-        <SectionDividerCurve fillClass="fill-background" className="absolute bottom-0 left-0 right-0" />
+        {/* Angled divider */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{
+        clipPath: "polygon(0 100%, 100% 100%, 100% 0)"
+      }} aria-hidden="true" />
       </section>
 
       {/* Anchor Chips */}
@@ -179,8 +180,8 @@ export default function Spa() {
         </Card>
       </section>
 
-      {/* Gold Divider Line */}
-      <GoldDividerLine />
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
 
       {/* Services Section */}
       <section id="spa-services" className="py-14 container">

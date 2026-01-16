@@ -16,7 +16,6 @@ import { SITE_CONFIG } from "@/config/siteConfig";
 import summitLogo from "@/assets/summit-logo.png";
 import e3Logo from "@/assets/e3-logo.png";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
-import { SectionDividerCurve, GoldDividerLine } from "@/components/ui/SectionDivider";
 export default function Summit() {
   const navigate = useNavigate();
   const {
@@ -240,8 +239,8 @@ export default function Summit() {
           </div>
         </div>
         
-        {/* Premium curved divider with gold edge */}
-        <SectionDividerCurve fillClass="fill-background" className="absolute bottom-0 left-0 right-0" />
+        {/* Section transition */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* Anchor Chips - Positioned after hero */}
@@ -285,8 +284,7 @@ export default function Summit() {
       </section>
 
       {/* Section transition divider with E³ motif */}
-      <div className="relative">
-        <GoldDividerLine />
+      <div className="relative h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent">
         <div className="absolute left-1/2 -translate-x-1/2 -top-3 bg-background px-4">
           <span className="text-accent font-bold text-sm">E³</span>
         </div>
