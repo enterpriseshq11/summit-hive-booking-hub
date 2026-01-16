@@ -241,9 +241,10 @@ export default function BookingHub() {
               onRetry={handleRetryAvailability}
             />
             
-            {/* H1 - Updated copy */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary-foreground leading-tight">
-              Book in Minutes.<br className="hidden sm:block" /> Arrive to Excellence.
+            {/* H1 - White/Gold split */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+              <span className="block text-white">Book in Minutes</span>
+              <span className="block text-accent">Arrive to Excellence</span>
             </h1>
             
             {/* Subtext - Updated copy */}
@@ -314,7 +315,10 @@ export default function BookingHub() {
             <Building2 className="h-5 w-5 text-accent" />
             <div className="h-px w-8 bg-accent/50" />
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Browse by Business</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <span className="block text-foreground">Browse by</span>
+            <span className="block text-accent">Business</span>
+          </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg mb-2">
             Start with the experience you want — we'll show the best times available.
           </p>

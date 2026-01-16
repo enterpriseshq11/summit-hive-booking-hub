@@ -156,8 +156,9 @@ export default function Summit() {
               </div>
               
               <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground leading-tight">
-                  The Summit Event Center
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+                  <span className="block text-white">The Summit Event Center</span>
+                  <span className="block text-accent">Elevate Every Event</span>
                 </h1>
                 <p className="text-2xl md:text-3xl font-light text-accent mb-4">
                   Elevate Every Event
@@ -285,7 +286,10 @@ export default function Summit() {
       {/* Venue Overview */}
       <section id="highlights" className="py-20 container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Premier Event Venue</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <span className="block text-foreground">Premier Event</span>
+            <span className="block text-accent">Venue</span>
+          </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Flexible layouts, premium finishes, and high-capacity spaces designed for weddings, corporate events, celebrations, conferences, and private rentals.
           </p>

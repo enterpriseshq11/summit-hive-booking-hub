@@ -128,8 +128,9 @@ export default function DopamineDrop() {
         {/* Cinematic Hero Background */}
         <CinematicHeroBackground />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
-          <h1 className="text-4xl md:text-6xl font-black text-white mb-4">
-            SPIN. EARN ENTRIES.<span className="block text-primary">WIN BIG.</span>
+          <h1 className="text-4xl md:text-6xl font-black mb-4">
+            <span className="block text-white">SPIN. EARN ENTRIES.</span>
+            <span className="block text-accent">WIN BIG.</span>
           </h1>
           <p className="text-lg md:text-xl text-zinc-300 mb-6">
             Every spin earns entries into monthly prize drawings. VIP members earn 2x entries!
