@@ -131,15 +131,12 @@ export default function Index() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Column - Content */}
             <div className="text-center lg:text-left space-y-8">
-              {/* Logo Icon - Reduced size with subtle backdrop */}
+              {/* Logo Icon */}
               <div 
                 className="flex justify-center lg:justify-start opacity-0 animate-fade-in-down"
                 style={{ animationDelay: "0.05s" }}
               >
-                <div className="relative inline-flex items-center justify-center">
-                  <div className="absolute inset-0 -m-2 rounded-xl backdrop-blur-sm bg-background/5 pointer-events-none" aria-hidden="true" />
-                  <img src={azLogoIcon} alt="A-Z Enterprises" className="relative z-10 h-16 w-16 object-contain" />
-                </div>
+                <img src={azLogoIcon} alt="A-Z Enterprises" className="h-20 w-20 object-contain" />
               </div>
               
               {/* Location Badge - Updated copy */}

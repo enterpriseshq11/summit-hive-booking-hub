@@ -217,19 +217,14 @@ export default function Summit() {
               </div>
             </div>
 
-            {/* Right - Summit Logo (reduced size, backdrop blur) */}
+            {/* Right - Summit Logo Prominently Displayed */}
             <div className="flex justify-center lg:justify-end">
-              <div className="relative inline-flex items-center justify-center" style={{ transform: "scale(0.85)" }}>
-                {/* Subtle backdrop blur */}
-                <div className="absolute inset-0 -m-6 rounded-3xl backdrop-blur-sm bg-background/5 pointer-events-none" aria-hidden="true" />
-                {/* Gold glow behind logo - reduced */}
-                <div className="absolute inset-0 bg-accent/15 blur-3xl rounded-full scale-75" />
-                <img 
-                  alt="The Summit Event Center - Elevate Every Event" 
-                  className="relative z-10 w-full max-w-3xl lg:max-w-4xl drop-shadow-2xl object-contain" 
-                  style={{ maxHeight: "clamp(400px, 55vw, 650px)" }} 
-                  src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
-                />
+              <div className="relative">
+                {/* Gold glow behind logo */}
+                <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
+                <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-4xl lg:max-w-5xl drop-shadow-2xl object-contain opacity-100" style={{
+                maxHeight: "clamp(500px, 70vw, 800px)"
+              }} src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" />
               </div>
             </div>
           </div>

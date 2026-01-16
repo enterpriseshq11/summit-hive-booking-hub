@@ -226,14 +226,13 @@ export default function VoiceVault() {
 
         <div className="container relative z-10 py-20 lg:py-28">
           <div className="max-w-3xl mx-auto text-center">
-            {/* Logo with subtle backdrop blur (reduced size) */}
-            <div className="relative mb-8 inline-flex items-center justify-center" style={{ transform: "scale(0.85)" }}>
-              <div className="absolute inset-0 -m-4 rounded-2xl backdrop-blur-sm bg-background/5 pointer-events-none" aria-hidden="true" />
-              <div className="absolute inset-0 bg-accent/15 blur-3xl rounded-full" />
+            {/* Logo with glow */}
+            <div className="relative mb-8 inline-block">
+              <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full" />
               <img 
                 src={voiceVaultLogo} 
                 alt="The Voice Vault by A-Z" 
-                className="relative z-10 h-28 md:h-32 mx-auto object-contain"
+                className="relative h-32 md:h-40 mx-auto object-contain"
               />
             </div>
             
