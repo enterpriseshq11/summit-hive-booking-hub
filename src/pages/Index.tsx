@@ -32,6 +32,7 @@ import {
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import azLogoIcon from "@/assets/az-logo-icon.png";
+import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
 const businesses = [
   {
@@ -123,21 +124,8 @@ export default function Index() {
     <div className="min-h-screen overflow-hidden">
       {/* Hero Section - Premium Black & Gold */}
       <section className="relative pt-8 pb-20 md:pt-12 md:pb-28 lg:pt-16 lg:pb-36 overflow-hidden bg-primary">
-        {/* Solid dark background with radial spotlight behind H1 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/95" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--accent)/0.08)_0%,transparent_60%)]" />
-        
-        {/* Reduced intensity grid pattern overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.008)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.008)_1px,transparent_1px)] bg-[size:60px_60px]" />
-        
-        {/* Faint grain texture */}
-        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }} />
-        
-        {/* One-time gold shimmer sweep - cinematic on load */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/20 to-transparent -translate-x-full animate-[shimmer-sweep_2s_ease-out_0.5s_forwards]" />
-        </div>
+        {/* Cinematic Hero Background with vignette, grain, and particle drift */}
+        <CinematicHeroBackground />
         
         <div className="container relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">

@@ -37,6 +37,7 @@ import { GiftCardBulkOrderModal } from "@/components/booking/GiftCardBulkOrderMo
 import { FloatingHelpDrawer } from "@/components/booking/FloatingHelpDrawer";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
+import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
 const giftCardOptions = [
   { amount: 50, label: "Starter", description: "Perfect for a quick reset or add-on.", popular: false, example: "Day pass or sauna session" },
@@ -153,11 +154,8 @@ export default function GiftCards() {
     <div className="min-h-screen">
       {/* Hero Section - Premium Black & Gold with subtler grid */}
       <section className="relative py-24 overflow-hidden bg-primary">
-        {/* Gold spotlight effect */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,hsl(var(--accent)/0.25)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
-        {/* A2: Subtler grid texture - reduced opacity */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:80px_80px]" />
+        {/* Cinematic Hero Background */}
+        <CinematicHeroBackground />
         
         <div className="container max-w-4xl text-center relative z-10">
           {/* Premium icon with gold ring + glow */}

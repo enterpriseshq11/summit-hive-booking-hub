@@ -14,6 +14,7 @@ import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import summitLogo from "@/assets/summit-logo.png";
 import e3Logo from "@/assets/e3-logo.png";
+import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 export default function Summit() {
   const navigate = useNavigate();
   const {
@@ -128,23 +129,16 @@ export default function Summit() {
   return <div className="min-h-screen">
       {/* Hero Section - Premium with Summit Logo + Mountain Branding */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-primary">
-        {/* Dark textured background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-black" />
+        {/* Cinematic Hero Background */}
+        <CinematicHeroBackground />
         
         {/* Mountain silhouette effect - subtle background */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{
         backgroundImage: `url(${summitLogo})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"
       }} />
-        
-        {/* Gold radial glow effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.08)_0%,transparent_40%)]" />
-        
-        {/* Subtle texture overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:80px_80px]" />
         
         {/* E³ watermark - subtle design motif */}
         <div className="absolute bottom-10 right-10 opacity-[0.03] hidden lg:block">

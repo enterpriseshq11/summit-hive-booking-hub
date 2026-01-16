@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { PromotionCategoryTab } from "@/components/promotions/PromotionCategoryTabs";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
 const TRUST_CHIPS = [
   { icon: BadgeCheck, label: "No coupons required" },
@@ -136,18 +137,16 @@ export default function Promotions() {
     <>
       {/* Hero Section - Enhanced with animated glow */}
       <section className="relative min-h-[65vh] flex items-center justify-center overflow-hidden bg-primary">
-        {/* Grid texture background */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(212,175,55,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(212,175,55,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
-        </div>
+        {/* Cinematic Hero Background */}
+        <CinematicHeroBackground />
         
         {/* Animated glow effect */}
         <motion.div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[180px] opacity-20"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[180px] opacity-15 pointer-events-none"
           style={{ background: "radial-gradient(circle, hsl(43 74% 49%) 0%, transparent 70%)" }}
           animate={{ 
             scale: [1, 1.1, 1],
-            opacity: [0.15, 0.25, 0.15]
+            opacity: [0.1, 0.2, 0.1]
           }}
           transition={{ 
             duration: 8, 
