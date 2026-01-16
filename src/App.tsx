@@ -49,6 +49,14 @@ import AdminAssumptions from "./pages/admin/Assumptions";
 import AdminPromotions from "./pages/admin/Promotions";
 import AdminDopamineDrop from "./pages/admin/DopamineDrop";
 import AdminVoiceVault from "./pages/admin/VoiceVault";
+import AdminOfficeListings from "./pages/admin/OfficeListings";
+import AdminOfficePhotos from "./pages/admin/OfficePhotos";
+import AdminOfficePromotions from "./pages/admin/OfficePromotions";
+import AdminOfficeInquiries from "./pages/admin/OfficeInquiries";
+
+// Public Coworking Pages
+import OfficeListingsHub from "./pages/coworking/OfficeListingsHub";
+import OfficeDetailPage from "./pages/coworking/OfficeDetailPage";
 
 // Command Center Pages
 import CommandCenterDashboard from "./pages/command-center/Dashboard";
@@ -86,6 +94,8 @@ function AppInner() {
           <Route path="/booking" element={<BookingHub />} />
           <Route path="/summit" element={<Summit />} />
           <Route path="/coworking" element={<Coworking />} />
+          <Route path="/coworking/offices" element={<OfficeListingsHub />} />
+          <Route path="/coworking/offices/:slug" element={<OfficeDetailPage />} />
           <Route path="/spa" element={<Spa />} />
           <Route path="/fitness" element={<Fitness />} />
           <Route path="/gift-cards" element={<GiftCards />} />
@@ -124,6 +134,10 @@ function AppInner() {
           <Route path="/admin/promotions" element={<AdminPromotions />} />
           <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
           <Route path="/admin/voice-vault" element={<AdminVoiceVault />} />
+          <Route path="/admin/office-listings" element={<AdminOfficeListings />} />
+          <Route path="/admin/office-listings/:id/photos" element={<AdminOfficePhotos />} />
+          <Route path="/admin/office-promotions" element={<AdminOfficePromotions />} />
+          <Route path="/admin/office-inquiries" element={<AdminOfficeInquiries />} />
         </Route>
 
         {/* Command Center routes */}

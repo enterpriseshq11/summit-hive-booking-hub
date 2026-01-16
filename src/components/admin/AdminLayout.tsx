@@ -29,7 +29,11 @@ import {
   Box,
   UserCog,
   Loader2,
-  Mic
+  Mic,
+  Building2,
+  ImagePlus,
+  Tag,
+  MessageSquare
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -51,6 +55,12 @@ const adminNavItems = [
   { title: "Users & Roles", href: "/admin/users-roles", icon: UserCog, ownerOnly: true },
   { title: "Audit Log", href: "/admin/audit-log", icon: Shield },
   { title: "Assumptions", href: "/admin/assumptions", icon: Lightbulb },
+];
+
+const coworkingNavItems = [
+  { title: "Office Listings", href: "/admin/office-listings", icon: Building2 },
+  { title: "Office Promotions", href: "/admin/office-promotions", icon: Tag },
+  { title: "Office Inquiries", href: "/admin/office-inquiries", icon: MessageSquare },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {
@@ -110,6 +120,30 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                       </SidebarMenuItem>
                     );
                   })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider px-3 py-2">
+                Coworking (The Hive)
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1 px-2">
+                  {coworkingNavItems.map((item) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild>
+                        <NavLink 
+                          to={item.href}
+                          className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                          activeClassName="bg-accent/10 text-accent font-medium"
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
