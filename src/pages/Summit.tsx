@@ -196,12 +196,22 @@ export default function Summit() {
                 </div>
               </div>
 
-              {/* Trust Line */}
-              <div className="flex items-center gap-2 justify-center lg:justify-start">
-                <CheckCircle className="h-5 w-5 text-accent" />
-                <p className="text-primary-foreground/60 text-sm">
-                  No obligation — request a proposal and review everything before you commit.
-                </p>
+              {/* Micro-Trust Row */}
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-primary-foreground/70 justify-center lg:justify-start">
+                {[
+                  { icon: MapPin, label: "Local team" },
+                  { icon: Clock, label: "Response within 24 hours" },
+                  { icon: Users, label: "Up to 300 guests" },
+                  { icon: Star, label: "Premium amenities" },
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center gap-1.5">
+                    <item.icon className="w-3.5 h-3.5 text-accent" />
+                    <span className="flex items-center gap-1">
+                      <Check className="w-3 h-3 text-accent" />
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
               </div>
 
               {/* Quick Info */}
