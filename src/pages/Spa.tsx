@@ -112,9 +112,9 @@ export default function Spa() {
             
             {/* Logo - Right Side */}
             <div className="flex-shrink-0 w-full lg:w-1/2 flex justify-center lg:justify-end">
-              <img src={restorationLoungeLogo} alt="The Hive Restoration Lounge Logo" className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl" style={{
+              <img alt="The Hive Restoration Lounge Logo" className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl" style={{
               maxHeight: "clamp(280px, 40vw, 420px)"
-            }} />
+            }} src="/lovable-uploads/5509800c-167c-43ec-a79a-bef75a2b447b.png" />
             </div>
           </div>
         </div>
@@ -284,25 +284,13 @@ export default function Spa() {
                 </p>
 
                 <ul className="space-y-3 mb-8">
-                  {[
-                    "• Relieves muscle tension",
-                    "• Increases flexibility",
-                    "• Blends gentle traction, targeted stretching, and mindful breathwork",
-                    "• Supports recovery, performance, and everyday posture and comfort",
-                  ].map((benefit, idx) => (
-                    <li key={idx} className="text-foreground">
+                  {["• Relieves muscle tension", "• Increases flexibility", "• Blends gentle traction, targeted stretching, and mindful breathwork", "• Supports recovery, performance, and everyday posture and comfort"].map((benefit, idx) => <li key={idx} className="text-foreground">
                       {benefit}
-                    </li>
-                  ))}
+                    </li>)}
                 </ul>
 
                 <div className="text-center">
-                  <Button
-                    size="lg"
-                    onClick={() => openRequestModal()}
-                    className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all"
-                    data-event="spa_stretching_cta_click"
-                  >
+                  <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
                     Book Assisted Stretching
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
