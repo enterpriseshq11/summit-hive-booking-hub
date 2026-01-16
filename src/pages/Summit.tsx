@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
-import { Card, CardElevated, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
@@ -262,13 +262,13 @@ export default function Summit() {
             }, {
               title: "Elevated Execution",
               desc: "Every detail managed so you can focus on the moment"
-            }].map((pillar, i) => <CardElevated key={i} className="bg-primary/5 border-accent/20">
+            }].map((pillar, i) => <Card key={i} className="bg-primary/5 border-accent/20">
                   <CardContent className="pt-6 text-center">
                     <div className="text-accent font-bold text-2xl mb-2">E<sup className="text-sm">³</sup></div>
                     <h3 className="font-semibold text-lg mb-2">{pillar.title}</h3>
                     <p className="text-sm text-muted-foreground">{pillar.desc}</p>
                   </CardContent>
-                </CardElevated>)}
+                </Card>)}
             </div>
           </div>
         </div>
@@ -297,7 +297,7 @@ export default function Summit() {
           {venueHighlights.map(highlight => {
           const Icon = highlight.icon;
           const isExpanded = expandedHighlight === highlight.id;
-          return <CardElevated key={highlight.id} className="hover:border-accent/30">
+          return <Card key={highlight.id} className="shadow-premium hover:shadow-premium-hover transition-all hover:border-accent/30">
                 <CardContent className="pt-6">
                   <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mx-auto mb-4">
                     <Icon className="h-6 w-6 text-accent" aria-hidden="true" />
@@ -334,7 +334,7 @@ export default function Summit() {
                     </CollapsibleContent>
                   </Collapsible>
                 </CardContent>
-              </CardElevated>;
+              </Card>;
         })}
         </div>
 
@@ -373,7 +373,7 @@ export default function Summit() {
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {eventTypes.map(type => {
             const Icon = type.icon;
-            return <CardElevated key={type.name} className={cn("hover:border-accent/40 group cursor-pointer", "focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2")} onClick={() => handleEventTypeClick(type.id)} role="button" tabIndex={0} onKeyDown={e => {
+            return <Card key={type.name} className={cn("hover:shadow-premium-hover hover:border-accent/40 transition-all duration-300 shadow-premium group cursor-pointer", "focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2")} onClick={() => handleEventTypeClick(type.id)} role="button" tabIndex={0} onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 handleEventTypeClick(type.id);
@@ -392,7 +392,7 @@ export default function Summit() {
                   <CardContent>
                     <p className="text-muted-foreground">{type.desc}</p>
                   </CardContent>
-                </CardElevated>;
+                </Card>;
           })}
           </div>
         </div>

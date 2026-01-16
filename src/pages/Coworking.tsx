@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
-import { Card, CardElevated, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Accordion,
   AccordionContent,
@@ -258,10 +258,10 @@ export default function Coworking() {
           {workspaceOptions.map((workspace) => {
             const IconComponent = workspace.icon;
             return (
-              <CardElevated 
+              <Card 
                 key={workspace.name} 
                 onClick={() => openRequestModal(workspace.name)}
-                className="cursor-pointer hover:border-accent/50 group relative overflow-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                className="cursor-pointer hover:shadow-premium-hover hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group relative overflow-hidden focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && openRequestModal(workspace.name)}
@@ -292,7 +292,7 @@ export default function Coworking() {
                     Select <ArrowRight className="h-4 w-4" />
                   </div>
                 </CardContent>
-              </CardElevated>
+              </Card>
             );
           })}
         </div>
@@ -320,7 +320,7 @@ export default function Coworking() {
             {whyTheHiveCards.map((card) => {
               const IconComponent = card.icon;
               return (
-                <CardElevated key={card.title} className="hover:border-accent/30">
+                <Card key={card.title} className="bg-card border-border hover:border-accent/30 transition-colors">
                   <CardContent className="pt-6">
                     <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center mb-4">
                       <IconComponent className="h-6 w-6 text-accent" aria-hidden="true" />
@@ -328,7 +328,7 @@ export default function Coworking() {
                     <h3 className="font-semibold text-lg mb-2">{card.title}</h3>
                     <p className="text-sm text-muted-foreground">{card.copy}</p>
                   </CardContent>
-                </CardElevated>
+                </Card>
               );
             })}
           </div>

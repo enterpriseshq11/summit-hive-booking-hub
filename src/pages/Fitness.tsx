@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
-import { Card, CardElevated, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useBusinessByType } from "@/hooks/useBusinesses";
@@ -296,10 +296,10 @@ export default function Fitness() {
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-10">
           {membershipTiers.map((tier) => (
-            <CardElevated 
+            <Card 
               key={tier.name} 
               onClick={() => openJoinModal(tier.type)}
-              className={`cursor-pointer group border-2 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${
+              className={`cursor-pointer hover:shadow-gold-lg hover:-translate-y-1 transition-all duration-300 shadow-premium group border-2 relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${
                 tier.highlighted 
                   ? "border-accent" 
                   : "border-transparent hover:border-accent/50"
@@ -341,7 +341,7 @@ export default function Fitness() {
                   Get started <ArrowRight className="h-4 w-4" />
                 </p>
               </CardContent>
-            </CardElevated>
+            </Card>
           ))}
         </div>
         

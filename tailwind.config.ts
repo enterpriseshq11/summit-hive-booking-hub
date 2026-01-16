@@ -99,8 +99,6 @@ export default {
 				'gold-lg': '0 0 40px hsl(43 74% 49% / 0.2)',
 				'premium': '0 4px 20px hsl(0 0% 0% / 0.08), 0 0 0 1px hsl(43 74% 49% / 0.1)',
 				'premium-hover': '0 8px 30px hsl(0 0% 0% / 0.12), 0 0 0 1px hsl(43 74% 49% / 0.2)',
-				'elevated': '0 8px 32px hsl(0 0% 0% / 0.12), inset 0 0 0 1px hsl(43 74% 49% / 0.1)',
-				'elevated-hover': '0 12px 40px hsl(0 0% 0% / 0.18), inset 0 0 0 1px hsl(43 74% 49% / 0.2)',
 			},
 			keyframes: {
 				"accordion-down": {

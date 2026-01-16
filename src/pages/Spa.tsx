@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Button, ButtonPrimary, ButtonSecondary } from "@/components/ui/button";
-import { Card, CardElevated, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
@@ -184,7 +184,7 @@ export default function Spa() {
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {/* Massage Therapy Card */}
-          <CardElevated className="group border-2 border-transparent hover:border-accent/50 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden">
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 transition-all duration-300 shadow-premium group border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -218,10 +218,10 @@ export default function Spa() {
                 Book this <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </CardContent>
-          </CardElevated>
+          </Card>
 
           {/* Recovery Services Card */}
-          <CardElevated className="group cursor-pointer border-2 border-transparent hover:border-accent/50 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={() => openRequestModal("recovery")} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openRequestModal("recovery")} data-event="spa_recovery_card_click">
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={() => openRequestModal("recovery")} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openRequestModal("recovery")} data-event="spa_recovery_card_click">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -246,10 +246,10 @@ export default function Spa() {
                 Book this <ArrowRight className="h-4 w-4" />
               </p>
             </CardContent>
-          </CardElevated>
+          </Card>
 
           {/* Wellness Experiences Card */}
-          <CardElevated className="group cursor-pointer border-2 border-transparent hover:border-accent/50 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={() => openRequestModal("wellness")} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openRequestModal("wellness")} data-event="spa_wellness_card_click">
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={() => openRequestModal("wellness")} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openRequestModal("wellness")} data-event="spa_wellness_card_click">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -274,7 +274,7 @@ export default function Spa() {
                 Book this <ArrowRight className="h-4 w-4" />
               </p>
             </CardContent>
-          </CardElevated>
+          </Card>
         </div>
         
         {/* Single section CTA */}
