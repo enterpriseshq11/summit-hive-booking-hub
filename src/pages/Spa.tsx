@@ -95,8 +95,8 @@ export default function Spa() {
               <p className="text-xl md:text-2xl text-accent font-medium mb-4">
                 Expert Care. Premium Experience.
               </p>
-              <p className="section-copy mx-auto lg:mx-0">
-                Professional recovery. Personalized care. Premium experience. Delivered by Lindsey.
+              <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl">
+                Professional recovery, massage therapy, and wellness treatments—personally delivered by Lindsey.
               </p>
               
               {/* Hero CTAs */}
@@ -190,7 +190,7 @@ export default function Spa() {
             <span className="block text-foreground">Our</span>
             <span className="block text-accent">Services</span>
           </h2>
-          <p className="section-copy-center">Restore your body. Restore your mind. Choose your path.</p>
+          <p className="text-muted-foreground text-lg">Restore your body and mind — choose your path to recovery</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {/* Massage Therapy Card */}

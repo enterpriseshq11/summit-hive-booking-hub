@@ -109,8 +109,8 @@ export default function Fitness() {
                 <span className="block text-white">Train on Your Schedule</span>
                 <span className="block text-accent">Get Real Results</span>
               </h1>
-              <p className="section-copy mb-8">
-                <span className="value-phrase">24/7 access</span>. Expert coaching. A community that notices when you show up.
+              <p className="text-xl md:text-2xl text-primary-foreground/80 mb-8 max-w-xl">
+                24/7 access, expert coaching, and a community that actually notices when you show up.
               </p>
               
               {/* Hero CTAs - Primary (Dominant) + Secondary */}
@@ -294,8 +294,8 @@ export default function Fitness() {
             <span className="block text-foreground">Choose Your</span>
             <span className="block text-accent">Membership</span>
           </h2>
-          <p className="section-copy-center">
-            Find your fit. All plans include <span className="value-phrase">24/7 access</span> and expert support.
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Find the membership that fits your goals — all plans include 24/7 access and expert support.
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-10">
