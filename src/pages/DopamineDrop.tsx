@@ -18,7 +18,6 @@ import { PastWinners } from "@/components/dopamine/PastWinners";
 import { ShareReferral } from "@/components/dopamine/ShareReferral";
 import { CrossSellStrip } from "@/components/dopamine/CrossSellStrip";
 import { KeyRulesSummary } from "@/components/dopamine/KeyRulesSummary";
-import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
 const DRAW_DATE = "2026-03-31T23:59:59";
 
@@ -124,9 +123,8 @@ export default function DopamineDrop() {
   return (
     <div className="min-h-screen bg-black">
       {/* Hero - Compact */}
-      <section className="relative py-4 md:py-6 bg-primary overflow-hidden">
-        {/* Cinematic Hero Background */}
-        <CinematicHeroBackground />
+      <section className="relative py-4 md:py-6 bg-gradient-to-b from-black via-zinc-900 to-black overflow-hidden">
+        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at 2px 2px, rgba(212,175,55,0.4) 1px, transparent 0)", backgroundSize: "50px 50px" }} />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
           <h1 className="text-4xl md:text-6xl font-black text-white mb-4">
             SPIN. EARN ENTRIES.<span className="block text-primary">WIN BIG.</span>

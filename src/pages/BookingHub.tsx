@@ -46,7 +46,6 @@ import { FloatingHelpCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import type { BusinessType } from "@/types";
-import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
 const businessIcons: Record<BusinessType, React.ComponentType<{ className?: string }>> = {
   summit: Building2,
@@ -229,8 +228,15 @@ export default function BookingHub() {
 
       {/* Hero Section - Premium Black & Gold */}
       <section ref={heroRef} id="availability" className="relative py-16 md:py-24 overflow-hidden bg-primary">
-        {/* Cinematic Hero Background */}
-        <CinematicHeroBackground />
+        {/* Background effects - Enhanced with vignette and spotlight */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--accent)/0.08)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--accent)/0.06)_0%,transparent_50%)]" />
+        {/* Reduced grid visibility */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        {/* Vignette effect */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,hsl(var(--primary))_100%)]" />
         
         <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-6 mb-8">

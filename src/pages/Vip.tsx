@@ -7,7 +7,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
 const GIVEAWAY_DATE = "March 31, 2026";
 
@@ -73,9 +72,11 @@ export default function Vip() {
     <MainLayout>
       <div className="min-h-screen bg-background">
         {/* Hero */}
-        <section className="relative py-20 md:py-32 bg-primary overflow-hidden">
-          {/* Cinematic Hero Background */}
-          <CinematicHeroBackground />
+        <section className="relative py-20 md:py-32 bg-gradient-to-b from-black via-zinc-900 to-background overflow-hidden">
+          <div className="absolute inset-0 opacity-20" style={{ 
+            backgroundImage: "radial-gradient(circle at 2px 2px, rgba(212,175,55,0.4) 1px, transparent 0)",
+            backgroundSize: "40px 40px"
+          }} />
           
           <div className="container mx-auto px-4 relative z-10 text-center">
             <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
