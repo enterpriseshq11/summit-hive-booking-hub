@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
 
@@ -150,7 +151,9 @@ export default function Coworking() {
                   Schedule a Tour
                 </ButtonSecondary>
               </div>
-
+              
+              {/* Micro-Trust Row */}
+              <MicroTrustRow className="justify-center lg:justify-start" />
               {/* Trust Chip */}
               <div className="flex items-center gap-2 px-4 py-2 text-sm text-primary-foreground/80" aria-hidden="true">
                 <Check className="h-4 w-4 text-accent" />

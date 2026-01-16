@@ -30,6 +30,7 @@ import {
   PreFooterCTA
 } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import azLogoIcon from "@/assets/az-logo-icon.png";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
@@ -263,6 +264,9 @@ export default function Index() {
                   <span>{SITE_CONFIG.hours.shortDays}</span>
                 </div>
               </div>
+              
+              {/* Micro-Trust Row */}
+              <MicroTrustRow className="justify-center lg:justify-start opacity-0 animate-fade-in" />
             </div>
 
             {/* Right Column - Experience Preview Panel */}

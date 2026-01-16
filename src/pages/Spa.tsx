@@ -11,6 +11,7 @@ import { NextAvailableWidget, WaitlistCTA, SpaBookingForm, FloatingHelpDrawer, S
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, FileText, Quote, User, Award, ShieldCheck, Wifi, Coffee, Zap, Droplets, Sun, Wind, ThermometerSun, Users, Activity, Target } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
+import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import restorationLoungeLogo from "@/assets/restoration-lounge-logo.jpg";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
@@ -128,6 +129,9 @@ export default function Spa() {
                 <CheckCircle className="h-5 w-5 text-accent" aria-hidden="true" />
                 <span className="text-sm">No obligation. Response within 24 hours.</span>
               </div>
+              
+              {/* Micro-Trust Row */}
+              <MicroTrustRow className="justify-center lg:justify-start" />
             </div>
             
             {/* Logo - Right Side (reduced size, backdrop blur) */}

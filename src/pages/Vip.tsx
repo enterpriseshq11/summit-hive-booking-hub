@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import CinematicHeroBackground from "@/components/ui/CinematicHeroBackground";
+import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 
 const GIVEAWAY_DATE = "March 31, 2026";
 
@@ -103,6 +104,9 @@ export default function Vip() {
                 Join VIP — $2.99/month
               </ButtonPrimary>
               <p className="text-sm text-zinc-400">Cancel anytime. No long-term commitment.</p>
+              
+              {/* Micro-Trust Row */}
+              <MicroTrustRow className="mt-4" />
             </div>
           </div>
         </section>

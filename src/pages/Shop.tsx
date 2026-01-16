@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Sparkles, Clock } from "lucide-react";
+import { MicroTrustRow } from "@/components/ui/MicroTrustRow";
 
 export default function Shop() {
   return (
@@ -20,9 +21,12 @@ export default function Shop() {
             Curated Products We
             <span className="block text-accent">Build & Stand Behind</span>
           </h1>
-          <p className="text-lg md:text-xl text-primary-foreground/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-primary-foreground/70 max-w-2xl mx-auto leading-relaxed mb-6">
             This is not a generic store. Every product featured here is something we personally designed, tested, or use daily.
           </p>
+          
+          {/* Micro-Trust Row */}
+          <MicroTrustRow />
         </div>
       </section>
 
