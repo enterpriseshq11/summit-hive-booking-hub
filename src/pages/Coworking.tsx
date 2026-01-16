@@ -128,8 +128,8 @@ export default function Coworking() {
                   <span className="block text-white">Private Offices & Flexible Workspaces</span>
                   <span className="block text-accent">in Wapakoneta</span>
                 </h1>
-                <p className="text-lg text-primary-foreground/70 max-w-xl">
-                  Private offices, dedicated desks, and day passes — request access in under 2 minutes.
+                <p className="section-copy">
+                  Private offices. Dedicated desks. Day passes. Request access in under 2 minutes.
                 </p>
               </div>
               
@@ -253,8 +253,8 @@ export default function Coworking() {
             <span className="block text-foreground">Choose Your</span>
             <span className="block text-accent">Workspace</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Choose your setup — all options include high-speed Wi-Fi, coffee bar access, and a professional environment.
+          <p className="section-copy-center">
+            Choose your setup. <span className="value-phrase">High-speed Wi-Fi</span>. <span className="value-phrase">Coffee bar</span>. Professional environment.
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">

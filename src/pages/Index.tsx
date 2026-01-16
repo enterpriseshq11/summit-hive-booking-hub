@@ -168,12 +168,12 @@ export default function Index() {
                   style={{ animationDelay: "0.4s" }}
                 />
                 
-                {/* Updated subheadline */}
+                {/* Updated subheadline - punchy, scannable */}
                 <p 
                   className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up"
                   style={{ animationDelay: "0.5s" }}
                 >
-                  Book in minutes. Confirm details before payment.
+                  Book in minutes. Confirm before payment.
                   <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
                 </p>
               </div>
@@ -334,10 +334,10 @@ export default function Index() {
             <span className="block text-accent">One Destination</span>
           </h2>
           <p 
-            className="text-lg text-muted-foreground opacity-0 animate-fade-in-up" 
+            className="section-copy-center opacity-0 animate-fade-in-up" 
             style={{ animationDelay: "0.3s" }}
           >
-            From life's biggest celebrations to everyday wellness, we've got you covered.
+            Life's biggest celebrations. Everyday wellness. We've got you covered.
           </p>
         </div>
       </section>

@@ -164,8 +164,8 @@ export default function Summit() {
                 <p className="text-2xl md:text-3xl font-light text-accent mb-4">
                   Elevate Every Event
                 </p>
-                <p className="text-lg md:text-xl text-primary-foreground/70 max-w-xl mx-auto lg:mx-0">
-                  A premium venue designed for unforgettable experiences—from private celebrations to large-scale events.
+                <p className="section-copy mx-auto lg:mx-0">
+                  Premium venue. Unforgettable experiences. Private celebrations to large-scale events.
                 </p>
               </div>
               
@@ -256,8 +256,8 @@ export default function Summit() {
               
               <h2 className="text-3xl md:text-4xl font-bold text-black">The E<sup className="text-accent text-lg md:text-xl">3</sup> Experience</h2>
             </div>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              The Summit is built on the E³ standard—an elevated approach to space, service, and execution that transforms events into experiences.
+            <p className="section-copy-center">
+              Elevated space. Elevated service. Elevated execution. Events become experiences.
             </p>
             
             {/* E³ Pillars */}
