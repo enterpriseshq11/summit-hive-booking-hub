@@ -234,23 +234,18 @@ export default function Index() {
                 </ButtonSecondary>
               </div>
 
-              {/* Micro-Trust Row */}
+              {/* Proof Chips - Subtle */}
               <div 
-                className="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2 text-sm text-primary-foreground/70 pt-4 opacity-0 animate-fade-in"
+                className="flex flex-wrap justify-center lg:justify-start gap-3 pt-4 opacity-0 animate-fade-in"
                 style={{ animationDelay: "0.9s" }}
               >
-                {[
-                  { icon: MapPin, label: "Local team" },
-                  { icon: Shield, label: "No contracts" },
-                  { icon: Clock, label: "Response within 24 hours" },
-                  { icon: Star, label: "Premium equipment" },
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center gap-1.5">
-                    <item.icon className="w-3.5 h-3.5 text-accent" />
-                    <span className="flex items-center gap-1">
-                      <Check className="w-3 h-3 text-accent" />
-                      {item.label}
-                    </span>
+                {proofChips.map((chip, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70"
+                  >
+                    <chip.icon className="h-4 w-4 text-accent/80" />
+                    <span>{chip.text}</span>
                   </div>
                 ))}
               </div>

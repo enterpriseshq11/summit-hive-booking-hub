@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Dumbbell, Check, Users, ArrowRight, Clock, Zap, Heart, Trophy, 
   ChevronRight, Quote, Shield, CheckCircle, Calendar, Target,
-  Award, ShieldCheck, Flame, User, Waves, Coffee, MapPin, FileX
+  Award, ShieldCheck, Flame, User, Waves, Coffee
 } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
@@ -132,23 +132,10 @@ export default function Fitness() {
                 </ButtonSecondary>
               </div>
               
-              {/* Micro-Trust Row */}
-              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-primary-foreground/70 mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                {[
-                  { icon: MapPin, label: "Local team" },
-                  { icon: FileX, label: "No contracts" },
-                  { icon: Clock, label: "Response within 24 hours" },
-                  { icon: Dumbbell, label: "Premium equipment" },
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center gap-1.5">
-                    <item.icon className="w-3.5 h-3.5 text-accent" />
-                    <span className="flex items-center gap-1">
-                      <Check className="w-3 h-3 text-accent" />
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {/* Microcopy under primary CTA */}
+              <p className="text-sm text-primary-foreground/60 mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                No contracts • Cancel anytime • Local team support
+              </p>
               
               {/* Tertiary text link */}
               <a 

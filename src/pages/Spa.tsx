@@ -9,7 +9,7 @@ import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useProviders } from "@/hooks/useProviders";
 import { NextAvailableWidget, WaitlistCTA, SpaBookingForm, FloatingHelpDrawer, SpaRequestModal, SpaWaitlistModal, SpaAnchorChips, StickyMobileSpaCTA } from "@/components/booking";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, FileText, Quote, User, Award, ShieldCheck, Wifi, Coffee, Zap, Droplets, Sun, Wind, ThermometerSun, Users, Activity, Target, Shield } from "lucide-react";
+import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, FileText, Quote, User, Award, ShieldCheck, Wifi, Coffee, Zap, Droplets, Sun, Wind, ThermometerSun, Users, Activity, Target } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import restorationLoungeLogo from "@/assets/restoration-lounge-logo.jpg";
@@ -123,22 +123,10 @@ export default function Spa() {
                 </div>
               </div>
               
-              {/* Micro-Trust Row */}
-              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-primary-foreground/70 justify-center lg:justify-start">
-                {[
-                  { icon: User, label: "Local team" },
-                  { icon: Clock, label: "Response within 24 hours" },
-                  { icon: Heart, label: "Premium care" },
-                  { icon: Shield, label: "Licensed therapists" },
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center gap-1.5">
-                    <item.icon className="w-3.5 h-3.5 text-accent" />
-                    <span className="flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3 text-accent" />
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
+              {/* Trust Badge */}
+              <div className="flex items-center justify-center lg:justify-start gap-2 text-primary-foreground/70">
+                <CheckCircle className="h-5 w-5 text-accent" aria-hidden="true" />
+                <span className="text-sm">No obligation. Response within 24 hours.</span>
               </div>
             </div>
             

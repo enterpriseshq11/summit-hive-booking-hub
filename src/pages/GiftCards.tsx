@@ -201,20 +201,20 @@ export default function GiftCards() {
             </ButtonSecondary>
           </div>
 
-          {/* Micro-Trust Row */}
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-primary-foreground/70">
+          {/* Trust chips */}
+          <div className="flex flex-wrap justify-center gap-3">
             {[
-              { icon: Clock, label: "Never expires" },
-              { icon: Mail, label: "Instant delivery" },
-              { icon: Shield, label: "Secure checkout" },
-              { icon: MapPin, label: "Redeem anywhere" },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center gap-1.5">
-                <item.icon className="w-3.5 h-3.5 text-accent" />
-                <span className="flex items-center gap-1">
-                  <Check className="w-3 h-3 text-accent" />
-                  {item.label}
-                </span>
+              { icon: Clock, label: "Never Expires" },
+              { icon: Mail, label: "Instant Delivery" },
+              { icon: Shield, label: "Secure Checkout" },
+              { icon: MapPin, label: "Redeem Anywhere" },
+            ].map((chip) => (
+              <div 
+                key={chip.label}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/5 border border-primary-foreground/10 text-sm text-primary-foreground/80"
+              >
+                <chip.icon className="h-4 w-4 text-accent" />
+                {chip.label}
               </div>
             ))}
           </div>
