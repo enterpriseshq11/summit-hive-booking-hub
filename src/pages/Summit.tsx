@@ -229,8 +229,8 @@ export default function Summit() {
               <div className="relative">
                 {/* Gold glow behind logo */}
                 <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
-                <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-2xl lg:max-w-3xl drop-shadow-2xl object-contain opacity-100" style={{
-                maxHeight: "clamp(400px, 60vw, 650px)"
+                <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-4xl lg:max-w-5xl drop-shadow-2xl object-contain opacity-100" style={{
+                maxHeight: "clamp(500px, 70vw, 800px)"
               }} src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" />
               </div>
             </div>
