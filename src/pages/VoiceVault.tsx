@@ -218,17 +218,6 @@ export default function VoiceVault() {
     <div className="min-h-screen">
       {/* HERO SECTION - A1/A3: Improved hierarchy and depth */}
       <section className="relative min-h-[75vh] flex items-center bg-primary text-primary-foreground overflow-hidden">
-        {/* Voice Vault watermark - Summit-style subtle background motif */}
-        <div 
-          className="absolute inset-0 opacity-[0.04] pointer-events-none" 
-          style={{
-            backgroundImage: `url(${voiceVaultLogo})`,
-            backgroundSize: "max(80%, 1000px) auto",
-            backgroundPosition: "50% 20%",
-            backgroundRepeat: "no-repeat",
-          }} 
-        />
-        
         {/* Gold spotlight effects */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,hsl(var(--accent)/0.2)_0%,transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
