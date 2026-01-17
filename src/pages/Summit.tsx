@@ -135,7 +135,7 @@ export default function Summit() {
         <div className="absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: `url(${summitLogo})`,
         backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundPosition: "60% 35%",
         backgroundRepeat: "no-repeat"
       }} />
         
