@@ -127,7 +127,7 @@ export default function Summit() {
   const victoriaSpecialties = ["Personalized Event Planning Support", "Venue Walkthroughs & Layout Guidance", "Capacity Planning & Event Logistics", "Clear Pricing & Booking Coordination"];
   return <div className="min-h-screen">
       {/* Hero Section - Premium with Summit Logo + Mountain Branding */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-primary">
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-primary">
         {/* Dark textured background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-black" />
         
@@ -151,7 +151,8 @@ export default function Summit() {
           <img src={e3Logo} alt="" className="w-64 h-auto" aria-hidden="true" />
         </div>
         
-        <div className="container relative z-10 py-16">
+        {/* Fixed-width container to lock layout across all screen sizes */}
+        <div className="relative z-10 py-16 w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left - Content */}
             <div className="space-y-8 text-center lg:text-left">
@@ -224,14 +225,16 @@ export default function Summit() {
               </div>
             </div>
 
-            {/* Right - Summit Logo Prominently Displayed */}
-            <div className="flex justify-center lg:justify-end lg:-mt-8 lg:translate-x-32 lg:translate-y-2 xl:translate-y-10 2xl:translate-y-14">
-              <div className="relative transform scale-100 md:scale-110 lg:scale-[1.25]">
+            {/* Right - Summit Logo - LOCKED POSITION (no viewport-based positioning) */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative w-[400px] lg:w-[480px]">
                 {/* Gold glow behind logo */}
                 <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
-                <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl drop-shadow-2xl object-contain opacity-100" style={{
-                maxHeight: "clamp(500px, 75vw, 900px)"
-              }} src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" />
+                <img 
+                  alt="The Summit Event Center - Elevate Every Event" 
+                  className="relative w-full drop-shadow-2xl object-contain" 
+                  src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
+                />
               </div>
             </div>
           </div>
