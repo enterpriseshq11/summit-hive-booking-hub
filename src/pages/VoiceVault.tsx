@@ -207,68 +207,36 @@ export default function VoiceVault() {
         {/* Subtle grid texture */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:80px_80px]" />
         
-        {/* Diagonal Watermarks - Left side (angled down-left) */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
-          <div 
-            className="absolute -left-20 top-[5%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.12] select-none"
-            style={{ transform: 'rotate(-18deg)', transformOrigin: 'left center' }}
-          >
-            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
-          </div>
-          <div 
-            className="absolute -left-20 top-[20%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.08] select-none"
-            style={{ transform: 'rotate(-18deg)', transformOrigin: 'left center' }}
-          >
-            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
-          </div>
-          <div 
-            className="absolute -left-20 top-[40%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.15] select-none"
-            style={{ transform: 'rotate(-18deg)', transformOrigin: 'left center' }}
-          >
-            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
-          </div>
-          <div 
-            className="absolute -left-20 top-[60%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.10] select-none"
-            style={{ transform: 'rotate(-18deg)', transformOrigin: 'left center' }}
-          >
-            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
-          </div>
-        </div>
+        {/* Logo Watermark Pattern Background */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-[0.08]"
+          style={{
+            backgroundImage: `url('/lovable-uploads/18ea10b5-e374-479a-964b-a6d42bfac671.png')`,
+            backgroundSize: '180px 180px',
+            backgroundRepeat: 'repeat',
+            filter: 'blur(0.5px)',
+          }}
+        />
         
-        {/* Diagonal Watermarks - Right side (angled down-right) */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
-          <div 
-            className="absolute -right-20 top-[15%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.10] select-none"
-            style={{ transform: 'rotate(18deg)', transformOrigin: 'right center' }}
-          >
-            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT
-          </div>
-          <div 
-            className="absolute -right-20 top-[35%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.15] select-none"
-            style={{ transform: 'rotate(18deg)', transformOrigin: 'right center' }}
-          >
-            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT
-          </div>
-          <div 
-            className="absolute -right-20 top-[55%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.08] select-none"
-            style={{ transform: 'rotate(18deg)', transformOrigin: 'right center' }}
-          >
-            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT
-          </div>
-          <div 
-            className="absolute -right-20 top-[75%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.12] select-none"
-            style={{ transform: 'rotate(18deg)', transformOrigin: 'right center' }}
-          >
-            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT
-          </div>
-        </div>
+        {/* Dark overlay for content readability */}
+        <div className="absolute inset-0 bg-primary/40" />
 
         <div className="container relative z-10 py-20 lg:py-28">
           <div className="max-w-3xl mx-auto text-center">
-            {/* Logo with glow */}
+            {/* Logo with glow - ENLARGED and POSITION LOCKED */}
             <div className="relative mb-8 inline-block">
-              <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full" />
-              <img alt="The Voice Vault by A-Z" className="relative h-32 md:h-40 mx-auto object-contain" src="/lovable-uploads/18ea10b5-e374-479a-964b-a6d42bfac671.png" />
+              <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-150" />
+              <img 
+                alt="The Voice Vault by A-Z" 
+                className="relative mx-auto object-contain" 
+                src="/lovable-uploads/18ea10b5-e374-479a-964b-a6d42bfac671.png"
+                style={{
+                  height: '280px',
+                  width: 'auto',
+                  minWidth: '280px',
+                  maxWidth: '400px',
+                }}
+              />
             </div>
             
             {/* A3: Clear headline hierarchy */}
