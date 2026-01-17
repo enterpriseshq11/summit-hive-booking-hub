@@ -203,23 +203,46 @@ export default function Coworking() {
                 No obligation. Local team response within 24 hours. No payment until confirmed.
               </div>
 
-              {/* Amenities Strip - Enhanced Pills */}
-              <div className="grid grid-cols-2 gap-2 max-w-xs mx-auto lg:mx-0 lg:max-w-none lg:inline-flex lg:flex-wrap">
+              {/* All Pills - Single Unified Group */}
+              <div className="flex flex-wrap gap-2 max-w-xs mx-auto lg:mx-0 lg:max-w-none justify-center lg:justify-start">
+                {/* Feature Pills */}
                 {[
                   { icon: Wifi, label: "High-Speed Internet" },
                   { icon: Coffee, label: "Coffee Bar" },
                   { icon: Clock, label: "Flexible Access" },
                   { icon: MapPin, label: "Prime Location" },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-accent/10 rounded-full border border-accent/30 lg:justify-start">
+                  <div key={item.label} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-accent/10 rounded-full border border-accent/30">
                     <item.icon className="h-3.5 w-3.5 text-accent flex-shrink-0" />
                     <span className="text-xs font-medium text-accent whitespace-nowrap">{item.label}</span>
                   </div>
                 ))}
+                {/* Section Anchor Pills */}
+                {[
+                  { id: "workspaces", label: "Options" },
+                  { id: "why-hive", label: "Why The Hive" },
+                  { id: "how-it-works", label: "How It Works" },
+                  { id: "testimonials", label: "Testimonials" },
+                  { id: "faq", label: "FAQ" },
+                ].map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => {
+                      const element = document.getElementById(section.id);
+                      if (element) {
+                        const offset = 80;
+                        const elementPosition = element.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.scrollY - offset;
+                        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+                      }
+                    }}
+                    className="flex items-center justify-center px-2.5 py-1.5 bg-accent/10 rounded-full border border-accent/30 text-xs font-medium text-accent whitespace-nowrap hover:bg-accent/20 hover:border-accent transition-all"
+                    aria-label={`Jump to ${section.label} section`}
+                  >
+                    {section.label}
+                  </button>
+                ))}
               </div>
-
-              {/* Anchor Chips - Section Links */}
-              <CoworkingAnchorChips />
             </div>
             
             {/* Logo - Right Side */}
@@ -240,12 +263,6 @@ export default function Coworking() {
         }} aria-hidden="true" />
       </section>
 
-      {/* Anchor Chips Section */}
-      <section className="py-6 container border-b border-border">
-        <div className="flex justify-center">
-          <CoworkingAnchorChips />
-        </div>
-      </section>
 
       {/* Availability Section - Below Hero */}
       <section className="py-10 container">
