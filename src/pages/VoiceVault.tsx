@@ -207,7 +207,7 @@ export default function VoiceVault() {
         {/* Subtle grid texture */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:80px_80px]" />
         
-        {/* Logo Watermark Pattern Background - masked to avoid logo area */}
+        {/* Logo Watermark Pattern Background */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-[0.25]"
           style={{
@@ -215,8 +215,6 @@ export default function VoiceVault() {
             backgroundSize: '180px 180px',
             backgroundRepeat: 'repeat',
             filter: 'blur(0.3px)',
-            maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 35%, black 50%, black 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 35%, black 50%, black 100%)',
           }}
         />
         
@@ -233,10 +231,10 @@ export default function VoiceVault() {
                 className="relative mx-auto object-contain" 
                 src="/lovable-uploads/18ea10b5-e374-479a-964b-a6d42bfac671.png"
                 style={{
-                  height: '360px',
+                  height: '280px',
                   width: 'auto',
-                  minWidth: '360px',
-                  maxWidth: '500px',
+                  minWidth: '280px',
+                  maxWidth: '400px',
                 }}
               />
             </div>
