@@ -170,22 +170,23 @@ export default function Fitness() {
             
             {/* Right Column - Visual */}
             <div className="relative hidden lg:block animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              {/* Logo showcase card - dark neutral, no yellow wash */}
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-primary-foreground/5 to-transparent border border-primary-foreground/10">
-                {/* Centered logo - large like Summit */}
-                <div className="absolute inset-0 flex items-center justify-center p-12">
+              {/* Logo showcase card */}
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20">
+                {/* Centered logo */}
+                <div className="absolute inset-0 flex items-center justify-center p-8">
                   <img 
-                    src="/assets/az-total-fitness-logo-transparent.png" 
+                    src="/assets/az-total-fitness-logo.png" 
                     alt="A-Z Total Fitness Enterprise"
-                    className="w-[70%] max-w-[520px] h-auto object-contain"
+                    className="h-20 md:h-28 lg:h-32 w-auto opacity-95"
                   />
                 </div>
-                {/* Subtle decorative glow */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-40 rounded-full bg-accent/5 blur-3xl" />
+                {/* Decorative elements */}
+                <div className="absolute top-4 right-4 h-20 w-20 rounded-full bg-accent/10 blur-xl" />
+                <div className="absolute bottom-4 left-4 h-16 w-16 rounded-full bg-accent/15 blur-lg" />
               </div>
               
-              {/* Floating stat cards - positioned further out to avoid overlap */}
-              <div className="absolute -bottom-6 -left-6 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.5s' }}>
+              {/* Floating stat cards */}
+              <div className="absolute -bottom-4 -left-4 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.5s' }}>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
                     <Flame className="h-5 w-5 text-accent" />
@@ -197,7 +198,7 @@ export default function Fitness() {
                 </div>
               </div>
               
-              <div className="absolute -top-6 -right-6 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.6s' }}>
+              <div className="absolute -top-4 -right-4 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.6s' }}>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
                     <Trophy className="h-5 w-5 text-accent" />
