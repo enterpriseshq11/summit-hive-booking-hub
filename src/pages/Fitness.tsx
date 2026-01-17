@@ -172,12 +172,12 @@ export default function Fitness() {
             <div className="relative hidden lg:block animate-fade-in" style={{ animationDelay: '0.3s' }}>
               {/* Logo showcase card - dark neutral, no yellow wash */}
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-primary-foreground/5 to-transparent border border-primary-foreground/10">
-                {/* Centered logo - large, no background */}
-                <div className="absolute inset-0 flex items-center justify-center p-8">
+                {/* Centered logo - large like Summit */}
+                <div className="absolute inset-0 flex items-center justify-center p-12">
                   <img 
                     src="/assets/az-total-fitness-logo-transparent.png" 
                     alt="A-Z Total Fitness Enterprise"
-                    className="w-[85%] max-w-[580px] h-auto object-contain"
+                    className="w-[70%] max-w-[520px] h-auto object-contain"
                   />
                 </div>
                 {/* Subtle decorative glow */}
