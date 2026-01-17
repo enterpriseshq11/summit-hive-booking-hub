@@ -127,7 +127,7 @@ export default function DopamineDrop() {
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at 2px 2px, rgba(212,175,55,0.4) 1px, transparent 0)", backgroundSize: "50px 50px" }} />
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
           <h1 className="text-4xl md:text-6xl font-black text-white mb-4">
-            SPIN. EARN ENTRIES.<span className="block text-primary">WIN BIG.</span>
+            SPIN. EARN ENTRIES.<span className="block text-accent">WIN BIG.</span>
           </h1>
           <p className="text-lg md:text-xl text-zinc-300 mb-6">
             Every spin earns entries into monthly prize drawings. VIP members earn 2x entries!
