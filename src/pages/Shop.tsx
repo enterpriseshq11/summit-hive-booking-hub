@@ -16,6 +16,38 @@ export default function Shop() {
           <div className="absolute bottom-10 right-20 w-96 h-96 bg-accent rounded-full blur-3xl" />
         </div>
         
+        {/* Honeycomb Watermark Pattern - Left */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
+          <svg className="absolute -left-20 top-1/4 w-[500px] h-[500px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="honeycomb-shop-left" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
+              <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+              <polygon points="10,17.32 20,22.32 20,32.32 10,37.32 0,32.32 0,22.32" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#honeycomb-shop-left)" />
+          </svg>
+        </div>
+        
+        {/* Honeycomb Watermark Pattern - Right */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
+          <svg className="absolute -right-20 top-1/3 w-[600px] h-[600px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="honeycomb-shop-right" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
+              <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+              <polygon points="10,17.32 20,22.32 20,32.32 10,37.32 0,32.32 0,22.32" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#honeycomb-shop-right)" />
+          </svg>
+        </div>
+        
+        {/* Honeycomb Watermark Pattern - Center Background */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.10]" aria-hidden="true">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="honeycomb-shop-center" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
+              <polygon points="6,0 12,3 12,9 6,12 0,9 0,3" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.3"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#honeycomb-shop-center)" />
+          </svg>
+        </div>
+        
         <div className="container relative z-10 text-center max-w-4xl mx-auto px-4">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
             Curated Products We
