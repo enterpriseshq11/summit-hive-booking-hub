@@ -202,11 +202,11 @@ export default function Fitness() {
             </div>
             
             {/* Right Column - Logo */}
-            <div className="relative hidden lg:flex items-center justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <div className="relative hidden lg:flex items-start justify-center animate-fade-in pt-2" style={{ animationDelay: '0.3s' }}>
               <img 
                 src={azTotalFitnessLogo} 
                 alt="A-Z Total Fitness Enterprise logo"
-                className="w-[380px] xl:w-[450px] 2xl:w-[520px] h-auto object-contain"
+                className="w-[480px] xl:w-[560px] 2xl:w-[640px] h-auto object-contain"
                 style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
               />
             </div>
