@@ -225,7 +225,7 @@ export default function Summit() {
             </div>
 
             {/* Right - Summit Logo Prominently Displayed */}
-            <div className="flex justify-center lg:justify-end lg:-mt-14 lg:translate-x-8 xl:translate-x-12">
+            <div className="flex justify-center lg:justify-end lg:-mt-16 lg:translate-x-14 xl:translate-x-20">
               <div className="relative transform scale-100 md:scale-110 lg:scale-[1.25] xl:scale-[1.38]">
                 {/* Gold glow behind logo */}
                 <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
