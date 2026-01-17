@@ -170,17 +170,15 @@ export default function Fitness() {
             
             {/* Right Column - Visual */}
             <div className="relative hidden lg:block animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              {/* Placeholder for gym photo/video - using styled container */}
+              {/* Logo showcase card */}
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20">
-                {/* Decorative gym-themed visual */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <div className="h-24 w-24 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-6 animate-pulse">
-                      <Dumbbell className="h-12 w-12 text-accent" />
-                    </div>
-                    <p className="text-primary-foreground/60 text-lg font-medium">Your Training Journey Starts Here</p>
-                    <p className="text-accent text-sm mt-2">State-of-the-art facility</p>
-                  </div>
+                {/* Centered logo */}
+                <div className="absolute inset-0 flex items-center justify-center p-8">
+                  <img 
+                    src="/assets/az-total-fitness-logo.png" 
+                    alt="A-Z Total Fitness Enterprise"
+                    className="h-20 md:h-28 lg:h-32 w-auto opacity-95"
+                  />
                 </div>
                 {/* Decorative elements */}
                 <div className="absolute top-4 right-4 h-20 w-20 rounded-full bg-accent/10 blur-xl" />
