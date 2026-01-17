@@ -151,87 +151,90 @@ export default function Summit() {
           <img src={e3Logo} alt="" className="w-64 h-auto" aria-hidden="true" />
         </div>
         
-        <div className="container relative z-10 py-16">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left - Content */}
-            <div className="space-y-8 text-center lg:text-left">
-              {/* E³ Badge */}
-              <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
-                <span className="text-accent font-bold text-lg">E³</span>
-                <span className="text-sm font-medium text-primary-foreground/80">The Elevated Experience</span>
-              </div>
-              
-              <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground leading-tight">
-                  The Summit Event Center
-                </h1>
-                <p className="text-2xl md:text-3xl font-light text-accent mb-4">
-                  Elevate Every Event
-                </p>
-                <p className="text-lg md:text-xl text-primary-foreground/70 max-w-xl mx-auto lg:mx-0">
-                  A premium venue designed for unforgettable experiences—from private celebrations to large-scale events.
-                </p>
-              </div>
-              
-              {/* Hero CTA Row */}
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4">
-                  <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary" data-event="summit_request_open">
-                    <CalendarDays className="h-5 w-5 mr-2" />
-                    Book with Victoria
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
-
-                  {/* Trust Chip */}
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/5 border border-primary-foreground/20 rounded-full text-sm font-medium text-primary-foreground/70" aria-label="Response within 24 hours">
-                    <Clock className="h-4 w-4 text-accent" aria-hidden="true" />
-                    Response within 24 hours
-                  </div>
+        {/* Hero content - fixed max-width prevents ultra-wide drift */}
+        <div className="relative z-10 py-16 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
+              {/* Left - Content */}
+              <div className="space-y-8 text-center sm:text-left">
+                {/* E³ Badge */}
+                <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
+                  <span className="text-accent font-bold text-lg">E³</span>
+                  <span className="text-sm font-medium text-primary-foreground/80">The Elevated Experience</span>
                 </div>
-
-                {/* Request Contact Input */}
-                <div className="max-w-md mx-auto lg:mx-0">
-                  <Label htmlFor="contact-input" className="text-sm text-primary-foreground/70 mb-2 block">
-                    Request a Booking (Optional)
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input id="contact-input" type="text" placeholder="Enter your email or phone number" value={contactInput} onChange={e => setContactInput(e.target.value)} className="bg-primary-foreground/5 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-accent" />
-                    <Button variant="outline" onClick={() => setShowRequestModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold">
-                      Send
+                
+                <div>
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground leading-tight">
+                    The Summit Event Center
+                  </h1>
+                  <p className="text-2xl md:text-3xl font-light text-accent mb-4">
+                    Elevate Every Event
+                  </p>
+                  <p className="text-lg md:text-xl text-primary-foreground/70 max-w-xl mx-auto sm:mx-0">
+                    A premium venue designed for unforgettable experiences—from private celebrations to large-scale events.
+                  </p>
+                </div>
+                
+                {/* Hero CTA Row */}
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                    <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary" data-event="summit_request_open">
+                      <CalendarDays className="h-5 w-5 mr-2" />
+                      Book with Victoria
+                      <ArrowRight className="h-5 w-5 ml-2" />
                     </Button>
+
+                    {/* Trust Chip */}
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/5 border border-primary-foreground/20 rounded-full text-sm font-medium text-primary-foreground/70" aria-label="Response within 24 hours">
+                      <Clock className="h-4 w-4 text-accent" aria-hidden="true" />
+                      Response within 24 hours
+                    </div>
+                  </div>
+
+                  {/* Request Contact Input */}
+                  <div className="max-w-md mx-auto sm:mx-0">
+                    <Label htmlFor="contact-input" className="text-sm text-primary-foreground/70 mb-2 block">
+                      Request a Booking (Optional)
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input id="contact-input" type="text" placeholder="Enter your email or phone number" value={contactInput} onChange={e => setContactInput(e.target.value)} className="bg-primary-foreground/5 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-accent" />
+                      <Button variant="outline" onClick={() => setShowRequestModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold">
+                        Send
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Trust Line */}
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
+                  <CheckCircle className="h-5 w-5 text-accent" />
+                  <p className="text-primary-foreground/60 text-sm">
+                    No obligation — request a proposal and review everything before you commit.
+                  </p>
+                </div>
+
+                {/* Quick Info */}
+                <div className="flex flex-wrap gap-6 text-sm text-primary-foreground/70 justify-center sm:justify-start">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-accent" aria-hidden="true" />
+                    <span>Wapakoneta, Ohio</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-accent" aria-hidden="true" />
+                    <span>Up to 300 guests</span>
                   </div>
                 </div>
               </div>
 
-              {/* Trust Line */}
-              <div className="flex items-center gap-2 justify-center lg:justify-start">
-                <CheckCircle className="h-5 w-5 text-accent" />
-                <p className="text-primary-foreground/60 text-sm">
-                  No obligation — request a proposal and review everything before you commit.
-                </p>
-              </div>
-
-              {/* Quick Info */}
-              <div className="flex flex-wrap gap-6 text-sm text-primary-foreground/70 justify-center lg:justify-start">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-accent" aria-hidden="true" />
-                  <span>Wapakoneta, Ohio</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-accent" aria-hidden="true" />
-                  <span>Up to 300 guests</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right - Summit Logo Prominently Displayed */}
-            <div className="flex justify-center lg:justify-end lg:-mt-8 lg:translate-x-32 lg:translate-y-2 xl:translate-y-10 2xl:translate-y-14">
-              <div className="relative transform scale-100 md:scale-110 lg:scale-[1.25]">
+              {/* Right - Summit Logo Stage (fixed alignment + consistent sizing) */}
+              <div className="relative flex items-center justify-center min-h-[260px] sm:min-h-[400px]">
                 {/* Gold glow behind logo */}
                 <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
-                <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl drop-shadow-2xl object-contain opacity-100" style={{
-                maxHeight: "clamp(500px, 75vw, 900px)"
-              }} src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" />
+                <img 
+                  alt="The Summit Event Center - Elevate Every Event" 
+                  className="relative w-[520px] max-w-full drop-shadow-2xl object-contain" 
+                  src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
+                />
               </div>
             </div>
           </div>
