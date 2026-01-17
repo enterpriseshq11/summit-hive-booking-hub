@@ -156,14 +156,14 @@ export default function Coworking() {
           </svg>
         </div>
         
-        <div className="container relative z-10">
-          <div className="grid lg:grid-cols-[auto_1fr_auto] gap-8 lg:gap-12 items-center">
-            {/* Logo - Left Side (hidden on mobile) */}
-            <div className="hidden lg:flex items-center justify-center">
+        <div className="container relative z-10 px-4 lg:px-6">
+          <div className="grid lg:grid-cols-[minmax(280px,420px)_1fr_auto] gap-6 lg:gap-8 items-center">
+            {/* Logo - Left Side (hidden on mobile, pushed left) */}
+            <div className="hidden lg:flex items-center justify-start -ml-4 xl:-ml-8">
               <img 
                 src={theHiveLogo} 
                 alt="The Hive by A-Z Logo" 
-                className="w-64 xl:w-80 max-w-[340px] h-auto object-contain drop-shadow-2xl"
+                className="w-80 xl:w-96 2xl:w-[420px] max-w-none h-auto object-contain drop-shadow-2xl"
               />
             </div>
             
