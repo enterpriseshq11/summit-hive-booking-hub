@@ -222,13 +222,13 @@ export default function VoiceVault() {
         <div className="absolute inset-0 bg-primary/40" />
 
         <div className="container relative z-10 py-12 lg:py-16">
-          <div className="max-w-3xl mx-auto text-center relative" style={{ paddingTop: '320px' }}>
+          <div className="max-w-3xl mx-auto text-center relative" style={{ paddingTop: '280px' }}>
             {/* Logo with glow - ABSOLUTE POSITIONED, ENLARGED, HIGHER */}
             <div 
               className="absolute left-1/2 z-20"
               style={{ 
                 transform: 'translateX(-50%)',
-                top: '-80px',
+                top: '-40px',
               }}
             >
               <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-150" />
@@ -237,14 +237,14 @@ export default function VoiceVault() {
                 className="relative object-contain" 
                 src="/lovable-uploads/18ea10b5-e374-479a-964b-a6d42bfac671.png"
                 style={{
-                  width: '520px',
-                  height: 'auto',
+                  height: '420px',
+                  width: '420px',
                 }}
               />
             </div>
             
             {/* A3: Clear headline hierarchy - pulled up tight under logo */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight" style={{ marginTop: '-20px' }}>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight" style={{ marginTop: '-60px' }}>
               <span className="text-gold-gradient">Voice Vault</span>
               <span className="block text-2xl md:text-3xl lg:text-4xl font-medium mt-2 text-primary-foreground/90">
                 by The Hive
