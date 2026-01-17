@@ -209,7 +209,7 @@ export default function VoiceVault() {
         
         {/* Logo Watermark Pattern Background */}
         <div 
-          className="absolute inset-0 pointer-events-none opacity-[0.18]"
+          className="absolute inset-0 pointer-events-none opacity-[0.25]"
           style={{
             backgroundImage: `url('/lovable-uploads/18ea10b5-e374-479a-964b-a6d42bfac671.png')`,
             backgroundSize: '180px 180px',
