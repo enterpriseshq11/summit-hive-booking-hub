@@ -227,8 +227,8 @@ export default function VoiceVault() {
             <div 
               className="absolute left-1/2 z-20"
               style={{ 
-                transform: 'translateX(-50%)',
-                top: '-40px',
+                transform: 'translateX(-50%) translateY(-120px)',
+                top: '0px',
               }}
             >
               <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-150" />
@@ -237,14 +237,14 @@ export default function VoiceVault() {
                 className="relative object-contain" 
                 src="/lovable-uploads/18ea10b5-e374-479a-964b-a6d42bfac671.png"
                 style={{
-                  height: '420px',
-                  width: '420px',
+                  height: '460px',
+                  width: '460px',
                 }}
               />
             </div>
             
-            {/* A3: Clear headline hierarchy - pulled up tight under logo */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight" style={{ marginTop: '-60px' }}>
+            {/* A3: Clear headline hierarchy */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
               <span className="text-gold-gradient">Voice Vault</span>
               <span className="block text-2xl md:text-3xl lg:text-4xl font-medium mt-2 text-primary-foreground/90">
                 by The Hive
