@@ -225,12 +225,12 @@ export default function Summit() {
             </div>
 
             {/* Right - Summit Logo Prominently Displayed */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="relative">
+            <div className="flex justify-center lg:justify-end lg:-mt-8 lg:translate-x-4 xl:translate-x-8">
+              <div className="relative transform scale-100 md:scale-105 lg:scale-115 xl:scale-125">
                 {/* Gold glow behind logo */}
                 <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
-                <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-4xl lg:max-w-5xl drop-shadow-2xl object-contain opacity-100" style={{
-                maxHeight: "clamp(500px, 70vw, 800px)"
+                <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl drop-shadow-2xl object-contain opacity-100" style={{
+                maxHeight: "clamp(500px, 75vw, 900px)"
               }} src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" />
               </div>
             </div>
