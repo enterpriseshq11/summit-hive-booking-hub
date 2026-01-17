@@ -163,7 +163,7 @@ export default function Coworking() {
               <img 
                 src={theHiveLogo} 
                 alt="The Hive by A-Z Logo" 
-                className="w-80 xl:w-96 2xl:w-[420px] max-w-none h-auto object-contain drop-shadow-2xl"
+                className="w-80 xl:w-96 2xl:w-[420px] max-w-none h-auto object-contain drop-shadow-2xl brightness-110 saturate-[1.3]"
               />
             </div>
             
