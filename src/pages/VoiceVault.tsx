@@ -224,23 +224,23 @@ export default function VoiceVault() {
         <div className="container relative z-10 py-20 lg:py-28">
           <div className="max-w-3xl mx-auto text-center">
             {/* Logo with glow - ENLARGED and POSITION LOCKED */}
-            <div className="relative mb-8 inline-block">
+            <div className="relative mb-2 inline-block" style={{ marginBottom: '-20px' }}>
               <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-150" />
               <img 
                 alt="The Voice Vault by A-Z" 
                 className="relative mx-auto object-contain" 
                 src="/lovable-uploads/18ea10b5-e374-479a-964b-a6d42bfac671.png"
                 style={{
-                  height: '280px',
+                  height: '380px',
                   width: 'auto',
-                  minWidth: '280px',
-                  maxWidth: '400px',
+                  minWidth: '380px',
+                  maxWidth: '500px',
                 }}
               />
             </div>
             
             {/* A3: Clear headline hierarchy */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight" style={{ marginTop: '-10px' }}>
               <span className="text-gold-gradient">Voice Vault</span>
               <span className="block text-2xl md:text-3xl lg:text-4xl font-medium mt-2 text-primary-foreground/90">
                 by The Hive
