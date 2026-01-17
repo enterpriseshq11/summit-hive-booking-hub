@@ -1,4 +1,5 @@
 import { useState } from "react";
+import azTotalFitnessLogo from "@/assets/az-total-fitness-transparent.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -200,49 +201,14 @@ export default function Fitness() {
               </div>
             </div>
             
-            {/* Right Column - Visual */}
-            <div className="relative hidden lg:block animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              {/* Placeholder for gym photo/video - using styled container */}
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20">
-                {/* Decorative gym-themed visual */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <div className="h-24 w-24 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-6 animate-pulse">
-                      <Dumbbell className="h-12 w-12 text-accent" />
-                    </div>
-                    <p className="text-primary-foreground/60 text-lg font-medium">Your Training Journey Starts Here</p>
-                    <p className="text-accent text-sm mt-2">State-of-the-art facility</p>
-                  </div>
-                </div>
-                {/* Decorative elements */}
-                <div className="absolute top-4 right-4 h-20 w-20 rounded-full bg-accent/10 blur-xl" />
-                <div className="absolute bottom-4 left-4 h-16 w-16 rounded-full bg-accent/15 blur-lg" />
-              </div>
-              
-              {/* Floating stat cards */}
-              <div className="absolute -bottom-4 -left-4 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.5s' }}>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
-                    <Flame className="h-5 w-5 text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Members Active</p>
-                    <p className="text-lg font-bold text-foreground">200+</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="absolute -top-4 -right-4 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.6s' }}>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
-                    <Trophy className="h-5 w-5 text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Certified Trainers</p>
-                    <p className="text-lg font-bold text-foreground">5+</p>
-                  </div>
-                </div>
-              </div>
+            {/* Right Column - Logo */}
+            <div className="relative hidden lg:flex items-center justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <img 
+                src={azTotalFitnessLogo} 
+                alt="A-Z Total Fitness Enterprise logo"
+                className="w-[380px] xl:w-[450px] 2xl:w-[520px] h-auto object-contain"
+                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+              />
             </div>
           </div>
         </div>
