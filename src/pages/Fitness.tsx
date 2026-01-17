@@ -172,20 +172,22 @@ export default function Fitness() {
             <div className="relative hidden lg:block animate-fade-in" style={{ animationDelay: '0.3s' }}>
               {/* Logo showcase card - dark neutral, no yellow wash */}
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-primary-foreground/5 to-transparent border border-primary-foreground/10">
-                {/* Centered logo - large, no background */}
-                <div className="absolute inset-0 flex items-center justify-center p-8">
-                  <img 
-                    src="/assets/az-total-fitness-logo-transparent.png" 
-                    alt="A-Z Total Fitness Enterprise"
-                    className="w-[85%] max-w-[580px] h-auto object-contain"
+                {/* Centered logo - large, truly transparent (no tile/box) */}
+                <div className="absolute inset-0 flex items-center justify-center p-6 bg-transparent border-0 shadow-none ring-0 outline-0">
+                  <img
+                    src="/assets/az-total-fitness-logo-transparent.png"
+                    alt="A-Z Total Fitness logo"
+                    className="w-[90%] max-w-[360px] lg:w-[85%] lg:max-w-[600px] h-auto object-contain bg-transparent border-0 shadow-none ring-0 outline-0"
+                    draggable={false}
                   />
                 </div>
-                {/* Subtle decorative glow */}
+
+                {/* Subtle decorative glow (kept very low to avoid wash) */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-40 rounded-full bg-accent/5 blur-3xl" />
               </div>
-              
-              {/* Floating stat cards - positioned further out to avoid overlap */}
-              <div className="absolute -bottom-6 -left-6 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.5s' }}>
+
+              {/* Floating stat cards - positioned outward to avoid overlap */}
+              <div className="absolute -bottom-8 -left-8 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.5s' }}>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
                     <Flame className="h-5 w-5 text-accent" />
@@ -196,8 +198,8 @@ export default function Fitness() {
                   </div>
                 </div>
               </div>
-              
-              <div className="absolute -top-6 -right-6 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.6s' }}>
+
+              <div className="absolute -top-8 -right-8 bg-card border border-border rounded-xl p-4 shadow-premium animate-fade-in" style={{ animationDelay: '0.6s' }}>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
                     <Trophy className="h-5 w-5 text-accent" />
