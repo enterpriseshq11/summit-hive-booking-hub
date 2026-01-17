@@ -76,7 +76,7 @@ export function ExperiencePreviewPanel() {
               transition-all duration-300 group
               opacity-0 animate-fade-in-left
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
-              bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/40 hover:scale-[1.02] hover:-translate-x-1
+              bg-white/15 border-white/30 hover:bg-white/25 hover:border-white/50 hover:scale-[1.02] hover:-translate-x-1
             `}
             style={{ 
               animationDelay: exp.delay,
@@ -90,7 +90,7 @@ export function ExperiencePreviewPanel() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-white truncate">{exp.name}</p>
-                <p className="text-sm text-white/60">{exp.tagline}</p>
+                <p className="text-sm text-white/70">{exp.tagline}</p>
               </div>
               <ChevronRight className="h-5 w-5 shrink-0 transition-all text-white/40 group-hover:text-white group-hover:translate-x-1" />
             </div>
