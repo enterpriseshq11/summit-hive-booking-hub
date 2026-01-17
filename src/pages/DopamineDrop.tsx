@@ -145,7 +145,7 @@ export default function DopamineDrop() {
             </Button>
             <Button 
               size="lg" 
-              className="border border-primary/50 bg-transparent text-primary hover:bg-primary/20 hover:border-primary" 
+              className="border border-accent/50 bg-transparent text-accent hover:bg-accent/20 hover:border-accent" 
               onClick={() => document.getElementById("prizes")?.scrollIntoView({ behavior: "smooth" })}
             >
               View Prizes + Rules<ChevronRight className="w-4 h-4 ml-1" />
