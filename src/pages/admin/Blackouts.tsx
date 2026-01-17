@@ -328,7 +328,7 @@ export default function AdminBlackouts() {
             <div className="space-y-4">
               <div>
                 <Label>Business (leave empty for all)</Label>
-                <Select value={form.business_id} onValueChange={(v) => setForm({ ...form, business_id: v === "all" ? "" : v })}>
+                <Select value={form.business_id || "all"} onValueChange={(v) => setForm({ ...form, business_id: v === "all" ? "" : v })}>
                   <SelectTrigger><SelectValue placeholder="All businesses" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Businesses</SelectItem>
@@ -340,7 +340,7 @@ export default function AdminBlackouts() {
               </div>
               <div>
                 <Label>Resource (leave empty for all)</Label>
-                <Select value={form.resource_id} onValueChange={(v) => setForm({ ...form, resource_id: v === "all" ? "" : v })}>
+                <Select value={form.resource_id || "all"} onValueChange={(v) => setForm({ ...form, resource_id: v === "all" ? "" : v })}>
                   <SelectTrigger><SelectValue placeholder="All resources" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Resources</SelectItem>

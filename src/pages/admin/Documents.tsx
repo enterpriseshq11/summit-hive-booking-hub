@@ -288,7 +288,7 @@ export default function AdminDocuments() {
                 </div>
                 <div>
                   <Label>Service Type (optional)</Label>
-                  <Select value={form.bookable_type_id} onValueChange={(v) => setForm({ ...form, bookable_type_id: v === "all" ? "" : v })}>
+                  <Select value={form.bookable_type_id || "all"} onValueChange={(v) => setForm({ ...form, bookable_type_id: v === "all" ? "" : v })}>
                     <SelectTrigger><SelectValue placeholder="All types" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Types</SelectItem>

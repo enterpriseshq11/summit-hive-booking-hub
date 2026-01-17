@@ -199,12 +199,15 @@ export function AvailabilitySearch({
           {businessType && bookableTypes && bookableTypes.length > 0 && (
             <div className="space-y-2">
               <label className="text-sm font-medium">Service Type</label>
-              <Select value={bookableTypeId} onValueChange={setBookableTypeId}>
+              <Select 
+                value={bookableTypeId || "__all__"} 
+                onValueChange={(v) => setBookableTypeId(v === "__all__" ? "" : v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border shadow-lg z-50">
-                  <SelectItem value="">All types</SelectItem>
+                  <SelectItem value="__all__">All types</SelectItem>
                   {bookableTypes.map((bt) => (
                     <SelectItem key={bt.id} value={bt.id}>
                       {bt.name}
