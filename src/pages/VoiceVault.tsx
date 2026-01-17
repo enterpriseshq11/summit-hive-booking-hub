@@ -228,13 +228,13 @@ export default function VoiceVault() {
               <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-150" />
               <img 
                 alt="The Voice Vault by A-Z" 
-                className="relative mx-auto object-contain" 
+                className="relative mx-auto object-contain shrink-0" 
                 src="/lovable-uploads/18ea10b5-e374-479a-964b-a6d42bfac671.png"
                 style={{
-                  height: '280px',
+                  height: '520px',
                   width: 'auto',
-                  minWidth: '280px',
-                  maxWidth: '400px',
+                  minWidth: '520px',
+                  maxWidth: 'none',
                 }}
               />
             </div>
