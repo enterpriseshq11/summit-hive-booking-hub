@@ -131,13 +131,33 @@ export default function Summit() {
         {/* Dark textured background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-black" />
         
-        {/* Mountain silhouette effect - subtle background */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{
-        backgroundImage: `url(${summitLogo})`,
-        backgroundSize: "max(100%, 1400px) auto",
-        backgroundPosition: "60% 35%",
-        backgroundRepeat: "no-repeat"
-      }} />
+        {/* Logo alignment wrapper - both layers share this anchor */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Mountain silhouette effect - subtle background */}
+          <div 
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.04]" 
+            style={{
+              backgroundImage: `url(${summitLogo})`,
+              backgroundSize: "max(100%, 1400px) auto",
+              backgroundPosition: "center center",
+              backgroundRepeat: "no-repeat"
+            }} 
+          />
+          
+          {/* Foreground gold logo - same anchor point */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center pointer-events-auto">
+            <div className="relative transform scale-[1.25]">
+              {/* Gold glow behind logo */}
+              <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
+              <img 
+                alt="The Summit Event Center - Elevate Every Event" 
+                className="relative w-full max-w-5xl drop-shadow-2xl object-contain opacity-100" 
+                style={{ maxHeight: "clamp(500px, 75vw, 900px)" }} 
+                src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
+              />
+            </div>
+          </div>
+        </div>
         
         {/* Gold radial glow effects */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
@@ -224,14 +244,17 @@ export default function Summit() {
               </div>
             </div>
 
-            {/* Right - Summit Logo Prominently Displayed */}
-            <div className="flex justify-center lg:justify-end lg:-mt-8 lg:translate-x-20 lg:translate-y-4 xl:translate-y-12 2xl:translate-y-16">
-              <div className="relative transform scale-100 md:scale-110 lg:scale-[1.25]">
+            {/* Right column - Mobile logo only (desktop logo is in shared anchor wrapper above) */}
+            <div className="flex justify-center lg:hidden">
+              <div className="relative transform scale-100 md:scale-110">
                 {/* Gold glow behind logo */}
                 <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
-                <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl drop-shadow-2xl object-contain opacity-100" style={{
-                maxHeight: "clamp(500px, 75vw, 900px)"
-              }} src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" />
+                <img 
+                  alt="The Summit Event Center - Elevate Every Event" 
+                  className="relative w-full max-w-4xl drop-shadow-2xl object-contain opacity-100" 
+                  style={{ maxHeight: "clamp(500px, 75vw, 900px)" }} 
+                  src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
+                />
               </div>
             </div>
           </div>
