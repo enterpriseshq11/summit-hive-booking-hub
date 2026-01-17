@@ -202,7 +202,7 @@ export default function Fitness() {
             </div>
             
             {/* Right Column - Logo */}
-            <div className="relative hidden lg:flex items-start justify-center animate-fade-in pt-2" style={{ animationDelay: '0.3s' }}>
+            <div className="relative hidden lg:flex items-start justify-center animate-fade-in pt-24 xl:pt-28" style={{ animationDelay: '0.3s' }}>
               <img 
                 src={azTotalFitnessLogo} 
                 alt="A-Z Total Fitness Enterprise logo"
