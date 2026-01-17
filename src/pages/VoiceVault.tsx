@@ -228,7 +228,7 @@ export default function VoiceVault() {
               className="absolute left-1/2 z-20"
               style={{ 
                 transform: 'translateX(-50%)',
-                top: '-40px',
+                top: '-70px',
               }}
             >
               <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-150" />
