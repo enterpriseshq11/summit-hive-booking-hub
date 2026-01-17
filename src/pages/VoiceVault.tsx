@@ -206,6 +206,38 @@ export default function VoiceVault() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
         {/* Subtle grid texture */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:80px_80px]" />
+        
+        {/* Diagonal Watermarks - Left side (angled down-left) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
+          <div 
+            className="absolute -left-32 top-1/2 -translate-y-1/2 whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.07] select-none"
+            style={{ transform: 'translateY(-50%) rotate(-18deg)', transformOrigin: 'center' }}
+          >
+            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ •
+          </div>
+          <div 
+            className="absolute -left-32 top-1/4 -translate-y-1/2 whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.05] select-none"
+            style={{ transform: 'translateY(-50%) rotate(-18deg)', transformOrigin: 'center' }}
+          >
+            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ •
+          </div>
+        </div>
+        
+        {/* Diagonal Watermarks - Right side (angled down-right) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
+          <div 
+            className="absolute -right-32 top-1/2 -translate-y-1/2 whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.07] select-none"
+            style={{ transform: 'translateY(-50%) rotate(18deg)', transformOrigin: 'center' }}
+          >
+            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
+          </div>
+          <div 
+            className="absolute -right-32 top-3/4 -translate-y-1/2 whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.05] select-none"
+            style={{ transform: 'translateY(-50%) rotate(18deg)', transformOrigin: 'center' }}
+          >
+            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
+          </div>
+        </div>
 
         <div className="container relative z-10 py-20 lg:py-28">
           <div className="max-w-3xl mx-auto text-center">
