@@ -216,129 +216,98 @@ export default function VoiceVault() {
 
   return (
     <div className="min-h-screen">
-      {/* HERO SECTION - Summit-style layout with watermark */}
-      <section className="relative min-h-[90vh] flex items-center bg-primary text-primary-foreground overflow-hidden">
-        {/* Dark textured background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-black" />
-        
-        {/* Voice Vault logo watermark - subtle background */}
-        <div 
-          className="absolute inset-0 opacity-[0.04] pointer-events-none" 
-          style={{
-            backgroundImage: `url(${voiceVaultLogo})`,
-            backgroundSize: "max(80%, 1000px) auto",
-            backgroundPosition: "60% 40%",
-            backgroundRepeat: "no-repeat"
-          }} 
-        />
-        
-        {/* Gold radial glow effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.08)_0%,transparent_40%)]" />
-        
+      {/* HERO SECTION - A1/A3: Improved hierarchy and depth */}
+      <section className="relative min-h-[75vh] flex items-center bg-primary text-primary-foreground overflow-hidden">
+        {/* Gold spotlight effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,hsl(var(--accent)/0.2)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
         {/* Subtle grid texture */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:80px_80px]" />
-        
-        {/* Additional watermark element in corner */}
-        <div className="absolute bottom-10 right-10 opacity-[0.03] hidden lg:block pointer-events-none">
-          <Mic className="w-64 h-64 text-accent" aria-hidden="true" />
-        </div>
 
-        <div className="container relative z-10 py-16">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left - Content */}
-            <div className="space-y-8 text-center lg:text-left">
-              {/* Voice Vault Badge */}
-              <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
-                <Mic className="h-5 w-5 text-accent" />
-                <span className="text-sm font-medium text-primary-foreground/80">Professional Recording Studio</span>
-              </div>
-              
-              <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground leading-tight">
-                  <span className="text-gold-gradient">Voice Vault</span>
-                  <span className="block text-2xl md:text-3xl lg:text-4xl font-medium mt-2 text-primary-foreground/90">
-                    by The Hive
-                  </span>
-                </h1>
-                <p className="text-2xl md:text-3xl font-light text-accent mb-4">
-                  Walk in. Record. Walk out.
-                </p>
-                <p className="text-lg md:text-xl text-primary-foreground/70 max-w-xl mx-auto lg:mx-0">
-                  A fully soundproof, professional podcast & recording studio designed for creators, professionals, and artists.
-                </p>
-              </div>
-              
-              {/* Hero CTA Row */}
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4">
-                  <Button
-                    size="lg"
-                    className="bg-accent hover:bg-accent/90 text-primary font-bold text-lg px-10 h-14 shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-shadow"
-                    onClick={handleBookingClick}
-                  >
-                    <Calendar className="w-5 h-5 mr-2" />
-                    Reserve Studio
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold text-lg px-8 h-14"
-                    onClick={scrollToPackages}
-                  >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    Explore Packages
-                  </Button>
-                </div>
-              </div>
+        <div className="container relative z-10 py-20 lg:py-28">
+          <div className="max-w-3xl mx-auto text-center">
+            {/* Logo with glow */}
+            <div className="relative mb-8 inline-block">
+              <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full" />
+              <img 
+                src={voiceVaultLogo} 
+                alt="The Voice Vault by A-Z" 
+                className="relative h-32 md:h-40 mx-auto object-contain"
+              />
+            </div>
+            
+            {/* A3: Clear headline hierarchy */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
+              <span className="text-gold-gradient">Voice Vault</span>
+              <span className="block text-2xl md:text-3xl lg:text-4xl font-medium mt-2 text-primary-foreground/90">
+                by The Hive
+              </span>
+            </h1>
+            
+            {/* C1: Clear explanation */}
+            <p className="text-lg md:text-xl text-primary-foreground/90 mb-3 max-w-2xl mx-auto font-medium">
+              A fully soundproof, professional podcast & recording studio
+            </p>
+            <p className="text-base md:text-lg text-primary-foreground/70 mb-6 max-w-xl mx-auto">
+              Designed for creators, professionals, and artists who want broadcast-quality audio without the hassle.
+            </p>
+            
+            <p className="text-xl md:text-2xl font-semibold text-accent mb-10">
+              Walk in. Record. Walk out. We handle the rest.
+            </p>
 
-              {/* Trust chips */}
-              <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                {[
-                  { icon: Shield, label: "Soundproof Studio" },
-                  { icon: Mic, label: "Pro Equipment" },
-                  { icon: Clock, label: "Flexible Booking" },
-                ].map((chip) => (
-                  <div 
-                    key={chip.label}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/5 border border-primary-foreground/10 text-sm text-primary-foreground/80"
-                  >
-                    <chip.icon className="h-4 w-4 text-accent" />
-                    {chip.label}
-                  </div>
-                ))}
-              </div>
+            {/* D1: Prominent, consistent CTAs */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+              <Button
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-primary font-bold text-lg px-10 h-14 shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-shadow"
+                onClick={handleBookingClick}
+              >
+                <Calendar className="w-5 h-5 mr-2" />
+                Reserve Studio
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold text-lg px-8 h-14"
+                onClick={scrollToPackages}
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                Explore Packages
+              </Button>
+            </div>
 
-              <p className="text-sm text-primary-foreground/60 text-center lg:text-left">
-                By booking, you agree to the{" "}
-                <button
-                  onClick={() => setTermsOpen(true)}
-                  className="underline text-accent hover:text-accent/80 transition-colors font-medium"
+            {/* Trust chips */}
+            <div className="flex flex-wrap justify-center gap-3 mb-6">
+              {[
+                { icon: Shield, label: "Soundproof Studio" },
+                { icon: Mic, label: "Pro Equipment" },
+                { icon: Clock, label: "Flexible Booking" },
+              ].map((chip) => (
+                <div 
+                  key={chip.label}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/5 border border-primary-foreground/10 text-sm text-primary-foreground/80"
                 >
-                  Studio & Content Terms
-                </button>
-                .
-              </p>
+                  <chip.icon className="h-4 w-4 text-accent" />
+                  {chip.label}
+                </div>
+              ))}
             </div>
 
-            {/* Right - Voice Vault Logo Prominently Displayed */}
-            <div className="flex justify-center lg:justify-end lg:-mt-8 lg:translate-x-20 lg:translate-y-4 xl:translate-y-8 2xl:translate-y-12">
-              <div className="relative transform scale-100 md:scale-110 lg:scale-[1.25]">
-                {/* Gold glow behind logo */}
-                <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
-                <img 
-                  src={voiceVaultLogo} 
-                  alt="Voice Vault by The Hive - Professional Recording Studio" 
-                  className="relative w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl drop-shadow-2xl object-contain opacity-100"
-                  style={{ maxHeight: "clamp(400px, 60vw, 700px)" }}
-                />
-              </div>
-            </div>
+            <p className="text-sm text-primary-foreground/60">
+              By booking, you agree to the{" "}
+              <button
+                onClick={() => setTermsOpen(true)}
+                className="underline text-accent hover:text-accent/80 transition-colors font-medium"
+              >
+                Studio & Content Terms
+              </button>
+              .
+            </p>
           </div>
         </div>
 
-        {/* Section transition */}
+        {/* Gradient divider */}
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
