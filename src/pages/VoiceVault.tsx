@@ -210,32 +210,56 @@ export default function VoiceVault() {
         {/* Diagonal Watermarks - Left side (angled down-left) */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
           <div 
-            className="absolute -left-32 top-1/2 -translate-y-1/2 whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.15] select-none"
-            style={{ transform: 'translateY(-50%) rotate(-18deg)', transformOrigin: 'center' }}
+            className="absolute -left-20 top-[5%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.12] select-none"
+            style={{ transform: 'rotate(-18deg)', transformOrigin: 'left center' }}
           >
-            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ •
+            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
           </div>
           <div 
-            className="absolute -left-32 top-1/4 -translate-y-1/2 whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.10] select-none"
-            style={{ transform: 'translateY(-50%) rotate(-18deg)', transformOrigin: 'center' }}
+            className="absolute -left-20 top-[20%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.08] select-none"
+            style={{ transform: 'rotate(-18deg)', transformOrigin: 'left center' }}
           >
-            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ •
+            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
+          </div>
+          <div 
+            className="absolute -left-20 top-[40%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.15] select-none"
+            style={{ transform: 'rotate(-18deg)', transformOrigin: 'left center' }}
+          >
+            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
+          </div>
+          <div 
+            className="absolute -left-20 top-[60%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.10] select-none"
+            style={{ transform: 'rotate(-18deg)', transformOrigin: 'left center' }}
+          >
+            THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
           </div>
         </div>
         
         {/* Diagonal Watermarks - Right side (angled down-right) */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
           <div 
-            className="absolute -right-32 top-1/2 -translate-y-1/2 whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.15] select-none"
-            style={{ transform: 'translateY(-50%) rotate(18deg)', transformOrigin: 'center' }}
+            className="absolute -right-20 top-[15%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.10] select-none"
+            style={{ transform: 'rotate(18deg)', transformOrigin: 'right center' }}
           >
-            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
+            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT
           </div>
           <div 
-            className="absolute -right-32 top-3/4 -translate-y-1/2 whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.10] select-none"
-            style={{ transform: 'translateY(-50%) rotate(18deg)', transformOrigin: 'center' }}
+            className="absolute -right-20 top-[35%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.15] select-none"
+            style={{ transform: 'rotate(18deg)', transformOrigin: 'right center' }}
           >
-            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT •
+            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT
+          </div>
+          <div 
+            className="absolute -right-20 top-[55%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.08] select-none"
+            style={{ transform: 'rotate(18deg)', transformOrigin: 'right center' }}
+          >
+            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT
+          </div>
+          <div 
+            className="absolute -right-20 top-[75%] whitespace-nowrap text-[52px] font-semibold tracking-[0.25em] text-accent/[0.12] select-none"
+            style={{ transform: 'rotate(18deg)', transformOrigin: 'right center' }}
+          >
+            🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT • 🎙️ • THE VOICE VAULT
           </div>
         </div>
 
