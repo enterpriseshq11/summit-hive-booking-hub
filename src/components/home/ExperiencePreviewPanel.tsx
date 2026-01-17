@@ -85,8 +85,8 @@ export function ExperiencePreviewPanel() {
             aria-label={`Go to ${exp.name} - ${exp.tagline}`}
           >
             <div className="flex items-center gap-4">
-              <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-all ${exp.iconBg} group-hover:bg-accent/30`}>
-                <exp.icon className={`h-6 w-6 ${exp.iconColor} group-hover:text-accent`} />
+              <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-all bg-accent/25 group-hover:bg-accent/40`}>
+                <exp.icon className="h-6 w-6 text-accent group-hover:text-accent" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-white truncate">{exp.name}</p>
