@@ -160,7 +160,7 @@ export default function Summit() {
                 <img 
                   src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
                   alt="The Summit Event Center" 
-                  className="w-48 h-auto drop-shadow-lg"
+                  className="w-64 h-auto drop-shadow-lg"
                 />
                 <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
                   <span className="text-accent font-bold text-lg">E³</span>
@@ -238,8 +238,8 @@ export default function Summit() {
               </div>
             </div>
 
-            {/* Right - Summit Logo Prominently Displayed */}
-            <div className="flex justify-center lg:justify-end lg:-mt-8 lg:translate-x-32 lg:translate-y-2 xl:translate-y-10 2xl:translate-y-14">
+            {/* Right - Summit Logo Prominently Displayed (hidden on mobile - shown at top instead) */}
+            <div className="hidden md:flex justify-center lg:justify-end lg:-mt-8 lg:translate-x-32 lg:translate-y-2 xl:translate-y-10 2xl:translate-y-14">
               <div className="relative transform scale-100 md:scale-110 lg:scale-[1.25]">
                 {/* Gold glow behind logo */}
                 <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
