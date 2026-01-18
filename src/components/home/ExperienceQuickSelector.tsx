@@ -10,7 +10,7 @@ const experiences = [
 
 export function ExperienceQuickSelector() {
   return (
-    <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+    <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-start gap-3">
       {experiences.map((exp) => (
         <Link
           key={exp.href}
