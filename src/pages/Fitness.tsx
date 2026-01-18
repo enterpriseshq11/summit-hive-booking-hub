@@ -91,7 +91,7 @@ export default function Fitness() {
   return (
     <div className="min-h-screen">
       {/* Hero Section - 2-Column Layout with Animation */}
-      <section className="relative py-12 md:py-16 overflow-hidden bg-primary">
+      <section className="relative pt-12 md:pt-16 pb-4 md:pb-6 overflow-hidden bg-primary">
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
@@ -130,79 +130,84 @@ export default function Fitness() {
         </div>
         
         <div className="container relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-            {/* Left Column - Copy */}
-            <div className="animate-fade-in">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-8">
-                <Dumbbell className="h-4 w-4" />
-                Total Fitness by A-Z
-              </div>
-              
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-primary-foreground leading-tight">
-                Train on your schedule. Get real results. Feel supported every step.
-              </h1>
-              <p className="text-xl md:text-2xl text-primary-foreground/80 mb-8 max-w-xl">
-                24/7 access, expert coaching, and a community that actually notices when you show up.
-              </p>
-              
-              {/* Hero CTAs - Primary (Dominant) + Secondary */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                <Button 
-                  size="lg" 
-                  onClick={() => openJoinModal()}
-                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all text-lg px-10 py-7"
-                  data-event="fitness_hero_cta_click"
-                >
-                  <Dumbbell className="h-5 w-5 mr-2" />
-                  Join Now
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  onClick={() => setShowOrientationModal(true)}
-                  className="border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 hover:border-primary-foreground/50 font-medium"
-                  data-event="fitness_hero_orientation_click"
-                >
-                  <Calendar className="h-5 w-5 mr-2" />
-                  Schedule Orientation
-                </Button>
-              </div>
-              
-              {/* Microcopy under primary CTA */}
-              <p className="text-sm text-primary-foreground/60 mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                No contracts • Cancel anytime • Local team support
-              </p>
-              
-              {/* Tertiary text link */}
-              <a 
-                href="#fitness-memberships" 
-                className="text-sm text-accent hover:underline inline-flex items-center gap-1 animate-fade-in"
-                style={{ animationDelay: '0.4s' }}
-              >
-                See Memberships <ChevronRight className="h-3 w-3" />
-              </a>
-              
-              {/* Trust Chips - 3 quick badges */}
-              <div className="flex flex-wrap gap-3 mt-8 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-                {[
-                  { icon: Clock, label: "24/7 Access" },
-                  { icon: Users, label: "Coach Support" },
-                  { icon: Shield, label: "No Contracts" }
-                ].map((chip) => (
-                  <div 
-                    key={chip.label} 
-                    className="flex items-center gap-2 px-4 py-2 bg-accent/15 rounded-full text-sm font-medium text-accent border border-accent/30"
+          <div className="relative">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+              {/* Left Column - Copy */}
+              <div className="animate-fade-in">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-8">
+                  <Dumbbell className="h-4 w-4" />
+                  Total Fitness by A-Z
+                </div>
+                
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-primary-foreground leading-tight">
+                  Train on your schedule. Get real results. Feel supported every step.
+                </h1>
+                <p className="text-xl md:text-2xl text-primary-foreground/80 mb-8 max-w-xl">
+                  24/7 access, expert coaching, and a community that actually notices when you show up.
+                </p>
+                
+                {/* Hero CTAs - Primary (Dominant) + Secondary */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                  <Button 
+                    size="lg" 
+                    onClick={() => openJoinModal()}
+                    className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all text-lg px-10 py-7"
+                    data-event="fitness_hero_cta_click"
                   >
-                    <chip.icon className="h-4 w-4" />
-                    {chip.label}
-                  </div>
-                ))}
+                    <Dumbbell className="h-5 w-5 mr-2" />
+                    Join Now
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    onClick={() => setShowOrientationModal(true)}
+                    className="border-primary-foreground/30 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 hover:border-primary-foreground/50 font-medium"
+                    data-event="fitness_hero_orientation_click"
+                  >
+                    <Calendar className="h-5 w-5 mr-2" />
+                    Schedule Orientation
+                  </Button>
+                </div>
+                
+                {/* Microcopy under primary CTA */}
+                <p className="text-sm text-primary-foreground/60 mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                  No contracts • Cancel anytime • Local team support
+                </p>
+                
+                {/* Tertiary text link */}
+                <a 
+                  href="#fitness-memberships" 
+                  className="text-sm text-accent hover:underline inline-flex items-center gap-1 animate-fade-in"
+                  style={{ animationDelay: '0.4s' }}
+                >
+                  See Memberships <ChevronRight className="h-3 w-3" />
+                </a>
+                
+                {/* Trust Chips - 3 quick badges */}
+                <div className="flex flex-wrap gap-3 mt-8 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+                  {[
+                    { icon: Clock, label: "24/7 Access" },
+                    { icon: Users, label: "Coach Support" },
+                    { icon: Shield, label: "No Contracts" }
+                  ].map((chip) => (
+                    <div 
+                      key={chip.label} 
+                      className="flex items-center gap-2 px-4 py-2 bg-accent/15 rounded-full text-sm font-medium text-accent border border-accent/30"
+                    >
+                      <chip.icon className="h-4 w-4" />
+                      {chip.label}
+                    </div>
+                  ))}
+                </div>
               </div>
+
+              {/* Spacer column (keeps 2-col layout on desktop without affecting height) */}
+              <div className="hidden lg:block" aria-hidden="true" />
             </div>
-            
-            {/* Right Column - Logo */}
-            <div className="relative hidden lg:flex items-start justify-center animate-fade-in pt-8 xl:pt-12" style={{ animationDelay: '0.3s' }}>
+
+            {/* Right Column - Logo (positioned without adding extra hero height) */}
+            <div className="absolute inset-y-0 right-0 hidden lg:flex w-1/2 items-start justify-center animate-fade-in pt-8 xl:pt-12" style={{ animationDelay: '0.3s' }}>
               <img 
                 src={azTotalFitnessLogo} 
                 alt="A-Z Total Fitness Enterprise logo"
