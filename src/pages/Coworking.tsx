@@ -250,7 +250,7 @@ export default function Coworking() {
               <img 
                 src={theHiveLogo} 
                 alt="The Hive by A-Z Logo" 
-                className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl brightness-110 saturate-[1.3]"
+                className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl brightness-110 saturate-[1.4] sepia-[0.15] hue-rotate-[-5deg]"
                 style={{ maxHeight: "clamp(280px, 40vw, 420px)" }}
               />
             </div>
