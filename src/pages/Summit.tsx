@@ -132,25 +132,12 @@ export default function Summit() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-black" />
         
         {/* Mountain silhouette effect - subtle background */}
-        <div className="absolute inset-0 opacity-[0.03] md:opacity-[0.04]" style={{
+        <div className="absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: `url(${summitLogo})`,
         backgroundSize: "max(100%, 1400px) auto",
+        backgroundPosition: "60% 35%",
         backgroundRepeat: "no-repeat"
-      }}>
-          {/* Mobile: slightly shifted right and scaled down; Desktop: unchanged */}
-          <div className="absolute inset-0 md:hidden" style={{
-            backgroundImage: `url(${summitLogo})`,
-            backgroundSize: "max(90%, 1200px) auto",
-            backgroundPosition: "70% 40%",
-            backgroundRepeat: "no-repeat"
-          }} />
-          <div className="hidden md:block absolute inset-0" style={{
-            backgroundImage: `url(${summitLogo})`,
-            backgroundSize: "max(100%, 1400px) auto",
-            backgroundPosition: "60% 35%",
-            backgroundRepeat: "no-repeat"
-          }} />
-        </div>
+      }} />
         
         {/* Gold radial glow effects */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
