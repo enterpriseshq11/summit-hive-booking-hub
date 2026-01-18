@@ -131,11 +131,25 @@ export default function Summit() {
         {/* Dark textured background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-black" />
         
-        {/* Mountain silhouette effect - subtle background */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{
+        {/* Mountain silhouette effect - subtle background - mobile shifted right for better SUMMIT visibility */}
+        <div className="absolute inset-0 opacity-[0.03] md:opacity-[0.04]" style={{
         backgroundImage: `url(${summitLogo})`,
-        backgroundSize: "max(100%, 1400px) auto",
-        backgroundPosition: "60% 35%",
+        backgroundSize: "max(85%, 1100px) auto",
+        backgroundRepeat: "no-repeat"
+      }}>
+          <style>{`
+            @media (max-width: 767px) {
+              .summit-watermark-mobile { background-position: 75% 40% !important; }
+            }
+            @media (min-width: 768px) {
+              .summit-watermark-mobile { background-position: 60% 35% !important; background-size: max(100%, 1400px) auto !important; }
+            }
+          `}</style>
+        </div>
+        <div className="summit-watermark-mobile absolute inset-0 opacity-[0.03] md:opacity-[0.04]" style={{
+        backgroundImage: `url(${summitLogo})`,
+        backgroundSize: "max(85%, 1100px) auto",
+        backgroundPosition: "75% 40%",
         backgroundRepeat: "no-repeat"
       }} />
         
