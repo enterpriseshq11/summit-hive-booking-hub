@@ -155,13 +155,16 @@ export default function Summit() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left - Content */}
             <div className="space-y-8 text-center lg:text-left">
-              {/* Mobile: Logo + E³ Badge stacked */}
+              {/* Mobile: Logo + E³ Badge stacked - logo uses absolute positioning to scale without reflow */}
               <div className="flex flex-col items-center gap-3 md:hidden">
-                <img 
-                  src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
-                  alt="The Summit Event Center" 
-                  className="w-64 h-auto drop-shadow-lg"
-                />
+                {/* Fixed-height container for logo - logo scales beyond this without pushing content */}
+                <div className="relative h-32 w-full flex items-center justify-center">
+                  <img 
+                    src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
+                    alt="The Summit Event Center" 
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 max-w-[90vw] h-auto drop-shadow-lg"
+                  />
+                </div>
                 <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
                   <span className="text-accent font-bold text-lg">E³</span>
                   <span className="text-sm font-medium text-primary-foreground/80">The Elevated Experience</span>
