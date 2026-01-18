@@ -155,14 +155,28 @@ export default function Summit() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left - Content */}
             <div className="space-y-8 text-center lg:text-left">
-              {/* E³ Badge */}
-              <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
+              {/* Mobile: Logo + E³ Badge stacked */}
+              <div className="flex flex-col items-center gap-3 md:hidden">
+                <img 
+                  src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
+                  alt="The Summit Event Center" 
+                  className="w-48 h-auto drop-shadow-lg"
+                />
+                <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
+                  <span className="text-accent font-bold text-lg">E³</span>
+                  <span className="text-sm font-medium text-primary-foreground/80">The Elevated Experience</span>
+                </div>
+              </div>
+
+              {/* Desktop: E³ Badge only (logo shown on right side) */}
+              <div className="hidden md:inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
                 <span className="text-accent font-bold text-lg">E³</span>
                 <span className="text-sm font-medium text-primary-foreground/80">The Elevated Experience</span>
               </div>
               
               <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground leading-tight">
+                {/* Desktop: Show H1 title text */}
+                <h1 className="hidden md:block text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground leading-tight">
                   The Summit Event Center
                 </h1>
                 <p className="text-2xl md:text-3xl font-light text-accent mb-4">
