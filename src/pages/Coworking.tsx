@@ -204,7 +204,7 @@ export default function Coworking() {
               </div>
 
               {/* All Pills - Single Unified Group */}
-              <div className="flex flex-wrap gap-2 justify-center lg:justify-center">
+              <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
                 {/* Feature Pills */}
                 {[
                   { icon: Wifi, label: "High-Speed Internet" },
