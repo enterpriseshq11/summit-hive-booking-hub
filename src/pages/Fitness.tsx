@@ -91,7 +91,7 @@ export default function Fitness() {
   return (
     <div className="min-h-screen">
       {/* Hero Section - 2-Column Layout with Animation */}
-      <section className="relative py-20 md:py-28 overflow-hidden bg-primary">
+      <section className="relative py-12 md:py-16 overflow-hidden bg-primary">
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
@@ -202,7 +202,7 @@ export default function Fitness() {
             </div>
             
             {/* Right Column - Logo */}
-            <div className="relative hidden lg:flex items-start justify-center animate-fade-in pt-24 xl:pt-28" style={{ animationDelay: '0.3s' }}>
+            <div className="relative hidden lg:flex items-start justify-center animate-fade-in pt-8 xl:pt-12" style={{ animationDelay: '0.3s' }}>
               <img 
                 src={azTotalFitnessLogo} 
                 alt="A-Z Total Fitness Enterprise logo"
