@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import { SEOHead, jsonLdSchemas } from "@/components/seo";
-import theHiveLogo from "@/assets/the-hive-logo-final.png";
+import theHiveLogo from "@/assets/the-hive-logo-transparent.png";
 
 export default function Coworking() {
   const navigate = useNavigate();
