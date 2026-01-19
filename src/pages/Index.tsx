@@ -195,7 +195,7 @@ export default function Index() {
               </div>
               
               {/* ========== GROUP B: Secondary Anchor Chips (Smaller, Subtle) ========== */}
-              <div className="flex flex-wrap justify-center -ml-48 gap-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
+              <div className="flex flex-wrap justify-center -ml-16 gap-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
                 <button onClick={() => scrollToSection('availability')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
                   Availability
                 </button>
