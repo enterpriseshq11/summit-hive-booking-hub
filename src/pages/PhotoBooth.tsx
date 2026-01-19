@@ -80,30 +80,52 @@ export default function PhotoBooth() {
         {/* Base radial glow */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent" />
         
-        {/* 360 Orbit Rings Watermark */}
+        {/* 360 Orbit Rings Watermark - All 4 corners + center clusters */}
         <div 
           className="absolute inset-0 pointer-events-none z-[1]" 
           aria-hidden="true"
           style={{
+            filter: 'blur(0.5px)',
             background: `
-              radial-gradient(circle at 70% 45%, transparent 0px, transparent 120px, rgba(212,175,55,0.08) 121px, rgba(212,175,55,0.08) 122px, transparent 123px, transparent 100%),
-              radial-gradient(circle at 70% 45%, transparent 0px, transparent 220px, rgba(212,175,55,0.06) 221px, rgba(212,175,55,0.06) 222px, transparent 223px, transparent 100%),
-              radial-gradient(circle at 70% 45%, transparent 0px, transparent 320px, rgba(212,175,55,0.05) 321px, rgba(212,175,55,0.05) 322px, transparent 323px, transparent 100%),
-              radial-gradient(circle at 30% 55%, transparent 0px, transparent 160px, rgba(212,175,55,0.05) 161px, rgba(212,175,55,0.05) 162px, transparent 163px, transparent 100%),
-              radial-gradient(circle at 30% 55%, transparent 0px, transparent 280px, rgba(212,175,55,0.04) 281px, rgba(212,175,55,0.04) 282px, transparent 283px, transparent 100%),
-              radial-gradient(circle at 50% 100%, transparent 0px, transparent 200px, rgba(212,175,55,0.04) 201px, rgba(212,175,55,0.04) 202px, transparent 203px, transparent 100%)
+              /* Top-Left Corner Cluster */
+              radial-gradient(circle at 12% 15%, transparent 0px, transparent 80px, rgba(212,175,55,0.13) 81px, rgba(212,175,55,0.13) 83px, transparent 84px, transparent 100%),
+              radial-gradient(circle at 12% 15%, transparent 0px, transparent 140px, rgba(212,175,55,0.10) 141px, rgba(212,175,55,0.10) 143px, transparent 144px, transparent 100%),
+              radial-gradient(circle at 12% 15%, transparent 0px, transparent 200px, rgba(212,175,55,0.08) 201px, rgba(212,175,55,0.08) 203px, transparent 204px, transparent 100%),
+              
+              /* Top-Right Corner Cluster */
+              radial-gradient(circle at 88% 18%, transparent 0px, transparent 90px, rgba(212,175,55,0.12) 91px, rgba(212,175,55,0.12) 93px, transparent 94px, transparent 100%),
+              radial-gradient(circle at 88% 18%, transparent 0px, transparent 160px, rgba(212,175,55,0.10) 161px, rgba(212,175,55,0.10) 163px, transparent 164px, transparent 100%),
+              radial-gradient(circle at 88% 18%, transparent 0px, transparent 240px, rgba(212,175,55,0.08) 241px, rgba(212,175,55,0.08) 243px, transparent 244px, transparent 100%),
+              
+              /* Bottom-Left Corner Cluster */
+              radial-gradient(circle at 10% 85%, transparent 0px, transparent 100px, rgba(212,175,55,0.12) 101px, rgba(212,175,55,0.12) 103px, transparent 104px, transparent 100%),
+              radial-gradient(circle at 10% 85%, transparent 0px, transparent 180px, rgba(212,175,55,0.10) 181px, rgba(212,175,55,0.10) 183px, transparent 184px, transparent 100%),
+              
+              /* Bottom-Right Corner Cluster */
+              radial-gradient(circle at 90% 88%, transparent 0px, transparent 70px, rgba(212,175,55,0.13) 71px, rgba(212,175,55,0.13) 73px, transparent 74px, transparent 100%),
+              radial-gradient(circle at 90% 88%, transparent 0px, transparent 130px, rgba(212,175,55,0.11) 131px, rgba(212,175,55,0.11) 133px, transparent 134px, transparent 100%),
+              radial-gradient(circle at 90% 88%, transparent 0px, transparent 200px, rgba(212,175,55,0.08) 201px, rgba(212,175,55,0.08) 203px, transparent 204px, transparent 100%),
+              
+              /* Center-Right Main Cluster (existing, enhanced) */
+              radial-gradient(circle at 70% 45%, transparent 0px, transparent 120px, rgba(212,175,55,0.14) 121px, rgba(212,175,55,0.14) 123px, transparent 124px, transparent 100%),
+              radial-gradient(circle at 70% 45%, transparent 0px, transparent 220px, rgba(212,175,55,0.11) 221px, rgba(212,175,55,0.11) 223px, transparent 224px, transparent 100%),
+              radial-gradient(circle at 70% 45%, transparent 0px, transparent 320px, rgba(212,175,55,0.08) 321px, rgba(212,175,55,0.08) 323px, transparent 324px, transparent 100%),
+              
+              /* Center-Left Secondary Cluster */
+              radial-gradient(circle at 28% 55%, transparent 0px, transparent 160px, rgba(212,175,55,0.10) 161px, rgba(212,175,55,0.10) 163px, transparent 164px, transparent 100%),
+              radial-gradient(circle at 28% 55%, transparent 0px, transparent 280px, rgba(212,175,55,0.08) 281px, rgba(212,175,55,0.08) 283px, transparent 284px, transparent 100%)
             `
           }}
         />
         
-        {/* Subtle animated glow pulse on center ring */}
+        {/* Subtle animated glow pulse on main ring */}
         <div 
           className="absolute inset-0 pointer-events-none z-[1] animate-pulse" 
           aria-hidden="true"
           style={{
             animationDuration: '4s',
             background: `
-              radial-gradient(circle at 70% 45%, transparent 0px, transparent 218px, rgba(212,175,55,0.03) 220px, rgba(212,175,55,0.03) 224px, transparent 226px, transparent 100%)
+              radial-gradient(circle at 70% 45%, transparent 0px, transparent 218px, rgba(212,175,55,0.06) 220px, rgba(212,175,55,0.06) 226px, transparent 228px, transparent 100%)
             `
           }}
         />
