@@ -143,7 +143,7 @@ export default function Fitness() {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 md:gap-8 lg:gap-12 items-start">
               {/* Left Column - Copy */}
-              <div className="animate-fade-in">
+              <div className="animate-fade-in flex flex-col items-center md:items-start text-center md:text-left">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-3 md:mb-6">
                   <Dumbbell className="h-4 w-4" />
                   Total Fitness by A-Z
@@ -157,7 +157,7 @@ export default function Fitness() {
                 </p>
                 
                 {/* Hero CTAs - Primary (Dominant) + Secondary */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                <div className="flex flex-col sm:flex-row items-center md:items-start sm:items-center gap-4 mb-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
                   <Button 
                     size="lg" 
                     onClick={() => openJoinModal()}
@@ -188,14 +188,14 @@ export default function Fitness() {
                 {/* Tertiary text link */}
                 <a 
                   href="#fitness-memberships" 
-                  className="text-sm text-accent hover:underline inline-flex items-center gap-1 animate-fade-in"
+                  className="text-sm text-accent hover:underline inline-flex items-center gap-1 animate-fade-in justify-center md:justify-start"
                   style={{ animationDelay: '0.4s' }}
                 >
                   See Memberships <ChevronRight className="h-3 w-3" />
                 </a>
                 
                 {/* Trust Chips - 3 quick badges */}
-                <div className="flex flex-wrap gap-3 mt-8 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+                <div className="flex flex-wrap gap-3 mt-8 animate-fade-in justify-center md:justify-start" style={{ animationDelay: '0.5s' }}>
                   {[
                     { icon: Clock, label: "24/7 Access" },
                     { icon: Users, label: "Coach Support" },
