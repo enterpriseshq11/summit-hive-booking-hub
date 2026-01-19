@@ -209,7 +209,7 @@ export default function Index() {
               
               {/* ========== GROUP C: Main CTAs (Separated, Same Height) ========== */}
               <div className="pt-4 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.7s" }}>
-                <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3">
+                <div className="flex flex-col sm:flex-row justify-center md:ml-6 lg:ml-0 lg:justify-start gap-3">
                   <Button size="lg" className="h-14 text-base px-8 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group sm:flex-1 sm:max-w-[220px]" asChild>
                     <Link to="/booking">
                       <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
