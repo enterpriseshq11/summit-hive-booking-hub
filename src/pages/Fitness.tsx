@@ -131,6 +131,15 @@ export default function Fitness() {
         
         <div className="container relative z-10">
           <div className="relative">
+            {/* Mobile-only logo at top of hero */}
+            <div className="flex justify-center md:hidden pt-2 mb-4">
+              <img 
+                src={azTotalFitnessLogo} 
+                alt="Total Fitness by A-Z" 
+                className="w-[clamp(150px,55vw,230px)] h-auto object-contain"
+              />
+            </div>
+            
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
               {/* Left Column - Copy */}
               <div className="animate-fade-in">
