@@ -82,7 +82,7 @@ export function Header() {
         key={item.href}
         to={item.href}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+          "flex items-center gap-1.5 px-2 lg:px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
           isActive
             ? "bg-accent text-primary"
             : item.primary
@@ -118,7 +118,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground overflow-x-hidden">
       {/* Desktop micro-trust line */}
       <div className="hidden lg:block border-b border-primary-foreground/10 bg-primary/95">
         <div className="container flex items-center justify-end gap-6 h-8 text-xs text-primary-foreground/70">
@@ -136,7 +136,7 @@ export function Header() {
         </div>
       </div>
 
-      <div className="container flex h-16 items-center justify-between gap-4">
+      <div className="container flex h-16 items-center justify-between gap-2 lg:gap-3 lg:px-4 xl:px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
           <img src={azLogoIcon} alt="A-Z Enterprises" className="h-10 w-10 object-contain" />
@@ -144,7 +144,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1" aria-label="Primary">
+        <nav className="hidden md:flex items-center space-x-0.5 lg:space-x-1" aria-label="Primary">
           {navItems.map(renderNavItem)}
 
           {showCommandCenter && (
