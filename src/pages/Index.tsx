@@ -188,7 +188,7 @@ export default function Index() {
               </div>
 
               {/* ========== CENTERED STACK: All selection rows aligned ========== */}
-              <div className="flex flex-col items-center gap-4 -mt-2">
+              <div className="flex flex-col items-center gap-4">
                 {/* GROUP A: Experience Pills */}
                 <div className="opacity-0 animate-fade-in-up" style={{
                 animationDelay: "0.55s"
