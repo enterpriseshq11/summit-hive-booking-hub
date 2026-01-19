@@ -167,7 +167,7 @@ export default function Index() {
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]" style={{
                 animationDelay: "0.2s"
               }}>
-                  <span className="block">      Wapakoneta's                  Premium</span>
+                  <span className="block">Wapakoneta's Premium</span>
                   <span className="block mt-1">Destination for</span>
                   <span className="block mt-1 text-accent">
                     Events, Work, Wellness & Fitness
@@ -191,17 +191,13 @@ export default function Index() {
               {/* ========== CENTERED STACK: All selection rows aligned ========== */}
               <div className="flex flex-col items-center gap-4">
                 {/* GROUP A: Experience Pills */}
-                <div className="opacity-0 animate-fade-in-up" style={{
-                animationDelay: "0.55s"
-              }}>
+                <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: "0.55s" }}>
                   <p className="text-sm text-white/50 mb-3 text-center">Pick your experience:</p>
                   <ExperienceQuickSelector />
                 </div>
                 
                 {/* GROUP B: Secondary Anchor Chips */}
-                <div className="flex flex-wrap justify-center gap-2 opacity-0 animate-fade-in-up" style={{
-                animationDelay: "0.6s"
-              }}>
+                <div className="flex flex-wrap justify-center gap-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
                   <button onClick={() => scrollToSection('availability')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
                     Availability
                   </button>
@@ -214,9 +210,7 @@ export default function Index() {
                 </div>
                 
                 {/* GROUP C: Main CTAs */}
-                <div className="pt-2 opacity-0 animate-fade-in-up" style={{
-                animationDelay: "0.7s"
-              }}>
+                <div className="pt-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.7s" }}>
                   <div className="flex flex-col sm:flex-row justify-center gap-3">
                     <Button size="lg" className="h-14 text-base px-8 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group" asChild>
                       <Link to="/booking">
@@ -235,14 +229,14 @@ export default function Index() {
                 </div>
 
                 {/* GROUP D: Feature/Trust Chips */}
-                <div className="pt-2 opacity-0 animate-fade-in" style={{
-                animationDelay: "0.9s"
-              }}>
+                <div className="pt-2 opacity-0 animate-fade-in" style={{ animationDelay: "0.9s" }}>
                   <div className="flex flex-wrap justify-center gap-2">
-                    {proofChips.map((chip, index) => <div key={index} className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60">
+                    {proofChips.map((chip, index) => (
+                      <div key={index} className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60">
                         <chip.icon className="h-3 w-3 text-accent/70" />
                         <span>{chip.text}</span>
-                      </div>)}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
