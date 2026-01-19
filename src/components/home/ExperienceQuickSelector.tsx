@@ -14,26 +14,26 @@ const bottomRow = [
   { name: "Total Fitness", href: "/fitness", icon: Dumbbell },
 ];
 
-const pillClasses = "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-accent hover:bg-accent/90 text-primary font-semibold shadow-lg shadow-accent/20 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-0.5 group shrink-0";
+const pillClasses = "inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-accent hover:bg-accent/90 text-primary font-semibold shadow-lg shadow-accent/20 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-0.5 group shrink-0";
 
 export function ExperienceQuickSelector() {
   return (
-    <div className="flex flex-col items-start gap-3 md:ml-[8.25rem] lg:ml-0">
-      {/* Row 1: 2 pills centered */}
-      <div className="flex justify-center ml-14 md:ml-24 gap-3">
+    <div className="flex flex-col items-center sm:items-start gap-2 sm:gap-3 md:ml-[8.25rem] lg:ml-0">
+      {/* Row 1: 2 pills */}
+      <div className="flex justify-center gap-2 sm:gap-3 sm:ml-14 md:ml-24">
         {topRow.map((exp) => (
           <Link key={exp.href} to={exp.href} className={pillClasses}>
-            <exp.icon className="h-4 w-4 text-primary transition-colors" />
-            <span className="text-sm font-semibold text-primary">{exp.name}</span>
+            <exp.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary transition-colors" />
+            <span className="text-xs sm:text-sm font-semibold text-primary">{exp.name}</span>
           </Link>
         ))}
       </div>
-      {/* Row 2: 3 pills centered */}
-      <div className="flex justify-center gap-3 flex-wrap">
+      {/* Row 2: 3 pills */}
+      <div className="flex justify-center gap-2 sm:gap-3">
         {bottomRow.map((exp) => (
           <Link key={exp.href} to={exp.href} className={pillClasses}>
-            <exp.icon className="h-4 w-4 text-primary transition-colors" />
-            <span className="text-sm font-semibold text-primary">{exp.name}</span>
+            <exp.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary transition-colors" />
+            <span className="text-xs sm:text-sm font-semibold text-primary">{exp.name}</span>
           </Link>
         ))}
       </div>
