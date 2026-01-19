@@ -174,7 +174,7 @@ export default function Index() {
                 
                 {/* Gold accent divider - right under the W in Wellness */}
                 <div className="hidden lg:flex justify-end -mt-4">
-                  <div className="w-24 h-1 bg-gradient-to-r from-accent to-accent/50 opacity-0 animate-fade-in mr-[23rem]" style={{
+                  <div className="w-24 h-1 bg-gradient-to-r from-accent to-accent/50 opacity-0 animate-fade-in mr-[26rem]" style={{
                     animationDelay: "0.4s"
                   }} />
                 </div>
