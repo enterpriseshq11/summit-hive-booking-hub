@@ -27,6 +27,8 @@ import DopamineDropTerms from "./pages/DopamineDropTerms";
 import Shop from "./pages/Shop";
 import BeamLights from "./pages/BeamLights";
 import VoiceVault from "./pages/VoiceVault";
+import PhotoBooth from "./pages/PhotoBooth";
+import PhotoBoothLanding from "./pages/PhotoBoothLanding";
 import NotFound from "./pages/NotFound";
 
 // Debug (public, never redirects)
@@ -106,6 +108,8 @@ function AppInner() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/beam-lights" element={<BeamLights />} />
           <Route path="/voice-vault" element={<VoiceVault />} />
+          <Route path="/360-photo-booth" element={<PhotoBooth />} />
+          <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
 
           {/* Protected customer routes */}
           <Route element={<ProtectedRoute />}>
