@@ -89,7 +89,7 @@ export default function Index() {
   };
   return <div className="min-h-screen overflow-hidden">
       {/* Hero Section - Premium Black & Gold */}
-      <section className="relative pt-8 pb-20 md:pt-12 md:pb-28 lg:pt-16 lg:pb-36 overflow-hidden bg-primary">
+      <section className="relative pt-4 pb-20 md:pt-6 md:pb-28 lg:pt-8 lg:pb-36 overflow-hidden bg-primary">
         {/* Solid dark background with radial spotlight behind H1 */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/95" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,hsl(var(--accent)/0.15)_0%,transparent_50%)]" />
