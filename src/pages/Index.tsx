@@ -6,7 +6,6 @@ import { NextAvailableStrip, ExperiencePreviewPanel, SocialProofSection, FAQSect
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import azLogoIcon from "@/assets/az-logo-icon.png";
-
 const businesses = [{
   name: "The Summit",
   tagline: "Premium Event Venue",
@@ -48,7 +47,6 @@ const businesses = [{
   href: "/fitness",
   colorClass: "fitness"
 }];
-
 const steps = [{
   number: "01",
   title: "Choose Your Experience",
@@ -70,7 +68,6 @@ const steps = [{
   description: "Everything's ready when you arrive",
   icon: Heart
 }];
-
 const proofChips = [{
   icon: Zap,
   text: "Book in Minutes"
@@ -84,14 +81,12 @@ const proofChips = [{
   icon: Shield,
   text: "Secure Booking"
 }];
-
 export default function Index() {
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({
       behavior: 'smooth'
     });
   };
-
   return <div className="min-h-screen overflow-hidden">
       {/* Hero Section - Premium Black & Gold */}
       <section className="relative pt-4 pb-20 md:pt-6 md:pb-28 lg:pt-8 lg:pb-36 overflow-hidden bg-primary">
@@ -172,9 +167,9 @@ export default function Index() {
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]" style={{
                 animationDelay: "0.2s"
               }}>
-                  <span className="block">       Wapakoneta's                     Premium</span>
-                  <span className="block mt-1">      Destination for</span>
-                  <span className="block mt-1 text-accent">        Events, Work,              Wellness & Fitness</span>
+                  <span className="block">       Wapakoneta's                     Premium</span>
+                  <span className="block mt-1">      Destination for</span>
+                  <span className="block mt-1 text-accent">        Events, Work,              Wellness & Fitness</span>
                 </h1>
                 
                 {/* Gold accent divider - right under the W in Wellness */}
@@ -185,9 +180,10 @@ export default function Index() {
                 </div>
                 
                 {/* Updated subheadline */}
-                <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
-                  Book in minutes. Confirm details before payment.
-                  <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
+                <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up" style={{
+                animationDelay: "0.5s"
+              }}>               Book in minutes. Confirm details before payment.                                       Local support when you need it.
+                         <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
                 </p>
               </div>
 
