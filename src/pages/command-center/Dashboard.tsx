@@ -57,42 +57,42 @@ export default function CommandCenterDashboard() {
       value: stats?.kpis.newLeads.value || 0,
       change: stats?.kpis.newLeads.change || 0,
       icon: Target,
-      onClick: () => navigate("/command-center/leads?status=new"),
+      onClick: () => navigate("/admin/leads?status=new"),
     },
     {
       title: "Leads Contacted",
       value: stats?.kpis.contacted.value || 0,
       change: stats?.kpis.contacted.change || 0,
       icon: Users,
-      onClick: () => navigate("/command-center/leads?status=contacted"),
+      onClick: () => navigate("/admin/leads?status=contacted"),
     },
     {
       title: "Leads Converted",
       value: stats?.kpis.converted.value || 0,
       change: stats?.kpis.converted.change || 0,
       icon: TrendingUp,
-      onClick: () => navigate("/command-center/leads?status=won"),
+      onClick: () => navigate("/admin/leads?status=won"),
     },
     {
       title: "Revenue Booked",
       value: formatCurrency(stats?.kpis.revenue.value || 0),
       change: stats?.kpis.revenue.change || 0,
       icon: DollarSign,
-      onClick: () => navigate("/command-center/revenue"),
+      onClick: () => navigate("/admin/revenue"),
       isCurrency: true,
     },
     {
       title: "Commission Owed",
       value: formatCurrency(stats?.kpis.commissionOwed.value || 0),
       icon: Percent,
-      onClick: () => navigate("/command-center/commissions"),
+      onClick: () => navigate("/admin/commissions"),
       isCurrency: true,
     },
     {
       title: "Active Employees",
       value: stats?.kpis.activeEmployees.value || 0,
       icon: Activity,
-      onClick: () => navigate("/command-center/employees"),
+      onClick: () => navigate("/admin/employees"),
     },
   ];
 
@@ -241,9 +241,9 @@ export default function CommandCenterDashboard() {
                     )}
                     onClick={() => {
                       if (alert.entityType === "lead" && alert.entityId) {
-                        navigate(`/command-center/leads/${alert.entityId}`);
+                        navigate(`/admin/leads/${alert.entityId}`);
                       } else if (alert.type === "commission_pending") {
-                        navigate("/command-center/commissions?status=pending");
+                        navigate("/admin/commissions?status=pending");
                       }
                     }}
                   >
