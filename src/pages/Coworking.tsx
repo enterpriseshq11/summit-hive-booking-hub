@@ -175,7 +175,7 @@ export default function Coworking() {
               </div>
               
               {/* CTA Row with Secondary */}
-              <div className="flex flex-col sm:flex-row gap-3 items-center md:ml-[4.5rem] lg:ml-0 lg:items-start">
+              <div className="flex flex-col sm:flex-row gap-3 items-center md:ml-[7.5rem] lg:ml-0 lg:items-start">
                 <Button 
                   size="lg" 
                   onClick={() => openRequestModal()}
