@@ -132,7 +132,7 @@ export default function Fitness() {
         <div className="container relative z-10">
           <div className="relative">
             {/* Mobile-only logo at top of hero */}
-            <div className="flex justify-center md:hidden pt-2 mb-4">
+            <div className="flex justify-center md:hidden mb-3">
               <img 
                 src={azTotalFitnessLogo} 
                 alt="Total Fitness by A-Z" 
@@ -140,10 +140,10 @@ export default function Fitness() {
               />
             </div>
             
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+            <div className="grid lg:grid-cols-2 gap-6 md:gap-12 lg:gap-16 items-start">
               {/* Left Column - Copy */}
               <div className="animate-fade-in">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-4 md:mb-8">
                   <Dumbbell className="h-4 w-4" />
                   Total Fitness by A-Z
                 </div>
