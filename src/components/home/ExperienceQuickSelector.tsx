@@ -18,9 +18,9 @@ const pillClasses = "inline-flex items-center justify-center gap-2 px-4 py-2.5 r
 
 export function ExperienceQuickSelector() {
   return (
-    <div className="flex flex-col items-center lg:items-start gap-3">
-      {/* Row 1: 2 pills centered on mobile, left-aligned on desktop */}
-      <div className="flex justify-center lg:justify-start gap-3">
+    <div className="flex flex-col items-center gap-3">
+      {/* Row 1: 2 pills centered */}
+      <div className="flex justify-center gap-3">
         {topRow.map((exp) => (
           <Link key={exp.href} to={exp.href} className={pillClasses}>
             <exp.icon className="h-4 w-4 text-primary transition-colors" />
@@ -28,8 +28,8 @@ export function ExperienceQuickSelector() {
           </Link>
         ))}
       </div>
-      {/* Row 2: 3 pills centered on mobile, left-aligned on desktop */}
-      <div className="flex justify-center lg:justify-start gap-3 flex-wrap">
+      {/* Row 2: 3 pills centered */}
+      <div className="flex justify-center gap-3 flex-wrap">
         {bottomRow.map((exp) => (
           <Link key={exp.href} to={exp.href} className={pillClasses}>
             <exp.icon className="h-4 w-4 text-primary transition-colors" />
