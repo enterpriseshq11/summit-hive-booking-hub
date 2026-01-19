@@ -10,14 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import {
   CalendarDays,
   Building2,
   Sparkles,
@@ -84,7 +76,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground overflow-x-hidden">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground">
       {/* Desktop micro-trust line */}
       <div className="hidden lg:block border-b border-primary-foreground/10 bg-primary/95">
         <div className="container flex items-center justify-end gap-6 h-8 text-xs text-primary-foreground/70">
@@ -109,7 +101,7 @@ export function Header() {
           <span className="text-xl font-bold text-gold-gradient hidden sm:inline">A-Z Enterprises</span>
         </Link>
 
-        {/* Desktop Navigation - 6 Primary Tabs */}
+        {/* Desktop Navigation - 5 Primary Tabs (Book Now, Experiences, Shop, Promotions, Account) */}
         <nav className="hidden md:flex items-center gap-1" aria-label="Primary">
           {/* 1. Book Now - Direct Link (Primary CTA) */}
           <Link
@@ -126,116 +118,90 @@ export function Header() {
           </Link>
 
           {/* 2. Experiences - Dropdown */}
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 data-[state=open]:bg-primary-foreground/10">
-                  <Building2 className="h-4 w-4 mr-1.5" />
-                  Experiences
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[280px] gap-1 p-2">
-                    {experienceItems.map((item) => (
-                      <li key={item.href}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to={item.href}
-                            className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent/10 hover:text-accent focus:bg-accent/10"
-                          >
-                            <item.icon className="h-5 w-5 text-accent" />
-                            <div>
-                              <div className="text-sm font-medium">{item.label}</div>
-                              <p className="text-xs text-muted-foreground">{item.description}</p>
-                            </div>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-1.5 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                <Building2 className="h-4 w-4" />
+                <span>Experiences</span>
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64 bg-popover z-[60]">
+              {experienceItems.map((item) => (
+                <DropdownMenuItem key={item.href} asChild>
+                  <Link to={item.href} className="flex items-center gap-3 py-2">
+                    <item.icon className="h-4 w-4 text-accent" />
+                    <div>
+                      <div className="font-medium">{item.label}</div>
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          {/* 3. Spin & Win - Direct Link */}
-          <Link
-            to="/dopamine-drop"
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-md transition-colors",
-              location.pathname === "/dopamine-drop"
-                ? "bg-accent text-primary"
-                : "text-accent hover:text-accent hover:bg-accent/10 animate-pulse"
-            )}
-          >
-            <CircleDot className="h-4 w-4" />
-            Spin & Win
-          </Link>
+          {/* 3. Shop - Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-1.5 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                <span>Shop</span>
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-popover z-[60]">
+              {shopItems.map((item) => (
+                <DropdownMenuItem key={item.href} asChild>
+                  <Link to={item.href} className="flex items-center gap-3 py-2">
+                    <item.icon className="h-4 w-4 text-accent" />
+                    <div>
+                      <div className="font-medium">{item.label}</div>
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          {/* 4. Shop - Dropdown */}
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 data-[state=open]:bg-primary-foreground/10">
-                  <ShoppingBag className="h-4 w-4 mr-1.5" />
-                  Shop
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[240px] gap-1 p-2">
-                    {shopItems.map((item) => (
-                      <li key={item.href}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to={item.href}
-                            className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent/10 hover:text-accent focus:bg-accent/10"
-                          >
-                            <item.icon className="h-5 w-5 text-accent" />
-                            <div>
-                              <div className="text-sm font-medium">{item.label}</div>
-                              <p className="text-xs text-muted-foreground">{item.description}</p>
-                            </div>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+          {/* 4. Promotions - Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-1.5 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                <Layers className="h-4 w-4" />
+                <span>Promotions</span>
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-60 bg-popover z-[60]">
+              {promotionItems.map((item) => (
+                <DropdownMenuItem key={item.href} asChild>
+                  <Link to={item.href} className="flex items-center gap-3 py-2">
+                    <item.icon className="h-4 w-4 text-accent" />
+                    <div>
+                      <div className="font-medium">{item.label}</div>
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          {/* 5. Promotions - Dropdown */}
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 data-[state=open]:bg-primary-foreground/10">
-                  <Layers className="h-4 w-4 mr-1.5" />
-                  Promotions
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[260px] gap-1 p-2">
-                    {promotionItems.map((item) => (
-                      <li key={item.href}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to={item.href}
-                            className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent/10 hover:text-accent focus:bg-accent/10"
-                          >
-                            <item.icon className="h-5 w-5 text-accent" />
-                            <div>
-                              <div className="text-sm font-medium">{item.label}</div>
-                              <p className="text-xs text-muted-foreground">{item.description}</p>
-                            </div>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-
-          {/* 6. Account - Dropdown (auth-aware) */}
+          {/* 5. Account - Dropdown (auth-aware) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
@@ -248,7 +214,7 @@ export function Header() {
                 <ChevronDown className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 bg-popover z-[60]">
               {user ? (
                 <>
                   <DropdownMenuItem asChild>
@@ -264,15 +230,15 @@ export function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/voice-vault" className="flex items-center gap-2">
-                      <Mic className="h-4 w-4" />
-                      Voice Vault
+                    <Link to="/dopamine-drop" className="flex items-center gap-2">
+                      <CircleDot className="h-4 w-4" />
+                      Spin & Win
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/dopamine-drop" className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4" />
-                      Rewards
+                    <Link to="/voice-vault" className="flex items-center gap-2">
+                      <Mic className="h-4 w-4" />
+                      Voice Vault
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -377,17 +343,7 @@ export function Header() {
             )}
           </div>
 
-          {/* 3. Spin & Win - Direct Link */}
-          <Link
-            to="/dopamine-drop"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-accent rounded-md hover:bg-accent/10"
-          >
-            <CircleDot className="h-5 w-5" />
-            Spin & Win
-          </Link>
-
-          {/* 4. Shop - Collapsible */}
+          {/* 3. Shop - Collapsible */}
           <div>
             <button
               onClick={() => toggleMobileSection("shop")}
@@ -419,7 +375,7 @@ export function Header() {
             )}
           </div>
 
-          {/* 5. Promotions - Collapsible */}
+          {/* 4. Promotions - Collapsible */}
           <div>
             <button
               onClick={() => toggleMobileSection("promotions")}
@@ -451,7 +407,7 @@ export function Header() {
             )}
           </div>
 
-          {/* 6. Account - Collapsible */}
+          {/* 5. Account - Collapsible */}
           <div>
             <button
               onClick={() => toggleMobileSection("account")}
@@ -484,20 +440,20 @@ export function Header() {
                       Bookings
                     </Link>
                     <Link
+                      to="/dopamine-drop"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                    >
+                      <CircleDot className="h-4 w-4 text-accent" />
+                      Spin & Win
+                    </Link>
+                    <Link
                       to="/voice-vault"
                       onClick={() => setMobileMenuOpen(false)}
                       className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
                     >
                       <Mic className="h-4 w-4 text-accent" />
                       Voice Vault
-                    </Link>
-                    <Link
-                      to="/dopamine-drop"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
-                    >
-                      <Trophy className="h-4 w-4 text-accent" />
-                      Rewards
                     </Link>
                     <Link
                       to="/account"
