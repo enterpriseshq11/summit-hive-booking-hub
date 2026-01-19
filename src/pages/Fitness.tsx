@@ -91,7 +91,7 @@ export default function Fitness() {
   return (
     <div className="min-h-screen">
       {/* Hero Section - 2-Column Layout with Animation */}
-      <section className="relative pt-12 md:pt-16 pb-4 md:pb-6 overflow-hidden bg-primary">
+      <section className="relative pt-6 md:pt-16 pb-4 md:pb-6 min-h-0 h-auto overflow-hidden bg-primary">
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
@@ -228,7 +228,7 @@ export default function Fitness() {
         </div>
         
         {/* Angled divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} aria-hidden="true" />
+        <div className="hidden md:block absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} aria-hidden="true" />
       </section>
 
       {/* Anchor Chips */}
