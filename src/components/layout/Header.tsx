@@ -82,7 +82,7 @@ export function Header() {
         key={item.href}
         to={item.href}
         className={cn(
-          "flex items-center gap-1 md:gap-0.5 lg:gap-1.5 px-1.5 md:px-1 lg:px-3 py-1.5 md:py-1 lg:py-2 text-sm md:text-xs lg:text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+          "flex items-center gap-1.5 px-2 lg:px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
           isActive
             ? "bg-accent text-primary"
             : item.primary
@@ -95,7 +95,7 @@ export function Header() {
           (item as any).pulse && !isActive && "animate-pulse"
         )}
       >
-        <item.icon className={cn("h-4 w-4 md:h-3 md:w-3 lg:h-4 lg:w-4 flex-shrink-0", (item as any).pulse && !isActive && "text-primary")} />
+        <item.icon className={cn("h-4 w-4 flex-shrink-0", (item as any).pulse && !isActive && "text-primary")} />
         {displayLabel}
       </Link>
     );
@@ -136,26 +136,26 @@ export function Header() {
         </div>
       </div>
 
-      <div className="container flex h-16 items-center justify-between gap-1 md:gap-1 lg:gap-3 lg:px-4 xl:px-6 overflow-x-hidden">
+      <div className="container flex h-16 items-center justify-between gap-2 lg:gap-3 lg:px-4 xl:px-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2 md:space-x-1 lg:space-x-3 flex-shrink-0">
-          <img src={azLogoIcon} alt="A-Z Enterprises" className="h-10 w-10 md:h-8 md:w-8 lg:h-10 lg:w-10 object-contain" />
-          <span className="text-xl md:text-base lg:text-xl font-bold text-gold-gradient hidden sm:inline">A-Z Enterprises</span>
+        <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
+          <img src={azLogoIcon} alt="A-Z Enterprises" className="h-10 w-10 object-contain" />
+          <span className="text-xl font-bold text-gold-gradient hidden sm:inline">A-Z Enterprises</span>
         </Link>
 
-        {/* Desktop/Tablet Navigation */}
-        <nav className="hidden md:flex items-center flex-wrap gap-x-0 gap-y-0.5 lg:gap-x-1" aria-label="Primary">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-0.5 lg:space-x-1" aria-label="Primary">
           {navItems.map(renderNavItem)}
 
           {showCommandCenter && (
             <Link
               to="/admin"
               className={cn(
-                "flex items-center gap-1 md:gap-0.5 lg:gap-2 px-2 md:px-1 lg:px-3 py-1.5 md:py-1 lg:py-2 text-sm md:text-xs lg:text-sm font-semibold rounded-md transition-colors",
+                "flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors",
                 isAdminRoute ? "bg-accent text-primary" : "bg-accent/20 text-accent hover:bg-accent/30"
               )}
             >
-              <LayoutDashboard className="h-4 w-4 md:h-3 md:w-3 lg:h-4 lg:w-4" />
+              <LayoutDashboard className="h-4 w-4" />
               Admin
             </Link>
           )}
