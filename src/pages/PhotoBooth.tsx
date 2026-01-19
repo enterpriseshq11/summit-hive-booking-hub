@@ -79,8 +79,106 @@ export default function PhotoBooth() {
       <section className="relative min-h-[70vh] flex items-center bg-gradient-to-b from-primary via-primary to-primary/95 text-primary-foreground overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent" />
         
+        {/* Orbit Rings Watermark - Primary Layer */}
+        <div className="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
+          <svg className="absolute w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Large orbit ring - top left, mostly off-screen */}
+            <ellipse 
+              cx="-100" 
+              cy="150" 
+              rx="450" 
+              ry="280" 
+              stroke="hsl(var(--accent))" 
+              strokeWidth="1" 
+              fill="none" 
+              className="opacity-[0.04] blur-[0.5px]"
+              transform="rotate(-15 -100 150)"
+            />
+            {/* Medium orbit ring - far right edge */}
+            <ellipse 
+              cx="1250" 
+              cy="400" 
+              rx="380" 
+              ry="240" 
+              stroke="hsl(var(--accent))" 
+              strokeWidth="1" 
+              fill="none" 
+              className="opacity-[0.05] blur-[0.5px]"
+              transform="rotate(20 1250 400)"
+            />
+            {/* Small orbit ring - bottom left */}
+            <ellipse 
+              cx="100" 
+              cy="700" 
+              rx="300" 
+              ry="180" 
+              stroke="hsl(var(--accent))" 
+              strokeWidth="0.8" 
+              fill="none" 
+              className="opacity-[0.035] blur-[0.5px]"
+              transform="rotate(-25 100 700)"
+            />
+          </svg>
+        </div>
+        
+        {/* Tiny Icons Watermark - Secondary Layer */}
+        <div className="absolute inset-0 pointer-events-none z-0 opacity-[0.03] md:opacity-[0.035]" aria-hidden="true">
+          <svg className="absolute w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Camera icon - top left area */}
+            <g transform="translate(80, 80)" stroke="hsl(var(--accent))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="0" y="4" width="18" height="14" rx="2" fill="none"/>
+              <circle cx="9" cy="11" r="4" fill="none"/>
+              <path d="M5 4 L7 0 L11 0 L13 4"/>
+            </g>
+            {/* Record dot - top right */}
+            <g transform="translate(1050, 120)">
+              <circle cx="8" cy="8" r="6" stroke="hsl(var(--accent))" strokeWidth="1.5" fill="none"/>
+              <circle cx="8" cy="8" r="2.5" fill="hsl(var(--accent))"/>
+            </g>
+            {/* QR symbol - left side middle */}
+            <g transform="translate(40, 350)" stroke="hsl(var(--accent))" strokeWidth="1.2" fill="none">
+              <rect x="0" y="0" width="7" height="7"/>
+              <rect x="2" y="2" width="3" height="3" fill="hsl(var(--accent))"/>
+              <rect x="11" y="0" width="7" height="7"/>
+              <rect x="13" y="2" width="3" height="3" fill="hsl(var(--accent))"/>
+              <rect x="0" y="11" width="7" height="7"/>
+              <rect x="2" y="13" width="3" height="3" fill="hsl(var(--accent))"/>
+            </g>
+            {/* Camera icon - bottom right */}
+            <g transform="translate(1100, 650)" stroke="hsl(var(--accent))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="0" y="4" width="18" height="14" rx="2" fill="none"/>
+              <circle cx="9" cy="11" r="4" fill="none"/>
+              <path d="M5 4 L7 0 L11 0 L13 4"/>
+            </g>
+            {/* Record dot - left side bottom */}
+            <g transform="translate(120, 580)">
+              <circle cx="8" cy="8" r="6" stroke="hsl(var(--accent))" strokeWidth="1.5" fill="none"/>
+              <circle cx="8" cy="8" r="2.5" fill="hsl(var(--accent))"/>
+            </g>
+            {/* Small play/share icon - right side */}
+            <g transform="translate(1080, 300)" stroke="hsl(var(--accent))" strokeWidth="1.2" fill="none">
+              <circle cx="6" cy="6" r="3"/>
+              <circle cx="18" cy="3" r="3"/>
+              <circle cx="18" cy="12" r="3"/>
+              <line x1="9" y1="6" x2="15" y2="4"/>
+              <line x1="9" y1="6" x2="15" y2="11"/>
+            </g>
+            {/* Camera icon - far right top */}
+            <g transform="translate(1020, 50)" stroke="hsl(var(--accent))" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="0" y="3" width="14" height="11" rx="1.5" fill="none"/>
+              <circle cx="7" cy="8.5" r="3" fill="none"/>
+            </g>
+            {/* QR - bottom left corner */}
+            <g transform="translate(60, 700)" stroke="hsl(var(--accent))" strokeWidth="1" fill="none">
+              <rect x="0" y="0" width="6" height="6"/>
+              <rect x="8" y="0" width="6" height="6"/>
+              <rect x="0" y="8" width="6" height="6"/>
+            </g>
+          </svg>
+        </div>
+        
         {/* Honeycomb Watermark Pattern - Left */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15] z-0" aria-hidden="true">
           <svg className="absolute -left-20 top-1/4 w-[500px] h-[500px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <pattern id="honeycomb-left-pb" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
               <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
@@ -91,7 +189,7 @@ export default function PhotoBooth() {
         </div>
         
         {/* Honeycomb Watermark Pattern - Right */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15] z-0" aria-hidden="true">
           <svg className="absolute -right-20 top-1/3 w-[600px] h-[600px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <pattern id="honeycomb-right-pb" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
               <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
