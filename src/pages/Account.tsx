@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   CalendarDays, 
   CreditCard, 
@@ -20,11 +22,85 @@ import {
   Building2,
   Heart,
   Dumbbell,
-  Plus
+  Plus,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  Check
 } from "lucide-react";
 
 export default function Account() {
   const { authUser } = useAuth();
+  const { toast } = useToast();
+  
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordChanged, setPasswordChanged] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newPassword || !confirmNewPassword) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all password fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "New password must be at least 8 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "New password and confirmation must match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsChangingPassword(true);
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    setIsChangingPassword(false);
+
+    if (error) {
+      toast({
+        title: "Password update failed",
+        description: error.message || "Could not update password. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      setPasswordChanged(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      toast({
+        title: "Password updated",
+        description: "Your password has been changed successfully.",
+      });
+      // Reset success state after 3 seconds
+      setTimeout(() => setPasswordChanged(false), 3000);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background py-12">
@@ -357,6 +433,102 @@ export default function Account() {
                   <Button variant="outline" className="border-accent/30 hover:border-accent hover:bg-accent/10">
                     Edit Profile
                   </Button>
+                </CardContent>
+              </Card>
+
+              {/* Password & Security Card */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                    <Lock className="h-5 w-5 text-accent" />
+                    Password & Security
+                  </CardTitle>
+                  <CardDescription>Update your password to keep your account secure</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    {/* New Password */}
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password" className="text-sm font-medium text-muted-foreground">
+                        New Password
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="new-password"
+                          type={showNewPassword ? "text" : "password"}
+                          placeholder="Enter new password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          disabled={isChangingPassword}
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          tabIndex={-1}
+                        >
+                          {showNewPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Minimum 8 characters</p>
+                    </div>
+
+                    {/* Confirm New Password */}
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-new-password" className="text-sm font-medium text-muted-foreground">
+                        Confirm New Password
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="confirm-new-password"
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm new password"
+                          value={confirmNewPassword}
+                          onChange={(e) => setConfirmNewPassword(e.target.value)}
+                          disabled={isChangingPassword}
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          tabIndex={-1}
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button
+                      type="submit"
+                      disabled={isChangingPassword || !newPassword || !confirmNewPassword}
+                      className="bg-accent hover:bg-accent/90 text-primary"
+                    >
+                      {isChangingPassword ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Updating...
+                        </>
+                      ) : passwordChanged ? (
+                        <>
+                          <Check className="h-4 w-4 mr-2" />
+                          Password Updated
+                        </>
+                      ) : (
+                        "Update Password"
+                      )}
+                    </Button>
+                  </form>
                 </CardContent>
               </Card>
 
