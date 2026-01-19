@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,11 +10,12 @@ import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useProviders } from "@/hooks/useProviders";
 import { NextAvailableWidget, WaitlistCTA, SpaBookingForm, FloatingHelpDrawer, SpaRequestModal, SpaWaitlistModal, SpaAnchorChips, StickyMobileSpaCTA } from "@/components/booking";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, FileText, Quote, User, Award, ShieldCheck, Wifi, Coffee, Zap, Droplets, Sun, Wind, ThermometerSun, Users, Activity, Target } from "lucide-react";
+import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, FileText, Quote, User, Award, ShieldCheck, Wifi, Coffee, Zap, Droplets, Sun, Wind, ThermometerSun, Users, Activity, Target, DollarSign, MapPin, Video } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import restorationLoungeLogo from "@/assets/restoration-lounge-logo.jpg";
 export default function Spa() {
+  const navigate = useNavigate();
   const {
     data: business
   } = useBusinessByType("spa");
@@ -23,12 +25,19 @@ export default function Spa() {
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const [preselectedService, setPreselectedService] = useState<"massage" | "recovery" | "wellness" | null>(null);
   const [bookingContact, setBookingContact] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
   const handleBookingSuccess = (bookingId: string) => {
     setShowBookingForm(false);
   };
+  
+  // Navigate to Lindsey's booking page
+  const goToBookWithLindsey = () => {
+    navigate('/book-with-lindsey');
+  };
+  
   const openRequestModal = (service?: "massage" | "recovery" | "wellness") => {
     setPreselectedService(service || null);
     setShowRequestModal(true);
@@ -109,7 +118,7 @@ export default function Spa() {
               
               {/* Hero CTAs */}
               <div className="flex flex-col sm:flex-row items-center md:ml-[7.25rem] lg:ml-0 lg:items-start gap-4 mb-6">
-                <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_hero_cta_click">
+                <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_hero_cta_click">
                   <Sparkles className="h-5 w-5 mr-2" />
                   Book With Lindsey
                   <ArrowRight className="h-5 w-5 ml-2" />
@@ -128,7 +137,7 @@ export default function Spa() {
                   </Label>
                   <div className="flex gap-2">
                     <Input id="booking-contact" type="text" placeholder="Enter your email or phone number" value={bookingContact} onChange={e => setBookingContact(e.target.value)} className="bg-background/90 border-accent/30 text-foreground placeholder:text-muted-foreground" />
-                    <Button onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0">
+                    <Button onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0">
                       Request
                     </Button>
                   </div>
@@ -223,14 +232,14 @@ export default function Spa() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-              <Button onClick={() => openRequestModal("massage")} className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold" data-event="spa_massage_card_click">
+              <Button onClick={goToBookWithLindsey} className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold" data-event="spa_massage_card_click">
                 Book this <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </CardContent>
           </Card>
 
           {/* Recovery Services Card */}
-          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={() => openRequestModal("recovery")} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openRequestModal("recovery")} data-event="spa_recovery_card_click">
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={goToBookWithLindsey} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToBookWithLindsey()} data-event="spa_recovery_card_click">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -258,7 +267,7 @@ export default function Spa() {
           </Card>
 
           {/* Wellness Experiences Card */}
-          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={() => openRequestModal("wellness")} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openRequestModal("wellness")} data-event="spa_wellness_card_click">
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={goToBookWithLindsey} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToBookWithLindsey()} data-event="spa_wellness_card_click">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -288,7 +297,7 @@ export default function Spa() {
         
         {/* Single section CTA */}
         <div className="text-center mt-10">
-          <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_services_cta_click">
+          <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_services_cta_click">
             Book With Lindsey
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
@@ -322,7 +331,7 @@ export default function Spa() {
                 </ul>
 
                 <div className="text-center">
-                  <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
+                  <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
                     Book Assisted Stretching
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
@@ -409,11 +418,17 @@ export default function Spa() {
                     </p>
                   </div>
 
-                  {/* CTA */}
-                  <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_lindsey_cta_click">
-                    Book With Lindsey
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
+                  {/* CTAs */}
+                  <div className="flex flex-wrap gap-3">
+                    <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_lindsey_cta_click">
+                      Book With Lindsey
+                      <ArrowRight className="h-5 w-5 ml-2" />
+                    </Button>
+                    <Button size="lg" variant="outline" onClick={() => setShowPricingModal(true)} className="border-accent text-accent hover:bg-accent/10" data-event="spa_lindsey_pricing_click">
+                      <DollarSign className="h-5 w-5 mr-2" />
+                      View Pricing
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -661,14 +676,52 @@ export default function Spa() {
         </div>
       </section>
 
+      {/* Virtual Tour Section - Coming Soon */}
+      <section id="spa-virtual-tour" className="py-14 container">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">Take a Virtual Tour</h2>
+          <p className="text-muted-foreground text-lg">Explore The Restoration Lounge before your visit</p>
+        </div>
+        <Card className="max-w-4xl mx-auto shadow-premium border-border overflow-hidden">
+          <CardContent className="p-0">
+            <div className="aspect-video bg-gradient-to-br from-primary via-primary/95 to-primary/90 flex items-center justify-center relative">
+              {/* Honeycomb pattern overlay */}
+              <div className="absolute inset-0 pointer-events-none opacity-[0.08]" aria-hidden="true">
+                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <pattern id="honeycomb-tour" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
+                    <polygon points="6,0 12,3 12,9 6,12 0,9 0,3" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.3"/>
+                  </pattern>
+                  <rect width="100%" height="100%" fill="url(#honeycomb-tour)" />
+                </svg>
+              </div>
+              
+              {/* Coming Soon Content */}
+              <div className="relative z-10 text-center p-8">
+                <div className="h-20 w-20 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-6 border-2 border-accent/40 shadow-gold">
+                  <Video className="h-10 w-10 text-accent" />
+                </div>
+                <h3 className="text-2xl font-bold text-primary-foreground mb-2">3D Walkthrough Coming Soon</h3>
+                <p className="text-primary-foreground/70 mb-6 max-w-md">
+                  Experience The Restoration Lounge in stunning 360° detail. Explore our private treatment rooms, relaxation areas, and premium amenities.
+                </p>
+                <Button variant="outline" className="border-accent text-accent hover:bg-accent/10" disabled>
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Virtual Tour (Coming Soon)
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       {/* Final CTA Section */}
       <section className="py-14 bg-primary">
         <div className="container text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-3 text-primary-foreground">Ready to Reset Your Body?</h2>
           <p className="text-primary-foreground/70 mb-6 max-w-2xl mx-auto text-lg">
-            Expert care and premium treatments — request your appointment and we'll confirm within 24 hours.
+            Expert care and premium treatments — book your appointment today.
           </p>
-          <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_final_cta_click">
+          <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_final_cta_click">
             Book With Lindsey
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
@@ -690,6 +743,54 @@ export default function Spa() {
         </DialogContent>
       </Dialog>
 
+      {/* Pricing Modal */}
+      <Dialog open={showPricingModal} onOpenChange={setShowPricingModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Lindsey's Pricing Menu</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold mb-2">Swedish Massage</h4>
+              <p className="text-sm text-muted-foreground">30 min — $45 | 60 min — $80</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Deep Tissue Massage</h4>
+              <p className="text-sm text-muted-foreground">30 min — $55 | 60 min — TBD</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Ashiatsu (Barefoot)</h4>
+              <p className="text-sm text-muted-foreground">60 min — $60 | 90 min — $90</p>
+            </div>
+            <div className="bg-green-500/10 p-3 rounded-lg">
+              <h4 className="font-semibold mb-2 text-green-600">Couples Massage (Promo)</h4>
+              <p className="text-sm text-muted-foreground">
+                60 min — <span className="line-through">$85</span> $70 | 90 min — <span className="line-through">$125</span> $95
+              </p>
+              <p className="text-xs text-green-600 mt-1">Promo valid through end of February</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Consultations</h4>
+              <p className="text-sm text-muted-foreground">Prenatal & Migraine — Free</p>
+            </div>
+            <div className="pt-2 border-t">
+              <h4 className="font-semibold mb-2">Available Add-ons</h4>
+              <p className="text-sm text-muted-foreground">Hot Stones • Aromatherapy • Cupping</p>
+              <p className="text-xs text-muted-foreground mt-1">Pricing available upon request</p>
+            </div>
+          </div>
+          <Button 
+            className="w-full mt-4 bg-accent hover:bg-accent/90 text-primary"
+            onClick={() => {
+              setShowPricingModal(false);
+              goToBookWithLindsey();
+            }}
+          >
+            View Full Menu & Book
+          </Button>
+        </DialogContent>
+      </Dialog>
+
       {/* Request Modal */}
       <SpaRequestModal open={showRequestModal} onOpenChange={setShowRequestModal} preselectedService={preselectedService} />
 
@@ -700,7 +801,7 @@ export default function Spa() {
       <FloatingHelpDrawer businessType="spa" phoneNumber={SITE_CONFIG.contact.phone} email={SITE_CONFIG.contact.email} />
 
       {/* Sticky Mobile CTA */}
-      <StickyMobileSpaCTA onRequestService={() => openRequestModal()} />
+      <StickyMobileSpaCTA onRequestService={goToBookWithLindsey} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
