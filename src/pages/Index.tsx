@@ -168,8 +168,8 @@ export default function Index() {
                 animationDelay: "0.2s"
               }}>
                   <span className="block">        Wapakoneta's                     Premium</span>
-                  <span className="block mt-1">        Destination for</span>
-                  <span className="block mt-1 text-accent">         Events, Work,            Wellness & Fitness</span>
+                  <span className="block mt-1">       Destination for</span>
+                  <span className="block mt-1 text-accent">         Events, Work,           Wellness & Fitness</span>
                 </h1>
                 
                 {/* Gold accent divider - right under Wellness */}
