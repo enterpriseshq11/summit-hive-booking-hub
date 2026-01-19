@@ -141,19 +141,6 @@ export default function Fitness() {
               />
             </div>
             
-            {/* Tablet-only logo overlay - positioned absolutely so nothing shifts */}
-            <div 
-              className="hidden md:flex lg:hidden absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 pointer-events-none z-20 justify-center"
-              aria-hidden="true"
-            >
-              <img 
-                src={azTotalFitnessLogo} 
-                alt="" 
-                className="w-[200px] h-auto object-contain"
-                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-              />
-            </div>
-            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 md:gap-8 lg:gap-12 items-start">
               {/* Left Column - Copy */}
               <div className="animate-fade-in flex flex-col items-center md:items-start text-center md:text-left">
