@@ -77,31 +77,38 @@ export default function PhotoBooth() {
 
       {/* Hero Section - 2-column layout matching Spa/Coworking/Fitness */}
       <section className="relative min-h-[70vh] flex items-center bg-gradient-to-b from-primary via-primary to-primary/95 text-primary-foreground overflow-hidden">
+        {/* Base radial glow */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent" />
         
-        {/* Honeycomb Watermark Pattern - Left */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
-          <svg className="absolute -left-20 top-1/4 w-[500px] h-[500px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <pattern id="honeycomb-left-pb" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
-              <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
-              <polygon points="10,17.32 20,22.32 20,32.32 10,37.32 0,32.32 0,22.32" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
-            </pattern>
-            <rect width="100%" height="100%" fill="url(#honeycomb-left-pb)" />
-          </svg>
-        </div>
+        {/* 360 Orbit Rings Watermark */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-[1]" 
+          aria-hidden="true"
+          style={{
+            background: `
+              radial-gradient(circle at 70% 45%, transparent 0px, transparent 120px, rgba(212,175,55,0.08) 121px, rgba(212,175,55,0.08) 122px, transparent 123px, transparent 100%),
+              radial-gradient(circle at 70% 45%, transparent 0px, transparent 220px, rgba(212,175,55,0.06) 221px, rgba(212,175,55,0.06) 222px, transparent 223px, transparent 100%),
+              radial-gradient(circle at 70% 45%, transparent 0px, transparent 320px, rgba(212,175,55,0.05) 321px, rgba(212,175,55,0.05) 322px, transparent 323px, transparent 100%),
+              radial-gradient(circle at 30% 55%, transparent 0px, transparent 160px, rgba(212,175,55,0.05) 161px, rgba(212,175,55,0.05) 162px, transparent 163px, transparent 100%),
+              radial-gradient(circle at 30% 55%, transparent 0px, transparent 280px, rgba(212,175,55,0.04) 281px, rgba(212,175,55,0.04) 282px, transparent 283px, transparent 100%),
+              radial-gradient(circle at 50% 100%, transparent 0px, transparent 200px, rgba(212,175,55,0.04) 201px, rgba(212,175,55,0.04) 202px, transparent 203px, transparent 100%)
+            `
+          }}
+        />
         
-        {/* Honeycomb Watermark Pattern - Right */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
-          <svg className="absolute -right-20 top-1/3 w-[600px] h-[600px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <pattern id="honeycomb-right-pb" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
-              <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
-              <polygon points="10,17.32 20,22.32 20,32.32 10,37.32 0,32.32 0,22.32" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
-            </pattern>
-            <rect width="100%" height="100%" fill="url(#honeycomb-right-pb)" />
-          </svg>
-        </div>
+        {/* Subtle animated glow pulse on center ring */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-[1] animate-pulse" 
+          aria-hidden="true"
+          style={{
+            animationDuration: '4s',
+            background: `
+              radial-gradient(circle at 70% 45%, transparent 0px, transparent 218px, rgba(212,175,55,0.03) 220px, rgba(212,175,55,0.03) 224px, transparent 226px, transparent 100%)
+            `
+          }}
+        />
         
-        <div className="container relative z-10 py-16 lg:py-24">
+        <div className="container relative z-[2] py-16 lg:py-24">
           <div className="flex flex-col-reverse lg:flex-row items-center gap-[clamp(24px,4vw,64px)]">
             {/* Left Column - Text Content */}
             <div className="flex-1 text-center lg:text-left">
