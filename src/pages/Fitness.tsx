@@ -156,7 +156,7 @@ export default function Fitness() {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 md:gap-8 lg:gap-12 items-start">
               {/* Left Column - Copy */}
-              <div className="animate-fade-in flex flex-col items-center md:items-start text-center md:text-left">
+              <div className="animate-fade-in flex flex-col items-center md:items-start text-center md:text-left md:pt-16 lg:pt-0">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-3 md:mb-6">
                   <Dumbbell className="h-4 w-4" />
                   Total Fitness by A-Z
