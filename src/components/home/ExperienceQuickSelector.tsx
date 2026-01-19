@@ -18,7 +18,7 @@ const pillClasses = "inline-flex items-center justify-center gap-2 px-4 py-2.5 r
 
 export function ExperienceQuickSelector() {
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-start gap-3">
       {/* Row 1: 2 pills centered */}
       <div className="flex justify-center gap-3">
         {topRow.map((exp) => (
