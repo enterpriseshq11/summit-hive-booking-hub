@@ -68,13 +68,13 @@ export default function AdminSchedule() {
           
           <div className="flex items-center gap-2">
             <Select value={selectedBusiness} onValueChange={setSelectedBusiness}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] bg-zinc-800 border-zinc-700 text-white">
                 <SelectValue placeholder="All Businesses" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Businesses</SelectItem>
+              <SelectContent className="bg-zinc-800 border-zinc-700">
+                <SelectItem value="all" className="text-white focus:bg-zinc-700 focus:text-white">All Businesses</SelectItem>
                 {businesses?.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  <SelectItem key={b.id} value={b.id} className="text-white focus:bg-zinc-700 focus:text-white">{b.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
