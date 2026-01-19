@@ -154,18 +154,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const userInitials = authUser?.profile ? `${authUser.profile.first_name?.[0] || ""}${authUser.profile.last_name?.[0] || ""}`.toUpperCase() || "U" : "U";
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex">
+    <div className="min-h-screen bg-zinc-950 text-white flex">
       <aside className={cn("fixed inset-y-0 left-0 z-50 flex flex-col bg-zinc-900 border-r border-zinc-800 transition-all duration-300", collapsed ? "w-16" : "w-64", mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0")}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-800">
-          {!collapsed && <Link to="/admin" className="font-bold text-lg text-amber-500">A-Z Command</Link>}
-          <Button variant="ghost" size="icon" className="hidden md:flex text-zinc-400 hover:text-zinc-100" onClick={() => setCollapsed(!collapsed)}>
+          {!collapsed && <Link to="/admin" className="font-bold text-lg text-amber-400">A-Z Command</Link>}
+          <Button variant="ghost" size="icon" className="hidden md:flex text-zinc-300 hover:text-white" onClick={() => setCollapsed(!collapsed)}>
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
         </div>
         <nav className="flex-1 overflow-y-auto py-4">
           {navSections.map((section) => (
             <div key={section.label} className="mb-4">
-              {!collapsed && <div className="px-4 mb-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{section.label}</div>}
+              {!collapsed && <div className="px-4 mb-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">{section.label}</div>}
               <ul className="space-y-1 px-2">
                 {section.items.map((item) => {
                   if (item.adminOnly && !isAdmin) return null;
@@ -173,7 +173,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   const isActive = item.end ? location.pathname === item.href : location.pathname === item.href || location.pathname.startsWith(item.href + "/");
                   return (
                     <li key={item.href}>
-                      <Link to={item.href} className={cn("flex items-center gap-3 px-3 py-2 rounded-lg transition-colors", isActive ? "bg-amber-500/10 text-amber-500" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800")} onClick={() => setMobileOpen(false)} title={collapsed ? item.title : undefined}>
+                      <Link to={item.href} className={cn("flex items-center gap-3 px-3 py-2 rounded-lg transition-colors", isActive ? "bg-amber-500/15 text-amber-400 font-medium" : "text-zinc-300 hover:text-white hover:bg-zinc-800")} onClick={() => setMobileOpen(false)} title={collapsed ? item.title : undefined}>
                         <item.icon className="h-5 w-5 flex-shrink-0" />
                         {!collapsed && <span>{item.title}</span>}
                         {item.title === "Alerts" && unreadAlerts > 0 && !collapsed && <Badge variant="destructive" className="ml-auto text-xs">{unreadAlerts}</Badge>}
@@ -187,11 +187,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
         <div className="p-4 border-t border-zinc-800">
           {!collapsed && (
-            <div className="flex items-center gap-3 text-sm text-zinc-400">
-              <Avatar className="h-8 w-8"><AvatarFallback className="bg-amber-500/20 text-amber-500 text-xs">{userInitials}</AvatarFallback></Avatar>
+            <div className="flex items-center gap-3 text-sm">
+              <Avatar className="h-8 w-8"><AvatarFallback className="bg-amber-500/20 text-amber-400 text-xs">{userInitials}</AvatarFallback></Avatar>
               <div className="flex-1 min-w-0">
-                <p className="truncate text-zinc-100">{authUser?.profile?.first_name} {authUser?.profile?.last_name}</p>
-                <p className="truncate text-xs capitalize">{authUser?.roles?.[0]?.replace("_", " ")}</p>
+                <p className="truncate text-white font-medium">{authUser?.profile?.first_name} {authUser?.profile?.last_name}</p>
+                <p className="truncate text-xs text-zinc-400 capitalize">{authUser?.roles?.[0]?.replace("_", " ")}</p>
               </div>
             </div>
           )}
@@ -201,24 +201,24 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <div className={cn("flex-1 flex flex-col", collapsed ? "md:ml-16" : "md:ml-64")}>
         <header className="h-16 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between px-4 sticky top-0 z-30">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="md:hidden text-zinc-400" onClick={() => setMobileOpen(true)}><Menu className="h-5 w-5" /></Button>
+            <Button variant="ghost" size="icon" className="md:hidden text-zinc-300" onClick={() => setMobileOpen(true)}><Menu className="h-5 w-5" /></Button>
             <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-              <Input placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 w-64 bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <Input placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 w-64 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400" />
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative text-zinc-400 hover:text-zinc-100" onClick={() => navigate("/admin/alerts")}>
+            <Button variant="ghost" size="icon" className="relative text-zinc-300 hover:text-white" onClick={() => navigate("/admin/alerts")}>
               <Bell className="h-5 w-5" />
               {unreadAlerts > 0 && <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />}
             </Button>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild><Button variant="ghost" className="gap-2 text-zinc-400 hover:text-zinc-100"><Avatar className="h-8 w-8"><AvatarFallback className="bg-amber-500/20 text-amber-500 text-xs">{userInitials}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild><Button variant="ghost" className="gap-2 text-zinc-300 hover:text-white"><Avatar className="h-8 w-8"><AvatarFallback className="bg-amber-500/20 text-amber-400 text-xs">{userInitials}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-zinc-800 border-zinc-700">
-                <div className="px-2 py-1.5 text-sm text-zinc-400">{authUser?.profile?.email}</div>
+                <div className="px-2 py-1.5 text-sm text-zinc-300">{authUser?.profile?.email}</div>
                 <DropdownMenuSeparator className="bg-zinc-700" />
-                <DropdownMenuItem className="text-zinc-100 focus:bg-zinc-700 cursor-pointer" onClick={() => navigate("/")}>Back to Website</DropdownMenuItem>
-                <DropdownMenuItem className="text-zinc-100 focus:bg-zinc-700 cursor-pointer" onClick={() => signOut()}><LogOut className="h-4 w-4 mr-2" />Sign Out</DropdownMenuItem>
+                <DropdownMenuItem className="text-white focus:bg-zinc-700 cursor-pointer" onClick={() => navigate("/")}>Back to Website</DropdownMenuItem>
+                <DropdownMenuItem className="text-white focus:bg-zinc-700 cursor-pointer" onClick={() => signOut()}><LogOut className="h-4 w-4 mr-2" />Sign Out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
