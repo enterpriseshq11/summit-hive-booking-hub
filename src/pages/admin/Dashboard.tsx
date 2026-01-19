@@ -80,8 +80,8 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+            <p className="text-zinc-300">
               Welcome back, {authUser?.profile?.first_name || "Admin"}
             </p>
           </div>

@@ -108,8 +108,8 @@ export default function CommandCenterDashboard() {
       <div className="space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Command Center</h1>
-          <p className="text-zinc-400">Real-time business performance overview</p>
+          <h1 className="text-2xl font-bold text-white">Command Center</h1>
+          <p className="text-zinc-300">Real-time business performance overview</p>
         </div>
 
         {/* KPI Row */}
@@ -139,8 +139,8 @@ export default function CommandCenterDashboard() {
                     </div>
                   )}
                 </div>
-                <div className="text-2xl font-bold text-zinc-100">{kpi.value}</div>
-                <div className="text-xs text-zinc-400">{kpi.title}</div>
+                <div className="text-2xl font-bold text-white">{kpi.value}</div>
+                <div className="text-xs text-zinc-300">{kpi.title}</div>
               </CardContent>
             </Card>
           ))}
