@@ -20,7 +20,7 @@ export function ExperienceQuickSelector() {
   return (
     <div className="flex flex-col items-start gap-3 md:ml-[8.25rem] lg:ml-0">
       {/* Row 1: 2 pills centered */}
-      <div className="flex justify-center ml-24 gap-3">
+      <div className="flex justify-center ml-14 md:ml-24 gap-3">
         {topRow.map((exp) => (
           <Link key={exp.href} to={exp.href} className={pillClasses}>
             <exp.icon className="h-4 w-4 text-primary transition-colors" />
