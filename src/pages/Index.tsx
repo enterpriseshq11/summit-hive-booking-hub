@@ -182,13 +182,14 @@ export default function Index() {
                 {/* Updated subheadline */}
                 <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up" style={{
                 animationDelay: "0.5s"
-              }}>               Book in minutes. Confirm details before payment.                                       Local support when you need it.
-                         <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
+              }}>
+                  Book in minutes. Confirm details before payment.
+                  <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
                 </p>
               </div>
 
               {/* ========== CENTERED STACK: All selection rows aligned ========== */}
-              <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center gap-4 -mt-2">
                 {/* GROUP A: Experience Pills */}
                 <div className="opacity-0 animate-fade-in-up" style={{
                 animationDelay: "0.55s"
