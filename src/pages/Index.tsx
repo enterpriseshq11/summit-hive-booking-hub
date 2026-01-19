@@ -154,7 +154,7 @@ export default function Index() {
                 </div>
                 
                 {/* Location Badge - Directly under logo */}
-                <div className="flex justify-center lg:justify-start lg:pl-6">
+                <div className="flex justify-center lg:justify-start lg:pl-12">
                   <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-sm font-medium text-white/90">
                     <MapPin className="h-4 w-4 text-accent" />
                     {SITE_CONFIG.location.full} • Local team • Premium experiences
