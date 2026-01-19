@@ -167,9 +167,11 @@ export default function Index() {
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]" style={{
                 animationDelay: "0.2s"
               }}>
-                  <span className="block">      Wapakoneta's                    Premium</span>
-                  <span className="block mt-1">      Destination for</span>
-                  <span className="block mt-1 text-accent">       Events, Work,             Wellness & Fitness</span>
+                  <span className="block">      Wapakoneta's                  Premium</span>
+                  <span className="block mt-1">Destination for</span>
+                  <span className="block mt-1 text-accent">
+                    Events, Work, Wellness & Fitness
+                  </span>
                 </h1>
                 
                 {/* Gold accent divider */}
@@ -180,8 +182,9 @@ export default function Index() {
                 {/* Updated subheadline */}
                 <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up" style={{
                 animationDelay: "0.5s"
-              }}>         Book in minutes. Confirm details before payment.
-                         Local support when you need it.<span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
+              }}>
+                  Book in minutes. Confirm details before payment.
+                  <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
                 </p>
               </div>
 
