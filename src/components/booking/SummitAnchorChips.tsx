@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Heart, Sparkles, HelpCircle } from "lucide-react";
+import { Heart, Sparkles, HelpCircle, Camera } from "lucide-react";
 
 const ANCHORS = [
+  { id: "360-photo-booth", label: "360 Photo Booth", icon: Camera },
   { id: "event-types", label: "Event Types", icon: Heart },
   { id: "highlights", label: "Highlights", icon: Sparkles },
   { id: "faq", label: "FAQ", icon: HelpCircle },
