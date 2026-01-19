@@ -161,7 +161,7 @@ export default function CommandCenterEmployees() {
                       <TableRow
                         key={emp.id}
                         className="border-zinc-800 hover:bg-zinc-800/50 cursor-pointer"
-                        onClick={() => navigate(`/command-center/employees/${emp.id}`)}
+                        onClick={() => navigate(`/admin/employees/${emp.id}`)}
                       >
                         <TableCell>
                           <div className="flex items-center gap-3">

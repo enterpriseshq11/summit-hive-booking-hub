@@ -55,9 +55,9 @@ export default function CommandCenterAlerts() {
 
     // Navigate to entity if applicable
     if (alert.entity_type === "lead" && alert.entity_id) {
-      navigate(`/command-center/leads/${alert.entity_id}`);
+      navigate(`/admin/leads/${alert.entity_id}`);
     } else if (alert.alert_type === "commission_pending") {
-      navigate("/command-center/commissions?status=pending");
+      navigate("/admin/commissions?status=pending");
     }
   };
 

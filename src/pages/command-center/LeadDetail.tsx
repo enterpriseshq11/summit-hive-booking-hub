@@ -203,7 +203,7 @@ export default function LeadDetailPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/command-center/leads")}
+              onClick={() => navigate("/admin/leads")}
               className="text-zinc-400 hover:text-zinc-100"
             >
               <ArrowLeft className="h-5 w-5" />
