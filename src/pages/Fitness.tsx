@@ -131,6 +131,19 @@ export default function Fitness() {
         
         <div className="container relative z-10">
           <div className="relative">
+            {/* Tablet-only logo - absolutely positioned so it doesn't affect layout */}
+            <div 
+              className="hidden md:flex lg:hidden absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8 pointer-events-none z-[5]"
+              aria-hidden="true"
+            >
+              <img 
+                src={azTotalFitnessLogo} 
+                alt="" 
+                className="w-[280px] h-auto object-contain opacity-95"
+                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+              />
+            </div>
+            
             {/* Mobile-only logo at top of hero */}
             <div className="flex justify-center md:hidden mb-2">
               <img 
