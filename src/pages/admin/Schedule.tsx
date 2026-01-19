@@ -87,19 +87,19 @@ export default function AdminSchedule() {
         </div>
 
         {/* Week Navigation */}
-        <div className="flex items-center justify-between bg-card border rounded-lg p-4">
-          <Button variant="outline" size="sm" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}>
+        <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg p-4">
+          <Button variant="outline" size="sm" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="border-zinc-600 text-white hover:bg-zinc-700 hover:text-white">
             <ChevronLeft className="h-4 w-4 mr-1" /> Previous
           </Button>
           <div className="text-center">
-            <h2 className="font-semibold">
+            <h2 className="font-semibold text-white">
               {format(weekStart, "MMM d")} - {format(weekEnd, "MMM d, yyyy")}
             </h2>
-            <Button variant="link" size="sm" onClick={() => setCurrentWeek(new Date())}>
+            <Button variant="link" size="sm" onClick={() => setCurrentWeek(new Date())} className="text-accent hover:text-accent/80">
               Today
             </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}>
+          <Button variant="outline" size="sm" onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="border-zinc-600 text-white hover:bg-zinc-700 hover:text-white">
             Next <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
@@ -118,11 +118,11 @@ export default function AdminSchedule() {
               const isToday = isSameDay(day, new Date());
               
               return (
-                <Card key={day.toISOString()} className={`min-h-[200px] ${isToday ? 'ring-2 ring-primary' : ''}`}>
+                <Card key={day.toISOString()} className={`min-h-[200px] bg-zinc-800 border-zinc-700 ${isToday ? 'ring-2 ring-primary' : ''}`}>
                   <CardHeader className="p-3 pb-2">
-                    <CardTitle className="text-sm font-medium flex justify-between items-center">
+                    <CardTitle className="text-sm font-medium flex justify-between items-center text-white">
                       <span>{format(day, "EEE")}</span>
-                      <span className={`text-lg ${isToday ? 'text-primary font-bold' : ''}`}>
+                      <span className={`text-lg ${isToday ? 'text-primary font-bold' : 'text-zinc-300'}`}>
                         {format(day, "d")}
                       </span>
                     </CardTitle>
@@ -148,7 +148,7 @@ export default function AdminSchedule() {
                       </button>
                     ))}
                     {dayBookings.length > 4 && (
-                      <div className="text-xs text-muted-foreground text-center pt-1">
+                      <div className="text-xs text-zinc-400 text-center pt-1">
                         +{dayBookings.length - 4} more
                       </div>
                     )}
