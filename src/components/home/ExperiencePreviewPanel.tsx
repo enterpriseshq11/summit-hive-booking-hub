@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { Building2, Sparkles, Dumbbell, ChevronRight } from "lucide-react";
+import { Building2, Sparkles, Dumbbell, Camera, ChevronRight } from "lucide-react";
 import type { BusinessType } from "@/types";
 
 const experiences: {
-  type: BusinessType;
+  type: BusinessType | "photo_booth";
   name: string;
   tagline: string;
   icon: typeof Building2;
@@ -57,8 +57,18 @@ const experiences: {
     iconBg: "bg-fitness/20",
     delay: "0.3s",
   },
+  {
+    type: "photo_booth",
+    name: "360 Photo Booth",
+    tagline: "Photo Booth Rentals + Event Entertainment",
+    icon: Camera,
+    href: "/360-photo-booth",
+    gradient: "from-accent/20 to-accent/5",
+    iconColor: "text-accent",
+    iconBg: "bg-accent/20",
+    delay: "0.4s",
+  },
 ];
-
 export function ExperiencePreviewPanel() {
   return (
     <div className="relative">
