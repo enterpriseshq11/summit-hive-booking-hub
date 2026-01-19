@@ -143,20 +143,23 @@ export default function Index() {
         <div className="container relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Column - Content */}
-            <div className="text-center lg:text-left space-y-8">
-              {/* Logo Icon */}
-              <div className="flex justify-center lg:justify-start opacity-0 animate-fade-in-down" style={{
+            <div className="text-center lg:text-left space-y-6">
+              {/* Logo + Location Pill Group - Tight spacing */}
+              <div className="space-y-3 opacity-0 animate-fade-in-down" style={{
               animationDelay: "0.05s"
             }}>
-                <img alt="A-Z Enterprises" className="h-44 w-44 object-contain" src="/lovable-uploads/cf63743c-5431-4ce2-a81a-b629897e880c.png" />
-              </div>
-              
-              {/* Location Badge - Updated copy */}
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-sm font-medium text-white/90 opacity-0 animate-fade-in-down" style={{
-              animationDelay: "0.1s"
-            }}>
-                <MapPin className="h-4 w-4 text-accent" />
-                {SITE_CONFIG.location.full} • Local team • Premium experiences
+                {/* Logo Icon */}
+                <div className="flex justify-center lg:justify-start">
+                  <img alt="A-Z Enterprises" className="h-44 w-44 object-contain" src="/lovable-uploads/cf63743c-5431-4ce2-a81a-b629897e880c.png" />
+                </div>
+                
+                {/* Location Badge - Directly under logo */}
+                <div className="flex justify-center lg:justify-start">
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-sm font-medium text-white/90">
+                    <MapPin className="h-4 w-4 text-accent" />
+                    {SITE_CONFIG.location.full} • Local team • Premium experiences
+                  </div>
+                </div>
               </div>
               
               {/* Main Headline - Updated copy with tighter line-height */}
