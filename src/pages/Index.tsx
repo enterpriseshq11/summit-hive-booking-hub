@@ -167,15 +167,15 @@ export default function Index() {
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]" style={{
                 animationDelay: "0.2s"
               }}>
-                  <span className="block">      Wapakoneta's                   Premium</span>
-                  <span className="block mt-1">     Destination for</span>
-                  <span className="block mt-1 text-accent">       Events, Work,           Wellness & Fitness</span>
+                  <span className="block">      Wapakoneta's                    Premium</span>
+                  <span className="block mt-1">      Destination for</span>
+                  <span className="block mt-1 text-accent">       Events, Work,             Wellness & Fitness</span>
                 </h1>
                 
                 {/* Gold accent divider - right under Wellness */}
                 <div className="hidden lg:block w-24 h-1 bg-gradient-to-r from-accent to-accent/50 opacity-0 animate-fade-in -mt-4" style={{
-                animationDelay: "0.4s"
-              }} />
+                  animationDelay: "0.4s"
+                }} />
                 
                 {/* Updated subheadline */}
                 <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up" style={{
