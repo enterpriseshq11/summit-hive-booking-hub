@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { NextAvailableWidget, SummitRequestModal, SummitWaitlistModal, SummitAnchorChips, StickyMobileSummitCTA } from "@/components/booking";
-import { CalendarDays, MapPin, Users, Clock, Star, ArrowRight, Heart, Building2, PartyPopper, Utensils, Tv, Car, Quote, HelpCircle, ChevronRight, ChevronDown, Sparkles, Check, User, Phone, Mail, CheckCircle } from "lucide-react";
+import { CalendarDays, MapPin, Users, Clock, Star, ArrowRight, Heart, Building2, PartyPopper, Utensils, Tv, Car, Quote, HelpCircle, ChevronRight, ChevronDown, Sparkles, Check, User, Phone, Mail, CheckCircle, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import summitLogo from "@/assets/summit-logo.png";
 import e3Logo from "@/assets/e3-logo.png";
+import PhotoBooth360Section from "@/components/summit/PhotoBooth360Section";
+
 export default function Summit() {
   const navigate = useNavigate();
   const {
@@ -304,6 +306,9 @@ export default function Summit() {
           <span className="text-accent font-bold text-sm">E³</span>
         </div>
       </div>
+
+      {/* 360 Photo Booth Experience - Signature Feature */}
+      <PhotoBooth360Section onRequestBooking={() => setShowRequestModal(true)} />
 
       {/* Venue Overview */}
       <section id="highlights" className="py-20 container">
