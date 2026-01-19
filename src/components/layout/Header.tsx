@@ -33,7 +33,7 @@ import {
   Layers,
 } from "lucide-react";
 import { useState } from "react";
-import azLogoIcon from "@/assets/az-logo-icon.png";
+import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
 
 const navItems = [
   { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
