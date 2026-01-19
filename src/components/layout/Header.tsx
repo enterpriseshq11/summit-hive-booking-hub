@@ -95,7 +95,7 @@ export function Header() {
         </div>
       </div>
 
-      <div className="container flex h-16 items-center justify-between gap-4 lg:px-4 xl:px-6">
+      <div className="container flex h-16 items-center gap-4 lg:px-4 xl:px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
           <img src={azLogoIcon} alt="A-Z Enterprises" className="h-10 w-10 object-contain" />
@@ -103,7 +103,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation - 5 Primary Tabs (Book Now, Experiences, Shop, Promotions, Account) */}
-        <nav className="hidden md:flex items-center gap-1" aria-label="Primary">
+        <nav className="hidden md:flex items-center gap-1 ml-2" aria-label="Primary">
           {/* 1. Book Now - Direct Link (Primary CTA) */}
           <Link
             to="/booking"
