@@ -143,9 +143,9 @@ export default function Index() {
         <div className="container relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Column - Content */}
-            <div className="text-center lg:text-left space-y-6">
+            <div className="text-center lg:text-left space-y-4">
               {/* Logo + Location Pill Group - Tight spacing */}
-              <div className="space-y-3 opacity-0 animate-fade-in-down" style={{
+              <div className="space-y-2 opacity-0 animate-fade-in-down" style={{
               animationDelay: "0.05s"
             }}>
                 {/* Logo Icon */}
@@ -163,7 +163,7 @@ export default function Index() {
               </div>
               
               {/* Main Headline - Updated copy with tighter line-height */}
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]" style={{
                 animationDelay: "0.2s"
               }}>
