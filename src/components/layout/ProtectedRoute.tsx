@@ -20,10 +20,10 @@ export function ProtectedRoute({
   const location = useLocation();
 
   const params = new URLSearchParams(location.search);
-  const isCommandCenter = location.pathname.startsWith("/command-center");
+  const isAdminRoute = location.pathname.startsWith("/admin");
   const debugMode = params.get("debug") === "1" || location.search.includes("debug=1");
 
-  if (isCommandCenter) {
+  if (isAdminRoute) {
     // eslint-disable-next-line no-console
     console.log("ProtectedRoute", location.pathname, location.search, {
       debugMode,
@@ -44,14 +44,14 @@ export function ProtectedRoute({
 
   // Debug bypass: if debugMode is true AND this is a command-center path, NEVER redirect.
   // Must render immediately (before any redirect / loading gating).
-  if (debugMode && isCommandCenter) {
+  if (debugMode && isAdminRoute) {
     const rolesCount = authUser?.roles?.length ?? 0;
     const hasAccess = requireAdmin ? !!authUser?.isAdmin : requireStaff ? !!authUser?.isStaff : true;
 
     return (
       <AuthDebugScreen
-        title="Command Center Debug"
-        subtitle="Rendered from ProtectedRoute for /command-center?debug=1 (no redirects)."
+        title="Admin Debug"
+        subtitle="Rendered from ProtectedRoute for /admin?debug=1 (no redirects)."
         pathname={location.pathname}
         search={location.search}
         requireAuth={requireAuth}

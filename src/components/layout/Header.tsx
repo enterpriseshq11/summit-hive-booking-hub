@@ -68,7 +68,7 @@ export function Header() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isAdminRoute = location.pathname.startsWith("/command-center");
+  const isAdminRoute = location.pathname.startsWith("/admin");
   const showCommandCenter = !!authUser?.isStaff;
 
   const renderNavItem = (item: typeof navItems[0]) => {
@@ -147,7 +147,7 @@ export function Header() {
 
           {showCommandCenter && (
             <Link
-              to="/command-center"
+              to="/admin"
               className={cn(
                 "flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors",
                 isAdminRoute ? "bg-accent text-primary" : "bg-accent/20 text-accent hover:bg-accent/30"
@@ -178,20 +178,12 @@ export function Header() {
                 </DropdownMenuItem>
 
                 {authUser?.isStaff && (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link to="/command-center" className="flex items-center gap-2">
-                        <LayoutDashboard className="h-4 w-4" />
-                        Command Center
-                      </Link>
-                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="flex items-center gap-2">
                         <LayoutDashboard className="h-4 w-4" />
-                        Admin Console
+                        Admin Dashboard
                       </Link>
                     </DropdownMenuItem>
-                  </>
                 )}
 
                 <DropdownMenuSeparator />
@@ -254,7 +246,7 @@ export function Header() {
 
           {showCommandCenter && (
             <Link
-              to="/command-center"
+              to="/admin"
               onClick={() => setMobileMenuOpen(false)}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-md transition-colors",

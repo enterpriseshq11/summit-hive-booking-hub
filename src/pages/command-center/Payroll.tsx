@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -81,7 +81,7 @@ export default function Payroll() {
   };
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -275,6 +275,6 @@ export default function Payroll() {
           </DialogContent>
         </Dialog>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

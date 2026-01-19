@@ -1,4 +1,4 @@
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { useCrmDashboardStats, useSmartAlerts, type DateRangeType } from "@/hooks/useCrmDashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -104,7 +104,7 @@ export default function CommandCenterDashboard() {
   const funnelColors = ["#f59e0b", "#eab308", "#84cc16", "#22c55e", "#10b981"];
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Page Header */}
         <div>
@@ -273,6 +273,6 @@ export default function CommandCenterDashboard() {
           </CardContent>
         </Card>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

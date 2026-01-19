@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { useCrmRevenue, useCreateCrmRevenue } from "@/hooks/useCrmRevenue";
 import { useCrmEmployees } from "@/hooks/useCrmEmployees";
 import { useCrmLeads } from "@/hooks/useCrmLeads";
@@ -121,7 +121,7 @@ export default function CommandCenterRevenue() {
   }, {} as Record<string, number>) || {};
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -403,7 +403,7 @@ export default function CommandCenterRevenue() {
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              navigate(`/command-center/leads/${rev.lead_id}`)
+                              navigate(`/admin/leads/${rev.lead_id}`)
                             }
                             className="text-amber-500 hover:text-amber-400 p-0 h-auto"
                           >
@@ -427,6 +427,6 @@ export default function CommandCenterRevenue() {
           </CardContent>
         </Card>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

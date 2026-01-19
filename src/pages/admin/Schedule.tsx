@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UnifiedAdminLayout } from "@/components/admin";
+import { AdminLayout } from "@/components/admin";
 import { useBookings } from "@/hooks/useBookings";
 import { useBusinesses } from "@/hooks/useBusinesses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,7 +58,7 @@ export default function AdminSchedule() {
   };
 
   return (
-    <UnifiedAdminLayout>
+    <AdminLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -243,6 +243,6 @@ export default function AdminSchedule() {
           </DialogContent>
         </Dialog>
       </div>
-    </UnifiedAdminLayout>
+    </AdminLayout>
   );
 }

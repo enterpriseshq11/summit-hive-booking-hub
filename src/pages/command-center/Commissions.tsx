@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import {
   useCrmCommissions,
   useApproveCommission,
@@ -87,7 +87,7 @@ export default function CommandCenterCommissions() {
   const markPaid = useMarkCommissionPaid();
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -385,6 +385,6 @@ export default function CommandCenterCommissions() {
           </CardContent>
         </Card>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

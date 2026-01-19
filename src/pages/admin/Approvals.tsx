@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UnifiedAdminLayout } from "@/components/admin";
+import { AdminLayout } from "@/components/admin";
 import { usePendingApprovals, useUpdateBookingStatus } from "@/hooks/useBookings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export default function AdminApprovals() {
   };
 
   return (
-    <UnifiedAdminLayout>
+    <AdminLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Approvals</h1>
@@ -222,6 +222,6 @@ export default function AdminApprovals() {
           </DialogContent>
         </Dialog>
       </div>
-    </UnifiedAdminLayout>
+    </AdminLayout>
   );
 }
