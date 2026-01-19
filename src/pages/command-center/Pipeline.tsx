@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { useCrmLeads, useUpdateCrmLead } from "@/hooks/useCrmLeads";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -76,7 +76,7 @@ function LeadCard({ lead, isDragging }: LeadCardProps) {
         "bg-zinc-800 border border-zinc-700 rounded-lg p-3 cursor-pointer hover:border-amber-500/50 transition-colors",
         isDragging && "opacity-50"
       )}
-      onClick={() => navigate(`/command-center/leads/${lead.id}`)}
+      onClick={() => navigate(`/admin/leads/${lead.id}`)}
     >
       <div className="flex items-start gap-2">
         <div
@@ -170,7 +170,7 @@ export default function CommandCenterPipeline() {
   const activeLead = activeId ? leads?.find((l) => l.id === activeId) : null;
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -240,6 +240,6 @@ export default function CommandCenterPipeline() {
           </DragOverlay>
         </DndContext>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

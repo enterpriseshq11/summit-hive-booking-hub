@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { UnifiedAdminLayout } from "@/components/admin";
+import { AdminLayout } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -505,7 +505,7 @@ const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
   });
 
   return (
-    <UnifiedAdminLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Stripe Mode Indicator */}
         <div className="flex flex-col sm:flex-row gap-4">
@@ -1213,6 +1213,6 @@ const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </UnifiedAdminLayout>
+    </AdminLayout>
   );
 }

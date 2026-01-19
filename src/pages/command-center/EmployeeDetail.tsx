@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { useCrmEmployee } from "@/hooks/useCrmEmployees";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -68,28 +68,28 @@ export default function EmployeeDetailPage() {
 
   if (isLoading) {
     return (
-      <CommandCenterLayout>
+      <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <RefreshCw className="h-8 w-8 animate-spin text-zinc-500" />
         </div>
-      </CommandCenterLayout>
+      </AdminLayout>
     );
   }
 
   if (!employee) {
     return (
-      <CommandCenterLayout>
+      <AdminLayout>
         <div className="text-center py-12">
           <p className="text-zinc-500">Employee not found</p>
           <Button
             variant="outline"
-            onClick={() => navigate("/command-center/employees")}
+            onClick={() => navigate("/admin/employees")}
             className="mt-4"
           >
             Back to Employees
           </Button>
         </div>
-      </CommandCenterLayout>
+      </AdminLayout>
     );
   }
 
@@ -127,14 +127,14 @@ export default function EmployeeDetailPage() {
   };
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-start gap-4">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/command-center/employees")}
+            onClick={() => navigate("/admin/employees")}
             className="text-zinc-400 hover:text-zinc-100"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -416,6 +416,6 @@ export default function EmployeeDetailPage() {
           </div>
         </div>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

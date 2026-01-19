@@ -1,4 +1,4 @@
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { useCrmEmployees, useCrmEmployee } from "@/hooks/useCrmEmployees";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +49,7 @@ export default function CommandCenterEmployees() {
   };
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -222,6 +222,6 @@ export default function CommandCenterEmployees() {
           </CardContent>
         </Card>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

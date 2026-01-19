@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { useCrmActivity } from "@/hooks/useCrmActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +61,7 @@ export default function CommandCenterActivity() {
   });
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -198,6 +198,6 @@ export default function CommandCenterActivity() {
           </CardContent>
         </Card>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

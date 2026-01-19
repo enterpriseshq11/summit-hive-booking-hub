@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { useCrmLeads, useCreateCrmLead, useUpdateCrmLead, useBulkUpdateLeads, type CrmLeadWithRelations } from "@/hooks/useCrmLeads";
 import { useCrmEmployees } from "@/hooks/useCrmEmployees";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -141,7 +141,7 @@ export default function CommandCenterLeads() {
   };
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -408,7 +408,7 @@ export default function CommandCenterLeads() {
                     <TableRow
                       key={lead.id}
                       className="border-zinc-800 hover:bg-zinc-800/50 cursor-pointer"
-                      onClick={() => navigate(`/command-center/leads/${lead.id}`)}
+                      onClick={() => navigate(`/admin/leads/${lead.id}`)}
                     >
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <Checkbox
@@ -491,7 +491,7 @@ export default function CommandCenterLeads() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-zinc-800 border-zinc-700">
                             <DropdownMenuItem
-                              onClick={() => navigate(`/command-center/leads/${lead.id}`)}
+                              onClick={() => navigate(`/admin/leads/${lead.id}`)}
                               className="text-zinc-100"
                             >
                               View Details
@@ -532,6 +532,6 @@ export default function CommandCenterLeads() {
           </CardContent>
         </Card>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

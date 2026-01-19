@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { useCrmAlerts, useMarkAlertRead, useDismissAlert } from "@/hooks/useCrmAlerts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -65,7 +65,7 @@ export default function CommandCenterAlerts() {
   const criticalCount = alerts?.filter((a) => a.severity === "critical").length || 0;
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -174,6 +174,6 @@ export default function CommandCenterAlerts() {
           )}
         </div>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }

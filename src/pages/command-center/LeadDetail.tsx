@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { CommandCenterLayout } from "@/components/command-center/CommandCenterLayout";
+import { AdminLayout } from "@/components/admin";
 import { useCrmLead, useUpdateCrmLead } from "@/hooks/useCrmLeads";
 import { useCrmActivity } from "@/hooks/useCrmActivity";
 import { useCrmRevenue, useCreateCrmRevenue } from "@/hooks/useCrmRevenue";
@@ -164,28 +164,28 @@ export default function LeadDetailPage() {
 
   if (leadLoading) {
     return (
-      <CommandCenterLayout>
+      <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <RefreshCw className="h-8 w-8 animate-spin text-zinc-500" />
         </div>
-      </CommandCenterLayout>
+      </AdminLayout>
     );
   }
 
   if (!lead) {
     return (
-      <CommandCenterLayout>
+      <AdminLayout>
         <div className="text-center py-12">
           <p className="text-zinc-500">Lead not found</p>
           <Button
             variant="outline"
-            onClick={() => navigate("/command-center/leads")}
+            onClick={() => navigate("/admin/leads")}
             className="mt-4"
           >
             Back to Leads
           </Button>
         </div>
-      </CommandCenterLayout>
+      </AdminLayout>
     );
   }
 
@@ -195,7 +195,7 @@ export default function LeadDetailPage() {
     .reduce((s, c) => s + Number(c.amount), 0);
 
   return (
-    <CommandCenterLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -636,6 +636,6 @@ export default function LeadDetailPage() {
           </div>
         </div>
       </div>
-    </CommandCenterLayout>
+    </AdminLayout>
   );
 }
