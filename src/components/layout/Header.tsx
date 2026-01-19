@@ -10,10 +10,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 import {
   CalendarDays,
   Building2,
@@ -32,89 +35,52 @@ import {
   Mic,
   Layers,
   Camera,
+  ChevronDown,
+  Settings,
+  Calendar,
+  Trophy,
+  Tag,
+  Percent,
+  Package,
+  UserPlus,
+  LogIn,
 } from "lucide-react";
 import { useState } from "react";
 import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
 
-const navItems = [
-  { label: "Book Now", href: "/booking", icon: CalendarDays, primary: true },
-  { 
-    label: "Spin & Win", 
-    href: "/dopamine-drop", 
-    icon: CircleDot, 
-    highlight: true,
-    pulse: true,
-    tooltip: "Monthly giveaways"
-  },
-  { label: "Summit", href: "/summit", icon: Building2 },
-  { label: "Coworking", href: "/coworking", icon: Building2 },
-  { label: "Spa", href: "/spa", icon: Sparkles },
-  { label: "Fitness", href: "/fitness", icon: Dumbbell },
-  { label: "360 Photo Booth", href: "/360-photo-booth", icon: Camera },
-  { label: "Gift Cards", href: "/gift-cards", icon: Gift },
-  { 
-    label: "Voice Vault", 
-    mobileLabel: "Voice Vault", 
-    desktopLabel: "Voice Vault", 
-    href: "/voice-vault", 
-    icon: Mic, 
-    highlight: true,
-    tooltip: "Podcast studio booking"
-  },
-  { label: "Shop", href: "/shop", icon: ShoppingBag },
-  { label: "Promotions", href: "/promotions", icon: Layers },
+// Experiences dropdown items
+const experienceItems = [
+  { label: "Summit", href: "/summit", icon: Building2, description: "Event center & venue" },
+  { label: "Hive Coworking", href: "/coworking", icon: Building2, description: "Private offices & coworking" },
+  { label: "Spa", href: "/spa", icon: Sparkles, description: "Massage & wellness" },
+  { label: "Fitness", href: "/fitness", icon: Dumbbell, description: "Gym & training" },
+  { label: "360 Photo Booth", href: "/360-photo-booth", icon: Camera, description: "Event photo experiences" },
+];
+
+// Shop dropdown items
+const shopItems = [
+  { label: "Gift Cards", href: "/gift-cards", icon: Gift, description: "Give the gift of experience" },
+  { label: "Merchandise", href: "/shop", icon: ShoppingBag, description: "Curated products" },
+];
+
+// Promotions dropdown items
+const promotionItems = [
+  { label: "Current Promotions", href: "/promotions", icon: Percent, description: "Active deals & offers" },
+  { label: "Limited Time Offers", href: "/promotions?filter=limited", icon: Tag, description: "Don't miss out" },
+  { label: "Bundles & Packages", href: "/promotions?filter=bundles", icon: Package, description: "Save with bundles" },
 ];
 
 export function Header() {
   const { user, authUser, signOut } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedMobileSection, setExpandedMobileSection] = useState<string | null>(null);
 
   const isAdminRoute = location.pathname.startsWith("/admin");
   const showCommandCenter = !!authUser?.isStaff;
 
-  const renderNavItem = (item: typeof navItems[0]) => {
-    const isActive = location.pathname === item.href;
-    const displayLabel = (item as any).desktopLabel || item.label;
-    
-    const linkContent = (
-      <Link
-        key={item.href}
-        to={item.href}
-        className={cn(
-          "flex items-center gap-1.5 px-2 lg:px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-          isActive
-            ? "bg-accent text-primary"
-            : item.primary
-              ? "bg-accent/20 text-accent hover:bg-accent/30"
-              : item.highlight
-                ? "text-accent hover:text-accent hover:bg-accent/10"
-                : (item as any).secondary
-                  ? "text-primary-foreground/50 hover:text-primary-foreground/80 hover:bg-primary-foreground/5"
-                  : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10",
-          (item as any).pulse && !isActive && "animate-pulse"
-        )}
-      >
-        <item.icon className={cn("h-4 w-4 flex-shrink-0", (item as any).pulse && !isActive && "text-primary")} />
-        {displayLabel}
-      </Link>
-    );
-
-    // Wrap with tooltip if item has tooltip text
-    if ((item as any).tooltip) {
-      return (
-        <Tooltip key={item.href}>
-          <TooltipTrigger asChild>
-            {linkContent}
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs">
-            {(item as any).tooltip}
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    return linkContent;
+  const toggleMobileSection = (section: string) => {
+    setExpandedMobileSection(expandedMobileSection === section ? null : section);
   };
 
   return (
@@ -136,129 +102,455 @@ export function Header() {
         </div>
       </div>
 
-      <div className="container flex h-16 items-center justify-between gap-2 lg:gap-3 lg:px-4 xl:px-6">
+      <div className="container flex h-16 items-center justify-between gap-4 lg:px-4 xl:px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
           <img src={azLogoIcon} alt="A-Z Enterprises" className="h-10 w-10 object-contain" />
           <span className="text-xl font-bold text-gold-gradient hidden sm:inline">A-Z Enterprises</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-0.5 lg:space-x-1" aria-label="Primary">
-          {navItems.map(renderNavItem)}
+        {/* Desktop Navigation - 6 Primary Tabs */}
+        <nav className="hidden md:flex items-center gap-1" aria-label="Primary">
+          {/* 1. Book Now - Direct Link (Primary CTA) */}
+          <Link
+            to="/booking"
+            className={cn(
+              "flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-md transition-colors",
+              location.pathname === "/booking"
+                ? "bg-accent text-primary"
+                : "bg-accent/20 text-accent hover:bg-accent/30"
+            )}
+          >
+            <CalendarDays className="h-4 w-4" />
+            Book Now
+          </Link>
 
-          {showCommandCenter && (
-            <Link
-              to="/admin"
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors",
-                isAdminRoute ? "bg-accent text-primary" : "bg-accent/20 text-accent hover:bg-accent/30"
+          {/* 2. Experiences - Dropdown */}
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="bg-transparent text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 data-[state=open]:bg-primary-foreground/10">
+                  <Building2 className="h-4 w-4 mr-1.5" />
+                  Experiences
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[280px] gap-1 p-2">
+                    {experienceItems.map((item) => (
+                      <li key={item.href}>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to={item.href}
+                            className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent/10 hover:text-accent focus:bg-accent/10"
+                          >
+                            <item.icon className="h-5 w-5 text-accent" />
+                            <div>
+                              <div className="text-sm font-medium">{item.label}</div>
+                              <p className="text-xs text-muted-foreground">{item.description}</p>
+                            </div>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+
+          {/* 3. Spin & Win - Direct Link */}
+          <Link
+            to="/dopamine-drop"
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+              location.pathname === "/dopamine-drop"
+                ? "bg-accent text-primary"
+                : "text-accent hover:text-accent hover:bg-accent/10 animate-pulse"
+            )}
+          >
+            <CircleDot className="h-4 w-4" />
+            Spin & Win
+          </Link>
+
+          {/* 4. Shop - Dropdown */}
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="bg-transparent text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 data-[state=open]:bg-primary-foreground/10">
+                  <ShoppingBag className="h-4 w-4 mr-1.5" />
+                  Shop
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[240px] gap-1 p-2">
+                    {shopItems.map((item) => (
+                      <li key={item.href}>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to={item.href}
+                            className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent/10 hover:text-accent focus:bg-accent/10"
+                          >
+                            <item.icon className="h-5 w-5 text-accent" />
+                            <div>
+                              <div className="text-sm font-medium">{item.label}</div>
+                              <p className="text-xs text-muted-foreground">{item.description}</p>
+                            </div>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+
+          {/* 5. Promotions - Dropdown */}
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="bg-transparent text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 data-[state=open]:bg-primary-foreground/10">
+                  <Layers className="h-4 w-4 mr-1.5" />
+                  Promotions
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[260px] gap-1 p-2">
+                    {promotionItems.map((item) => (
+                      <li key={item.href}>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to={item.href}
+                            className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent/10 hover:text-accent focus:bg-accent/10"
+                          >
+                            <item.icon className="h-5 w-5 text-accent" />
+                            <div>
+                              <div className="text-sm font-medium">{item.label}</div>
+                              <p className="text-xs text-muted-foreground">{item.description}</p>
+                            </div>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+
+          {/* 6. Account - Dropdown (auth-aware) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-1.5 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                <User className="h-4 w-4" />
+                <span>{user ? (authUser?.profile?.first_name || "Account") : "Account"}</span>
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {user ? (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/account" className="flex items-center gap-2">
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/account" className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Bookings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/voice-vault" className="flex items-center gap-2">
+                      <Mic className="h-4 w-4" />
+                      Voice Vault
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dopamine-drop" className="flex items-center gap-2">
+                      <Trophy className="h-4 w-4" />
+                      Rewards
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/account" className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+
+                  {showCommandCenter && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center gap-2 text-accent">
+                          <LayoutDashboard className="h-4 w-4" />
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut} className="text-destructive">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link to="/login" className="flex items-center gap-2">
+                      <LogIn className="h-4 w-4" />
+                      Login
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/login?mode=signup" className="flex items-center gap-2">
+                      <UserPlus className="h-4 w-4" />
+                      Create Account
+                    </Link>
+                  </DropdownMenuItem>
+                </>
               )}
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Admin
-            </Link>
-          )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
 
-        {/* Auth Section */}
-        <div className="flex items-center gap-2">
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground hover:bg-primary-foreground/10">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">{authUser?.profile?.first_name || "Account"}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild>
-                  <Link to="/account" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    My Account
-                  </Link>
-                </DropdownMenuItem>
-
-                {authUser?.isStaff && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin" className="flex items-center gap-2">
-                        <LayoutDashboard className="h-4 w-4" />
-                        Admin Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                )}
-
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="text-destructive">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button asChild size="sm" className="bg-accent hover:bg-accent/90 text-primary font-semibold">
-              <Link to="/login">Login</Link>
-            </Button>
-          )}
-
-          {/* Mobile Menu Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden text-primary-foreground hover:bg-primary-foreground/10"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
+        {/* Mobile Menu Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden text-primary-foreground hover:bg-primary-foreground/10"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
       </div>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <nav className="md:hidden border-t border-primary-foreground/10 bg-primary p-4 space-y-2 animate-fade-in" aria-label="Mobile">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.href;
-            const displayLabel = item.mobileLabel || item.label;
-            const tooltip = (item as any).tooltip;
-            return (
-              <Link
-                key={item.href}
-                to={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors",
-                  isActive
-                    ? "bg-accent text-primary"
-                    : item.highlight
-                      ? "text-accent hover:text-accent hover:bg-accent/10"
-                      : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <div className="flex flex-col">
-                  <span>{displayLabel}</span>
-                  {tooltip && (
-                    <span className="text-xs text-primary-foreground/50">{tooltip}</span>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
+        <nav className="md:hidden border-t border-primary-foreground/10 bg-primary p-4 space-y-1 animate-fade-in max-h-[80vh] overflow-y-auto" aria-label="Mobile">
+          {/* 1. Book Now - Primary CTA */}
+          <Link
+            to="/booking"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-md bg-accent/20 text-accent"
+          >
+            <CalendarDays className="h-5 w-5" />
+            Book Now
+          </Link>
 
-          {showCommandCenter && (
-            <Link
-              to="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-md transition-colors",
-                isAdminRoute ? "bg-accent text-primary" : "text-accent bg-accent/20 hover:bg-accent/30"
-              )}
+          {/* 2. Experiences - Collapsible */}
+          <div>
+            <button
+              onClick={() => toggleMobileSection("experiences")}
+              className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
             >
-              <LayoutDashboard className="h-5 w-5" />
-              Admin
-            </Link>
-          )}
+              <span className="flex items-center gap-3">
+                <Building2 className="h-5 w-5" />
+                Experiences
+              </span>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedMobileSection === "experiences" && "rotate-180")} />
+            </button>
+            {expandedMobileSection === "experiences" && (
+              <div className="ml-4 mt-1 space-y-1 border-l-2 border-primary-foreground/10 pl-4">
+                {experienceItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                  >
+                    <item.icon className="h-4 w-4 text-accent" />
+                    <div>
+                      <div>{item.label}</div>
+                      <div className="text-xs text-primary-foreground/50">{item.description}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 3. Spin & Win - Direct Link */}
+          <Link
+            to="/dopamine-drop"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-accent rounded-md hover:bg-accent/10"
+          >
+            <CircleDot className="h-5 w-5" />
+            Spin & Win
+          </Link>
+
+          {/* 4. Shop - Collapsible */}
+          <div>
+            <button
+              onClick={() => toggleMobileSection("shop")}
+              className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+            >
+              <span className="flex items-center gap-3">
+                <ShoppingBag className="h-5 w-5" />
+                Shop
+              </span>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedMobileSection === "shop" && "rotate-180")} />
+            </button>
+            {expandedMobileSection === "shop" && (
+              <div className="ml-4 mt-1 space-y-1 border-l-2 border-primary-foreground/10 pl-4">
+                {shopItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                  >
+                    <item.icon className="h-4 w-4 text-accent" />
+                    <div>
+                      <div>{item.label}</div>
+                      <div className="text-xs text-primary-foreground/50">{item.description}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 5. Promotions - Collapsible */}
+          <div>
+            <button
+              onClick={() => toggleMobileSection("promotions")}
+              className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+            >
+              <span className="flex items-center gap-3">
+                <Layers className="h-5 w-5" />
+                Promotions
+              </span>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedMobileSection === "promotions" && "rotate-180")} />
+            </button>
+            {expandedMobileSection === "promotions" && (
+              <div className="ml-4 mt-1 space-y-1 border-l-2 border-primary-foreground/10 pl-4">
+                {promotionItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                  >
+                    <item.icon className="h-4 w-4 text-accent" />
+                    <div>
+                      <div>{item.label}</div>
+                      <div className="text-xs text-primary-foreground/50">{item.description}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 6. Account - Collapsible */}
+          <div>
+            <button
+              onClick={() => toggleMobileSection("account")}
+              className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+            >
+              <span className="flex items-center gap-3">
+                <User className="h-5 w-5" />
+                {user ? (authUser?.profile?.first_name || "Account") : "Account"}
+              </span>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedMobileSection === "account" && "rotate-180")} />
+            </button>
+            {expandedMobileSection === "account" && (
+              <div className="ml-4 mt-1 space-y-1 border-l-2 border-primary-foreground/10 pl-4">
+                {user ? (
+                  <>
+                    <Link
+                      to="/account"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-accent" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      to="/account"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                    >
+                      <Calendar className="h-4 w-4 text-accent" />
+                      Bookings
+                    </Link>
+                    <Link
+                      to="/voice-vault"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                    >
+                      <Mic className="h-4 w-4 text-accent" />
+                      Voice Vault
+                    </Link>
+                    <Link
+                      to="/dopamine-drop"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                    >
+                      <Trophy className="h-4 w-4 text-accent" />
+                      Rewards
+                    </Link>
+                    <Link
+                      to="/account"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                    >
+                      <Settings className="h-4 w-4 text-accent" />
+                      Settings
+                    </Link>
+                    {showCommandCenter && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 text-sm text-accent font-medium rounded-md hover:bg-accent/10"
+                      >
+                        <LayoutDashboard className="h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-destructive rounded-md hover:bg-destructive/10 w-full text-left"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                    >
+                      <LogIn className="h-4 w-4 text-accent" />
+                      Login
+                    </Link>
+                    <Link
+                      to="/login?mode=signup"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                    >
+                      <UserPlus className="h-4 w-4 text-accent" />
+                      Create Account
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </nav>
       )}
     </header>
