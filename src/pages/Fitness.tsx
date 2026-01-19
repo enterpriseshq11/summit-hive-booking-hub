@@ -132,18 +132,19 @@ export default function Fitness() {
         <div className="container relative z-10">
           <div className="relative">
             {/* Mobile-only logo at top of hero */}
-            <div className="flex justify-center md:hidden mb-3">
+            <div className="flex justify-center md:hidden mb-2">
               <img 
                 src={azTotalFitnessLogo} 
-                alt="Total Fitness by A-Z" 
-                className="w-[clamp(150px,55vw,230px)] h-auto object-contain"
+                alt="A-Z Total Fitness Enterprise" 
+                className="w-[clamp(140px,50vw,200px)] h-auto object-contain"
+                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
               />
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 md:gap-12 lg:gap-16 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 md:gap-8 lg:gap-12 items-start">
               {/* Left Column - Copy */}
               <div className="animate-fade-in">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-4 md:mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-3 md:mb-6">
                   <Dumbbell className="h-4 w-4" />
                   Total Fitness by A-Z
                 </div>
@@ -216,11 +217,11 @@ export default function Fitness() {
             </div>
 
             {/* Right Column - Logo (positioned without adding extra hero height) */}
-            <div className="absolute inset-y-0 right-0 hidden lg:flex w-1/2 items-start justify-center animate-fade-in pt-8 xl:pt-12" style={{ animationDelay: '0.3s' }}>
+            <div className="absolute inset-y-0 right-0 hidden lg:flex w-1/2 items-start justify-center animate-fade-in pt-4 xl:pt-6" style={{ animationDelay: '0.3s' }}>
               <img 
                 src={azTotalFitnessLogo} 
                 alt="A-Z Total Fitness Enterprise logo"
-                className="w-[480px] xl:w-[560px] 2xl:w-[640px] h-auto object-contain brightness-110 saturate-[1.3] sepia-[0.15] hue-rotate-[-5deg]"
+                className="w-[420px] xl:w-[480px] 2xl:w-[540px] h-auto object-contain"
                 style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
               />
             </div>
