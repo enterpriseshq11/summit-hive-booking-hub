@@ -140,7 +140,7 @@ export default function Fitness() {
               />
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 md:gap-12 lg:gap-16 items-start">
+            <div className="grid -mt-6 md:mt-0 grid-cols-1 lg:grid-cols-2 gap-0 md:gap-12 lg:gap-16 items-start">
               {/* Left Column - Copy */}
               <div className="animate-fade-in">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-sm font-semibold text-accent border border-accent/30 mb-4 md:mb-8">
