@@ -167,11 +167,9 @@ export default function Index() {
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]" style={{
                 animationDelay: "0.2s"
               }}>
-                  <span className="block">Wapakoneta's Premium</span>
-                  <span className="block mt-1">Destination for</span>
-                  <span className="block mt-1 text-accent">
-                    Events, Work, Wellness & Fitness
-                  </span>
+                  <span className="block">       Wapakoneta's                   Premium</span>
+                  <span className="block mt-1">      Destination for</span>
+                  <span className="block mt-1 text-accent">       Events, Work,           Wellness & Fitness</span>
                 </h1>
                 
                 {/* Gold accent divider */}
@@ -182,63 +180,63 @@ export default function Index() {
                 {/* Updated subheadline */}
                 <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up" style={{
                 animationDelay: "0.5s"
-              }}>
-                  Book in minutes. Confirm details before payment.
-                  <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
+              }}>      Book in minutes. Confirm details before payment.
+Local support when you need it.<span className="block mt-1 font-medium text-white/80">                  Local support when you need it.</span>
                 </p>
               </div>
 
-              {/* ========== CENTERED STACK: All selection rows aligned ========== */}
-              <div className="flex flex-col items-center gap-4">
-                {/* GROUP A: Experience Pills */}
-                <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: "0.55s" }}>
-                  <p className="text-sm text-white/50 mb-3 text-center">Pick your experience:</p>
-                  <ExperienceQuickSelector />
-                </div>
+              {/* HOMEPAGE-02: Pick Your Experience Quick Selector */}
+              <div className="opacity-0 animate-fade-in-up" style={{
+              animationDelay: "0.55s"
+            }}>
+                <p className="text-sm text-white/50 mb-3 text-center lg:text-left">Pick your experience:</p>
+                <ExperienceQuickSelector />
+              </div>
+              
+              {/* Section anchor chips */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-2 opacity-0 animate-fade-in-up" style={{
+              animationDelay: "0.6s"
+            }}>
+                <button onClick={() => scrollToSection('availability')} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+                  Availability
+                </button>
+                <button onClick={() => scrollToSection('experiences')} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+                  Experiences
+                </button>
+                <button onClick={() => scrollToSection('faq')} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+                  FAQ
+                </button>
+              </div>
+              
+              {/* HOMEPAGE-01: Two CTAs - Primary + Secondary */}
+              <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 opacity-0 animate-fade-in-up" style={{
+              animationDelay: "0.7s"
+            }}>
+                <Button size="lg" className="text-lg px-10 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group" asChild>
+                  <Link to="/booking">
+                    {/* Inner highlight */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <CalendarDays className="h-5 w-5 mr-2 relative z-10" />
+                    <span className="relative z-10">Book Now</span>
+                    <ArrowRight className="h-5 w-5 ml-2 relative z-10" />
+                  </Link>
+                </Button>
                 
-                {/* GROUP B: Secondary Anchor Chips */}
-                <div className="flex flex-wrap justify-center gap-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
-                  <button onClick={() => scrollToSection('availability')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
-                    Availability
-                  </button>
-                  <button onClick={() => scrollToSection('experiences')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
-                    Experiences
-                  </button>
-                  <button onClick={() => scrollToSection('faq')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
-                    FAQ
-                  </button>
-                </div>
-                
-                {/* GROUP C: Main CTAs */}
-                <div className="pt-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.7s" }}>
-                  <div className="flex flex-col sm:flex-row justify-center gap-3">
-                    <Button size="lg" className="h-14 text-base px-8 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group" asChild>
-                      <Link to="/booking">
-                        <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <CalendarDays className="h-5 w-5 mr-2 relative z-10" />
-                        <span className="relative z-10">Book Now</span>
-                        <ArrowRight className="h-5 w-5 ml-2 relative z-10" />
-                      </Link>
-                    </Button>
-                    
-                    <Button size="lg" className="h-14 text-base px-8 bg-accent hover:bg-accent/90 text-primary font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-1" onClick={() => scrollToSection('experiences')}>
-                      <ExternalLink className="h-5 w-5 mr-2" />
-                      Explore Experiences
-                    </Button>
-                  </div>
-                </div>
+                {/* Secondary CTA */}
+                <Button size="lg" className="text-lg px-8 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-1" onClick={() => scrollToSection('experiences')}>
+                  <ExternalLink className="h-5 w-5 mr-2" />
+                  Explore All Experiences
+                </Button>
+              </div>
 
-                {/* GROUP D: Feature/Trust Chips */}
-                <div className="pt-2 opacity-0 animate-fade-in" style={{ animationDelay: "0.9s" }}>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {proofChips.map((chip, index) => (
-                      <div key={index} className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60">
-                        <chip.icon className="h-3 w-3 text-accent/70" />
-                        <span>{chip.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              {/* Proof Chips - Subtle */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-4 opacity-0 animate-fade-in" style={{
+              animationDelay: "0.9s"
+            }}>
+                {proofChips.map((chip, index) => <div key={index} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70">
+                    <chip.icon className="h-4 w-4 text-accent/80" />
+                    <span>{chip.text}</span>
+                  </div>)}
               </div>
 
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 opacity-0 animate-fade-in" style={{
