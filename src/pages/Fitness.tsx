@@ -220,7 +220,7 @@ export default function Fitness() {
               <img 
                 src={azTotalFitnessLogo} 
                 alt="A-Z Total Fitness Enterprise logo"
-                className="w-[480px] xl:w-[560px] 2xl:w-[640px] h-auto object-contain"
+                className="w-[480px] xl:w-[560px] 2xl:w-[640px] h-auto object-contain brightness-110 saturate-[1.3] sepia-[0.15] hue-rotate-[-5deg]"
                 style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
               />
             </div>
