@@ -53,7 +53,6 @@ const experienceItems = [
 const shopItems = [
   { label: "Gift Cards", href: "/gift-cards", icon: Gift, description: "Give the gift of experience" },
   { label: "Merchandise", href: "/shop", icon: ShoppingBag, description: "Curated products" },
-  { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, description: "Win prizes & rewards" },
 ];
 
 // Promotions dropdown items
@@ -285,6 +284,20 @@ export function Header() {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* 6. Spin & Win - Direct Link */}
+          <Link
+            to="/dopamine-drop"
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+              location.pathname === "/dopamine-drop"
+                ? "bg-accent/20 text-accent"
+                : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+            )}
+          >
+            <CircleDot className="h-4 w-4" />
+            Spin & Win
+          </Link>
         </nav>
 
         {/* Mobile Menu Toggle */}
@@ -508,6 +521,21 @@ export function Header() {
               </div>
             )}
           </div>
+
+          {/* 6. Spin & Win - Direct Link */}
+          <Link
+            to="/dopamine-drop"
+            onClick={() => setMobileMenuOpen(false)}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors",
+              location.pathname === "/dopamine-drop"
+                ? "bg-accent/20 text-accent"
+                : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+            )}
+          >
+            <CircleDot className="h-5 w-5" />
+            Spin & Win
+          </Link>
         </nav>
       )}
     </header>
