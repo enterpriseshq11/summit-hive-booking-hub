@@ -252,8 +252,8 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Right Column - Experience Preview Panel */}
-            <div className="hidden lg:block opacity-0 animate-fade-in-left" style={{
+            {/* Right Column - Experience Preview Panel - Aligned with Wapakoneta pill */}
+            <div className="hidden lg:block opacity-0 animate-fade-in-left self-start mt-[11.75rem]" style={{
             animationDelay: "0.5s"
           }}>
               <ExperiencePreviewPanel />
