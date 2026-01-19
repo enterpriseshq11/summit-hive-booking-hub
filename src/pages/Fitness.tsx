@@ -91,7 +91,7 @@ export default function Fitness() {
   return (
     <div className="min-h-screen">
       {/* Hero Section - 2-Column Layout with Animation */}
-      <section className="relative pt-6 md:pt-16 pb-4 md:pb-6 min-h-0 h-auto overflow-hidden bg-primary">
+      <section className="relative pt-6 md:pt-16 pb-4 md:pb-16 lg:pb-6 min-h-0 h-auto overflow-hidden bg-primary">
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
