@@ -31,6 +31,7 @@ import {
   Clock,
   Mic,
   Layers,
+  Camera,
 } from "lucide-react";
 import { useState } from "react";
 import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
@@ -49,6 +50,7 @@ const navItems = [
   { label: "Coworking", href: "/coworking", icon: Building2 },
   { label: "Spa", href: "/spa", icon: Sparkles },
   { label: "Fitness", href: "/fitness", icon: Dumbbell },
+  { label: "360 Photo Booth", href: "/360-photo-booth", icon: Camera },
   { label: "Gift Cards", href: "/gift-cards", icon: Gift },
   { 
     label: "Voice Vault", 
