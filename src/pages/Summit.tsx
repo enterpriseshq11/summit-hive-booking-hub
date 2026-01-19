@@ -157,8 +157,8 @@ export default function Summit() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left - Content */}
             <div className="space-y-8 text-center lg:text-left">
-              {/* Mobile: Logo + E³ Badge stacked - logo uses absolute positioning to scale without reflow */}
-              <div className="flex flex-col items-center gap-3 md:hidden">
+              {/* Mobile + Tablet: Logo + E³ Badge stacked at top */}
+              <div className="flex flex-col items-center gap-3 lg:hidden">
                 {/* Fixed-height container for logo - logo scales beyond this without pushing content */}
                 <div className="relative h-32 w-full flex items-center justify-center">
                   <img 
@@ -173,8 +173,8 @@ export default function Summit() {
                 </div>
               </div>
 
-              {/* Desktop: E³ Badge only (logo shown on right side) */}
-              <div className="hidden md:inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
+              {/* Desktop only: E³ Badge (logo shown on right side) */}
+              <div className="hidden lg:inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
                 <span className="text-accent font-bold text-lg">E³</span>
                 <span className="text-sm font-medium text-primary-foreground/80">The Elevated Experience</span>
               </div>
@@ -192,9 +192,9 @@ export default function Summit() {
                 </p>
               </div>
               
-              {/* Hero CTA Row */}
+              {/* Hero CTA Row - centered on mobile/tablet, left-aligned on desktop */}
               <div className="flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4">
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                   <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary" data-event="summit_request_open">
                     <CalendarDays className="h-5 w-5 mr-2" />
                     Book with Victoria
@@ -243,9 +243,9 @@ export default function Summit() {
               </div>
             </div>
 
-            {/* Right - Summit Logo Prominently Displayed (hidden on mobile - shown at top instead) */}
-            <div className="hidden md:flex justify-center lg:justify-end lg:-mt-8 lg:translate-x-32 lg:translate-y-2 xl:translate-y-10 2xl:translate-y-14">
-              <div className="relative transform scale-100 md:scale-110 lg:scale-[1.25]">
+            {/* Right - Summit Logo Prominently Displayed (desktop only - tablet/mobile show at top) */}
+            <div className="hidden lg:flex justify-center lg:justify-end lg:-mt-8 lg:translate-x-32 lg:translate-y-2 xl:translate-y-10 2xl:translate-y-14">
+              <div className="relative transform scale-100 lg:scale-[1.25]">
                 {/* Gold glow behind logo */}
                 <div className="absolute inset-0 bg-accent/20 blur-3xl rounded-full scale-75" />
                 <img alt="The Summit Event Center - Elevate Every Event" className="relative w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl drop-shadow-2xl object-contain opacity-100" style={{
