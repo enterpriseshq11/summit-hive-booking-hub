@@ -188,58 +188,54 @@ export default function Index() {
                 </p>
               </div>
 
-              {/* HOMEPAGE-02: Pick Your Experience Quick Selector */}
-              <div className="opacity-0 animate-fade-in-up" style={{
-              animationDelay: "0.55s"
-            }}>
+              {/* ========== GROUP A: Experience Pills (Primary Selection) ========== */}
+              <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: "0.55s" }}>
                 <p className="text-sm text-white/50 mb-3 text-center lg:text-left">Pick your experience:</p>
                 <ExperienceQuickSelector />
               </div>
               
-              {/* Section anchor chips */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-2 opacity-0 animate-fade-in-up" style={{
-              animationDelay: "0.6s"
-            }}>
-                <button onClick={() => scrollToSection('availability')} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+              {/* ========== GROUP B: Secondary Anchor Chips (Smaller, Subtle) ========== */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
+                <button onClick={() => scrollToSection('availability')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
                   Availability
                 </button>
-                <button onClick={() => scrollToSection('experiences')} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+                <button onClick={() => scrollToSection('experiences')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
                   Experiences
                 </button>
-                <button onClick={() => scrollToSection('faq')} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+                <button onClick={() => scrollToSection('faq')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
                   FAQ
                 </button>
               </div>
               
-              {/* HOMEPAGE-01: Two CTAs - Primary + Secondary */}
-              <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 opacity-0 animate-fade-in-up" style={{
-              animationDelay: "0.7s"
-            }}>
-                <Button size="lg" className="text-lg px-10 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group" asChild>
-                  <Link to="/booking">
-                    {/* Inner highlight */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <CalendarDays className="h-5 w-5 mr-2 relative z-10" />
-                    <span className="relative z-10">Book Now</span>
-                    <ArrowRight className="h-5 w-5 ml-2 relative z-10" />
-                  </Link>
-                </Button>
-                
-                {/* Secondary CTA */}
-                <Button size="lg" className="text-lg px-8 py-7 bg-accent hover:bg-accent/90 text-primary font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-1" onClick={() => scrollToSection('experiences')}>
-                  <ExternalLink className="h-5 w-5 mr-2" />
-                  Explore All Experiences
-                </Button>
+              {/* ========== GROUP C: Main CTAs (Separated, Same Height) ========== */}
+              <div className="pt-4 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.7s" }}>
+                <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3">
+                  <Button size="lg" className="h-14 text-base px-8 bg-accent hover:bg-accent/90 text-primary font-bold shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group sm:flex-1 sm:max-w-[220px]" asChild>
+                    <Link to="/booking">
+                      <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <CalendarDays className="h-5 w-5 mr-2 relative z-10" />
+                      <span className="relative z-10">Book Now</span>
+                      <ArrowRight className="h-5 w-5 ml-2 relative z-10" />
+                    </Link>
+                  </Button>
+                  
+                  <Button size="lg" className="h-14 text-base px-8 bg-accent hover:bg-accent/90 text-primary font-bold shadow-xl shadow-accent/20 hover:shadow-accent/40 transition-all duration-300 hover:-translate-y-1 sm:flex-1 sm:max-w-[220px]" onClick={() => scrollToSection('experiences')}>
+                    <ExternalLink className="h-5 w-5 mr-2" />
+                    Explore Experiences
+                  </Button>
+                </div>
               </div>
 
-              {/* Proof Chips - Subtle */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-4 opacity-0 animate-fade-in" style={{
-              animationDelay: "0.9s"
-            }}>
-                {proofChips.map((chip, index) => <div key={index} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70">
-                    <chip.icon className="h-4 w-4 text-accent/80" />
-                    <span>{chip.text}</span>
-                  </div>)}
+              {/* ========== GROUP D: Feature/Trust Chips (Subtle, Last) ========== */}
+              <div className="pt-2 opacity-0 animate-fade-in" style={{ animationDelay: "0.9s" }}>
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center lg:justify-start gap-2">
+                  {proofChips.map((chip, index) => (
+                    <div key={index} className="flex items-center justify-center sm:justify-start gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60">
+                      <chip.icon className="h-3 w-3 text-accent/70" />
+                      <span>{chip.text}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 opacity-0 animate-fade-in" style={{
