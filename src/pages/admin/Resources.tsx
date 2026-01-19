@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AdminLayout } from "@/components/admin";
+import { UnifiedAdminLayout } from "@/components/admin";
 import { useResources, useCreateResource, useUpdateResource, useDeleteResource } from "@/hooks/useResources";
 import { useBusinesses } from "@/hooks/useBusinesses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -114,7 +114,7 @@ export default function AdminResources() {
   };
 
   return (
-    <AdminLayout>
+    <UnifiedAdminLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -290,6 +290,6 @@ export default function AdminResources() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
+    </UnifiedAdminLayout>
   );
 }

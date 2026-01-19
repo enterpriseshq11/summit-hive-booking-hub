@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { AdminLayout } from "@/components/admin";
+import { UnifiedAdminLayout } from "@/components/admin";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <AdminLayout>
+    <UnifiedAdminLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-start">
           <div>
@@ -587,6 +587,6 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminLayout>
+    </UnifiedAdminLayout>
   );
 }
