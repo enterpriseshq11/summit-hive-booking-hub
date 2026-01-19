@@ -82,7 +82,7 @@ export function Header() {
         key={item.href}
         to={item.href}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+          "flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap lg:gap-2 lg:px-2.5 xl:px-3",
           isActive
             ? "bg-accent text-primary"
             : item.primary
