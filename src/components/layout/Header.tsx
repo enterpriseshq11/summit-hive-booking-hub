@@ -98,16 +98,16 @@ export function Header() {
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
           <img src={azLogoIcon} alt="A-Z Enterprises" className="h-10 w-10 object-contain" />
-          <span className="text-xl font-bold text-gold-gradient hidden sm:inline">A-Z Enterprises</span>
+          <span className="text-xl font-bold text-gold-gradient hidden lg:inline">A-Z Enterprises</span>
         </Link>
 
-        {/* Desktop Navigation - 5 Primary Tabs (Book Now, Experiences, Shop, Promotions, Account) */}
-        <nav className="hidden md:flex items-center gap-1 ml-2" aria-label="Primary">
+        {/* Desktop Navigation - 6 Primary Tabs (Book Now, Experiences, Shop, Promotions, Account, Spin & Win) */}
+        <nav className="hidden md:flex items-center gap-0.5 md:gap-0.5 lg:gap-1 ml-2" aria-label="Primary">
           {/* 1. Book Now - Direct Link (Primary CTA) */}
           <Link
             to="/booking"
             className={cn(
-              "flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-md transition-colors",
+              "flex items-center gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-4 py-2 text-xs md:text-xs lg:text-sm font-semibold rounded-md transition-colors",
               location.pathname === "/booking"
                 ? "bg-accent text-primary"
                 : "bg-accent/20 text-accent hover:bg-accent/30"
@@ -123,7 +123,7 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="gap-1.5 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                className="gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 text-xs md:text-xs lg:text-sm text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
               >
                 <Building2 className="h-4 w-4" />
                 <span>Experiences</span>
@@ -151,7 +151,7 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="gap-1.5 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                className="gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 text-xs md:text-xs lg:text-sm text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
               >
                 <ShoppingBag className="h-4 w-4" />
                 <span>Shop</span>
@@ -179,7 +179,7 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="gap-1.5 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                className="gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 text-xs md:text-xs lg:text-sm text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
               >
                 <Layers className="h-4 w-4" />
                 <span>Promotions</span>
@@ -207,7 +207,7 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="gap-1.5 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                className="gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 text-xs md:text-xs lg:text-sm text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
               >
                 <User className="h-4 w-4" />
                 <span>{user ? (authUser?.profile?.first_name || "Account") : "Account"}</span>
@@ -289,7 +289,7 @@ export function Header() {
           <Link
             to="/dopamine-drop"
             className={cn(
-              "flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+              "flex items-center gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 py-2 text-xs md:text-xs lg:text-sm font-medium rounded-md transition-colors",
               location.pathname === "/dopamine-drop"
                 ? "bg-accent/20 text-accent"
                 : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
