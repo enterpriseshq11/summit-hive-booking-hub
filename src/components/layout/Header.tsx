@@ -136,8 +136,8 @@ export function Header() {
 
       <div className="container flex h-16 items-center justify-between gap-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-3 flex-shrink-0 bg-transparent">
-          <img src={azLogoIcon} alt="A-Z Enterprises" className="h-10 w-10 object-contain bg-transparent" />
+        <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
+          <img src={azLogoIcon} alt="A-Z Enterprises" className="h-10 w-10 object-contain" />
           <span className="text-xl font-bold text-gold-gradient hidden sm:inline">A-Z Enterprises</span>
         </Link>
 
