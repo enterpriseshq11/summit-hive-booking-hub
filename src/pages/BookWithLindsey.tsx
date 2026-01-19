@@ -99,14 +99,16 @@ const ROOMS = [
     name: "H1 - Hallway Room", 
     description: "Calm, quiet, and perfect for focused recovery sessions.",
     capacity: 1,
-    image: null // Placeholder until photo provided
+    image: null, // Placeholder until photo provided
+    placeholder: "Serene treatment space with natural lighting"
   },
   { 
     id: "22222222-2222-2222-2222-222222222222", 
     name: "B1 - Back Room", 
     description: "Secluded and peaceful for maximum relaxation. Ideal for couples.",
     capacity: 2,
-    image: null // Placeholder until photo provided
+    image: null, // Placeholder until photo provided
+    placeholder: "Private couples suite with premium amenities"
   },
 ];
 
@@ -549,8 +551,9 @@ export default function BookWithLindsey() {
                               {room.image ? (
                                 <img src={room.image} alt={room.name} className="w-full h-24 object-cover rounded mb-2" />
                               ) : (
-                                <div className="w-full h-24 bg-muted rounded flex items-center justify-center mb-2">
-                                  <MapPin className="h-8 w-8 text-muted-foreground/50" />
+                                <div className="w-full h-24 bg-gradient-to-br from-accent/10 to-accent/5 rounded flex flex-col items-center justify-center mb-2 border border-accent/20">
+                                  <MapPin className="h-6 w-6 text-accent/60 mb-1" />
+                                  <span className="text-xs text-muted-foreground">{room.placeholder}</span>
                                 </div>
                               )}
                               <h4 className="font-semibold text-sm">{room.name}</h4>
@@ -685,19 +688,36 @@ export default function BookWithLindsey() {
         </section>
       )}
 
-      {/* Matterport Embed Placeholder */}
+      {/* Matterport Virtual Tour - Coming Soon */}
       <section className="py-12 container">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-2">Take a Virtual Tour</h2>
           <p className="text-muted-foreground">Explore The Restoration Lounge before your visit</p>
         </div>
-        <Card className="max-w-4xl mx-auto overflow-hidden">
-          <div className="aspect-video bg-muted flex items-center justify-center">
-            {/* Matterport embed will go here - placeholder for now */}
-            <div className="text-center">
-              <MapPin className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-              <p className="text-muted-foreground">Matterport Virtual Tour</p>
-              <p className="text-sm text-muted-foreground/70">Embed coming soon</p>
+        <Card className="max-w-4xl mx-auto overflow-hidden shadow-premium">
+          <div className="aspect-video bg-gradient-to-br from-primary via-primary/95 to-primary/90 flex items-center justify-center relative">
+            {/* Honeycomb pattern overlay */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.08]" aria-hidden="true">
+              <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <pattern id="honeycomb-tour-booking" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
+                  <polygon points="6,0 12,3 12,9 6,12 0,9 0,3" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.3"/>
+                </pattern>
+                <rect width="100%" height="100%" fill="url(#honeycomb-tour-booking)" />
+              </svg>
+            </div>
+            
+            {/* Coming Soon Content */}
+            <div className="relative z-10 text-center p-8">
+              <div className="h-16 w-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4 border-2 border-accent/40 shadow-gold">
+                <MapPin className="h-8 w-8 text-accent" />
+              </div>
+              <h3 className="text-xl font-bold text-primary-foreground mb-2">3D Walkthrough Coming Soon</h3>
+              <p className="text-primary-foreground/70 mb-4 max-w-md">
+                Experience our private treatment rooms in stunning 360° detail.
+              </p>
+              <Button variant="outline" className="border-accent text-accent hover:bg-accent/10" disabled>
+                Virtual Tour (Coming Soon)
+              </Button>
             </div>
           </div>
         </Card>
