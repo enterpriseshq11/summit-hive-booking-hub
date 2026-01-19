@@ -148,7 +148,7 @@ export default function Index() {
               <div className="flex justify-center lg:justify-start opacity-0 animate-fade-in-down" style={{
               animationDelay: "0.05s"
             }}>
-                <img alt="A-Z Enterprises" className="h-60 w-60 object-contain" src="/lovable-uploads/cf63743c-5431-4ce2-a81a-b629897e880c.png" />
+                <img alt="A-Z Enterprises" className="h-44 w-44 object-contain" src="/lovable-uploads/cf63743c-5431-4ce2-a81a-b629897e880c.png" />
               </div>
               
               {/* Location Badge - Updated copy */}
