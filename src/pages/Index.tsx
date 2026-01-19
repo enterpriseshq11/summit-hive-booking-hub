@@ -160,6 +160,29 @@ export default function Index() {
                     {SITE_CONFIG.location.full} • Local team • Premium experiences
                   </div>
                 </div>
+                
+                {/* Experience Quick Links - Premium mini links */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-1.5 mt-2">
+                  {[
+                    { name: "The Summit", href: "/summit" },
+                    { name: "The Hive", href: "/coworking" },
+                    { name: "Restoration", href: "/spa" },
+                    { name: "Total Fitness", href: "/fitness" },
+                    { name: "360 Photo Booth", href: "/photo-booth" }
+                  ].map((exp, idx) => (
+                    <Link 
+                      key={exp.name}
+                      to={exp.href}
+                      className="text-xs text-white/50 hover:text-accent transition-all duration-300 hover:drop-shadow-[0_0_6px_hsl(var(--accent)/0.5)] relative group"
+                    >
+                      <span className="relative">
+                        {exp.name}
+                        <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-accent group-hover:w-full transition-all duration-300" />
+                      </span>
+                      {idx < 4 && <span className="ml-3 text-white/20">•</span>}
+                    </Link>
+                  ))}
+                </div>
               </div>
               
               {/* Main Headline - Updated copy with tighter line-height */}
