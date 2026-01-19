@@ -33,7 +33,7 @@ import NotFound from "./pages/NotFound";
 import AuthDebug from "./pages/__debug/AuthDebug";
 import DebugPing from "./pages/__debug/Ping";
 
-// Admin Pages
+// Admin Pages (unified under /admin/*)
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminSchedule from "./pages/admin/Schedule";
 import AdminApprovals from "./pages/admin/Approvals";
@@ -55,12 +55,7 @@ import AdminOfficePhotos from "./pages/admin/OfficePhotos";
 import AdminOfficePromotions from "./pages/admin/OfficePromotions";
 import AdminOfficeInquiries from "./pages/admin/OfficeInquiries";
 
-// Public Coworking Pages
-import OfficeListingsHub from "./pages/coworking/OfficeListingsHub";
-import OfficeDetailPage from "./pages/coworking/OfficeDetailPage";
-
-// Command Center Pages
-import CommandCenterDashboard from "./pages/command-center/Dashboard";
+// Command Center Pages (now unified under /admin/*)
 import CommandCenterLeads from "./pages/command-center/Leads";
 import CommandCenterLeadDetail from "./pages/command-center/LeadDetail";
 import CommandCenterPipeline from "./pages/command-center/Pipeline";
@@ -72,6 +67,10 @@ import CommandCenterRevenue from "./pages/command-center/Revenue";
 import CommandCenterCommissions from "./pages/command-center/Commissions";
 import CommandCenterSettings from "./pages/command-center/Settings";
 import CommandCenterPayroll from "./pages/command-center/Payroll";
+
+// Public Coworking Pages
+import OfficeListingsHub from "./pages/coworking/OfficeListingsHub";
+import OfficeDetailPage from "./pages/coworking/OfficeDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -117,9 +116,25 @@ function AppInner() {
         {/* Auth routes (no layout) */}
         <Route path="/login" element={<Login />} />
 
-        {/* Admin routes - each with ProtectedRoute check */}
+        {/* Unified Admin routes - all under /admin/* with staff protection */}
         <Route element={<ProtectedRoute requireStaff />}>
+          {/* Dashboard */}
           <Route path="/admin" element={<AdminDashboard />} />
+          
+          {/* Command Center (CRM) */}
+          <Route path="/admin/leads" element={<CommandCenterLeads />} />
+          <Route path="/admin/leads/:id" element={<CommandCenterLeadDetail />} />
+          <Route path="/admin/pipeline" element={<CommandCenterPipeline />} />
+          <Route path="/admin/employees" element={<CommandCenterEmployees />} />
+          <Route path="/admin/employees/:id" element={<CommandCenterEmployeeDetail />} />
+          <Route path="/admin/activity" element={<CommandCenterActivity />} />
+          <Route path="/admin/alerts" element={<CommandCenterAlerts />} />
+          <Route path="/admin/revenue" element={<CommandCenterRevenue />} />
+          <Route path="/admin/commissions" element={<CommandCenterCommissions />} />
+          <Route path="/admin/payroll" element={<CommandCenterPayroll />} />
+          <Route path="/admin/settings" element={<CommandCenterSettings />} />
+          
+          {/* Booking Operations */}
           <Route path="/admin/schedule" element={<AdminSchedule />} />
           <Route path="/admin/approvals" element={<AdminApprovals />} />
           <Route path="/admin/resources" element={<AdminResources />} />
@@ -129,33 +144,29 @@ function AppInner() {
           <Route path="/admin/documents" element={<AdminDocuments />} />
           <Route path="/admin/reviews" element={<AdminReviews />} />
           <Route path="/admin/leads-waitlists" element={<AdminLeadsWaitlists />} />
-          <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
-          <Route path="/admin/audit-log" element={<AdminAuditLog />} />
-          <Route path="/admin/assumptions" element={<AdminAssumptions />} />
-          <Route path="/admin/promotions" element={<AdminPromotions />} />
-          <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
+          
+          {/* Voice Vault */}
           <Route path="/admin/voice-vault" element={<AdminVoiceVault />} />
+          
+          {/* Coworking (The Hive) */}
           <Route path="/admin/office-listings" element={<AdminOfficeListings />} />
           <Route path="/admin/office-listings/:id/photos" element={<AdminOfficePhotos />} />
           <Route path="/admin/office-promotions" element={<AdminOfficePromotions />} />
           <Route path="/admin/office-inquiries" element={<AdminOfficeInquiries />} />
+          
+          {/* Marketing */}
+          <Route path="/admin/promotions" element={<AdminPromotions />} />
+          <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
+          
+          {/* System */}
+          <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
+          <Route path="/admin/audit-log" element={<AdminAuditLog />} />
+          <Route path="/admin/assumptions" element={<AdminAssumptions />} />
         </Route>
 
-        {/* Command Center routes */}
-        <Route element={<ProtectedRoute requireStaff />}>
-          <Route path="/command-center" element={<CommandCenterDashboard />} />
-          <Route path="/command-center/leads" element={<CommandCenterLeads />} />
-          <Route path="/command-center/leads/:id" element={<CommandCenterLeadDetail />} />
-          <Route path="/command-center/pipeline" element={<CommandCenterPipeline />} />
-          <Route path="/command-center/employees" element={<CommandCenterEmployees />} />
-          <Route path="/command-center/employees/:id" element={<CommandCenterEmployeeDetail />} />
-          <Route path="/command-center/activity" element={<CommandCenterActivity />} />
-          <Route path="/command-center/alerts" element={<CommandCenterAlerts />} />
-          <Route path="/command-center/revenue" element={<CommandCenterRevenue />} />
-          <Route path="/command-center/commissions" element={<CommandCenterCommissions />} />
-          <Route path="/command-center/settings" element={<CommandCenterSettings />} />
-          <Route path="/command-center/payroll" element={<CommandCenterPayroll />} />
-        </Route>
+        {/* Legacy command-center redirects (for backwards compatibility) */}
+        <Route path="/command-center" element={<AdminDashboard />} />
+        <Route path="/command-center/*" element={<NotFound />} />
 
         {/* Catch-all */}
         <Route path="*" element={<NotFound />} />
@@ -181,5 +192,3 @@ const App = () => (
 );
 
 export default App;
-
-
