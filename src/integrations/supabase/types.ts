@@ -2577,6 +2577,69 @@ export type Database = {
           },
         ]
       }
+      photo_booth_inquiries: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          email: string
+          event_date: string | null
+          event_location: string | null
+          event_type: string | null
+          full_name: string
+          id: string
+          internal_notes: string | null
+          notes: string | null
+          phone: string
+          preferred_contact: string | null
+          source: string | null
+          status: string | null
+          updated_at: string
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          email: string
+          event_date?: string | null
+          event_location?: string | null
+          event_type?: string | null
+          full_name: string
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          phone: string
+          preferred_contact?: string | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          email?: string
+          event_date?: string | null
+          event_location?: string | null
+          event_type?: string | null
+          full_name?: string
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          phone?: string
+          preferred_contact?: string | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       pricing_rules: {
         Row: {
           bookable_type_id: string | null
