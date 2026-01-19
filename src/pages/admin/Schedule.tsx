@@ -62,8 +62,8 @@ export default function AdminSchedule() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
-            <p className="text-muted-foreground">View and manage all bookings across businesses</p>
+            <h1 className="text-2xl font-bold text-white">Schedule</h1>
+            <p className="text-zinc-300">View and manage all bookings across businesses</p>
           </div>
           
           <div className="flex items-center gap-2">
@@ -82,8 +82,8 @@ export default function AdminSchedule() {
         </div>
 
         {/* Helper Text */}
-        <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
-          <strong>Tip:</strong> Click any booking to view details. Use the business filter to focus on specific locations. Today's date is highlighted with a blue border.
+        <div className="bg-zinc-800/50 rounded-lg p-3 text-sm text-zinc-300">
+          <strong className="text-white">Tip:</strong> Click any booking to view details. Use the business filter to focus on specific locations. Today's date is highlighted with a blue border.
         </div>
 
         {/* Week Navigation */}
@@ -153,7 +153,7 @@ export default function AdminSchedule() {
                       </div>
                     )}
                     {dayBookings.length === 0 && (
-                      <div className="text-xs text-muted-foreground text-center py-4">
+                      <div className="text-xs text-zinc-400 text-center py-4">
                         No bookings
                       </div>
                     )}
@@ -174,11 +174,11 @@ export default function AdminSchedule() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Booking #</label>
-                    <p className="font-mono">{selectedBooking.booking_number}</p>
+                    <label className="text-sm font-medium text-zinc-400">Booking #</label>
+                    <p className="font-mono text-white">{selectedBooking.booking_number}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Status</label>
+                    <label className="text-sm font-medium text-zinc-400">Status</label>
                     <Badge className={getStatusColor(selectedBooking.status || '')}>
                       {selectedBooking.status}
                     </Badge>
@@ -186,47 +186,47 @@ export default function AdminSchedule() {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Customer</label>
-                  <p>{selectedBooking.guest_name || `${selectedBooking.profiles?.first_name} ${selectedBooking.profiles?.last_name}`}</p>
-                  <p className="text-sm text-muted-foreground">{selectedBooking.guest_email || selectedBooking.profiles?.email}</p>
+                  <label className="text-sm font-medium text-zinc-400">Customer</label>
+                  <p className="text-white">{selectedBooking.guest_name || `${selectedBooking.profiles?.first_name} ${selectedBooking.profiles?.last_name}`}</p>
+                  <p className="text-sm text-zinc-300">{selectedBooking.guest_email || selectedBooking.profiles?.email}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Date & Time</label>
-                    <p className="flex items-center gap-1">
+                    <label className="text-sm font-medium text-zinc-400">Date & Time</label>
+                    <p className="flex items-center gap-1 text-white">
                       <CalendarDays className="h-4 w-4" />
                       {format(new Date(selectedBooking.start_datetime), "MMM d, yyyy")}
                     </p>
-                    <p className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <p className="flex items-center gap-1 text-sm text-zinc-300">
                       <Clock className="h-3 w-3" />
                       {format(new Date(selectedBooking.start_datetime), "h:mm a")} - 
                       {format(new Date(selectedBooking.end_datetime), "h:mm a")}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Business</label>
-                    <p>{selectedBooking.businesses?.name}</p>
+                    <label className="text-sm font-medium text-zinc-400">Business</label>
+                    <p className="text-white">{selectedBooking.businesses?.name}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Total</label>
-                    <p className="text-lg font-bold">${selectedBooking.total_amount?.toFixed(2)}</p>
+                    <label className="text-sm font-medium text-zinc-400">Total</label>
+                    <p className="text-lg font-bold text-white">${selectedBooking.total_amount?.toFixed(2)}</p>
                   </div>
                   {selectedBooking.deposit_amount && (
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Deposit</label>
-                      <p>${selectedBooking.deposit_amount?.toFixed(2)}</p>
+                      <label className="text-sm font-medium text-zinc-400">Deposit</label>
+                      <p className="text-white">${selectedBooking.deposit_amount?.toFixed(2)}</p>
                     </div>
                   )}
                 </div>
 
                 {selectedBooking.notes && (
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Notes</label>
-                    <p className="text-sm">{selectedBooking.notes}</p>
+                    <label className="text-sm font-medium text-zinc-400">Notes</label>
+                    <p className="text-sm text-zinc-300">{selectedBooking.notes}</p>
                   </div>
                 )}
 

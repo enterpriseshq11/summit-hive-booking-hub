@@ -276,11 +276,11 @@ export default function AdminPackages() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
               <Package className="h-6 w-6" />
               Packages & Add-ons
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-zinc-300">
               Configure service packages and optional add-ons
             </p>
           </div>
@@ -318,9 +318,9 @@ export default function AdminPackages() {
                       <TableRow key={pkg.id}>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{pkg.name}</div>
+                            <div className="font-medium text-white">{pkg.name}</div>
                             {pkg.description && (
-                              <div className="text-sm text-muted-foreground truncate max-w-xs">
+                              <div className="text-sm text-zinc-400 truncate max-w-xs">
                                 {pkg.description}
                               </div>
                             )}
@@ -329,11 +329,11 @@ export default function AdminPackages() {
                         <TableCell>{getBookableTypeName(pkg.bookable_type_id)}</TableCell>
                         <TableCell>{pkg.duration_mins} min</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 text-white">
                             <DollarSign className="h-3 w-3" />
                             {pkg.base_price}
                             {pkg.member_price && pkg.member_price !== pkg.base_price && (
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-zinc-400">
                                 (${pkg.member_price} member)
                               </span>
                             )}
@@ -397,9 +397,9 @@ export default function AdminPackages() {
                       <TableRow key={addon.id}>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{addon.name}</div>
+                            <div className="font-medium text-white">{addon.name}</div>
                             {addon.description && (
-                              <div className="text-sm text-muted-foreground truncate max-w-xs">
+                              <div className="text-sm text-zinc-400 truncate max-w-xs">
                                 {addon.description}
                               </div>
                             )}
@@ -407,10 +407,10 @@ export default function AdminPackages() {
                         </TableCell>
                         <TableCell>{getBusinessName(addon.business_id)}</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 text-white">
                             <DollarSign className="h-3 w-3" />
                             {addon.base_price}
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-zinc-400">
                               ({addon.pricing_mode})
                             </span>
                           </div>

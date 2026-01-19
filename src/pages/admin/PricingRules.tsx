@@ -220,11 +220,11 @@ export default function AdminPricingRules() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
               <DollarSign className="h-6 w-6" />
               Pricing Rules
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-zinc-300">
               Configure dynamic pricing, discounts, and modifiers
             </p>
           </div>
@@ -272,8 +272,8 @@ export default function AdminPricingRules() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{rule.name}</div>
-                        <div className="text-sm text-muted-foreground">{getBusinessName(rule.business_id)}</div>
+                        <div className="font-medium text-white">{rule.name}</div>
+                        <div className="text-sm text-zinc-400">{getBusinessName(rule.business_id)}</div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -289,12 +289,12 @@ export default function AdminPricingRules() {
                     </TableCell>
                     <TableCell>
                       {rule.valid_from || rule.valid_until ? (
-                        <div className="text-xs">
+                        <div className="text-xs text-zinc-300">
                           {rule.valid_from && <div>From: {new Date(rule.valid_from).toLocaleDateString()}</div>}
                           {rule.valid_until && <div>Until: {new Date(rule.valid_until).toLocaleDateString()}</div>}
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">Always</span>
+                        <span className="text-zinc-400">Always</span>
                       )}
                     </TableCell>
                     <TableCell>

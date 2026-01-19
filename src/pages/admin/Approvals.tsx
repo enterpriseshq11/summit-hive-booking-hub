@@ -37,8 +37,8 @@ export default function AdminApprovals() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Approvals</h1>
-          <p className="text-muted-foreground">Review and process pending booking requests</p>
+          <h1 className="text-2xl font-bold text-white">Approvals</h1>
+          <p className="text-zinc-300">Review and process pending booking requests</p>
         </div>
 
         {/* Helper Text */}

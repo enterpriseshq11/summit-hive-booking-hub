@@ -184,11 +184,11 @@ export default function AdminDocuments() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
               <FileText className="h-6 w-6" />
               Documents & Templates
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-zinc-300">
               Manage contracts, waivers, policies, and intake forms
             </p>
           </div>
@@ -411,8 +411,8 @@ function DocumentTable({
               <TableRow key={template.id}>
                 <TableCell>
                   <div>
-                    <div className="font-medium">{template.name}</div>
-                    <div className="text-xs text-muted-foreground">v{template.version || 1}</div>
+                    <div className="font-medium text-white">{template.name}</div>
+                    <div className="text-xs text-zinc-400">v{template.version || 1}</div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -420,8 +420,8 @@ function DocumentTable({
                 </TableCell>
                 <TableCell>
                   <div className="text-sm">
-                    <div>{getBusinessName(template.business_id)}</div>
-                    <div className="text-muted-foreground">{getBookableTypeName(template.bookable_type_id)}</div>
+                    <div className="text-white">{getBusinessName(template.business_id)}</div>
+                    <div className="text-zinc-400">{getBookableTypeName(template.bookable_type_id)}</div>
                   </div>
                 </TableCell>
                 <TableCell>

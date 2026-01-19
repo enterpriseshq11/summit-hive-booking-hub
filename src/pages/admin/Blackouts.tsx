@@ -169,11 +169,11 @@ export default function AdminBlackouts() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
               <CalendarX className="h-6 w-6" />
               Blackouts
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-zinc-300">
               Manage blackout dates and availability overrides
             </p>
           </div>
@@ -223,22 +223,22 @@ export default function AdminBlackouts() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          <div>{getBusinessName(blackout.business_id)}</div>
+                          <div className="text-white">{getBusinessName(blackout.business_id)}</div>
                           {blackout.resource_id && (
-                            <div className="text-muted-foreground">{getResourceName(blackout.resource_id)}</div>
+                            <div className="text-zinc-400">{getResourceName(blackout.resource_id)}</div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          <div>{format(new Date(blackout.start_datetime), "MMM d, yyyy h:mm a")}</div>
-                          <div className="text-muted-foreground">
+                          <div className="text-white">{format(new Date(blackout.start_datetime), "MMM d, yyyy h:mm a")}</div>
+                          <div className="text-zinc-400">
                             to {format(new Date(blackout.end_datetime), "MMM d, yyyy h:mm a")}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm text-zinc-400">
                           {blackout.reason || "—"}
                         </span>
                       </TableCell>

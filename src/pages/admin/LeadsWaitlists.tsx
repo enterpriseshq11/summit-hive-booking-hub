@@ -155,11 +155,11 @@ export default function AdminLeadsWaitlists() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
               <Users className="h-6 w-6" />
               Leads & Waitlists
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-zinc-300">
               Manage inquiries and waitlist entries
             </p>
           </div>
@@ -231,13 +231,13 @@ export default function AdminLeadsWaitlists() {
                       <TableRow key={lead.id}>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{lead.first_name} {lead.last_name}</div>
-                            <div className="text-sm text-muted-foreground flex items-center gap-1">
+                            <div className="font-medium text-white">{lead.first_name} {lead.last_name}</div>
+                            <div className="text-sm text-zinc-300 flex items-center gap-1">
                               <Mail className="h-3 w-3" />
                               {lead.email}
                             </div>
                             {lead.phone && (
-                              <div className="text-sm text-muted-foreground flex items-center gap-1">
+                              <div className="text-sm text-zinc-400 flex items-center gap-1">
                                 <Phone className="h-3 w-3" />
                                 {lead.phone}
                               </div>
@@ -246,8 +246,8 @@ export default function AdminLeadsWaitlists() {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div>{lead.event_type || "General Inquiry"}</div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-white">{lead.event_type || "General Inquiry"}</div>
+                            <div className="text-sm text-zinc-400">
                               {getBusinessName(lead.business_id)}
                             </div>
                           </div>

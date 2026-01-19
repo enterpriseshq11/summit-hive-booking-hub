@@ -139,11 +139,11 @@ export default function AdminReviews() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
               <Star className="h-6 w-6" />
               Reviews
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-zinc-300">
               View and respond to customer reviews
             </p>
           </div>
@@ -325,13 +325,13 @@ function ReviewTable({
                 </TableCell>
                 <TableCell>
                   <div className="max-w-md">
-                    {review.title && <div className="font-medium">{review.title}</div>}
+                    {review.title && <div className="font-medium text-white">{review.title}</div>}
                     {review.content && (
-                      <div className="text-sm text-muted-foreground line-clamp-2">{review.content}</div>
+                      <div className="text-sm text-zinc-300 line-clamp-2">{review.content}</div>
                     )}
                     {review.admin_response && (
-                      <div className="mt-2 text-xs text-muted-foreground border-l-2 pl-2">
-                        <span className="font-medium">Response:</span> {review.admin_response}
+                      <div className="mt-2 text-xs text-zinc-400 border-l-2 pl-2">
+                        <span className="font-medium text-zinc-300">Response:</span> {review.admin_response}
                       </div>
                     )}
                   </div>
