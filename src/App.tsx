@@ -29,6 +29,7 @@ import BeamLights from "./pages/BeamLights";
 import VoiceVault from "./pages/VoiceVault";
 import PhotoBooth from "./pages/PhotoBooth";
 import PhotoBoothLanding from "./pages/PhotoBoothLanding";
+import BookWithLindsey from "./pages/BookWithLindsey";
 import NotFound from "./pages/NotFound";
 
 // Debug (public, never redirects)
@@ -99,6 +100,7 @@ function AppInner() {
           <Route path="/coworking/offices" element={<OfficeListingsHub />} />
           <Route path="/coworking/offices/:slug" element={<OfficeDetailPage />} />
           <Route path="/spa" element={<Spa />} />
+          <Route path="/book-with-lindsey" element={<BookWithLindsey />} />
           <Route path="/fitness" element={<Fitness />} />
           <Route path="/gift-cards" element={<GiftCards />} />
           <Route path="/promotions" element={<Promotions />} />
