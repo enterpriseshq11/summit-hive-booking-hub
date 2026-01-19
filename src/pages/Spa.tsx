@@ -108,7 +108,7 @@ export default function Spa() {
               </p>
               
               {/* Hero CTAs */}
-              <div className="flex flex-col sm:flex-row items-center md:ml-32 lg:ml-0 lg:items-start gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row items-center md:ml-[6.5rem] lg:ml-0 lg:items-start gap-4 mb-6">
                 <Button size="lg" onClick={() => openRequestModal()} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_hero_cta_click">
                   <Sparkles className="h-5 w-5 mr-2" />
                   Book With Lindsey
