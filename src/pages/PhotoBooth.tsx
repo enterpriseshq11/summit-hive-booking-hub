@@ -23,6 +23,7 @@ import { SEOHead } from "@/components/seo";
 import { PhotoBoothInquiryModal } from "@/components/booking/PhotoBoothInquiryModal";
 import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/siteConfig";
+import photoBoothLogo from "@/assets/360-photo-booth-logo.png";
 
 const FEATURES = [
   { icon: Camera, text: "360 platform + pro lighting setup" },
@@ -74,52 +75,91 @@ export default function PhotoBooth() {
         description="Turn your event into a VIP experience with slow-motion, share-ready 360 videos. Attendant included, instant sharing, perfect for weddings, parties, and corporate events."
       />
 
-      {/* Hero Section */}
+      {/* Hero Section - 2-column layout matching Spa/Coworking/Fitness */}
       <section className="relative min-h-[70vh] flex items-center bg-gradient-to-b from-primary via-primary to-primary/95 text-primary-foreground overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent" />
         
+        {/* Honeycomb Watermark Pattern - Left */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
+          <svg className="absolute -left-20 top-1/4 w-[500px] h-[500px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="honeycomb-left-pb" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
+              <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+              <polygon points="10,17.32 20,22.32 20,32.32 10,37.32 0,32.32 0,22.32" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#honeycomb-left-pb)" />
+          </svg>
+        </div>
+        
+        {/* Honeycomb Watermark Pattern - Right */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
+          <svg className="absolute -right-20 top-1/3 w-[600px] h-[600px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="honeycomb-right-pb" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
+              <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+              <polygon points="10,17.32 20,22.32 20,32.32 10,37.32 0,32.32 0,22.32" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#honeycomb-right-pb)" />
+          </svg>
+        </div>
+        
         <div className="container relative z-10 py-16 lg:py-24">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 text-accent font-medium text-sm mb-6">
-              <Camera className="h-4 w-4" />
-              Event Entertainment
+          <div className="flex flex-col-reverse lg:flex-row items-center gap-[clamp(24px,4vw,64px)]">
+            {/* Left Column - Text Content */}
+            <div className="flex-1 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 text-accent font-medium text-sm mb-6">
+                <Camera className="h-4 w-4" />
+                Event Entertainment
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-gold-gradient">
+                360 Photo Booth Rentals
+              </h1>
+
+              <p className="text-lg sm:text-xl text-primary-foreground/80 mb-8 max-w-2xl lg:max-w-xl">
+                Turn your event into a VIP experience with slow-motion, share-ready 360 videos your guests will love.
+              </p>
+
+              {/* Quick bullets */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-10">
+                {["Attendant included", "Instant sharing (QR/text/email)", "Perfect for weddings, parties, corporate events"].map((item, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {item}
+                  </span>
+                ))}
+              </div>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4">
+                <Button
+                  size="lg"
+                  className="bg-accent text-primary hover:bg-accent/90 font-semibold px-8 py-6 text-lg shadow-lg shadow-accent/30"
+                  onClick={() => setInquiryOpen(true)}
+                >
+                  Inquire Now
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-accent/30 text-accent hover:bg-accent/10 font-semibold px-8 py-6 text-lg"
+                  onClick={() => setInquiryOpen(true)}
+                >
+                  Check Availability
+                </Button>
+              </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-gold-gradient">
-              360 Photo Booth Rentals
-            </h1>
-
-            <p className="text-lg sm:text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              Turn your event into a VIP experience with slow-motion, share-ready 360 videos your guests will love.
-            </p>
-
-            {/* Quick bullets */}
-            <div className="flex flex-wrap justify-center gap-3 mb-10">
-              {["Attendant included", "Instant sharing (QR/text/email)", "Perfect for weddings, parties, corporate events"].map((item, i) => (
-                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  {item}
-                </span>
-              ))}
-            </div>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                size="lg"
-                className="bg-accent text-primary hover:bg-accent/90 font-semibold px-8 py-6 text-lg shadow-lg shadow-accent/30"
-                onClick={() => setInquiryOpen(true)}
-              >
-                Inquire Now
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-accent/30 text-accent hover:bg-accent/10 font-semibold px-8 py-6 text-lg"
-                onClick={() => setInquiryOpen(true)}
-              >
-                Check Availability
-              </Button>
+            {/* Right Column - Logo */}
+            <div className="flex-shrink-0 w-full lg:w-auto flex justify-center lg:justify-end">
+              <img 
+                src={photoBoothLogo} 
+                alt="360 Photo Booth Logo" 
+                className="w-full object-contain drop-shadow-2xl"
+                style={{
+                  maxWidth: "520px",
+                  width: "min(520px, 42vw)",
+                  height: "auto"
+                }}
+              />
             </div>
           </div>
         </div>
