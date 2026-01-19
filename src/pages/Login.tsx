@@ -1,236 +1,159 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, ArrowLeft, Check, X } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
 
-const OTP_RESEND_COOLDOWN = 60; // seconds
+type AuthView = "signin" | "signup" | "forgot" | "reset-sent";
+
 const PASSWORD_MIN_LENGTH = 8;
 
-interface PasswordValidation {
-  minLength: boolean;
-  hasUppercase: boolean;
-  hasLowercase: boolean;
-  hasNumber: boolean;
-}
-
-function validatePassword(password: string): PasswordValidation {
-  return {
-    minLength: password.length >= PASSWORD_MIN_LENGTH,
-    hasUppercase: /[A-Z]/.test(password),
-    hasLowercase: /[a-z]/.test(password),
-    hasNumber: /\d/.test(password),
-  };
-}
-
-function isPasswordValid(validation: PasswordValidation): boolean {
-  return validation.minLength && validation.hasUppercase && validation.hasLowercase && validation.hasNumber;
-}
-
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"otp" | "password">("otp");
-  const [passwordMode, setPasswordMode] = useState<"signin" | "signup" | "forgot">("signin");
-  
-  // OTP resend cooldown
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [lastOtpEmail, setLastOtpEmail] = useState("");
+  const [view, setView] = useState<AuthView>("signin");
+  const [resetEmail, setResetEmail] = useState("");
 
-  const { signInWithOtp, verifyOtp, signInWithPassword, signUp, resetPassword } = useAuth();
+  const { signInWithPassword, signUp, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Deterministic redirect: return-to from protected route OR default /account
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/account";
 
-  // Track page view
   useEffect(() => {
-    trackEvent("view_login", { tab: activeTab });
-  }, []);
+    trackEvent("view_login", { view });
+  }, [view]);
 
-  // Cooldown timer for OTP resend
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
+  // Normalize and trim identifier
+  const normalizeIdentifier = (value: string) => value.trim().toLowerCase();
 
-  // Password validation state
-  const passwordValidation = validatePassword(password);
-  const passwordIsValid = isPasswordValid(passwordValidation);
+  // Check if identifier is an email
+  const isEmail = (value: string) => value.includes("@");
 
-  // Email Code (OTP) - unified flow for both new and existing users
-  const handleSendOtp = useCallback(async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const trimmedEmail = email.trim().toLowerCase();
+  // Look up email by username
+  const getEmailByUsername = async (username: string): Promise<string | null> => {
+    const normalizedUsername = normalizeIdentifier(username);
     
-    if (!trimmedEmail) {
-      toast({
-        title: "Email required",
-        description: "Please enter your email address.",
-        variant: "destructive",
-      });
-      return;
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("email")
+      .ilike("username", normalizedUsername)
+      .maybeSingle();
+
+    if (error || !data?.email) {
+      return null;
     }
 
-    // Basic email format validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    trackEvent("otp_continue", { email: trimmedEmail });
-    
-    const { error } = await signInWithOtp(trimmedEmail);
-    setIsLoading(false);
-
-    if (error) {
-      trackEvent("otp_send_fail", { error: error.message });
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      setOtpSent(true);
-      setLastOtpEmail(trimmedEmail);
-      setResendCooldown(OTP_RESEND_COOLDOWN);
-      toast({
-        title: "Check your email",
-        description: "We sent you a code. Enter it below to continue.",
-      });
-    }
-  }, [email, signInWithOtp, toast]);
-
-  const handleResendOtp = useCallback(async () => {
-    if (resendCooldown > 0 || isLoading) return;
-    
-    setIsLoading(true);
-    const { error } = await signInWithOtp(lastOtpEmail);
-    setIsLoading(false);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      setResendCooldown(OTP_RESEND_COOLDOWN);
-      toast({
-        title: "Code resent",
-        description: "Check your email for the new code.",
-      });
-    }
-  }, [resendCooldown, isLoading, lastOtpEmail, signInWithOtp, toast]);
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedOtp = otp.trim();
-    
-    if (!lastOtpEmail || !trimmedOtp) {
-      toast({
-        title: "Code required",
-        description: "Please enter the verification code.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    const { error } = await verifyOtp(lastOtpEmail, trimmedOtp);
-    setIsLoading(false);
-
-    if (error) {
-      trackEvent("otp_verify_fail", { error: error.message });
-      toast({
-        title: "Invalid or expired code",
-        description: "Please check the code and try again, or request a new one.",
-        variant: "destructive",
-      });
-    } else {
-      trackEvent("otp_verify_success");
-      toast({
-        title: "Welcome!",
-        description: "You've successfully signed in.",
-      });
-      navigate(from, { replace: true });
-    }
+    return data.email;
   };
 
-  // Password - explicit sign in
-  const handlePasswordSignIn = async (e: React.FormEvent) => {
+  // Handle sign in
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedEmail = email.trim().toLowerCase();
     
-    if (!trimmedEmail || !password) {
+    const normalizedIdentifier = normalizeIdentifier(identifier);
+    
+    if (!normalizedIdentifier || !password) {
       toast({
         title: "Missing fields",
-        description: "Please enter both email and password.",
+        description: "Please enter your email or username and password.",
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    trackEvent("password_login_attempt");
-    const { error } = await signInWithPassword(trimmedEmail, password);
-    setIsLoading(false);
+    trackEvent("signin_attempt");
 
-    if (error) {
-      trackEvent("password_login_fail", { error: error.message });
+    try {
+      let emailToUse = normalizedIdentifier;
+
+      // If not an email, look up by username
+      if (!isEmail(normalizedIdentifier)) {
+        const foundEmail = await getEmailByUsername(normalizedIdentifier);
+        if (!foundEmail) {
+          // Don't reveal if username exists - use generic error
+          toast({
+            title: "Sign in failed",
+            description: "Incorrect email, username, or password.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          trackEvent("signin_fail", { reason: "username_not_found" });
+          return;
+        }
+        emailToUse = foundEmail;
+      }
+
+      const { error } = await signInWithPassword(emailToUse, password);
+
+      if (error) {
+        trackEvent("signin_fail", { error: error.message });
+        toast({
+          title: "Sign in failed",
+          description: "Incorrect email, username, or password.",
+          variant: "destructive",
+        });
+      } else {
+        trackEvent("signin_success");
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully signed in.",
+        });
+        navigate(from, { replace: true });
+      }
+    } catch (err) {
       toast({
         title: "Sign in failed",
-        description: error.message || "Invalid email or password.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-    } else {
-      trackEvent("password_login_success");
-      toast({
-        title: "Welcome back!",
-        description: "You've successfully signed in.",
-      });
-      navigate(from, { replace: true });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Password - explicit sign up
-  const handlePasswordSignUp = async (e: React.FormEvent) => {
+  // Handle sign up
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedEmail = email.trim().toLowerCase();
     
-    if (!trimmedEmail || !password) {
+    const normalizedEmail = normalizeIdentifier(identifier);
+    
+    if (!normalizedEmail || !password) {
       toast({
         title: "Missing fields",
-        description: "Please enter email and password.",
+        description: "Please enter your email and password.",
         variant: "destructive",
       });
       return;
     }
 
-    if (!passwordIsValid) {
+    if (!isEmail(normalizedEmail)) {
       toast({
-        title: "Weak password",
-        description: "Please meet all password requirements.",
+        title: "Invalid email",
+        description: "Please enter a valid email address to create an account.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < PASSWORD_MIN_LENGTH) {
+      toast({
+        title: "Password too short",
+        description: `Password must be at least ${PASSWORD_MIN_LENGTH} characters.`,
         variant: "destructive",
       });
       return;
@@ -246,33 +169,38 @@ export default function Login() {
     }
 
     setIsLoading(true);
-    trackEvent("password_signup_attempt");
-    const { error } = await signUp(trimmedEmail, password);
-    setIsLoading(false);
+    trackEvent("signup_attempt");
+
+    const { error } = await signUp(normalizedEmail, password);
 
     if (error) {
-      trackEvent("password_signup_fail", { error: error.message });
+      trackEvent("signup_fail", { error: error.message });
       toast({
         title: "Sign up failed",
         description: error.message || "Could not create account.",
         variant: "destructive",
       });
     } else {
-      trackEvent("password_signup_success");
+      trackEvent("signup_success");
       toast({
-        title: "Check your email",
-        description: "We sent you a confirmation link. Please verify your email to complete signup.",
+        title: "Account created!",
+        description: "Check your email to verify your account.",
       });
-      // Don't navigate - user needs to confirm email first
+      setView("signin");
+      setPassword("");
+      setConfirmPassword("");
     }
+
+    setIsLoading(false);
   };
 
-  // Forgot password
+  // Handle forgot password
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedEmail = email.trim().toLowerCase();
     
-    if (!trimmedEmail) {
+    const normalizedEmail = normalizeIdentifier(resetEmail);
+    
+    if (!normalizedEmail) {
       toast({
         title: "Email required",
         description: "Please enter your email address.",
@@ -281,366 +209,394 @@ export default function Login() {
       return;
     }
 
-    setIsLoading(true);
-    trackEvent("forgot_password_start");
-    const { error } = await resetPassword(trimmedEmail);
-    setIsLoading(false);
-
-    if (error) {
+    if (!isEmail(normalizedEmail)) {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
         variant: "destructive",
       });
-    } else {
-      trackEvent("forgot_password_success");
-      toast({
-        title: "Check your email",
-        description: "We sent you a password reset link.",
-      });
-      setPasswordMode("signin");
+      return;
+    }
+
+    setIsLoading(true);
+    trackEvent("forgot_password_attempt");
+
+    const { error } = await resetPassword(normalizedEmail);
+
+    if (error) {
+      // Don't reveal if email exists - show success anyway
+      console.error("Password reset error:", error);
+    }
+
+    trackEvent("forgot_password_sent");
+    setView("reset-sent");
+    setIsLoading(false);
+  };
+
+  // Handle key press for form submission
+  const handleKeyPress = (e: React.KeyboardEvent, handler: (e: React.FormEvent) => void) => {
+    if (e.key === "Enter") {
+      handler(e);
     }
   };
 
-  const resetOtpFlow = () => {
-    setOtpSent(false);
-    setOtp("");
-    setResendCooldown(0);
-  };
-
-  const ValidationItem = ({ valid, text }: { valid: boolean; text: string }) => (
-    <div className={`flex items-center gap-1.5 text-xs ${valid ? "text-green-600" : "text-muted-foreground"}`}>
-      {valid ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-      {text}
-    </div>
-  );
-
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-b from-muted/50 to-background">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-b from-zinc-900 via-zinc-900 to-black">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
+        {/* Back to home */}
+        <div className="text-center">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to home
           </Link>
-          <h1 className="text-2xl font-bold">Welcome to A-Z Enterprises</h1>
-          <p className="text-muted-foreground">
-            Sign in to manage your bookings and memberships
-          </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>
-              Choose your preferred sign-in method
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs 
-              value={activeTab} 
-              onValueChange={(v) => {
-                setActiveTab(v as "otp" | "password");
-                trackEvent("view_login", { tab: v });
-                resetOtpFlow();
-                setPasswordMode("signin");
-              }}
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="otp">Email Code</TabsTrigger>
-                <TabsTrigger value="password">Password</TabsTrigger>
-              </TabsList>
-
-              {/* EMAIL CODE (OTP) TAB */}
-              <TabsContent value="otp" className="space-y-4 mt-4">
-                {!otpSent ? (
-                  <form onSubmit={handleSendOtp} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email-otp">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="email-otp"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-9"
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        We'll email you a code. If you're new, this creates your account.
-                      </p>
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                      Continue
-                    </Button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleVerifyOtp} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="otp">Enter Code</Label>
-                      <Input
-                        id="otp"
-                        type="text"
-                        placeholder="123456"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                        maxLength={6}
-                        className="text-center text-2xl tracking-widest"
-                        required
-                        autoFocus
-                        disabled={isLoading}
-                      />
-                      <p className="text-sm text-muted-foreground">
-                        Check your email for the 6-digit code sent to <strong>{lastOtpEmail}</strong>
-                      </p>
-                    </div>
-                    
-                    <Button type="submit" className="w-full" disabled={isLoading || otp.length < 6}>
-                      {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                      Verify & Continue
-                    </Button>
-
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="flex-1"
-                        onClick={handleResendOtp}
-                        disabled={resendCooldown > 0 || isLoading}
-                      >
-                        {resendCooldown > 0 ? `Resend (${resendCooldown}s)` : "Resend Code"}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className="flex-1"
-                        onClick={resetOtpFlow}
-                        disabled={isLoading}
-                      >
-                        Change Email
-                      </Button>
-                    </div>
-                  </form>
-                )}
-              </TabsContent>
-
-              {/* PASSWORD TAB */}
-              <TabsContent value="password" className="space-y-4 mt-4">
-                {passwordMode !== "forgot" && (
-                  <div className="flex rounded-md border border-border overflow-hidden">
-                    <button
-                      type="button"
-                      className={`flex-1 py-2 text-sm font-medium transition-colors ${
-                        passwordMode === "signin"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                      }`}
-                      onClick={() => setPasswordMode("signin")}
+        <Card className="border-zinc-800 bg-zinc-900/80 backdrop-blur-sm shadow-2xl">
+          {/* SIGN IN VIEW */}
+          {view === "signin" && (
+            <>
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl font-bold text-white">Sign in</CardTitle>
+                <CardDescription className="text-zinc-400">
+                  Access your bookings, memberships, and perks
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  {/* Identifier Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="identifier" className="text-zinc-300">
+                      Email or username
+                    </Label>
+                    <Input
+                      id="identifier"
+                      type="text"
+                      placeholder="you@example.com"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      onKeyPress={(e) => handleKeyPress(e, handleSignIn)}
+                      autoFocus
+                      autoComplete="username"
                       disabled={isLoading}
-                    >
-                      Sign In
-                    </button>
-                    <button
-                      type="button"
-                      className={`flex-1 py-2 text-sm font-medium transition-colors ${
-                        passwordMode === "signup"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                      }`}
-                      onClick={() => setPasswordMode("signup")}
-                      disabled={isLoading}
-                    >
-                      Sign Up
-                    </button>
+                      className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-accent focus:ring-accent"
+                    />
                   </div>
-                )}
 
-                {passwordMode === "signin" && (
-                  <form onSubmit={handlePasswordSignIn} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email-signin">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="email-signin"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-9"
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
+                  {/* Password Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-zinc-300">
+                      Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onKeyPress={(e) => handleKeyPress(e, handleSignIn)}
+                        autoComplete="current-password"
+                        disabled={isLoading}
+                        className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 pr-10 focus:border-accent focus:ring-accent"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password-signin">Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="password-signin"
-                          type="password"
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="pl-9"
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
+                  </div>
+
+                  {/* Remember me / Forgot password row */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="remember"
+                        checked={rememberMe}
+                        onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                        className="border-zinc-600 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                      />
+                      <Label htmlFor="remember" className="text-sm text-zinc-400 cursor-pointer">
+                        Remember me
+                      </Label>
                     </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                      Sign In
-                    </Button>
                     <button
                       type="button"
-                      className="w-full text-sm text-muted-foreground hover:text-foreground underline"
-                      onClick={() => setPasswordMode("forgot")}
-                      disabled={isLoading}
+                      onClick={() => {
+                        setView("forgot");
+                        setResetEmail(isEmail(identifier) ? identifier : "");
+                      }}
+                      className="text-sm text-accent hover:text-accent/80 transition-colors"
                     >
                       Forgot password?
                     </button>
-                  </form>
-                )}
+                  </div>
 
-                {passwordMode === "signup" && (
-                  <form onSubmit={handlePasswordSignUp} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email-signup">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="email-signup"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-9"
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password-signup">Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="password-signup"
-                          type="password"
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="pl-9"
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
-                      {password.length > 0 && (
-                        <div className="grid grid-cols-2 gap-1 pt-1">
-                          <ValidationItem valid={passwordValidation.minLength} text="8+ characters" />
-                          <ValidationItem valid={passwordValidation.hasUppercase} text="Uppercase" />
-                          <ValidationItem valid={passwordValidation.hasLowercase} text="Lowercase" />
-                          <ValidationItem valid={passwordValidation.hasNumber} text="Number" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">Confirm Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="confirm-password"
-                          type="password"
-                          placeholder="••••••••"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="pl-9"
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
-                      {confirmPassword && password !== confirmPassword && (
-                        <p className="text-xs text-destructive flex items-center gap-1">
-                          <X className="h-3 w-3" /> Passwords don't match
-                        </p>
-                      )}
-                      {confirmPassword && password === confirmPassword && (
-                        <p className="text-xs text-green-600 flex items-center gap-1">
-                          <Check className="h-3 w-3" /> Passwords match
-                        </p>
-                      )}
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={isLoading || !passwordIsValid || password !== confirmPassword}
-                    >
-                      {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                      Create Account
-                    </Button>
-                  </form>
-                )}
+                  {/* Sign In Button */}
+                  <Button
+                    type="submit"
+                    className="w-full bg-accent hover:bg-accent/90 text-black font-semibold h-11"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Sign in"
+                    )}
+                  </Button>
 
-                {passwordMode === "forgot" && (
-                  <form onSubmit={handleForgotPassword} className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Enter your email and we'll send you a link to reset your password.
-                    </p>
-                    <div className="space-y-2">
-                      <Label htmlFor="email-forgot">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="email-forgot"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-9"
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                      Send Reset Link
-                    </Button>
+                  {/* Create account link */}
+                  <div className="text-center pt-2">
                     <button
                       type="button"
-                      className="w-full text-sm text-muted-foreground hover:text-foreground"
-                      onClick={() => setPasswordMode("signin")}
-                      disabled={isLoading}
+                      onClick={() => {
+                        setView("signup");
+                        setPassword("");
+                      }}
+                      className="text-sm text-accent hover:text-accent/80 transition-colors"
                     >
-                      ← Back to sign in
+                      Create account
                     </button>
-                  </form>
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
+                  </div>
+                </form>
+              </CardContent>
+            </>
+          )}
+
+          {/* SIGN UP VIEW */}
+          {view === "signup" && (
+            <>
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl font-bold text-white">Create account</CardTitle>
+                <CardDescription className="text-zinc-400">
+                  Join to book and manage your experiences
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  {/* Email Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email" className="text-zinc-300">
+                      Email
+                    </Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      autoFocus
+                      autoComplete="email"
+                      disabled={isLoading}
+                      className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-accent focus:ring-accent"
+                    />
+                  </div>
+
+                  {/* Password Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password" className="text-zinc-300">
+                      Password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="signup-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoComplete="new-password"
+                        disabled={isLoading}
+                        className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 pr-10 focus:border-accent focus:ring-accent"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-xs text-zinc-500">
+                      Minimum {PASSWORD_MIN_LENGTH} characters
+                    </p>
+                  </div>
+
+                  {/* Confirm Password Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm" className="text-zinc-300">
+                      Confirm password
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="signup-confirm"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onKeyPress={(e) => handleKeyPress(e, handleSignUp)}
+                        autoComplete="new-password"
+                        disabled={isLoading}
+                        className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 pr-10 focus:border-accent focus:ring-accent"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Create Account Button */}
+                  <Button
+                    type="submit"
+                    className="w-full bg-accent hover:bg-accent/90 text-black font-semibold h-11"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Create account"
+                    )}
+                  </Button>
+
+                  {/* Back to sign in */}
+                  <div className="text-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setView("signin");
+                        setPassword("");
+                        setConfirmPassword("");
+                      }}
+                      className="text-sm text-zinc-400 hover:text-white transition-colors"
+                    >
+                      Already have an account? <span className="text-accent">Sign in</span>
+                    </button>
+                  </div>
+                </form>
+              </CardContent>
+            </>
+          )}
+
+          {/* FORGOT PASSWORD VIEW */}
+          {view === "forgot" && (
+            <>
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl font-bold text-white">Reset password</CardTitle>
+                <CardDescription className="text-zinc-400">
+                  Enter your email to receive a reset link
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  {/* Email Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email" className="text-zinc-300">
+                      Email
+                    </Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      onKeyPress={(e) => handleKeyPress(e, handleForgotPassword)}
+                      autoFocus
+                      autoComplete="email"
+                      disabled={isLoading}
+                      className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-accent focus:ring-accent"
+                    />
+                  </div>
+
+                  {/* Send Reset Button */}
+                  <Button
+                    type="submit"
+                    className="w-full bg-accent hover:bg-accent/90 text-black font-semibold h-11"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Send reset link"
+                    )}
+                  </Button>
+
+                  {/* Back to sign in */}
+                  <div className="text-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setView("signin")}
+                      className="text-sm text-zinc-400 hover:text-white transition-colors"
+                    >
+                      Back to <span className="text-accent">Sign in</span>
+                    </button>
+                  </div>
+                </form>
+              </CardContent>
+            </>
+          )}
+
+          {/* RESET SENT VIEW */}
+          {view === "reset-sent" && (
+            <>
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl font-bold text-white">Check your email</CardTitle>
+                <CardDescription className="text-zinc-400">
+                  We sent you a password reset link
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-center text-zinc-400 text-sm">
+                  If an account exists for <strong className="text-white">{resetEmail}</strong>, 
+                  you'll receive an email with instructions to reset your password.
+                </p>
+
+                <Button
+                  onClick={() => {
+                    setView("signin");
+                    setResetEmail("");
+                  }}
+                  className="w-full bg-accent hover:bg-accent/90 text-black font-semibold h-11"
+                >
+                  Return to Sign in
+                </Button>
+              </CardContent>
+            </>
+          )}
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground">
-          By signing in, you agree to our{" "}
-          <Link to="/terms" className="underline hover:text-foreground">
+        {/* Footer Links */}
+        <div className="flex justify-center gap-4 text-xs text-zinc-500">
+          <Link to="/terms" className="hover:text-zinc-300 transition-colors">
             Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link to="/privacy" className="underline hover:text-foreground">
+          </Link>
+          <span>•</span>
+          <Link to="/privacy" className="hover:text-zinc-300 transition-colors">
             Privacy Policy
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );
