@@ -148,8 +148,8 @@ export default function Index() {
               <div className="space-y-3 opacity-0 animate-fade-in-down" style={{
               animationDelay: "0.05s"
             }}>
-                {/* Logo Icon */}
-                <div className="flex justify-center lg:justify-start">
+                {/* Logo Icon - positioned above W in Wapakoneta's */}
+                <div className="flex justify-center lg:justify-start lg:pl-6">
                   <img alt="A-Z Enterprises" className="h-44 w-44 object-contain" src="/lovable-uploads/cf63743c-5431-4ce2-a81a-b629897e880c.png" />
                 </div>
                 
