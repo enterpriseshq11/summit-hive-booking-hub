@@ -191,11 +191,28 @@ export default function PhotoBooth() {
               />
             </div>
           </div>
+
+          {/* Anchor Chips - Centered */}
+          <div className="flex flex-wrap justify-center gap-3 mt-10">
+            {[
+              { label: "Availability", href: "#what-you-get" },
+              { label: "Experiences", href: "#perfect-for" },
+              { label: "FAQ", href: "#faq" },
+            ].map((chip) => (
+              <a
+                key={chip.label}
+                href={chip.href}
+                className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 text-primary-foreground/80 text-sm font-medium hover:bg-white/20 transition-colors"
+              >
+                {chip.label}
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* What You Get */}
-      <section className="py-16 lg:py-24 bg-background">
+      <section id="what-you-get" className="py-16 lg:py-24 bg-background">
         <div className="container">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">What You Get</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-5xl mx-auto">
@@ -217,7 +234,7 @@ export default function PhotoBooth() {
       </section>
 
       {/* Perfect For */}
-      <section className="py-16 lg:py-24 bg-muted/30">
+      <section id="perfect-for" className="py-16 lg:py-24 bg-muted/30">
         <div className="container">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">Perfect For</h2>
           <div className="flex flex-wrap justify-center gap-4 max-w-3xl mx-auto">
@@ -293,7 +310,7 @@ export default function PhotoBooth() {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 lg:py-24 bg-muted/30">
+      <section id="faq" className="py-16 lg:py-24 bg-muted/30">
         <div className="container max-w-3xl">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">Frequently Asked Questions</h2>
           <div className="space-y-3">
