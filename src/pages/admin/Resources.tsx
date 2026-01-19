@@ -118,8 +118,8 @@ export default function AdminResources() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Resources</h1>
-            <p className="text-muted-foreground">Manage rooms, offices, and equipment</p>
+            <h1 className="text-2xl font-bold text-white">Resources</h1>
+            <p className="text-zinc-300">Manage rooms, offices, and equipment</p>
           </div>
           <Button onClick={openCreateDialog}>
             <Plus className="h-4 w-4 mr-2" />
@@ -159,8 +159,8 @@ export default function AdminResources() {
                   <TableRow key={resource.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{resource.name}</p>
-                        <p className="text-sm text-muted-foreground">{resource.slug}</p>
+                        <p className="font-medium text-white">{resource.name}</p>
+                        <p className="text-sm text-zinc-400">{resource.slug}</p>
                       </div>
                     </TableCell>
                     <TableCell>
