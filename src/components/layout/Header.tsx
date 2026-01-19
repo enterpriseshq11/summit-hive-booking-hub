@@ -53,6 +53,7 @@ const experienceItems = [
 const shopItems = [
   { label: "Gift Cards", href: "/gift-cards", icon: Gift, description: "Give the gift of experience" },
   { label: "Merchandise", href: "/shop", icon: ShoppingBag, description: "Curated products" },
+  { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, description: "Win prizes & rewards" },
 ];
 
 // Promotions dropdown items
