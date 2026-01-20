@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { Building2, Sparkles, Dumbbell, Camera, ChevronRight } from "lucide-react";
+import { Building2, Sparkles, Dumbbell, Camera, Mic, ChevronRight } from "lucide-react";
 import type { BusinessType } from "@/types";
 
 const experiences: {
-  type: BusinessType | "photo_booth";
+  type: BusinessType | "photo_booth" | "voice_vault";
   name: string;
   tagline: string;
   icon: typeof Building2;
@@ -67,6 +67,17 @@ const experiences: {
     iconColor: "text-accent",
     iconBg: "bg-accent/20",
     delay: "0.4s",
+  },
+  {
+    type: "voice_vault",
+    name: "Voice Vault",
+    tagline: "Podcast Studio + Recording",
+    icon: Mic,
+    href: "/voice-vault",
+    gradient: "from-accent/20 to-accent/5",
+    iconColor: "text-accent",
+    iconBg: "bg-accent/20",
+    delay: "0.5s",
   },
 ];
 export function ExperiencePreviewPanel() {
