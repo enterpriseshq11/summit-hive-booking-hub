@@ -57,6 +57,22 @@ interface UseLindseyAvailabilityParams {
 export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: UseLindseyAvailabilityParams) {
   const spaBusinessId = "4df48af2-39e4-4bd1-a9b3-963de8ef39d7";
 
+  // Fetch provider settings for buffer times
+  const { data: providerSettings } = useQuery({
+    queryKey: ["lindsey-provider-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("provider_settings")
+        .select("*")
+        .eq("business_id", spaBusinessId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || { buffer_before_mins: 0, buffer_after_mins: 15, slot_increment_mins: 30 };
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Fetch availability windows (Lindsey's schedule)
   const { data: availabilityWindows } = useQuery({
     queryKey: ["lindsey-availability-windows"],
