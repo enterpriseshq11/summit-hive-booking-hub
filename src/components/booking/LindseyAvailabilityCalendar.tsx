@@ -9,13 +9,34 @@ import { cn } from "@/lib/utils";
 import { format, addDays, startOfToday, isBefore, startOfDay } from "date-fns";
 import { 
   CalendarIcon, Clock, CheckCircle, XCircle, ChevronRight, ArrowLeft,
-  Heart, Flame, Star, Users, MapPin, Sparkles, ArrowRight
+  Heart, Flame, Star, Users, MapPin, Sparkles, ArrowRight, HelpCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useLindseyAvailability, isPromoDate, calculateServicePrice } from "@/hooks/useLindseyAvailability";
 
-// Services data
-const SERVICES = [
+// Service option type
+interface ServiceOption {
+  duration: number;
+  price: number;
+  label: string;
+  promoPrice?: number;
+  note?: string;
+}
+
+interface Service {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  options: ServiceOption[];
+  featured?: boolean;
+  isPromo?: boolean;
+  isFree?: boolean;
+}
+
+// Services data - Updated per spec
+const SERVICES: Service[] = [
   {
     id: "swedish",
     name: "Swedish Massage",
@@ -32,14 +53,14 @@ const SERVICES = [
     description: "Focused therapeutic work, deeper pressure.",
     icon: Flame,
     options: [
+      // Only 30-min available per spec - no 60-min until pricing confirmed
       { duration: 30, price: 55, label: "30 min" },
-      { duration: 60, price: null, label: "60 min", note: "Contact for quote" },
     ],
   },
   {
     id: "ashiatsu",
     name: "Ashiatsu (Barefoot Massage)",
-    description: "Deep pressure using feet for full body relief.",
+    description: "Uses overhead bars for balance; deep pressure using feet for full body relief.",
     icon: Star,
     featured: true,
     options: [
@@ -50,11 +71,12 @@ const SERVICES = [
   {
     id: "couples",
     name: "Couples Massage",
-    description: "Side-by-side couples session with add-ons available.",
+    description: "Side-by-side couples session with add-ons available (hot stones, aromatherapy, cupping).",
     icon: Users,
     featured: true,
     isPromo: true,
     options: [
+      // Promo pricing for Jan + Feb; normal pricing otherwise
       { duration: 60, price: 85, promoPrice: 70, label: "60 min" },
       { duration: 90, price: 125, promoPrice: 95, label: "90 min" },
     ],
@@ -63,7 +85,7 @@ const SERVICES = [
     id: "prenatal-consult",
     name: "Prenatal Consultation",
     description: "Free consult to determine safest approach.",
-    icon: Heart,
+    icon: HelpCircle,
     isFree: true,
     options: [{ duration: 15, price: 0, label: "Free" }],
   },
@@ -71,7 +93,7 @@ const SERVICES = [
     id: "migraine-consult",
     name: "Migraine Consultation",
     description: "Free consult to identify triggers and plan session.",
-    icon: Heart,
+    icon: HelpCircle,
     isFree: true,
     options: [{ duration: 15, price: 0, label: "Free" }],
   },
@@ -91,36 +113,6 @@ const ROOMS = [
     capacity: 2,
   },
 ];
-
-// Time slots from 9 AM to 8 PM
-const TIME_SLOTS = [
-  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
-  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
-  "18:00", "18:30", "19:00", "19:30", "20:00"
-];
-
-// Mock availability data
-const generateMockAvailability = () => {
-  const today = startOfToday();
-  const availability: Record<string, { available: number; total: number }> = {};
-  
-  for (let i = 0; i < 60; i++) {
-    const date = addDays(today, i);
-    const dateKey = format(date, "yyyy-MM-dd");
-    const dayOfWeek = date.getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    const baseAvailable = isWeekend ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 6) + 2;
-    const totalSlots = 8;
-    
-    availability[dateKey] = {
-      available: Math.min(baseAvailable, totalSlots),
-      total: totalSlots,
-    };
-  }
-  
-  return availability;
-};
 
 type BookingStep = "service" | "calendar" | "time" | "contact" | "confirm";
 
@@ -142,23 +134,21 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   // Ref for scrolling to calendar step
   const calendarStepRef = useRef<HTMLDivElement>(null);
   
-  const availability = useMemo(() => generateMockAvailability(), []);
-  
-  // Generate mock slots for selected day
-  const selectedDaySlots = useMemo(() => {
-    if (!selectedDate) return [];
-    
-    const dateKey = format(selectedDate, "yyyy-MM-dd");
-    const dayAvail = availability[dateKey];
-    
-    if (!dayAvail) return [];
-    
-    return TIME_SLOTS.map((time, index) => ({
-      time,
-      available: index < dayAvail.available || Math.random() > 0.5,
-      display: format(new Date(`2000-01-01T${time}`), "h:mm a"),
-    }));
-  }, [selectedDate, availability]);
+  // Use the real availability hook
+  const {
+    selectedDaySlots,
+    getAvailabilityMap,
+    getDayAvailability,
+    isLoading: isLoadingAvailability,
+  } = useLindseyAvailability({
+    selectedDate,
+    selectedDuration: selectedDuration || 60,
+  });
+
+  // Generate availability map for calendar coloring based on selected duration
+  const availability = useMemo(() => {
+    return getAvailabilityMap(60, selectedDuration || 60);
+  }, [getAvailabilityMap, selectedDuration]);
   
   const getDateAvailability = (date: Date) => {
     const dateKey = format(date, "yyyy-MM-dd");
@@ -176,12 +166,19 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
     return service.options.find(o => o.duration === selectedDuration);
   };
 
-  const calculatePrice = () => {
+  // Calculate price based on service, duration, and selected date (for promo pricing)
+  const calculatePrice = (): number | null => {
+    const service = getSelectedServiceData();
     const option = getSelectedOption();
-    if (!option) return null;
-    if ('promoPrice' in option && option.promoPrice) {
-      return option.promoPrice;
+    if (!service || !option) return null;
+    
+    // For couples massage, check date-based promo pricing
+    if (service.id === "couples" && selectedDate && 'promoPrice' in option) {
+      if (isPromoDate(selectedDate)) {
+        return option.promoPrice ?? option.price;
+      }
     }
+    
     return option.price;
   };
   
@@ -490,35 +487,46 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <h4 className="font-semibold">{service.name}</h4>
-                              {service.isPromo && (
-                                <Badge variant="outline" className="border-green-500 text-green-600 text-xs">Promo</Badge>
+                              {service.isPromo && isPromoDate(new Date()) && (
+                                <Badge variant="outline" className="border-accent text-accent text-xs">
+                                  Promo Active
+                                </Badge>
                               )}
                               {service.isFree && (
-                                <Badge variant="outline" className="border-green-500 text-green-600 text-xs">Free</Badge>
+                                <Badge variant="outline" className="border-accent text-accent text-xs">Free</Badge>
                               )}
                             </div>
                             <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
                             <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
-                              {service.options.map((opt) => (
-                                <Button
-                                  key={opt.duration}
-                                  variant="outline"
-                                  size="sm"
-                                  className="hover:border-accent hover:bg-accent/10"
-                                  onClick={() => handleServiceSelect(service.id, opt.duration)}
-                                >
-                                  <span>{opt.label}</span>
-                                  {'promoPrice' in opt && opt.promoPrice ? (
-                                    <span className="ml-2 text-accent font-semibold">${opt.promoPrice}</span>
-                                  ) : opt.price !== null && opt.price > 0 ? (
-                                    <span className="ml-2 text-accent font-semibold">${opt.price}</span>
-                                  ) : opt.price === 0 ? (
-                                    <span className="ml-2 text-accent font-semibold">Free</span>
-                                  ) : (
-                                    <span className="ml-2 text-muted-foreground text-xs">{opt.note}</span>
-                                  )}
-                                </Button>
-                              ))}
+                              {service.options.map((opt) => {
+                                // Determine display price based on current date promo status
+                                const showPromoPrice = service.isPromo && opt.promoPrice !== undefined && isPromoDate(new Date());
+                                const displayPrice = showPromoPrice ? opt.promoPrice : opt.price;
+                                
+                                return (
+                                  <Button
+                                    key={opt.duration}
+                                    variant="outline"
+                                    size="sm"
+                                    className="hover:border-accent hover:bg-accent/10"
+                                    onClick={() => handleServiceSelect(service.id, opt.duration)}
+                                  >
+                                    <span>{opt.label}</span>
+                                    {displayPrice > 0 ? (
+                                      <span className="ml-2">
+                                        {showPromoPrice && opt.price !== opt.promoPrice && (
+                                          <span className="line-through text-muted-foreground mr-1">${opt.price}</span>
+                                        )}
+                                        <span className="text-accent font-semibold">${displayPrice}</span>
+                                      </span>
+                                    ) : displayPrice === 0 ? (
+                                      <span className="ml-2 text-accent font-semibold">Free</span>
+                                    ) : opt.note ? (
+                                      <span className="ml-2 text-muted-foreground text-xs">{opt.note}</span>
+                                    ) : null}
+                                  </Button>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
@@ -632,27 +640,38 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                 </div>
                 
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                  {selectedDaySlots.map((slot) => (
-                    <Button
-                      key={slot.time}
-                      variant="outline"
-                      disabled={!slot.available}
-                      onClick={() => handleTimeSelect(slot.time)}
-                      className={cn(
-                        "h-12 flex flex-col items-center justify-center gap-0.5 transition-all",
-                        slot.available 
-                          ? "hover:bg-accent/10 hover:border-accent" 
-                          : "opacity-50 cursor-not-allowed"
-                      )}
-                    >
-                      <span className="text-sm font-medium">{slot.display}</span>
-                      {slot.available ? (
-                        <span className="text-xs text-green-600">Open</span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Booked</span>
-                      )}
-                    </Button>
-                  ))}
+                  {selectedDaySlots.length === 0 ? (
+                    <div className="col-span-full text-center py-8">
+                      <p className="text-muted-foreground">No available times for this date.</p>
+                      <p className="text-sm text-muted-foreground mt-1">Try selecting a different date.</p>
+                    </div>
+                  ) : (
+                    selectedDaySlots.map((slot) => (
+                      <Button
+                        key={slot.time}
+                        variant="outline"
+                        disabled={!slot.available}
+                        onClick={() => handleTimeSelect(slot.time)}
+                        className={cn(
+                          "h-12 flex flex-col items-center justify-center gap-0.5 transition-all",
+                          slot.available 
+                            ? "hover:bg-accent/10 hover:border-accent" 
+                            : "opacity-50 cursor-not-allowed"
+                        )}
+                      >
+                        <span className="text-sm font-medium">{slot.display}</span>
+                        {slot.available ? (
+                          <span className="text-xs text-green-600">Open</span>
+                        ) : slot.reason === "booked" ? (
+                          <span className="text-xs text-destructive">Booked</span>
+                        ) : slot.reason === "too-short" ? (
+                          <span className="text-xs text-muted-foreground">Too late</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Closed</span>
+                        )}
+                      </Button>
+                    ))
+                  )}
                 </div>
               </div>
             )}
