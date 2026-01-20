@@ -15,27 +15,27 @@ export function BookingCategoryPicker() {
 
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Mobile: 2-row grid (2 on top, 3 on bottom), Tablet/Desktop: flex wrap */}
-      <div className="grid grid-cols-2 gap-3 w-full sm:hidden">
-        {/* Row 1: First 2 pills */}
+      {/* Mobile: 2-row layout (2 on top narrower, 3 on bottom wider) */}
+      <div className="flex justify-center gap-3 sm:hidden">
+        {/* Row 1: First 2 pills - narrower */}
         {categories.slice(0, 2).map((cat) => (
           <button
             key={cat.type}
             onClick={() => navigate(cat.route)}
-            className="inline-flex items-center justify-center gap-2 px-3 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-[hsl(45,70%,50%)]/80 text-black border-2 border-transparent hover:bg-[hsl(45,70%,45%)] hover:border-black/20"
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-[hsl(45,70%,50%)]/80 text-black border-2 border-transparent hover:bg-[hsl(45,70%,45%)] hover:border-black/20 min-w-[140px] max-w-[160px]"
           >
             <cat.icon className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">{cat.name}</span>
           </button>
         ))}
       </div>
-      <div className="grid grid-cols-3 gap-3 w-full sm:hidden">
-        {/* Row 2: Last 3 pills */}
+      <div className="flex justify-center gap-2 sm:hidden">
+        {/* Row 2: Last 3 pills - wider */}
         {categories.slice(2).map((cat) => (
           <button
             key={cat.type}
             onClick={() => navigate(cat.route)}
-            className="inline-flex items-center justify-center gap-1.5 px-2 py-3 rounded-xl font-semibold text-xs transition-all duration-300 bg-[hsl(45,70%,50%)]/80 text-black border-2 border-transparent hover:bg-[hsl(45,70%,45%)] hover:border-black/20"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl font-semibold text-xs transition-all duration-300 bg-[hsl(45,70%,50%)]/80 text-black border-2 border-transparent hover:bg-[hsl(45,70%,45%)] hover:border-black/20 min-w-[105px] flex-1 max-w-[120px]"
           >
             <cat.icon className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="truncate">{cat.name}</span>
