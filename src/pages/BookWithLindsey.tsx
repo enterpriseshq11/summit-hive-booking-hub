@@ -232,22 +232,38 @@ export default function BookWithLindsey() {
             </p>
             
             {/* Quick CTAs */}
-            <div className="flex flex-wrap justify-center gap-3">
-              <Button 
-                size="lg" 
-                onClick={() => document.getElementById("pricing-menu")?.scrollIntoView({ behavior: "smooth" })}
-                className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold"
-              >
-                <Sparkles className="h-5 w-5 mr-2" />
-                View Services & Pricing
-              </Button>
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button 
+                  size="lg" 
+                  onClick={() => document.getElementById("pricing-menu")?.scrollIntoView({ behavior: "smooth" })}
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold"
+                >
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  View Services & Pricing
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => setShowPricingModal(true)}
+                  className="border-accent text-accent hover:bg-accent/10"
+                >
+                  Quick Price Check
+                </Button>
+              </div>
               <Button
                 size="lg"
-                variant="outline"
-                onClick={() => setShowPricingModal(true)}
-                className="border-accent text-accent hover:bg-accent/10"
+                onClick={() => {
+                  setStep("booking");
+                  setTimeout(() => {
+                    bookingFormRef.current?.scrollIntoView({ behavior: "smooth" });
+                    bookingFormRef.current?.focus();
+                  }, 100);
+                }}
+                className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold"
               >
-                Quick Price Check
+                <CalendarIcon className="h-5 w-5 mr-2" />
+                Book With Lindsey
               </Button>
             </div>
             
