@@ -52,6 +52,7 @@ const businessIcons: Record<BusinessType, React.ComponentType<{ className?: stri
   coworking: Building2,
   spa: Sparkles,
   fitness: Dumbbell,
+  photo_booth: Building2,
   voice_vault: Building2,
 };
 
@@ -60,6 +61,7 @@ const businessRoutes: Record<BusinessType, string> = {
   coworking: "/coworking",
   spa: "/spa",
   fitness: "/fitness",
+  photo_booth: "/photo-booth",
   voice_vault: "/voice-vault",
 };
 
@@ -68,6 +70,7 @@ const businessLabels: Record<BusinessType, string> = {
   coworking: "The Hive",
   spa: "Restoration Lounge",
   fitness: "Total Fitness",
+  photo_booth: "360 Photo Booth",
   voice_vault: "Voice Vault",
 };
 
@@ -76,6 +79,7 @@ const businessDescriptions: Record<BusinessType, string> = {
   coworking: "Private Offices + Coworking",
   spa: "Recovery + Spa Treatments",
   fitness: "24/7 Gym + Coaching",
+  photo_booth: "360 Photo Booth Rental",
   voice_vault: "Podcast Studio",
 };
 
@@ -85,6 +89,7 @@ const businessBestFor: Record<BusinessType, string> = {
   coworking: "Best for: Remote work, startups, private offices",
   spa: "Best for: Massage, facials, recovery treatments",
   fitness: "Best for: Strength training, classes, personal coaching",
+  photo_booth: "Best for: Weddings, parties, corporate events",
   voice_vault: "Best for: Podcast recording, voiceovers, content creation",
 };
 
@@ -93,6 +98,7 @@ const businessTags: Record<BusinessType, string[]> = {
   coworking: ["Focus Work", "Meetings"],
   spa: ["Recovery", "Reset"],
   fitness: ["Training", "Performance"],
+  photo_booth: ["360", "Events", "Add-on"],
   voice_vault: ["Recording", "Podcasts"],
 };
 
@@ -102,6 +108,7 @@ const businessBadges: Record<BusinessType, { text: string; type: "deposit" | "in
   coworking: { text: "Day passes available", type: "info" },
   spa: { text: "Deposit required", type: "deposit" },
   fitness: { text: "Flexible memberships", type: "info" },
+  photo_booth: { text: "Deposit required", type: "deposit" },
   voice_vault: { text: "Hourly booking", type: "info" },
 };
 

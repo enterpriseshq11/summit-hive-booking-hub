@@ -70,6 +70,7 @@ const businessUnitLabels: Record<BusinessType, string> = {
   fitness: "Fitness",
   coworking: "Coworking",
   summit: "Summit",
+  photo_booth: "360 Photo Booth",
   voice_vault: "Voice Vault",
 };
 

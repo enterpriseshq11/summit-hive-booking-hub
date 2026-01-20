@@ -39,6 +39,7 @@ const servicePlaceholders: Record<BusinessType, string> = {
   coworking: "e.g. Office Tour, Day Pass",
   spa: "e.g. Massage, Facial, Recovery",
   fitness: "e.g. Day Pass, Membership",
+  photo_booth: "e.g. 360 Rental, Event Add-on",
   voice_vault: "e.g. Podcast Recording",
 };
 
@@ -133,6 +134,8 @@ export function AvailabilitySearch({
             <SelectItem value="coworking">The Hive - Coworking</SelectItem>
             <SelectItem value="spa">Restoration Lounge - Spa</SelectItem>
             <SelectItem value="fitness">Total Fitness - Gym</SelectItem>
+            <SelectItem value="photo_booth">360 Photo Booth</SelectItem>
+            <SelectItem value="voice_vault">Voice Vault</SelectItem>
           </SelectContent>
         </Select>
 
@@ -186,6 +189,8 @@ export function AvailabilitySearch({
                 <SelectItem value="coworking">The Hive - Coworking</SelectItem>
                 <SelectItem value="spa">Restoration Lounge - Spa</SelectItem>
                 <SelectItem value="fitness">Total Fitness - Gym</SelectItem>
+                <SelectItem value="photo_booth">360 Photo Booth</SelectItem>
+                <SelectItem value="voice_vault">Voice Vault</SelectItem>
               </SelectContent>
             </Select>
             {businessType && (
