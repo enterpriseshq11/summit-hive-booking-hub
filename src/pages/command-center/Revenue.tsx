@@ -51,6 +51,7 @@ const businessUnitLabels: Record<BusinessType, string> = {
   fitness: "Fitness",
   coworking: "Coworking",
   summit: "Summit",
+  photo_booth: "360 Photo Booth",
   voice_vault: "Voice Vault",
 };
 
@@ -59,6 +60,7 @@ const businessUnitColors: Record<BusinessType, string> = {
   fitness: "bg-green-500/20 text-green-400 border-green-500/50",
   coworking: "bg-blue-500/20 text-blue-400 border-blue-500/50",
   summit: "bg-purple-500/20 text-purple-400 border-purple-500/50",
+  photo_booth: "bg-amber-500/20 text-amber-400 border-amber-500/50",
   voice_vault: "bg-accent/20 text-accent border-accent/50",
 };
 
