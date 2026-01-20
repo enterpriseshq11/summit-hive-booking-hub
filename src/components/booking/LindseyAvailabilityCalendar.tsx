@@ -357,7 +357,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const currentStepIndex = steps.findIndex(s => s.key === step);
 
   return (
-    <Card className="shadow-premium border-border overflow-hidden">
+    <Card ref={calendarStepRef} id="lindsey-booking-step-2" className="shadow-premium border-border overflow-hidden scroll-mt-24">
       {/* Gold accent line */}
       <div className="h-1 bg-accent" />
       
@@ -531,7 +531,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
 
             {/* Step 2: Calendar - Date Selection */}
             {step === "calendar" && (
-              <div ref={calendarStepRef} className="space-y-4">
+              <div className="space-y-4">
                 <p className="text-muted-foreground text-center">
                   Select your preferred date
                 </p>
