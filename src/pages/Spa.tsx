@@ -168,29 +168,6 @@ export default function Spa() {
         <SpaAnchorChips />
       </section>
 
-      {/* Next Available Widget - Premium Card Styling */}
-      <section className="py-10 container">
-        <Card className="max-w-4xl mx-auto shadow-premium border-border relative overflow-hidden">
-          {/* Gold accent line */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-accent" />
-          <CardHeader className="border-b border-border pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Clock className="h-5 w-5 text-accent" />
-              Next Available Appointments
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <NextAvailableWidget businessType="spa" title="Next Available Appointments" showPrice={false} limit={3} onJoinWaitlist={() => setShowWaitlistModal(true)} onRequestTour={() => openRequestModal()} onAskDayPass={() => {
-            const helpBtn = document.querySelector('[data-help-trigger]');
-            if (helpBtn instanceof HTMLElement) helpBtn.click();
-          }} emptyMessage="No openings in the next 14 days" emptySubMessage="Request anyway — we'll confirm options within 24 hours, or join the waitlist." />
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Gradient Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
-
       {/* Services Section */}
       <section id="spa-services" className="py-14 container">
         <div className="text-center mb-10">
