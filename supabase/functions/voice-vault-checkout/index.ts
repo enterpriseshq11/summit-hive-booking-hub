@@ -51,6 +51,14 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[VOICE-VAULT-CHECKOUT] ${step}${detailsStr}`);
 };
 
+const jsonResponse = (status: number, body: unknown) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
+const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -76,16 +84,36 @@ serve(async (req) => {
     logStep("Request parsed", { type, payment_plan, white_glove_option, customer_email });
 
     if (!type || !customer_name || !customer_email) {
-      throw new Error("Missing required fields: type, customer_name, customer_email");
+      return jsonResponse(400, {
+        error: "Missing required fields: type, customer_name, customer_email",
+      });
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    if (!isValidEmail(customer_email)) {
+      return jsonResponse(400, { error: `Invalid email address: ${customer_email}` });
+    }
+
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      // Misconfiguration: return explicit message for faster debugging.
+      return jsonResponse(500, { error: "Server misconfigured: STRIPE_SECRET_KEY is not set" });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) {
+      return jsonResponse(500, {
+        error: "Server misconfigured: backend keys are not set",
+      });
+    }
+
+    const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
     });
 
     const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      supabaseUrl,
+      serviceRoleKey
     );
 
     // Check if customer exists in Stripe
@@ -286,30 +314,32 @@ serve(async (req) => {
 
     // Update record with checkout session ID
     if (type === "hourly") {
-      await supabaseClient
+      const { error: updateError } = await supabaseClient
         .from("voice_vault_bookings")
         .update({ stripe_checkout_session_id: session.id })
         .eq("id", recordId);
+
+      if (updateError) {
+        logStep("Error updating booking with session id", { error: updateError, recordId });
+      }
     } else {
-      await supabaseClient
+      const { error: updateError } = await supabaseClient
         .from("voice_vault_packages")
         .update({ stripe_checkout_session_id: session.id })
         .eq("id", recordId);
+
+      if (updateError) {
+        logStep("Error updating package with session id", { error: updateError, recordId });
+      }
     }
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
-    return new Response(
-      JSON.stringify({ url: session.url, record_id: recordId }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
-    );
+    return jsonResponse(200, { url: session.url, record_id: recordId });
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-    );
+    return jsonResponse(500, { error: errorMessage });
   }
 });

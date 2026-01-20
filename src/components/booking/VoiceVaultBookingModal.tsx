@@ -26,6 +26,34 @@ import {
   type WhiteGlovePaymentOption 
 } from "@/config/voiceVaultPricing";
 
+function isValidEmail(email: string) {
+  // Keep it simple: Stripe will reject obviously invalid emails.
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+async function getFunctionErrorMessage(err: unknown) {
+  // Supabase functions errors often include a Response on `context`.
+  const anyErr = err as any;
+  const context = anyErr?.context;
+
+  try {
+    if (context instanceof Response) {
+      const text = await context.text();
+      try {
+        const json = JSON.parse(text);
+        if (json?.error) return String(json.error);
+      } catch {
+        // ignore JSON parse
+      }
+      return text || anyErr?.message;
+    }
+  } catch {
+    // ignore
+  }
+
+  return anyErr?.message || "Something went wrong";
+}
+
 interface VoiceVaultBookingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -86,11 +114,21 @@ export function VoiceVaultBookingModal({
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      if (!customerName.trim()) {
+        toast.error("Please enter your name.");
+        return;
+      }
+
+      if (!isValidEmail(customerEmail)) {
+        toast.error("Please enter a valid email address.");
+        return;
+      }
+
       const payload: Record<string, unknown> = {
         type: bookingType,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
+        customer_name: customerName.trim(),
+        customer_email: customerEmail.trim(),
+        customer_phone: customerPhone.trim() || null,
       };
 
       if (bookingType === "hourly") {
@@ -119,7 +157,7 @@ export function VoiceVaultBookingModal({
         throw new Error("No checkout URL returned");
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Something went wrong";
+      const message = await getFunctionErrorMessage(err);
       toast.error(message);
     } finally {
       setLoading(false);
@@ -132,7 +170,7 @@ export function VoiceVaultBookingModal({
   const canProceedFromDetails = bookingType === "hourly" 
     ? bookingDate && startTime && parseInt(durationHours) >= hourly.minimumHours
     : paymentPlan !== null;
-  const canProceedFromContact = customerName && customerEmail;
+  const canProceedFromContact = customerName.trim().length > 0 && isValidEmail(customerEmail);
 
   const getStepTitle = () => {
     switch (step) {
