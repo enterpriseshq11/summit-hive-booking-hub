@@ -85,7 +85,7 @@ export default function BookWithLindsey() {
               </p>
               
               {/* Hero CTAs */}
-              <div className="flex flex-col sm:flex-row flex-wrap items-center lg:items-start gap-3 mb-4 md:max-lg:translate-x-16">
+              <div className="flex flex-col sm:flex-row flex-wrap items-center lg:items-start gap-3 mb-4 md:max-lg:translate-x-20">
                 <Button 
                   size="lg" 
                   onClick={() => document.getElementById("booking-calendar")?.scrollIntoView({ behavior: "smooth" })}
