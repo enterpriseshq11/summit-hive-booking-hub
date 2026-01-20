@@ -146,7 +146,7 @@ export default function Account() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-foreground">My Bookings</h2>
               <Button asChild className="bg-accent text-primary hover:bg-accent/90">
-                <Link to="/book">New Booking</Link>
+                <Link to="/booking">New Booking</Link>
               </Button>
             </div>
 

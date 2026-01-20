@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export function CrossSellStrip() {
   const actions = [
-    { label: "Book Now", href: "/book", icon: Calendar },
+    { label: "Book Now", href: "/booking", icon: Calendar },
     { label: "Gift Cards", href: "/gift-cards", icon: Gift },
     { label: "Shop", href: "/shop", icon: ShoppingBag },
     { label: "Book Massage", href: "/spa", icon: Sparkles },
