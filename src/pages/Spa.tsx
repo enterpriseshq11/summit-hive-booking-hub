@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useProviders } from "@/hooks/useProviders";
 import { NextAvailableWidget, WaitlistCTA, SpaBookingForm, FloatingHelpDrawer, SpaRequestModal, SpaWaitlistModal, SpaAnchorChips, StickyMobileSpaCTA } from "@/components/booking";
+import { TherapistDropdown } from "@/components/booking/TherapistDropdown";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, FileText, Quote, User, Award, ShieldCheck, Wifi, Coffee, Zap, Droplets, Sun, Wind, ThermometerSun, Users, Activity, Target, DollarSign, MapPin, Video } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
@@ -118,11 +119,7 @@ export default function Spa() {
               
               {/* Hero CTAs */}
               <div className="flex flex-col sm:flex-row items-center md:ml-[7.25rem] lg:ml-0 lg:items-start gap-4 mb-6">
-                <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_hero_cta_click">
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Book With Lindsey
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
+                <TherapistDropdown />
                 <Button size="lg" variant="outline" onClick={() => setShowWaitlistModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold" data-event="spa_hero_secondary_cta_click">
                   <Clock className="h-5 w-5 mr-2" />
                   Join Waitlist
