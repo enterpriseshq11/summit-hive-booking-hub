@@ -15,6 +15,7 @@ import { SITE_CONFIG } from "@/config/siteConfig";
 import summitLogo from "@/assets/summit-logo.png";
 import e3Logo from "@/assets/e3-logo.png";
 import PhotoBooth360Section from "@/components/summit/PhotoBooth360Section";
+import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
 
 export default function Summit() {
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ export default function Summit() {
   const [prefillQuestion, setPrefillQuestion] = useState<string | undefined>();
   const [expandedHighlight, setExpandedHighlight] = useState<string | null>(null);
   const [contactInput, setContactInput] = useState("");
+  const [preferredDate, setPreferredDate] = useState("");
+  const [preferredStartTime, setPreferredStartTime] = useState("18:00");
   const handleSlotSelect = (slot: any) => {
     navigate(`/booking?slot=${slot.id}&business=summit`);
   };
@@ -259,6 +262,91 @@ export default function Summit() {
         {/* Section transition */}
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
+
+      {/* Under-hero booking module (request-only per spec) */}
+      <UnderHeroBookingCard
+        title="Request Your Date"
+        icon={<CalendarDays className="h-5 w-5 text-accent" />}
+        description="Choose an event type and preferred time. Victoria will confirm options within 24 hours."
+      >
+        <div className="grid gap-6">
+          <div className="grid sm:grid-cols-3 gap-3">
+            {eventTypes.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setSelectedEventType(t.id)}
+                className={cn(
+                  "text-left rounded-lg border p-4 transition-colors",
+                  selectedEventType === t.id
+                    ? "border-accent bg-accent/5"
+                    : "border-border hover:border-accent/50"
+                )}
+              >
+                <div className="flex items-center gap-2 font-semibold">
+                  <t.icon className="h-4 w-4 text-accent" />
+                  {t.name}
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">{t.tagline}</p>
+              </button>
+            ))}
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="summit-preferred-date">Preferred Date</Label>
+              <Input
+                id="summit-preferred-date"
+                type="date"
+                value={preferredDate}
+                onChange={(e) => setPreferredDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="summit-preferred-time">Preferred Start Time</Label>
+              <Input
+                id="summit-preferred-time"
+                type="time"
+                value={preferredStartTime}
+                onChange={(e) => setPreferredStartTime(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              className="bg-accent hover:bg-accent/90 text-primary font-semibold"
+              onClick={() => {
+                const extras = [
+                  selectedEventType ? `Event type: ${selectedEventType}` : null,
+                  preferredDate ? `Preferred date: ${preferredDate}` : null,
+                  preferredStartTime ? `Preferred start: ${preferredStartTime}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" | ");
+
+                if (extras) setPrefillQuestion(extras);
+                setShowRequestModal(true);
+              }}
+            >
+              Book with Victoria
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowWaitlistModal(true)}
+              className="border-accent/30 text-accent hover:bg-accent/10"
+            >
+              Notify Me
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            This is a request. You’ll review the proposal before any payment is required.
+          </p>
+        </div>
+      </UnderHeroBookingCard>
 
       {/* Anchor Chips - Positioned after hero */}
       <section className="py-6 container">

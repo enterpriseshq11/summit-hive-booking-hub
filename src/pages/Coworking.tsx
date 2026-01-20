@@ -31,6 +31,7 @@ import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import { SEOHead, jsonLdSchemas } from "@/components/seo";
 import theHiveLogo from "@/assets/the-hive-logo-transparent.png";
+import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
 
 export default function Coworking() {
   const navigate = useNavigate();
@@ -263,68 +264,66 @@ export default function Coworking() {
         }} aria-hidden="true" />
       </section>
 
-
-      {/* Availability Section - Below Hero */}
-      <section className="py-10 container">
-        <Card className="max-w-4xl mx-auto shadow-premium border-border relative overflow-hidden">
-          {/* Gold accent line */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-accent" />
-          <CardHeader className="border-b border-border pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Zap className="h-5 w-5 text-accent" />
-              Availability
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            {businessLoading ? (
-              <div className="space-y-3">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            ) : business ? (
-              <>
-                <NextAvailableWidget 
-                  businessType="coworking"
-                  title="Available Spaces"
-                  onSlotSelect={() => openRequestModal()}
-                  emptyMessage="No instant openings shown — request access anyway and we'll confirm options within 24 hours."
-                  emptySubMessage="Or join the waitlist and we'll notify you the moment space opens up."
-                  onJoinWaitlist={() => setShowWaitlistModal(true)}
-                  onRequestTour={() => setShowTourModal(true)}
-                  onAskDayPass={() => openRequestModal("Day Pass")}
-                />
-                <div className="mt-6 pt-6 border-t border-border flex gap-3">
-                  <Button 
-                    onClick={() => openRequestModal()}
-                    className="flex-1 bg-accent hover:bg-accent/90 text-primary"
-                  >
-                    Request Access
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => setShowWaitlistModal(true)}
-                    className="flex-1"
-                  >
-                    Join Waitlist
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-4">
-                <div className="flex items-center justify-center gap-2 text-muted-foreground mb-3">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>Availability temporarily unavailable</span>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => window.location.reload()} className="gap-2">
-                  <RefreshCw className="h-4 w-4" />
-                  Retry
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </section>
+      {/* Under-hero booking module (placement requirement) */}
+      <UnderHeroBookingCard
+        title="Book Workspace Time"
+        icon={<Zap className="h-5 w-5 text-accent" />}
+        description={
+          "Pick an option, then choose the next available time or request access."
+        }
+      >
+        {businessLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : business ? (
+          <>
+            <NextAvailableWidget
+              businessType="coworking"
+              title="Available Spaces"
+              onSlotSelect={() => openRequestModal()}
+              emptyMessage="No instant openings shown — request access anyway and we'll confirm options within 24 hours."
+              emptySubMessage="Or join the waitlist and we'll notify you the moment space opens up."
+              onJoinWaitlist={() => setShowWaitlistModal(true)}
+              onRequestTour={() => setShowTourModal(true)}
+              onAskDayPass={() => openRequestModal("Day Pass")}
+            />
+            <div className="mt-6 pt-6 border-t border-border flex gap-3">
+              <Button
+                onClick={() => openRequestModal("Day Pass")}
+                className="flex-1 bg-accent hover:bg-accent/90 text-primary"
+              >
+                Book a Day Pass
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowTourModal(true)}
+                className="flex-1"
+              >
+                Schedule a Tour
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-4">
+            <div className="flex items-center justify-center gap-2 text-muted-foreground mb-3">
+              <AlertCircle className="h-4 w-4" />
+              <span>Availability temporarily unavailable</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.reload()}
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Retry
+            </Button>
+          </div>
+        )}
+      </UnderHeroBookingCard>
 
       {/* Gradient Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />

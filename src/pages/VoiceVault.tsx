@@ -16,6 +16,7 @@ import voiceVaultLogo from "@/assets/voice-vault-logo.png";
 import { VoiceVaultBookingModal } from "@/components/booking/VoiceVaultBookingModal";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
+import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
 
 // Gallery is currently in "Coming Soon" state - real images to be added
 const galleryComingSoon = true;
@@ -305,6 +306,59 @@ export default function VoiceVault() {
         {/* Gradient divider */}
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
+
+      {/* Under-hero booking module (inline entry; full wizard is in the booking UI) */}
+      <UnderHeroBookingCard
+        title="Reserve Studio Time"
+        icon={<Calendar className="h-5 w-5 text-accent" />}
+        description="Select a booking type and complete checkout to reserve."
+      >
+        <div className="grid gap-4">
+          <div className="grid sm:grid-cols-3 gap-3">
+            <button
+              type="button"
+              onClick={() => openBooking("hourly")}
+              className="text-left rounded-lg border border-border hover:border-accent/50 transition-colors p-4"
+            >
+              <p className="font-semibold text-foreground">Hourly Rental</p>
+              <p className="mt-1 text-sm text-muted-foreground">Pick a date/time and reserve.</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => openBooking("core_series")}
+              className="text-left rounded-lg border border-border hover:border-accent/50 transition-colors p-4"
+            >
+              <p className="font-semibold text-foreground">Core Series</p>
+              <p className="mt-1 text-sm text-muted-foreground">Recurring package option.</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => openBooking("white_glove")}
+              className="text-left rounded-lg border border-border hover:border-accent/50 transition-colors p-4"
+            >
+              <p className="font-semibold text-foreground">White Glove</p>
+              <p className="mt-1 text-sm text-muted-foreground">Full production support.</p>
+            </button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={() => openBooking("hourly")}
+              className="bg-accent hover:bg-accent/90 text-primary font-semibold"
+            >
+              Start Booking
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={scrollToPackages}
+              className="border-accent/30 text-accent hover:bg-accent/10"
+            >
+              See Packages
+            </Button>
+          </div>
+        </div>
+      </UnderHeroBookingCard>
 
       {/* Gradient Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
