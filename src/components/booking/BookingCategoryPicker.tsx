@@ -29,15 +29,15 @@ export function BookingCategoryPicker() {
           </button>
         ))}
       </div>
-      <div className="flex justify-center gap-2 sm:hidden">
+      <div className="flex justify-center gap-1.5 sm:hidden">
         {/* Row 2: Last 3 pills - wider */}
         {categories.slice(2).map((cat) => (
           <button
             key={cat.type}
             onClick={() => navigate(cat.route)}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl font-semibold text-xs transition-all duration-300 bg-[hsl(45,70%,50%)]/80 text-black border-2 border-transparent hover:bg-[hsl(45,70%,45%)] hover:border-black/20 min-w-[105px] flex-1 max-w-[120px]"
+            className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg font-semibold text-[10px] transition-all duration-300 bg-[hsl(45,70%,50%)]/80 text-black border-2 border-transparent hover:bg-[hsl(45,70%,45%)] hover:border-black/20 min-w-[95px] flex-1 max-w-[110px]"
           >
-            <cat.icon className="h-3.5 w-3.5 flex-shrink-0" />
+            <cat.icon className="h-3 w-3 flex-shrink-0" />
             <span className="truncate">{cat.name}</span>
           </button>
         ))}
