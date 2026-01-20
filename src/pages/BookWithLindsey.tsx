@@ -280,24 +280,6 @@ export default function BookWithLindsey() {
                 </Button>
               </div>
               
-              {/* Book With Lindsey CTA */}
-              <div className="flex justify-center lg:justify-start lg:ml-4 mb-6">
-                <Button
-                  size="lg"
-                  onClick={() => {
-                    setStep("booking");
-                    setTimeout(() => {
-                      bookingFormRef.current?.scrollIntoView({ behavior: "smooth" });
-                      bookingFormRef.current?.focus();
-                    }, 100);
-                  }}
-                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold"
-                >
-                  <CalendarIcon className="h-5 w-5 mr-2" />
-                  Book With Lindsey
-                </Button>
-              </div>
-              
               {/* Trust Badge */}
               <div className="flex items-center justify-center lg:justify-start gap-2 text-primary-foreground/70">
                 <CheckCircle className="h-5 w-5 text-accent" aria-hidden="true" />
