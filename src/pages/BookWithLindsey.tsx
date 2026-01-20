@@ -14,10 +14,11 @@ import { toast } from "sonner";
 import { format, addDays } from "date-fns";
 import { 
   Sparkles, Clock, Heart, ArrowRight, ArrowLeft, Star, CheckCircle, Calendar as CalendarIcon, 
-  User, MapPin, Phone, Mail, Gift, Flame, Users, ChevronRight, AlertCircle, Info
+  User, MapPin, Phone, Mail, Gift, Flame, Users, ChevronRight, AlertCircle, Info, Eye
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import restorationLoungeLogo from "@/assets/restoration-lounge-logo.jpg";
+import { LindseyAvailabilityCalendar } from "@/components/booking/LindseyAvailabilityCalendar";
 
 // Lindsey's pricing menu data
 const SERVICES = {
@@ -264,19 +265,19 @@ export default function BookWithLindsey() {
               <div className="flex flex-col sm:flex-row flex-wrap items-center lg:items-start gap-3 mb-4">
                 <Button 
                   size="lg" 
+                  onClick={() => document.getElementById("availability-calendar")?.scrollIntoView({ behavior: "smooth" })}
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold"
+                >
+                  <Eye className="h-5 w-5 mr-2" />
+                  See Availability
+                </Button>
+                <Button 
+                  size="lg" 
                   onClick={() => document.getElementById("pricing-menu")?.scrollIntoView({ behavior: "smooth" })}
                   className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold"
                 >
                   <Sparkles className="h-5 w-5 mr-2" />
                   View Services & Pricing
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => setShowPricingModal(true)}
-                  className="border-accent text-accent hover:bg-accent/10"
-                >
-                  Quick Price Check
                 </Button>
               </div>
               
@@ -306,6 +307,29 @@ export default function BookWithLindsey() {
           aria-hidden="true" 
         />
       </section>
+
+      {/* Availability Calendar Section */}
+      <section id="availability-calendar" className="py-12 container">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">See Availability</h2>
+          <p className="text-muted-foreground text-lg">Check open times before booking — no client info shown</p>
+        </div>
+        
+        <div className="max-w-4xl mx-auto">
+          <LindseyAvailabilityCalendar 
+            onSelectDate={(date) => {
+              setSelectedDate(date);
+              setStep("booking");
+              setTimeout(() => {
+                bookingFormRef.current?.scrollIntoView({ behavior: "smooth" });
+              }, 100);
+            }}
+          />
+        </div>
+      </section>
+
+      {/* Gradient Divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
 
       {/* Pricing Menu Section */}
       <section id="pricing-menu" className="py-12 container">
