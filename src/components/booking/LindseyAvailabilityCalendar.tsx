@@ -455,14 +455,29 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                   Select a service to begin booking
                 </p>
                 
-                {/* Featured Services */}
+                {/* All Services - Unified List */}
                 <div className="grid gap-3">
-                  {SERVICES.filter(s => s.featured).map((service) => (
-                    <Card key={service.id} className="border-accent/50 hover:border-accent transition-colors">
+                  {SERVICES.map((service) => (
+                    <Card 
+                      key={service.id} 
+                      className={cn(
+                        "transition-colors cursor-pointer group",
+                        service.featured ? "border-accent/50 hover:border-accent" : "hover:border-accent/50"
+                      )}
+                      onClick={() => handleServiceSelect(service.id, service.options[0].duration)}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                            <service.icon className="h-5 w-5 text-accent" />
+                          <div className={cn(
+                            "h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                            service.featured ? "bg-accent/10" : "bg-muted",
+                            "group-hover:bg-accent/20"
+                          )}>
+                            <service.icon className={cn(
+                              "h-5 w-5 transition-colors",
+                              service.featured ? "text-accent" : "text-muted-foreground",
+                              "group-hover:text-accent"
+                            )} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
@@ -470,9 +485,12 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                               {service.isPromo && (
                                 <Badge variant="outline" className="border-green-500 text-green-600 text-xs">Promo</Badge>
                               )}
+                              {service.isFree && (
+                                <Badge variant="outline" className="border-green-500 text-green-600 text-xs">Free</Badge>
+                              )}
                             </div>
                             <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
                               {service.options.map((opt) => (
                                 <Button
                                   key={opt.duration}
@@ -484,8 +502,10 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                                   <span>{opt.label}</span>
                                   {'promoPrice' in opt && opt.promoPrice ? (
                                     <span className="ml-2 text-accent font-semibold">${opt.promoPrice}</span>
-                                  ) : opt.price !== null ? (
+                                  ) : opt.price !== null && opt.price > 0 ? (
                                     <span className="ml-2 text-accent font-semibold">${opt.price}</span>
+                                  ) : opt.price === 0 ? (
+                                    <span className="ml-2 text-accent font-semibold">Free</span>
                                   ) : (
                                     <span className="ml-2 text-muted-foreground text-xs">{opt.note}</span>
                                   )}
@@ -497,42 +517,6 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                       </CardContent>
                     </Card>
                   ))}
-                </div>
-
-                {/* Other Services */}
-                <div className="pt-4">
-                  <h4 className="text-sm font-medium text-muted-foreground mb-3">More Services</h4>
-                  <div className="grid gap-2">
-                    {SERVICES.filter(s => !s.featured).map((service) => (
-                      <Card key={service.id} className="hover:border-accent/50 transition-colors">
-                        <CardContent className="p-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <service.icon className="h-4 w-4 text-muted-foreground shrink-0" />
-                              <span className="font-medium text-sm truncate">{service.name}</span>
-                              {service.isFree && (
-                                <Badge variant="outline" className="border-green-500 text-green-600 text-xs shrink-0">Free</Badge>
-                              )}
-                            </div>
-                            <div className="flex gap-2 shrink-0">
-                              {service.options.map((opt) => (
-                                <Button
-                                  key={opt.duration}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-xs hover:text-accent"
-                                  onClick={() => handleServiceSelect(service.id, opt.duration)}
-                                >
-                                  {opt.label} {opt.price !== null && opt.price > 0 && `$${opt.price}`}
-                                  {opt.price === 0 && "Free"}
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
                 </div>
               </div>
             )}
