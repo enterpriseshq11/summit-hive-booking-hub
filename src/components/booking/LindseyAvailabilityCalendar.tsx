@@ -203,9 +203,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       setSelectedDate(date);
       setStep("time");
       
-      // Scroll to time step after state update
+      // Scroll to time step after state update - center to keep booking module visible
       setTimeout(() => {
-        timeStepRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        timeStepRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 50);
     }
   };
