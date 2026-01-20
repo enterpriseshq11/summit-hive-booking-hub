@@ -211,6 +211,7 @@ export type Database = {
           end_time: string
           id: string
           is_active: boolean | null
+          provider_id: string | null
           resource_id: string | null
           start_time: string
         }
@@ -221,6 +222,7 @@ export type Database = {
           end_time: string
           id?: string
           is_active?: boolean | null
+          provider_id?: string | null
           resource_id?: string | null
           start_time: string
         }
@@ -231,6 +233,7 @@ export type Database = {
           end_time?: string
           id?: string
           is_active?: boolean | null
+          provider_id?: string | null
           resource_id?: string | null
           start_time?: string
         }
@@ -3117,6 +3120,62 @@ export type Database = {
           },
         ]
       }
+      provider_settings: {
+        Row: {
+          auto_confirm_bookings: boolean
+          buffer_after_mins: number
+          buffer_before_mins: number
+          business_id: string | null
+          created_at: string
+          id: string
+          max_advance_days: number
+          min_advance_hours: number
+          notification_email: string | null
+          notification_sms: string | null
+          provider_id: string | null
+          slot_increment_mins: number
+          updated_at: string
+        }
+        Insert: {
+          auto_confirm_bookings?: boolean
+          buffer_after_mins?: number
+          buffer_before_mins?: number
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          max_advance_days?: number
+          min_advance_hours?: number
+          notification_email?: string | null
+          notification_sms?: string | null
+          provider_id?: string | null
+          slot_increment_mins?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_confirm_bookings?: boolean
+          buffer_after_mins?: number
+          buffer_before_mins?: number
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          max_advance_days?: number
+          min_advance_hours?: number
+          notification_email?: string | null
+          notification_sms?: string | null
+          provider_id?: string | null
+          slot_increment_mins?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_settings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       providers: {
         Row: {
           accepts_bookings: boolean | null
@@ -3172,6 +3231,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "providers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_blocks: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          created_by: string | null
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          provider_id: string | null
+          reason: string | null
+          start_time: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          provider_id?: string | null
+          reason?: string | null
+          start_time: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          provider_id?: string | null
+          reason?: string | null
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_blocks_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
