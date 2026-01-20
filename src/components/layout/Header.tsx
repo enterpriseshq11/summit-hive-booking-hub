@@ -47,6 +47,8 @@ const experienceItems = [
   { label: "Spa", href: "/spa", icon: Sparkles, description: "Massage & wellness" },
   { label: "Fitness", href: "/fitness", icon: Dumbbell, description: "Gym & training" },
   { label: "360 Photo Booth", href: "/360-photo-booth", icon: Camera, description: "Event photo experiences" },
+  { label: "Voice Vault", href: "/voice-vault", icon: Mic, description: "Private recording studio" },
+  { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, description: "Daily rewards & prizes" },
 ];
 
 // Shop dropdown items
@@ -221,24 +223,6 @@ export function Header() {
                     <Link to="/account" className="flex items-center gap-2">
                       <LayoutDashboard className="h-4 w-4" />
                       Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/account" className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Bookings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/dopamine-drop" className="flex items-center gap-2">
-                      <CircleDot className="h-4 w-4" />
-                      Spin & Win
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/voice-vault" className="flex items-center gap-2">
-                      <Mic className="h-4 w-4" />
-                      Voice Vault
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -444,30 +428,6 @@ export function Header() {
                     >
                       <LayoutDashboard className="h-4 w-4 text-accent" />
                       Dashboard
-                    </Link>
-                    <Link
-                      to="/account"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
-                    >
-                      <Calendar className="h-4 w-4 text-accent" />
-                      Bookings
-                    </Link>
-                    <Link
-                      to="/dopamine-drop"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
-                    >
-                      <CircleDot className="h-4 w-4 text-accent" />
-                      Spin & Win
-                    </Link>
-                    <Link
-                      to="/voice-vault"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
-                    >
-                      <Mic className="h-4 w-4 text-accent" />
-                      Voice Vault
                     </Link>
                     <Link
                       to="/account"
