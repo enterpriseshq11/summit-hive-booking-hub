@@ -208,32 +208,60 @@ export default function BookWithLindsey() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative py-12 md:py-16 bg-primary overflow-hidden">
+      {/* Hero Section - Matching Spa Layout */}
+      <section className="relative py-16 md:py-24 overflow-hidden bg-primary min-h-[70vh] flex items-center">
+        {/* Background - dark with subtle gold radial */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary via-primary to-primary/95" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.08)_0%,transparent_60%)]" />
         
+        {/* Honeycomb Watermark Pattern - Left */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
+          <svg className="absolute -left-20 top-1/4 w-[500px] h-[500px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="honeycomb-left-lindsey" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
+              <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+              <polygon points="10,17.32 20,22.32 20,32.32 10,37.32 0,32.32 0,22.32" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#honeycomb-left-lindsey)" />
+          </svg>
+        </div>
+        
+        {/* Honeycomb Watermark Pattern - Right */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15]" aria-hidden="true">
+          <svg className="absolute -right-20 top-1/3 w-[600px] h-[600px]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="honeycomb-right-lindsey" x="0" y="0" width="20" height="17.32" patternUnits="userSpaceOnUse">
+              <polygon points="10,0 20,5 20,15 10,20 0,15 0,5" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+              <polygon points="10,17.32 20,22.32 20,32.32 10,37.32 0,32.32 0,22.32" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.5"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#honeycomb-right-lindsey)" />
+          </svg>
+        </div>
+        
+        {/* Honeycomb Watermark Pattern - Center Background */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.10]" aria-hidden="true">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="honeycomb-center-lindsey" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
+              <polygon points="6,0 12,3 12,9 6,12 0,9 0,3" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.3"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#honeycomb-center-lindsey)" />
+          </svg>
+        </div>
+        
         <div className="container relative z-10">
-          <div className="flex flex-col items-center text-center">
-            {/* Logo */}
-            <img 
-              src="/lovable-uploads/5509800c-167c-43ec-a79a-bef75a2b447b.png" 
-              alt="The Hive Restoration Lounge" 
-              className="h-24 md:h-32 object-contain mb-6"
-            />
-            
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-3">
-              Book With Lindsey
-            </h1>
-            <p className="text-lg md:text-xl text-accent font-medium mb-2">
-              Licensed Massage Therapist & Recovery Specialist
-            </p>
-            <p className="text-primary-foreground/70 max-w-xl mb-6">
-              Results-driven recovery treatments. Every session is intentional, customized, and focused on real outcomes.
-            </p>
-            
-            {/* Quick CTAs */}
-            <div className="flex flex-col items-center gap-3">
-              <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-col-reverse lg:flex-row items-center gap-10 lg:gap-16">
+            {/* Hero Copy - Left Side */}
+            <div className="flex-1 text-center lg:text-left">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground">
+                Book With Lindsey
+              </h1>
+              <p className="text-xl md:text-2xl text-accent font-medium mb-4">
+                Licensed Massage Therapist & Recovery Specialist
+              </p>
+              <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl">
+                Results-driven recovery treatments. Every session is intentional, customized, and focused on real outcomes.
+              </p>
+              
+              {/* Hero CTAs - Left Aligned */}
+              <div className="flex flex-col sm:flex-row flex-wrap items-center lg:items-start gap-3 mb-4">
                 <Button 
                   size="lg" 
                   onClick={() => document.getElementById("pricing-menu")?.scrollIntoView({ behavior: "smooth" })}
@@ -251,29 +279,50 @@ export default function BookWithLindsey() {
                   Quick Price Check
                 </Button>
               </div>
-              <Button
-                size="lg"
-                onClick={() => {
-                  setStep("booking");
-                  setTimeout(() => {
-                    bookingFormRef.current?.scrollIntoView({ behavior: "smooth" });
-                    bookingFormRef.current?.focus();
-                  }, 100);
-                }}
-                className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold"
-              >
-                <CalendarIcon className="h-5 w-5 mr-2" />
-                Book With Lindsey
-              </Button>
+              
+              {/* Book With Lindsey CTA */}
+              <div className="flex justify-center lg:justify-start mb-6">
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    setStep("booking");
+                    setTimeout(() => {
+                      bookingFormRef.current?.scrollIntoView({ behavior: "smooth" });
+                      bookingFormRef.current?.focus();
+                    }, 100);
+                  }}
+                  className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold"
+                >
+                  <CalendarIcon className="h-5 w-5 mr-2" />
+                  Book With Lindsey
+                </Button>
+              </div>
+              
+              {/* Trust Badge */}
+              <div className="flex items-center justify-center lg:justify-start gap-2 text-primary-foreground/70">
+                <CheckCircle className="h-5 w-5 text-accent" aria-hidden="true" />
+                <span className="text-sm">Available 7 days a week • 9 AM – 9 PM</span>
+              </div>
             </div>
             
-            {/* Trust badge */}
-            <div className="flex items-center gap-2 mt-6 text-primary-foreground/70">
-              <CheckCircle className="h-5 w-5 text-accent" />
-              <span className="text-sm">Available 7 days a week • 9 AM – 9 PM</span>
+            {/* Logo - Right Side */}
+            <div className="flex-shrink-0 w-full lg:w-1/2 flex justify-center lg:justify-end">
+              <img 
+                src="/lovable-uploads/5509800c-167c-43ec-a79a-bef75a2b447b.png" 
+                alt="The Hive Restoration Lounge Logo" 
+                className="w-full max-w-md lg:max-w-lg object-contain drop-shadow-2xl"
+                style={{ maxHeight: "clamp(280px, 40vw, 420px)" }}
+              />
             </div>
           </div>
         </div>
+        
+        {/* Angled divider */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-16 bg-background" 
+          style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} 
+          aria-hidden="true" 
+        />
       </section>
 
       {/* Pricing Menu Section */}
