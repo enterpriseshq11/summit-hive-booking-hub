@@ -203,9 +203,10 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       setSelectedDate(date);
       setStep("time");
       
-      // Scroll to time step after state update - center to keep booking module visible
+      // Scroll to booking card (not time step) to keep "Book Your Session" visible
+      // The card has scroll-mt-24 to clear the sticky header
       setTimeout(() => {
-        timeStepRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        calendarStepRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 50);
     }
   };
