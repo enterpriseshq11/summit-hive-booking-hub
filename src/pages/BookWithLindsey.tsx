@@ -281,7 +281,7 @@ export default function BookWithLindsey() {
               </div>
               
               {/* Book With Lindsey CTA */}
-              <div className="flex justify-center lg:justify-start mb-6">
+              <div className="flex justify-center lg:justify-start lg:ml-4 mb-6">
                 <Button
                   size="lg"
                   onClick={() => {
