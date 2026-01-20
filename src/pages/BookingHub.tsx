@@ -298,10 +298,7 @@ export default function BookingHub() {
 
           {/* BOOKNOW-01: Quick Booking Category Picker */}
           <div className="max-w-4xl mx-auto mb-8">
-            <BookingCategoryPicker
-              selectedCategory={businessFilter}
-              onCategoryChange={handleCategorySelect}
-            />
+            <BookingCategoryPicker />
           </div>
 
           {/* Section Anchor Chips */}
