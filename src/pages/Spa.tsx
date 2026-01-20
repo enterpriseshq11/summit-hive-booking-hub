@@ -271,10 +271,7 @@ export default function Spa() {
         
         {/* Single section CTA */}
         <div className="text-center mt-10">
-          <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_services_cta_click">
-            Book With Lindsey
-            <ArrowRight className="h-5 w-5 ml-2" />
-          </Button>
+          <TherapistDropdown />
           <p className="text-sm text-muted-foreground mt-3">
             You'll review everything before payment. No surprise fees.
           </p>
@@ -695,10 +692,9 @@ export default function Spa() {
           <p className="text-primary-foreground/70 mb-6 max-w-2xl mx-auto text-lg">
             Expert care and premium treatments — book your appointment today.
           </p>
-          <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_final_cta_click">
-            Book With Lindsey
-            <ArrowRight className="h-5 w-5 ml-2" />
-          </Button>
+          <div className="flex justify-center">
+            <TherapistDropdown />
+          </div>
           <p className="text-sm text-primary-foreground/60 mt-4 max-w-md mx-auto">
             No obligation • Response within 24 hours • You'll review everything before payment
           </p>
