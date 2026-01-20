@@ -131,8 +131,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
   
-  // Ref for scrolling to calendar step
+  // Refs for scrolling to steps
   const calendarStepRef = useRef<HTMLDivElement>(null);
+  const timeStepRef = useRef<HTMLDivElement>(null);
   
   // Use the real availability hook
   const {
@@ -201,6 +202,11 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
     if (date) {
       setSelectedDate(date);
       setStep("time");
+      
+      // Scroll to time step after state update
+      setTimeout(() => {
+        timeStepRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
     }
   };
 
@@ -631,7 +637,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
 
             {/* Step 3: Time Selection */}
             {step === "time" && selectedDate && (
-              <div className="space-y-4">
+              <div ref={timeStepRef} id="lindsey-booking-step-3" className="space-y-4 scroll-mt-24">
                 <div className="text-center mb-4">
                   <h4 className="font-semibold text-lg">
                     {format(selectedDate, "EEEE, MMMM d, yyyy")}
