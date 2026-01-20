@@ -230,11 +230,11 @@ export default function Fitness() {
             </div>
 
             {/* Right Column - Logo (positioned without adding extra hero height) */}
-            <div className="absolute inset-y-0 right-0 hidden lg:flex w-1/2 items-start justify-center animate-fade-in pt-4 xl:pt-6 lg:translate-y-8" style={{ animationDelay: '0.3s' }}>
+            <div className="absolute inset-y-0 right-0 hidden lg:flex w-1/2 items-start justify-center animate-fade-in pt-4 xl:pt-6 lg:translate-y-16" style={{ animationDelay: '0.3s' }}>
               <img 
                 src={azTotalFitnessLogo} 
                 alt="A-Z Total Fitness Enterprise logo"
-                className="w-[420px] xl:w-[480px] 2xl:w-[540px] h-auto object-contain"
+                className="w-[480px] xl:w-[540px] 2xl:w-[600px] h-auto object-contain"
                 style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
               />
             </div>
