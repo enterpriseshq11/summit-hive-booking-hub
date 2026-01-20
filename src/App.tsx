@@ -57,6 +57,7 @@ import AdminOfficeListings from "./pages/admin/OfficeListings";
 import AdminOfficePhotos from "./pages/admin/OfficePhotos";
 import AdminOfficePromotions from "./pages/admin/OfficePromotions";
 import AdminOfficeInquiries from "./pages/admin/OfficeInquiries";
+import AdminProviderSchedule from "./pages/admin/ProviderSchedule";
 
 // Command Center Pages (now unified under /admin/*)
 import CommandCenterLeads from "./pages/command-center/Leads";
@@ -153,6 +154,9 @@ function AppInner() {
           
           {/* Voice Vault */}
           <Route path="/admin/voice-vault" element={<AdminVoiceVault />} />
+          
+          {/* Spa / Provider Schedule */}
+          <Route path="/admin/my-schedule" element={<AdminProviderSchedule />} />
           
           {/* Coworking (The Hive) */}
           <Route path="/admin/office-listings" element={<AdminOfficeListings />} />

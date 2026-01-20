@@ -82,6 +82,12 @@ const navSections = [
     ],
   },
   {
+    label: "Spa (Restoration Lounge)",
+    items: [
+      { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
+    ],
+  },
+  {
     label: "Voice Vault",
     items: [
       { title: "Voice Vault", href: "/admin/voice-vault", icon: Mic },
