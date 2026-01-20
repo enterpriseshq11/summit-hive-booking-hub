@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -139,6 +139,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
   
+  // Ref for scrolling to calendar step
+  const calendarStepRef = useRef<HTMLDivElement>(null);
+  
   const availability = useMemo(() => generateMockAvailability(), []);
   
   // Generate mock slots for selected day
@@ -190,6 +193,11 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       setSelectedRoom("22222222-2222-2222-2222-222222222222");
     }
     setStep("calendar");
+    
+    // Scroll to calendar step after state update
+    setTimeout(() => {
+      calendarStepRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -523,7 +531,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
 
             {/* Step 2: Calendar - Date Selection */}
             {step === "calendar" && (
-              <div className="space-y-4">
+              <div ref={calendarStepRef} className="space-y-4">
                 <p className="text-muted-foreground text-center">
                   Select your preferred date
                 </p>
