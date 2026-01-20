@@ -17,7 +17,7 @@ export const THERAPISTS: Therapist[] = [
     id: "lindsey",
     name: "Lindsey",
     subtitle: "Licensed Massage Therapist",
-    route: "/book-with-lindsey",
+    route: "/book-with-lindsey#availability-calendar",
     available: true,
   },
   // Add more therapists here as they join:
@@ -25,7 +25,7 @@ export const THERAPISTS: Therapist[] = [
   //   id: "new-therapist",
   //   name: "New Therapist Name",
   //   subtitle: "Massage Therapist",
-  //   route: "/book-with-new-therapist",
+  //   route: "/book-with-new-therapist#availability-calendar",
   //   available: true,
   // },
 ];
@@ -73,6 +73,17 @@ export function TherapistDropdown({ className }: TherapistDropdownProps) {
   const handleSelect = (therapist: Therapist) => {
     setIsOpen(false);
     navigate(therapist.route);
+    
+    // After navigation, scroll to the anchor if present
+    setTimeout(() => {
+      const hash = therapist.route.split('#')[1];
+      if (hash) {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }, 100);
   };
 
   return (
