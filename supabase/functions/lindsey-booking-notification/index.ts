@@ -12,10 +12,11 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[LINDSEY-NOTIFICATION] ${step}${detailsStr}`);
 };
 
-// Provider settings - Lindsey
-const LINDSEY_EMAIL = "lindsey@a-zenterpriseshq.com";
+// Provider settings - Lindsey (using verified domain: azenterpriseshq.com)
+const LINDSEY_EMAIL = "lindsey@azenterpriseshq.com";
 const LINDSEY_PHONE = "+15676441090";
-const FROM_EMAIL = "A-Z Enterprises <no-reply@a-zenterpriseshq.com>";
+const FROM_EMAIL = "A-Z Enterprises <no-reply@azenterpriseshq.com>";
+const REPLY_TO_EMAIL = "info@azenterpriseshq.com";
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
 
 const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;
@@ -395,12 +396,14 @@ Ref: ${stripeRef}`;
       const [lindseyResult, customerResult] = await Promise.all([
         resend.emails.send({
           from: FROM_EMAIL,
+          reply_to: REPLY_TO_EMAIL,
           to: [LINDSEY_EMAIL],
           subject: staffSubject,
           html: lindseyEmailHtml,
         }),
         resend.emails.send({
           from: FROM_EMAIL,
+          reply_to: REPLY_TO_EMAIL,
           to: [booking.guest_email],
           subject: customerSubject,
           html: customerEmailHtml,
@@ -628,12 +631,14 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
       const [lindseyResult, customerResult] = await Promise.all([
         resend.emails.send({
           from: FROM_EMAIL,
+          reply_to: REPLY_TO_EMAIL,
           to: [LINDSEY_EMAIL],
           subject: `📋 New Free Consultation – ${serviceName} – ${dateStr} at ${startTimeStr}`,
           html: lindseyEmailHtml,
         }),
         resend.emails.send({
           from: FROM_EMAIL,
+          reply_to: REPLY_TO_EMAIL,
           to: [booking.guest_email],
           subject: `Your Consultation is Confirmed – ${dateStr}`,
           html: customerEmailHtml,

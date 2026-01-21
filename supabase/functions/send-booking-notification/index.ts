@@ -13,18 +13,20 @@ const logStep = (step: string, details?: unknown) => {
 };
 
 // ============= CONFIGURATION =============
-const FROM_EMAIL = "A-Z Enterprises <no-reply@a-zenterpriseshq.com>";
+// Verified domain: azenterpriseshq.com (no hyphen)
+const FROM_EMAIL = "A-Z Enterprises <no-reply@azenterpriseshq.com>";
+const REPLY_TO_EMAIL = "info@azenterpriseshq.com";
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
 const BUSINESS_PHONE = "(567) 644-1090";
 
-// Staff contacts by business type
+// Staff contacts by business type (using verified domain: azenterpriseshq.com)
 const STAFF_CONTACTS: Record<string, { email: string; phone: string; name: string }> = {
-  spa: { email: "lindsey@a-zenterpriseshq.com", phone: "+15676441019", name: "Lindsey" },
-  photo_booth: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-  coworking: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-  event_center: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-  fitness: { email: "info@a-zenterpriseshq.com", phone: "+15673796340", name: "A-Z Team" },
-  default: { email: "info@a-zenterpriseshq.com", phone: "+15673796340", name: "A-Z Team" },
+  spa: { email: "lindsey@azenterpriseshq.com", phone: "+15676441019", name: "Lindsey" },
+  photo_booth: { email: "victoria@azenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
+  coworking: { email: "victoria@azenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
+  event_center: { email: "victoria@azenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
+  fitness: { email: "info@azenterpriseshq.com", phone: "+15673796340", name: "A-Z Team" },
+  default: { email: "info@azenterpriseshq.com", phone: "+15673796340", name: "A-Z Team" },
 };
 
 const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;
@@ -701,6 +703,7 @@ serve(async (req) => {
 
           const emailResult = await resend.emails.send({
             from: FROM_EMAIL,
+            reply_to: REPLY_TO_EMAIL,
             to: [customerEmail],
             subject,
             html,
@@ -800,6 +803,7 @@ serve(async (req) => {
 
           const emailResult = await resend.emails.send({
             from: FROM_EMAIL,
+            reply_to: REPLY_TO_EMAIL,
             to: [staffEmail],
             subject,
             html,
