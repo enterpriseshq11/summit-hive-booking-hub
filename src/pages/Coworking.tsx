@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { 
+  NextAvailableWidget, 
   CoworkingRequestModal,
   ScheduleTourModal,
   HiveWaitlistModal,
@@ -19,7 +20,6 @@ import {
   AmenitiesAccordion,
   LocalProofStrip,
   FloatingHelpDrawer,
-  HiveBookingWizard,
 } from "@/components/booking";
 import { 
   Building2, Wifi, Coffee, Users, MapPin, ArrowRight, Check, 
@@ -264,11 +264,13 @@ export default function Coworking() {
         }} aria-hidden="true" />
       </section>
 
-      {/* Under-hero booking module - Real calendar booking wizard */}
+      {/* Under-hero booking module (placement requirement) */}
       <UnderHeroBookingCard
         title="Book Workspace Time"
         icon={<Zap className="h-5 w-5 text-accent" />}
-        description="Select your workspace type, pick a time, and pay to confirm your booking."
+        description={
+          "Pick an option, then choose the next available time or request access."
+        }
       >
         {businessLoading ? (
           <div className="space-y-3">
@@ -277,7 +279,33 @@ export default function Coworking() {
             <Skeleton className="h-10 w-full" />
           </div>
         ) : business ? (
-          <HiveBookingWizard />
+          <>
+            <NextAvailableWidget
+              businessType="coworking"
+              title="Available Spaces"
+              onSlotSelect={() => openRequestModal()}
+              emptyMessage="No instant openings shown — request access anyway and we'll confirm options within 24 hours."
+              emptySubMessage="Or join the waitlist and we'll notify you the moment space opens up."
+              onJoinWaitlist={() => setShowWaitlistModal(true)}
+              onRequestTour={() => setShowTourModal(true)}
+              onAskDayPass={() => openRequestModal("Day Pass")}
+            />
+            <div className="mt-6 pt-6 border-t border-border flex gap-3">
+              <Button
+                onClick={() => openRequestModal("Day Pass")}
+                className="flex-1 bg-accent hover:bg-accent/90 text-primary"
+              >
+                Book a Day Pass
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowTourModal(true)}
+                className="flex-1"
+              >
+                Schedule a Tour
+              </Button>
+            </div>
+          </>
         ) : (
           <div className="text-center py-4">
             <div className="flex items-center justify-center gap-2 text-muted-foreground mb-3">

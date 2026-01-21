@@ -47,4 +47,3 @@ export { VoiceVaultBookingModal } from "./VoiceVaultBookingModal";
 export { BookingCategoryPicker } from "./BookingCategoryPicker";
 export { BookingHelpSection } from "./BookingHelpSection";
 export { PaymentExampleBlock } from "./PaymentExampleBlock";
-export { HiveBookingWizard } from "./HiveBookingWizard";
