@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import photoBoothLogo from "@/assets/360-photo-booth-logo.png";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
-import { ExperienceBookingWizard } from "@/components/booking/ExperienceBookingWizard";
+import { PhotoBoothBookingWizard } from "@/components/booking/PhotoBoothBookingWizard";
 
 const FEATURES = [
   { icon: Camera, text: "360 platform + pro lighting setup" },
@@ -223,9 +223,9 @@ export default function PhotoBooth() {
       <UnderHeroBookingCard
         title="Book Your 360 Photo Booth"
         icon={<Camera className="h-5 w-5 text-accent" />}
-        description="Choose a package, pick a time, and pay your deposit to reserve the slot."
+        description="Choose how many hours you want, pick a time, and pay your deposit to reserve the slot."
       >
-        <ExperienceBookingWizard businessType="photo_booth" checkoutFunction="experience-checkout" depositPercent={33} />
+        <PhotoBoothBookingWizard depositPercent={33} />
         <div className="mt-5 flex justify-center">
           <a
             href={SITE_CONFIG.contact.phoneLink}
