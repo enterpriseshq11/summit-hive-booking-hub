@@ -12,15 +12,62 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[LINDSEY-NOTIFICATION] ${step}${detailsStr}`);
 };
 
-const LINDSEY_EMAIL = "lindsey@restoration-lounge.com";
-const LINDSEY_PHONE = "+15673796340"; // For future SMS
+// Provider settings - Lindsey
+const LINDSEY_EMAIL = "lindsey@a-zenterpriseshq.com";
+const LINDSEY_PHONE = "+15676441090";
 const FROM_EMAIL = "Restoration Lounge by A-Z <onboarding@resend.dev>";
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
-const BUSINESS_HOURS = "By Appointment Only";
 
 interface BookingNotificationRequest {
   booking_id: string;
   type: "confirmed" | "cancelled" | "reminder";
+  stripe_session_id?: string;
+  stripe_payment_intent?: string;
+}
+
+// SMS via Twilio (only if env vars are set)
+async function sendSMS(to: string, message: string): Promise<{ success: boolean; sid?: string; error?: string }> {
+  const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+  const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+  const fromPhone = Deno.env.get("TWILIO_PHONE_NUMBER");
+
+  // Skip SMS if Twilio not configured
+  if (!accountSid || !authToken || !fromPhone) {
+    logStep("SMS skipped - Twilio not configured");
+    return { success: false, error: "Twilio not configured" };
+  }
+
+  try {
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+    const auth = btoa(`${accountSid}:${authToken}`);
+
+    const response = await fetch(twilioUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        To: to,
+        From: fromPhone,
+        Body: message,
+      }),
+    });
+
+    const result = await response.json();
+    
+    if (response.ok) {
+      logStep("SMS sent successfully", { sid: result.sid });
+      return { success: true, sid: result.sid };
+    } else {
+      logStep("SMS send failed", { error: result.message });
+      return { success: false, error: result.message };
+    }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    logStep("SMS error", { error: msg });
+    return { success: false, error: msg };
+  }
 }
 
 serve(async (req) => {
@@ -41,8 +88,8 @@ serve(async (req) => {
     });
     const resend = new Resend(resendKey);
 
-    const { booking_id, type }: BookingNotificationRequest = await req.json();
-    logStep("Request received", { booking_id, type });
+    const { booking_id, type, stripe_session_id, stripe_payment_intent }: BookingNotificationRequest = await req.json();
+    logStep("Request received", { booking_id, type, stripe_session_id });
 
     if (!booking_id) {
       return new Response(JSON.stringify({ error: "booking_id is required" }), {
@@ -74,6 +121,7 @@ serve(async (req) => {
     logStep("Booking fetched", { 
       guest_name: booking.guest_name, 
       guest_email: booking.guest_email,
+      guest_phone: booking.guest_phone,
       status: booking.status 
     });
 
@@ -91,6 +139,10 @@ serve(async (req) => {
       month: "long",
       day: "numeric",
     });
+    const shortDateStr = startDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
     const startTimeStr = startDate.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
@@ -103,16 +155,33 @@ serve(async (req) => {
     });
 
     // Get room name if assigned
-    const roomName = booking.booking_resources?.[0]?.resources?.name || "To be assigned";
+    const roomName = booking.booking_resources?.[0]?.resources?.name || "H1 – Hallway Room";
 
     // Get add-ons if any
     const addons = booking.booking_addons?.map((ba: { addons: { name: string } }) => ba.addons?.name).filter(Boolean) || [];
+    const addonsStr = addons.length > 0 ? addons.join(", ") : "None";
 
     // Get payment info
     const payment = booking.payments?.find((p: { status: string }) => p.status === "completed");
     const amountPaid = payment?.amount || booking.total_amount || 0;
 
+    // Stripe reference
+    const stripeRef = stripe_payment_intent || stripe_session_id || payment?.stripe_payment_intent_id || booking.booking_number || booking.id.slice(0, 8).toUpperCase();
+
     if (type === "confirmed") {
+      // ============= SMS TO LINDSEY =============
+      const smsMessage = `NEW PAID BOOKING ✅
+${serviceName} — ${duration}min
+${shortDateStr} at ${startTimeStr}–${endTimeStr}
+Room: ${roomName}
+Client: ${booking.guest_name} (${booking.guest_phone || "no phone"})
+Add-ons: ${addonsStr}
+Paid: $${amountPaid.toFixed(2)}
+Ref: ${stripeRef}`;
+
+      // Send SMS (will skip if Twilio not configured)
+      const smsResult = await sendSMS(LINDSEY_PHONE, smsMessage);
+
       // ============= EMAIL TO LINDSEY =============
       const lindseyEmailHtml = `
 <!DOCTYPE html>
@@ -140,24 +209,32 @@ serve(async (req) => {
     </div>
     <div class="content">
       <div class="highlight">
-        <strong>💰 Payment Received: $${amountPaid.toFixed(2)}</strong>
+        <strong>💰 Payment Received: $${amountPaid.toFixed(2)}</strong><br>
+        <span style="font-size: 12px; color: #666;">Status: PAID ✅ | Ref: ${stripeRef}</span>
       </div>
       
       <h2 style="margin-top: 0;">Appointment Details</h2>
       <table class="info-table">
         <tr><td>📅 Date</td><td><strong>${dateStr}</strong></td></tr>
-        <tr><td>⏰ Time</td><td><strong>${startTimeStr} - ${endTimeStr}</strong></td></tr>
+        <tr><td>⏰ Time</td><td><strong>${startTimeStr} – ${endTimeStr}</strong></td></tr>
         <tr><td>🧘 Service</td><td>${serviceName}</td></tr>
         <tr><td>⏱️ Duration</td><td>${duration} minutes</td></tr>
         <tr><td>🚪 Room</td><td>${roomName}</td></tr>
-        ${addons.length > 0 ? `<tr><td>✨ Add-ons</td><td>${addons.join(", ")}</td></tr>` : ""}
+        <tr><td>✨ Add-ons</td><td>${addonsStr}</td></tr>
       </table>
 
       <h2>Client Information</h2>
       <table class="info-table">
         <tr><td>👤 Name</td><td><strong>${booking.guest_name}</strong></td></tr>
         <tr><td>📧 Email</td><td><a href="mailto:${booking.guest_email}">${booking.guest_email}</a></td></tr>
-        ${booking.guest_phone ? `<tr><td>📱 Phone</td><td><a href="tel:${booking.guest_phone}">${booking.guest_phone}</a></td></tr>` : ""}
+        <tr><td>📱 Phone</td><td>${booking.guest_phone ? `<a href="tel:${booking.guest_phone}">${booking.guest_phone}</a>` : "Not provided"}</td></tr>
+      </table>
+
+      <h2>Payment</h2>
+      <table class="info-table">
+        <tr><td>💵 Amount Paid</td><td><strong style="color: #48bb78;">$${amountPaid.toFixed(2)}</strong></td></tr>
+        <tr><td>✅ Status</td><td>PAID</td></tr>
+        <tr><td>🔗 Stripe Ref</td><td><code style="background: #f0f0f0; padding: 2px 6px; font-size: 12px;">${stripeRef}</code></td></tr>
       </table>
 
       ${booking.internal_notes ? `
@@ -166,6 +243,11 @@ serve(async (req) => {
           <p style="margin: 5px 0 0 0;">${booking.internal_notes}</p>
         </div>
       ` : ""}
+
+      <div style="background: #e6fffa; padding: 15px; border-radius: 4px; margin-top: 15px; text-align: center;">
+        <strong>📅 This appointment has been added to your schedule.</strong><br>
+        <span style="font-size: 13px; color: #666;">The time slot is now blocked and no longer bookable.</span>
+      </div>
 
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
         Booking #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}<br>
@@ -193,12 +275,8 @@ serve(async (req) => {
     .success-badge { display: inline-block; background: #48bb78; color: white; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 20px; margin-bottom: 20px; }
     .appointment-box { background: #f8f6f0; border: 2px solid #d4af37; border-radius: 8px; padding: 20px; margin: 20px 0; }
     .appointment-box h3 { margin: 0 0 15px 0; color: #2d3748; }
-    .detail-row { display: flex; margin: 10px 0; }
-    .detail-label { width: 100px; color: #666; }
-    .detail-value { font-weight: bold; }
     .location-box { background: #edf2f7; padding: 15px; border-radius: 4px; margin: 20px 0; }
     .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 14px; color: #666; }
-    .cta-button { display: inline-block; background: #d4af37; color: #0a0a0a; padding: 12px 30px; text-decoration: none; font-weight: bold; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -221,7 +299,7 @@ serve(async (req) => {
         <table style="width: 100%;">
           <tr><td style="padding: 8px 0; color: #666;">Service:</td><td style="padding: 8px 0; font-weight: bold;">${serviceName}</td></tr>
           <tr><td style="padding: 8px 0; color: #666;">Date:</td><td style="padding: 8px 0; font-weight: bold;">${dateStr}</td></tr>
-          <tr><td style="padding: 8px 0; color: #666;">Time:</td><td style="padding: 8px 0; font-weight: bold;">${startTimeStr} - ${endTimeStr}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Time:</td><td style="padding: 8px 0; font-weight: bold;">${startTimeStr} – ${endTimeStr}</td></tr>
           <tr><td style="padding: 8px 0; color: #666;">Duration:</td><td style="padding: 8px 0; font-weight: bold;">${duration} minutes</td></tr>
           <tr><td style="padding: 8px 0; color: #666;">Room:</td><td style="padding: 8px 0; font-weight: bold;">${roomName}</td></tr>
           ${addons.length > 0 ? `<tr><td style="padding: 8px 0; color: #666;">Add-ons:</td><td style="padding: 8px 0;">${addons.join(", ")}</td></tr>` : ""}
@@ -255,7 +333,7 @@ serve(async (req) => {
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+        <p style="font-size: 18px;"><a href="tel:+15676441090">(567) 644-1090</a></p>
       </div>
 
       <p style="margin-top: 30px;">
@@ -298,6 +376,8 @@ serve(async (req) => {
           success: true,
           lindsey_email_id: lindseyResult.data?.id,
           customer_email_id: customerResult.data?.id,
+          sms_sent: smsResult.success,
+          sms_sid: smsResult.sid,
         }),
         {
           status: 200,
