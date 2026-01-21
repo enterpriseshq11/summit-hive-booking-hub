@@ -111,6 +111,8 @@ interface NotificationRequest {
     | "request"
     | "confirmation"
     | "booking_confirmed"
+    | "approved"
+    | "denied"
     | "reminder"
     | "reminder_24h"
     | "reminder_2h"
@@ -348,6 +350,173 @@ function normalizeNotificationType(input: NotificationRequest["notification_type
   return { notification_type: input as any, reminder_type: reminderType };
 }
 
+async function alreadySent(
+  supabase: any,
+  params: { booking_id: string; notification_type: string; channel: string; recipient_type: string }
+): Promise<boolean> {
+  const { booking_id, notification_type, channel, recipient_type } = params;
+  try {
+    const { data, error } = await supabase
+      .from("notification_logs")
+      .select("id")
+      .eq("booking_id", booking_id)
+      .eq("notification_type", notification_type)
+      .eq("channel", channel)
+      .eq("recipient_type", recipient_type)
+      .eq("status", "sent")
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error) return false;
+    return Array.isArray(data) && data.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+function extractFromNotes(notes: unknown, label: string): string | undefined {
+  if (typeof notes !== "string" || !notes.trim()) return undefined;
+  const lines = notes.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const hit = lines.find((l) => l.toLowerCase().startsWith(label.toLowerCase() + ":"));
+  if (!hit) return undefined;
+  const value = hit.slice(label.length + 1).trim();
+  return value || undefined;
+}
+
+function buildSummitStaffRequestEmail(booking: Record<string, unknown>): { subject: string; html: string } {
+  const startDate = new Date(booking.start_datetime as string);
+  const endDate = new Date(booking.end_datetime as string);
+  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const endTimeStr = endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  const eventType =
+    extractFromNotes(booking.notes, "Event Type") ||
+    ((booking.bookable_types as Record<string, unknown>)?.name as string | undefined) ||
+    "Event";
+  const preferredDates = extractFromNotes(booking.notes, "Preferred Dates") || shortDate;
+  const guests = extractFromNotes(booking.notes, "Guest Range") || (booking.guest_count ? String(booking.guest_count) : "Not provided");
+  const budget = extractFromNotes(booking.notes, "Budget Comfort") || "Not provided";
+  const ceremony = extractFromNotes(booking.notes, "Ceremony included");
+  const company = extractFromNotes(booking.notes, "Company");
+  const requestedStart = extractFromNotes(booking.notes, "Requested Start Time") || startTimeStr;
+  const requestedDuration = extractFromNotes(booking.notes, "Requested Duration") || `${computeDurationMins(booking)} minutes`;
+  const requestedEnd = extractFromNotes(booking.notes, "Requested End Time") || endTimeStr;
+  const estPrice = extractFromNotes(booking.notes, "Estimated Price");
+
+  const subject = `Summit Event Request — ${eventType} — ${preferredDates.split(",")[0].trim()}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+  <body style="font-family: Arial, sans-serif; color:#111; line-height:1.5;">
+    <div style="max-width: 640px; margin: 0 auto; padding: 20px;">
+      <h1 style="margin:0;">Summit Event Request</h1>
+      <p style="margin:6px 0 18px 0; color:#444;">Status: <strong>PENDING APPROVAL</strong></p>
+
+      <h2 style="margin:0 0 8px 0;">Customer</h2>
+      <ul style="margin:0 0 18px 18px;">
+        <li><strong>Name:</strong> ${booking.guest_name || "Not provided"}</li>
+        <li><strong>Phone:</strong> ${booking.guest_phone || "Not provided"}</li>
+        <li><strong>Email:</strong> ${booking.guest_email || "Not provided"}</li>
+      </ul>
+
+      <h2 style="margin:0 0 8px 0;">Request Details</h2>
+      <ul style="margin:0 0 18px 18px;">
+        <li><strong>Event Type:</strong> ${eventType}</li>
+        <li><strong>Preferred Date(s):</strong> ${preferredDates}</li>
+        <li><strong>Requested Start Time:</strong> ${requestedStart}</li>
+        <li><strong>Requested Duration:</strong> ${requestedDuration}</li>
+        <li><strong>Requested End Time:</strong> ${requestedEnd}</li>
+        <li><strong>Estimated Guests:</strong> ${guests}</li>
+        <li><strong>Budget Comfort Level:</strong> ${budget}</li>
+        ${typeof ceremony === "string" ? `<li><strong>Ceremony included:</strong> ${ceremony}</li>` : ""}
+        ${typeof company === "string" ? `<li><strong>Company:</strong> ${company}</li>` : ""}
+        ${typeof estPrice === "string" ? `<li><strong>Estimated Price:</strong> ${estPrice}</li>` : ""}
+      </ul>
+
+      <h2 style="margin:0 0 8px 0;">Notes</h2>
+      <pre style="white-space: pre-wrap; background:#f6f6f6; padding:12px; border-radius:8px; margin:0;">${(booking.notes as string) || ""}</pre>
+    </div>
+  </body>
+</html>`;
+
+  return { subject, html };
+}
+
+function buildSummitCustomerRequestEmail(booking: Record<string, unknown>): { subject: string; html: string } {
+  const startDate = new Date(booking.start_datetime as string);
+  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const eventType = extractFromNotes(booking.notes, "Event Type") || "Event";
+  const preferredDates = extractFromNotes(booking.notes, "Preferred Dates") || shortDate;
+  const subject = `Summit Event Request Received — ${eventType}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+  <body style="font-family: Arial, sans-serif; color:#111; line-height:1.5;">
+    <div style="max-width: 640px; margin: 0 auto; padding: 20px;">
+      <h1 style="margin:0;">We received your request</h1>
+      <p style="margin:6px 0 18px 0; color:#444;">Request submitted — awaiting approval.</p>
+      <p style="margin:0 0 14px 0;">Here’s what we have on file:</p>
+      <ul style="margin:0 0 18px 18px;">
+        <li><strong>Event Type:</strong> ${eventType}</li>
+        <li><strong>Preferred Date(s):</strong> ${preferredDates}</li>
+        <li><strong>Requested Time:</strong> ${timeStr}</li>
+      </ul>
+      <p style="margin:0; color:#444;">Next step: Victoria will review and follow up.</p>
+    </div>
+  </body>
+</html>`;
+
+  return { subject, html };
+}
+
+function buildSummitDecisionCustomerEmail(
+  booking: Record<string, unknown>,
+  decision: "approved" | "denied"
+): { subject: string; html: string } {
+  const startDate = new Date(booking.start_datetime as string);
+  const endDate = new Date(booking.end_datetime as string);
+  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const endTimeStr = endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const eventType = extractFromNotes(booking.notes, "Event Type") || "Event";
+
+  const subject =
+    decision === "approved" ? "Your Summit Event Request is Approved" : "Update on Your Summit Event Request";
+
+  const body =
+    decision === "approved"
+      ? `
+        <p>Your request has been <strong>approved</strong>.</p>
+        <ul>
+          <li><strong>Event Type:</strong> ${eventType}</li>
+          <li><strong>Date:</strong> ${dateStr}</li>
+          <li><strong>Time:</strong> ${startTimeStr} – ${endTimeStr}</li>
+        </ul>
+        <p>Next step: we’ll contact you to finalize details and payment.</p>
+      `
+      : `
+        <p>We’re unable to approve this time/date.</p>
+        <p>Please submit another request or contact us for options.</p>
+      `;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+  <body style="font-family: Arial, sans-serif; color:#111; line-height:1.5;">
+    <div style="max-width: 640px; margin: 0 auto; padding: 20px;">
+      <h1 style="margin:0;">${decision === "approved" ? "Approved" : "Not approved"}</h1>
+      <div style="margin-top: 12px;">${body}</div>
+    </div>
+  </body>
+</html>`;
+
+  return { subject, html };
+}
+
 async function resolveStaffContact(params: {
   supabase: any;
   booking: any;
@@ -355,9 +524,10 @@ async function resolveStaffContact(params: {
   sourceBrand?: string;
   victoriaEnv: { email: string; phone: string };
   lindseyEnv?: { email?: string; phone?: string };
+  dylanEnv?: { email?: string; phone?: string };
   replyToEmail: string;
 }): Promise<{ contact: { email: string; phone?: string; name: string }; debug: StaffResolutionDebug }> {
-  const { supabase, booking, businessType, sourceBrand, victoriaEnv, lindseyEnv, replyToEmail } = params;
+  const { supabase, booking, businessType, sourceBrand, victoriaEnv, lindseyEnv, dylanEnv, replyToEmail } = params;
 
   const normalizedSourceBrand = normalizeBrandAlias(sourceBrand);
   const owner = ownerFromSourceBrand(normalizedSourceBrand);
@@ -476,9 +646,8 @@ async function resolveStaffContact(params: {
     return { contact: { email: victoriaEnv.email, phone: victoriaEnv.phone, name: "Victoria" }, debug };
   }
   if (owner === "lindsey") {
-    // Staff inbox uses @a-zenterpriseshq.com (with hyphen)
-    const email = lindseyEnv?.email || "lindsey@a-zenterpriseshq.com";
-    const phone = lindseyEnv?.phone || "+15676441019";
+    const email = lindseyEnv?.email || dylanEnv?.email || replyToEmail;
+    const phone = lindseyEnv?.phone || dylanEnv?.phone;
     debug.branch = "C_source_brand_mapping";
     debug.staff_email = email;
     debug.staff_phone = phone;
@@ -488,10 +657,10 @@ async function resolveStaffContact(params: {
 
   // Priority E: final fallback (no silent skip)
   debug.branch = "E_final_fallback";
-  debug.staff_email = replyToEmail;
+  debug.staff_email = dylanEnv?.email || replyToEmail;
   debug.staff_name = "A-Z Team";
   debug.notes?.push("staff routing unresolved; falling back to REPLY_TO_EMAIL");
-  return { contact: { email: replyToEmail, name: "A-Z Team" }, debug };
+  return { contact: { email: debug.staff_email, phone: dylanEnv?.phone, name: "A-Z Team" }, debug };
 }
 
 function computeDurationMins(booking: Record<string, unknown>): number {
@@ -925,6 +1094,9 @@ serve(async (req) => {
     const LINDSEY_NOTIFY_EMAIL = Deno.env.get("LINDSEY_NOTIFY_EMAIL") || undefined;
     const LINDSEY_NOTIFY_PHONE = Deno.env.get("LINDSEY_NOTIFY_PHONE") || undefined;
 
+    const DYLAN_NOTIFY_EMAIL = Deno.env.get("DYLAN_NOTIFY_EMAIL") || undefined;
+    const DYLAN_NOTIFY_PHONE = Deno.env.get("DYLAN_NOTIFY_PHONE") || undefined;
+
     const { contact: resolvedStaffContact, debug: staffRoutingDebug } = await resolveStaffContact({
       supabase,
       booking,
@@ -932,6 +1104,7 @@ serve(async (req) => {
       sourceBrand,
       victoriaEnv: { email: VICTORIA_NOTIFY_EMAIL, phone: VICTORIA_NOTIFY_PHONE },
       lindseyEnv: { email: LINDSEY_NOTIFY_EMAIL, phone: LINDSEY_NOTIFY_PHONE },
+      dylanEnv: { email: DYLAN_NOTIFY_EMAIL, phone: DYLAN_NOTIFY_PHONE },
       replyToEmail: REPLY_TO_EMAIL,
     });
 
@@ -992,7 +1165,7 @@ serve(async (req) => {
 
     logStep("Staff routing resolved", staffRoutingDebug);
 
-    // Check idempotency for confirmations ONLY
+    // Check idempotency for confirmations ONLY (legacy booking table timestamps)
     if (notification_type === "confirmation") {
       const alreadySentCustomer = !!booking.email_sent_customer_at;
       const alreadySentStaff = !!booking.email_sent_staff_at;
@@ -1033,6 +1206,16 @@ serve(async (req) => {
       const customerEmail = test_customer_email || resolvedCustomerEmail;
       if (recipients.includes("customer") && customerEmail) {
         try {
+          if (
+            await alreadySent(supabase, {
+              booking_id,
+              notification_type,
+              channel: "email",
+              recipient_type: "customer",
+            })
+          ) {
+            logStep("Skip send - already sent (logs)", { booking_id, notification_type, recipient_type: "customer" });
+          } else {
           const durationMins = computeDurationMins(booking);
           const paymentLabel = describePayment(booking);
           const startDate = new Date(booking.start_datetime);
@@ -1043,20 +1226,35 @@ serve(async (req) => {
           let html: string;
 
           if (notification_type === "request") {
-            subject = `Request received from ${brandLabel} — ${shortDate} at ${timeStr}`;
-            html = buildCustomerConfirmationEmail(
-              {
-                ...booking,
-                notes: [
-                  booking.notes,
-                  `Type: Request`,
-                  `Duration: ${durationMins} minutes`,
-                  `Payment: ${paymentLabel}`,
-                ].filter(Boolean).join("\n"),
-              },
-              businessType,
-              staffContact
-            );
+            if (businessType === "summit") {
+              const out = buildSummitCustomerRequestEmail(booking);
+              subject = out.subject;
+              html = out.html;
+            } else {
+              subject = `Request received from ${brandLabel} — ${shortDate} at ${timeStr}`;
+              html = buildCustomerConfirmationEmail(
+                {
+                  ...booking,
+                  notes: [
+                    booking.notes,
+                    `Type: Request`,
+                    `Duration: ${durationMins} minutes`,
+                    `Payment: ${paymentLabel}`,
+                  ].filter(Boolean).join("\n"),
+                },
+                businessType,
+                staffContact
+              );
+            }
+          } else if (notification_type === "approved" || notification_type === "denied") {
+            if (businessType === "summit") {
+              const out = buildSummitDecisionCustomerEmail(booking, notification_type);
+              subject = out.subject;
+              html = out.html;
+            } else {
+              subject = `Update from ${brandLabel} — ${shortDate} at ${timeStr}`;
+              html = buildCustomerConfirmationEmail(booking, businessType, staffContact);
+            }
           } else if (notification_type === "confirmation") {
             subject = `Your ${brandLabel} booking is confirmed — ${shortDate} at ${timeStr}`;
             html = buildCustomerConfirmationEmail(booking, businessType, staffContact);
@@ -1110,7 +1308,13 @@ serve(async (req) => {
             provider: "resend",
             provider_message_id: emailResult.data?.id,
             error_message: emailResult.error?.message,
-            metadata: { source_brand: sourceBrand, reminder_type },
+            metadata: {
+              source_brand: sourceBrand,
+              business_type: businessType,
+              reminder_type,
+              resolved_staff_email: staffContact.email,
+              staff_resolution_branch: staffRoutingDebug.branch,
+            },
           });
 
           // Update idempotency timestamp
@@ -1124,6 +1328,7 @@ serve(async (req) => {
             const reason = emailResult.error?.message || "resend_failed";
             failures.push({ key: "customer_email", reason, details: emailResult.error });
             throw new Error(`Customer email failed: ${reason}`);
+          }
           }
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
@@ -1173,27 +1378,60 @@ serve(async (req) => {
         }
 
         try {
+          if (
+            await alreadySent(supabase, {
+              booking_id,
+              notification_type,
+              channel: "email",
+              recipient_type: "staff",
+            })
+          ) {
+            logStep("Skip send - already sent (logs)", { booking_id, notification_type, recipient_type: "staff" });
+            return new Response(JSON.stringify({ success: true, skipped: true, reason: "already_sent" }), {
+              status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
           const durationMins = computeDurationMins(booking);
           const paymentLabel = describePayment(booking);
           const startDate = new Date(booking.start_datetime);
           const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
           const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 
-          const kind = notification_type === "request" ? "Request" : notification_type === "confirmation" ? "Booking" : "Reminder";
-          const subject = `${kind}: ${brandLabel} — ${booking.guest_name || "Guest"} — ${shortDate} ${timeStr}`;
-          const html = buildStaffConfirmationEmail(
-            {
-              ...booking,
-              notes: [
-                booking.notes,
-                `Source: ${brandLabel}`,
-                `Type: ${kind}`,
-                `Duration: ${durationMins} minutes`,
-                `Payment: ${paymentLabel}`,
-              ].filter(Boolean).join("\n"),
-            },
-            businessType
-          );
+          let subject: string;
+          let html: string;
+
+          if (notification_type === "request" && businessType === "summit") {
+            const out = buildSummitStaffRequestEmail(booking);
+            subject = out.subject;
+            html = out.html;
+          } else {
+            const kind =
+              notification_type === "request"
+                ? "Request"
+                : notification_type === "confirmation"
+                  ? "Booking"
+                  : notification_type === "approved"
+                    ? "Approved"
+                    : notification_type === "denied"
+                      ? "Denied"
+                      : "Reminder";
+
+            subject = `${kind}: ${brandLabel} — ${booking.guest_name || "Guest"} — ${shortDate} ${timeStr}`;
+            html = buildStaffConfirmationEmail(
+              {
+                ...booking,
+                notes: [
+                  booking.notes,
+                  `Source: ${brandLabel}`,
+                  `Type: ${kind}`,
+                  `Duration: ${durationMins} minutes`,
+                  `Payment: ${paymentLabel}`,
+                ].filter(Boolean).join("\n"),
+              },
+              businessType
+            );
+          }
 
           logStep("EMAIL: staff send starting", {
             booking_id,
@@ -1236,6 +1474,8 @@ serve(async (req) => {
               business_type: businessType,
               reminder_type,
               staff_routing: staffRoutingDebug,
+              resolved_staff_email: staffEmail,
+              staff_resolution_branch: staffRoutingDebug.branch,
               resend: emailResult,
             },
           });
