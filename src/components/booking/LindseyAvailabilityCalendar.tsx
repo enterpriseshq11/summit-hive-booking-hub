@@ -326,7 +326,15 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
         setCompletionType("free");
         setBookingComplete(true);
         setStep("confirm");
-        toast.success("Free consultation booked! Check your email for details.");
+        
+        // Show appropriate message based on email status
+        if (data?.email_sent) {
+          toast.success("Free consultation booked! Check your email for details.");
+        } else {
+          toast.success("Free consultation booked! Confirmation details will be sent shortly.");
+          console.warn("Email not sent:", data?.email_error);
+        }
+        
         onBookingComplete?.();
         return;
       }
