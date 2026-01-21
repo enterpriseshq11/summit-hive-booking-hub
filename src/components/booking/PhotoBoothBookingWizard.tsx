@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusinesses } from "@/hooks/useBusinesses";
 import { useBookableTypes } from "@/hooks/useBookableTypes";
-import { useAvailability, useCreateSlotHold, useReleaseSlotHold } from "@/hooks/useAvailability";
+import { useAvailability } from "@/hooks/useAvailability";
 import { 
   Clock, 
   Minus, 
@@ -138,8 +138,7 @@ export function PhotoBoothBookingWizard({
     return days;
   }, [availabilityByDay, step, today]);
 
-  const createHold = useCreateSlotHold();
-  const releaseHold = useReleaseSlotHold();
+  // Slot holds are now created server-side in experience-checkout edge function
 
   const total = selectedHours * HOURLY_RATE;
   const { deposit, remaining } = computeDeposit(total, depositPercent, minDeposit);
@@ -174,16 +173,8 @@ export function PhotoBoothBookingWizard({
     }
 
     setIsSubmitting(true);
-    let holdId: string | null = null;
     try {
-      const hold = await createHold.mutateAsync({
-        bookable_type_id: selectedSlot.bookable_type_id,
-        resource_id: selectedSlot.resource_id,
-        start_datetime: selectedSlot.start_time,
-        end_datetime: selectedSlot.end_time,
-      });
-      holdId = hold.id;
-
+      // Slot hold is now created server-side in the edge function
       const { data, error } = await supabase.functions.invoke("experience-checkout", {
         body: {
           business_type: "photo_booth",
@@ -197,24 +188,32 @@ export function PhotoBoothBookingWizard({
           customer_name: guestInfo.name.trim(),
           customer_email: guestInfo.email.trim(),
           customer_phone: guestInfo.phone.trim(),
-          hold_id: holdId,
         },
       });
 
-      if (error) throw error;
-      if (!data?.url) throw new Error(data?.error || "Checkout session failed");
+      if (error) {
+        // Try to extract error message from response context
+        const context = (error as any)?.context;
+        if (context instanceof Response) {
+          try {
+            const text = await context.text();
+            const json = JSON.parse(text);
+            throw new Error(json?.error || "Checkout failed");
+          } catch {
+            throw new Error("Unable to proceed to payment");
+          }
+        }
+        throw error;
+      }
+      
+      if (!data?.url) {
+        throw new Error(data?.error || "Checkout session failed");
+      }
 
       window.location.href = data.url;
     } catch (err: any) {
       const message = err?.message || "Unable to proceed to payment.";
       toast.error(message);
-      if (holdId) {
-        try {
-          await releaseHold.mutateAsync(holdId);
-        } catch {
-          // ignore
-        }
-      }
     } finally {
       setIsSubmitting(false);
     }
