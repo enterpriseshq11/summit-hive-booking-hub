@@ -347,6 +347,14 @@ Ref: ${stripeRef}`;
 </body>
 </html>`;
 
+      // Detailed logging before email send
+      logStep("Sending paid booking emails", {
+        provider: "Resend",
+        from: FROM_EMAIL,
+        lindseyRecipient: LINDSEY_EMAIL,
+        customerRecipient: booking.guest_email,
+      });
+
       const [lindseyResult, customerResult] = await Promise.all([
         resend.emails.send({
           from: FROM_EMAIL,
@@ -362,16 +370,24 @@ Ref: ${stripeRef}`;
         }),
       ]);
 
-      logStep("Paid booking emails sent", {
+      const emailSuccess = !!(lindseyResult.data?.id || customerResult.data?.id);
+
+      logStep("Paid booking emails result", {
         lindseyEmailId: lindseyResult.data?.id,
+        lindseyError: lindseyResult.error,
         customerEmailId: customerResult.data?.id,
+        customerError: customerResult.error,
+        success: emailSuccess,
       });
 
       return new Response(
         JSON.stringify({
           success: true,
+          email_sent: emailSuccess,
           lindsey_email_id: lindseyResult.data?.id,
+          lindsey_email_error: lindseyResult.error,
           customer_email_id: customerResult.data?.id,
+          customer_email_error: customerResult.error,
           sms_sent: smsResult.success,
           sms_sid: smsResult.sid,
         }),
@@ -546,6 +562,15 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 </body>
 </html>`;
 
+      // Detailed logging before email send
+      logStep("Sending free consultation emails", {
+        provider: "Resend",
+        from: FROM_EMAIL,
+        lindseyRecipient: LINDSEY_EMAIL,
+        customerRecipient: booking.guest_email,
+        bookingId: booking_id,
+      });
+
       const [lindseyResult, customerResult] = await Promise.all([
         resend.emails.send({
           from: FROM_EMAIL,
@@ -561,18 +586,24 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
         }),
       ]);
 
-      logStep("Free consultation emails sent", {
+      const emailSuccess = !!(lindseyResult.data?.id || customerResult.data?.id);
+
+      logStep("Free consultation emails result", {
         lindseyEmailId: lindseyResult.data?.id,
-        customerEmailId: customerResult.data?.id,
         lindseyError: lindseyResult.error,
+        customerEmailId: customerResult.data?.id,
         customerError: customerResult.error,
+        success: emailSuccess,
       });
 
       return new Response(
         JSON.stringify({
           success: true,
+          email_sent: emailSuccess,
           lindsey_email_id: lindseyResult.data?.id,
+          lindsey_email_error: lindseyResult.error,
           customer_email_id: customerResult.data?.id,
+          customer_email_error: customerResult.error,
           sms_sent: smsResult.success,
         }),
         {

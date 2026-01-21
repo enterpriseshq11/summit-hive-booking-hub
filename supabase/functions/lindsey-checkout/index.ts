@@ -124,6 +124,8 @@ serve(async (req) => {
       logStep("Free booking created", { bookingId: booking?.id });
 
       // Send confirmation email for free consultation
+      let emailSent = false;
+      let emailError = null;
       try {
         const notificationResponse = await fetch(
           `${supabaseUrl}/functions/v1/lindsey-booking-notification`,
@@ -140,16 +142,25 @@ serve(async (req) => {
           }
         );
         const notifResult = await notificationResponse.json();
-        logStep("Free consultation notification sent", notifResult);
+        emailSent = notifResult.email_sent === true;
+        emailError = notifResult.lindsey_email_error || notifResult.customer_email_error || null;
+        logStep("Free consultation notification result", { 
+          emailSent, 
+          emailError,
+          fullResult: notifResult 
+        });
       } catch (notifError) {
         // Log but don't fail the booking
         logStep("Notification error (non-fatal)", { error: String(notifError) });
+        emailError = String(notifError);
       }
 
       return jsonResponse(200, { 
         success: true, 
         booking_id: booking?.id, 
-        is_free: true 
+        is_free: true,
+        email_sent: emailSent,
+        email_error: emailError,
       });
     }
 
