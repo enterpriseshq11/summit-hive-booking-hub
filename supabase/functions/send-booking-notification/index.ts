@@ -29,6 +29,16 @@ const STAFF_CONTACTS: Record<string, { email: string; phone: string; name: strin
 
 const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;
 
+function safeJson(value: unknown, maxLen = 2000): string {
+  try {
+    const str = JSON.stringify(value);
+    if (str.length <= maxLen) return str;
+    return `${str.slice(0, maxLen)}…(truncated)`;
+  } catch {
+    return "<unserializable>";
+  }
+}
+
 interface NotificationRequest {
   booking_id: string;
   notification_type: "confirmation" | "reminder" | "cancellation" | "reschedule";
@@ -36,6 +46,10 @@ interface NotificationRequest {
   recipients?: ("customer" | "staff")[];
   stripe_session_id?: string;
   stripe_payment_intent?: string;
+
+  // Admin-only overrides for manual testing
+  test_customer_email?: string;
+  test_staff_email?: string;
 }
 
 // ============= SMS VIA TWILIO =============
@@ -498,6 +512,8 @@ serve(async (req) => {
       recipients = ["customer", "staff"],
       stripe_session_id,
       stripe_payment_intent,
+      test_customer_email,
+      test_staff_email,
     }: NotificationRequest = await req.json();
 
     logStep("Request received", { booking_id, notification_type, channels, recipients });
@@ -532,7 +548,78 @@ serve(async (req) => {
     }
 
     const businessType = booking.businesses?.type || "default";
-    const staffContact = STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default;
+
+    // Resolve staff contact from assigned provider (preferred), else fallback mapping
+    let resolvedStaffEmail: string | undefined;
+    let resolvedStaffPhone: string | undefined;
+    let resolvedStaffName: string | undefined;
+
+    if (booking.assigned_provider_id) {
+      const { data: providerRow, error: providerErr } = await supabase
+        .from("providers")
+        .select("id,user_id,name")
+        .eq("id", booking.assigned_provider_id)
+        .maybeSingle();
+
+      if (providerErr) {
+        logStep("Provider lookup error", { error: providerErr, provider_id: booking.assigned_provider_id });
+      }
+
+      if (providerRow?.user_id) {
+        const { data: profileRow, error: profileErr } = await supabase
+          .from("profiles")
+          .select("email,phone,first_name,last_name")
+          .eq("id", providerRow.user_id)
+          .maybeSingle();
+
+        if (profileErr) {
+          logStep("Profile lookup error", { error: profileErr, user_id: providerRow.user_id });
+        }
+
+        resolvedStaffEmail = profileRow?.email ?? undefined;
+        resolvedStaffPhone = profileRow?.phone ?? undefined;
+        resolvedStaffName = `${profileRow?.first_name ?? ""} ${profileRow?.last_name ?? ""}`.trim() || providerRow.name;
+      }
+    }
+
+    const fallbackStaff = STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default;
+    const staffContact = {
+      email: resolvedStaffEmail || fallbackStaff.email,
+      phone: resolvedStaffPhone || fallbackStaff.phone,
+      name: resolvedStaffName || fallbackStaff.name,
+    };
+
+    // Admin-only manual test overrides
+    if (test_customer_email || test_staff_email) {
+      const authHeader = req.headers.get("authorization") || "";
+      const token = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7) : "";
+
+      // Block overrides for internal service-role calls (webhook/schedulers)
+      if (!token || token === serviceRoleKey) {
+        return new Response(JSON.stringify({ error: "Test overrides require an authenticated admin user" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+      if (userErr || !userData?.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: isAdmin, error: adminErr } = await supabase.rpc("is_admin", { _user_id: userData.user.id });
+      if (adminErr || !isAdmin) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      logStep("Admin test overrides enabled", { booking_id, test_customer_email, test_staff_email });
+    }
 
     logStep("Booking fetched", { 
       guest_name: booking.guest_name, 
@@ -556,11 +643,31 @@ serve(async (req) => {
     }
 
     const results: Record<string, unknown> = {};
+    const failures: Array<{ key: string; reason: string; details?: unknown }> = [];
 
     // ============= SEND EMAILS =============
     if (channels.includes("email")) {
       // Customer email
-      if (recipients.includes("customer") && booking.guest_email) {
+      if (recipients.includes("customer")) {
+        const customerEmail = test_customer_email || booking.guest_email;
+        if (!customerEmail) {
+          const reason = "missing_customer_email";
+          logStep("Customer email skipped", { booking_id, reason });
+          failures.push({ key: "customer_email", reason });
+          await logNotification(supabase, {
+            booking_id,
+            notification_type,
+            channel: "email",
+            recipient_type: "customer",
+            status: "failed",
+            provider: "resend",
+            error_message: reason,
+          });
+        }
+      }
+
+      const customerEmail = test_customer_email || booking.guest_email;
+      if (recipients.includes("customer") && customerEmail) {
         try {
           const businessLabel = getBusinessLabel(businessType);
           const startDate = new Date(booking.start_datetime);
@@ -579,11 +686,31 @@ serve(async (req) => {
             html = buildReminderEmail(booking, businessType, reminderType);
           }
 
+          logStep("EMAIL: customer send starting", {
+            booking_id,
+            to: customerEmail,
+            from: FROM_EMAIL,
+            subject,
+            payload: {
+              notification_type,
+              business_type: businessType,
+              booking_number: booking.booking_number,
+              start_datetime: booking.start_datetime,
+            },
+          });
+
           const emailResult = await resend.emails.send({
             from: FROM_EMAIL,
-            to: [booking.guest_email],
+            to: [customerEmail],
             subject,
             html,
+          });
+
+          logStep("EMAIL: customer send finished", {
+            booking_id,
+            to: customerEmail,
+            subject,
+            resend: safeJson(emailResult),
           });
 
           results.customer_email = { success: !!emailResult.data?.id, id: emailResult.data?.id, error: emailResult.error };
@@ -593,7 +720,7 @@ serve(async (req) => {
             notification_type,
             channel: "email",
             recipient_type: "customer",
-            recipient_email: booking.guest_email,
+            recipient_email: customerEmail,
             subject,
             status: emailResult.data?.id ? "sent" : "failed",
             provider: "resend",
@@ -607,14 +734,53 @@ serve(async (req) => {
           }
 
           logStep("Customer email sent", { email: booking.guest_email, id: emailResult.data?.id });
+
+          if (!emailResult.data?.id) {
+            const reason = emailResult.error?.message || "resend_failed";
+            failures.push({ key: "customer_email", reason, details: emailResult.error });
+            throw new Error(`Customer email failed: ${reason}`);
+          }
         } catch (e) {
-          logStep("Customer email error", { error: String(e) });
-          results.customer_email = { success: false, error: String(e) };
+          const msg = e instanceof Error ? e.message : String(e);
+          logStep("Customer email error", { error: msg, stack: e instanceof Error ? e.stack : undefined });
+          results.customer_email = { success: false, error: msg };
+          failures.push({ key: "customer_email", reason: msg });
+          await logNotification(supabase, {
+            booking_id,
+            notification_type,
+            channel: "email",
+            recipient_type: "customer",
+            recipient_email: customerEmail,
+            status: "failed",
+            provider: "resend",
+            error_message: msg,
+            metadata: {
+              stripe_session_id,
+              stripe_payment_intent,
+            },
+          });
         }
       }
 
       // Staff email
       if (recipients.includes("staff")) {
+        const staffEmail = test_staff_email || staffContact.email;
+        if (!staffEmail) {
+          const reason = "missing_staff_email";
+          logStep("Staff email skipped", { booking_id, reason, assigned_provider_id: booking.assigned_provider_id });
+          failures.push({ key: "staff_email", reason });
+          await logNotification(supabase, {
+            booking_id,
+            notification_type,
+            channel: "email",
+            recipient_type: "staff",
+            status: "failed",
+            provider: "resend",
+            error_message: reason,
+            metadata: { assigned_provider_id: booking.assigned_provider_id },
+          });
+        }
+
         try {
           const businessLabel = getBusinessLabel(businessType);
           const startDate = new Date(booking.start_datetime);
@@ -624,11 +790,26 @@ serve(async (req) => {
           const subject = `New ${businessLabel} Booking — ${booking.guest_name} — ${shortDate} ${timeStr}`;
           const html = buildStaffConfirmationEmail(booking, businessType);
 
+          logStep("EMAIL: staff send starting", {
+            booking_id,
+            to: staffEmail,
+            from: FROM_EMAIL,
+            subject,
+            resolved_staff: { name: staffContact.name, email: staffContact.email, phone: staffContact.phone },
+          });
+
           const emailResult = await resend.emails.send({
             from: FROM_EMAIL,
-            to: [staffContact.email],
+            to: [staffEmail],
             subject,
             html,
+          });
+
+          logStep("EMAIL: staff send finished", {
+            booking_id,
+            to: staffEmail,
+            subject,
+            resend: safeJson(emailResult),
           });
 
           results.staff_email = { success: !!emailResult.data?.id, id: emailResult.data?.id, error: emailResult.error };
@@ -638,7 +819,7 @@ serve(async (req) => {
             notification_type,
             channel: "email",
             recipient_type: "staff",
-            recipient_email: staffContact.email,
+            recipient_email: staffEmail,
             subject,
             status: emailResult.data?.id ? "sent" : "failed",
             provider: "resend",
@@ -652,9 +833,32 @@ serve(async (req) => {
           }
 
           logStep("Staff email sent", { email: staffContact.email, id: emailResult.data?.id });
+
+          if (!emailResult.data?.id) {
+            const reason = emailResult.error?.message || "resend_failed";
+            failures.push({ key: "staff_email", reason, details: emailResult.error });
+            throw new Error(`Staff email failed: ${reason}`);
+          }
         } catch (e) {
-          logStep("Staff email error", { error: String(e) });
-          results.staff_email = { success: false, error: String(e) };
+          const msg = e instanceof Error ? e.message : String(e);
+          logStep("Staff email error", { error: msg, stack: e instanceof Error ? e.stack : undefined });
+          results.staff_email = { success: false, error: msg };
+          failures.push({ key: "staff_email", reason: msg });
+          await logNotification(supabase, {
+            booking_id,
+            notification_type,
+            channel: "email",
+            recipient_type: "staff",
+            recipient_email: staffEmail,
+            status: "failed",
+            provider: "resend",
+            error_message: msg,
+            metadata: {
+              stripe_session_id,
+              stripe_payment_intent,
+              assigned_provider_id: booking.assigned_provider_id,
+            },
+          });
         }
       }
     }
@@ -712,6 +916,14 @@ serve(async (req) => {
     }
 
     logStep("Notification complete", results);
+
+    if (failures.length > 0) {
+      // Hard-fail so upstream (webhook / scheduler) can surface errors & retry.
+      return new Response(JSON.stringify({ success: false, results, failures }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     return new Response(JSON.stringify({ success: true, results }), {
       status: 200,
