@@ -46,6 +46,16 @@ serve(async (req) => {
     const queryDate = date || start_date || new Date().toISOString().split("T")[0];
     const endQueryDate = end_date || queryDate;
 
+    // Parse dates and generate list of all dates in range
+    const startDateObj = new Date(queryDate + "T00:00:00");
+    const endDateObj = new Date(endQueryDate + "T00:00:00");
+    const allDatesInRange: string[] = [];
+    const currentDate = new Date(startDateObj);
+    while (currentDate <= endDateObj) {
+      allDatesInRange.push(currentDate.toISOString().split("T")[0]);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
     // Get business if filtering by type
     let businessId: string | undefined;
     if (business_type) {
@@ -114,14 +124,10 @@ serve(async (req) => {
     const { data: resources, error: resError } = await resourcesQuery;
     if (resError) throw resError;
 
-    // Get availability windows for the day of week
-    const queryDateObj = new Date(queryDate);
-    const dayOfWeek = queryDateObj.getDay();
-
+    // Get ALL availability windows (for all days of week)
     const { data: availabilityWindows } = await supabase
       .from("availability_windows")
       .select("*")
-      .eq("day_of_week", dayOfWeek)
       .eq("is_active", true);
 
     // Get existing bookings for the date range
@@ -131,6 +137,7 @@ serve(async (req) => {
         id,
         start_datetime,
         end_datetime,
+        bookable_type_id,
         booking_resources (
           resource_id
         )
@@ -161,17 +168,32 @@ serve(async (req) => {
 
     // Build available slots
     const availableSlots: AvailableSlot[] = [];
-    const blockedResources = new Set<string>();
 
-    // Pre-index intervals per resource for overlap checks
+    // Pre-index bookings per resource with buffer applied
     const bookedByResource = new Map<string, { start: number; end: number }[]>();
     for (const booking of existingBookings || []) {
       const start = new Date(booking.start_datetime).getTime();
-      const end = new Date(booking.end_datetime).getTime();
+      const baseEnd = new Date(booking.end_datetime).getTime();
+      
+      // Find buffer for this booking's bookable type
+      const bt = bookableTypes?.find((t: any) => t.id === booking.bookable_type_id);
+      const bufferAfterMs = ((bt?.buffer_after_mins || 0) * 60 * 1000);
+      const end = baseEnd + bufferAfterMs;
+      
       for (const br of booking.booking_resources || []) {
         const arr = bookedByResource.get(br.resource_id) || [];
         arr.push({ start, end });
         bookedByResource.set(br.resource_id, arr);
+      }
+      
+      // Also block by resource linked to bookable type if no explicit booking_resources
+      if ((!booking.booking_resources || booking.booking_resources.length === 0) && bt) {
+        const linkedResources = resources?.filter((r: any) => r.business_id === bt.business_id) || [];
+        for (const r of linkedResources) {
+          const arr = bookedByResource.get(r.id) || [];
+          arr.push({ start, end });
+          bookedByResource.set(r.id, arr);
+        }
       }
     }
 
@@ -185,76 +207,122 @@ serve(async (req) => {
       holdsByResource.set(hold.resource_id, arr);
     }
 
-    // Mark blocked resources from blackouts
+    // Process blackouts - map by date/resource
+    const blackoutsByDateResource = new Map<string, boolean>();
     blackouts?.forEach((blackout: any) => {
-      if (blackout.resource_id) {
-        blockedResources.add(`${blackout.resource_id}-blackout`);
+      const blackoutStart = new Date(blackout.start_datetime);
+      const blackoutEnd = new Date(blackout.end_datetime);
+      
+      // Mark all dates and resources affected
+      for (const dateStr of allDatesInRange) {
+        const dateObj = new Date(dateStr + "T12:00:00");
+        if (dateObj >= blackoutStart && dateObj <= blackoutEnd) {
+          if (blackout.resource_id) {
+            blackoutsByDateResource.set(`${dateStr}-${blackout.resource_id}`, true);
+          } else if (blackout.business_id) {
+            // Business-wide blackout - mark all resources
+            resources?.filter((r: any) => r.business_id === blackout.business_id).forEach((r: any) => {
+              blackoutsByDateResource.set(`${dateStr}-${r.id}`, true);
+            });
+          }
+        }
       }
     });
 
-    // Generate time slots based on availability windows
-    // NOTE: We still step by 60 minutes for a clean schedule; slot length can be longer via duration_mins.
+    // Generate time slots for EACH day in the range
     const slotLengthMins = Math.max(30, Number(duration_mins || 60));
     const stepMins = 60;
-    availabilityWindows?.forEach((window: any) => {
-      const startHour = parseInt(window.start_time.split(":")[0]);
-      const endHour = parseInt(window.end_time.split(":")[0]);
 
-      for (let minutesFromStart = startHour * 60; minutesFromStart < endHour * 60; minutesFromStart += stepMins) {
-        const startTotalMins = minutesFromStart;
-        const endTotalMins = minutesFromStart + slotLengthMins;
+    for (const dateStr of allDatesInRange) {
+      const dateObj = new Date(dateStr + "T12:00:00"); // Use noon to avoid timezone issues
+      const dayOfWeek = dateObj.getDay();
+      
+      // Find windows for this day of week
+      const windowsForDay = availabilityWindows?.filter((w: any) => w.day_of_week === dayOfWeek) || [];
+      
+      for (const window of windowsForDay) {
+        const startHour = parseInt(window.start_time.split(":")[0]);
+        const startMinute = parseInt(window.start_time.split(":")[1] || "0");
+        const endHour = parseInt(window.end_time.split(":")[0]);
+        const endMinute = parseInt(window.end_time.split(":")[1] || "0");
+        
+        const windowStartMins = startHour * 60 + startMinute;
+        const windowEndMins = endHour * 60 + endMinute;
 
-        // Must fit within the window
-        if (endTotalMins > endHour * 60) continue;
+        // Check which resources or bookable types this window applies to
+        let applicableResources: any[] = [];
+        let applicableBookableType: any = null;
+        
+        if (window.resource_id) {
+          const res = resources?.find((r: any) => r.id === window.resource_id);
+          if (res) applicableResources = [res];
+          applicableBookableType = bookableTypes?.find((bt: any) => bt.business_id === res?.business_id);
+        } else if (window.bookable_type_id) {
+          applicableBookableType = bookableTypes?.find((bt: any) => bt.id === window.bookable_type_id);
+          if (applicableBookableType) {
+            applicableResources = resources?.filter((r: any) => r.business_id === applicableBookableType.business_id) || [];
+          }
+        }
 
-        const pad2 = (n: number) => String(n).padStart(2, "0");
-        const startH = Math.floor(startTotalMins / 60);
-        const startM = startTotalMins % 60;
-        const endH = Math.floor(endTotalMins / 60);
-        const endM = endTotalMins % 60;
+        if (!applicableBookableType || applicableResources.length === 0) continue;
 
-        // Keep datetime strings consistent with existing frontend expectations (no timezone suffix)
-        const slotStart = `${queryDate}T${pad2(startH)}:${pad2(startM)}:00`;
-        const slotEnd = `${queryDate}T${pad2(endH)}:${pad2(endM)}:00`;
+        // Get buffer for this bookable type
+        const bufferAfterMins = applicableBookableType.buffer_after_mins || 0;
 
-        resources?.forEach((resource: any) => {
-          const startMs = new Date(slotStart).getTime();
-          const endMs = new Date(slotEnd).getTime();
+        for (let minutesFromMidnight = windowStartMins; minutesFromMidnight < windowEndMins; minutesFromMidnight += stepMins) {
+          const slotStartMins = minutesFromMidnight;
+          const slotEndMins = minutesFromMidnight + slotLengthMins;
 
-          // Blackout blocks entire resource
-          const isBlackout = blockedResources.has(`${resource.id}-blackout`);
+          // Slot must fit within the window
+          if (slotEndMins > windowEndMins) continue;
 
-          const overlaps = (intervals: { start: number; end: number }[]) =>
-            intervals.some((i) => startMs < i.end && endMs > i.start);
+          const pad2 = (n: number) => String(n).padStart(2, "0");
+          const startH = Math.floor(slotStartMins / 60);
+          const startM = slotStartMins % 60;
+          const endH = Math.floor(slotEndMins / 60);
+          const endM = slotEndMins % 60;
 
-          const isBooked = overlaps(bookedByResource.get(resource.id) || []);
-          const isHeld = overlaps(holdsByResource.get(resource.id) || []);
-          const isBlocked = isBlackout || isBooked || isHeld;
+          const slotStart = `${dateStr}T${pad2(startH)}:${pad2(startM)}:00`;
+          const slotEnd = `${dateStr}T${pad2(endH)}:${pad2(endM)}:00`;
 
-          // Check capacity if party_size specified
-          const hasCapacity = !party_size || (resource.capacity && resource.capacity >= party_size);
+          for (const resource of applicableResources) {
+            const slotStartMs = new Date(slotStart).getTime();
+            const slotEndMs = new Date(slotEnd).getTime();
+            // Add buffer when checking for conflicts (the new booking needs buffer room after it)
+            const slotEndWithBufferMs = slotEndMs + (bufferAfterMins * 60 * 1000);
 
-          // Find matching bookable type
-          const matchingBT = bookableTypes?.find((bt: any) => bt.business_id === resource.business_id);
-          if (!matchingBT) return;
+            // Check blackout
+            const isBlackout = blackoutsByDateResource.get(`${dateStr}-${resource.id}`) === true;
 
-          // Find package pricing
-          const pkg = packages?.find((p: any) => p.bookable_type_id === matchingBT.id);
+            // Check overlap with existing bookings (which already include their buffer)
+            const overlaps = (intervals: { start: number; end: number }[]) =>
+              intervals.some((i) => slotStartMs < i.end && slotEndWithBufferMs > i.start);
 
-          availableSlots.push({
-            id: `${resource.id}-${slotStart}`,
-            start_time: slotStart,
-            end_time: slotEnd,
-            resource_id: resource.id,
-            resource_name: resource.name,
-            bookable_type_id: matchingBT.id,
-            bookable_type_name: matchingBT.name,
-            base_price: pkg?.base_price || 0,
-            is_available: !isBlocked && hasCapacity,
-          });
-        });
+            const isBooked = overlaps(bookedByResource.get(resource.id) || []);
+            const isHeld = overlaps(holdsByResource.get(resource.id) || []);
+            const isBlocked = isBlackout || isBooked || isHeld;
+
+            // Check capacity if party_size specified
+            const hasCapacity = !party_size || (resource.capacity && resource.capacity >= party_size);
+
+            // Find package pricing
+            const pkg = packages?.find((p: any) => p.bookable_type_id === applicableBookableType.id);
+
+            availableSlots.push({
+              id: `${resource.id}-${slotStart}`,
+              start_time: slotStart,
+              end_time: slotEnd,
+              resource_id: resource.id,
+              resource_name: resource.name,
+              bookable_type_id: applicableBookableType.id,
+              bookable_type_name: applicableBookableType.name,
+              base_price: pkg?.base_price || 0,
+              is_available: !isBlocked && hasCapacity,
+            });
+          }
+        }
       }
-    });
+    }
 
     // Get next available slots per business for the "Next Available" widget
     const nextAvailable: Record<string, AvailableSlot[]> = {};
