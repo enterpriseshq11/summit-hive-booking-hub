@@ -46,11 +46,11 @@ export function ShareReferral({ isAuthenticated }: ShareReferralProps) {
             <Users className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-bold text-white">Share & Earn</h3>
-            <p className="text-xs text-zinc-500">Referral bonuses coming soon</p>
+            <h3 className="font-bold text-lg text-white">Share & Earn</h3>
+            <p className="text-sm text-zinc-300">Referral bonuses coming soon</p>
           </div>
         </div>
-        <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">
+        <Badge variant="outline" className="border-primary/40 text-primary text-xs font-semibold">
           <Clock className="w-3 h-3 mr-1" />
           COMING
         </Badge>
@@ -62,25 +62,25 @@ export function ShareReferral({ isAuthenticated }: ShareReferralProps) {
           <div className="flex items-center gap-3 mb-3">
             <Gift className="w-5 h-5 text-primary" />
             <div>
-              <p className="text-sm text-white font-medium">Referral Rewards</p>
-              <p className="text-xs text-zinc-500">Earn bonus entries for each friend</p>
+              <p className="text-base text-white font-semibold">Referral Rewards</p>
+              <p className="text-sm text-zinc-300">Earn bonus entries for each friend</p>
             </div>
           </div>
           
           {/* Disabled Progress Bar - Coming Soon placeholder */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-zinc-500">Friends referred</span>
-              <span className="text-zinc-600">0 / 5</span>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-zinc-300">Friends referred</span>
+              <span className="text-zinc-400 font-medium">0 / 5</span>
             </div>
             <Progress value={0} className="h-2 bg-zinc-700" />
-            <p className="text-[10px] text-zinc-600 text-center">
+            <p className="text-xs text-zinc-400 text-center">
               Referral tracking coming soon
             </p>
           </div>
         </div>
         
-        <p className="text-sm text-zinc-400">
+        <p className="text-base text-zinc-200 leading-relaxed">
           Share this page with friends now to prepare for future referral bonuses!
         </p>
       </div>
@@ -102,7 +102,7 @@ export function ShareReferral({ isAuthenticated }: ShareReferralProps) {
         </Button>
       </div>
       
-      <p className="text-[10px] text-zinc-600 text-center mt-2">
+      <p className="text-xs text-zinc-400 text-center mt-3">
         Sharing now prepares you for future referral bonuses
       </p>
     </Card>
