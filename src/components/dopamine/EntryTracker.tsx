@@ -62,7 +62,7 @@ function CountdownTimer({ targetDate }: { targetDate: string }) {
           >
             {item.value.toString().padStart(2, '0')}
           </motion.span>
-          <span className="text-[10px] text-zinc-500 uppercase tracking-wide">{item.label}</span>
+          <span className="text-xs text-zinc-300 uppercase tracking-wide font-medium">{item.label}</span>
         </div>
       ))}
     </div>
@@ -151,36 +151,36 @@ export function EntryTracker({
           >
             {spinsRemaining}
           </motion.div>
-          <div className="text-sm text-zinc-400 mt-1 flex items-center justify-center gap-1">
+          <div className="text-sm text-zinc-200 mt-1 flex items-center justify-center gap-1 font-medium">
             <Ticket className="w-4 h-4" />
             Spins Remaining Today
           </div>
           {isVip && (
-            <div className="text-xs text-primary mt-1 font-medium">VIP: {maxSpins} spins/day</div>
+            <div className="text-sm text-primary mt-1 font-semibold">VIP: {maxSpins} spins/day</div>
           )}
         </div>
         
         {/* Streak Visualization with Progress Bar */}
         <div className="bg-zinc-800/60 rounded-lg p-3 border border-zinc-700/50">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-zinc-400 flex items-center gap-2">
+            <span className="text-sm text-zinc-200 flex items-center gap-2 font-medium">
               <Flame className={`w-4 h-4 ${streak > 0 ? 'text-orange-500 animate-pulse' : 'text-zinc-600'}`} />
               Current Streak
             </span>
             <div className="flex items-center gap-1">
               <span className="font-bold text-xl text-white">{streak}</span>
-              <span className="text-xs text-zinc-500">days</span>
+              <span className="text-sm text-zinc-300">days</span>
               {streak >= 3 && <span className="text-orange-500 ml-1">🔥</span>}
               {streak >= 7 && <span>🔥</span>}
             </div>
           </div>
           <Progress value={streakProgress} className="h-2 bg-zinc-700" />
-          <p className="text-xs text-zinc-500 mt-2">Keep your streak alive to earn bonus entries</p>
+          <p className="text-sm text-zinc-300 mt-2">Keep your streak alive to earn bonus entries</p>
         </div>
 
         {/* Entry Breakdown - Separated rows with strong contrast */}
         <div className="space-y-2">
-          <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+          <div className="text-sm font-semibold text-zinc-200 uppercase tracking-wider mb-2">
             This Month's Entries
           </div>
           
@@ -241,7 +241,7 @@ export function EntryTracker({
 
         {/* ISOLATED: Total Entries - Emphasized */}
         <div className="bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-xl p-4 border border-primary/40 text-center">
-          <div className="text-xs text-zinc-400 uppercase tracking-wider mb-1">Total Entries</div>
+          <div className="text-sm text-zinc-200 uppercase tracking-wider mb-1 font-semibold">Total Entries</div>
           <motion.div 
             key={totalEntries}
             initial={{ scale: 1.2 }}
@@ -251,7 +251,7 @@ export function EntryTracker({
             {totalEntries}
           </motion.div>
           {isVip && (
-            <div className="text-xs text-primary/80 mt-1 flex items-center justify-center gap-1">
+            <div className="text-sm text-primary mt-1 flex items-center justify-center gap-1 font-semibold">
               <Zap className="w-3 h-3" />
               2x multiplier active
             </div>
@@ -260,8 +260,8 @@ export function EntryTracker({
 
         {/* Draw Countdown */}
         <div className="bg-zinc-800/40 rounded-lg p-3 border border-zinc-700/50">
-          <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
-            <Timer className="w-3 h-3" />
+          <div className="flex items-center gap-2 text-sm font-semibold text-zinc-200 uppercase tracking-wider mb-2">
+            <Timer className="w-4 h-4" />
             Grand Draw Countdown
           </div>
           <CountdownTimer targetDate={drawDate} />
