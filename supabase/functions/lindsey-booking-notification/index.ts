@@ -12,9 +12,11 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[LINDSEY-NOTIFICATION] ${step}${detailsStr}`);
 };
 
-// Provider settings - Lindsey (using verified domain: azenterpriseshq.com)
-const LINDSEY_EMAIL = "lindsey@azenterpriseshq.com";
-const LINDSEY_PHONE = "+15676441090";
+// Provider settings - Lindsey
+// IMPORTANT: Staff inbox uses @a-zenterpriseshq.com (with hyphen)
+// FROM/sender uses @azenterpriseshq.com (no hyphen, verified in Resend)
+const LINDSEY_EMAIL = "lindsey@a-zenterpriseshq.com";
+const LINDSEY_PHONE = "+15676441019";
 const FROM_EMAIL = "A-Z Enterprises <no-reply@azenterpriseshq.com>";
 const REPLY_TO_EMAIL = "info@azenterpriseshq.com";
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
