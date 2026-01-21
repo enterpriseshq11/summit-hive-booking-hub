@@ -1,6 +1,8 @@
-import { Share2, Copy, Check } from "lucide-react";
+import { Share2, Copy, Check, Users, Gift, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -36,34 +38,73 @@ export function ShareReferral({ isAuthenticated }: ShareReferralProps) {
   };
 
   return (
-    <Card className="p-6 bg-zinc-900/80 border-zinc-700 h-full flex flex-col">
-      <div className="flex items-center gap-3 mb-4">
-        <Share2 className="w-6 h-6 text-primary" />
-        <div>
-          <h3 className="font-bold text-white">Share & Earn</h3>
-          <p className="text-sm text-muted-foreground">Tell friends about Spin & Win</p>
+    <Card className="p-5 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-zinc-700 h-full flex flex-col">
+      {/* Header with Coming Soon Badge */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-full">
+            <Users className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-bold text-white">Share & Earn</h3>
+            <p className="text-xs text-zinc-500">Referral bonuses coming soon</p>
+          </div>
         </div>
+        <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">
+          <Clock className="w-3 h-3 mr-1" />
+          COMING
+        </Badge>
       </div>
       
-      <p className="text-sm text-zinc-400 mb-4 flex-1">
-        Share this page with friends. Future referral bonuses coming soon!
-      </p>
+      {/* Visual emphasis for referrals coming */}
+      <div className="flex-1 space-y-4">
+        <div className="bg-zinc-800/60 rounded-lg p-4 border border-zinc-700/50">
+          <div className="flex items-center gap-3 mb-3">
+            <Gift className="w-5 h-5 text-primary" />
+            <div>
+              <p className="text-sm text-white font-medium">Referral Rewards</p>
+              <p className="text-xs text-zinc-500">Earn bonus entries for each friend</p>
+            </div>
+          </div>
+          
+          {/* Disabled Progress Bar - Coming Soon placeholder */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-zinc-500">Friends referred</span>
+              <span className="text-zinc-600">0 / 5</span>
+            </div>
+            <Progress value={0} className="h-2 bg-zinc-700" />
+            <p className="text-[10px] text-zinc-600 text-center">
+              Referral tracking coming soon
+            </p>
+          </div>
+        </div>
+        
+        <p className="text-sm text-zinc-400">
+          Share this page with friends now to prepare for future referral bonuses!
+        </p>
+      </div>
       
-      <div className="flex gap-2">
+      {/* Share Buttons */}
+      <div className="flex gap-2 mt-4">
         <Button 
-          className="flex-1 border border-primary/40 bg-transparent text-primary hover:bg-primary/20 hover:border-primary"
+          className="flex-1 border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary font-semibold"
           onClick={handleShare}
         >
           <Share2 className="w-4 h-4 mr-2" />
-          Share
+          Share Page
         </Button>
         <Button 
-          className="border border-primary/40 bg-transparent text-primary hover:bg-primary/20 hover:border-primary"
+          className="border border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:border-zinc-500"
           onClick={handleCopy}
         >
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
         </Button>
       </div>
+      
+      <p className="text-[10px] text-zinc-600 text-center mt-2">
+        Sharing now prepares you for future referral bonuses
+      </p>
     </Card>
   );
 }
