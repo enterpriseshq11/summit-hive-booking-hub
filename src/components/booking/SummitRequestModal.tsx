@@ -27,7 +27,6 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useBookableTypes } from "@/hooks/useBookableTypes";
-import { useCreateBooking } from "@/hooks/useBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -68,7 +67,6 @@ export function SummitRequestModal({
   const { user, authUser } = useAuth();
   const { data: business } = useBusinessByType("summit");
   const { data: bookableTypes } = useBookableTypes(business?.id);
-  const createBooking = useCreateBooking();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -128,6 +126,23 @@ export function SummitRequestModal({
     return type?.id || bookableTypes[0]?.id;
   };
 
+  const formatSubmitError = (err: unknown) => {
+    const anyErr = err as any;
+    const msg =
+      (typeof anyErr?.message === "string" && anyErr.message) ||
+      (typeof anyErr?.error === "string" && anyErr.error) ||
+      (typeof anyErr?.error_description === "string" && anyErr.error_description) ||
+      (typeof anyErr?.details === "string" && anyErr.details) ||
+      (typeof anyErr?.hint === "string" && anyErr.hint) ||
+      (typeof err === "string" ? err : "");
+    if (msg) return msg;
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return String(err);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -162,7 +177,6 @@ export function SummitRequestModal({
       const bookingData = {
         business_id: business.id,
         bookable_type_id: bookableTypeId,
-        customer_id: user?.id || null,
         guest_name: guestName || null,
         guest_email: guestEmail || null,
         guest_phone: guestPhone || null,
@@ -183,39 +197,28 @@ export function SummitRequestModal({
             : "",
           notes ? `Additional notes: ${notes}` : "",
         ].filter(Boolean).join("\n"),
-        status: "pending" as const,
-        source_brand: "summit",
-        subtotal: 0,
-        total_amount: 0,
-        // DB trigger sets booking_number when NULL. Types currently require a string, so we cast.
-        booking_number: null as any,
       };
 
-      const result = await createBooking.mutateAsync(bookingData);
-
-      // Fire centralized notification pipeline immediately (request-based flow)
-      const { error: notifyError } = await supabase.functions.invoke("send-booking-notification", {
-        body: {
-          booking_id: result.id,
-          notification_type: "request",
-          channels: ["email", "sms"],
-          recipients: ["customer", "staff"],
-        },
+      // IMPORTANT: Summit requests are submitted via backend function to avoid anonymous RLS failures.
+      const { data, error } = await supabase.functions.invoke("summit-request", {
+        body: bookingData,
       });
-      if (notifyError) throw notifyError;
+      if (error) throw error;
+      if (!data?.booking_id) throw new Error("Submit succeeded but no booking_id was returned.");
 
       // Best-effort audit log (do not block submission for public/anon users)
       try {
         await supabase.from("audit_log").insert([
           {
             entity_type: "booking",
-            entity_id: result.id,
+            entity_id: data.booking_id,
             action_type: "summit_event_request",
             after_json: {
               event_type: selectedEventType,
               guest_range: guestRange,
               budget_comfort: budgetComfort,
               wants_tour: wantsTour,
+              notifications: data?.notify,
             } as any,
           },
         ]);
@@ -228,12 +231,18 @@ export function SummitRequestModal({
       setTimeout(() => {
         onOpenChange(false);
         setIsSuccess(false);
-        navigate(`/booking/confirmation?id=${result.id}&pending=true`);
+        navigate(`/booking/confirmation?id=${data.booking_id}&pending=true`);
       }, 2000);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      console.error("[SummitRequestModal] Submit failed", {
+        error,
+        selectedEventType,
+        preferredDates: preferredDates.map((d) => d.toISOString()),
+        businessId: business?.id,
+      });
+      const message = formatSubmitError(error);
       toast.error("Unable to submit — please try again.", {
-        description: message || "If this continues, please contact us directly.",
+        description: message?.slice(0, 280) || "If this continues, please contact us directly.",
       });
     } finally {
       setIsSubmitting(false);
