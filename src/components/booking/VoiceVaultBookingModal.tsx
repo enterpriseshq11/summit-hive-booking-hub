@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { format, addDays, startOfToday } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Calendar as CalendarIcon, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -78,7 +81,7 @@ export function VoiceVaultBookingModal({
   const [whiteGloveOption, setWhiteGloveOption] = useState<WhiteGlovePaymentOption>("standard");
 
   // Hourly booking details
-  const [bookingDate, setBookingDate] = useState("");
+  const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
   const [startTime, setStartTime] = useState("09:00");
   const [durationHours, setDurationHours] = useState("2");
 
@@ -92,13 +95,16 @@ export function VoiceVaultBookingModal({
     setBookingType(initialType || "hourly");
     setPaymentPlan("weekly");
     setWhiteGloveOption("standard");
-    setBookingDate("");
+    setBookingDate(undefined);
     setStartTime("09:00");
     setDurationHours("2");
     setCustomerName("");
     setCustomerEmail("");
     setCustomerPhone("");
   };
+
+  const today = startOfToday();
+  const maxDate = addDays(today, 60); // Allow booking up to 60 days out
 
   const handleClose = () => {
     resetForm();
@@ -132,7 +138,7 @@ export function VoiceVaultBookingModal({
       };
 
       if (bookingType === "hourly") {
-        payload.booking_date = bookingDate;
+        payload.booking_date = bookingDate ? format(bookingDate, "yyyy-MM-dd") : "";
         payload.start_time = startTime;
         payload.end_time = calculateEndTime(startTime, parseInt(durationHours));
         payload.duration_hours = parseInt(durationHours);
@@ -203,7 +209,7 @@ export function VoiceVaultBookingModal({
       <DialogContent className="max-w-md sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-accent" />
+            <CalendarIcon className="w-6 h-6 text-accent" />
             {getStepTitle()}
           </DialogTitle>
           <DialogDescription>
@@ -276,14 +282,23 @@ export function VoiceVaultBookingModal({
           {step === "details" && bookingType === "hourly" && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="booking-date">Date</Label>
-                <Input
-                  id="booking-date"
-                  type="date"
-                  value={bookingDate}
-                  onChange={(e) => setBookingDate(e.target.value)}
-                  min={new Date().toISOString().split("T")[0]}
-                />
+                <Label>Select a Date</Label>
+                <div className="rounded-lg border border-border p-3 bg-card">
+                  <CalendarComponent
+                    mode="single"
+                    selected={bookingDate}
+                    onSelect={setBookingDate}
+                    disabled={(date) => date < today}
+                    fromDate={today}
+                    toDate={maxDate}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </div>
+                {bookingDate && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Selected: <span className="font-medium text-foreground">{format(bookingDate, "EEEE, MMMM d, yyyy")}</span>
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -472,11 +487,11 @@ export function VoiceVaultBookingModal({
                     {bookingType === "white_glove" && whiteGlove.name}
                   </span>
                 </div>
-                {bookingType === "hourly" && (
+                {bookingType === "hourly" && bookingDate && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Date & Time</span>
                     <span className="font-medium text-foreground">
-                      {bookingDate} at {startTime}
+                      {format(bookingDate, "MMM d, yyyy")} at {startTime}
                     </span>
                   </div>
                 )}
