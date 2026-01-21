@@ -282,9 +282,14 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
         return;
       }
 
-      // Redirect to Stripe checkout
+      // Redirect to Stripe checkout - use window.open like Voice Vault for reliability
       if (data?.url) {
-        window.location.href = data.url;
+        toast.success("Redirecting to secure payment...");
+        window.open(data.url, "_blank");
+        // Show confirmation in current window
+        setBookingComplete(true);
+        setStep("confirm");
+        onBookingComplete?.();
       } else {
         throw new Error("No checkout URL received");
       }
