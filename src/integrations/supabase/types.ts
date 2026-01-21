@@ -2003,6 +2003,109 @@ export type Database = {
           },
         ]
       }
+      notification_logs: {
+        Row: {
+          booking_id: string | null
+          channel: string
+          created_at: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          notification_type: string
+          provider: string | null
+          provider_message_id: string | null
+          recipient_email: string | null
+          recipient_phone: string | null
+          recipient_type: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          channel: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          notification_type: string
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          recipient_type: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          notification_type?: string
+          provider?: string | null
+          provider_message_id?: string | null
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          recipient_type?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          setting_key: string
+          setting_value: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          setting_key: string
+          setting_value: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string
@@ -3495,6 +3598,54 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_reminders: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          notification_log_id: string | null
+          processed_at: string | null
+          reminder_type: string
+          scheduled_for: string
+          status: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          notification_log_id?: string | null
+          processed_at?: string | null
+          reminder_type: string
+          scheduled_for: string
+          status?: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          notification_log_id?: string | null
+          processed_at?: string | null
+          reminder_type?: string
+          scheduled_for?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_reminders_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_reminders_notification_log_id_fkey"
+            columns: ["notification_log_id"]
+            isOneToOne: false
+            referencedRelation: "notification_logs"
             referencedColumns: ["id"]
           },
         ]
