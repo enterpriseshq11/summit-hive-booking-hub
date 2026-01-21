@@ -10,9 +10,6 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[LINDSEY-STAFF-SMS] ${step}${detailsStr}`);
 };
 
-// Lindsey staff line
-const LINDSEY_STAFF_PHONE = "+15676441019";
-
 interface LindseyStaffBookingNotificationRequest {
   booking_id: string;
   type: "confirmed";
@@ -84,6 +81,19 @@ serve(async (req) => {
     const { booking_id } = payload;
     logStep("Request received", { booking_id });
 
+    // Load Lindsey's phone from secrets (NO hardcoded values)
+    const lindseyPhone = Deno.env.get("LINDSEY_NOTIFY_PHONE");
+    if (!lindseyPhone) {
+      logStep("LINDSEY_NOTIFY_PHONE not configured - skipping SMS");
+      return new Response(
+        JSON.stringify({ success: true, sms_sent: false, sms_error: "Phone number not configured" }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
     if (!booking_id) {
       return new Response(JSON.stringify({ error: "booking_id is required" }), {
         status: 400,
@@ -127,7 +137,7 @@ serve(async (req) => {
 
     const sms = `NEW LINDSEY BOOKING\n${dateStr} @ ${timeStr} • ${durationMins} min\nName: ${booking.guest_name || "(no name)"} • Phone: ${booking.guest_phone || "(no phone)"}\nDeposit: ${formatMoney(deposit)} • Due on arrival: ${formatMoney(dueOnArrival)}`;
 
-    const smsResult = await sendSMS(LINDSEY_STAFF_PHONE, sms);
+    const smsResult = await sendSMS(lindseyPhone, sms);
 
     return new Response(
       JSON.stringify({
