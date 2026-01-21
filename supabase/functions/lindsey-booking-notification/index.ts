@@ -29,10 +29,12 @@ interface BookingNotificationRequest {
 async function sendSMS(to: string, message: string): Promise<{ success: boolean; sid?: string; error?: string }> {
   const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
   const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
-  const fromPhone = Deno.env.get("TWILIO_PHONE_NUMBER");
+  // Backwards compatible env var support
+  const fromPhone = Deno.env.get("TWILIO_FROM_NUMBER") || Deno.env.get("TWILIO_PHONE_NUMBER");
+  const messagingServiceSid = Deno.env.get("TWILIO_MESSAGING_SERVICE_SID");
 
   // Skip SMS if Twilio not configured
-  if (!accountSid || !authToken || !fromPhone) {
+  if (!accountSid || !authToken || (!fromPhone && !messagingServiceSid)) {
     logStep("SMS skipped - Twilio not configured");
     return { success: false, error: "Twilio not configured" };
   }
@@ -49,7 +51,7 @@ async function sendSMS(to: string, message: string): Promise<{ success: boolean;
       },
       body: new URLSearchParams({
         To: to,
-        From: fromPhone,
+        ...(messagingServiceSid ? { MessagingServiceSid: messagingServiceSid } : { From: fromPhone! }),
         Body: message,
       }),
     });
