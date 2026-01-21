@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,42 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLindseyAvailability, isPromoDate, calculateServicePrice } from "@/hooks/useLindseyAvailability";
+import { useCreateSlotHold, useReleaseSlotHold } from "@/hooks/useAvailability";
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function getHashQueryParams() {
+  // With HashRouter, query params often live inside window.location.hash.
+  // Example: "#/book-with-lindsey?booking=success&id=..."
+  const hash = window.location.hash || "";
+  const qIndex = hash.indexOf("?");
+  const queryString = qIndex >= 0 ? hash.slice(qIndex + 1) : "";
+  return new URLSearchParams(queryString);
+}
+
+async function getFunctionErrorMessage(err: unknown) {
+  const anyErr = err as any;
+  const context = anyErr?.context;
+
+  try {
+    if (context instanceof Response) {
+      const text = await context.text();
+      try {
+        const json = JSON.parse(text);
+        if (json?.error) return String(json.error);
+      } catch {
+        // ignore
+      }
+      return text || anyErr?.message;
+    }
+  } catch {
+    // ignore
+  }
+
+  return anyErr?.message || "Something went wrong";
+}
 
 // Service option type
 interface ServiceOption {
@@ -130,6 +166,10 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
+  const [activeHoldId, setActiveHoldId] = useState<string | null>(null);
+
+  const createHold = useCreateSlotHold();
+  const releaseHold = useReleaseSlotHold();
   
   // Refs for scrolling to steps
   const calendarStepRef = useRef<HTMLDivElement>(null);
@@ -223,8 +263,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       return;
     }
 
-    if (!guestInfo.name || !guestInfo.email) {
-      toast.error("Please provide your name and email");
+    if (!guestInfo.name.trim() || !isValidEmail(guestInfo.email)) {
+      toast.error("Please provide your name and a valid email");
       return;
     }
 
@@ -234,7 +274,6 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
     setIsSubmitting(true);
 
     try {
-      // Create the booking in the database
       const startDatetime = `${format(selectedDate, "yyyy-MM-dd")}T${selectedTime}:00`;
       const endMinutes = selectedDuration || 60;
       const [hours, mins] = selectedTime.split(":").map(Number);
@@ -243,84 +282,91 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       const endTime = `${String(endHours).padStart(2, "0")}:${String(endMins).padStart(2, "0")}`;
       const endDatetime = `${format(selectedDate, "yyyy-MM-dd")}T${endTime}:00`;
 
-      // Get spa business ID
-      const { data: business } = await supabase
-        .from("businesses")
-        .select("id")
-        .eq("type", "spa")
-        .single();
+      const price = calculatePrice() || 0;
 
-      if (!business) {
-        throw new Error("Business not found");
-      }
+      // 1) Create a temporary hold so nobody else can take the slot mid-checkout.
+      const hold = await createHold.mutateAsync({
+        bookable_type_id: "lindsey-massage",
+        resource_id: roomId,
+        start_datetime: startDatetime,
+        end_datetime: endDatetime,
+      });
+      setActiveHoldId(hold.id);
 
-      // Get or create bookable type
-      const { data: bookableType } = await supabase
-        .from("bookable_types")
-        .select("id")
-        .eq("business_id", business.id)
-        .eq("slug", "massage")
-        .single();
-
-      const bookableTypeId = bookableType?.id || business.id;
-
-      // Create booking
-      const { error: bookingError } = await supabase
-        .from("bookings")
-        .insert({
-          business_id: business.id,
-          bookable_type_id: bookableTypeId,
-          booking_number: `SPA-${Date.now()}`,
+      // 2) Create Stripe checkout session + pending booking (server-side).
+      const notes = `Service: ${getSelectedServiceData()?.name}, Duration: ${selectedDuration} min, Room: ${ROOMS.find(r => r.id === roomId)?.name}`;
+      const { data, error } = await supabase.functions.invoke("lindsey-checkout", {
+        body: {
+          hold_id: hold.id,
+          resource_id: roomId,
           start_datetime: startDatetime,
           end_datetime: endDatetime,
-          guest_name: guestInfo.name,
-          guest_email: guestInfo.email,
-          guest_phone: guestInfo.phone || null,
-          status: "pending",
-          subtotal: calculatePrice() || 0,
-          total_amount: calculatePrice() || 0,
-          notes: `Service: ${getSelectedServiceData()?.name}, Duration: ${selectedDuration} min, Room: ${ROOMS.find(r => r.id === roomId)?.name}`,
-        });
+          guest_name: guestInfo.name.trim(),
+          guest_email: guestInfo.email.trim(),
+          guest_phone: guestInfo.phone.trim() || null,
+          total_amount: price,
+          notes,
+        },
+      });
 
-      if (bookingError) {
-        console.error("Booking error:", bookingError);
-        throw bookingError;
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.assign(data.url);
+        return;
       }
 
-      // Send notification email
-      try {
-        await supabase.functions.invoke("spa-booking-notification", {
-          body: {
-            type: "booking_confirmation",
-            booking: {
-              guest_name: guestInfo.name,
-              guest_email: guestInfo.email,
-              guest_phone: guestInfo.phone,
-              service_name: getSelectedServiceData()?.name,
-              duration: selectedDuration,
-              room_name: ROOMS.find(r => r.id === roomId)?.name,
-              date: format(selectedDate, "EEEE, MMMM d, yyyy"),
-              time: format(new Date(`2000-01-01T${selectedTime}`), "h:mm a"),
-              price: calculatePrice(),
-            },
-          },
-        });
-      } catch (notificationError) {
-        console.warn("Notification error:", notificationError);
-        // Don't fail the booking if notification fails
+      // Free consults: confirm instantly with no checkout.
+      if (data?.free === true) {
+        setBookingComplete(true);
+        setStep("confirm");
+        toast.success("You're booked.");
+        onBookingComplete?.();
+        return;
       }
 
-      setBookingComplete(true);
-      setStep("confirm");
-      toast.success("Booking request submitted! Lindsey will confirm within 24 hours.");
-      onBookingComplete?.();
+      throw new Error("No checkout URL returned");
     } catch (error) {
       console.error("Booking submission error:", error);
-      toast.error("Failed to submit booking. Please try again.");
+      const message = await getFunctionErrorMessage(error);
+      toast.error(message);
+
+      // Best-effort: release hold on failure
+      if (activeHoldId) {
+        try {
+          await releaseHold.mutateAsync(activeHoldId);
+        } catch {
+          // ignore
+        }
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    // Handle return-from-payment (Stripe success/cancel URLs)
+    const params = getHashQueryParams();
+    const booking = params.get("booking");
+    const bookingId = params.get("id");
+    const holdId = params.get("hold_id");
+
+    if (booking === "cancelled" && holdId) {
+      releaseHold.mutate(holdId);
+      toast.message("Payment cancelled", { description: "Your time slot was released." });
+      // Remove params from hash to avoid repeated toasts
+      window.location.hash = window.location.hash.split("?")[0];
+      return;
+    }
+
+    if (booking === "success" && bookingId) {
+      setBookingComplete(true);
+      setStep("confirm");
+      toast.success("You're booked.");
+      onBookingComplete?.();
+      window.location.hash = window.location.hash.split("?")[0];
+    }
+  }, [onBookingComplete, releaseHold]);
 
   const resetBooking = () => {
     setSelectedService(null);
@@ -763,7 +809,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                 </Button>
 
                 <p className="text-center text-xs text-muted-foreground">
-                  Lindsey will confirm within 24 hours. No payment required now.
+                  Secure payment is required to confirm your time.
                 </p>
               </form>
             )}
