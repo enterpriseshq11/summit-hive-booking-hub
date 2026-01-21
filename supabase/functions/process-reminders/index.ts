@@ -33,6 +33,7 @@ serve(async (req) => {
         id,
         booking_id,
         reminder_type,
+        recipient_type,
         scheduled_for,
         bookings(status)
       `)
@@ -64,6 +65,8 @@ serve(async (req) => {
           continue;
         }
 
+        const recipientType = (reminder as { recipient_type?: string }).recipient_type || "customer";
+
         // Call the notification function
         const notificationUrl = `${supabaseUrl}/functions/v1/send-booking-notification`;
         const response = await fetch(notificationUrl, {
@@ -75,8 +78,10 @@ serve(async (req) => {
           body: JSON.stringify({
             booking_id: reminder.booking_id,
             notification_type: "reminder",
-            channels: ["email", "sms"],
-            recipients: ["customer"],
+            reminder_type: reminder.reminder_type,
+            // Customer: email only. Staff (Victoria): email + sms.
+            channels: recipientType === "staff" ? ["email", "sms"] : ["email"],
+            recipients: recipientType === "staff" ? ["staff"] : ["customer"],
           }),
         });
 

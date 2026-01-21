@@ -12,10 +12,7 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[BOOKING-NOTIFICATION] ${step}${detailsStr}`);
 };
 
-// ============= CONFIGURATION =============
-// Verified domain: azenterpriseshq.com (no hyphen)
-const FROM_EMAIL = "A-Z Enterprises <no-reply@azenterpriseshq.com>";
-const REPLY_TO_EMAIL = "info@azenterpriseshq.com";
+// ============= CONFIGURATION (ENV-DRIVEN) =============
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
 const BUSINESS_PHONE = "(567) 644-1090";
 
@@ -43,7 +40,8 @@ function safeJson(value: unknown, maxLen = 2000): string {
 
 interface NotificationRequest {
   booking_id: string;
-  notification_type: "confirmation" | "reminder" | "cancellation" | "reschedule";
+  notification_type: "request" | "confirmation" | "reminder" | "cancellation" | "reschedule";
+  reminder_type?: string;
   channels?: ("email" | "sms")[];
   recipients?: ("customer" | "staff")[];
   stripe_session_id?: string;
@@ -130,34 +128,98 @@ async function logNotification(
 async function scheduleReminders(
   supabase: any,
   bookingId: string,
-  startDatetime: string
+  startDatetime: string,
+  opts: {
+    recipientTypes: Array<"customer" | "staff">;
+    reminderTypes: Array<"24h" | "2h" | "day_of_morning" | "1h">;
+    timezone: string;
+  }
 ) {
   const start = new Date(startDatetime);
   const now = new Date();
 
-  // 24h reminder
-  const reminder24h = new Date(start.getTime() - 24 * 60 * 60 * 1000);
-  if (reminder24h > now) {
-    await supabase.from("scheduled_reminders").upsert({
-      booking_id: bookingId,
-      reminder_type: "24h",
-      scheduled_for: reminder24h.toISOString(),
-      status: "pending",
-    }, { onConflict: "booking_id,reminder_type" });
+  // Helpers: timezone-aware date creation (no external deps)
+  const getTzOffsetMs = (date: Date, timeZone: string) => {
+    const dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    const parts = dtf.formatToParts(date);
+    const map = Object.fromEntries(parts.filter((p) => p.type !== "literal").map((p) => [p.type, p.value]));
+    const asUTC = Date.UTC(
+      Number(map.year),
+      Number(map.month) - 1,
+      Number(map.day),
+      Number(map.hour),
+      Number(map.minute),
+      Number(map.second)
+    );
+    return asUTC - date.getTime();
+  };
+
+  const makeZonedTime = (
+    y: number,
+    m: number,
+    d: number,
+    hh: number,
+    mm: number,
+    ss: number,
+    timeZone: string
+  ) => {
+    // Start with an approximate UTC time, then correct once using tz offset.
+    const approx = new Date(Date.UTC(y, m - 1, d, hh, mm, ss));
+    const offset = getTzOffsetMs(approx, timeZone);
+    return new Date(approx.getTime() - offset);
+  };
+
+  const startParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: opts.timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(start);
+  const partsMap = Object.fromEntries(startParts.filter((p) => p.type !== "literal").map((p) => [p.type, p.value]));
+  const y = Number(partsMap.year);
+  const m = Number(partsMap.month);
+  const d = Number(partsMap.day);
+
+  const scheduleForType = (type: "24h" | "2h" | "day_of_morning" | "1h") => {
+    if (type === "24h") return new Date(start.getTime() - 24 * 60 * 60 * 1000);
+    if (type === "2h") return new Date(start.getTime() - 2 * 60 * 60 * 1000);
+    if (type === "1h") return new Date(start.getTime() - 1 * 60 * 60 * 1000);
+    // Morning-of at 9:00 AM local
+    return makeZonedTime(y, m, d, 9, 0, 0, opts.timezone);
+  };
+
+  let scheduledCount = 0;
+  for (const reminderType of opts.reminderTypes) {
+    const scheduledFor = scheduleForType(reminderType);
+    if (scheduledFor <= now) continue;
+
+    for (const recipientType of opts.recipientTypes) {
+      await supabase
+        .from("scheduled_reminders")
+        .upsert(
+          {
+            booking_id: bookingId,
+            reminder_type: reminderType,
+            recipient_type: recipientType,
+            scheduled_for: scheduledFor.toISOString(),
+            status: "pending",
+          },
+          { onConflict: "booking_id,reminder_type,recipient_type" }
+        );
+      scheduledCount++;
+    }
   }
 
-  // 2h reminder
-  const reminder2h = new Date(start.getTime() - 2 * 60 * 60 * 1000);
-  if (reminder2h > now) {
-    await supabase.from("scheduled_reminders").upsert({
-      booking_id: bookingId,
-      reminder_type: "2h",
-      scheduled_for: reminder2h.toISOString(),
-      status: "pending",
-    }, { onConflict: "booking_id,reminder_type" });
-  }
-
-  logStep("Reminders scheduled", { bookingId, reminder24h: reminder24h.toISOString(), reminder2h: reminder2h.toISOString() });
+  logStep("Reminders scheduled", { bookingId, scheduledCount, reminderTypes: opts.reminderTypes, recipientTypes: opts.recipientTypes, timezone: opts.timezone });
 }
 
 // ============= EMAIL TEMPLATES =============
@@ -168,8 +230,56 @@ function getBusinessLabel(businessType: string): string {
     coworking: "The Hive by A-Z",
     event_center: "Memory Maker Event Center",
     fitness: "A-Z Total Fitness",
+    voice_vault: "Voice Vault",
   };
   return labels[businessType] || "A-Z Enterprises";
+}
+
+function normalizeSourceBrand(value: string | null | undefined, businessType: string): string | undefined {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  const map: Record<string, string> = {
+    coworking: "hive",
+    event_center: "summit",
+    photo_booth: "photo_booth_360",
+    voice_vault: "voice_vault",
+  };
+  return map[businessType];
+}
+
+function sourceBrandLabel(sourceBrand: string | undefined, businessType: string): string {
+  const map: Record<string, string> = {
+    hive: "The Hive",
+    summit: "The Summit",
+    photo_booth_360: "360 Photo Booth",
+    voice_vault: "Voice Vault",
+  };
+  return (sourceBrand && map[sourceBrand]) || getBusinessLabel(businessType);
+}
+
+function isVictoriaBrand(sourceBrand: string | undefined) {
+  return sourceBrand === "hive" || sourceBrand === "summit" || sourceBrand === "photo_booth_360" || sourceBrand === "voice_vault";
+}
+
+function computeDurationMins(booking: Record<string, unknown>): number {
+  try {
+    const s = new Date(booking.start_datetime as string).getTime();
+    const e = new Date(booking.end_datetime as string).getTime();
+    if (!Number.isFinite(s) || !Number.isFinite(e) || e <= s) return 0;
+    return Math.round((e - s) / 60000);
+  } catch {
+    return 0;
+  }
+}
+
+function describePayment(booking: Record<string, unknown>): string {
+  const total = Number(booking.total_amount || 0);
+  const deposit = Number(booking.deposit_amount || 0);
+  const status = String(booking.status || "");
+
+  if (total <= 0) return "Unpaid / request only";
+  if (status === "confirmed") return "Paid";
+  if (status === "deposit_paid" || deposit > 0) return "Deposit paid";
+  return "Unpaid / request only";
 }
 
 function buildCustomerConfirmationEmail(booking: Record<string, unknown>, businessType: string): string {
@@ -500,6 +610,20 @@ serve(async (req) => {
     const resendKey = Deno.env.get("RESEND_API_KEY");
     if (!resendKey) throw new Error("RESEND_API_KEY is not set");
 
+    const FROM_EMAIL = Deno.env.get("FROM_EMAIL");
+    const FROM_NAME = Deno.env.get("FROM_NAME");
+    const REPLY_TO_EMAIL = Deno.env.get("REPLY_TO_EMAIL");
+    if (!FROM_EMAIL || !FROM_NAME || !REPLY_TO_EMAIL) {
+      throw new Error("Sender env vars are not set: FROM_EMAIL, FROM_NAME, REPLY_TO_EMAIL");
+    }
+    const FROM_HEADER = `${FROM_NAME} <${FROM_EMAIL}>`;
+
+    const VICTORIA_NOTIFY_EMAIL = Deno.env.get("VICTORIA_NOTIFY_EMAIL");
+    const VICTORIA_NOTIFY_PHONE = Deno.env.get("VICTORIA_NOTIFY_PHONE");
+    if (!VICTORIA_NOTIFY_EMAIL || !VICTORIA_NOTIFY_PHONE) {
+      throw new Error("Victoria recipient env vars are not set: VICTORIA_NOTIFY_EMAIL, VICTORIA_NOTIFY_PHONE");
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseUrl || !serviceRoleKey) throw new Error("Backend keys are not set");
@@ -510,6 +634,7 @@ serve(async (req) => {
     const {
       booking_id,
       notification_type,
+      reminder_type,
       channels = ["email", "sms"],
       recipients = ["customer", "staff"],
       stripe_session_id,
@@ -518,7 +643,7 @@ serve(async (req) => {
       test_staff_email,
     }: NotificationRequest = await req.json();
 
-    logStep("Request received", { booking_id, notification_type, channels, recipients });
+    logStep("Request received", { booking_id, notification_type, reminder_type, channels, recipients });
 
     if (!booking_id) {
       return new Response(JSON.stringify({ error: "booking_id is required" }), {
@@ -550,13 +675,23 @@ serve(async (req) => {
     }
 
     const businessType = booking.businesses?.type || "default";
+    const sourceBrand = normalizeSourceBrand((booking as any).source_brand, businessType);
+    const brandLabel = sourceBrandLabel(sourceBrand, businessType);
+    const timezone = booking.businesses?.timezone || "America/New_York";
 
-    // Resolve staff contact from assigned provider (preferred), else fallback mapping
+    // Resolve staff contact from assigned provider (preferred), else fallback mapping.
+    // For Victoria brands, ALWAYS route to Victoria.
     let resolvedStaffEmail: string | undefined;
     let resolvedStaffPhone: string | undefined;
     let resolvedStaffName: string | undefined;
 
-    if (booking.assigned_provider_id) {
+    if (isVictoriaBrand(sourceBrand)) {
+      resolvedStaffEmail = VICTORIA_NOTIFY_EMAIL;
+      resolvedStaffPhone = VICTORIA_NOTIFY_PHONE;
+      resolvedStaffName = "Victoria";
+    }
+
+    if (!isVictoriaBrand(sourceBrand) && booking.assigned_provider_id) {
       const { data: providerRow, error: providerErr } = await supabase
         .from("providers")
         .select("id,user_id,name")
@@ -590,6 +725,18 @@ serve(async (req) => {
       phone: resolvedStaffPhone || fallbackStaff.phone,
       name: resolvedStaffName || fallbackStaff.name,
     };
+
+    // Ensure we can resolve a customer email (guest_email preferred)
+    let resolvedCustomerEmail: string | undefined = booking.guest_email || undefined;
+    if (!resolvedCustomerEmail && booking.customer_id) {
+      const { data: profileRow, error: profileErr } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", booking.customer_id)
+        .maybeSingle();
+      if (profileErr) logStep("Customer profile lookup error", { error: profileErr, customer_id: booking.customer_id });
+      resolvedCustomerEmail = profileRow?.email ?? undefined;
+    }
 
     // Admin-only manual test overrides
     if (test_customer_email || test_staff_email) {
@@ -630,7 +777,7 @@ serve(async (req) => {
       status: booking.status 
     });
 
-    // Check idempotency for confirmations
+    // Check idempotency for confirmations ONLY
     if (notification_type === "confirmation") {
       const alreadySentCustomer = !!booking.email_sent_customer_at;
       const alreadySentStaff = !!booking.email_sent_staff_at;
@@ -651,7 +798,7 @@ serve(async (req) => {
     if (channels.includes("email")) {
       // Customer email
       if (recipients.includes("customer")) {
-        const customerEmail = test_customer_email || booking.guest_email;
+        const customerEmail = test_customer_email || resolvedCustomerEmail;
         if (!customerEmail) {
           const reason = "missing_customer_email";
           logStep("Customer email skipped", { booking_id, reason });
@@ -668,10 +815,11 @@ serve(async (req) => {
         }
       }
 
-      const customerEmail = test_customer_email || booking.guest_email;
+      const customerEmail = test_customer_email || resolvedCustomerEmail;
       if (recipients.includes("customer") && customerEmail) {
         try {
-          const businessLabel = getBusinessLabel(businessType);
+          const durationMins = computeDurationMins(booking);
+          const paymentLabel = describePayment(booking);
           const startDate = new Date(booking.start_datetime);
           const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
           const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
@@ -679,22 +827,39 @@ serve(async (req) => {
           let subject: string;
           let html: string;
 
-          if (notification_type === "confirmation") {
-            subject = `Your ${businessLabel} Appointment is Confirmed — ${shortDate} at ${timeStr}`;
+          if (notification_type === "request") {
+            subject = `Request received from ${brandLabel} — ${shortDate} at ${timeStr}`;
+            html = buildCustomerConfirmationEmail(
+              {
+                ...booking,
+                notes: [
+                  booking.notes,
+                  `Type: Request`,
+                  `Duration: ${durationMins} minutes`,
+                  `Payment: ${paymentLabel}`,
+                ].filter(Boolean).join("\n"),
+              },
+              businessType
+            );
+          } else if (notification_type === "confirmation") {
+            subject = `Your ${brandLabel} booking is confirmed — ${shortDate} at ${timeStr}`;
             html = buildCustomerConfirmationEmail(booking, businessType);
           } else {
-            const reminderType = notification_type === "reminder" ? "24h" : notification_type;
-            subject = `Reminder: ${businessLabel} Appointment — ${shortDate} at ${timeStr}`;
+            const reminderType = reminder_type || "24h";
+            const prefix = reminderType === "day_of_morning" ? "Today" : reminderType === "1h" ? "In 1 hour" : reminderType === "2h" ? "In 2 hours" : "Reminder";
+            subject = `${prefix}: ${brandLabel} — ${shortDate} at ${timeStr}`;
             html = buildReminderEmail(booking, businessType, reminderType);
           }
 
           logStep("EMAIL: customer send starting", {
             booking_id,
             to: customerEmail,
-            from: FROM_EMAIL,
+            from: FROM_HEADER,
             subject,
             payload: {
               notification_type,
+              reminder_type,
+              source_brand: sourceBrand,
               business_type: businessType,
               booking_number: booking.booking_number,
               start_datetime: booking.start_datetime,
@@ -702,7 +867,7 @@ serve(async (req) => {
           });
 
           const emailResult = await resend.emails.send({
-            from: FROM_EMAIL,
+            from: FROM_HEADER,
             reply_to: REPLY_TO_EMAIL,
             to: [customerEmail],
             subject,
@@ -729,6 +894,7 @@ serve(async (req) => {
             provider: "resend",
             provider_message_id: emailResult.data?.id,
             error_message: emailResult.error?.message,
+            metadata: { source_brand: sourceBrand, reminder_type },
           });
 
           // Update idempotency timestamp
@@ -785,24 +951,38 @@ serve(async (req) => {
         }
 
         try {
-          const businessLabel = getBusinessLabel(businessType);
+          const durationMins = computeDurationMins(booking);
+          const paymentLabel = describePayment(booking);
           const startDate = new Date(booking.start_datetime);
           const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
           const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 
-          const subject = `New ${businessLabel} Booking — ${booking.guest_name} — ${shortDate} ${timeStr}`;
-          const html = buildStaffConfirmationEmail(booking, businessType);
+          const kind = notification_type === "request" ? "Request" : notification_type === "confirmation" ? "Booking" : "Reminder";
+          const subject = `${kind}: ${brandLabel} — ${booking.guest_name || "Guest"} — ${shortDate} ${timeStr}`;
+          const html = buildStaffConfirmationEmail(
+            {
+              ...booking,
+              notes: [
+                booking.notes,
+                `Source: ${brandLabel}`,
+                `Type: ${kind}`,
+                `Duration: ${durationMins} minutes`,
+                `Payment: ${paymentLabel}`,
+              ].filter(Boolean).join("\n"),
+            },
+            businessType
+          );
 
           logStep("EMAIL: staff send starting", {
             booking_id,
             to: staffEmail,
-            from: FROM_EMAIL,
+            from: FROM_HEADER,
             subject,
             resolved_staff: { name: staffContact.name, email: staffContact.email, phone: staffContact.phone },
           });
 
           const emailResult = await resend.emails.send({
-            from: FROM_EMAIL,
+            from: FROM_HEADER,
             reply_to: REPLY_TO_EMAIL,
             to: [staffEmail],
             subject,
@@ -829,6 +1009,7 @@ serve(async (req) => {
             provider: "resend",
             provider_message_id: emailResult.data?.id,
             error_message: emailResult.error?.message,
+            metadata: { source_brand: sourceBrand, reminder_type },
           });
 
           // Update idempotency timestamp
@@ -869,13 +1050,14 @@ serve(async (req) => {
 
     // ============= SEND SMS =============
     if (channels.includes("sms")) {
-      // Customer SMS
-      if (recipients.includes("customer") && booking.guest_phone) {
+      // Customer SMS (disabled for Victoria brands per current requirements)
+      const allowCustomerSms = !isVictoriaBrand(sourceBrand);
+      if (allowCustomerSms && recipients.includes("customer") && booking.guest_phone) {
         let smsMessage: string;
         if (notification_type === "confirmation") {
           smsMessage = buildCustomerConfirmationSMS(booking, businessType);
         } else {
-          smsMessage = buildReminderSMS(booking, businessType, notification_type);
+          smsMessage = buildReminderSMS(booking, businessType, reminder_type || notification_type);
         }
 
         const smsResult = await sendSMS(booking.guest_phone, smsMessage);
@@ -895,8 +1077,16 @@ serve(async (req) => {
       }
 
       // Staff SMS
-      if (recipients.includes("staff") && notification_type === "confirmation") {
-        const smsMessage = buildStaffConfirmationSMS(booking, businessType);
+      if (recipients.includes("staff")) {
+        const smsMessage = notification_type === "reminder"
+          ? buildReminderSMS(booking, businessType, reminder_type || "1h")
+          : buildStaffConfirmationSMS(
+              {
+                ...booking,
+                notes: [booking.notes, `Source: ${brandLabel}`].filter(Boolean).join("\n"),
+              },
+              businessType
+            );
         const smsResult = await sendSMS(staffContact.phone, smsMessage);
         results.staff_sms = smsResult;
 
@@ -910,13 +1100,19 @@ serve(async (req) => {
           provider: "twilio",
           provider_message_id: smsResult.sid,
           error_message: smsResult.error,
+          metadata: { source_brand: sourceBrand, reminder_type },
         });
       }
     }
 
-    // Schedule reminders for confirmations
-    if (notification_type === "confirmation") {
-      await scheduleReminders(supabase, booking_id, booking.start_datetime);
+    // Schedule reminders for requests + confirmations
+    if (notification_type === "request" || notification_type === "confirmation") {
+      const victoria = isVictoriaBrand(sourceBrand);
+      await scheduleReminders(supabase, booking_id, booking.start_datetime, {
+        timezone,
+        reminderTypes: victoria ? ["day_of_morning", "1h"] : ["24h", "2h"],
+        recipientTypes: victoria ? ["customer", "staff"] : ["customer"],
+      });
     }
 
     logStep("Notification complete", results);

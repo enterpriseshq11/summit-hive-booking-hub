@@ -532,6 +532,7 @@ export type Database = {
           notes: string | null
           package_id: string | null
           promo_code_id: string | null
+          source_brand: string | null
           start_datetime: string
           status: Database["public"]["Enums"]["booking_status"] | null
           subtotal: number
@@ -567,6 +568,7 @@ export type Database = {
           notes?: string | null
           package_id?: string | null
           promo_code_id?: string | null
+          source_brand?: string | null
           start_datetime: string
           status?: Database["public"]["Enums"]["booking_status"] | null
           subtotal?: number
@@ -602,6 +604,7 @@ export type Database = {
           notes?: string | null
           package_id?: string | null
           promo_code_id?: string | null
+          source_brand?: string | null
           start_datetime?: string
           status?: Database["public"]["Enums"]["booking_status"] | null
           subtotal?: number
@@ -3609,6 +3612,7 @@ export type Database = {
           id: string
           notification_log_id: string | null
           processed_at: string | null
+          recipient_type: string
           reminder_type: string
           scheduled_for: string
           status: string
@@ -3619,6 +3623,7 @@ export type Database = {
           id?: string
           notification_log_id?: string | null
           processed_at?: string | null
+          recipient_type?: string
           reminder_type: string
           scheduled_for: string
           status?: string
@@ -3629,6 +3634,7 @@ export type Database = {
           id?: string
           notification_log_id?: string | null
           processed_at?: string | null
+          recipient_type?: string
           reminder_type?: string
           scheduled_for?: string
           status?: string
