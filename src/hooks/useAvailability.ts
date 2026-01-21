@@ -5,6 +5,7 @@ import type { BusinessType } from "@/types";
 interface AvailabilityParams {
   business_type?: BusinessType;
   bookable_type_id?: string;
+  duration_mins?: number;
   date?: string;
   start_date?: string;
   end_date?: string;
