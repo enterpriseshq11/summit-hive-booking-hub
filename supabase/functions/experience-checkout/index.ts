@@ -196,7 +196,30 @@ serve(async (req) => {
     });
     if (brError) throw new Error(brError.message);
 
-    // If a hold was provided, mark it consumed (best-effort)
+    // Create slot hold server-side (using service role bypasses RLS)
+    // This prevents double-booking while customer completes payment
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 min hold
+    const { data: holdData, error: holdCreateError } = await supabase
+      .from("slot_holds")
+      .insert({
+        bookable_type_id: bt!.id,
+        resource_id,
+        start_datetime,
+        end_datetime,
+        user_id: null,
+        session_id: `checkout-${booking.id}`,
+        expires_at: expiresAt,
+        status: "active",
+      })
+      .select("id")
+      .single();
+    if (holdCreateError) {
+      logStep("Hold creation failed (non-fatal)", { error: holdCreateError });
+    } else {
+      logStep("Slot hold created", { holdId: holdData?.id });
+    }
+
+    // If a client-side hold was provided, mark it consumed (legacy support)
     if (hold_id) {
       const { error: holdError } = await supabase
         .from("slot_holds")
