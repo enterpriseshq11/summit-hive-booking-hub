@@ -136,6 +136,8 @@ serve(async (req) => {
                 body: JSON.stringify({
                   booking_id: bookingId,
                   type: "confirmed",
+                  stripe_session_id: session.id,
+                  stripe_payment_intent: session.payment_intent as string,
                 }),
               });
               
