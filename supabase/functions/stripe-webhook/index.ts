@@ -12,6 +12,9 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
+// Lindsey (Book with Lindsey) identifier
+const LINDSEY_BOOKABLE_TYPE_ID = "f7c9e18f-3b4c-4c2a-9d85-4a2c067fd8fb";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -79,10 +82,9 @@ serve(async (req) => {
         const isDeposit = metadata.is_deposit === "true";
 
         const businessType = metadata.business_type;
-        const isLindseyBooking =
-          businessType === "spa" &&
-          (typeof metadata.service_name === "string" && metadata.service_name.length > 0 ||
-            typeof metadata.duration === "string" && metadata.duration.length > 0);
+        const hasLegacyLindseyMetadata =
+          typeof metadata.service_name === "string" && metadata.service_name.length > 0 &&
+          typeof metadata.duration === "string" && metadata.duration.length > 0;
         logStep("Checkout completed", { bookingId, membershipTierId, isDeposit, businessType });
 
         if (bookingId) {
@@ -127,8 +129,23 @@ serve(async (req) => {
 
           logStep("Booking updated", { bookingId, newStatus });
 
-          // Send notification for spa/Lindsey bookings
+          // Lindsey bookings: either legacy metadata (lindsey-checkout) OR specific bookable_type_id (experience-checkout)
+          let isLindseyBooking = false;
           if (businessType === "spa") {
+            if (hasLegacyLindseyMetadata) {
+              isLindseyBooking = true;
+            } else {
+              const { data: b } = await supabase
+                .from("bookings")
+                .select("bookable_type_id")
+                .eq("id", bookingId)
+                .maybeSingle();
+              isLindseyBooking = b?.bookable_type_id === LINDSEY_BOOKABLE_TYPE_ID;
+            }
+          }
+
+          // Send email notification ONLY for Lindsey (Book with Lindsey)
+          if (isLindseyBooking) {
             try {
               const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/lindsey-booking-notification`;
               const notificationResponse = await fetch(notificationUrl, {

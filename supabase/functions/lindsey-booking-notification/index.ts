@@ -15,8 +15,10 @@ const logStep = (step: string, details?: unknown) => {
 // Provider settings - Lindsey
 const LINDSEY_EMAIL = "lindsey@a-zenterpriseshq.com";
 const LINDSEY_PHONE = "+15676441090";
-const FROM_EMAIL = "Restoration Lounge by A-Z <onboarding@resend.dev>";
+const FROM_EMAIL = "A-Z Enterprises <no-reply@a-zenterpriseshq.com>";
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
+
+const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;
 
 interface BookingNotificationRequest {
   booking_id: string;
@@ -127,6 +129,10 @@ serve(async (req) => {
       status: booking.status 
     });
 
+    // Idempotency: if webhook retries, don't double-send.
+    const alreadySentCustomer = !!booking.email_sent_customer_at;
+    const alreadySentStaff = !!booking.email_sent_staff_at;
+
     // Parse service details from notes
     const notesMatch = booking.notes?.match(/Service: ([^,]+), Duration: (\d+)/);
     const serviceName = notesMatch ? notesMatch[1] : "Massage Therapy";
@@ -157,7 +163,7 @@ serve(async (req) => {
     });
 
     // Get room name if assigned
-    const roomName = booking.booking_resources?.[0]?.resources?.name || "H1 – Hallway Room";
+    const roomName = booking.booking_resources?.[0]?.resources?.name || "TBD";
 
     // Get add-ons if any
     const addons = booking.booking_addons?.map((ba: { addons: { name: string } }) => ba.addons?.name).filter(Boolean) || [];
@@ -165,13 +171,38 @@ serve(async (req) => {
 
     // Get payment info
     const payment = booking.payments?.find((p: { status: string }) => p.status === "completed");
-    const amountPaid = payment?.amount || booking.total_amount || 0;
+    const totalAmount = Number(booking.total_amount || 0);
+    const depositAmount = Number(booking.deposit_amount || 0);
+    const dueOnArrival = Number(booking.balance_due ?? Math.max(0, totalAmount - depositAmount));
+    const amountPaid = Number(payment?.amount ?? depositAmount ?? 0);
 
     // Stripe reference
     const stripeRef = stripe_payment_intent || stripe_session_id || payment?.stripe_payment_intent_id || booking.booking_number || booking.id.slice(0, 8).toUpperCase();
 
     // ============= PAID BOOKING =============
     if (type === "confirmed") {
+      // Only send after payment-confirmed statuses
+      const allowedStatuses = new Set(["deposit_paid", "confirmed"]);
+      if (!allowedStatuses.has(String(booking.status || ""))) {
+        logStep("Skip send - booking not in confirmed status", { status: booking.status });
+        return new Response(
+          JSON.stringify({ success: true, skipped: true, reason: "booking_not_confirmed" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      // If both already sent, return idempotent success.
+      if (alreadySentCustomer && alreadySentStaff) {
+        logStep("Skip send - already sent", { booking_id });
+        return new Response(
+          JSON.stringify({ success: true, email_sent: true, duplicate: true }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const customerSubject = `Your Massage is Confirmed — ${shortDateStr} at ${startTimeStr}`;
+      const staffSubject = `New Lindsey Booking Confirmed — ${booking.guest_name} — ${shortDateStr} ${startTimeStr}`;
+
       const smsMessage = `NEW PAID BOOKING ✅
 ${serviceName} — ${duration}min
 ${shortDateStr} at ${startTimeStr}–${endTimeStr}
@@ -208,10 +239,10 @@ Ref: ${stripeRef}`;
       <h1 style="margin-top: 10px;">New Appointment Confirmed</h1>
     </div>
     <div class="content">
-      <div class="highlight">
-        <strong>💰 Payment Received: $${amountPaid.toFixed(2)}</strong><br>
-        <span style="font-size: 12px; color: #666;">Status: PAID ✅ | Ref: ${stripeRef}</span>
-      </div>
+       <div class="highlight">
+         <strong>💰 Payment Confirmed</strong><br>
+         <span style="font-size: 12px; color: #666;">Status: ${String(booking.status || "confirmed").toUpperCase()} | Ref: ${stripeRef}</span>
+       </div>
       
       <h2 style="margin-top: 0;">Appointment Details</h2>
       <table class="info-table">
@@ -232,8 +263,10 @@ Ref: ${stripeRef}`;
 
       <h2>Payment</h2>
       <table class="info-table">
-        <tr><td>💵 Amount Paid</td><td><strong style="color: #48bb78;">$${amountPaid.toFixed(2)}</strong></td></tr>
-        <tr><td>✅ Status</td><td>PAID</td></tr>
+         <tr><td>💵 Total</td><td><strong>${formatMoney(totalAmount)}</strong></td></tr>
+         <tr><td>💳 Deposit Paid</td><td><strong style="color: #48bb78;">${formatMoney(amountPaid)}</strong></td></tr>
+         <tr><td>🏁 Due on Arrival</td><td><strong>${formatMoney(dueOnArrival)}</strong></td></tr>
+         <tr><td>✅ Status</td><td>${String(booking.status || "confirmed").toUpperCase()}</td></tr>
         <tr><td>🔗 Stripe Ref</td><td><code style="background: #f0f0f0; padding: 2px 6px; font-size: 12px;">${stripeRef}</code></td></tr>
       </table>
 
@@ -302,7 +335,9 @@ Ref: ${stripeRef}`;
           <tr><td style="padding: 8px 0; color: #666;">Duration:</td><td style="padding: 8px 0; font-weight: bold;">${duration} minutes</td></tr>
           <tr><td style="padding: 8px 0; color: #666;">Room:</td><td style="padding: 8px 0; font-weight: bold;">${roomName}</td></tr>
           ${addons.length > 0 ? `<tr><td style="padding: 8px 0; color: #666;">Add-ons:</td><td style="padding: 8px 0;">${addons.join(", ")}</td></tr>` : ""}
-          <tr><td style="padding: 8px 0; color: #666;">Amount Paid:</td><td style="padding: 8px 0; font-weight: bold; color: #48bb78;">$${amountPaid.toFixed(2)}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Total:</td><td style="padding: 8px 0; font-weight: bold;">${formatMoney(totalAmount)}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Deposit Paid:</td><td style="padding: 8px 0; font-weight: bold; color: #48bb78;">${formatMoney(amountPaid)}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Due on Arrival:</td><td style="padding: 8px 0; font-weight: bold;">${formatMoney(dueOnArrival)}</td></tr>
         </table>
       </div>
 
@@ -361,13 +396,13 @@ Ref: ${stripeRef}`;
         resend.emails.send({
           from: FROM_EMAIL,
           to: [LINDSEY_EMAIL],
-          subject: `✅ New PAID Booking – ${serviceName} – ${dateStr} at ${startTimeStr}`,
+          subject: staffSubject,
           html: lindseyEmailHtml,
         }),
         resend.emails.send({
           from: FROM_EMAIL,
           to: [booking.guest_email],
-          subject: `Your Appointment is Confirmed – ${dateStr}`,
+          subject: customerSubject,
           html: customerEmailHtml,
         }),
       ]);
@@ -381,6 +416,23 @@ Ref: ${stripeRef}`;
         customerError: customerResult.error,
         success: emailSuccess,
       });
+
+      // Persist idempotency markers (best-effort, prevents duplicates on webhook retry)
+      const now = new Date().toISOString();
+      if (customerResult.data?.id && !alreadySentCustomer) {
+        await supabase
+          .from("bookings")
+          .update({ email_sent_customer_at: now })
+          .eq("id", booking_id)
+          .is("email_sent_customer_at", null);
+      }
+      if (lindseyResult.data?.id && !alreadySentStaff) {
+        await supabase
+          .from("bookings")
+          .update({ email_sent_staff_at: now })
+          .eq("id", booking_id)
+          .is("email_sent_staff_at", null);
+      }
 
       return new Response(
         JSON.stringify({

@@ -519,6 +519,8 @@ export type Database = {
           customer_id: string | null
           deposit_amount: number | null
           discount_amount: number | null
+          email_sent_customer_at: string | null
+          email_sent_staff_at: string | null
           end_datetime: string
           gift_card_id: string | null
           guest_count: number | null
@@ -552,6 +554,8 @@ export type Database = {
           customer_id?: string | null
           deposit_amount?: number | null
           discount_amount?: number | null
+          email_sent_customer_at?: string | null
+          email_sent_staff_at?: string | null
           end_datetime: string
           gift_card_id?: string | null
           guest_count?: number | null
@@ -585,6 +589,8 @@ export type Database = {
           customer_id?: string | null
           deposit_amount?: number | null
           discount_amount?: number | null
+          email_sent_customer_at?: string | null
+          email_sent_staff_at?: string | null
           end_datetime?: string
           gift_card_id?: string | null
           guest_count?: number | null
