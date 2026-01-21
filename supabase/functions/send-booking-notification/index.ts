@@ -16,14 +16,16 @@ const logStep = (step: string, details?: unknown) => {
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
 const BUSINESS_PHONE = "(567) 644-1090";
 
-// Staff contacts by business type (using verified domain: azenterpriseshq.com)
+// Staff contacts by business type
+// IMPORTANT: Staff inboxes use @a-zenterpriseshq.com (with hyphen)
+// FROM/sender uses @azenterpriseshq.com (no hyphen, verified in Resend)
 const STAFF_CONTACTS: Record<string, { email: string; phone: string; name: string }> = {
-  spa: { email: "lindsey@azenterpriseshq.com", phone: "+15676441019", name: "Lindsey" },
-  photo_booth: { email: "victoria@azenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-  coworking: { email: "victoria@azenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-  event_center: { email: "victoria@azenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-  fitness: { email: "info@azenterpriseshq.com", phone: "+15673796340", name: "A-Z Team" },
-  default: { email: "info@azenterpriseshq.com", phone: "+15673796340", name: "A-Z Team" },
+  spa: { email: "lindsey@a-zenterpriseshq.com", phone: "+15676441019", name: "Lindsey" },
+  photo_booth: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
+  coworking: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
+  event_center: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
+  fitness: { email: "dylan@a-zenterpriseshq.com", phone: "+15673796340", name: "Dylan" },
+  default: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
 };
 
 const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;
@@ -479,7 +481,8 @@ async function resolveStaffContact(params: {
     return { contact: { email: victoriaEnv.email, phone: victoriaEnv.phone, name: "Victoria" }, debug };
   }
   if (owner === "lindsey") {
-    const email = lindseyEnv?.email || "lindsey@azenterpriseshq.com";
+    // Staff inbox uses @a-zenterpriseshq.com (with hyphen)
+    const email = lindseyEnv?.email || "lindsey@a-zenterpriseshq.com";
     const phone = lindseyEnv?.phone || "+15676441019";
     debug.branch = "C_source_brand_mapping";
     debug.staff_email = email;
