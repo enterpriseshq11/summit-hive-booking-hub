@@ -1,0 +1,728 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const logStep = (step: string, details?: unknown) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
+  console.log(`[BOOKING-NOTIFICATION] ${step}${detailsStr}`);
+};
+
+// ============= CONFIGURATION =============
+const FROM_EMAIL = "A-Z Enterprises <no-reply@a-zenterpriseshq.com>";
+const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
+const BUSINESS_PHONE = "(567) 644-1090";
+
+// Staff contacts by business type
+const STAFF_CONTACTS: Record<string, { email: string; phone: string; name: string }> = {
+  spa: { email: "lindsey@a-zenterpriseshq.com", phone: "+15676441019", name: "Lindsey" },
+  photo_booth: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
+  coworking: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
+  event_center: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
+  fitness: { email: "info@a-zenterpriseshq.com", phone: "+15673796340", name: "A-Z Team" },
+  default: { email: "info@a-zenterpriseshq.com", phone: "+15673796340", name: "A-Z Team" },
+};
+
+const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;
+
+interface NotificationRequest {
+  booking_id: string;
+  notification_type: "confirmation" | "reminder" | "cancellation" | "reschedule";
+  channels?: ("email" | "sms")[];
+  recipients?: ("customer" | "staff")[];
+  stripe_session_id?: string;
+  stripe_payment_intent?: string;
+}
+
+// ============= SMS VIA TWILIO =============
+async function sendSMS(to: string, message: string): Promise<{ success: boolean; sid?: string; error?: string }> {
+  const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+  const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+  const fromPhone = Deno.env.get("TWILIO_FROM_NUMBER") || Deno.env.get("TWILIO_PHONE_NUMBER");
+  const messagingServiceSid = Deno.env.get("TWILIO_MESSAGING_SERVICE_SID");
+
+  if (!accountSid || !authToken || (!fromPhone && !messagingServiceSid)) {
+    logStep("SMS skipped - Twilio not configured");
+    return { success: false, error: "Twilio not configured" };
+  }
+
+  try {
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+    const auth = btoa(`${accountSid}:${authToken}`);
+
+    const response = await fetch(twilioUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        To: to,
+        ...(messagingServiceSid ? { MessagingServiceSid: messagingServiceSid } : { From: fromPhone! }),
+        Body: message,
+      }),
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      logStep("SMS sent", { sid: result.sid, to });
+      return { success: true, sid: result.sid };
+    }
+
+    logStep("SMS failed", { error: result.message });
+    return { success: false, error: result.message };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    logStep("SMS error", { error: msg });
+    return { success: false, error: msg };
+  }
+}
+
+// ============= LOG NOTIFICATION =============
+async function logNotification(
+  supabase: any,
+  data: {
+    booking_id: string;
+    notification_type: string;
+    channel: string;
+    recipient_type: string;
+    recipient_email?: string;
+    recipient_phone?: string;
+    subject?: string;
+    status: string;
+    provider?: string;
+    provider_message_id?: string;
+    error_message?: string;
+    metadata?: Record<string, unknown>;
+  }
+) {
+  try {
+    await supabase.from("notification_logs").insert({
+      ...data,
+      sent_at: data.status === "sent" ? new Date().toISOString() : null,
+    });
+  } catch (e) {
+    logStep("Failed to log notification", { error: String(e) });
+  }
+}
+
+// ============= SCHEDULE REMINDERS =============
+async function scheduleReminders(
+  supabase: any,
+  bookingId: string,
+  startDatetime: string
+) {
+  const start = new Date(startDatetime);
+  const now = new Date();
+
+  // 24h reminder
+  const reminder24h = new Date(start.getTime() - 24 * 60 * 60 * 1000);
+  if (reminder24h > now) {
+    await supabase.from("scheduled_reminders").upsert({
+      booking_id: bookingId,
+      reminder_type: "24h",
+      scheduled_for: reminder24h.toISOString(),
+      status: "pending",
+    }, { onConflict: "booking_id,reminder_type" });
+  }
+
+  // 2h reminder
+  const reminder2h = new Date(start.getTime() - 2 * 60 * 60 * 1000);
+  if (reminder2h > now) {
+    await supabase.from("scheduled_reminders").upsert({
+      booking_id: bookingId,
+      reminder_type: "2h",
+      scheduled_for: reminder2h.toISOString(),
+      status: "pending",
+    }, { onConflict: "booking_id,reminder_type" });
+  }
+
+  logStep("Reminders scheduled", { bookingId, reminder24h: reminder24h.toISOString(), reminder2h: reminder2h.toISOString() });
+}
+
+// ============= EMAIL TEMPLATES =============
+function getBusinessLabel(businessType: string): string {
+  const labels: Record<string, string> = {
+    spa: "Restoration Lounge",
+    photo_booth: "360 Photo Booth",
+    coworking: "The Hive by A-Z",
+    event_center: "Memory Maker Event Center",
+    fitness: "A-Z Total Fitness",
+  };
+  return labels[businessType] || "A-Z Enterprises";
+}
+
+function buildCustomerConfirmationEmail(booking: Record<string, unknown>, businessType: string): string {
+  const businessLabel = getBusinessLabel(businessType);
+  const staffContact = STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default;
+  
+  const startDate = new Date(booking.start_datetime as string);
+  const endDate = new Date(booking.end_datetime as string);
+  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const endTimeStr = endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  const totalAmount = Number(booking.total_amount || 0);
+  const depositAmount = Number(booking.deposit_amount || 0);
+  const balanceDue = Number(booking.balance_due ?? Math.max(0, totalAmount - depositAmount));
+  
+  // Extract service info from notes or bookable_type
+  const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Your Booking";
+  const roomName = ((booking.booking_resources as Array<{ resources?: { name?: string } }>)?.[0]?.resources?.name) || "TBD";
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2d3748; padding: 30px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 24px; }
+    .content { padding: 30px 20px; background: #ffffff; }
+    .success-badge { display: inline-block; background: #48bb78; color: white; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 20px; margin-bottom: 20px; }
+    .appointment-box { background: #f8f6f0; border: 2px solid #d4af37; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .location-box { background: #edf2f7; padding: 15px; border-radius: 4px; margin: 20px 0; }
+    .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${businessLabel}</h1>
+      <p style="color: #a0aec0; margin: 5px 0 0 0;">by A-Z Enterprises</p>
+    </div>
+    <div class="content">
+      <div style="text-align: center;">
+        <span class="success-badge">✓ Booking Confirmed</span>
+        <h2 style="margin: 10px 0;">Your Appointment is Booked!</h2>
+      </div>
+      
+      <p>Hi ${(booking.guest_name as string)?.split(" ")[0] || "there"},</p>
+      <p>Great news! Your appointment has been confirmed. Here are your details:</p>
+
+      <div class="appointment-box">
+        <h3 style="margin-top: 0;">📅 Appointment Details</h3>
+        <table style="width: 100%;">
+          <tr><td style="padding: 8px 0; color: #666;">Service:</td><td style="padding: 8px 0; font-weight: bold;">${serviceName}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Date:</td><td style="padding: 8px 0; font-weight: bold;">${dateStr}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Time:</td><td style="padding: 8px 0; font-weight: bold;">${startTimeStr} – ${endTimeStr}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Location:</td><td style="padding: 8px 0; font-weight: bold;">${roomName}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Total:</td><td style="padding: 8px 0; font-weight: bold;">${formatMoney(totalAmount)}</td></tr>
+          ${depositAmount > 0 ? `<tr><td style="padding: 8px 0; color: #666;">Deposit Paid:</td><td style="padding: 8px 0; font-weight: bold; color: #48bb78;">${formatMoney(depositAmount)}</td></tr>` : ""}
+          ${balanceDue > 0 ? `<tr><td style="padding: 8px 0; color: #666;">Due on Arrival:</td><td style="padding: 8px 0; font-weight: bold;">${formatMoney(balanceDue)}</td></tr>` : ""}
+        </table>
+      </div>
+
+      <div class="location-box">
+        <strong>📍 Location</strong>
+        <p style="margin: 10px 0 0 0;">
+          ${businessLabel}<br>
+          ${BUSINESS_ADDRESS}
+        </p>
+        <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+          Please arrive 5-10 minutes early. Free parking is available on-site.
+        </p>
+      </div>
+
+      <h3>Need to Make Changes?</h3>
+      <p style="font-size: 14px; color: #666;">
+        To reschedule or cancel, please contact us at least 24 hours in advance at <a href="tel:${BUSINESS_PHONE}">${BUSINESS_PHONE}</a>.
+      </p>
+
+      <div style="text-align: center; margin-top: 30px;">
+        <p>Questions? Contact us:</p>
+        <p style="font-size: 18px;"><a href="tel:${BUSINESS_PHONE}">${BUSINESS_PHONE}</a></p>
+      </div>
+
+      <p style="margin-top: 30px;">
+        We look forward to seeing you!<br><br>
+        <strong>${staffContact.name}</strong><br>
+        ${businessLabel}
+      </p>
+    </div>
+    <div class="footer">
+      <p>Booking Confirmation #${booking.booking_number || (booking.id as string).slice(0, 8).toUpperCase()}</p>
+      <p>${businessLabel} | A-Z Enterprises | Wapakoneta, Ohio</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function buildStaffConfirmationEmail(booking: Record<string, unknown>, businessType: string): string {
+  const businessLabel = getBusinessLabel(businessType);
+  
+  const startDate = new Date(booking.start_datetime as string);
+  const endDate = new Date(booking.end_datetime as string);
+  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const endTimeStr = endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  const totalAmount = Number(booking.total_amount || 0);
+  const depositAmount = Number(booking.deposit_amount || 0);
+  const balanceDue = Number(booking.balance_due ?? Math.max(0, totalAmount - depositAmount));
+  
+  const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Booking";
+  const roomName = ((booking.booking_resources as Array<{ resources?: { name?: string } }>)?.[0]?.resources?.name) || "TBD";
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2d3748; padding: 20px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 20px; }
+    .badge { display: inline-block; background: #48bb78; color: white; padding: 4px 12px; font-size: 12px; font-weight: bold; border-radius: 4px; }
+    .content { padding: 20px; background: #ffffff; }
+    .info-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    .info-table td { padding: 10px; border-bottom: 1px solid #eee; }
+    .info-table td:first-child { font-weight: bold; width: 140px; color: #666; }
+    .highlight { background: #f0fff4; border-left: 4px solid #48bb78; padding: 15px; margin: 15px 0; }
+    .footer { background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="badge">💳 NEW BOOKING</span>
+      <h1 style="margin-top: 10px;">${businessLabel}</h1>
+    </div>
+    <div class="content">
+      <div class="highlight">
+        <strong>💰 Payment Confirmed</strong><br>
+        <span style="font-size: 12px; color: #666;">Status: ${String(booking.status || "confirmed").toUpperCase()}</span>
+      </div>
+      
+      <h2 style="margin-top: 0;">Appointment Details</h2>
+      <table class="info-table">
+        <tr><td>📅 Date</td><td><strong>${dateStr}</strong></td></tr>
+        <tr><td>⏰ Time</td><td><strong>${startTimeStr} – ${endTimeStr}</strong></td></tr>
+        <tr><td>🧘 Service</td><td>${serviceName}</td></tr>
+        <tr><td>🚪 Room/Resource</td><td>${roomName}</td></tr>
+      </table>
+
+      <h2>Client Information</h2>
+      <table class="info-table">
+        <tr><td>👤 Name</td><td><strong>${booking.guest_name}</strong></td></tr>
+        <tr><td>📧 Email</td><td><a href="mailto:${booking.guest_email}">${booking.guest_email}</a></td></tr>
+        <tr><td>📱 Phone</td><td>${booking.guest_phone ? `<a href="tel:${booking.guest_phone}">${booking.guest_phone}</a>` : "Not provided"}</td></tr>
+      </table>
+
+      <h2>Payment</h2>
+      <table class="info-table">
+        <tr><td>💵 Total</td><td><strong>${formatMoney(totalAmount)}</strong></td></tr>
+        <tr><td>💳 Deposit Paid</td><td><strong style="color: #48bb78;">${formatMoney(depositAmount)}</strong></td></tr>
+        <tr><td>🏁 Due on Arrival</td><td><strong>${formatMoney(balanceDue)}</strong></td></tr>
+      </table>
+
+      ${booking.notes ? `
+        <div style="background: #fffbeb; padding: 15px; border-radius: 4px; margin-top: 15px;">
+          <strong>📝 Notes:</strong>
+          <p style="margin: 5px 0 0 0;">${booking.notes}</p>
+        </div>
+      ` : ""}
+
+      <p style="margin-top: 20px; font-size: 14px; color: #666;">
+        Booking #${booking.booking_number || (booking.id as string).slice(0, 8).toUpperCase()}<br>
+        <a href="https://summit-hive-booking-hub.lovable.app/#/admin/schedule">View in Admin Dashboard</a>
+      </p>
+    </div>
+    <div class="footer">
+      <p>${businessLabel} | A-Z Enterprises</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function buildReminderEmail(booking: Record<string, unknown>, businessType: string, reminderType: string): string {
+  const businessLabel = getBusinessLabel(businessType);
+  const staffContact = STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default;
+  
+  const startDate = new Date(booking.start_datetime as string);
+  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  const reminderText = reminderType === "24h" ? "tomorrow" : "in 2 hours";
+  
+  const roomName = ((booking.booking_resources as Array<{ resources?: { name?: string } }>)?.[0]?.resources?.name) || "TBD";
+  const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Your Appointment";
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2d3748; padding: 30px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 24px; }
+    .content { padding: 30px 20px; background: #ffffff; }
+    .reminder-badge { display: inline-block; background: #4299e1; color: white; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 20px; margin-bottom: 20px; }
+    .appointment-box { background: #f8f6f0; border: 2px solid #d4af37; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .location-box { background: #edf2f7; padding: 15px; border-radius: 4px; margin: 20px 0; }
+    .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${businessLabel}</h1>
+      <p style="color: #a0aec0; margin: 5px 0 0 0;">by A-Z Enterprises</p>
+    </div>
+    <div class="content">
+      <div style="text-align: center;">
+        <span class="reminder-badge">⏰ Reminder</span>
+        <h2 style="margin: 10px 0;">Your appointment is ${reminderText}!</h2>
+      </div>
+      
+      <p>Hi ${(booking.guest_name as string)?.split(" ")[0] || "there"},</p>
+      <p>Just a friendly reminder about your upcoming appointment:</p>
+
+      <div class="appointment-box">
+        <h3 style="margin-top: 0;">📅 Appointment Details</h3>
+        <table style="width: 100%;">
+          <tr><td style="padding: 8px 0; color: #666;">Service:</td><td style="padding: 8px 0; font-weight: bold;">${serviceName}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Date:</td><td style="padding: 8px 0; font-weight: bold;">${dateStr}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Time:</td><td style="padding: 8px 0; font-weight: bold;">${startTimeStr}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Location:</td><td style="padding: 8px 0; font-weight: bold;">${roomName}</td></tr>
+        </table>
+      </div>
+
+      <div class="location-box">
+        <strong>📍 Location</strong>
+        <p style="margin: 10px 0 0 0;">
+          ${businessLabel}<br>
+          ${BUSINESS_ADDRESS}
+        </p>
+        <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+          Please arrive 5-10 minutes early. Free parking is available on-site.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px;">
+        <p>Need to reschedule? Call us:</p>
+        <p style="font-size: 18px;"><a href="tel:${BUSINESS_PHONE}">${BUSINESS_PHONE}</a></p>
+      </div>
+
+      <p style="margin-top: 30px;">
+        See you soon!<br><br>
+        <strong>${staffContact.name}</strong><br>
+        ${businessLabel}
+      </p>
+    </div>
+    <div class="footer">
+      <p>Booking #${booking.booking_number || (booking.id as string).slice(0, 8).toUpperCase()}</p>
+      <p>${businessLabel} | A-Z Enterprises | Wapakoneta, Ohio</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// ============= SMS TEMPLATES =============
+function buildCustomerConfirmationSMS(booking: Record<string, unknown>, businessType: string): string {
+  const businessLabel = getBusinessLabel(businessType);
+  const startDate = new Date(booking.start_datetime as string);
+  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  return `✅ BOOKING CONFIRMED
+${businessLabel}
+${shortDate} at ${timeStr}
+${BUSINESS_ADDRESS}
+Questions? ${BUSINESS_PHONE}`;
+}
+
+function buildStaffConfirmationSMS(booking: Record<string, unknown>, businessType: string): string {
+  const businessLabel = getBusinessLabel(businessType);
+  const startDate = new Date(booking.start_datetime as string);
+  const endDate = new Date(booking.end_datetime as string);
+  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const endTimeStr = endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  const totalAmount = Number(booking.total_amount || 0);
+  const depositAmount = Number(booking.deposit_amount || 0);
+  const roomName = ((booking.booking_resources as Array<{ resources?: { name?: string } }>)?.[0]?.resources?.name) || "TBD";
+  
+  return `NEW ${businessLabel.toUpperCase()} BOOKING ✅
+${shortDate} ${startTimeStr}–${endTimeStr}
+${roomName}
+Client: ${booking.guest_name} (${booking.guest_phone || "no phone"})
+Paid: ${formatMoney(depositAmount)} / Total: ${formatMoney(totalAmount)}`;
+}
+
+function buildReminderSMS(booking: Record<string, unknown>, businessType: string, reminderType: string): string {
+  const businessLabel = getBusinessLabel(businessType);
+  const startDate = new Date(booking.start_datetime as string);
+  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  const reminderText = reminderType === "24h" ? "tomorrow" : "in 2 hours";
+  
+  return `⏰ REMINDER: Your ${businessLabel} appointment is ${reminderText}!
+${shortDate} at ${timeStr}
+${BUSINESS_ADDRESS}
+Questions? ${BUSINESS_PHONE}`;
+}
+
+// ============= MAIN HANDLER =============
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const resendKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendKey) throw new Error("RESEND_API_KEY is not set");
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) throw new Error("Backend keys are not set");
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
+    const resend = new Resend(resendKey);
+
+    const {
+      booking_id,
+      notification_type,
+      channels = ["email", "sms"],
+      recipients = ["customer", "staff"],
+      stripe_session_id,
+      stripe_payment_intent,
+    }: NotificationRequest = await req.json();
+
+    logStep("Request received", { booking_id, notification_type, channels, recipients });
+
+    if (!booking_id) {
+      return new Response(JSON.stringify({ error: "booking_id is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Fetch booking with all related data
+    const { data: booking, error: bookingError } = await supabase
+      .from("bookings")
+      .select(`
+        *,
+        bookable_types(*),
+        businesses(*),
+        booking_resources(*, resources(*)),
+        booking_addons(*, addons(*)),
+        payments(*)
+      `)
+      .eq("id", booking_id)
+      .single();
+
+    if (bookingError || !booking) {
+      logStep("Booking fetch error", { error: bookingError });
+      return new Response(JSON.stringify({ error: "Booking not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const businessType = booking.businesses?.type || "default";
+    const staffContact = STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default;
+
+    logStep("Booking fetched", { 
+      guest_name: booking.guest_name, 
+      guest_email: booking.guest_email,
+      business_type: businessType,
+      status: booking.status 
+    });
+
+    // Check idempotency for confirmations
+    if (notification_type === "confirmation") {
+      const alreadySentCustomer = !!booking.email_sent_customer_at;
+      const alreadySentStaff = !!booking.email_sent_staff_at;
+      
+      if (alreadySentCustomer && alreadySentStaff) {
+        logStep("Skip send - already sent", { booking_id });
+        return new Response(
+          JSON.stringify({ success: true, skipped: true, reason: "already_sent" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    const results: Record<string, unknown> = {};
+
+    // ============= SEND EMAILS =============
+    if (channels.includes("email")) {
+      // Customer email
+      if (recipients.includes("customer") && booking.guest_email) {
+        try {
+          const businessLabel = getBusinessLabel(businessType);
+          const startDate = new Date(booking.start_datetime);
+          const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+          const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+
+          let subject: string;
+          let html: string;
+
+          if (notification_type === "confirmation") {
+            subject = `Your ${businessLabel} Appointment is Confirmed — ${shortDate} at ${timeStr}`;
+            html = buildCustomerConfirmationEmail(booking, businessType);
+          } else {
+            const reminderType = notification_type === "reminder" ? "24h" : notification_type;
+            subject = `Reminder: ${businessLabel} Appointment — ${shortDate} at ${timeStr}`;
+            html = buildReminderEmail(booking, businessType, reminderType);
+          }
+
+          const emailResult = await resend.emails.send({
+            from: FROM_EMAIL,
+            to: [booking.guest_email],
+            subject,
+            html,
+          });
+
+          results.customer_email = { success: !!emailResult.data?.id, id: emailResult.data?.id, error: emailResult.error };
+
+          await logNotification(supabase, {
+            booking_id,
+            notification_type,
+            channel: "email",
+            recipient_type: "customer",
+            recipient_email: booking.guest_email,
+            subject,
+            status: emailResult.data?.id ? "sent" : "failed",
+            provider: "resend",
+            provider_message_id: emailResult.data?.id,
+            error_message: emailResult.error?.message,
+          });
+
+          // Update idempotency timestamp
+          if (notification_type === "confirmation" && emailResult.data?.id) {
+            await supabase.from("bookings").update({ email_sent_customer_at: new Date().toISOString() }).eq("id", booking_id);
+          }
+
+          logStep("Customer email sent", { email: booking.guest_email, id: emailResult.data?.id });
+        } catch (e) {
+          logStep("Customer email error", { error: String(e) });
+          results.customer_email = { success: false, error: String(e) };
+        }
+      }
+
+      // Staff email
+      if (recipients.includes("staff")) {
+        try {
+          const businessLabel = getBusinessLabel(businessType);
+          const startDate = new Date(booking.start_datetime);
+          const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+          const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+
+          const subject = `New ${businessLabel} Booking — ${booking.guest_name} — ${shortDate} ${timeStr}`;
+          const html = buildStaffConfirmationEmail(booking, businessType);
+
+          const emailResult = await resend.emails.send({
+            from: FROM_EMAIL,
+            to: [staffContact.email],
+            subject,
+            html,
+          });
+
+          results.staff_email = { success: !!emailResult.data?.id, id: emailResult.data?.id, error: emailResult.error };
+
+          await logNotification(supabase, {
+            booking_id,
+            notification_type,
+            channel: "email",
+            recipient_type: "staff",
+            recipient_email: staffContact.email,
+            subject,
+            status: emailResult.data?.id ? "sent" : "failed",
+            provider: "resend",
+            provider_message_id: emailResult.data?.id,
+            error_message: emailResult.error?.message,
+          });
+
+          // Update idempotency timestamp
+          if (notification_type === "confirmation" && emailResult.data?.id) {
+            await supabase.from("bookings").update({ email_sent_staff_at: new Date().toISOString() }).eq("id", booking_id);
+          }
+
+          logStep("Staff email sent", { email: staffContact.email, id: emailResult.data?.id });
+        } catch (e) {
+          logStep("Staff email error", { error: String(e) });
+          results.staff_email = { success: false, error: String(e) };
+        }
+      }
+    }
+
+    // ============= SEND SMS =============
+    if (channels.includes("sms")) {
+      // Customer SMS
+      if (recipients.includes("customer") && booking.guest_phone) {
+        let smsMessage: string;
+        if (notification_type === "confirmation") {
+          smsMessage = buildCustomerConfirmationSMS(booking, businessType);
+        } else {
+          smsMessage = buildReminderSMS(booking, businessType, notification_type);
+        }
+
+        const smsResult = await sendSMS(booking.guest_phone, smsMessage);
+        results.customer_sms = smsResult;
+
+        await logNotification(supabase, {
+          booking_id,
+          notification_type,
+          channel: "sms",
+          recipient_type: "customer",
+          recipient_phone: booking.guest_phone,
+          status: smsResult.success ? "sent" : "failed",
+          provider: "twilio",
+          provider_message_id: smsResult.sid,
+          error_message: smsResult.error,
+        });
+      }
+
+      // Staff SMS
+      if (recipients.includes("staff") && notification_type === "confirmation") {
+        const smsMessage = buildStaffConfirmationSMS(booking, businessType);
+        const smsResult = await sendSMS(staffContact.phone, smsMessage);
+        results.staff_sms = smsResult;
+
+        await logNotification(supabase, {
+          booking_id,
+          notification_type,
+          channel: "sms",
+          recipient_type: "staff",
+          recipient_phone: staffContact.phone,
+          status: smsResult.success ? "sent" : "failed",
+          provider: "twilio",
+          provider_message_id: smsResult.sid,
+          error_message: smsResult.error,
+        });
+      }
+    }
+
+    // Schedule reminders for confirmations
+    if (notification_type === "confirmation") {
+      await scheduleReminders(supabase, booking_id, booking.start_datetime);
+    }
+
+    logStep("Notification complete", results);
+
+    return new Response(JSON.stringify({ success: true, results }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("ERROR", { message: errorMessage });
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
