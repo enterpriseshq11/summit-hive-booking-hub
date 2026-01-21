@@ -1,0 +1,232 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const logStep = (step: string, details?: unknown) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
+  console.log(`[LINDSEY-CHECKOUT] ${step}${detailsStr}`);
+};
+
+const jsonResponse = (status: number, body: unknown) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    logStep("Function started");
+
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) throw new Error("Backend keys are not set");
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false },
+    });
+
+    const body = await req.json();
+    const {
+      service_id,
+      service_name,
+      duration,
+      price,
+      room_id,
+      start_datetime,
+      end_datetime,
+      customer_name,
+      customer_email,
+      customer_phone,
+    } = body || {};
+
+    logStep("Request parsed", { service_id, service_name, duration, price, room_id, start_datetime, end_datetime });
+
+    // Validate required fields
+    if (!service_name || !duration || price === undefined || !start_datetime || !end_datetime) {
+      return jsonResponse(400, { error: "Missing required booking fields" });
+    }
+    if (!customer_name || !customer_email) {
+      return jsonResponse(400, { error: "Missing customer name or email" });
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(customer_email.trim())) {
+      return jsonResponse(400, { error: "Invalid email format" });
+    }
+
+    // Get spa business
+    const { data: business, error: bizError } = await supabase
+      .from("businesses")
+      .select("id, name")
+      .eq("type", "spa")
+      .single();
+    if (bizError || !business) throw new Error(bizError?.message || "Spa business not found");
+
+    // Get massage-therapy bookable type
+    const { data: bookableType, error: btError } = await supabase
+      .from("bookable_types")
+      .select("id, deposit_percentage, deposit_fixed_amount")
+      .eq("business_id", business.id)
+      .eq("slug", "massage-therapy")
+      .single();
+    if (btError || !bookableType) throw new Error(btError?.message || "Massage bookable type not found");
+
+    const total = Number(price);
+    
+    // For free consultations, just create the booking without payment
+    if (total <= 0) {
+      const { data: bookingNumber } = await supabase.rpc("generate_booking_number");
+      
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .insert({
+          business_id: business.id,
+          bookable_type_id: bookableType.id,
+          start_datetime,
+          end_datetime,
+          status: "confirmed",
+          subtotal: 0,
+          total_amount: 0,
+          booking_number: bookingNumber || `SPA-${Date.now()}`,
+          guest_name: customer_name.trim(),
+          guest_email: customer_email.trim(),
+          guest_phone: customer_phone?.trim() || null,
+          notes: `Service: ${service_name}, Duration: ${duration} min (Free Consultation)`,
+        })
+        .select("id")
+        .single();
+      
+      if (bookingError) throw new Error(bookingError.message);
+
+      // Attach room if provided
+      if (room_id && booking) {
+        await supabase.from("booking_resources").insert({
+          booking_id: booking.id,
+          resource_id: room_id,
+          start_datetime,
+          end_datetime,
+        });
+      }
+
+      logStep("Free booking created", { bookingId: booking?.id });
+      return jsonResponse(200, { 
+        success: true, 
+        booking_id: booking?.id, 
+        is_free: true 
+      });
+    }
+
+    // Generate booking number
+    const { data: bookingNumber, error: bnError } = await supabase.rpc("generate_booking_number");
+    if (bnError) logStep("Booking number generation warning", { error: bnError });
+
+    // Create pending booking
+    const { data: booking, error: bookingError } = await supabase
+      .from("bookings")
+      .insert({
+        business_id: business.id,
+        bookable_type_id: bookableType.id,
+        start_datetime,
+        end_datetime,
+        status: "pending",
+        subtotal: total,
+        total_amount: total,
+        booking_number: bookingNumber || `SPA-${Date.now()}`,
+        guest_name: customer_name.trim(),
+        guest_email: customer_email.trim(),
+        guest_phone: customer_phone?.trim() || null,
+        deposit_amount: total, // Full payment
+        balance_due: 0,
+        notes: `Service: ${service_name}, Duration: ${duration} min`,
+      })
+      .select("id")
+      .single();
+
+    if (bookingError || !booking) throw new Error(bookingError?.message || "Failed to create booking");
+
+    // Attach room if provided
+    if (room_id) {
+      const { error: brError } = await supabase.from("booking_resources").insert({
+        booking_id: booking.id,
+        resource_id: room_id,
+        start_datetime,
+        end_datetime,
+      });
+      if (brError) logStep("Room attachment warning", { error: brError });
+    }
+
+    // Create Stripe checkout for full payment
+    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const origin = req.headers.get("origin") || "http://localhost:3000";
+
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `${service_name} - ${duration} min`,
+              description: `Massage with Lindsey at The Hive Restoration Lounge`,
+              metadata: {
+                booking_id: booking.id,
+                service_id: service_id || "",
+                duration: String(duration),
+              },
+            },
+            unit_amount: Math.round(total * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      customer_email: customer_email.trim(),
+      success_url: `${origin}/#/book-with-lindsey?booking=success&id=${booking.id}`,
+      cancel_url: `${origin}/#/book-with-lindsey?booking=cancelled&id=${booking.id}`,
+      metadata: {
+        booking_id: booking.id,
+        business_type: "spa",
+        service_name,
+        duration: String(duration),
+      },
+    });
+
+    // Create pending payment record
+    const { error: payError } = await supabase.from("payments").insert({
+      booking_id: booking.id,
+      amount: total,
+      payment_type: "full",
+      status: "pending",
+      stripe_payment_intent_id: session.payment_intent as string,
+      metadata: {
+        checkout_session_id: session.id,
+        service_name,
+        duration,
+      },
+    });
+    if (payError) logStep("Payment insert warning", { error: payError });
+
+    logStep("Checkout session created", { bookingId: booking.id, sessionId: session.id });
+    return jsonResponse(200, { 
+      url: session.url, 
+      booking_id: booking.id, 
+      session_id: session.id 
+    });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    logStep("ERROR", { msg });
+    return jsonResponse(500, { error: msg });
+  }
+});
