@@ -220,27 +220,103 @@ export default function DopamineDrop() {
 
       {/* How It Works - Now below the wheel */}
 
-      {/* [SPIN-06] Enhanced Prizes Section */}
+      {/* [SPIN-06] Enhanced Prizes Section with color differentiation */}
       <section id="prizes" className="py-12 md:py-20 bg-zinc-900/50">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-3xl font-bold text-center mb-8 text-white">This Month's Giveaway Prizes</h2>
+          <h2 className="text-3xl font-bold text-center mb-3 text-white">This Month's Giveaway Prizes</h2>
+          <p className="text-center text-zinc-400 mb-8">Spin daily to earn entries. VIP entries count double!</p>
           <div className="grid md:grid-cols-2 gap-6">
             {[
-              { icon: "💆", title: "Massage Giveaway Winner", desc: "Full massage session at Restoration Spa", value: "Value: $80+", when: "Drawn monthly" },
-              { icon: "💪", title: "PT Session Giveaway Winner", desc: "1-hour personal training at Total Fitness", value: "Value: $75+", when: "Drawn monthly" },
-              { icon: "🎟️", title: "General Entries Pool", desc: "Entries count toward grand prize drawing", value: "Grand Prize Pool", when: "March 31, 2026" },
-              { icon: "🏆", title: "Grand Giveaway", desc: "Major prize package from all A-Z businesses", value: "Value: $500+", when: "March 31, 2026" }
-            ].map((prize, i) => (
-              <div key={i} className="bg-zinc-800/50 rounded-xl p-6 border border-zinc-700 hover:border-primary/50 transition-colors">
-                <span className="text-4xl mb-3 block">{prize.icon}</span>
-                <h3 className="text-lg font-bold text-white mb-2">{prize.title}</h3>
-                <p className="text-muted-foreground text-sm mb-3">{prize.desc}</p>
-                <div className="flex items-center justify-between text-xs">
-                  <Badge variant="outline" className="border-primary/30 text-primary">{prize.value}</Badge>
-                  <span className="text-zinc-500">{prize.when}</span>
-                </div>
-              </div>
-            ))}
+              { 
+                icon: "💆", 
+                title: "Massage Giveaway", 
+                desc: "Full massage session at Restoration Spa", 
+                value: "$80+", 
+                when: "Draws monthly",
+                daysLeft: null,
+                color: "orange",
+                entryType: "massage"
+              },
+              { 
+                icon: "💪", 
+                title: "PT Session Giveaway", 
+                desc: "1-hour personal training at Total Fitness", 
+                value: "$75+", 
+                when: "Draws monthly",
+                daysLeft: null,
+                color: "green",
+                entryType: "pt"
+              },
+              { 
+                icon: "🎟️", 
+                title: "General Entries Pool", 
+                desc: "Entries count toward grand prize drawing", 
+                value: "Grand Prize Pool", 
+                when: "Draws March 31",
+                daysLeft: 69,
+                color: "pink",
+                entryType: "general"
+              },
+              { 
+                icon: "🏆", 
+                title: "Grand Giveaway", 
+                desc: "Major prize package from all A-Z businesses", 
+                value: "$500+", 
+                when: "March 31, 2026",
+                daysLeft: 69,
+                color: "gold",
+                entryType: "general"
+              }
+            ].map((prize, i) => {
+              const colorStyles: Record<string, string> = {
+                orange: "border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent hover:border-orange-500/50",
+                green: "border-green-500/30 bg-gradient-to-br from-green-500/10 to-transparent hover:border-green-500/50",
+                pink: "border-pink-500/30 bg-gradient-to-br from-pink-500/10 to-transparent hover:border-pink-500/50",
+                gold: "border-primary/40 bg-gradient-to-br from-primary/20 via-yellow-500/10 to-transparent hover:border-primary"
+              };
+              const valueColors: Record<string, string> = {
+                orange: "text-orange-400",
+                green: "text-green-400",
+                pink: "text-pink-400",
+                gold: "text-primary"
+              };
+              return (
+                <motion.div 
+                  key={i} 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  className={`rounded-xl p-6 border transition-all duration-300 ${colorStyles[prize.color]}`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <span className="text-4xl">{prize.icon}</span>
+                    {prize.daysLeft !== null && (
+                      <Badge className="bg-zinc-700/80 text-zinc-300 text-xs">
+                        {prize.daysLeft} days left
+                      </Badge>
+                    )}
+                    {prize.daysLeft === null && (
+                      <Badge variant="outline" className="border-zinc-600 text-zinc-400 text-xs">
+                        {prize.when}
+                      </Badge>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">{prize.title}</h3>
+                  <p className="text-zinc-400 text-sm mb-4">{prize.desc}</p>
+                  <div className="flex items-center justify-between">
+                    <span className={`font-bold text-lg ${valueColors[prize.color]}`}>
+                      {prize.value}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-3 border-t border-zinc-700/50 pt-3">
+                    {prize.entryType === "general" 
+                      ? "Earn entries by spinning daily. VIP entries count double!"
+                      : `Earn ${prize.entryType} entries by spinning. VIP = 2x entries!`}
+                  </p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
