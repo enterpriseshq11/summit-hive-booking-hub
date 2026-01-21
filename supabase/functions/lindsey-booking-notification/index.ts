@@ -20,7 +20,7 @@ const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
 
 interface BookingNotificationRequest {
   booking_id: string;
-  type: "confirmed" | "cancelled" | "reminder";
+  type: "confirmed" | "cancelled" | "reminder" | "free_consultation";
   stripe_session_id?: string;
   stripe_payment_intent?: string;
 }
@@ -168,8 +168,8 @@ serve(async (req) => {
     // Stripe reference
     const stripeRef = stripe_payment_intent || stripe_session_id || payment?.stripe_payment_intent_id || booking.booking_number || booking.id.slice(0, 8).toUpperCase();
 
+    // ============= PAID BOOKING =============
     if (type === "confirmed") {
-      // ============= SMS TO LINDSEY =============
       const smsMessage = `NEW PAID BOOKING ✅
 ${serviceName} — ${duration}min
 ${shortDateStr} at ${startTimeStr}–${endTimeStr}
@@ -179,10 +179,8 @@ Add-ons: ${addonsStr}
 Paid: $${amountPaid.toFixed(2)}
 Ref: ${stripeRef}`;
 
-      // Send SMS (will skip if Twilio not configured)
       const smsResult = await sendSMS(LINDSEY_PHONE, smsMessage);
 
-      // ============= EMAIL TO LINDSEY =============
       const lindseyEmailHtml = `
 <!DOCTYPE html>
 <html>
@@ -261,7 +259,6 @@ Ref: ${stripeRef}`;
 </body>
 </html>`;
 
-      // ============= EMAIL TO CUSTOMER =============
       const customerEmailHtml = `
 <!DOCTYPE html>
 <html>
@@ -350,7 +347,6 @@ Ref: ${stripeRef}`;
 </body>
 </html>`;
 
-      // Send both emails
       const [lindseyResult, customerResult] = await Promise.all([
         resend.emails.send({
           from: FROM_EMAIL,
@@ -366,7 +362,7 @@ Ref: ${stripeRef}`;
         }),
       ]);
 
-      logStep("Emails sent", {
+      logStep("Paid booking emails sent", {
         lindseyEmailId: lindseyResult.data?.id,
         customerEmailId: customerResult.data?.id,
       });
@@ -378,6 +374,206 @@ Ref: ${stripeRef}`;
           customer_email_id: customerResult.data?.id,
           sms_sent: smsResult.success,
           sms_sid: smsResult.sid,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // ============= FREE CONSULTATION =============
+    if (type === "free_consultation") {
+      logStep("Processing free consultation notification");
+
+      const smsMessage = `NEW FREE CONSULTATION 📋
+${serviceName} — ${duration}min
+${shortDateStr} at ${startTimeStr}–${endTimeStr}
+Room: ${roomName}
+Client: ${booking.guest_name} (${booking.guest_phone || "no phone"})
+Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
+
+      const smsResult = await sendSMS(LINDSEY_PHONE, smsMessage);
+
+      // Email to Lindsey for free consultation
+      const lindseyEmailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2d3748; padding: 20px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 20px; }
+    .badge { display: inline-block; background: #3182ce; color: white; padding: 4px 12px; font-size: 12px; font-weight: bold; border-radius: 4px; }
+    .content { padding: 20px; background: #ffffff; }
+    .info-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    .info-table td { padding: 10px; border-bottom: 1px solid #eee; }
+    .info-table td:first-child { font-weight: bold; width: 140px; color: #666; }
+    .highlight { background: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; margin: 15px 0; }
+    .footer { background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="badge">📋 FREE CONSULTATION</span>
+      <h1 style="margin-top: 10px;">New Consultation Scheduled</h1>
+    </div>
+    <div class="content">
+      <div class="highlight">
+        <strong>Complimentary Consultation</strong><br>
+        <span style="font-size: 12px; color: #666;">No payment required</span>
+      </div>
+      
+      <h2 style="margin-top: 0;">Appointment Details</h2>
+      <table class="info-table">
+        <tr><td>📅 Date</td><td><strong>${dateStr}</strong></td></tr>
+        <tr><td>⏰ Time</td><td><strong>${startTimeStr} – ${endTimeStr}</strong></td></tr>
+        <tr><td>🧘 Service</td><td>${serviceName}</td></tr>
+        <tr><td>⏱️ Duration</td><td>${duration} minutes</td></tr>
+        <tr><td>🚪 Room</td><td>${roomName}</td></tr>
+      </table>
+
+      <h2>Client Information</h2>
+      <table class="info-table">
+        <tr><td>👤 Name</td><td><strong>${booking.guest_name}</strong></td></tr>
+        <tr><td>📧 Email</td><td><a href="mailto:${booking.guest_email}">${booking.guest_email}</a></td></tr>
+        <tr><td>📱 Phone</td><td>${booking.guest_phone ? `<a href="tel:${booking.guest_phone}">${booking.guest_phone}</a>` : "Not provided"}</td></tr>
+      </table>
+
+      <div style="background: #e6fffa; padding: 15px; border-radius: 4px; margin-top: 15px; text-align: center;">
+        <strong>📅 This consultation has been added to your schedule.</strong><br>
+        <span style="font-size: 13px; color: #666;">The time slot is now blocked and no longer bookable.</span>
+      </div>
+
+      <p style="margin-top: 20px; font-size: 14px; color: #666;">
+        Booking #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}<br>
+        <a href="https://summit-hive-booking-hub.lovable.app/#/admin/schedule">View in Admin Dashboard</a>
+      </p>
+    </div>
+    <div class="footer">
+      <p>Restoration Lounge | A-Z Enterprises</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+      // Email to customer for free consultation
+      const customerEmailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2d3748; padding: 30px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 24px; }
+    .content { padding: 30px 20px; background: #ffffff; }
+    .success-badge { display: inline-block; background: #3182ce; color: white; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 20px; margin-bottom: 20px; }
+    .appointment-box { background: #f8f6f0; border: 2px solid #d4af37; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .appointment-box h3 { margin: 0 0 15px 0; color: #2d3748; }
+    .location-box { background: #edf2f7; padding: 15px; border-radius: 4px; margin: 20px 0; }
+    .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Restoration Lounge</h1>
+      <p style="color: #a0aec0; margin: 5px 0 0 0;">by A-Z Enterprises</p>
+    </div>
+    <div class="content">
+      <div style="text-align: center;">
+        <span class="success-badge">✓ Consultation Confirmed</span>
+        <h2 style="margin: 10px 0;">Your Consultation is Scheduled!</h2>
+      </div>
+      
+      <p>Hi ${booking.guest_name?.split(" ")[0] || "there"},</p>
+      <p>Thank you for scheduling a consultation with Lindsey! Here are your details:</p>
+
+      <div class="appointment-box">
+        <h3>📅 Consultation Details</h3>
+        <table style="width: 100%;">
+          <tr><td style="padding: 8px 0; color: #666;">Service:</td><td style="padding: 8px 0; font-weight: bold;">${serviceName}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Date:</td><td style="padding: 8px 0; font-weight: bold;">${dateStr}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Time:</td><td style="padding: 8px 0; font-weight: bold;">${startTimeStr} – ${endTimeStr}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Duration:</td><td style="padding: 8px 0; font-weight: bold;">${duration} minutes</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Room:</td><td style="padding: 8px 0; font-weight: bold;">${roomName}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Cost:</td><td style="padding: 8px 0; font-weight: bold; color: #3182ce;">Complimentary</td></tr>
+        </table>
+      </div>
+
+      <div class="location-box">
+        <strong>📍 Location</strong>
+        <p style="margin: 10px 0 0 0;">
+          Restoration Lounge at The Hive<br>
+          ${BUSINESS_ADDRESS}
+        </p>
+        <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+          Please arrive 5 minutes early. Free parking is available on-site.
+        </p>
+      </div>
+
+      <h3>What to Expect</h3>
+      <p style="font-size: 14px;">
+        During your consultation, Lindsey will discuss your needs, answer any questions, 
+        and help determine the best treatment plan for you. This is a great opportunity to 
+        share any health concerns or preferences before your first massage session.
+      </p>
+
+      <h3>Need to Reschedule?</h3>
+      <p style="font-size: 14px; color: #666;">
+        Please give us at least 24 hours notice if you need to change your appointment time.
+      </p>
+
+      <div style="text-align: center; margin-top: 30px;">
+        <p>Questions? Contact us:</p>
+        <p style="font-size: 18px;"><a href="tel:+15676441090">(567) 644-1090</a></p>
+      </div>
+
+      <p style="margin-top: 30px;">
+        Looking forward to meeting you!<br><br>
+        <strong>Lindsey</strong><br>
+        Restoration Lounge
+      </p>
+    </div>
+    <div class="footer">
+      <p>Booking Confirmation #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}</p>
+      <p>Restoration Lounge | A-Z Enterprises | Wapakoneta, Ohio</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+      const [lindseyResult, customerResult] = await Promise.all([
+        resend.emails.send({
+          from: FROM_EMAIL,
+          to: [LINDSEY_EMAIL],
+          subject: `📋 New Free Consultation – ${serviceName} – ${dateStr} at ${startTimeStr}`,
+          html: lindseyEmailHtml,
+        }),
+        resend.emails.send({
+          from: FROM_EMAIL,
+          to: [booking.guest_email],
+          subject: `Your Consultation is Confirmed – ${dateStr}`,
+          html: customerEmailHtml,
+        }),
+      ]);
+
+      logStep("Free consultation emails sent", {
+        lindseyEmailId: lindseyResult.data?.id,
+        customerEmailId: customerResult.data?.id,
+        lindseyError: lindseyResult.error,
+        customerError: customerResult.error,
+      });
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          lindsey_email_id: lindseyResult.data?.id,
+          customer_email_id: customerResult.data?.id,
+          sms_sent: smsResult.success,
         }),
         {
           status: 200,
