@@ -151,6 +151,37 @@ serve(async (req) => {
               logStep("Lindsey notification error", { error: String(notifError) });
             }
           }
+
+          // Send staff notification for 360 Photo Booth bookings (Victoria)
+          if (businessType === "photo_booth") {
+            try {
+              const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/staff-booking-notification`;
+              const notificationResponse = await fetch(notificationUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                },
+                body: JSON.stringify({
+                  booking_id: bookingId,
+                  type: "confirmed",
+                  business_type: "photo_booth",
+                  booking_status: newStatus,
+                  stripe_session_id: session.id,
+                  stripe_payment_intent: session.payment_intent as string,
+                }),
+              });
+
+              if (notificationResponse.ok) {
+                logStep("Victoria notification sent", { bookingId });
+              } else {
+                const errText = await notificationResponse.text();
+                logStep("Victoria notification failed", { status: notificationResponse.status, error: errText });
+              }
+            } catch (notifError) {
+              logStep("Victoria notification error", { error: String(notifError) });
+            }
+          }
         }
 
         if (membershipTierId && userId) {
