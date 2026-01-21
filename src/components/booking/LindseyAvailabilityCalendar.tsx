@@ -1,4 +1,5 @@
-import { useState, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -121,6 +122,9 @@ interface LindseyAvailabilityCalendarProps {
 }
 
 export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvailabilityCalendarProps) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
   const [step, setStep] = useState<BookingStep>("service");
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
@@ -130,6 +134,19 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
+  const [completionType, setCompletionType] = useState<"paid" | "free" | null>(null);
+  const [completedBookingId, setCompletedBookingId] = useState<string | null>(null);
+  const [completedSummary, setCompletedSummary] = useState<
+    | {
+        serviceName?: string;
+        duration?: number;
+        dateLabel?: string;
+        timeLabel?: string;
+        roomName?: string;
+        total?: number;
+      }
+    | null
+  >(null);
   
   // Refs for scrolling to steps
   const calendarStepRef = useRef<HTMLDivElement>(null);
@@ -145,6 +162,37 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
     selectedDate,
     selectedDuration: selectedDuration || 60,
   });
+
+  // Handle Stripe return URLs (success/cancel) in the same way other paid flows do.
+  useEffect(() => {
+    const booking = searchParams.get("booking");
+    const id = searchParams.get("id");
+
+    if (!booking) return;
+
+    if (booking === "success" && id) {
+      setCompletionType("paid");
+      setCompletedBookingId(id);
+      setBookingComplete(true);
+      setStep("confirm");
+      toast.success("Payment successful. Your booking is confirmed.");
+
+      try {
+        const raw = sessionStorage.getItem(`lindsey_booking_${id}`);
+        if (raw) setCompletedSummary(JSON.parse(raw));
+      } catch {
+        // ignore
+      }
+
+      // Clean the URL so refreshing doesn't re-trigger toasts.
+      navigate("/book-with-lindsey", { replace: true });
+    }
+
+    if (booking === "cancelled") {
+      toast.error("Payment cancelled. Your time is not reserved until payment is completed.");
+      navigate("/book-with-lindsey", { replace: true });
+    }
+  }, [navigate, searchParams]);
 
   // Generate availability map for calendar coloring based on selected duration
   const availability = useMemo(() => {
@@ -275,6 +323,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
 
       // Handle free consultations (no payment needed)
       if (data?.is_free) {
+        setCompletionType("free");
         setBookingComplete(true);
         setStep("confirm");
         toast.success("Free consultation booked! Check your email for details.");
@@ -282,14 +331,27 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
         return;
       }
 
-      // Redirect to Stripe checkout - use window.open like Voice Vault for reliability
+      // Paid booking: open Stripe checkout (same pattern as other flows; avoids iframe blank-screen issues)
       if (data?.url) {
         toast.success("Redirecting to secure payment...");
-        window.open(data.url, "_blank");
-        // Show confirmation in current window
-        setBookingComplete(true);
-        setStep("confirm");
-        onBookingComplete?.();
+        const bookingId = data?.booking_id as string | undefined;
+        if (bookingId) {
+          try {
+            const summary = {
+              serviceName: serviceData?.name || "Massage",
+              duration: selectedDuration || undefined,
+              dateLabel: selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy") : undefined,
+              timeLabel: selectedTime ? format(new Date(`2000-01-01T${selectedTime}`), "h:mm a") : undefined,
+              roomName: ROOMS.find((r) => r.id === roomId)?.name || "H1 - Hallway Room",
+              total: price,
+            };
+            sessionStorage.setItem(`lindsey_booking_${bookingId}`, JSON.stringify(summary));
+          } catch {
+            // ignore
+          }
+        }
+
+        window.open(data.url, "_blank", "noopener,noreferrer");
       } else {
         throw new Error("No checkout URL received");
       }
@@ -408,20 +470,24 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
             <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Booking Request Submitted!</h2>
+            <h2 className="text-2xl font-bold mb-2">
+              {completionType === "paid" ? "Payment Successful!" : "Consultation Booked!"}
+            </h2>
             <p className="text-muted-foreground mb-6">
-              Lindsey will review and confirm within 24 hours. Check your email for details.
+              {completionType === "paid"
+                ? "Your booking is confirmed. Check your email for your receipt and details."
+                : "This is a free consultation. Check your email for details."}
             </p>
             <div className="bg-muted rounded-lg p-4 text-left max-w-sm mx-auto mb-6">
               <h3 className="font-semibold mb-2">Your Booking Details</h3>
               <ul className="space-y-1 text-sm text-muted-foreground">
-                <li><strong>Service:</strong> {getSelectedServiceData()?.name}</li>
-                <li><strong>Duration:</strong> {selectedDuration} minutes</li>
-                <li><strong>Date:</strong> {selectedDate && format(selectedDate, "EEEE, MMMM d, yyyy")}</li>
-                <li><strong>Time:</strong> {selectedTime && format(new Date(`2000-01-01T${selectedTime}`), "h:mm a")}</li>
-                <li><strong>Room:</strong> {ROOMS.find(r => r.id === selectedRoom)?.name || "H1 - Hallway Room"}</li>
-                {calculatePrice() !== null && calculatePrice() !== 0 && (
-                  <li><strong>Estimated Total:</strong> ${calculatePrice()}</li>
+                <li><strong>Service:</strong> {completedSummary?.serviceName || getSelectedServiceData()?.name}</li>
+                <li><strong>Duration:</strong> {completedSummary?.duration ?? selectedDuration} minutes</li>
+                <li><strong>Date:</strong> {completedSummary?.dateLabel || (selectedDate && format(selectedDate, "EEEE, MMMM d, yyyy"))}</li>
+                <li><strong>Time:</strong> {completedSummary?.timeLabel || (selectedTime && format(new Date(`2000-01-01T${selectedTime}`), "h:mm a"))}</li>
+                <li><strong>Room:</strong> {completedSummary?.roomName || ROOMS.find(r => r.id === selectedRoom)?.name || "H1 - Hallway Room"}</li>
+                {completionType === "paid" && typeof completedSummary?.total === "number" && (
+                  <li><strong>Total Paid:</strong> ${completedSummary.total}</li>
                 )}
               </ul>
             </div>
