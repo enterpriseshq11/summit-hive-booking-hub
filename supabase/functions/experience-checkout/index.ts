@@ -58,6 +58,7 @@ serve(async (req) => {
     const {
       business_type,
       package_id,
+      bookable_type_id,
       resource_id,
       start_datetime,
       end_datetime,
@@ -65,44 +66,99 @@ serve(async (req) => {
       customer_email,
       customer_phone,
       hold_id,
+      // New hourly pricing fields
+      duration_hours,
+      hourly_rate,
+      total_amount: passedTotalAmount,
     } = body || {};
 
-    logStep("Request parsed", { business_type, package_id, resource_id, start_datetime, end_datetime });
+    logStep("Request parsed", { business_type, package_id, bookable_type_id, resource_id, start_datetime, end_datetime, duration_hours, hourly_rate });
 
-    if (!business_type || !package_id || !resource_id || !start_datetime || !end_datetime) {
+    if (!business_type || !resource_id || !start_datetime || !end_datetime) {
       return jsonResponse(400, { error: "Missing required fields" });
     }
     if (!customer_name || !customer_email || !customer_phone) {
       return jsonResponse(400, { error: "Missing customer details" });
     }
 
-    // Look up package + bookable type + business
-    const { data: pkg, error: pkgError } = await supabase
-      .from("packages")
-      .select("id, name, base_price, duration_mins, bookable_type_id")
-      .eq("id", package_id)
-      .single();
-    if (pkgError || !pkg) throw new Error(pkgError?.message || "Package not found");
+    let pkg: { id: string; name: string; base_price: number; duration_mins: number; bookable_type_id: string } | null = null;
+    let bt: { id: string; name: string; business_id: string; deposit_percentage: number | null; deposit_fixed_amount: number | null } | null = null;
+    let biz: { id: string; type: string; name: string } | null = null;
+    let total = 0;
+    let productName = "";
 
-    const { data: bt, error: btError } = await supabase
-      .from("bookable_types")
-      .select("id, name, business_id, deposit_percentage, deposit_fixed_amount")
-      .eq("id", pkg.bookable_type_id)
-      .single();
-    if (btError || !bt) throw new Error(btError?.message || "Bookable type not found");
+    // Check if using hourly pricing (no package_id, but has duration_hours and total_amount)
+    const isHourlyPricing = !package_id && duration_hours && passedTotalAmount !== undefined;
 
-    const { data: biz, error: bizError } = await supabase
-      .from("businesses")
-      .select("id, type, name")
-      .eq("id", bt.business_id)
-      .single();
-    if (bizError || !biz) throw new Error(bizError?.message || "Business not found");
-    if (biz.type !== business_type) {
-      return jsonResponse(400, { error: "Package does not belong to requested business" });
+    if (isHourlyPricing) {
+      // Hourly pricing mode - look up bookable_type directly
+      logStep("Using hourly pricing mode", { duration_hours, hourly_rate, passedTotalAmount });
+
+      if (!bookable_type_id) {
+        return jsonResponse(400, { error: "Missing bookable_type_id for hourly pricing" });
+      }
+
+      const { data: btData, error: btError } = await supabase
+        .from("bookable_types")
+        .select("id, name, business_id, deposit_percentage, deposit_fixed_amount")
+        .eq("id", bookable_type_id)
+        .single();
+      if (btError || !btData) throw new Error(btError?.message || "Bookable type not found");
+      bt = btData;
+
+      const { data: bizData, error: bizError } = await supabase
+        .from("businesses")
+        .select("id, type, name")
+        .eq("id", bt.business_id)
+        .single();
+      if (bizError || !bizData) throw new Error(bizError?.message || "Business not found");
+      biz = bizData;
+
+      if (biz.type !== business_type) {
+        return jsonResponse(400, { error: "Bookable type does not belong to requested business" });
+      }
+
+      total = Number(passedTotalAmount);
+      productName = `${biz.name} - ${duration_hours} Hour${duration_hours > 1 ? "s" : ""} @ $${hourly_rate}/hr`;
+    } else {
+      // Package-based pricing mode (legacy)
+      if (!package_id) {
+        return jsonResponse(400, { error: "Missing package_id" });
+      }
+
+      const { data: pkgData, error: pkgError } = await supabase
+        .from("packages")
+        .select("id, name, base_price, duration_mins, bookable_type_id")
+        .eq("id", package_id)
+        .single();
+      if (pkgError || !pkgData) throw new Error(pkgError?.message || "Package not found");
+      pkg = pkgData;
+
+      const { data: btData, error: btError } = await supabase
+        .from("bookable_types")
+        .select("id, name, business_id, deposit_percentage, deposit_fixed_amount")
+        .eq("id", pkg.bookable_type_id)
+        .single();
+      if (btError || !btData) throw new Error(btError?.message || "Bookable type not found");
+      bt = btData;
+
+      const { data: bizData, error: bizError } = await supabase
+        .from("businesses")
+        .select("id, type, name")
+        .eq("id", bt.business_id)
+        .single();
+      if (bizError || !bizData) throw new Error(bizError?.message || "Business not found");
+      biz = bizData;
+
+      if (biz.type !== business_type) {
+        return jsonResponse(400, { error: "Package does not belong to requested business" });
+      }
+
+      total = Number(pkg.base_price || 0);
+      productName = `${biz.name} - ${pkg.name}`;
     }
 
-    const total = Number(pkg.base_price || 0);
-    const { deposit, remaining } = computeDeposit(total, bt.deposit_percentage, bt.deposit_fixed_amount);
+    const { deposit, remaining } = computeDeposit(total, bt!.deposit_percentage, bt!.deposit_fixed_amount);
 
     // Generate booking number
     const { data: bookingNumber, error: bnError } = await supabase.rpc("generate_booking_number");
@@ -112,9 +168,9 @@ serve(async (req) => {
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .insert({
-        business_id: bt.business_id,
-        bookable_type_id: bt.id,
-        package_id: pkg.id,
+        business_id: bt!.business_id,
+        bookable_type_id: bt!.id,
+        package_id: pkg?.id || null,
         start_datetime,
         end_datetime,
         status: "pending",
@@ -153,17 +209,22 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const origin = req.headers.get("origin") || "http://localhost:3000";
 
+    // Build success/cancel URLs based on business type
+    const successPath = business_type === "photo_booth" ? "360-photo-booth" : business_type;
+    const successUrl = `${origin}/#/${successPath}?booking=success&id=${booking.id}`;
+    const cancelUrl = `${origin}/#/${successPath}?booking=cancelled&id=${booking.id}`;
+
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `${biz.name} - ${pkg.name} (Deposit)`,
+              name: `${productName} (Deposit)`,
               metadata: {
                 booking_id: booking.id,
                 business_type: String(business_type),
-                package_id: String(pkg.id),
+                ...(pkg?.id ? { package_id: String(pkg.id) } : {}),
               },
             },
             unit_amount: Math.round(deposit * 100),
@@ -172,12 +233,12 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${origin}/#/360-photo-booth?booking=success&id=${booking.id}`,
-      cancel_url: `${origin}/#/360-photo-booth?booking=cancelled&id=${booking.id}`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         booking_id: booking.id,
         business_type: String(business_type),
-        package_id: String(pkg.id),
+        ...(pkg?.id ? { package_id: String(pkg.id) } : {}),
         is_deposit: "true",
         total_amount: String(total),
         deposit_amount: String(deposit),
