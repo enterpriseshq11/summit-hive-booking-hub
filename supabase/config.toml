@@ -44,3 +44,12 @@ verify_jwt = false
 
 [functions.export-payroll]
 verify_jwt = false
+
+[functions.experience-checkout]
+verify_jwt = false
+
+[functions.lindsey-checkout]
+verify_jwt = false
+
+[functions.send-inquiry-notification]
+verify_jwt = false

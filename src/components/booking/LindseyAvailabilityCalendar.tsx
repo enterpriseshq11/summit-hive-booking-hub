@@ -228,13 +228,22 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       return;
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(guestInfo.email.trim())) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
     // Use selected room or default to H1
     const roomId = selectedRoom || "11111111-1111-1111-1111-111111111111";
+    const price = calculatePrice() || 0;
+    const serviceData = getSelectedServiceData();
 
     setIsSubmitting(true);
 
     try {
-      // Create the booking in the database
+      // Build datetime strings
       const startDatetime = `${format(selectedDate, "yyyy-MM-dd")}T${selectedTime}:00`;
       const endMinutes = selectedDuration || 60;
       const [hours, mins] = selectedTime.split(":").map(Number);
@@ -243,80 +252,46 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       const endTime = `${String(endHours).padStart(2, "0")}:${String(endMins).padStart(2, "0")}`;
       const endDatetime = `${format(selectedDate, "yyyy-MM-dd")}T${endTime}:00`;
 
-      // Get spa business ID
-      const { data: business } = await supabase
-        .from("businesses")
-        .select("id")
-        .eq("type", "spa")
-        .single();
-
-      if (!business) {
-        throw new Error("Business not found");
-      }
-
-      // Get or create bookable type
-      const { data: bookableType } = await supabase
-        .from("bookable_types")
-        .select("id")
-        .eq("business_id", business.id)
-        .eq("slug", "massage")
-        .single();
-
-      const bookableTypeId = bookableType?.id || business.id;
-
-      // Create booking
-      const { error: bookingError } = await supabase
-        .from("bookings")
-        .insert({
-          business_id: business.id,
-          bookable_type_id: bookableTypeId,
-          booking_number: `SPA-${Date.now()}`,
+      // Call lindsey-checkout edge function
+      const { data, error } = await supabase.functions.invoke("lindsey-checkout", {
+        body: {
+          service_id: selectedService,
+          service_name: serviceData?.name || "Massage",
+          duration: selectedDuration,
+          price,
+          room_id: roomId,
           start_datetime: startDatetime,
           end_datetime: endDatetime,
-          guest_name: guestInfo.name,
-          guest_email: guestInfo.email,
-          guest_phone: guestInfo.phone || null,
-          status: "pending",
-          subtotal: calculatePrice() || 0,
-          total_amount: calculatePrice() || 0,
-          notes: `Service: ${getSelectedServiceData()?.name}, Duration: ${selectedDuration} min, Room: ${ROOMS.find(r => r.id === roomId)?.name}`,
-        });
+          customer_name: guestInfo.name.trim(),
+          customer_email: guestInfo.email.trim(),
+          customer_phone: guestInfo.phone?.trim() || "",
+        },
+      });
 
-      if (bookingError) {
-        console.error("Booking error:", bookingError);
-        throw bookingError;
+      if (error) {
+        console.error("Checkout error:", error);
+        throw new Error(error.message || "Failed to process booking");
       }
 
-      // Send notification email
-      try {
-        await supabase.functions.invoke("spa-booking-notification", {
-          body: {
-            type: "booking_confirmation",
-            booking: {
-              guest_name: guestInfo.name,
-              guest_email: guestInfo.email,
-              guest_phone: guestInfo.phone,
-              service_name: getSelectedServiceData()?.name,
-              duration: selectedDuration,
-              room_name: ROOMS.find(r => r.id === roomId)?.name,
-              date: format(selectedDate, "EEEE, MMMM d, yyyy"),
-              time: format(new Date(`2000-01-01T${selectedTime}`), "h:mm a"),
-              price: calculatePrice(),
-            },
-          },
-        });
-      } catch (notificationError) {
-        console.warn("Notification error:", notificationError);
-        // Don't fail the booking if notification fails
+      // Handle free consultations (no payment needed)
+      if (data?.is_free) {
+        setBookingComplete(true);
+        setStep("confirm");
+        toast.success("Free consultation booked! Check your email for details.");
+        onBookingComplete?.();
+        return;
       }
 
-      setBookingComplete(true);
-      setStep("confirm");
-      toast.success("Booking request submitted! Lindsey will confirm within 24 hours.");
-      onBookingComplete?.();
+      // Redirect to Stripe checkout
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL received");
+      }
     } catch (error) {
       console.error("Booking submission error:", error);
-      toast.error("Failed to submit booking. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to submit booking. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -758,13 +733,15 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                   className="w-full bg-accent hover:bg-accent/90 text-primary font-bold"
                   disabled={isSubmitting || !guestInfo.name || !guestInfo.email}
                 >
-                  {isSubmitting ? "Submitting..." : "Confirm Booking"}
+                  {isSubmitting ? "Processing..." : calculatePrice() === 0 ? "Confirm Booking" : "Proceed to Payment"}
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
 
-                <p className="text-center text-xs text-muted-foreground">
-                  Lindsey will confirm within 24 hours. No payment required now.
-                </p>
+                {calculatePrice() !== 0 && (
+                  <p className="text-center text-xs text-muted-foreground">
+                    You will be redirected to secure payment.
+                  </p>
+                )}
               </form>
             )}
           </>
