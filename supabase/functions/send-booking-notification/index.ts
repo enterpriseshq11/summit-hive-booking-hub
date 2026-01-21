@@ -110,6 +110,7 @@ interface NotificationRequest {
   notification_type:
     | "request"
     | "confirmation"
+    | "denied"
     | "booking_confirmed"
     | "reminder"
     | "reminder_24h"
@@ -341,12 +342,15 @@ function isVictoriaBrand(sourceBrand: string | undefined) {
 
 function normalizeNotificationType(input: NotificationRequest["notification_type"], reminderType?: string) {
   if (input === "booking_confirmed") return { notification_type: "confirmation" as const, reminder_type: reminderType };
+  if (input === "denied") return { notification_type: "denied" as const, reminder_type: reminderType };
   if (input === "reminder_24h") return { notification_type: "reminder" as const, reminder_type: reminderType || "24h" };
   if (input === "reminder_2h") return { notification_type: "reminder" as const, reminder_type: reminderType || "2h" };
   if (input === "reminder_1h") return { notification_type: "reminder" as const, reminder_type: reminderType || "1h" };
   if (input === "reminder_day_of") return { notification_type: "reminder" as const, reminder_type: reminderType || "day_of_morning" };
   return { notification_type: input as any, reminder_type: reminderType };
 }
+
+type CustomerEmailMode = "confirmed" | "requested" | "denied";
 
 async function resolveStaffContact(params: {
   supabase: any;
@@ -517,9 +521,16 @@ function describePayment(booking: Record<string, unknown>): string {
 }
 
 function buildCustomerConfirmationEmail(
-  booking: Record<string, unknown>, 
+  booking: Record<string, unknown>,
   businessType: string,
-  staffContact: { email: string; phone?: string; name: string }
+  staffContact: { email: string; phone?: string; name: string },
+  opts?: {
+    mode?: CustomerEmailMode;
+    headline?: string;
+    lead?: string;
+    badgeText?: string;
+    badgeColor?: string;
+  }
 ): string {
   const businessLabel = getBusinessLabel(businessType);
   
@@ -537,6 +548,29 @@ function buildCustomerConfirmationEmail(
   const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Your Booking";
   const roomName = ((booking.booking_resources as Array<{ resources?: { name?: string } }>)?.[0]?.resources?.name) || "TBD";
 
+  const mode: CustomerEmailMode = opts?.mode || "confirmed";
+  const badgeText =
+    opts?.badgeText || (mode === "requested" ? "Booking Requested" : mode === "denied" ? "Request Denied" : "✓ Booking Confirmed");
+  const headline =
+    opts?.headline || (mode === "requested" ? "Request Submitted (Pending Approval)" : mode === "denied" ? "Your request was denied" : "Your Appointment is Booked!");
+  const lead =
+    opts?.lead ||
+    (mode === "requested"
+      ? "We received your request. It is pending approval from our team."
+      : mode === "denied"
+        ? "We reviewed your request and we’re not able to approve it for the requested time."
+        : "Great news! Your appointment has been confirmed. Here are your details:");
+  const badgeColor = opts?.badgeColor || (mode === "denied" ? "#e53e3e" : mode === "requested" ? "#d69e2e" : "#48bb78");
+
+  const denialReason =
+    mode === "denied"
+      ? (typeof (booking as any).internal_notes === "string" && (booking as any).internal_notes.trim()
+          ? (booking as any).internal_notes.trim().slice(0, 400)
+          : typeof (booking as any).cancellation_reason === "string" && (booking as any).cancellation_reason.trim()
+            ? (booking as any).cancellation_reason.trim().slice(0, 400)
+            : "")
+      : "";
+
   return `
 <!DOCTYPE html>
 <html>
@@ -547,7 +581,7 @@ function buildCustomerConfirmationEmail(
     .header { background: #2d3748; padding: 30px; text-align: center; }
     .header h1 { color: #d4af37; margin: 0; font-size: 24px; }
     .content { padding: 30px 20px; background: #ffffff; }
-    .success-badge { display: inline-block; background: #48bb78; color: white; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 20px; margin-bottom: 20px; }
+    .success-badge { display: inline-block; background: ${badgeColor}; color: white; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 20px; margin-bottom: 20px; }
     .appointment-box { background: #f8f6f0; border: 2px solid #d4af37; border-radius: 8px; padding: 20px; margin: 20px 0; }
     .location-box { background: #edf2f7; padding: 15px; border-radius: 4px; margin: 20px 0; }
     .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 14px; color: #666; }
@@ -561,12 +595,21 @@ function buildCustomerConfirmationEmail(
     </div>
     <div class="content">
       <div style="text-align: center;">
-        <span class="success-badge">✓ Booking Confirmed</span>
-        <h2 style="margin: 10px 0;">Your Appointment is Booked!</h2>
+        <span class="success-badge">${badgeText}</span>
+        <h2 style="margin: 10px 0;">${headline}</h2>
       </div>
       
       <p>Hi ${(booking.guest_name as string)?.split(" ")[0] || "there"},</p>
-      <p>Great news! Your appointment has been confirmed. Here are your details:</p>
+      <p>${lead}</p>
+
+      ${mode === "requested" ? `<p style="font-size: 14px; color: #666;">Pending approval from our team.</p>` : ""}
+
+      ${mode === "denied" && denialReason ? `
+        <div style="background: #fff5f5; border-left: 4px solid #e53e3e; padding: 12px 14px; margin: 16px 0;">
+          <strong>Reason:</strong>
+          <div style="margin-top: 6px; color: #742a2a;">${denialReason}</div>
+        </div>
+      ` : ""}
 
       <div class="appointment-box">
         <h3 style="margin-top: 0;">📅 Appointment Details</h3>
@@ -603,7 +646,7 @@ function buildCustomerConfirmationEmail(
       </div>
 
       <p style="margin-top: 30px;">
-        We look forward to seeing you!<br><br>
+        ${mode === "denied" ? "If you’d like to request a different date or time, reply to this email or call us." : "We look forward to seeing you!"}<br><br>
         <strong>${staffContact.name}</strong><br>
         ${businessLabel}
       </p>
@@ -633,6 +676,13 @@ function buildStaffConfirmationEmail(booking: Record<string, unknown>, businessT
   const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Booking";
   const roomName = ((booking.booking_resources as Array<{ resources?: { name?: string } }>)?.[0]?.resources?.name) || "TBD";
 
+  const emailKind = typeof (booking as any).email_kind === "string" ? String((booking as any).email_kind) : "BOOKING";
+  const adminLink = typeof (booking as any).admin_link === "string" ? String((booking as any).admin_link) : "https://summit-hive-booking-hub.lovable.app/#/admin/approvals";
+  const isRequest = emailKind.toUpperCase() === "REQUEST";
+  const badgeText = isRequest ? "📝 NEW REQUEST" : "💳 NEW BOOKING";
+  const highlightTitle = isRequest ? "📝 Request Submitted" : "💰 Payment Confirmed";
+  const highlightSub = isRequest ? "Status: PENDING APPROVAL" : `Status: ${String(booking.status || "confirmed").toUpperCase()}`;
+
   return `
 <!DOCTYPE html>
 <html>
@@ -654,13 +704,13 @@ function buildStaffConfirmationEmail(booking: Record<string, unknown>, businessT
 <body>
   <div class="container">
     <div class="header">
-      <span class="badge">💳 NEW BOOKING</span>
+      <span class="badge">${badgeText}</span>
       <h1 style="margin-top: 10px;">${businessLabel}</h1>
     </div>
     <div class="content">
       <div class="highlight">
-        <strong>💰 Payment Confirmed</strong><br>
-        <span style="font-size: 12px; color: #666;">Status: ${String(booking.status || "confirmed").toUpperCase()}</span>
+        <strong>${highlightTitle}</strong><br>
+        <span style="font-size: 12px; color: #666;">${highlightSub}</span>
       </div>
       
       <h2 style="margin-top: 0;">Appointment Details</h2>
@@ -694,7 +744,7 @@ function buildStaffConfirmationEmail(booking: Record<string, unknown>, businessT
 
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
         Booking #${booking.booking_number || (booking.id as string).slice(0, 8).toUpperCase()}<br>
-        <a href="https://summit-hive-booking-hub.lovable.app/#/admin/schedule">View in Admin Dashboard</a>
+        <a href="${adminLink}">Open in Admin Dashboard</a>
       </p>
     </div>
     <div class="footer">
@@ -1043,7 +1093,7 @@ serve(async (req) => {
           let html: string;
 
           if (notification_type === "request") {
-            subject = `Request received from ${brandLabel} — ${shortDate} at ${timeStr}`;
+            subject = `Booking Requested — ${brandLabel} — ${shortDate} at ${timeStr}`;
             html = buildCustomerConfirmationEmail(
               {
                 ...booking,
@@ -1055,11 +1105,29 @@ serve(async (req) => {
                 ].filter(Boolean).join("\n"),
               },
               businessType,
-              staffContact
+              staffContact,
+              {
+                mode: "requested",
+                badgeText: "Booking Requested",
+                headline: "Request Submitted (Pending Approval)",
+                lead: "We received your request. It is pending approval from our team.",
+              }
             );
           } else if (notification_type === "confirmation") {
             subject = `Your ${brandLabel} booking is confirmed — ${shortDate} at ${timeStr}`;
-            html = buildCustomerConfirmationEmail(booking, businessType, staffContact);
+            html = buildCustomerConfirmationEmail(booking, businessType, staffContact, {
+              mode: "confirmed",
+              badgeText: "✓ Booking Confirmed",
+              headline: "Your Booking is Confirmed",
+            });
+          } else if (notification_type === "denied") {
+            subject = `Request Denied — ${brandLabel} — ${shortDate} at ${timeStr}`;
+            html = buildCustomerConfirmationEmail(booking, businessType, staffContact, {
+              mode: "denied",
+              badgeText: "Request Denied",
+              headline: "Request Denied",
+              lead: "We reviewed your request and we’re not able to approve it for the requested time.",
+            });
           } else {
             const reminderType = reminder_type || "24h";
             const prefix = reminderType === "day_of_morning" ? "Today" : reminderType === "1h" ? "In 1 hour" : reminderType === "2h" ? "In 2 hours" : "Reminder";
@@ -1179,11 +1247,15 @@ serve(async (req) => {
           const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
           const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 
-          const kind = notification_type === "request" ? "Request" : notification_type === "confirmation" ? "Booking" : "Reminder";
+          const kind = notification_type === "request" ? "Request" : notification_type === "confirmation" ? "Booking" : notification_type === "denied" ? "Request" : "Reminder";
           const subject = `${kind}: ${brandLabel} — ${booking.guest_name || "Guest"} — ${shortDate} ${timeStr}`;
+
+          const adminLink = `https://summit-hive-booking-hub.lovable.app/#/admin/approvals?id=${booking_id}`;
           const html = buildStaffConfirmationEmail(
             {
               ...booking,
+              admin_link: adminLink,
+              email_kind: notification_type === "request" ? "REQUEST" : "BOOKING",
               notes: [
                 booking.notes,
                 `Source: ${brandLabel}`,

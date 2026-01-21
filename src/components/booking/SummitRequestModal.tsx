@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { format, addDays, addHours } from "date-fns";
 import { 
@@ -93,6 +94,24 @@ export function SummitRequestModal({
   // Corporate-specific fields
   const [companyName, setCompanyName] = useState("");
 
+  // Required time period fields
+  const [startTime, setStartTime] = useState("18:00");
+  const [durationHours, setDurationHours] = useState("4");
+
+  const clampTimeWindow = (start: Date, end: Date) => {
+    const startHour = start.getHours() + start.getMinutes() / 60;
+    const endHour = end.getHours() + end.getMinutes() / 60;
+    return startHour >= 9 && endHour <= 21;
+  };
+
+  const buildStartEndFromDate = (date: Date, hhmm: string, hours: number) => {
+    const [hh, mm] = hhmm.split(":").map((v) => parseInt(v, 10));
+    const start = new Date(date);
+    start.setHours(Number.isFinite(hh) ? hh : 0, Number.isFinite(mm) ? mm : 0, 0, 0);
+    const end = addHours(start, hours);
+    return { start, end };
+  };
+
   useEffect(() => {
     if (prefillEventType) setSelectedEventType(prefillEventType);
     if (prefillQuestion) setNotes(prefillQuestion);
@@ -158,6 +177,14 @@ export function SummitRequestModal({
       return;
     }
 
+    const durationNum = parseInt(durationHours, 10);
+    if (!startTime || !Number.isFinite(durationNum) || durationNum < 1 || durationNum > 8) {
+      toast.error("Please choose a valid time period", {
+        description: "Start time and duration (1–8 hours) are required.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -170,9 +197,15 @@ export function SummitRequestModal({
           ? parseInt(guestRange.split("-")[1]) 
           : null;
 
-      const startDate = preferredDates[0];
-      // Summit requests are request-only (no live inventory). Use a default 60m duration so notifications include duration.
-      const endDate = addHours(startDate, 1);
+      const primaryDate = preferredDates[0];
+      const { start: startDate, end: endDate } = buildStartEndFromDate(primaryDate, startTime, durationNum);
+
+      if (!clampTimeWindow(startDate, endDate)) {
+        toast.error("Time must be between 9:00 AM and 9:00 PM", {
+          description: "Adjust your start time or duration so your event stays within business hours.",
+        });
+        return;
+      }
       
       const bookingData = {
         business_id: business.id,
@@ -186,6 +219,9 @@ export function SummitRequestModal({
         notes: [
           `Event Type: ${selectedEventType}`,
           `Preferred Dates: ${preferredDates.map(d => format(d, "PPP")).join(", ")}`,
+          `Preferred Start Time: ${format(startDate, "h:mm a")}`,
+          `Preferred Duration: ${durationNum} hour${durationNum === 1 ? "" : "s"}`,
+          `Preferred End Time: ${format(endDate, "h:mm a")}`,
           `Guest Range: ${guestRange || customGuestCount || "Not specified"}`,
           `Budget Comfort: ${budgetComfort || "Not specified"}`,
           wantsTour ? "Wants venue tour: Yes" : "",
@@ -269,10 +305,8 @@ export function SummitRequestModal({
             <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-accent/20 flex items-center justify-center">
               <Check className="h-8 w-8 text-accent" />
             </div>
-            <p className="font-semibold text-xl mb-2">Request Submitted!</p>
-            <p className="text-muted-foreground">
-              Our team will review and respond within 24 hours.
-            </p>
+            <p className="font-semibold text-xl mb-2">Booking Requested</p>
+            <p className="text-muted-foreground">Request submitted (pending approval). Victoria will respond within 24 hours.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -357,6 +391,45 @@ export function SummitRequestModal({
                   </PopoverContent>
                 </Popover>
               )}
+            </div>
+
+            {/* Required Time Period */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Preferred Time Period *</Label>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="summit-start-time">Start Time (9:00 AM–9:00 PM)</Label>
+                  <Input
+                    id="summit-start-time"
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    required
+                    step={900}
+                    min="09:00"
+                    max="21:00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Duration (hours)</Label>
+                  <Select value={durationHours} onValueChange={setDurationHours}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 8 }).map((_, i) => {
+                        const v = String(i + 1);
+                        return (
+                          <SelectItem key={v} value={v}>
+                            {v} hour{v === "1" ? "" : "s"}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">Requests outside 9:00 AM–9:00 PM will be blocked.</p>
             </div>
 
             {/* Guest Count Range Presets */}

@@ -23,6 +23,29 @@ type SummitRequestBody = {
   notes?: string | null;
 };
 
+function minutesBetween(start: Date, end: Date) {
+  return Math.floor((end.getTime() - start.getTime()) / 60000);
+}
+
+function getLocalTimeParts(date: Date, timeZone: string): { hour: number; minute: number } {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.filter((p) => p.type !== "literal").map((p) => [p.type, p.value]));
+  return { hour: Number(map.hour), minute: Number(map.minute) };
+}
+
+function isWithinSummitHours(start: Date, end: Date, timeZone: string) {
+  const s = getLocalTimeParts(start, timeZone);
+  const e = getLocalTimeParts(end, timeZone);
+  const startHour = s.hour + s.minute / 60;
+  const endHour = e.hour + e.minute / 60;
+  return startHour >= 9 && endHour <= 21;
+}
+
 function isUuid(v: unknown): v is string {
   return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 }
@@ -103,6 +126,37 @@ serve(async (req) => {
     const end = typeof body.end_datetime === "string" ? new Date(body.end_datetime) : null;
     if (!start || !end || !Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) {
       return new Response(JSON.stringify({ error: "Invalid start/end datetime" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Enforce required time period: 1–8 hours
+    const durationMins = minutesBetween(start, end);
+    if (durationMins < 60 || durationMins > 8 * 60) {
+      return new Response(JSON.stringify({ error: "Duration must be between 1 and 8 hours" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Summit hours: 9:00 AM – 9:00 PM daily (enforced in business timezone)
+    const { data: biz, error: bizErr } = await supabase
+      .from("businesses")
+      .select("timezone")
+      .eq("id", body.business_id)
+      .maybeSingle();
+    if (bizErr) {
+      logStep("Business lookup failed", { error: bizErr.message });
+      return new Response(JSON.stringify({ error: "Unable to validate business hours" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const timeZone = biz?.timezone || "America/New_York";
+    if (!isWithinSummitHours(start, end, timeZone)) {
+      return new Response(JSON.stringify({ error: "Requested time must be between 9:00 AM and 9:00 PM" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
