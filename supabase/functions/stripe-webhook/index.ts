@@ -78,7 +78,8 @@ serve(async (req) => {
         const userId = metadata.user_id;
         const isDeposit = metadata.is_deposit === "true";
 
-        logStep("Checkout completed", { bookingId, membershipTierId, isDeposit });
+        const businessType = metadata.business_type;
+        logStep("Checkout completed", { bookingId, membershipTierId, isDeposit, businessType });
 
         if (bookingId) {
           // Update payment status
@@ -121,6 +122,33 @@ serve(async (req) => {
           }
 
           logStep("Booking updated", { bookingId, newStatus });
+
+          // Send notification for spa/Lindsey bookings
+          if (businessType === "spa") {
+            try {
+              const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/lindsey-booking-notification`;
+              const notificationResponse = await fetch(notificationUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                },
+                body: JSON.stringify({
+                  booking_id: bookingId,
+                  type: "confirmed",
+                }),
+              });
+              
+              if (notificationResponse.ok) {
+                logStep("Lindsey notification sent", { bookingId });
+              } else {
+                const errText = await notificationResponse.text();
+                logStep("Lindsey notification failed", { status: notificationResponse.status, error: errText });
+              }
+            } catch (notifError) {
+              logStep("Lindsey notification error", { error: String(notifError) });
+            }
+          }
         }
 
         if (membershipTierId && userId) {
