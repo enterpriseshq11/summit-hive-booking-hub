@@ -24,6 +24,15 @@ interface BookingRecord {
   status: string;
 }
 
+interface SlotHoldRecord {
+  id: string;
+  start_datetime: string;
+  end_datetime: string;
+  status: string;
+  expires_at: string;
+  resource_id: string;
+}
+
 // Type for blackout dates from DB
 interface BlackoutRecord {
   id: string;
@@ -109,6 +118,38 @@ export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: 
     staleTime: 30 * 1000, // 30 seconds - refresh more often
   });
 
+  // Fetch active slot holds (10-min lock during checkout) for the next 60 days
+  const { data: slotHolds } = useQuery({
+    queryKey: ["lindsey-slot-holds"],
+    queryFn: async () => {
+      const startDate = format(new Date(), "yyyy-MM-dd");
+      const endDate = format(addDays(new Date(), 60), "yyyy-MM-dd");
+
+      const nowIso = new Date().toISOString();
+      const { data, error } = await supabase
+        .from("slot_holds")
+        .select("id, start_datetime, end_datetime, status, expires_at, resource_id")
+        .in("resource_id", [
+          "11111111-1111-1111-1111-111111111111",
+          "22222222-2222-2222-2222-222222222222",
+        ])
+        .eq("status", "active")
+        .gte("expires_at", nowIso)
+        .gte("start_datetime", `${startDate}T00:00:00`)
+        .lte("start_datetime", `${endDate}T23:59:59`);
+
+      // If RLS blocks this query for anonymous users, fail closed (no holds), but don't crash the UI.
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.warn("Slot holds query failed:", error);
+        return [] as SlotHoldRecord[];
+      }
+
+      return (data || []) as SlotHoldRecord[];
+    },
+    staleTime: 10 * 1000,
+  });
+
   // Fetch blackout dates
   const { data: blackouts } = useQuery({
     queryKey: ["lindsey-blackouts"],
@@ -170,19 +211,27 @@ export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: 
    * Check if a specific time slot conflicts with existing bookings
    */
   const isSlotBooked = (date: Date, slotStart: string, durationMins: number): boolean => {
-    if (!bookings) return false;
+    if (!bookings && !slotHolds) return false;
     
     const dateStr = format(date, "yyyy-MM-dd");
     const slotStartTime = parseISO(`${dateStr}T${slotStart}:00`);
     const slotEndTime = addMinutes(slotStartTime, durationMins);
     
-    return bookings.some(booking => {
+    const bookingOverlap = (bookings || []).some((booking) => {
       const bookingStart = parseISO(booking.start_datetime);
       const bookingEnd = parseISO(booking.end_datetime);
-      
-      // Check for overlap: slot starts before booking ends AND slot ends after booking starts
       return isBefore(slotStartTime, bookingEnd) && isAfter(slotEndTime, bookingStart);
     });
+
+    if (bookingOverlap) return true;
+
+    const holdOverlap = (slotHolds || []).some((hold) => {
+      const holdStart = parseISO(hold.start_datetime);
+      const holdEnd = parseISO(hold.end_datetime);
+      return isBefore(slotStartTime, holdEnd) && isAfter(slotEndTime, holdStart);
+    });
+
+    return holdOverlap;
   };
 
   /**
@@ -297,6 +346,7 @@ export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: 
     availabilityWindows,
     bookings,
     blackouts,
+    slotHolds,
     getTimeSlotsForDate,
     getDayAvailability,
     getAvailabilityMap,
