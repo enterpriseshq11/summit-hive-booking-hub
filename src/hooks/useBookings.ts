@@ -115,7 +115,7 @@ export function useUpdateBookingStatus() {
       notes?: string;
     }) => {
       const updates: BookingUpdate = { status };
-      if (status === "cancelled" || status === ("denied" as any)) {
+      if (status === "cancelled") {
         updates.cancelled_at = new Date().toISOString();
         updates.cancellation_reason = notes;
       }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin";
 import { usePendingApprovals, useUpdateBookingStatus } from "@/hooks/useBookings";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,41 +17,20 @@ export default function AdminApprovals() {
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
 
-  const handleAction = async () => {
+  const handleAction = () => {
     if (!selectedBooking || !action) return;
-
-    const decision = action === "approve" ? "approved" : "denied";
-
-    updateStatus.mutate(
-      {
-        id: selectedBooking.id,
-        status: decision as any,
-        notes,
-      },
-      {
-        onSuccess: async () => {
-          // Summit decision emails (customer)
-          try {
-            if (selectedBooking?.businesses?.type === "summit" || selectedBooking?.source_brand === "summit") {
-              await supabase.functions.invoke("send-booking-notification", {
-                body: {
-                  booking_id: selectedBooking.id,
-                  notification_type: decision,
-                  channels: ["email"],
-                  recipients: ["customer"],
-                },
-              });
-            }
-          } catch {
-            // Non-blocking
-          }
-
-          setSelectedBooking(null);
-          setAction(null);
-          setNotes("");
-        },
+    
+    updateStatus.mutate({
+      id: selectedBooking.id,
+      status: action === "approve" ? "confirmed" : "cancelled",
+      notes,
+    }, {
+      onSuccess: () => {
+        setSelectedBooking(null);
+        setAction(null);
+        setNotes("");
       }
-    );
+    });
   };
 
   return (
@@ -238,7 +216,7 @@ export default function AdminApprovals() {
                 onClick={handleAction}
                 disabled={updateStatus.isPending}
               >
-                  {updateStatus.isPending ? "Processing..." : action === "approve" ? "Approve" : "Deny"}
+                {updateStatus.isPending ? "Processing..." : action === "approve" ? "Approve & Send Payment Link" : "Deny Request"}
               </Button>
             </DialogFooter>
           </DialogContent>

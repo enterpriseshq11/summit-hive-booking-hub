@@ -23,27 +23,6 @@ type SummitRequestBody = {
   notes?: string | null;
 };
 
-function getLocalParts(date: Date, timeZone: string) {
-  const dtf = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-  const parts = dtf.formatToParts(date);
-  const map = Object.fromEntries(parts.filter((p) => p.type !== "literal").map((p) => [p.type, p.value]));
-  return {
-    year: Number(map.year),
-    month: Number(map.month),
-    day: Number(map.day),
-    hour: Number(map.hour),
-    minute: Number(map.minute),
-  };
-}
-
 function isUuid(v: unknown): v is string {
   return typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 }
@@ -124,49 +103,6 @@ serve(async (req) => {
     const end = typeof body.end_datetime === "string" ? new Date(body.end_datetime) : null;
     if (!start || !end || !Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) {
       return new Response(JSON.stringify({ error: "Invalid start/end datetime" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Summit hours enforcement (9:00 AM – 9:00 PM daily) in the business timezone.
-    // This is request-only (no inventory lock), but we still block obviously invalid times.
-    const { data: businessRow, error: bizErr } = await supabase
-      .from("businesses")
-      .select("timezone")
-      .eq("id", body.business_id)
-      .maybeSingle();
-    if (bizErr) {
-      logStep("Business lookup failed", { error: bizErr.message, business_id: body.business_id });
-      return new Response(JSON.stringify({ error: "Unable to validate business hours" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const tz = businessRow?.timezone || "America/New_York";
-    const s = getLocalParts(start, tz);
-    const e = getLocalParts(end, tz);
-    const startMins = s.hour * 60 + s.minute;
-    const endMins = e.hour * 60 + e.minute;
-    const OPEN_MINS = 9 * 60;
-    const CLOSE_MINS = 21 * 60;
-
-    // Ensure the request stays within a single day window and inside hours.
-    const sameLocalDay = s.year === e.year && s.month === e.month && s.day === e.day;
-    if (!sameLocalDay) {
-      return new Response(JSON.stringify({ error: "Summit requests must start and end on the same day" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (startMins < OPEN_MINS || startMins >= CLOSE_MINS) {
-      return new Response(JSON.stringify({ error: "Start time must be between 9:00 AM and 9:00 PM" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (endMins > CLOSE_MINS) {
-      return new Response(JSON.stringify({ error: "End time must be 9:00 PM or earlier" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
