@@ -168,10 +168,6 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const [bookingComplete, setBookingComplete] = useState(false);
   const [activeHoldId, setActiveHoldId] = useState<string | null>(null);
 
-  // Lindsey booking constants (UUIDs required by backend)
-  const LINDSEY_BOOKABLE_TYPE_ID = "a52382c3-f924-4e58-b4a8-2179522f39f7";
-  const SPA_BUSINESS_ID = "4df48af2-39e4-4bd1-a9b3-963de8ef39d7";
-
   const createHold = useCreateSlotHold();
   const releaseHold = useReleaseSlotHold();
   
@@ -277,8 +273,6 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
 
     setIsSubmitting(true);
 
-    let createdHoldId: string | null = null;
-
     try {
       const startDatetime = `${format(selectedDate, "yyyy-MM-dd")}T${selectedTime}:00`;
       const endMinutes = selectedDuration || 60;
@@ -292,12 +286,11 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
 
       // 1) Create a temporary hold so nobody else can take the slot mid-checkout.
       const hold = await createHold.mutateAsync({
-        bookable_type_id: LINDSEY_BOOKABLE_TYPE_ID,
+        bookable_type_id: "lindsey-massage",
         resource_id: roomId,
         start_datetime: startDatetime,
         end_datetime: endDatetime,
       });
-      createdHoldId = hold.id;
       setActiveHoldId(hold.id);
 
       // 2) Create Stripe checkout session + pending booking (server-side).
@@ -305,8 +298,6 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       const { data, error } = await supabase.functions.invoke("lindsey-checkout", {
         body: {
           hold_id: hold.id,
-          business_id: SPA_BUSINESS_ID,
-          bookable_type_id: LINDSEY_BOOKABLE_TYPE_ID,
           resource_id: roomId,
           start_datetime: startDatetime,
           end_datetime: endDatetime,
@@ -341,10 +332,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       toast.error(message);
 
       // Best-effort: release hold on failure
-      const holdIdToRelease = createdHoldId || activeHoldId;
-      if (holdIdToRelease) {
+      if (activeHoldId) {
         try {
-          await releaseHold.mutateAsync(holdIdToRelease);
+          await releaseHold.mutateAsync(activeHoldId);
         } catch {
           // ignore
         }
