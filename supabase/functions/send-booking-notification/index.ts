@@ -28,6 +28,75 @@ const STAFF_CONTACTS: Record<string, { email: string; phone: string; name: strin
 
 const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;
 
+type StaffOwner = "victoria" | "lindsey" | "default";
+
+type StaffRoutingBranch =
+  | "A_assigned_coordinator"
+  | "A_assigned_provider"
+  | "B_business_settings"
+  | "C_source_brand_mapping"
+  | "D_env_fallback"
+  | "E_final_fallback";
+
+type StaffResolutionDebug = {
+  booking_id: string;
+  booking_source_brand?: string;
+  normalized_source_brand?: string;
+  business_type?: string;
+  assigned_provider_id?: string | null;
+  assigned_coordinator_id?: string | null;
+  owner: StaffOwner;
+  branch: StaffRoutingBranch;
+  staff_email?: string;
+  staff_phone?: string;
+  staff_name?: string;
+  notes?: string[];
+};
+
+const STAFF_OWNER_BY_SOURCE_BRAND: Record<StaffOwner, string[]> = {
+  victoria: [
+    // Canonical + aliases
+    "hive",
+    "coworking",
+    "office",
+    "offices",
+    "the_hive",
+    "summit",
+    "event",
+    "events",
+    "event_center",
+    "memory_maker",
+    "photo_booth",
+    "photobooth",
+    "360",
+    "photo_booth_360",
+    "voice_vault",
+  ],
+  lindsey: ["spa", "restoration_lounge", "massage"],
+  default: [],
+};
+
+function normalizeBrandAlias(raw?: string | null): string | undefined {
+  if (!raw) return undefined;
+  const v = String(raw).trim().toLowerCase();
+  if (!v) return undefined;
+  // Normalize common separators
+  const cleaned = v.replace(/\s+/g, "_").replace(/-+/g, "_");
+  // Normalize common aliases
+  if (["thehive", "the_hive", "hive_by_az", "hive_by_a_z"].includes(cleaned)) return "hive";
+  if (["360_photo_booth", "photo_booth", "photobooth", "360"].includes(cleaned)) return "photo_booth_360";
+  if (["memory_maker", "memory_maker_event_center"].includes(cleaned)) return "event_center";
+  return cleaned;
+}
+
+function ownerFromSourceBrand(sourceBrand?: string): StaffOwner {
+  const normalized = normalizeBrandAlias(sourceBrand);
+  if (!normalized) return "default";
+  if (STAFF_OWNER_BY_SOURCE_BRAND.victoria.includes(normalized)) return "victoria";
+  if (STAFF_OWNER_BY_SOURCE_BRAND.lindsey.includes(normalized)) return "lindsey";
+  return "default";
+}
+
 function safeJson(value: unknown, maxLen = 2000): string {
   try {
     const str = JSON.stringify(value);
@@ -40,7 +109,18 @@ function safeJson(value: unknown, maxLen = 2000): string {
 
 interface NotificationRequest {
   booking_id: string;
-  notification_type: "request" | "confirmation" | "reminder" | "cancellation" | "reschedule";
+  // Note: we accept multiple external names and normalize later.
+  notification_type:
+    | "request"
+    | "confirmation"
+    | "booking_confirmed"
+    | "reminder"
+    | "reminder_24h"
+    | "reminder_2h"
+    | "reminder_1h"
+    | "reminder_day_of"
+    | "cancellation"
+    | "reschedule";
   reminder_type?: string;
   channels?: ("email" | "sms")[];
   recipients?: ("customer" | "staff")[];
@@ -259,7 +339,161 @@ function sourceBrandLabel(sourceBrand: string | undefined, businessType: string)
 }
 
 function isVictoriaBrand(sourceBrand: string | undefined) {
-  return sourceBrand === "hive" || sourceBrand === "summit" || sourceBrand === "photo_booth_360" || sourceBrand === "voice_vault";
+  return ownerFromSourceBrand(sourceBrand) === "victoria";
+}
+
+function normalizeNotificationType(input: NotificationRequest["notification_type"], reminderType?: string) {
+  if (input === "booking_confirmed") return { notification_type: "confirmation" as const, reminder_type: reminderType };
+  if (input === "reminder_24h") return { notification_type: "reminder" as const, reminder_type: reminderType || "24h" };
+  if (input === "reminder_2h") return { notification_type: "reminder" as const, reminder_type: reminderType || "2h" };
+  if (input === "reminder_1h") return { notification_type: "reminder" as const, reminder_type: reminderType || "1h" };
+  if (input === "reminder_day_of") return { notification_type: "reminder" as const, reminder_type: reminderType || "day_of_morning" };
+  return { notification_type: input as any, reminder_type: reminderType };
+}
+
+async function resolveStaffContact(params: {
+  supabase: any;
+  booking: any;
+  businessType: string;
+  sourceBrand?: string;
+  victoriaEnv: { email: string; phone: string };
+  lindseyEnv?: { email?: string; phone?: string };
+  replyToEmail: string;
+}): Promise<{ contact: { email: string; phone?: string; name: string }; debug: StaffResolutionDebug }> {
+  const { supabase, booking, businessType, sourceBrand, victoriaEnv, lindseyEnv, replyToEmail } = params;
+
+  const normalizedSourceBrand = normalizeBrandAlias(sourceBrand);
+  const owner = ownerFromSourceBrand(normalizedSourceBrand);
+  const debug: StaffResolutionDebug = {
+    booking_id: booking.id,
+    booking_source_brand: booking.source_brand ?? undefined,
+    normalized_source_brand: normalizedSourceBrand,
+    business_type: businessType,
+    assigned_provider_id: booking.assigned_provider_id ?? null,
+    assigned_coordinator_id: booking.assigned_coordinator_id ?? null,
+    owner,
+    branch: "E_final_fallback",
+    notes: [],
+  };
+
+  // Priority A: Explicit assignment (coordinator first, then provider)
+  if (booking.assigned_coordinator_id) {
+    const { data: coordinatorProfile, error } = await supabase
+      .from("profiles")
+      .select("email,phone,first_name,last_name")
+      .eq("id", booking.assigned_coordinator_id)
+      .maybeSingle();
+
+    if (error) debug.notes?.push(`assigned_coordinator lookup error: ${error.message}`);
+    const email = coordinatorProfile?.email ?? undefined;
+    if (email) {
+      debug.branch = "A_assigned_coordinator";
+      debug.staff_email = email;
+      debug.staff_phone = coordinatorProfile?.phone ?? undefined;
+      debug.staff_name = `${coordinatorProfile?.first_name ?? ""} ${coordinatorProfile?.last_name ?? ""}`.trim() || "Assigned coordinator";
+      return {
+        contact: {
+          email,
+          phone: debug.staff_phone,
+          name: debug.staff_name!,
+        },
+        debug,
+      };
+    }
+    debug.notes?.push("assigned_coordinator_id present but no email found");
+  }
+
+  if (booking.assigned_provider_id) {
+    const { data: providerRow, error: providerErr } = await supabase
+      .from("providers")
+      .select("id,user_id,name")
+      .eq("id", booking.assigned_provider_id)
+      .maybeSingle();
+    if (providerErr) debug.notes?.push(`provider lookup error: ${providerErr.message}`);
+
+    if (providerRow?.user_id) {
+      const { data: profileRow, error: profileErr } = await supabase
+        .from("profiles")
+        .select("email,phone,first_name,last_name")
+        .eq("id", providerRow.user_id)
+        .maybeSingle();
+      if (profileErr) debug.notes?.push(`provider user profile lookup error: ${profileErr.message}`);
+
+      const email = profileRow?.email ?? undefined;
+      if (email) {
+        debug.branch = "A_assigned_provider";
+        debug.staff_email = email;
+        debug.staff_phone = profileRow?.phone ?? undefined;
+        debug.staff_name = `${profileRow?.first_name ?? ""} ${profileRow?.last_name ?? ""}`.trim() || providerRow.name || "Assigned provider";
+        return {
+          contact: {
+            email,
+            phone: debug.staff_phone,
+            name: debug.staff_name!,
+          },
+          debug,
+        };
+      }
+      debug.notes?.push("assigned_provider_id present but provider profile email missing");
+    }
+  }
+
+  // Priority B: Business settings (data-driven)
+  // Supported keys:
+  // - settings.notify_staff_email
+  // - settings.notify_staff_user_id (profile id)
+  // - settings.staff_user_id (profile id)
+  const settings = booking.businesses?.settings || {};
+  const settingsEmail = settings?.notify_staff_email;
+  if (typeof settingsEmail === "string" && settingsEmail.includes("@")) {
+    debug.branch = "B_business_settings";
+    debug.staff_email = settingsEmail;
+    debug.staff_name = "Business notify";
+    return { contact: { email: settingsEmail, name: "Business notify" }, debug };
+  }
+
+  const settingsUserId = settings?.notify_staff_user_id || settings?.staff_user_id;
+  if (typeof settingsUserId === "string") {
+    const { data: profileRow, error } = await supabase
+      .from("profiles")
+      .select("email,phone,first_name,last_name")
+      .eq("id", settingsUserId)
+      .maybeSingle();
+    if (error) debug.notes?.push(`business settings staff_user_id lookup error: ${error.message}`);
+    const email = profileRow?.email ?? undefined;
+    if (email) {
+      debug.branch = "B_business_settings";
+      debug.staff_email = email;
+      debug.staff_phone = profileRow?.phone ?? undefined;
+      debug.staff_name = `${profileRow?.first_name ?? ""} ${profileRow?.last_name ?? ""}`.trim() || "Business staff";
+      return { contact: { email, phone: debug.staff_phone, name: debug.staff_name! }, debug };
+    }
+  }
+
+  // Priority C: source_brand mapping
+  if (owner === "victoria") {
+    debug.branch = "C_source_brand_mapping";
+    debug.staff_email = victoriaEnv.email;
+    debug.staff_phone = victoriaEnv.phone;
+    debug.staff_name = "Victoria";
+    return { contact: { email: victoriaEnv.email, phone: victoriaEnv.phone, name: "Victoria" }, debug };
+  }
+  if (owner === "lindsey") {
+    const email = lindseyEnv?.email || "lindsey@azenterpriseshq.com";
+    const phone = lindseyEnv?.phone || "+15676441019";
+    debug.branch = "C_source_brand_mapping";
+    debug.staff_email = email;
+    debug.staff_phone = phone;
+    debug.staff_name = "Lindsey";
+    return { contact: { email, phone, name: "Lindsey" }, debug };
+  }
+
+  // Priority E: final fallback (no silent skip)
+  debug.branch = "E_final_fallback";
+  debug.staff_email = replyToEmail;
+  debug.staff_name = "A-Z Team";
+  debug.notes?.push("staff routing unresolved; falling back to REPLY_TO_EMAIL");
+  return { contact: { email: replyToEmail, name: "A-Z Team" }, debug };
 }
 
 function computeDurationMins(booking: Record<string, unknown>): number {
@@ -635,8 +869,8 @@ serve(async (req) => {
 
     const {
       booking_id,
-      notification_type,
-      reminder_type,
+      notification_type: raw_notification_type,
+      reminder_type: raw_reminder_type,
       channels = ["email", "sms"],
       recipients = ["customer", "staff"],
       stripe_session_id,
@@ -644,6 +878,8 @@ serve(async (req) => {
       test_customer_email,
       test_staff_email,
     }: NotificationRequest = await req.json();
+
+    const { notification_type, reminder_type } = normalizeNotificationType(raw_notification_type, raw_reminder_type);
 
     logStep("Request received", { booking_id, notification_type, reminder_type, channels, recipients });
 
@@ -681,51 +917,24 @@ serve(async (req) => {
     const brandLabel = sourceBrandLabel(sourceBrand, businessType);
     const timezone = booking.businesses?.timezone || "America/New_York";
 
-    // Resolve staff contact from assigned provider (preferred), else fallback mapping.
-    // For Victoria brands, ALWAYS route to Victoria.
-    let resolvedStaffEmail: string | undefined;
-    let resolvedStaffPhone: string | undefined;
-    let resolvedStaffName: string | undefined;
+    const LINDSEY_NOTIFY_EMAIL = Deno.env.get("LINDSEY_NOTIFY_EMAIL") || undefined;
+    const LINDSEY_NOTIFY_PHONE = Deno.env.get("LINDSEY_NOTIFY_PHONE") || undefined;
 
-    if (isVictoriaBrand(sourceBrand)) {
-      resolvedStaffEmail = VICTORIA_NOTIFY_EMAIL;
-      resolvedStaffPhone = VICTORIA_NOTIFY_PHONE;
-      resolvedStaffName = "Victoria";
-    }
+    const { contact: resolvedStaffContact, debug: staffRoutingDebug } = await resolveStaffContact({
+      supabase,
+      booking,
+      businessType,
+      sourceBrand,
+      victoriaEnv: { email: VICTORIA_NOTIFY_EMAIL, phone: VICTORIA_NOTIFY_PHONE },
+      lindseyEnv: { email: LINDSEY_NOTIFY_EMAIL, phone: LINDSEY_NOTIFY_PHONE },
+      replyToEmail: REPLY_TO_EMAIL,
+    });
 
-    if (!isVictoriaBrand(sourceBrand) && booking.assigned_provider_id) {
-      const { data: providerRow, error: providerErr } = await supabase
-        .from("providers")
-        .select("id,user_id,name")
-        .eq("id", booking.assigned_provider_id)
-        .maybeSingle();
-
-      if (providerErr) {
-        logStep("Provider lookup error", { error: providerErr, provider_id: booking.assigned_provider_id });
-      }
-
-      if (providerRow?.user_id) {
-        const { data: profileRow, error: profileErr } = await supabase
-          .from("profiles")
-          .select("email,phone,first_name,last_name")
-          .eq("id", providerRow.user_id)
-          .maybeSingle();
-
-        if (profileErr) {
-          logStep("Profile lookup error", { error: profileErr, user_id: providerRow.user_id });
-        }
-
-        resolvedStaffEmail = profileRow?.email ?? undefined;
-        resolvedStaffPhone = profileRow?.phone ?? undefined;
-        resolvedStaffName = `${profileRow?.first_name ?? ""} ${profileRow?.last_name ?? ""}`.trim() || providerRow.name;
-      }
-    }
-
-    const fallbackStaff = STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default;
     const staffContact = {
-      email: resolvedStaffEmail || fallbackStaff.email,
-      phone: resolvedStaffPhone || fallbackStaff.phone,
-      name: resolvedStaffName || fallbackStaff.name,
+      // Preserve old fallback mapping behavior for templates that expect a name/phone,
+      // but ALWAYS prefer deterministic routing output.
+      ...((STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default) as any),
+      ...resolvedStaffContact,
     };
 
     // Ensure we can resolve a customer email (guest_email preferred)
@@ -778,6 +987,8 @@ serve(async (req) => {
       business_type: businessType,
       status: booking.status 
     });
+
+    logStep("Staff routing resolved", staffRoutingDebug);
 
     // Check idempotency for confirmations ONLY
     if (notification_type === "confirmation") {
@@ -948,7 +1159,13 @@ serve(async (req) => {
             status: "failed",
             provider: "resend",
             error_message: reason,
-            metadata: { assigned_provider_id: booking.assigned_provider_id },
+            metadata: {
+              assigned_provider_id: booking.assigned_provider_id,
+              assigned_coordinator_id: (booking as any).assigned_coordinator_id,
+              source_brand: sourceBrand,
+              business_type: businessType,
+              staff_routing: staffRoutingDebug,
+            },
           });
         }
 
@@ -1011,7 +1228,13 @@ serve(async (req) => {
             provider: "resend",
             provider_message_id: emailResult.data?.id,
             error_message: emailResult.error?.message,
-            metadata: { source_brand: sourceBrand, reminder_type },
+            metadata: {
+              source_brand: sourceBrand,
+              business_type: businessType,
+              reminder_type,
+              staff_routing: staffRoutingDebug,
+              resend: emailResult,
+            },
           });
 
           // Update idempotency timestamp
@@ -1044,6 +1267,11 @@ serve(async (req) => {
               stripe_session_id,
               stripe_payment_intent,
               assigned_provider_id: booking.assigned_provider_id,
+              assigned_coordinator_id: (booking as any).assigned_coordinator_id,
+              source_brand: sourceBrand,
+              business_type: businessType,
+              reminder_type,
+              staff_routing: staffRoutingDebug,
             },
           });
         }
@@ -1089,7 +1317,31 @@ serve(async (req) => {
               },
               businessType
             );
-        const smsResult = await sendSMS(staffContact.phone, smsMessage);
+        const staffPhone = staffContact.phone;
+        if (!staffPhone) {
+          const reason = "missing_staff_phone";
+          failures.push({ key: "staff_sms", reason });
+          await logNotification(supabase, {
+            booking_id,
+            notification_type,
+            channel: "sms",
+            recipient_type: "staff",
+            status: "failed",
+            provider: "twilio",
+            error_message: reason,
+            metadata: {
+              source_brand: sourceBrand,
+              business_type: businessType,
+              reminder_type,
+              staff_routing: staffRoutingDebug,
+            },
+          });
+          // Skip sending since there's no number.
+          results.staff_sms = { success: false, error: reason };
+          // continue processing other channels/reminders
+        }
+
+        const smsResult = await sendSMS(staffPhone, smsMessage);
         results.staff_sms = smsResult;
 
         await logNotification(supabase, {
@@ -1097,12 +1349,17 @@ serve(async (req) => {
           notification_type,
           channel: "sms",
           recipient_type: "staff",
-          recipient_phone: staffContact.phone,
+          recipient_phone: staffPhone,
           status: smsResult.success ? "sent" : "failed",
           provider: "twilio",
           provider_message_id: smsResult.sid,
           error_message: smsResult.error,
-          metadata: { source_brand: sourceBrand, reminder_type },
+          metadata: {
+            source_brand: sourceBrand,
+            business_type: businessType,
+            reminder_type,
+            staff_routing: staffRoutingDebug,
+          },
         });
       }
     }
