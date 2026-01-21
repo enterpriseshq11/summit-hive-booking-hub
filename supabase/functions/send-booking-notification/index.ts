@@ -16,17 +16,12 @@ const logStep = (step: string, details?: unknown) => {
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
 const BUSINESS_PHONE = "(567) 644-1090";
 
-// Staff contacts by business type
-// IMPORTANT: Staff inboxes use @a-zenterpriseshq.com (with hyphen)
-// FROM/sender uses @azenterpriseshq.com (no hyphen, verified in Resend)
-const STAFF_CONTACTS: Record<string, { email: string; phone: string; name: string }> = {
-  spa: { email: "lindsey@a-zenterpriseshq.com", phone: "+15676441019", name: "Lindsey" },
-  photo_booth: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-  coworking: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-  event_center: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-  fitness: { email: "dylan@a-zenterpriseshq.com", phone: "+15673796340", name: "Dylan" },
-  default: { email: "victoria@a-zenterpriseshq.com", phone: "+15673796340", name: "Victoria" },
-};
+// ============= SECRETS-DRIVEN (NO HARDCODED STAFF EMAILS) =============
+// CRITICAL DOMAIN RULE:
+// - Sender domain: azenterpriseshq.com (no hyphen, verified in Resend)
+// - Staff recipient inboxes: @a-zenterpriseshq.com (with hyphen)
+// - All staff emails MUST come from secrets or database assignments
+// - Never construct, guess, or mutate email domains in code
 
 const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;
 
@@ -521,9 +516,12 @@ function describePayment(booking: Record<string, unknown>): string {
   return "Unpaid / request only";
 }
 
-function buildCustomerConfirmationEmail(booking: Record<string, unknown>, businessType: string): string {
+function buildCustomerConfirmationEmail(
+  booking: Record<string, unknown>, 
+  businessType: string,
+  staffContact: { email: string; phone?: string; name: string }
+): string {
   const businessLabel = getBusinessLabel(businessType);
-  const staffContact = STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default;
   
   const startDate = new Date(booking.start_datetime as string);
   const endDate = new Date(booking.end_datetime as string);
@@ -707,9 +705,13 @@ function buildStaffConfirmationEmail(booking: Record<string, unknown>, businessT
 </html>`;
 }
 
-function buildReminderEmail(booking: Record<string, unknown>, businessType: string, reminderType: string): string {
+function buildReminderEmail(
+  booking: Record<string, unknown>, 
+  businessType: string, 
+  reminderType: string,
+  staffContact: { email: string; phone?: string; name: string }
+): string {
   const businessLabel = getBusinessLabel(businessType);
-  const staffContact = STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default;
   
   const startDate = new Date(booking.start_datetime as string);
   const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
@@ -934,9 +936,6 @@ serve(async (req) => {
     });
 
     const staffContact = {
-      // Preserve old fallback mapping behavior for templates that expect a name/phone,
-      // but ALWAYS prefer deterministic routing output.
-      ...((STAFF_CONTACTS[businessType] || STAFF_CONTACTS.default) as any),
       ...resolvedStaffContact,
     };
 
@@ -1055,16 +1054,17 @@ serve(async (req) => {
                   `Payment: ${paymentLabel}`,
                 ].filter(Boolean).join("\n"),
               },
-              businessType
+              businessType,
+              staffContact
             );
           } else if (notification_type === "confirmation") {
             subject = `Your ${brandLabel} booking is confirmed — ${shortDate} at ${timeStr}`;
-            html = buildCustomerConfirmationEmail(booking, businessType);
+            html = buildCustomerConfirmationEmail(booking, businessType, staffContact);
           } else {
             const reminderType = reminder_type || "24h";
             const prefix = reminderType === "day_of_morning" ? "Today" : reminderType === "1h" ? "In 1 hour" : reminderType === "2h" ? "In 2 hours" : "Reminder";
             subject = `${prefix}: ${brandLabel} — ${shortDate} at ${timeStr}`;
-            html = buildReminderEmail(booking, businessType, reminderType);
+            html = buildReminderEmail(booking, businessType, reminderType, staffContact);
           }
 
           logStep("EMAIL: customer send starting", {
@@ -1344,26 +1344,29 @@ serve(async (req) => {
           // continue processing other channels/reminders
         }
 
-        const smsResult = await sendSMS(staffPhone, smsMessage);
-        results.staff_sms = smsResult;
+        if (!staffPhone) {
+          logStep("Staff SMS skipped - no phone number configured", { staff_email: staffContact.email });
+          results.staff_sms = { success: false, error: "No phone number configured for staff" };
+        } else {
+          const smsResult = await sendSMS(staffPhone, smsMessage);
+          results.staff_sms = smsResult;
 
-        await logNotification(supabase, {
-          booking_id,
-          notification_type,
-          channel: "sms",
-          recipient_type: "staff",
-          recipient_phone: staffPhone,
-          status: smsResult.success ? "sent" : "failed",
-          provider: "twilio",
-          provider_message_id: smsResult.sid,
-          error_message: smsResult.error,
-          metadata: {
-            source_brand: sourceBrand,
-            business_type: businessType,
-            reminder_type,
-            staff_routing: staffRoutingDebug,
-          },
-        });
+          await logNotification(supabase, {
+            booking_id,
+            notification_type,
+            channel: "sms",
+            recipient_type: "staff",
+            recipient_phone: staffPhone,
+            status: smsResult.success ? "sent" : "failed",
+            provider: "Twilio",
+            provider_message_id: smsResult.sid,
+            error_message: smsResult.error,
+            metadata: {
+              staff_routing_branch: staffRoutingDebug.branch,
+              staff_routing_path: staffRoutingDebug.notes?.join(", "),
+            },
+          });
+        }
       }
     }
 
