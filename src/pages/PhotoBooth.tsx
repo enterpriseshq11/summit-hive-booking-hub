@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import photoBoothLogo from "@/assets/360-photo-booth-logo.png";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
+import { ExperienceBookingWizard } from "@/components/booking/ExperienceBookingWizard";
 
 const FEATURES = [
   { icon: Camera, text: "360 platform + pro lighting setup" },
@@ -68,9 +69,11 @@ const FAQS = [
 export default function PhotoBooth() {
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-  const [preferredDate, setPreferredDate] = useState("");
-  const [preferredStartTime, setPreferredStartTime] = useState("18:00");
-  const [preferredHours, setPreferredHours] = useState("2");
+
+  const scrollToBooking = () => {
+    const el = document.getElementById("photo-booth-booking");
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <>
@@ -166,9 +169,9 @@ export default function PhotoBooth() {
                 <Button
                   size="lg"
                   className="bg-accent text-primary hover:bg-accent/90 font-semibold px-8 py-6 text-lg shadow-lg shadow-accent/30"
-                  onClick={() => setInquiryOpen(true)}
+                  onClick={scrollToBooking}
                 >
-                  Inquire Now
+                  Book & Pay Deposit
                 </Button>
                 <Button
                   size="lg"
@@ -176,7 +179,7 @@ export default function PhotoBooth() {
                   className="border-accent/30 text-accent hover:bg-accent/10 font-semibold px-8 py-6 text-lg"
                   onClick={() => setInquiryOpen(true)}
                 >
-                  Check Availability
+                  Request Info
                 </Button>
               </div>
             </div>
@@ -216,80 +219,23 @@ export default function PhotoBooth() {
       </section>
 
       {/* Under-hero booking module (current flow uses inquiry + confirmation) */}
+      <div id="photo-booth-booking" />
       <UnderHeroBookingCard
-        title="Request Your 360 Photo Booth"
+        title="Book Your 360 Photo Booth"
         icon={<Camera className="h-5 w-5 text-accent" />}
-        description="Pick your preferred date and time. We’ll confirm availability within 24 hours."
+        description="Choose a package, pick a time, and pay your deposit to reserve the slot."
       >
-        <div className="grid gap-6">
-          <div className="grid sm:grid-cols-3 gap-3">
-            {[2, 3, 4].map((h) => (
-              <button
-                key={h}
-                type="button"
-                onClick={() => setPreferredHours(String(h))}
-                className={cn(
-                  "text-left rounded-lg border p-4 transition-colors",
-                  preferredHours === String(h)
-                    ? "border-accent bg-accent/5"
-                    : "border-border hover:border-accent/50"
-                )}
-              >
-                <p className="font-semibold text-foreground">{h} Hour Rental</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Attendant included • Setup + teardown
-                </p>
-              </button>
-            ))}
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="photo-booth-preferred-date" className="text-sm font-medium">
-                Preferred Date
-              </label>
-              <input
-                id="photo-booth-preferred-date"
-                type="date"
-                value={preferredDate}
-                onChange={(e) => setPreferredDate(e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
-                className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="photo-booth-preferred-time" className="text-sm font-medium">
-                Preferred Start Time
-              </label>
-              <input
-                id="photo-booth-preferred-time"
-                type="time"
-                value={preferredStartTime}
-                onChange={(e) => setPreferredStartTime(e.target.value)}
-                className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              className="bg-accent text-primary hover:bg-accent/90 font-semibold"
-              onClick={() => setInquiryOpen(true)}
-            >
-              Continue to Booking Request
-            </Button>
-            <a
-              href={SITE_CONFIG.contact.phoneLink}
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-accent/30 px-4 py-2 text-accent hover:bg-accent/10 font-medium"
-            >
-              <Phone className="h-4 w-4" />
-              Call Now
-            </a>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            Preferences saved: {preferredHours} hrs • {preferredDate || "Select a date"} • {preferredStartTime}
-          </p>
+        <ExperienceBookingWizard businessType="photo_booth" checkoutFunction="experience-checkout" depositPercent={33} />
+        <div className="mt-5 flex justify-center">
+          <a
+            href={SITE_CONFIG.contact.phoneLink}
+            className={cn(
+              "inline-flex items-center justify-center gap-2 rounded-md border border-accent/30 px-4 py-2 text-accent hover:bg-accent/10 font-medium"
+            )}
+          >
+            <Phone className="h-4 w-4" />
+            Call Now
+          </a>
         </div>
       </UnderHeroBookingCard>
 
@@ -433,9 +379,9 @@ export default function PhotoBooth() {
             <Button
               size="lg"
               className="bg-accent text-primary hover:bg-accent/90 font-semibold px-10 py-6 text-lg shadow-lg shadow-accent/30"
-              onClick={() => setInquiryOpen(true)}
+              onClick={scrollToBooking}
             >
-              Inquire Now
+              Book & Pay Deposit
             </Button>
             <a
               href={SITE_CONFIG.contact.phoneLink}

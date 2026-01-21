@@ -333,7 +333,7 @@ export function ExperienceBookingWizard({
                   <strong>Total:</strong> ${total.toFixed(0)}
                 </p>
                 <p className="text-sm">
-                  <strong>Deposit Due Today (33%):</strong> ${deposit.toFixed(0)}
+                  <strong>Deposit Due Today ({depositPercent}%):</strong> ${deposit.toFixed(0)}
                 </p>
                 <p className="text-sm">
                   <strong>Remaining Balance Due on Arrival:</strong> ${remaining.toFixed(0)}

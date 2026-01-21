@@ -12,6 +12,7 @@ interface AvailabilityRequest {
   date?: string;
   start_date?: string;
   end_date?: string;
+  duration_mins?: number;
   party_size?: number;
   resource_id?: string;
 }
@@ -39,7 +40,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body: AvailabilityRequest = await req.json();
-    const { business_type, bookable_type_id, date, start_date, end_date, party_size, resource_id } = body;
+    const { business_type, bookable_type_id, date, start_date, end_date, duration_mins, party_size, resource_id } = body;
 
     // Determine date range
     const queryDate = date || start_date || new Date().toISOString().split("T")[0];
@@ -162,19 +163,27 @@ serve(async (req) => {
     const availableSlots: AvailableSlot[] = [];
     const blockedResources = new Set<string>();
 
-    // Mark blocked resources from bookings
-    existingBookings?.forEach((booking: any) => {
-      booking.booking_resources?.forEach((br: any) => {
-        blockedResources.add(`${br.resource_id}-${booking.start_datetime}`);
-      });
-    });
-
-    // Mark blocked resources from holds
-    activeHolds?.forEach((hold: any) => {
-      if (hold.resource_id) {
-        blockedResources.add(`${hold.resource_id}-${hold.start_datetime}`);
+    // Pre-index intervals per resource for overlap checks
+    const bookedByResource = new Map<string, { start: number; end: number }[]>();
+    for (const booking of existingBookings || []) {
+      const start = new Date(booking.start_datetime).getTime();
+      const end = new Date(booking.end_datetime).getTime();
+      for (const br of booking.booking_resources || []) {
+        const arr = bookedByResource.get(br.resource_id) || [];
+        arr.push({ start, end });
+        bookedByResource.set(br.resource_id, arr);
       }
-    });
+    }
+
+    const holdsByResource = new Map<string, { start: number; end: number }[]>();
+    for (const hold of activeHolds || []) {
+      if (!hold.resource_id) continue;
+      const start = new Date(hold.start_datetime).getTime();
+      const end = new Date(hold.end_datetime).getTime();
+      const arr = holdsByResource.get(hold.resource_id) || [];
+      arr.push({ start, end });
+      holdsByResource.set(hold.resource_id, arr);
+    }
 
     // Mark blocked resources from blackouts
     blackouts?.forEach((blackout: any) => {
@@ -184,19 +193,43 @@ serve(async (req) => {
     });
 
     // Generate time slots based on availability windows
-    const slotDurationMins = 60; // Default 1 hour slots
+    // NOTE: We still step by 60 minutes for a clean schedule; slot length can be longer via duration_mins.
+    const slotLengthMins = Math.max(30, Number(duration_mins || 60));
+    const stepMins = 60;
     availabilityWindows?.forEach((window: any) => {
       const startHour = parseInt(window.start_time.split(":")[0]);
       const endHour = parseInt(window.end_time.split(":")[0]);
 
-      for (let hour = startHour; hour < endHour; hour++) {
-        const slotStart = `${queryDate}T${hour.toString().padStart(2, "0")}:00:00`;
-        const slotEnd = `${queryDate}T${(hour + 1).toString().padStart(2, "0")}:00:00`;
+      for (let minutesFromStart = startHour * 60; minutesFromStart < endHour * 60; minutesFromStart += stepMins) {
+        const startTotalMins = minutesFromStart;
+        const endTotalMins = minutesFromStart + slotLengthMins;
+
+        // Must fit within the window
+        if (endTotalMins > endHour * 60) continue;
+
+        const pad2 = (n: number) => String(n).padStart(2, "0");
+        const startH = Math.floor(startTotalMins / 60);
+        const startM = startTotalMins % 60;
+        const endH = Math.floor(endTotalMins / 60);
+        const endM = endTotalMins % 60;
+
+        // Keep datetime strings consistent with existing frontend expectations (no timezone suffix)
+        const slotStart = `${queryDate}T${pad2(startH)}:${pad2(startM)}:00`;
+        const slotEnd = `${queryDate}T${pad2(endH)}:${pad2(endM)}:00`;
 
         resources?.forEach((resource: any) => {
-          // Check if this resource is blocked
-          const isBlocked = blockedResources.has(`${resource.id}-${slotStart}`) ||
-                           blockedResources.has(`${resource.id}-blackout`);
+          const startMs = new Date(slotStart).getTime();
+          const endMs = new Date(slotEnd).getTime();
+
+          // Blackout blocks entire resource
+          const isBlackout = blockedResources.has(`${resource.id}-blackout`);
+
+          const overlaps = (intervals: { start: number; end: number }[]) =>
+            intervals.some((i) => startMs < i.end && endMs > i.start);
+
+          const isBooked = overlaps(bookedByResource.get(resource.id) || []);
+          const isHeld = overlaps(holdsByResource.get(resource.id) || []);
+          const isBlocked = isBlackout || isBooked || isHeld;
 
           // Check capacity if party_size specified
           const hasCapacity = !party_size || (resource.capacity && resource.capacity >= party_size);
@@ -251,6 +284,7 @@ serve(async (req) => {
           business_type,
           bookable_type_id,
           party_size,
+          duration_mins: slotLengthMins,
         },
       }),
       {
