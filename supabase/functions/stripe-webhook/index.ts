@@ -79,6 +79,10 @@ serve(async (req) => {
         const isDeposit = metadata.is_deposit === "true";
 
         const businessType = metadata.business_type;
+        const isLindseyBooking =
+          businessType === "spa" &&
+          (typeof metadata.service_name === "string" && metadata.service_name.length > 0 ||
+            typeof metadata.duration === "string" && metadata.duration.length > 0);
         logStep("Checkout completed", { bookingId, membershipTierId, isDeposit, businessType });
 
         if (bookingId) {
@@ -149,6 +153,35 @@ serve(async (req) => {
               }
             } catch (notifError) {
               logStep("Lindsey notification error", { error: String(notifError) });
+            }
+          }
+
+          // Send staff SMS only for Lindsey (Book with Lindsey) confirmed checkouts
+          if (isLindseyBooking) {
+            try {
+              const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/lindsey-staff-booking-notification`;
+              const notificationResponse = await fetch(notificationUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                },
+                body: JSON.stringify({
+                  booking_id: bookingId,
+                  type: "confirmed",
+                  stripe_session_id: session.id,
+                  stripe_payment_intent: session.payment_intent as string,
+                }),
+              });
+
+              if (notificationResponse.ok) {
+                logStep("Lindsey staff SMS sent", { bookingId });
+              } else {
+                const errText = await notificationResponse.text();
+                logStep("Lindsey staff SMS failed", { status: notificationResponse.status, error: errText });
+              }
+            } catch (notifError) {
+              logStep("Lindsey staff SMS error", { error: String(notifError) });
             }
           }
 
