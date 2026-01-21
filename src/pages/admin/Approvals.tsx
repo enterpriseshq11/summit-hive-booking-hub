@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
 import { usePendingApprovals, useUpdateBookingStatus } from "@/hooks/useBookings";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,23 +15,53 @@ import { format } from "date-fns";
 export default function AdminApprovals() {
   const { data: pendingBookings, isLoading } = usePendingApprovals();
   const updateStatus = useUpdateBookingStatus();
+  const [searchParams] = useSearchParams();
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
+
+  const summitPending = useMemo(() => {
+    return (pendingBookings || []).filter((b: any) => b?.businesses?.type === "summit" || b?.source_brand === "summit");
+  }, [pendingBookings]);
+
+  // Deep link support from staff email: /admin/approvals?id=<booking_id>
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (!id) return;
+    const match = summitPending.find((b: any) => b.id === id);
+    if (!match) return;
+
+    setSelectedBooking(match);
+    setAction("approve");
+  }, [searchParams, summitPending]);
 
   const handleAction = () => {
     if (!selectedBooking || !action) return;
     
     updateStatus.mutate({
       id: selectedBooking.id,
-      status: action === "approve" ? "confirmed" : "cancelled",
+      status: action === "approve" ? "confirmed" : "denied",
       notes,
     }, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        // Send decision email to customer
+        try {
+          await supabase.functions.invoke("send-booking-notification", {
+            body: {
+              booking_id: selectedBooking.id,
+              notification_type: action === "approve" ? "confirmation" : "denied",
+              channels: ["email"],
+              recipients: ["customer"],
+            },
+          });
+        } catch {
+          // non-blocking
+        }
+
         setSelectedBooking(null);
         setAction(null);
         setNotes("");
-      }
+      },
     });
   };
 
@@ -37,19 +69,19 @@ export default function AdminApprovals() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Approvals</h1>
-          <p className="text-zinc-300">Review and process pending booking requests</p>
+          <h1 className="text-2xl font-bold text-white">Summit Requests</h1>
+          <p className="text-zinc-300">Approve or deny Summit event requests (request-only)</p>
         </div>
 
         {/* Helper Text */}
-        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-4 text-sm">
+          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-4 text-sm">
           <div className="flex items-start gap-3">
             <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-medium text-blue-700 dark:text-blue-300">How approvals work</p>
               <ul className="mt-1 text-blue-600 dark:text-blue-400 space-y-1">
-                <li>• <strong>Approve:</strong> Customer receives payment link and contract for signature</li>
-                <li>• <strong>Deny:</strong> Customer is notified with your reason (optional)</li>
+                  <li>• <strong>Approve:</strong> Customer receives “Request Approved / Booking Confirmed”</li>
+                  <li>• <strong>Deny:</strong> Customer receives “Request Denied” (include reason if provided)</li>
                 <li>• Requests older than 48 hours should be prioritized</li>
               </ul>
             </div>
@@ -62,7 +94,7 @@ export default function AdminApprovals() {
               <Skeleton key={i} className="h-32" />
             ))}
           </div>
-        ) : pendingBookings?.length === 0 ? (
+        ) : summitPending.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -72,7 +104,7 @@ export default function AdminApprovals() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {pendingBookings?.map((booking) => (
+            {summitPending.map((booking) => (
               <Card key={booking.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row justify-between gap-4">
@@ -199,9 +231,7 @@ export default function AdminApprovals() {
                 <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-lg">
                   <p>Upon approval:</p>
                   <ul className="list-disc list-inside mt-1 space-y-1">
-                    <li>Payment link will be sent to customer</li>
-                    <li>Required documents will be queued for signature</li>
-                    <li>Confirmation email will be sent after payment</li>
+                    <li>Customer gets a “Request Approved / Booking Confirmed” email</li>
                   </ul>
                 </div>
               )}
