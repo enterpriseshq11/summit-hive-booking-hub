@@ -4414,9 +4414,11 @@ export type Database = {
         | "pending"
         | "pending_payment"
         | "pending_documents"
+        | "approved"
         | "confirmed"
         | "in_progress"
         | "completed"
+        | "denied"
         | "cancelled"
         | "no_show"
       business_type:
@@ -4685,9 +4687,11 @@ export const Constants = {
         "pending",
         "pending_payment",
         "pending_documents",
+        "approved",
         "confirmed",
         "in_progress",
         "completed",
+        "denied",
         "cancelled",
         "no_show",
       ],

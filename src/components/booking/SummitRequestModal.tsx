@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { format, addDays, addHours } from "date-fns";
+import { format, addHours, setHours, setMinutes } from "date-fns";
 import { 
   CalendarDays, 
   Users, 
@@ -77,6 +77,10 @@ export function SummitRequestModal({
   const [budgetComfort, setBudgetComfort] = useState("");
   const [wantsTour, setWantsTour] = useState(false);
   const [notes, setNotes] = useState(prefillQuestion || "");
+
+  // Summit time + duration (request-only, no slot holds)
+  const [startTime, setStartTime] = useState("17:00"); // default 5:00 PM
+  const [durationHours, setDurationHours] = useState("4"); // default 4 hours
   
   // Contact info for guests
   const [guestName, setGuestName] = useState(
@@ -170,9 +174,29 @@ export function SummitRequestModal({
           ? parseInt(guestRange.split("-")[1]) 
           : null;
 
-      const startDate = preferredDates[0];
-      // Summit requests are request-only (no live inventory). Use a default 60m duration so notifications include duration.
-      const endDate = addHours(startDate, 1);
+      const baseDate = preferredDates[0];
+      const [hhStr, mmStr] = startTime.split(":");
+      const hh = Number(hhStr);
+      const mm = Number(mmStr);
+      if (!Number.isFinite(hh) || !Number.isFinite(mm)) {
+        throw new Error("Invalid start time");
+      }
+
+      const startDate = setMinutes(setHours(baseDate, hh), mm);
+      const durationH = Math.max(1, Math.min(12, Number(durationHours || 1)));
+      const endDate = addHours(startDate, durationH);
+
+      // Summit hours: 9:00 AM – 9:00 PM (local). Enforce client-side too.
+      const startMins = startDate.getHours() * 60 + startDate.getMinutes();
+      const endMins = endDate.getHours() * 60 + endDate.getMinutes();
+      const OPEN_MINS = 9 * 60;
+      const CLOSE_MINS = 21 * 60;
+      if (startMins < OPEN_MINS || startMins >= CLOSE_MINS) {
+        throw new Error("Start time must be between 9:00 AM and 9:00 PM");
+      }
+      if (endMins > CLOSE_MINS) {
+        throw new Error("End time must be 9:00 PM or earlier. Please reduce duration or choose an earlier start time.");
+      }
       
       const bookingData = {
         business_id: business.id,
@@ -186,6 +210,9 @@ export function SummitRequestModal({
         notes: [
           `Event Type: ${selectedEventType}`,
           `Preferred Dates: ${preferredDates.map(d => format(d, "PPP")).join(", ")}`,
+          `Requested Start Time: ${format(startDate, "h:mm a")}`,
+          `Requested Duration: ${durationH} hour${durationH === 1 ? "" : "s"}`,
+          `Requested End Time: ${format(endDate, "h:mm a")}`,
           `Guest Range: ${guestRange || customGuestCount || "Not specified"}`,
           `Budget Comfort: ${budgetComfort || "Not specified"}`,
           wantsTour ? "Wants venue tour: Yes" : "",
@@ -271,7 +298,7 @@ export function SummitRequestModal({
             </div>
             <p className="font-semibold text-xl mb-2">Request Submitted!</p>
             <p className="text-muted-foreground">
-              Our team will review and respond within 24 hours.
+              Request submitted — awaiting approval.
             </p>
           </div>
         ) : (
@@ -357,6 +384,54 @@ export function SummitRequestModal({
                   </PopoverContent>
                 </Popover>
               )}
+            </div>
+
+            {/* Start time + duration (Summit hours: 9 AM - 9 PM) */}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-base font-semibold">Requested Start Time *</Label>
+                <select
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className={cn(
+                    "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  )}
+                >
+                  {Array.from({ length: (21 - 9) * 4 }, (_, i) => {
+                    const totalMins = 9 * 60 + i * 15;
+                    const hh = Math.floor(totalMins / 60);
+                    const mm = totalMins % 60;
+                    const value = `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+                    const label = format(setMinutes(setHours(new Date(), hh), mm), "h:mm a");
+                    return (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    );
+                  })}
+                </select>
+                <p className="text-xs text-muted-foreground">Available daily 9:00 AM – 9:00 PM</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-base font-semibold">Requested Duration *</Label>
+                <select
+                  value={durationHours}
+                  onChange={(e) => setDurationHours(e.target.value)}
+                  className={cn(
+                    "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  )}
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((h) => (
+                    <option key={h} value={String(h)}>
+                      {h} hour{h === 1 ? "" : "s"}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground">We’ll confirm the final schedule during approval.</p>
+              </div>
             </div>
 
             {/* Guest Count Range Presets */}
