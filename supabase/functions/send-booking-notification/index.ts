@@ -228,6 +228,7 @@ function getBusinessLabel(businessType: string): string {
     spa: "Restoration Lounge",
     photo_booth: "360 Photo Booth",
     coworking: "The Hive by A-Z",
+    summit: "The Summit",
     event_center: "Memory Maker Event Center",
     fitness: "A-Z Total Fitness",
     voice_vault: "Voice Vault",
@@ -239,6 +240,7 @@ function normalizeSourceBrand(value: string | null | undefined, businessType: st
   if (typeof value === "string" && value.trim()) return value.trim();
   const map: Record<string, string> = {
     coworking: "hive",
+    summit: "summit",
     event_center: "summit",
     photo_booth: "photo_booth_360",
     voice_vault: "voice_vault",

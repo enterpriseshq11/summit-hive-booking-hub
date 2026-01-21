@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { format, addDays } from "date-fns";
+import { format, addDays, addHours } from "date-fns";
 import { 
   CalendarDays, 
   Users, 
@@ -156,6 +156,8 @@ export function SummitRequestModal({
           : null;
 
       const startDate = preferredDates[0];
+      // Summit requests are request-only (no live inventory). Use a default 60m duration so notifications include duration.
+      const endDate = addHours(startDate, 1);
       
       const bookingData = {
         business_id: business.id,
@@ -166,7 +168,7 @@ export function SummitRequestModal({
         guest_phone: guestPhone || null,
         guest_count: guestCount,
         start_datetime: startDate.toISOString(),
-        end_datetime: startDate.toISOString(),
+        end_datetime: endDate.toISOString(),
         notes: [
           `Event Type: ${selectedEventType}`,
           `Preferred Dates: ${preferredDates.map(d => format(d, "PPP")).join(", ")}`,
@@ -182,25 +184,44 @@ export function SummitRequestModal({
           notes ? `Additional notes: ${notes}` : "",
         ].filter(Boolean).join("\n"),
         status: "pending" as const,
+        source_brand: "summit",
         subtotal: 0,
         total_amount: 0,
-        booking_number: "",
+        // DB trigger sets booking_number when NULL. Types currently require a string, so we cast.
+        booking_number: null as any,
       };
 
       const result = await createBooking.mutateAsync(bookingData);
 
-      // Log to audit
-      await supabase.from("audit_log").insert([{
-        entity_type: "booking",
-        entity_id: result.id,
-        action_type: "summit_event_request",
-        after_json: { 
-          event_type: selectedEventType, 
-          guest_range: guestRange,
-          budget_comfort: budgetComfort,
-          wants_tour: wantsTour 
-        } as any,
-      }]);
+      // Fire centralized notification pipeline immediately (request-based flow)
+      const { error: notifyError } = await supabase.functions.invoke("send-booking-notification", {
+        body: {
+          booking_id: result.id,
+          notification_type: "request",
+          channels: ["email", "sms"],
+          recipients: ["customer", "staff"],
+        },
+      });
+      if (notifyError) throw notifyError;
+
+      // Best-effort audit log (do not block submission for public/anon users)
+      try {
+        await supabase.from("audit_log").insert([
+          {
+            entity_type: "booking",
+            entity_id: result.id,
+            action_type: "summit_event_request",
+            after_json: {
+              event_type: selectedEventType,
+              guest_range: guestRange,
+              budget_comfort: budgetComfort,
+              wants_tour: wantsTour,
+            } as any,
+          },
+        ]);
+      } catch {
+        // ignore
+      }
 
       setIsSuccess(true);
       
@@ -210,8 +231,9 @@ export function SummitRequestModal({
         navigate(`/booking/confirmation?id=${result.id}&pending=true`);
       }, 2000);
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       toast.error("Unable to submit — please try again.", {
-        description: "If this continues, please contact us directly."
+        description: message || "If this continues, please contact us directly.",
       });
     } finally {
       setIsSubmitting(false);
