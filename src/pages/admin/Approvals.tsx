@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info } from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 type BusinessUnit = "all" | "summit" | "hive" | "restoration" | "photo_booth" | "voice_vault";
 
@@ -52,6 +52,16 @@ function formatEstimate(booking: any) {
   return `$${Number(amount).toFixed(2)}`;
 }
 
+function formatUSD0(amount: any) {
+  const n = Number(amount);
+  if (!Number.isFinite(n)) return "—";
+  return `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+}
+
+type ApprovalItem =
+  | { kind: "booking"; booking: any }
+  | { kind: "hive_lease"; inquiry: any };
+
 export default function AdminApprovals() {
   // IMPORTANT: Dashboard "Pending Approvals" uses bookings.status='pending'.
   // Keep this page on the same source of truth to prevent count/list mismatches.
@@ -81,6 +91,20 @@ export default function AdminApprovals() {
     },
   });
 
+  const { data: pendingLeaseRequests, isLoading: leasePendingLoading } = useQuery({
+    queryKey: ["office_inquiries", "lease_request", "pending"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("office_inquiries")
+        .select("*")
+        .eq("inquiry_type", "lease_request")
+        .eq("approval_status", "pending")
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const { data: deniedBookings, isLoading: deniedLoading } = useQuery({
     queryKey: ["bookings", "approvals", "denied"],
     queryFn: async () => {
@@ -102,7 +126,87 @@ export default function AdminApprovals() {
     },
   });
 
+  const { data: deniedLeaseRequests, isLoading: leaseDeniedLoading } = useQuery({
+    queryKey: ["office_inquiries", "lease_request", "denied"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("office_inquiries")
+        .select("*")
+        .eq("inquiry_type", "lease_request")
+        .eq("approval_status", "denied")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const updateStatus = useUpdateBookingStatus();
+  const queryClient = useQueryClient();
+
+  const updateLeaseApproval = useMutation({
+    mutationFn: async (params: { id: string; status: "confirmed" | "denied"; reason?: string }) => {
+      const now = new Date().toISOString();
+      const patch: any = {
+        approval_status: params.status,
+      };
+      if (params.status === "confirmed") {
+        patch.approved_at = now;
+        patch.denied_at = null;
+        patch.denial_reason = null;
+      } else {
+        patch.denied_at = now;
+        patch.denial_reason = params.reason || null;
+      }
+
+      const { data, error } = await supabase
+        .from("office_inquiries")
+        .update(patch)
+        .eq("id", params.id)
+        .select("*")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async (updated) => {
+      // refresh lists
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["office_inquiries", "lease_request", "pending"] }),
+        queryClient.invalidateQueries({ queryKey: ["office_inquiries", "lease_request", "denied"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin_stats"] }),
+        queryClient.invalidateQueries({ queryKey: ["admin_alerts"] }),
+      ]);
+
+      // notify customer (best-effort)
+      try {
+        await supabase.functions.invoke("send-inquiry-notification", {
+          body: {
+            type: updated.approval_status === "confirmed" ? "lease_approved" : "lease_denied",
+            inquiry: {
+              first_name: updated.first_name,
+              last_name: updated.last_name,
+              email: updated.email,
+              phone: updated.phone,
+              company_name: updated.company_name,
+              workspace_type: updated.workspace_type,
+              move_in_timeframe: updated.move_in_timeframe,
+              seats_needed: updated.seats_needed,
+              inquiry_type: updated.inquiry_type,
+              needs_meeting_rooms: updated.needs_meeting_rooms,
+              needs_business_address: updated.needs_business_address,
+              office_code: updated.office_code,
+              lease_term_months: updated.lease_term_months,
+              monthly_rate: updated.monthly_rate,
+              term_total: updated.term_total,
+              deposit_amount: updated.deposit_amount,
+              denial_reason: updated.denial_reason,
+            },
+          },
+        });
+      } catch {
+        // non-blocking
+      }
+    },
+  });
   const [searchParams] = useSearchParams();
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
@@ -110,13 +214,32 @@ export default function AdminApprovals() {
   const [businessUnit, setBusinessUnit] = useState<BusinessUnit>("all");
   const [statusTab, setStatusTab] = useState<"pending" | "denied">("pending");
   const [viewDenied, setViewDenied] = useState<any>(null);
+  const [selectedLease, setSelectedLease] = useState<any>(null);
 
   const filteredPending = useMemo(() => {
-    return (pendingBookings || []).filter((b: any) => matchesUnit(b, businessUnit));
+    const bookingItems: ApprovalItem[] = (pendingBookings || [])
+      .filter((b: any) => matchesUnit(b, businessUnit))
+      .map((b: any) => ({ kind: "booking", booking: b }));
+
+    const shouldIncludeHiveLease = businessUnit === "all" || businessUnit === "hive";
+    const leaseItems: ApprovalItem[] = shouldIncludeHiveLease
+      ? (pendingLeaseRequests || []).map((i: any) => ({ kind: "hive_lease", inquiry: i }))
+      : [];
+
+    return [...bookingItems, ...leaseItems];
   }, [pendingBookings, businessUnit]);
 
   const filteredDenied = useMemo(() => {
-    return (deniedBookings || []).filter((b: any) => matchesUnit(b, businessUnit));
+    const bookingItems: ApprovalItem[] = (deniedBookings || [])
+      .filter((b: any) => matchesUnit(b, businessUnit))
+      .map((b: any) => ({ kind: "booking", booking: b }));
+
+    const shouldIncludeHiveLease = businessUnit === "all" || businessUnit === "hive";
+    const leaseItems: ApprovalItem[] = shouldIncludeHiveLease
+      ? (deniedLeaseRequests || []).map((i: any) => ({ kind: "hive_lease", inquiry: i }))
+      : [];
+
+    return [...bookingItems, ...leaseItems];
   }, [deniedBookings, businessUnit]);
 
   // Deep link support from staff email: /admin/approvals?id=<booking_id>
@@ -131,7 +254,23 @@ export default function AdminApprovals() {
   }, [searchParams, pendingBookings]);
 
   const handleAction = () => {
-    if (!selectedBooking || !action) return;
+    if (!action) return;
+
+    // Hive lease request
+    if (selectedLease) {
+      updateLeaseApproval.mutate({
+        id: selectedLease.id,
+        status: action === "approve" ? "confirmed" : "denied",
+        reason: notes,
+      });
+      setSelectedLease(null);
+      setAction(null);
+      setNotes("");
+      return;
+    }
+
+    // Standard booking
+    if (!selectedBooking) return;
     
     updateStatus.mutate({
       id: selectedBooking.id,
@@ -200,13 +339,13 @@ export default function AdminApprovals() {
           </div>
         </div>
 
-        {statusTab === "pending" && isLoading ? (
+        {statusTab === "pending" && (isLoading || leasePendingLoading) ? (
           <div className="space-y-4">
             {Array(3).fill(0).map((_, i) => (
               <Skeleton key={i} className="h-32" />
             ))}
           </div>
-        ) : statusTab === "denied" && deniedLoading ? (
+        ) : statusTab === "denied" && (deniedLoading || leaseDeniedLoading) ? (
           <div className="space-y-4">
             {Array(3).fill(0).map((_, i) => (
               <Skeleton key={i} className="h-32" />
@@ -239,18 +378,25 @@ export default function AdminApprovals() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {(statusTab === "pending" ? filteredPending : filteredDenied).map((booking) => (
-              <Card key={booking.id} className="hover:shadow-md transition-shadow">
+            {(statusTab === "pending" ? filteredPending : filteredDenied).map((item) => (
+              <Card
+                key={item.kind === "booking" ? item.booking.id : item.inquiry.id}
+                className="hover:shadow-md transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row justify-between gap-4">
                     <div className="space-y-3 flex-1">
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="font-semibold text-lg">
-                            {booking.guest_name || "Customer"}
+                            {item.kind === "booking"
+                              ? item.booking.guest_name || "Customer"
+                              : `${item.inquiry.first_name || "Customer"} ${item.inquiry.last_name || ""}`.trim()}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            {booking.guest_email || "No email provided"}
+                            {item.kind === "booking"
+                              ? item.booking.guest_email || "No email provided"
+                              : item.inquiry.email || "No email provided"}
                           </p>
                         </div>
                         {statusTab === "pending" ? (
@@ -264,44 +410,103 @@ export default function AdminApprovals() {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span>{format(new Date(booking.start_datetime), "MMM d, yyyy")}</span>
+                      {item.kind === "booking" ? (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>{format(new Date(item.booking.start_datetime), "MMM d, yyyy")}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span>{format(new Date(item.booking.start_datetime), "h:mm a")}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span>{item.booking.guest_count || 1} guests</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <span>{formatEstimate(item.booking)}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>{format(new Date(booking.start_datetime), "h:mm a")}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4 text-muted-foreground" />
-                          <span>{booking.guest_count || 1} guests</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span>{formatEstimate(booking)}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary">{booking.businesses?.name}</Badge>
-                        <Badge variant="outline">{booking.bookable_types?.name}</Badge>
-                        {booking.packages?.name && (
-                          <Badge variant="outline">{booking.packages?.name}</Badge>
-                        )}
-                      </div>
-
-                      {booking.notes && (
-                        <div className="bg-muted/50 rounded-lg p-3 text-sm">
-                          <p className="text-muted-foreground">Customer Notes:</p>
-                          <p>{booking.notes}</p>
+                      ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>{format(new Date(item.inquiry.created_at), "MMM d, yyyy")}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span>{format(new Date(item.inquiry.created_at), "h:mm a")}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span>Lease request</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <span>{formatUSD0(item.inquiry.term_total)}</span>
+                          </div>
                         </div>
                       )}
 
-                      {statusTab === "denied" && (booking.cancellation_reason || booking.internal_notes) && (
+                      <div className="flex flex-wrap gap-2">
+                        {item.kind === "booking" ? (
+                          <>
+                            <Badge variant="secondary">{item.booking.businesses?.name}</Badge>
+                            <Badge variant="outline">{item.booking.bookable_types?.name}</Badge>
+                            {item.booking.packages?.name && (
+                              <Badge variant="outline">{item.booking.packages?.name}</Badge>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <Badge variant="secondary">The Hive</Badge>
+                            <Badge variant="outline">Office Lease Request</Badge>
+                            {item.inquiry.office_code && (
+                              <Badge variant="outline">Office {item.inquiry.office_code}</Badge>
+                            )}
+                            {item.inquiry.lease_term_months && (
+                              <Badge variant="outline">{item.inquiry.lease_term_months} months</Badge>
+                            )}
+                          </>
+                        )}
+                      </div>
+
+                      {item.kind === "booking" && item.booking.notes && (
+                        <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                          <p className="text-muted-foreground">Customer Notes:</p>
+                          <p>{item.booking.notes}</p>
+                        </div>
+                      )}
+
+                      {item.kind === "hive_lease" && (
+                        <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1">
+                          <p className="text-muted-foreground">Pricing:</p>
+                          <p>
+                            Monthly: <span className="font-medium">{formatUSD0(item.inquiry.monthly_rate)}</span>
+                          </p>
+                          <p>
+                            Term total: <span className="font-medium">{formatUSD0(item.inquiry.term_total)}</span>
+                          </p>
+                          <p>
+                            Deposit/down: <span className="font-medium">{formatUSD0(item.inquiry.deposit_amount)}</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground">Request-based — no payment collected now.</p>
+                        </div>
+                      )}
+
+                      {statusTab === "denied" && item.kind === "booking" && (item.booking.cancellation_reason || item.booking.internal_notes) && (
                         <div className="bg-muted/50 rounded-lg p-3 text-sm">
                           <p className="text-muted-foreground">Denied Reason:</p>
-                          <p>{booking.cancellation_reason || booking.internal_notes}</p>
+                          <p>{item.booking.cancellation_reason || item.booking.internal_notes}</p>
+                        </div>
+                      )}
+
+                      {statusTab === "denied" && item.kind === "hive_lease" && item.inquiry.denial_reason && (
+                        <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                          <p className="text-muted-foreground">Denied Reason:</p>
+                          <p>{item.inquiry.denial_reason}</p>
                         </div>
                       )}
                     </div>
@@ -311,7 +516,13 @@ export default function AdminApprovals() {
                         <Button
                           className="flex-1 lg:flex-none"
                           onClick={() => {
-                            setSelectedBooking(booking);
+                            if (item.kind === "booking") {
+                              setSelectedBooking(item.booking);
+                              setSelectedLease(null);
+                            } else {
+                              setSelectedLease(item.inquiry);
+                              setSelectedBooking(null);
+                            }
                             setAction("approve");
                           }}
                         >
@@ -322,7 +533,13 @@ export default function AdminApprovals() {
                           variant="outline"
                           className="flex-1 lg:flex-none"
                           onClick={() => {
-                            setSelectedBooking(booking);
+                            if (item.kind === "booking") {
+                              setSelectedBooking(item.booking);
+                              setSelectedLease(null);
+                            } else {
+                              setSelectedLease(item.inquiry);
+                              setSelectedBooking(null);
+                            }
                             setAction("deny");
                           }}
                         >
@@ -335,7 +552,7 @@ export default function AdminApprovals() {
                         <Button
                           variant="outline"
                           className="flex-1 lg:flex-none"
-                          onClick={() => setViewDenied(booking)}
+                          onClick={() => setViewDenied(item.kind === "booking" ? item.booking : item.inquiry)}
                         >
                           <MessageSquare className="h-4 w-4 mr-2" />
                           View Details
@@ -350,7 +567,7 @@ export default function AdminApprovals() {
         )}
 
         {/* Approval/Denial Dialog */}
-        <Dialog open={!!action} onOpenChange={() => { setAction(null); setNotes(""); }}>
+        <Dialog open={!!action} onOpenChange={() => { setAction(null); setNotes(""); setSelectedLease(null); }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -359,16 +576,22 @@ export default function AdminApprovals() {
             </DialogHeader>
             
             <div className="space-y-4">
-              {selectedBooking && (
+              {(selectedBooking || selectedLease) && (
                 <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                   <p className="font-medium">
-                    {selectedBooking.guest_name || `${selectedBooking.profiles?.first_name} ${selectedBooking.profiles?.last_name}`}
+                    {selectedLease
+                      ? `${selectedLease.first_name || "Customer"} ${selectedLease.last_name || ""}`.trim()
+                      : selectedBooking.guest_name || `${selectedBooking.profiles?.first_name} ${selectedBooking.profiles?.last_name}`}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(selectedBooking.start_datetime), "MMMM d, yyyy 'at' h:mm a")}
+                    {selectedLease
+                      ? `Submitted ${format(new Date(selectedLease.created_at), "MMMM d, yyyy 'at' h:mm a")}`
+                      : format(new Date(selectedBooking.start_datetime), "MMMM d, yyyy 'at' h:mm a")}
                   </p>
                   <p className="text-sm">
-                    {selectedBooking.businesses?.name} - {selectedBooking.bookable_types?.name}
+                    {selectedLease
+                      ? `The Hive — Office Lease Request${selectedLease.office_code ? ` (Office ${selectedLease.office_code})` : ""}`
+                      : `${selectedBooking.businesses?.name} - ${selectedBooking.bookable_types?.name}`}
                   </p>
                 </div>
               )}
@@ -405,9 +628,13 @@ export default function AdminApprovals() {
               <Button
                 variant={action === "approve" ? "default" : "destructive"}
                 onClick={handleAction}
-                disabled={updateStatus.isPending}
+                disabled={updateStatus.isPending || updateLeaseApproval.isPending}
               >
-                {updateStatus.isPending ? "Processing..." : action === "approve" ? "Approve & Notify Customer" : "Deny Request"}
+                {updateStatus.isPending || updateLeaseApproval.isPending
+                  ? "Processing..."
+                  : action === "approve"
+                    ? "Approve & Notify Customer"
+                    : "Deny Request"}
               </Button>
             </DialogFooter>
           </DialogContent>
