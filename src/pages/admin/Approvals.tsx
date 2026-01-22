@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
 import { useUpdateBookingStatus } from "@/hooks/useBookings";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,16 +81,43 @@ export default function AdminApprovals() {
     },
   });
 
+  const { data: deniedBookings, isLoading: deniedLoading } = useQuery({
+    queryKey: ["bookings", "approvals", "denied"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select(
+          `
+          *,
+          businesses(name, type),
+          bookable_types(name),
+          packages(name)
+        `
+        )
+        .eq("status", "denied")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const updateStatus = useUpdateBookingStatus();
   const [searchParams] = useSearchParams();
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
   const [businessUnit, setBusinessUnit] = useState<BusinessUnit>("all");
+  const [statusTab, setStatusTab] = useState<"pending" | "denied">("pending");
+  const [viewDenied, setViewDenied] = useState<any>(null);
 
   const filteredPending = useMemo(() => {
     return (pendingBookings || []).filter((b: any) => matchesUnit(b, businessUnit));
   }, [pendingBookings, businessUnit]);
+
+  const filteredDenied = useMemo(() => {
+    return (deniedBookings || []).filter((b: any) => matchesUnit(b, businessUnit));
+  }, [deniedBookings, businessUnit]);
 
   // Deep link support from staff email: /admin/approvals?id=<booking_id>
   useEffect(() => {
@@ -151,6 +178,13 @@ export default function AdminApprovals() {
           </TabsList>
         </Tabs>
 
+        <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "pending" | "denied")}>
+          <TabsList className="w-full justify-start flex-wrap h-auto">
+            <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="denied">Denied</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* Helper Text */}
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-4 text-sm">
           <div className="flex items-start gap-3">
@@ -166,7 +200,13 @@ export default function AdminApprovals() {
           </div>
         </div>
 
-        {isLoading ? (
+        {statusTab === "pending" && isLoading ? (
+          <div className="space-y-4">
+            {Array(3).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
+          </div>
+        ) : statusTab === "denied" && deniedLoading ? (
           <div className="space-y-4">
             {Array(3).fill(0).map((_, i) => (
               <Skeleton key={i} className="h-32" />
@@ -181,7 +221,7 @@ export default function AdminApprovals() {
               </p>
             </CardContent>
           </Card>
-        ) : filteredPending.length === 0 ? (
+        ) : statusTab === "pending" && filteredPending.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -189,9 +229,17 @@ export default function AdminApprovals() {
               <p className="text-muted-foreground">All booking requests have been processed</p>
             </CardContent>
           </Card>
+        ) : statusTab === "denied" && filteredDenied.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium">No denied requests</h3>
+              <p className="text-muted-foreground">Denied requests will show here.</p>
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-4">
-            {filteredPending.map((booking) => (
+            {(statusTab === "pending" ? filteredPending : filteredDenied).map((booking) => (
               <Card key={booking.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row justify-between gap-4">
@@ -205,9 +253,15 @@ export default function AdminApprovals() {
                             {booking.guest_email || "No email provided"}
                           </p>
                         </div>
-                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                          Pending Review
-                        </Badge>
+                        {statusTab === "pending" ? (
+                          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                            Pending Review
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                            Denied
+                          </Badge>
+                        )}
                       </div>
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -243,31 +297,51 @@ export default function AdminApprovals() {
                           <p>{booking.notes}</p>
                         </div>
                       )}
+
+                      {statusTab === "denied" && (booking.cancellation_reason || booking.internal_notes) && (
+                        <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                          <p className="text-muted-foreground">Denied Reason:</p>
+                          <p>{booking.cancellation_reason || booking.internal_notes}</p>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex lg:flex-col gap-2 lg:justify-center">
-                      <Button
-                        className="flex-1 lg:flex-none"
-                        onClick={() => {
-                          setSelectedBooking(booking);
-                          setAction("approve");
-                        }}
-                      >
-                        <Check className="h-4 w-4 mr-2" />
-                        Approve
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex-1 lg:flex-none"
-                        onClick={() => {
-                          setSelectedBooking(booking);
-                          setAction("deny");
-                        }}
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Deny
-                      </Button>
-                    </div>
+                    {statusTab === "pending" ? (
+                      <div className="flex lg:flex-col gap-2 lg:justify-center">
+                        <Button
+                          className="flex-1 lg:flex-none"
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setAction("approve");
+                          }}
+                        >
+                          <Check className="h-4 w-4 mr-2" />
+                          Approve
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1 lg:flex-none"
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setAction("deny");
+                          }}
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Deny
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex lg:flex-col gap-2 lg:justify-center">
+                        <Button
+                          variant="outline"
+                          className="flex-1 lg:flex-none"
+                          onClick={() => setViewDenied(booking)}
+                        >
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -336,6 +410,40 @@ export default function AdminApprovals() {
                 {updateStatus.isPending ? "Processing..." : action === "approve" ? "Approve & Notify Customer" : "Deny Request"}
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Denied details (read-only) */}
+        <Dialog open={!!viewDenied} onOpenChange={(o) => !o && setViewDenied(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Denied Request</DialogTitle>
+            </DialogHeader>
+
+            {viewDenied && (
+              <div className="space-y-4">
+                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                  <p className="font-medium">
+                    {viewDenied.guest_name || "Customer"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(viewDenied.start_datetime), "MMMM d, yyyy 'at' h:mm a")}
+                  </p>
+                  <p className="text-sm">
+                    {viewDenied.businesses?.name} - {viewDenied.bookable_types?.name}
+                  </p>
+                </div>
+
+                {(viewDenied.cancellation_reason || viewDenied.internal_notes) && (
+                  <div className="bg-muted/50 rounded-lg p-4">
+                    <p className="text-sm font-medium">Denied Reason</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {viewDenied.cancellation_reason || viewDenied.internal_notes}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

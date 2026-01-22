@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
-type Booking = Database["public"]["Tables"]["bookings"]["Row"];
 type BookingInsert = Database["public"]["Tables"]["bookings"]["Insert"];
 type BookingUpdate = Database["public"]["Tables"]["bookings"]["Update"];
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
@@ -131,6 +130,10 @@ export function useUpdateBookingStatus() {
       const updates: BookingUpdate = { status };
       if (status === "cancelled") {
         updates.cancelled_at = new Date().toISOString();
+        updates.cancellation_reason = notes;
+      }
+      if (status === "denied") {
+        // Track denial reason in a dedicated field so it can be displayed in Admin → Approvals → Denied.
         updates.cancellation_reason = notes;
       }
       if (notes) {
