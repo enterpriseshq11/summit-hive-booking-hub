@@ -55,7 +55,10 @@ export default function Coworking() {
       benefits: [
         "Secure, lockable workspace",
         "Professional business address",
-        "Priority booking for meeting rooms"
+        "Priority booking for meeting rooms",
+        "Standard offices (S1/S2): $350/mo (6 or 12 months)",
+        "Premium offices (P1/P2): $550/mo (6 or 12 months)",
+        "Deposit/down shown in the request (no payment collected now)",
       ],
     },
     { 

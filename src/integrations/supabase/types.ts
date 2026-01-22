@@ -2170,25 +2170,34 @@ export type Database = {
       }
       office_inquiries: {
         Row: {
+          approval_status: string
+          approved_at: string | null
           assigned_to: string | null
           company_name: string | null
           created_at: string
+          denial_reason: string | null
+          denied_at: string | null
+          deposit_amount: number | null
           email: string
           first_name: string
           id: string
           inquiry_type: string
           internal_notes: string | null
           last_name: string | null
+          lease_term_months: number | null
           message: string | null
+          monthly_rate: number | null
           move_in_timeframe: string | null
           needs_business_address: boolean | null
           needs_meeting_rooms: boolean | null
+          office_code: string | null
           office_id: string | null
           phone: string | null
           preferred_tour_dates: Json | null
           seats_needed: number | null
           source: string | null
           status: string | null
+          term_total: number | null
           tour_type: string | null
           updated_at: string
           utm_campaign: string | null
@@ -2197,25 +2206,34 @@ export type Database = {
           workspace_type: string | null
         }
         Insert: {
+          approval_status?: string
+          approved_at?: string | null
           assigned_to?: string | null
           company_name?: string | null
           created_at?: string
+          denial_reason?: string | null
+          denied_at?: string | null
+          deposit_amount?: number | null
           email: string
           first_name: string
           id?: string
           inquiry_type?: string
           internal_notes?: string | null
           last_name?: string | null
+          lease_term_months?: number | null
           message?: string | null
+          monthly_rate?: number | null
           move_in_timeframe?: string | null
           needs_business_address?: boolean | null
           needs_meeting_rooms?: boolean | null
+          office_code?: string | null
           office_id?: string | null
           phone?: string | null
           preferred_tour_dates?: Json | null
           seats_needed?: number | null
           source?: string | null
           status?: string | null
+          term_total?: number | null
           tour_type?: string | null
           updated_at?: string
           utm_campaign?: string | null
@@ -2224,25 +2242,34 @@ export type Database = {
           workspace_type?: string | null
         }
         Update: {
+          approval_status?: string
+          approved_at?: string | null
           assigned_to?: string | null
           company_name?: string | null
           created_at?: string
+          denial_reason?: string | null
+          denied_at?: string | null
+          deposit_amount?: number | null
           email?: string
           first_name?: string
           id?: string
           inquiry_type?: string
           internal_notes?: string | null
           last_name?: string | null
+          lease_term_months?: number | null
           message?: string | null
+          monthly_rate?: number | null
           move_in_timeframe?: string | null
           needs_business_address?: boolean | null
           needs_meeting_rooms?: boolean | null
+          office_code?: string | null
           office_id?: string | null
           phone?: string | null
           preferred_tour_dates?: Json | null
           seats_needed?: number | null
           source?: string | null
           status?: string | null
+          term_total?: number | null
           tour_type?: string | null
           updated_at?: string
           utm_campaign?: string | null

@@ -51,10 +51,22 @@ export function useAdminAlerts() {
       }
 
       // Pending approvals
-      const { count: pendingApprovals } = await supabase
-        .from("bookings")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pending");
+      // Includes:
+      // - Bookings requiring approval (bookings.status = 'pending')
+      // - Hive office lease requests (office_inquiries.approval_status = 'pending' AND inquiry_type = 'lease_request')
+      const [{ count: pendingBookingsApprovals }, { count: pendingLeaseApprovals }] = await Promise.all([
+        supabase
+          .from("bookings")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending"),
+        supabase
+          .from("office_inquiries")
+          .select("*", { count: "exact", head: true })
+          .eq("approval_status", "pending")
+          .eq("inquiry_type", "lease_request"),
+      ]);
+
+      const pendingApprovals = (pendingBookingsApprovals || 0) + (pendingLeaseApprovals || 0);
 
       if (pendingApprovals && pendingApprovals > 0) {
         alerts.push({
@@ -123,11 +135,20 @@ export function useAdminStats() {
         .lt("start_datetime", tomorrowIso)
         .neq("status", "cancelled");
 
-      // Pending approvals
-      const { count: pendingApprovals } = await supabase
-        .from("bookings")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pending");
+      // Pending approvals (bookings + Hive lease requests)
+      const [{ count: pendingBookingsApprovals }, { count: pendingLeaseApprovals }] = await Promise.all([
+        supabase
+          .from("bookings")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending"),
+        supabase
+          .from("office_inquiries")
+          .select("*", { count: "exact", head: true })
+          .eq("approval_status", "pending")
+          .eq("inquiry_type", "lease_request"),
+      ]);
+
+      const pendingApprovals = (pendingBookingsApprovals || 0) + (pendingLeaseApprovals || 0);
 
       // Active resources
       const { count: activeResources } = await supabase

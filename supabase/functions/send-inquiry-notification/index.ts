@@ -10,7 +10,7 @@ const corsHeaders = {
 };
 
 interface InquiryNotificationRequest {
-  type: 'user_confirmation' | 'staff_notification';
+  type: 'user_confirmation' | 'staff_notification' | 'lease_approved' | 'lease_denied';
   inquiry: {
     first_name: string;
     last_name?: string | null;
@@ -24,6 +24,14 @@ interface InquiryNotificationRequest {
     inquiry_type: string;
     needs_meeting_rooms?: boolean;
     needs_business_address?: boolean;
+
+    // Hive lease request fields (optional)
+    office_code?: string | null;
+    lease_term_months?: number | null;
+    monthly_rate?: number | null;
+    term_total?: number | null;
+    deposit_amount?: number | null;
+    denial_reason?: string | null;
   };
 }
 
@@ -109,6 +117,88 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       console.log("User confirmation email sent:", userEmailResponse);
+
+      return new Response(JSON.stringify({ success: true, emailId: userEmailResponse.data?.id }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+
+    } else if (type === 'lease_approved' || type === 'lease_denied') {
+      const isApproved = type === 'lease_approved';
+      const subject = isApproved
+        ? 'Your Office Request Was Approved – The Hive by A-Z'
+        : 'Update on Your Office Request – The Hive by A-Z';
+
+      const pricingLines = [
+        inquiry.office_code ? `Office: ${inquiry.office_code}` : null,
+        inquiry.lease_term_months ? `Lease term: ${inquiry.lease_term_months} months` : null,
+        typeof inquiry.monthly_rate === 'number' ? `Monthly: $${inquiry.monthly_rate}` : null,
+        typeof inquiry.term_total === 'number' ? `Term total: $${inquiry.term_total}` : null,
+        typeof inquiry.deposit_amount === 'number' ? `Deposit/down: $${inquiry.deposit_amount}` : null,
+      ].filter(Boolean);
+
+      const decisionLine = isApproved
+        ? 'Good news — your request has been approved. Next step is to confirm move-in details and finalize paperwork. No payment is required until confirmed.'
+        : 'Your request was not approved at this time. If you have questions, reply to this email and we can review alternatives.';
+
+      const reasonBlock = !isApproved && inquiry.denial_reason
+        ? `<div class="highlight-box"><strong>Reason:</strong><br>${inquiry.denial_reason}</div>`
+        : '';
+
+      const userEmailResponse = await resend.emails.send({
+        from: FROM_EMAIL,
+        to: [inquiry.email],
+        subject,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: #0a0a0a; padding: 30px; text-align: center; }
+              .header h1 { color: #d4af37; margin: 0; font-size: 24px; }
+              .content { padding: 30px 20px; background: #ffffff; }
+              .highlight-box { background: #f8f6f0; border-left: 4px solid #d4af37; padding: 15px; margin: 20px 0; }
+              .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 14px; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>The Hive by A-Z</h1>
+              </div>
+              <div class="content">
+                <h2>Hi ${inquiry.first_name}!</h2>
+                <p>${decisionLine}</p>
+
+                ${pricingLines.length ? `
+                  <div class="highlight-box">
+                    <strong>Request Summary:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                      ${pricingLines.map((l) => `<li>${l}</li>`).join('')}
+                    </ul>
+                    <p style="margin: 10px 0 0 0; font-size: 13px; color: #444;">Request-based — no payment collected now.</p>
+                  </div>
+                ` : ''}
+
+                ${reasonBlock}
+
+                <p>Questions? Reply to this email or call us at <strong>(567) 379-6340</strong>.</p>
+                <p style="margin-top: 30px;">
+                  Best regards,<br>
+                  <strong>The Hive Team</strong><br>
+                  A-Z Enterprises
+                </p>
+              </div>
+              <div class="footer">
+                <p>The Hive by A-Z | Wapakoneta, Ohio</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      });
 
       return new Response(JSON.stringify({ success: true, emailId: userEmailResponse.data?.id }), {
         status: 200,
