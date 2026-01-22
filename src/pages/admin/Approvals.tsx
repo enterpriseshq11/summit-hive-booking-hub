@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
-import { usePendingApprovals, useUpdateBookingStatus } from "@/hooks/useBookings";
+import { useUpdateBookingStatus } from "@/hooks/useBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info } from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
 
 type BusinessUnit = "all" | "summit" | "hive" | "restoration" | "photo_booth" | "voice_vault";
 
@@ -52,7 +53,34 @@ function formatEstimate(booking: any) {
 }
 
 export default function AdminApprovals() {
-  const { data: pendingBookings, isLoading } = usePendingApprovals();
+  // IMPORTANT: Dashboard "Pending Approvals" uses bookings.status='pending'.
+  // Keep this page on the same source of truth to prevent count/list mismatches.
+  const {
+    data: pendingBookings,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["bookings", "approvals", "pending"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select(
+          `
+          *,
+          businesses(name, type),
+          bookable_types(name),
+          packages(name)
+        `
+        )
+        .eq("status", "pending")
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const updateStatus = useUpdateBookingStatus();
   const [searchParams] = useSearchParams();
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -144,6 +172,15 @@ export default function AdminApprovals() {
               <Skeleton key={i} className="h-32" />
             ))}
           </div>
+        ) : isError ? (
+          <Card>
+            <CardContent className="py-10">
+              <h3 className="text-lg font-medium">Couldn't load approvals</h3>
+              <p className="text-muted-foreground mt-1">
+                {(error as any)?.message || "Please refresh and try again."}
+              </p>
+            </CardContent>
+          </Card>
         ) : filteredPending.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
