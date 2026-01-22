@@ -81,6 +81,27 @@ export default function AdminApprovals() {
     },
   });
 
+  const { data: confirmedBookings, isLoading: confirmedLoading } = useQuery({
+    queryKey: ["bookings", "approvals", "confirmed"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select(
+          `
+          *,
+          businesses(name, type),
+          bookable_types(name),
+          packages(name)
+        `
+        )
+        .eq("status", "confirmed")
+        .order("start_datetime", { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const { data: deniedBookings, isLoading: deniedLoading } = useQuery({
     queryKey: ["bookings", "approvals", "denied"],
     queryFn: async () => {
@@ -108,8 +129,9 @@ export default function AdminApprovals() {
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
   const [businessUnit, setBusinessUnit] = useState<BusinessUnit>("all");
-  const [statusTab, setStatusTab] = useState<"pending" | "denied">("pending");
+  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied">("pending");
   const [viewDenied, setViewDenied] = useState<any>(null);
+  const [viewConfirmed, setViewConfirmed] = useState<any>(null);
 
   const filteredPending = useMemo(() => {
     return (pendingBookings || []).filter((b: any) => matchesUnit(b, businessUnit));
@@ -118,6 +140,10 @@ export default function AdminApprovals() {
   const filteredDenied = useMemo(() => {
     return (deniedBookings || []).filter((b: any) => matchesUnit(b, businessUnit));
   }, [deniedBookings, businessUnit]);
+
+  const filteredConfirmed = useMemo(() => {
+    return (confirmedBookings || []).filter((b: any) => matchesUnit(b, businessUnit));
+  }, [confirmedBookings, businessUnit]);
 
   // Deep link support from staff email: /admin/approvals?id=<booking_id>
   useEffect(() => {
@@ -178,9 +204,10 @@ export default function AdminApprovals() {
           </TabsList>
         </Tabs>
 
-        <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "pending" | "denied")}>
+        <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "pending" | "confirmed" | "denied")}>
           <TabsList className="w-full justify-start flex-wrap h-auto">
             <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
             <TabsTrigger value="denied">Denied</TabsTrigger>
           </TabsList>
         </Tabs>
@@ -201,6 +228,12 @@ export default function AdminApprovals() {
         </div>
 
         {statusTab === "pending" && isLoading ? (
+          <div className="space-y-4">
+            {Array(3).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
+          </div>
+        ) : statusTab === "confirmed" && confirmedLoading ? (
           <div className="space-y-4">
             {Array(3).fill(0).map((_, i) => (
               <Skeleton key={i} className="h-32" />
@@ -229,6 +262,14 @@ export default function AdminApprovals() {
               <p className="text-muted-foreground">All booking requests have been processed</p>
             </CardContent>
           </Card>
+        ) : statusTab === "confirmed" && filteredConfirmed.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium">No confirmed bookings</h3>
+              <p className="text-muted-foreground">Approved bookings will show here.</p>
+            </CardContent>
+          </Card>
         ) : statusTab === "denied" && filteredDenied.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
@@ -239,7 +280,12 @@ export default function AdminApprovals() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {(statusTab === "pending" ? filteredPending : filteredDenied).map((booking) => (
+            {(statusTab === "pending"
+              ? filteredPending
+              : statusTab === "confirmed"
+                ? filteredConfirmed
+                : filteredDenied
+            ).map((booking) => (
               <Card key={booking.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row justify-between gap-4">
@@ -256,6 +302,10 @@ export default function AdminApprovals() {
                         {statusTab === "pending" ? (
                           <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
                             Pending Review
+                          </Badge>
+                        ) : statusTab === "confirmed" ? (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            Confirmed
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
@@ -335,7 +385,10 @@ export default function AdminApprovals() {
                         <Button
                           variant="outline"
                           className="flex-1 lg:flex-none"
-                          onClick={() => setViewDenied(booking)}
+                          onClick={() => {
+                            if (statusTab === "confirmed") setViewConfirmed(booking);
+                            else setViewDenied(booking);
+                          }}
                         >
                           <MessageSquare className="h-4 w-4 mr-2" />
                           View Details
@@ -442,6 +495,29 @@ export default function AdminApprovals() {
                     </p>
                   </div>
                 )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Confirmed details (read-only) */}
+        <Dialog open={!!viewConfirmed} onOpenChange={(o) => !o && setViewConfirmed(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmed Booking</DialogTitle>
+            </DialogHeader>
+
+            {viewConfirmed && (
+              <div className="space-y-4">
+                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                  <p className="font-medium">{viewConfirmed.guest_name || "Customer"}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(viewConfirmed.start_datetime), "MMMM d, yyyy 'at' h:mm a")}
+                  </p>
+                  <p className="text-sm">
+                    {viewConfirmed.businesses?.name} - {viewConfirmed.bookable_types?.name}
+                  </p>
+                </div>
               </div>
             )}
           </DialogContent>
