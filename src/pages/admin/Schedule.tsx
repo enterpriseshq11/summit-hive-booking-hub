@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AdminLayout } from "@/components/admin";
 import { useBookings } from "@/hooks/useBookings";
 import { useBusinesses } from "@/hooks/useBusinesses";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays, Clock, ChevronLeft, ChevronRight, Calendar, CalendarRange } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BookingEditDialog } from "@/components/admin/BookingEditDialog";
 import { 
   format, 
   startOfWeek, 
@@ -27,6 +29,44 @@ import {
 
 type ViewMode = "week" | "month";
 
+type BusinessUnit = "all" | "summit" | "hive" | "restoration" | "photo_booth" | "voice_vault";
+
+const BUSINESS_UNIT_TABS: { value: BusinessUnit; label: string }[] = [
+  { value: "summit", label: "The Summit" },
+  { value: "hive", label: "The Hive" },
+  { value: "restoration", label: "Restoration" },
+  { value: "photo_booth", label: "360 Photo Booth" },
+  { value: "voice_vault", label: "Voice Vault" },
+  { value: "all", label: "All" },
+];
+
+function matchesUnit(b: any, unit: BusinessUnit) {
+  if (unit === "all") return true;
+  const t = b?.businesses?.type;
+  const sb = b?.source_brand;
+  switch (unit) {
+    case "summit":
+      return t === "summit" || sb === "summit";
+    case "hive":
+      return t === "coworking" || sb === "hive";
+    case "restoration":
+      return t === "spa" || sb === "restoration";
+    case "photo_booth":
+      return t === "photo_booth" || sb === "photo_booth";
+    case "voice_vault":
+      return t === "voice_vault" || sb === "voice_vault";
+  }
+}
+
+function formatMoneyOrEstimate(b: any) {
+  const t = b?.businesses?.type ?? b?.source_brand;
+  const isSummit = t === "summit";
+  const amount = b?.total_amount;
+  if (isSummit && (!Number.isFinite(amount) || amount <= 0)) return "Estimate pending";
+  if (!Number.isFinite(amount)) return "—";
+  return `$${Number(amount).toFixed(2)}`;
+}
+
 const STAFF_MEMBERS = [
   { id: "all", name: "All Staff" },
   { id: "dylan", name: "Dylan" },
@@ -38,11 +78,13 @@ const STAFF_MEMBERS = [
 ];
 
 export default function AdminSchedule() {
+  const [businessUnit, setBusinessUnit] = useState<BusinessUnit>("all");
   const [selectedBusiness, setSelectedBusiness] = useState<string>("all");
   const [selectedStaff, setSelectedStaff] = useState<string>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("week");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   // Calculate date ranges based on view mode
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
@@ -62,11 +104,15 @@ export default function AdminSchedule() {
     : eachDayOfInterval({ start: monthViewStart, end: monthViewEnd });
 
   const { data: businesses } = useBusinesses();
-  const { data: bookings, isLoading } = useBookings({
+  const { data: bookings, isLoading, refetch } = useBookings({
     businessId: selectedBusiness === "all" ? undefined : selectedBusiness,
     startDate: (viewMode === "week" ? weekStart : monthViewStart).toISOString(),
     endDate: (viewMode === "week" ? weekEnd : monthViewEnd).toISOString(),
   });
+
+  const filteredBookings = useMemo(() => {
+    return (bookings || []).filter((b) => matchesUnit(b, businessUnit));
+  }, [bookings, businessUnit]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -91,7 +137,7 @@ export default function AdminSchedule() {
   };
 
   const getBookingsForDay = (date: Date) => {
-    return bookings?.filter((booking) => {
+    return filteredBookings?.filter((booking) => {
       const bookingDate = new Date(booking.start_datetime);
       return isSameDay(bookingDate, date);
     }) || [];
@@ -129,6 +175,16 @@ export default function AdminSchedule() {
             <h1 className="text-2xl font-bold text-white">Schedule</h1>
             <p className="text-zinc-300">View and manage all bookings across businesses</p>
           </div>
+
+          <Tabs value={businessUnit} onValueChange={(v) => setBusinessUnit(v as BusinessUnit)}>
+            <TabsList className="w-full justify-start flex-wrap h-auto">
+              {BUSINESS_UNIT_TABS.map((t) => (
+                <TabsTrigger key={t.value} value={t.value}>
+                  {t.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
           
           <div className="flex flex-wrap items-center gap-2">
             {/* View Mode Toggle */}
@@ -341,7 +397,7 @@ export default function AdminSchedule() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-zinc-400">Total</label>
-                    <p className="text-lg font-bold text-white">${selectedBooking.total_amount?.toFixed(2)}</p>
+                    <p className="text-lg font-bold text-white">{formatMoneyOrEstimate(selectedBooking)}</p>
                   </div>
                   {selectedBooking.deposit_amount && (
                     <div>
@@ -362,7 +418,10 @@ export default function AdminSchedule() {
                   <Button variant="outline" className="flex-1 border-zinc-600 text-white hover:bg-zinc-700" onClick={() => setSelectedBooking(null)}>
                     Close
                   </Button>
-                  <Button className="flex-1 bg-accent text-black hover:bg-accent/90">
+                  <Button
+                    className="flex-1 bg-accent text-black hover:bg-accent/90"
+                    onClick={() => setEditOpen(true)}
+                  >
                     Edit Booking
                   </Button>
                 </div>
@@ -370,6 +429,15 @@ export default function AdminSchedule() {
             )}
           </DialogContent>
         </Dialog>
+
+        <BookingEditDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          booking={selectedBooking}
+          onUpdated={() => {
+            refetch();
+          }}
+        />
       </div>
     </AdminLayout>
   );
