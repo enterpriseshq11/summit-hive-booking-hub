@@ -11,6 +11,45 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info } from "lucide-react";
 import { format } from "date-fns";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+type BusinessUnit = "all" | "summit" | "hive" | "restoration" | "photo_booth" | "voice_vault";
+
+const BUSINESS_UNIT_TABS: { value: BusinessUnit; label: string }[] = [
+  { value: "summit", label: "The Summit" },
+  { value: "hive", label: "The Hive" },
+  { value: "restoration", label: "Restoration" },
+  { value: "photo_booth", label: "360 Photo Booth" },
+  { value: "voice_vault", label: "Voice Vault" },
+  { value: "all", label: "All" },
+];
+
+function matchesUnit(b: any, unit: BusinessUnit) {
+  if (unit === "all") return true;
+  const t = b?.businesses?.type;
+  const sb = b?.source_brand;
+  switch (unit) {
+    case "summit":
+      return t === "summit" || sb === "summit";
+    case "hive":
+      return t === "coworking" || sb === "hive";
+    case "restoration":
+      return t === "spa" || sb === "restoration";
+    case "photo_booth":
+      return t === "photo_booth" || sb === "photo_booth";
+    case "voice_vault":
+      return t === "voice_vault" || sb === "voice_vault";
+  }
+}
+
+function formatEstimate(booking: any) {
+  const t = booking?.businesses?.type ?? booking?.source_brand;
+  const isRequestOnly = t === "summit";
+  const amount = booking?.total_amount;
+  if (isRequestOnly && (!Number.isFinite(amount) || amount <= 0)) return "Estimate pending";
+  if (!Number.isFinite(amount)) return "—";
+  return `$${Number(amount).toFixed(2)}`;
+}
 
 export default function AdminApprovals() {
   const { data: pendingBookings, isLoading } = usePendingApprovals();
@@ -19,21 +58,22 @@ export default function AdminApprovals() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
+  const [businessUnit, setBusinessUnit] = useState<BusinessUnit>("all");
 
-  const summitPending = useMemo(() => {
-    return (pendingBookings || []).filter((b: any) => b?.businesses?.type === "summit" || b?.source_brand === "summit");
-  }, [pendingBookings]);
+  const filteredPending = useMemo(() => {
+    return (pendingBookings || []).filter((b: any) => matchesUnit(b, businessUnit));
+  }, [pendingBookings, businessUnit]);
 
   // Deep link support from staff email: /admin/approvals?id=<booking_id>
   useEffect(() => {
     const id = searchParams.get("id");
     if (!id) return;
-    const match = summitPending.find((b: any) => b.id === id);
+    const match = (pendingBookings || []).find((b: any) => b.id === id);
     if (!match) return;
 
     setSelectedBooking(match);
     setAction("approve");
-  }, [searchParams, summitPending]);
+  }, [searchParams, pendingBookings]);
 
   const handleAction = () => {
     if (!selectedBooking || !action) return;
@@ -69,9 +109,19 @@ export default function AdminApprovals() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Summit Requests</h1>
-          <p className="text-zinc-300">Approve or deny Summit event requests (request-only)</p>
+          <h1 className="text-2xl font-bold text-white">Approvals</h1>
+          <p className="text-zinc-300">Review pending or requested bookings by business unit</p>
         </div>
+
+        <Tabs value={businessUnit} onValueChange={(v) => setBusinessUnit(v as BusinessUnit)}>
+          <TabsList className="w-full justify-start flex-wrap h-auto">
+            {BUSINESS_UNIT_TABS.map((t) => (
+              <TabsTrigger key={t.value} value={t.value}>
+                {t.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
         {/* Helper Text */}
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-4 text-sm">
@@ -94,7 +144,7 @@ export default function AdminApprovals() {
               <Skeleton key={i} className="h-32" />
             ))}
           </div>
-        ) : summitPending.length === 0 ? (
+        ) : filteredPending.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -104,7 +154,7 @@ export default function AdminApprovals() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {summitPending.map((booking) => (
+            {filteredPending.map((booking) => (
               <Card key={booking.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row justify-between gap-4">
@@ -138,7 +188,7 @@ export default function AdminApprovals() {
                         </div>
                         <div className="flex items-center gap-2">
                           <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span>${booking.total_amount?.toFixed(2)}</span>
+                          <span>{formatEstimate(booking)}</span>
                         </div>
                       </div>
 
@@ -246,7 +296,7 @@ export default function AdminApprovals() {
                 onClick={handleAction}
                 disabled={updateStatus.isPending}
               >
-                {updateStatus.isPending ? "Processing..." : action === "approve" ? "Approve & Send Payment Link" : "Deny Request"}
+                {updateStatus.isPending ? "Processing..." : action === "approve" ? "Approve & Notify Customer" : "Deny Request"}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -81,22 +81,36 @@ export function usePendingApprovals() {
   return useQuery({
     queryKey: ["bookings", "pending"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("bookings")
-        .select(
-          `
+      const baseSelect = `
           *,
           businesses(name, type),
           bookable_types(name),
           packages(name),
           profiles:customer_id(first_name, last_name, email, phone)
-        `
-        )
-        .eq("status", "pending")
-        .order("created_at", { ascending: true });
+        `;
 
-      if (error) throw error;
-      return data;
+      // Some projects use only 'pending' (enum); others also include 'requested'.
+      // If 'requested' isn't in the enum, Postgres will throw, so we retry safely.
+      const tryStatuses = [
+        ["pending", "requested"],
+        ["pending"],
+      ] as const;
+
+      for (const statuses of tryStatuses) {
+        const { data, error } = await supabase
+          .from("bookings")
+          .select(baseSelect)
+          // cast because Supabase typings are stricter than runtime
+          .in("status", statuses as unknown as BookingStatus[])
+          .order("created_at", { ascending: true });
+
+        if (!error) return data;
+
+        const msg = (error as any)?.message ?? "";
+        if (!msg.includes("invalid input value for enum")) throw error;
+      }
+
+      return [];
     },
   });
 }
