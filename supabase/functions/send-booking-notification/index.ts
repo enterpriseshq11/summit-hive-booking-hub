@@ -14,37 +14,7 @@ const logStep = (step: string, details?: unknown) => {
 
 // ============= CONFIGURATION (ENV-DRIVEN) =============
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
-// Legacy default (Spa/Lindsey flows). Keep unchanged.
 const BUSINESS_PHONE = "(567) 644-1090";
-
-function toTelLink(raw: string): string {
-  const digits = String(raw).replace(/\D/g, "");
-  if (!digits) return `tel:${raw}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `tel:+${digits}`;
-  if (digits.length === 10) return `tel:+1${digits}`;
-  return `tel:+${digits}`;
-}
-
-function resolveCustomerContactPhone(params: { businessType: string; sourceBrand?: string }) {
-  // Requirement:
-  // - Summit/Hive/360/Voice Vault -> Victoria: (567) 379-6340 / tel:+15673796340
-  // - Spa -> keep Lindsey number as-is
-  const owner = ownerFromSourceBrand(normalizeBrandAlias(params.sourceBrand));
-  const victoriaBusinessTypes = new Set(["summit", "coworking", "photo_booth", "voice_vault", "event_center"]);
-
-  if (owner === "victoria" || victoriaBusinessTypes.has(params.businessType)) {
-    const victoriaRaw = Deno.env.get("VICTORIA_NOTIFY_PHONE") || "+15673796340";
-    return {
-      display: "(567) 379-6340",
-      href: toTelLink(victoriaRaw),
-    };
-  }
-
-  return {
-    display: BUSINESS_PHONE,
-    href: `tel:${BUSINESS_PHONE}`,
-  };
-}
 
 // ============= SECRETS-DRIVEN (NO HARDCODED STAFF EMAILS) =============
 // CRITICAL DOMAIN RULE:
@@ -563,8 +533,6 @@ function buildCustomerConfirmationEmail(
   }
 ): string {
   const businessLabel = getBusinessLabel(businessType);
-  const sourceBrand = (booking as any).source_brand as string | undefined;
-  const contactPhone = resolveCustomerContactPhone({ businessType, sourceBrand });
   
   const startDate = new Date(booking.start_datetime as string);
   const endDate = new Date(booking.end_datetime as string);
@@ -669,12 +637,12 @@ function buildCustomerConfirmationEmail(
 
       <h3>Need to Make Changes?</h3>
       <p style="font-size: 14px; color: #666;">
-        To reschedule or cancel, please contact us at least 24 hours in advance at <a href="${contactPhone.href}">${contactPhone.display}</a>.
+        To reschedule or cancel, please contact us at least 24 hours in advance at <a href="tel:${BUSINESS_PHONE}">${BUSINESS_PHONE}</a>.
       </p>
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="${contactPhone.href}">${contactPhone.display}</a></p>
+        <p style="font-size: 18px;"><a href="tel:${BUSINESS_PHONE}">${BUSINESS_PHONE}</a></p>
       </div>
 
       <p style="margin-top: 30px;">
@@ -794,8 +762,6 @@ function buildReminderEmail(
   staffContact: { email: string; phone?: string; name: string }
 ): string {
   const businessLabel = getBusinessLabel(businessType);
-  const sourceBrand = (booking as any).source_brand as string | undefined;
-  const contactPhone = resolveCustomerContactPhone({ businessType, sourceBrand });
   
   const startDate = new Date(booking.start_datetime as string);
   const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
@@ -860,7 +826,7 @@ function buildReminderEmail(
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Need to reschedule? Call us:</p>
-        <p style="font-size: 18px;"><a href="${contactPhone.href}">${contactPhone.display}</a></p>
+        <p style="font-size: 18px;"><a href="tel:${BUSINESS_PHONE}">${BUSINESS_PHONE}</a></p>
       </div>
 
       <p style="margin-top: 30px;">
