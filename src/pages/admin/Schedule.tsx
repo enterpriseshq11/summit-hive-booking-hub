@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays, Clock, ChevronLeft, ChevronRight, Calendar, CalendarRange } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookingEditDialog } from "@/components/admin/BookingEditDialog";
 import { 
   format, 
@@ -24,39 +24,9 @@ import {
   eachDayOfInterval, 
   isSameDay,
   isSameMonth,
-  getDay
 } from "date-fns";
 
 type ViewMode = "week" | "month";
-
-type BusinessUnit = "all" | "summit" | "hive" | "restoration" | "photo_booth" | "voice_vault";
-
-const BUSINESS_UNIT_TABS: { value: BusinessUnit; label: string }[] = [
-  { value: "summit", label: "The Summit" },
-  { value: "hive", label: "The Hive" },
-  { value: "restoration", label: "Restoration" },
-  { value: "photo_booth", label: "360 Photo Booth" },
-  { value: "voice_vault", label: "Voice Vault" },
-  { value: "all", label: "All" },
-];
-
-function matchesUnit(b: any, unit: BusinessUnit) {
-  if (unit === "all") return true;
-  const t = b?.businesses?.type;
-  const sb = b?.source_brand;
-  switch (unit) {
-    case "summit":
-      return t === "summit" || sb === "summit";
-    case "hive":
-      return t === "coworking" || sb === "hive";
-    case "restoration":
-      return t === "spa" || sb === "restoration";
-    case "photo_booth":
-      return t === "photo_booth" || sb === "photo_booth";
-    case "voice_vault":
-      return t === "voice_vault" || sb === "voice_vault";
-  }
-}
 
 function formatMoneyOrEstimate(b: any) {
   const t = b?.businesses?.type ?? b?.source_brand;
@@ -67,33 +37,19 @@ function formatMoneyOrEstimate(b: any) {
   return `$${Number(amount).toFixed(2)}`;
 }
 
-const STAFF_MEMBERS = [
-  { id: "all", name: "All Staff" },
-  { id: "dylan", name: "Dylan" },
-  { id: "victoria", name: "Victoria" },
-  { id: "elyse", name: "Elyse" },
-  { id: "lindsay", name: "Lindsay" },
-  { id: "josh", name: "Josh" },
-  { id: "dillon", name: "Dillon" },
-];
-
 export default function AdminSchedule() {
-  const [businessUnit, setBusinessUnit] = useState<BusinessUnit>("all");
   const [selectedBusiness, setSelectedBusiness] = useState<string>("all");
-  const [selectedStaff, setSelectedStaff] = useState<string>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("week");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [moreOpenDayKey, setMoreOpenDayKey] = useState<string | null>(null);
 
   // Calculate date ranges based on view mode
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-
-  const rangeStart = viewMode === "week" ? weekStart : monthStart;
-  const rangeEnd = viewMode === "week" ? weekEnd : monthEnd;
 
   // For month view, we need to include days from previous/next month to fill the grid
   const monthViewStart = startOfWeek(monthStart, { weekStartsOn: 0 });
@@ -111,13 +67,15 @@ export default function AdminSchedule() {
   });
 
   const filteredBookings = useMemo(() => {
-    return (bookings || []).filter((b) => matchesUnit(b, businessUnit));
-  }, [bookings, businessUnit]);
+    // Hide denied bookings to keep the calendar uncluttered.
+    return (bookings || []).filter((b: any) => b?.status !== "denied");
+  }, [bookings]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "confirmed": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800";
       case "pending": return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800";
+      case "denied": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800";
       case "cancelled": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800";
       case "completed": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800";
       case "no_show": return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-gray-200 dark:border-gray-800";
@@ -129,6 +87,7 @@ export default function AdminSchedule() {
     switch (status) {
       case "confirmed": return "✓ Confirmed";
       case "pending": return "⏳ Pending";
+      case "denied": return "✗ Denied";
       case "cancelled": return "✗ Cancelled";
       case "completed": return "✓ Complete";
       case "no_show": return "– No Show";
@@ -175,16 +134,6 @@ export default function AdminSchedule() {
             <h1 className="text-2xl font-bold text-white">Schedule</h1>
             <p className="text-zinc-300">View and manage all bookings across businesses</p>
           </div>
-
-          <Tabs value={businessUnit} onValueChange={(v) => setBusinessUnit(v as BusinessUnit)}>
-            <TabsList className="w-full justify-start flex-wrap h-auto">
-              {BUSINESS_UNIT_TABS.map((t) => (
-                <TabsTrigger key={t.value} value={t.value}>
-                  {t.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
           
           <div className="flex flex-wrap items-center gap-2">
             {/* View Mode Toggle */}
@@ -208,20 +157,6 @@ export default function AdminSchedule() {
                 Month
               </Button>
             </div>
-
-            {/* Staff Filter */}
-            <Select value={selectedStaff} onValueChange={setSelectedStaff}>
-              <SelectTrigger className="w-[140px] bg-zinc-800 border-zinc-700 text-white">
-                <SelectValue placeholder="All Staff" />
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700">
-                {STAFF_MEMBERS.map((staff) => (
-                  <SelectItem key={staff.id} value={staff.id} className="text-white focus:bg-zinc-700 focus:text-white">
-                    {staff.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
 
             {/* Business Filter */}
             <Select value={selectedBusiness} onValueChange={setSelectedBusiness}>
@@ -287,6 +222,8 @@ export default function AdminSchedule() {
                 const isToday = isSameDay(day, new Date());
                 const isCurrentMonth = isSameMonth(day, currentDate);
                 const maxBookingsToShow = viewMode === "week" ? 4 : 2;
+                const overflowBookings = dayBookings.slice(maxBookingsToShow);
+                const dayKey = day.toISOString().slice(0, 10);
                 
                 return (
                   <Card 
@@ -331,9 +268,49 @@ export default function AdminSchedule() {
                         </button>
                       ))}
                       {dayBookings.length > maxBookingsToShow && (
-                        <div className={`text-xs text-zinc-400 text-center ${viewMode === "week" ? "pt-1" : ""}`}>
-                          +{dayBookings.length - maxBookingsToShow} more
-                        </div>
+                        <Popover open={moreOpenDayKey === dayKey} onOpenChange={(open) => setMoreOpenDayKey(open ? dayKey : null)}>
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              className={`text-xs text-zinc-400 text-center w-full ${viewMode === "week" ? "pt-1" : ""} hover:underline`}
+                            >
+                              +{dayBookings.length - maxBookingsToShow} more
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent align="center" className="w-72 p-2 bg-zinc-900 border-zinc-700">
+                            <div className="text-xs font-medium text-zinc-200 px-1 pb-2">
+                              {format(day, "MMM d, yyyy")}
+                            </div>
+                            <div className="space-y-1 max-h-64 overflow-auto pr-1">
+                              {overflowBookings.map((booking) => (
+                                <button
+                                  key={booking.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedBooking(booking);
+                                    setMoreOpenDayKey(null);
+                                  }}
+                                  className="w-full text-left rounded border border-zinc-800 hover:bg-zinc-800/60 px-2 py-2"
+                                >
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                      <div className="text-sm font-medium text-white truncate">
+                                        {booking.guest_name || "Guest"}
+                                      </div>
+                                      <div className="text-xs text-zinc-300 flex items-center gap-1 mt-0.5">
+                                        <Clock className="h-3 w-3" />
+                                        {format(new Date(booking.start_datetime), "h:mm a")}
+                                      </div>
+                                    </div>
+                                    <span className={`shrink-0 text-[10px] px-2 py-1 rounded border ${getStatusColor(booking.status || '')}`}>
+                                      {(booking.status || "").toString()}
+                                    </span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       )}
                       {dayBookings.length === 0 && viewMode === "week" && (
                         <div className="text-xs text-zinc-400 text-center py-4">
