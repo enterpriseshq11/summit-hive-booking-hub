@@ -35,8 +35,40 @@ interface InquiryNotificationRequest {
   };
 }
 
-const STAFF_EMAIL = "info@az-enterprises.com";
-const FROM_EMAIL = "The Hive by A-Z <onboarding@resend.dev>";
+function getFromEmail() {
+  const fromName = Deno.env.get("FROM_NAME") || "A-Z Enterprises";
+  const fromEmail = Deno.env.get("FROM_EMAIL") || "no-reply@azenterpriseshq.com";
+  return `${fromName} <${fromEmail}>`;
+}
+
+function getReplyTo() {
+  return Deno.env.get("REPLY_TO_EMAIL") || "info@azenterpriseshq.com";
+}
+
+function getVictoriaEmail() {
+  // Secrets-driven (preferred)
+  return Deno.env.get("VICTORIA_NOTIFY_EMAIL") || Deno.env.get("DYLAN_NOTIFY_EMAIL") || "";
+}
+
+function formatUSD(amount: number | null | undefined) {
+  if (typeof amount !== "number" || !Number.isFinite(amount)) return "—";
+  return `$${amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+}
+
+function fullName(inquiry: InquiryNotificationRequest["inquiry"]) {
+  return `${inquiry.first_name || "Customer"}${inquiry.last_name ? ` ${inquiry.last_name}` : ""}`.trim();
+}
+
+function buildLeaseSummary(inquiry: InquiryNotificationRequest["inquiry"]) {
+  const termLabel = inquiry.lease_term_months === 12 ? "12 months" : inquiry.lease_term_months === 6 ? "6 months" : (inquiry.lease_term_months ? `${inquiry.lease_term_months} months` : "—");
+  return {
+    office: inquiry.office_code || "—",
+    term: termLabel,
+    monthly: formatUSD(inquiry.monthly_rate),
+    termTotal: formatUSD(inquiry.term_total),
+    deposit: formatUSD(inquiry.deposit_amount),
+  };
+}
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
@@ -46,15 +78,37 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { type, inquiry }: InquiryNotificationRequest = await req.json();
-    
-    console.log(`Processing ${type} notification for ${inquiry.email}`);
+
+    const requestId = crypto.randomUUID();
+    const isLease = inquiry.inquiry_type === "lease_request";
+    console.log(
+      JSON.stringify({
+        at: "send-inquiry-notification.start",
+        requestId,
+        type,
+        inquiry_type: inquiry.inquiry_type,
+        to: inquiry.email,
+        office_code: inquiry.office_code ?? null,
+        lease_term_months: inquiry.lease_term_months ?? null,
+      })
+    );
 
     if (type === 'user_confirmation') {
+      const FROM_EMAIL = getFromEmail();
+      const replyTo = getReplyTo();
+
+      const subject = isLease
+        ? "Hive Request Submitted — We’ll Confirm Within 24 Hours"
+        : "Hive Request Submitted — We’ll Confirm Within 24 Hours";
+
+      const lease = isLease ? buildLeaseSummary(inquiry) : null;
+
       // Send confirmation email to the user
       const userEmailResponse = await resend.emails.send({
         from: FROM_EMAIL,
         to: [inquiry.email],
-        subject: "We Received Your Workspace Inquiry – The Hive by A-Z",
+        reply_to: replyTo,
+        subject,
         html: `
           <!DOCTYPE html>
           <html>
@@ -77,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               <div class="content">
                 <h2>Thank you, ${inquiry.first_name}!</h2>
-                <p>We've received your workspace inquiry and a member of our team will be in touch within <strong>24 hours</strong>.</p>
+                <p>Request submitted — no payment collected now. We’ll confirm availability and next steps within <strong>24 hours</strong>.</p>
                 
                 <div class="highlight-box">
                   <strong>What happens next:</strong>
@@ -91,10 +145,23 @@ const handler = async (req: Request): Promise<Response> => {
                 <p><strong>Your Request Summary:</strong></p>
                 <ul style="list-style: none; padding: 0;">
                   ${inquiry.workspace_type ? `<li>🏢 Workspace Type: ${inquiry.workspace_type}</li>` : ''}
+                  ${isLease ? `<li>🔑 Office selected: ${lease?.office}</li>` : ''}
+                  ${isLease ? `<li>📆 Lease term: ${lease?.term}</li>` : ''}
+                  ${isLease ? `<li>💵 Monthly: ${lease?.monthly}</li>` : ''}
+                  ${isLease ? `<li>🧾 Term total: ${lease?.termTotal}</li>` : ''}
+                  ${isLease ? `<li>🏦 Deposit/down: ${lease?.deposit}</li>` : ''}
                   ${inquiry.move_in_timeframe ? `<li>📅 Timeline: ${inquiry.move_in_timeframe}</li>` : ''}
                   ${inquiry.seats_needed ? `<li>👥 Seats Needed: ${inquiry.seats_needed}</li>` : ''}
                   ${inquiry.company_name ? `<li>🏛️ Company: ${inquiry.company_name}</li>` : ''}
                 </ul>
+
+                <div class="highlight-box">
+                  <strong>What to expect:</strong>
+                  <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>You’ll receive another message once your request is approved or denied.</li>
+                    <li>No payment is required until confirmed.</li>
+                  </ul>
+                </div>
                 
                 <p>Questions in the meantime? Reply to this email or call us at <strong>(567) 379-6340</strong>.</p>
                 
@@ -116,7 +183,15 @@ const handler = async (req: Request): Promise<Response> => {
         `,
       });
 
-      console.log("User confirmation email sent:", userEmailResponse);
+      console.log(
+        JSON.stringify({
+          at: "send-inquiry-notification.user_confirmation.sent",
+          requestId,
+          success: true,
+          emailId: userEmailResponse?.data?.id ?? null,
+          to: inquiry.email,
+        })
+      );
 
       return new Response(JSON.stringify({ success: true, emailId: userEmailResponse.data?.id }), {
         status: 200,
@@ -124,6 +199,8 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else if (type === 'lease_approved' || type === 'lease_denied') {
+      const FROM_EMAIL = getFromEmail();
+      const replyTo = getReplyTo();
       const isApproved = type === 'lease_approved';
       const subject = isApproved
         ? 'Your Office Request Was Approved – The Hive by A-Z'
@@ -148,6 +225,7 @@ const handler = async (req: Request): Promise<Response> => {
       const userEmailResponse = await resend.emails.send({
         from: FROM_EMAIL,
         to: [inquiry.email],
+        reply_to: replyTo,
         subject,
         html: `
           <!DOCTYPE html>
@@ -206,18 +284,41 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else if (type === 'staff_notification') {
+      const FROM_EMAIL = getFromEmail();
+      const replyTo = getReplyTo();
+      const victoriaEmail = getVictoriaEmail();
+      const lease = isLease ? buildLeaseSummary(inquiry) : null;
+
+      if (!victoriaEmail) {
+        console.error(
+          JSON.stringify({
+            at: "send-inquiry-notification.staff_notification.missing_recipient",
+            requestId,
+            reason: "No VICTORIA_NOTIFY_EMAIL or DYLAN_NOTIFY_EMAIL configured",
+          })
+        );
+        return new Response(JSON.stringify({ success: false, error: "Missing staff recipient" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+
       // Send notification email to staff
       const inquiryTypeLabels: Record<string, string> = {
         request: '📋 Workspace Request',
         tour: '🏢 Tour Request',
         waitlist: '⏳ Waitlist Signup',
         question: '❓ General Question',
+        lease_request: '🏢 Office Lease Request',
       };
+
+      const approvalsLink = "https://summit-hive-booking-hub.lovable.app/#/admin/approvals";
 
       const staffEmailResponse = await resend.emails.send({
         from: FROM_EMAIL,
-        to: [STAFF_EMAIL],
-        subject: `[New Lead] ${inquiryTypeLabels[inquiry.inquiry_type] || 'Inquiry'} from ${inquiry.first_name} ${inquiry.last_name || ''}`.trim(),
+        to: [victoriaEmail],
+        reply_to: replyTo,
+        subject: `[The Hive] ${inquiryTypeLabels[inquiry.inquiry_type] || 'Inquiry'} — ${fullName(inquiry)}`,
         html: `
           <!DOCTYPE html>
           <html>
@@ -256,6 +357,11 @@ const handler = async (req: Request): Promise<Response> => {
                   ${inquiry.phone ? `<tr><td>Phone</td><td><a href="tel:${inquiry.phone}">${inquiry.phone}</a></td></tr>` : ''}
                   ${inquiry.company_name ? `<tr><td>Company</td><td>${inquiry.company_name}</td></tr>` : ''}
                   ${inquiry.workspace_type ? `<tr><td>Workspace Type</td><td>${inquiry.workspace_type}</td></tr>` : ''}
+                  ${isLease ? `<tr><td>Office</td><td><strong>${lease?.office}</strong></td></tr>` : ''}
+                  ${isLease ? `<tr><td>Lease term</td><td>${lease?.term}</td></tr>` : ''}
+                  ${isLease ? `<tr><td>Monthly</td><td>${lease?.monthly}</td></tr>` : ''}
+                  ${isLease ? `<tr><td>Term total</td><td><strong>${lease?.termTotal}</strong></td></tr>` : ''}
+                  ${isLease ? `<tr><td>Deposit/down</td><td>${lease?.deposit}</td></tr>` : ''}
                   ${inquiry.move_in_timeframe ? `<tr><td>Timeline</td><td>${inquiry.move_in_timeframe}</td></tr>` : ''}
                   ${inquiry.seats_needed ? `<tr><td>Seats Needed</td><td>${inquiry.seats_needed}</td></tr>` : ''}
                   <tr>
@@ -275,9 +381,9 @@ const handler = async (req: Request): Promise<Response> => {
                   </div>
                 ` : ''}
                 
-                <p style="margin-top: 20px; font-size: 14px; color: #666;">
-                  View and manage this lead in the <a href="https://summit-hive-booking-hub.lovable.app/#/admin/office-inquiries">Admin Dashboard</a>
-                </p>
+                 <p style="margin-top: 20px; font-size: 14px; color: #666;">
+                   Review / approve / deny in <a href="${approvalsLink}">Admin Approvals</a>
+                 </p>
               </div>
             </div>
           </body>
@@ -285,7 +391,15 @@ const handler = async (req: Request): Promise<Response> => {
         `,
       });
 
-      console.log("Staff notification email sent:", staffEmailResponse);
+      console.log(
+        JSON.stringify({
+          at: "send-inquiry-notification.staff_notification.sent",
+          requestId,
+          success: true,
+          emailId: staffEmailResponse?.data?.id ?? null,
+          to: victoriaEmail,
+        })
+      );
 
       return new Response(JSON.stringify({ success: true, emailId: staffEmailResponse.data?.id }), {
         status: 200,
@@ -299,7 +413,13 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
   } catch (error: any) {
-    console.error("Error in send-inquiry-notification function:", error);
+    console.error(
+      JSON.stringify({
+        at: "send-inquiry-notification.error",
+        message: error?.message || String(error),
+        stack: error?.stack || null,
+      })
+    );
     return new Response(
       JSON.stringify({ error: error.message }),
       {
