@@ -5,6 +5,8 @@ import { useHivePrivateOffices } from "@/hooks/useHivePrivateOffices";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
+import hiveOfficeS2 from "@/assets/hive-office-s2.jpg";
+import hiveOfficeS1 from "@/assets/hive-office-s1.jpg";
 
 type Props = {
   onRequestOffice: (officeCode: string) => void;
@@ -25,6 +27,12 @@ function bookedLabel(bookedUntil: string | null) {
 
 export function HiveOfficeCards({ onRequestOffice }: Props) {
   const { data, isLoading, isError } = useHivePrivateOffices();
+
+  const getOfficeBackground = (officeCode: string) => {
+    if (officeCode === "S2") return hiveOfficeS2;
+    if (officeCode === "S1") return hiveOfficeS1;
+    return null;
+  };
 
   if (isLoading) {
     return (
@@ -67,8 +75,19 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
       <div className="grid gap-3 sm:grid-cols-2">
         {data.map((office) => {
           const isBooked = office.status === "booked";
+          const bg = getOfficeBackground(office.code);
           return (
-            <Card key={office.code} className="overflow-hidden">
+            <Card
+              key={office.code}
+              className={bg ? "overflow-hidden bg-cover bg-center" : "overflow-hidden"}
+              style={
+                bg
+                  ? {
+                      backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${bg})`,
+                    }
+                  : undefined
+              }
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
