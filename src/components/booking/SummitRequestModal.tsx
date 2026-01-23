@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { format, addDays, addHours } from "date-fns";
+import { z } from "zod";
 import { 
   CalendarDays, 
   Users, 
@@ -30,6 +31,21 @@ import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useBookableTypes } from "@/hooks/useBookableTypes";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+const contactSchema = z.object({
+  name: z.string().trim().min(1, { message: "Full name is required." }).max(120, { message: "Name is too long." }),
+  email: z
+    .string()
+    .trim()
+    .min(1, { message: "Email is required." })
+    .max(255, { message: "Email is too long." })
+    .refine((v) => isValidEmail(v), { message: "Enter a valid email address." }),
+  phone: z.string().trim().min(1, { message: "Phone is required." }).max(40, { message: "Phone is too long." }),
+});
 
 interface SummitRequestModalProps {
   open: boolean;
@@ -87,6 +103,7 @@ export function SummitRequestModal({
   );
   const [guestEmail, setGuestEmail] = useState(authUser?.profile?.email || "");
   const [guestPhone, setGuestPhone] = useState(authUser?.profile?.phone || "");
+  const [contactErrors, setContactErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
 
   // Wedding-specific fields
   const [ceremonyIncluded, setCeremonyIncluded] = useState<boolean | null>(null);
@@ -172,7 +189,21 @@ export function SummitRequestModal({
       return;
     }
 
-    if (!user && (!guestEmail || !guestName)) {
+    const contactParse = contactSchema.safeParse({
+      name: guestName,
+      email: guestEmail,
+      phone: guestPhone,
+    });
+
+    if (!contactParse.success) {
+      const nextErrors: { name?: string; email?: string; phone?: string } = {};
+      for (const issue of contactParse.error.issues) {
+        const key = issue.path?.[0];
+        if (key === "name" || key === "email" || key === "phone") {
+          nextErrors[key] = issue.message;
+        }
+      }
+      setContactErrors(nextErrors);
       toast.error("Please provide your contact information");
       return;
     }
@@ -210,9 +241,9 @@ export function SummitRequestModal({
       const bookingData = {
         business_id: business.id,
         bookable_type_id: bookableTypeId,
-        guest_name: guestName || null,
-        guest_email: guestEmail || null,
-        guest_phone: guestPhone || null,
+        guest_name: contactParse.data.name,
+        guest_email: contactParse.data.email,
+        guest_phone: contactParse.data.phone,
         guest_count: guestCount,
         start_datetime: startDate.toISOString(),
         end_datetime: endDate.toISOString(),
@@ -285,7 +316,13 @@ export function SummitRequestModal({
     }
   };
 
-  const isValid = selectedEventType && preferredDates.length > 0 && (user || (guestName && guestEmail));
+  const isValid =
+    !!selectedEventType &&
+    preferredDates.length > 0 &&
+    !!guestName.trim() &&
+    !!guestEmail.trim() &&
+    !!guestPhone.trim() &&
+    isValidEmail(guestEmail);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -538,48 +575,6 @@ export function SummitRequestModal({
               </div>
             )}
 
-            {/* Contact Information (for guests) */}
-            {!user && (
-              <Card className="border-border">
-                <CardContent className="pt-4 space-y-4">
-                  <Label className="text-base font-semibold">Contact Information</Label>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="guest-name">Your Name *</Label>
-                      <Input
-                        id="guest-name"
-                        value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
-                        placeholder="Full name"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="guest-email">Email *</Label>
-                      <Input
-                        id="guest-email"
-                        type="email"
-                        value={guestEmail}
-                        onChange={(e) => setGuestEmail(e.target.value)}
-                        placeholder="your@email.com"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="guest-phone">Phone (optional)</Label>
-                    <Input
-                      id="guest-phone"
-                      type="tel"
-                      value={guestPhone}
-                      onChange={(e) => setGuestPhone(e.target.value)}
-                      placeholder="(555) 123-4567"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Tour Request */}
             <div className="flex items-center space-x-3">
               <Checkbox
@@ -604,6 +599,95 @@ export function SummitRequestModal({
                 rows={3}
               />
             </div>
+
+            {/* Contact Information */}
+            <Card className="border-border">
+              <CardContent className="pt-4 space-y-4">
+                <Label className="text-base font-semibold">Contact Information</Label>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="guest-name">Full Name *</Label>
+                    <Input
+                      id="guest-name"
+                      value={guestName}
+                      onChange={(e) => {
+                        setGuestName(e.target.value);
+                        setContactErrors((prev) => ({ ...prev, name: undefined }));
+                      }}
+                      onBlur={() => {
+                        const parsed = contactSchema.safeParse({ name: guestName, email: guestEmail, phone: guestPhone });
+                        if (!parsed.success) {
+                          const nameIssue = parsed.error.issues.find((i) => i.path?.[0] === "name");
+                          setContactErrors((prev) => ({ ...prev, name: nameIssue?.message }));
+                        }
+                      }}
+                      placeholder="Full name"
+                      autoComplete="name"
+                      required
+                    />
+                    {contactErrors.name && (
+                      <p className="text-xs text-destructive" role="alert">
+                        {contactErrors.name}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="guest-email">Email *</Label>
+                    <Input
+                      id="guest-email"
+                      type="email"
+                      value={guestEmail}
+                      onChange={(e) => {
+                        setGuestEmail(e.target.value);
+                        setContactErrors((prev) => ({ ...prev, email: undefined }));
+                      }}
+                      onBlur={() => {
+                        const parsed = contactSchema.safeParse({ name: guestName, email: guestEmail, phone: guestPhone });
+                        if (!parsed.success) {
+                          const emailIssue = parsed.error.issues.find((i) => i.path?.[0] === "email");
+                          setContactErrors((prev) => ({ ...prev, email: emailIssue?.message }));
+                        }
+                      }}
+                      placeholder="your@email.com"
+                      autoComplete="email"
+                      required
+                    />
+                    {contactErrors.email && (
+                      <p className="text-xs text-destructive" role="alert">
+                        {contactErrors.email}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="guest-phone">Phone *</Label>
+                  <Input
+                    id="guest-phone"
+                    type="tel"
+                    value={guestPhone}
+                    onChange={(e) => {
+                      setGuestPhone(e.target.value);
+                      setContactErrors((prev) => ({ ...prev, phone: undefined }));
+                    }}
+                    onBlur={() => {
+                      const parsed = contactSchema.safeParse({ name: guestName, email: guestEmail, phone: guestPhone });
+                      if (!parsed.success) {
+                        const phoneIssue = parsed.error.issues.find((i) => i.path?.[0] === "phone");
+                        setContactErrors((prev) => ({ ...prev, phone: phoneIssue?.message }));
+                      }
+                    }}
+                    placeholder="(555) 123-4567"
+                    autoComplete="tel"
+                    required
+                  />
+                  {contactErrors.phone && (
+                    <p className="text-xs text-destructive" role="alert">
+                      {contactErrors.phone}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Submit */}
             <div className="pt-2">

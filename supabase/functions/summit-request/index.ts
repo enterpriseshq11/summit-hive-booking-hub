@@ -122,6 +122,13 @@ serve(async (req) => {
       });
     }
 
+    if (typeof body.guest_phone !== "string" || !body.guest_phone.trim()) {
+      return new Response(JSON.stringify({ error: "Guest phone is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const start = typeof body.start_datetime === "string" ? new Date(body.start_datetime) : null;
     const end = typeof body.end_datetime === "string" ? new Date(body.end_datetime) : null;
     if (!start || !end || !Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) {
@@ -163,6 +170,12 @@ serve(async (req) => {
     }
 
     const guestPhone = normalizePhoneToE164US(body.guest_phone);
+    if (!guestPhone) {
+      return new Response(JSON.stringify({ error: "Valid guest phone is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const guestCount = typeof body.guest_count === "number" && Number.isFinite(body.guest_count) ? Math.max(1, Math.min(500, Math.floor(body.guest_count))) : null;
     const notes = typeof body.notes === "string" ? body.notes.slice(0, 4000) : null;
 
