@@ -533,6 +533,12 @@ function buildCustomerConfirmationEmail(
   }
 ): string {
   const businessLabel = getBusinessLabel(businessType);
+
+  // IMPORTANT: Ticket requires updating ONLY Summit customer confirmation email contact phone.
+  // Keep all other emails/brands unchanged.
+  const sourceBrand = typeof (booking as any).source_brand === "string" ? String((booking as any).source_brand).toLowerCase() : "";
+  const customerContactPhoneText = sourceBrand === "summit" ? "(567) 379-6340" : BUSINESS_PHONE;
+  const customerContactPhoneHref = sourceBrand === "summit" ? "tel:+15673796340" : `tel:${BUSINESS_PHONE}`;
   
   const startDate = new Date(booking.start_datetime as string);
   const endDate = new Date(booking.end_datetime as string);
@@ -637,12 +643,12 @@ function buildCustomerConfirmationEmail(
 
       <h3>Need to Make Changes?</h3>
       <p style="font-size: 14px; color: #666;">
-        To reschedule or cancel, please contact us at least 24 hours in advance at <a href="tel:${BUSINESS_PHONE}">${BUSINESS_PHONE}</a>.
+        To reschedule or cancel, please contact us at least 24 hours in advance at <a href="${customerContactPhoneHref}">${customerContactPhoneText}</a>.
       </p>
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:${BUSINESS_PHONE}">${BUSINESS_PHONE}</a></p>
+        <p style="font-size: 18px;"><a href="${customerContactPhoneHref}">${customerContactPhoneText}</a></p>
       </div>
 
       <p style="margin-top: 30px;">
