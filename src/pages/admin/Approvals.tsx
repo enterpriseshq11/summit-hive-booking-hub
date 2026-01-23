@@ -126,6 +126,29 @@ export default function AdminApprovals() {
     },
   });
 
+  const { data: confirmedBookings, isLoading: confirmedLoading } = useQuery({
+    queryKey: ["bookings", "approvals", "confirmed"],
+    queryFn: async () => {
+      // "Approve" transitions bookings to status='confirmed' via useUpdateBookingStatus.
+      // Some historic records may use status='approved', so include it best-effort.
+      const { data, error } = await supabase
+        .from("bookings")
+        .select(
+          `
+          *,
+          businesses(name, type),
+          bookable_types(name),
+          packages(name)
+        `
+        )
+        .in("status", ["confirmed", "approved"])
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const { data: deniedLeaseRequests, isLoading: leaseDeniedLoading } = useQuery({
     queryKey: ["office_inquiries", "lease_request", "denied"],
     queryFn: async () => {
@@ -134,6 +157,20 @@ export default function AdminApprovals() {
         .select("*")
         .eq("inquiry_type", "lease_request")
         .eq("approval_status", "denied")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: confirmedLeaseRequests, isLoading: leaseConfirmedLoading } = useQuery({
+    queryKey: ["office_inquiries", "lease_request", "confirmed"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("office_inquiries")
+        .select("*")
+        .eq("inquiry_type", "lease_request")
+        .eq("approval_status", "confirmed")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data || [];
@@ -212,7 +249,7 @@ export default function AdminApprovals() {
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
   const [businessUnit, setBusinessUnit] = useState<BusinessUnit>("all");
-  const [statusTab, setStatusTab] = useState<"pending" | "denied">("pending");
+  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied">("pending");
   const [viewDenied, setViewDenied] = useState<any>(null);
   const [selectedLease, setSelectedLease] = useState<any>(null);
 
@@ -241,6 +278,19 @@ export default function AdminApprovals() {
 
     return [...bookingItems, ...leaseItems];
   }, [deniedBookings, businessUnit]);
+
+  const filteredConfirmed = useMemo(() => {
+    const bookingItems: ApprovalItem[] = (confirmedBookings || [])
+      .filter((b: any) => matchesUnit(b, businessUnit))
+      .map((b: any) => ({ kind: "booking", booking: b }));
+
+    const shouldIncludeHiveLease = businessUnit === "all" || businessUnit === "hive";
+    const leaseItems: ApprovalItem[] = shouldIncludeHiveLease
+      ? (confirmedLeaseRequests || []).map((i: any) => ({ kind: "hive_lease", inquiry: i }))
+      : [];
+
+    return [...bookingItems, ...leaseItems];
+  }, [confirmedBookings, confirmedLeaseRequests, businessUnit]);
 
   // Deep link support from staff email: /admin/approvals?id=<booking_id>
   useEffect(() => {
@@ -317,9 +367,10 @@ export default function AdminApprovals() {
           </TabsList>
         </Tabs>
 
-        <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "pending" | "denied")}>
+        <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "pending" | "confirmed" | "denied")}>
           <TabsList className="w-full justify-start flex-wrap h-auto">
             <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
             <TabsTrigger value="denied">Denied</TabsTrigger>
           </TabsList>
         </Tabs>
@@ -340,6 +391,12 @@ export default function AdminApprovals() {
         </div>
 
         {statusTab === "pending" && (isLoading || leasePendingLoading) ? (
+          <div className="space-y-4">
+            {Array(3).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
+          </div>
+        ) : statusTab === "confirmed" && (confirmedLoading || leaseConfirmedLoading) ? (
           <div className="space-y-4">
             {Array(3).fill(0).map((_, i) => (
               <Skeleton key={i} className="h-32" />
@@ -368,6 +425,14 @@ export default function AdminApprovals() {
               <p className="text-muted-foreground">All booking requests have been processed</p>
             </CardContent>
           </Card>
+        ) : statusTab === "confirmed" && filteredConfirmed.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium">No confirmed items</h3>
+              <p className="text-muted-foreground">Approved and confirmed requests will show here.</p>
+            </CardContent>
+          </Card>
         ) : statusTab === "denied" && filteredDenied.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
@@ -378,7 +443,12 @@ export default function AdminApprovals() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {(statusTab === "pending" ? filteredPending : filteredDenied).map((item) => (
+            {(statusTab === "pending"
+              ? filteredPending
+              : statusTab === "confirmed"
+                ? filteredConfirmed
+                : filteredDenied
+            ).map((item) => (
               <Card
                 key={item.kind === "booking" ? item.booking.id : item.inquiry.id}
                 className="hover:shadow-md transition-shadow"
@@ -402,6 +472,10 @@ export default function AdminApprovals() {
                         {statusTab === "pending" ? (
                           <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
                             Pending Review
+                          </Badge>
+                        ) : statusTab === "confirmed" ? (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            Confirmed
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
@@ -547,7 +621,7 @@ export default function AdminApprovals() {
                           Deny
                         </Button>
                       </div>
-                    ) : (
+                    ) : statusTab === "denied" ? (
                       <div className="flex lg:flex-col gap-2 lg:justify-center">
                         <Button
                           variant="outline"
@@ -558,6 +632,8 @@ export default function AdminApprovals() {
                           View Details
                         </Button>
                       </div>
+                    ) : (
+                      <div className="hidden lg:block" />
                     )}
                   </div>
                 </CardContent>
