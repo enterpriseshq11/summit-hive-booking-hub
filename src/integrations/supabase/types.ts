@@ -1724,6 +1724,45 @@ export type Database = {
           },
         ]
       }
+      hive_private_offices: {
+        Row: {
+          booked_until: string | null
+          code: string
+          deposit_amount: number
+          floor_label: string
+          label: string
+          monthly_rate: number
+          notes: string | null
+          status: string
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          booked_until?: string | null
+          code: string
+          deposit_amount: number
+          floor_label: string
+          label: string
+          monthly_rate: number
+          notes?: string | null
+          status?: string
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          booked_until?: string | null
+          code?: string
+          deposit_amount?: number
+          floor_label?: string
+          label?: string
+          monthly_rate?: number
+          notes?: string | null
+          status?: string
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           assigned_to: string | null
