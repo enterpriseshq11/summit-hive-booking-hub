@@ -1,7 +1,7 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
-  ExternalLink, 
   Shield, 
   Zap, 
   Eye, 
@@ -45,7 +45,9 @@ const benefits = [
 ];
 
 export default function BeamLights() {
-  const beamUrl = "https://beeamhq.com/?utm_source=main_site&utm_medium=referral&utm_campaign=shop_hub";
+  // NOTE: External store currently shows a Shopify billing/API warning.
+  // Keep the customer experience clean by routing to an A-Z hosted "Coming Soon" page.
+  const storeHref = "/shop/beam-lights/coming-soon";
   
   return (
     <div className="min-h-screen">
@@ -77,16 +79,10 @@ export default function BeamLights() {
             size="lg" 
             className="bg-accent hover:bg-accent/90 text-primary font-semibold text-lg px-8 py-6 group"
           >
-            <a 
-              href={beamUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-3"
-              data-event="cta_click_beam_hero"
-            >
+            <Link to={storeHref} className="flex items-center gap-3" data-event="cta_click_beam_hero">
               Shop BEEAM Lights
-              <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </a>
+              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </Link>
           </Button>
         </div>
       </section>
@@ -211,16 +207,10 @@ export default function BeamLights() {
               size="lg"
               className="group"
             >
-              <a 
-                href={beamUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2"
-                data-event="cta_click_beam_collection"
-              >
+              <Link to={storeHref} className="flex items-center gap-2" data-event="cta_click_beam_collection">
                 View Full Collection
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </a>
+              </Link>
             </Button>
           </div>
         </div>
@@ -259,16 +249,10 @@ export default function BeamLights() {
             size="lg" 
             className="bg-accent hover:bg-accent/90 text-primary font-semibold text-lg px-10 py-6 group"
           >
-            <a 
-              href={beamUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-3"
-              data-event="cta_click_beam_footer"
-            >
+            <Link to={storeHref} className="flex items-center gap-3" data-event="cta_click_beam_footer">
               Shop BEEAM Lights
-              <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </a>
+              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </Link>
           </Button>
         </div>
       </section>

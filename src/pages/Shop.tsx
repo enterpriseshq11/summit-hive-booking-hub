@@ -1,8 +1,7 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExternalLink, Sparkles, Clock } from "lucide-react";
-
-const beamUrl = "https://beeamhq.com/?utm_source=main_site&utm_medium=referral&utm_campaign=shop_hub";
+import { ArrowRight, Sparkles, Clock } from "lucide-react";
 
 export default function Shop() {
   return (
@@ -91,16 +90,14 @@ export default function Shop() {
                     Premium lighting designed for performance, visibility, and durability. Built for those who refuse to compromise.
                   </p>
                   <Button asChild size="lg" className="w-full md:w-auto bg-accent hover:bg-accent/90 text-primary font-semibold group">
-                    <a 
-                      href={beamUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
+                    <Link
+                      to="/shop/beam-lights"
                       className="flex items-center justify-center gap-2"
                       data-event="cta_click_shop_beeam"
                     >
-                      Shop BEEAM Lights
-                      <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                    </a>
+                      BEEAM Lights
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
                   </Button>
                 </CardContent>
               </div>
