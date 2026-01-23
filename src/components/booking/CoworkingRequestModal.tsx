@@ -77,6 +77,7 @@ const budgetOptions = [
 export function CoworkingRequestModal({ open, onOpenChange, preselectedType, preselectedOfficeCode }: CoworkingRequestModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [emailWarning, setEmailWarning] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     workspaceType: normalizeWorkspaceType(preselectedType) || "",
     moveInTimeframe: "",
@@ -134,6 +135,7 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setEmailWarning(null);
 
     try {
       const isPrivateOffice = formData.workspaceType === "private-office";
@@ -193,9 +195,16 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
 
       if (error) throw error;
 
+      // eslint-disable-next-line no-console
+      console.log("HIVE_REQUEST_INSERT_OK", {
+        inquiry_type: isPrivateOffice ? "lease_request" : "request",
+        office_code: isPrivateOffice ? formData.officeCode : null,
+        lease_term_months: isPrivateOffice ? termMonths : null,
+      });
+
       // Notifications (best-effort)
       try {
-        await supabase.functions.invoke("send-inquiry-notification", {
+        const userRes = await supabase.functions.invoke("send-inquiry-notification", {
           body: {
             type: "user_confirmation",
             inquiry: {
@@ -218,7 +227,7 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
             },
           },
         });
-        await supabase.functions.invoke("send-inquiry-notification", {
+        const staffRes = await supabase.functions.invoke("send-inquiry-notification", {
           body: {
             type: "staff_notification",
             inquiry: {
@@ -242,8 +251,22 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
             },
           },
         });
+
+        // eslint-disable-next-line no-console
+        console.log("HIVE_REQUEST_NOTIFY_RESULTS", {
+          user: { error: userRes.error?.message || null, data: userRes.data || null },
+          staff: { error: staffRes.error?.message || null, data: staffRes.data || null },
+        });
+
+        if (userRes.error || staffRes.error || userRes.data?.success === false || staffRes.data?.success === false) {
+          setEmailWarning(
+            "Request submitted. If you don’t receive an email, we’ll still follow up within 24 hours."
+          );
+        }
       } catch {
-        // non-blocking
+        setEmailWarning(
+          "Request submitted. If you don’t receive an email, we’ll still follow up within 24 hours."
+        );
       }
 
       setIsSuccess(true);
@@ -262,6 +285,7 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
     onOpenChange(false);
     setTimeout(() => {
       setIsSuccess(false);
+      setEmailWarning(null);
       setFormData({
         workspaceType: "",
         moveInTimeframe: "",
@@ -293,6 +317,9 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
             <p className="text-muted-foreground mb-6">
               Request received. We’ll reach out shortly to confirm availability and next steps. No payment is required until confirmed.
             </p>
+            {emailWarning ? (
+              <p className="text-xs text-muted-foreground mb-4">{emailWarning}</p>
+            ) : null}
             <Button onClick={handleClose} className="bg-accent hover:bg-accent/90 text-primary">
               Done
             </Button>
