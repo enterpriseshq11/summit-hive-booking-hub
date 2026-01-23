@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ interface CoworkingRequestModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   preselectedType?: string;
+  preselectedOfficeCode?: string;
 }
 
 const workspaceTypes = [
@@ -73,7 +74,7 @@ const budgetOptions = [
   { value: "not-sure", label: "Not sure yet" },
 ];
 
-export function CoworkingRequestModal({ open, onOpenChange, preselectedType }: CoworkingRequestModalProps) {
+export function CoworkingRequestModal({ open, onOpenChange, preselectedType, preselectedOfficeCode }: CoworkingRequestModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
@@ -93,6 +94,38 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType }: C
     officeCode: "",
     leaseTermMonths: "",
   });
+
+  // If a user clicks an office card, open the modal pre-filled.
+  useEffect(() => {
+    if (!open) return;
+    if (!preselectedOfficeCode) return;
+    setFormData((prev) => ({
+      ...prev,
+      workspaceType: "private-office",
+      officeCode: preselectedOfficeCode,
+    }));
+  }, [open, preselectedOfficeCode]);
+
+  // Keep workspace type synced when opened from CTA.
+  useEffect(() => {
+    if (!open) return;
+    const normalized = normalizeWorkspaceType(preselectedType);
+    if (!normalized) return;
+    setFormData((prev) => ({
+      ...prev,
+      workspaceType: normalized,
+    }));
+  }, [open, preselectedType]);
+
+  const isPrivateOffice = formData.workspaceType === "private-office";
+  const termMonths = useMemo(
+    () => (formData.leaseTermMonths ? Number(formData.leaseTermMonths) : undefined),
+    [formData.leaseTermMonths]
+  );
+  const pricing = useMemo(
+    () => (isPrivateOffice ? pricingForOffice(formData.officeCode, termMonths) : null),
+    [isPrivateOffice, formData.officeCode, termMonths]
+  );
 
   const handleSeatSelect = (seat: number | string) => {
     setFormData(prev => ({ ...prev, seats: seat.toString() }));
@@ -302,7 +335,7 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType }: C
           </div>
 
           {/* Office + Lease Term (Private Office only) */}
-          {formData.workspaceType === "private-office" && (
+           {isPrivateOffice && (
             <div className="space-y-4 border border-border rounded-lg p-4">
               <div className="flex items-center gap-2">
                 <Calculator className="h-4 w-4 text-accent" />
@@ -349,20 +382,18 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType }: C
                 </div>
               </div>
 
-              {(() => {
-                const term = formData.leaseTermMonths ? Number(formData.leaseTermMonths) : undefined;
-                const p = pricingForOffice(formData.officeCode, term);
-                if (!p) return null;
+               {(() => {
+                 if (!pricing || !termMonths) return null;
                 return (
                   <div className="bg-muted/40 border border-border rounded-lg p-4">
                     <p className="text-sm font-medium mb-3">Pricing Breakdown</p>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div className="text-muted-foreground">Monthly</div>
-                      <div className="text-right font-medium">{formatUSD(p.monthly)}</div>
-                      <div className="text-muted-foreground">Term total ({term} months)</div>
-                      <div className="text-right font-medium">{formatUSD(p.termTotal)}</div>
+                       <div className="text-right font-medium">{formatUSD(pricing.monthly)}</div>
+                       <div className="text-muted-foreground">Term total ({termMonths} months)</div>
+                       <div className="text-right font-medium">{formatUSD(pricing.termTotal)}</div>
                       <div className="text-muted-foreground">Deposit/down</div>
-                      <div className="text-right font-medium">{formatUSD(p.deposit)}</div>
+                       <div className="text-right font-medium">{formatUSD(pricing.deposit)}</div>
                     </div>
                     <p className="text-xs text-muted-foreground mt-3">
                       Request-based — no payment collected now.

@@ -10,7 +10,7 @@ import {
   type OfficeType,
   type PricingVisibility
 } from "@/hooks/useOfficeListings";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -22,10 +22,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Building2, Plus, Pencil, Trash2, Users, Square, Eye, EyeOff, 
-  Star, Filter, ImagePlus, Tag, ArrowUpDown
+  Building2, Plus, Pencil, Trash2, Users, Eye, EyeOff, 
+  Star, Filter, ImagePlus, Tag
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { HivePrivateOfficeAvailabilityManager } from "@/components/admin/HivePrivateOfficeAvailabilityManager";
 
 const officeTypes: { value: OfficeType; label: string }[] = [
   { value: "private_office", label: "Private Office" },
@@ -274,6 +275,9 @@ export default function AdminOfficeListings() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Hive S1/S2/P1/P2 availability (drives public under-hero cards) */}
+        <HivePrivateOfficeAvailabilityManager />
 
         {/* Listings Table */}
         {isLoading ? (

@@ -10,12 +10,9 @@ import {
 } from "@/components/ui/accordion";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { 
-  NextAvailableWidget, 
   CoworkingRequestModal,
   ScheduleTourModal,
-  HiveWaitlistModal,
   StickyMobileHiveCTA,
-  CoworkingAnchorChips,
   PlanComparisonTable,
   AmenitiesAccordion,
   LocalProofStrip,
@@ -32,17 +29,19 @@ import { SITE_CONFIG } from "@/config/siteConfig";
 import { SEOHead, jsonLdSchemas } from "@/components/seo";
 import theHiveLogo from "@/assets/the-hive-logo-transparent.png";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
+import { HiveOfficeCards } from "@/components/coworking/HiveOfficeCards";
 
 export default function Coworking() {
   const navigate = useNavigate();
   const { data: business, isLoading: businessLoading } = useBusinessByType("coworking");
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showTourModal, setShowTourModal] = useState(false);
-  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [selectedWorkspaceType, setSelectedWorkspaceType] = useState<string | null>(null);
+  const [selectedOfficeCode, setSelectedOfficeCode] = useState<string | null>(null);
 
-  const openRequestModal = (workspaceType?: string) => {
+  const openRequestModal = (workspaceType?: string, officeCode?: string) => {
     setSelectedWorkspaceType(workspaceType || null);
+    setSelectedOfficeCode(officeCode || null);
     setShowRequestModal(true);
   };
 
@@ -283,15 +282,8 @@ export default function Coworking() {
           </div>
         ) : business ? (
           <>
-            <NextAvailableWidget
-              businessType="coworking"
-              title="Available Spaces"
-              onSlotSelect={() => openRequestModal()}
-              emptyMessage="No instant openings shown — request access anyway and we'll confirm options within 24 hours."
-              emptySubMessage="Or join the waitlist and we'll notify you the moment space opens up."
-              onJoinWaitlist={() => setShowWaitlistModal(true)}
-              onRequestTour={() => setShowTourModal(true)}
-              onAskDayPass={() => openRequestModal("Day Pass")}
+            <HiveOfficeCards
+              onRequestOffice={(code) => openRequestModal("Private Office", code)}
             />
             <div className="mt-6 pt-6 border-t border-border flex gap-3">
               <Button
@@ -562,17 +554,13 @@ export default function Coworking() {
         open={showRequestModal} 
         onOpenChange={setShowRequestModal}
         preselectedType={selectedWorkspaceType || undefined}
+        preselectedOfficeCode={selectedOfficeCode || undefined}
       />
       <ScheduleTourModal 
         open={showTourModal} 
         onOpenChange={setShowTourModal}
         businessType="coworking"
       />
-      <HiveWaitlistModal 
-        open={showWaitlistModal} 
-        onOpenChange={setShowWaitlistModal}
-      />
-
       {/* Sticky Mobile CTA */}
       <StickyMobileHiveCTA onRequestClick={() => openRequestModal()} />
 
