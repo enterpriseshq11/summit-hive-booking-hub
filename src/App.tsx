@@ -26,7 +26,6 @@ import Vip from "./pages/Vip";
 import DopamineDropTerms from "./pages/DopamineDropTerms";
 import Shop from "./pages/Shop";
 import BeamLights from "./pages/BeamLights";
-import BeamLightsComingSoon from "./pages/BeamLightsComingSoon";
 import VoiceVault from "./pages/VoiceVault";
 import PhotoBooth from "./pages/PhotoBooth";
 import PhotoBoothLanding from "./pages/PhotoBoothLanding";
@@ -111,7 +110,6 @@ function AppInner() {
           <Route path="/terms/dopamine-drop" element={<DopamineDropTerms />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/beam-lights" element={<BeamLights />} />
-          <Route path="/shop/beam-lights/coming-soon" element={<BeamLightsComingSoon />} />
           <Route path="/voice-vault" element={<VoiceVault />} />
           <Route path="/360-photo-booth" element={<PhotoBooth />} />
           <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
