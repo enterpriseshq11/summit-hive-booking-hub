@@ -298,7 +298,11 @@ export function SummitRequestModal({
       setTimeout(() => {
         onOpenChange(false);
         setIsSuccess(false);
-        navigate(`/booking/confirmation?id=${data.booking_id}&pending=true`);
+        // Summit requests are request-only; redirect back to the Summit page (valid route)
+        // instead of the non-existent /booking/confirmation route.
+        navigate("/summit");
+        // Ensure the user lands at the top/hero.
+        requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "smooth" }));
       }, 2000);
     } catch (error) {
       console.error("[SummitRequestModal] Submit failed", {
