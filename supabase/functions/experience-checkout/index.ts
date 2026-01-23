@@ -72,7 +72,18 @@ serve(async (req) => {
       total_amount: passedTotalAmount,
     } = body || {};
 
-    logStep("Request parsed", { business_type, package_id, bookable_type_id, resource_id, start_datetime, end_datetime, duration_hours, hourly_rate });
+    logStep("Request parsed", {
+      business_type,
+      package_id,
+      bookable_type_id,
+      resource_id,
+      start_datetime,
+      end_datetime,
+      duration_hours,
+      hourly_rate,
+      has_customer_email: Boolean(customer_email),
+      has_customer_phone: Boolean(customer_phone),
+    });
 
     if (!business_type || !resource_id || !start_datetime || !end_datetime) {
       return jsonResponse(400, { error: "Missing required fields" });
@@ -237,6 +248,8 @@ serve(async (req) => {
     const successUrl = `${origin}/#/${successPath}?booking=success&id=${booking.id}`;
     const cancelUrl = `${origin}/#/${successPath}?booking=cancelled&id=${booking.id}`;
 
+    logStep("Creating Stripe checkout session", { bookingId: booking.id, deposit, remaining, total, business_type });
+
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -284,7 +297,7 @@ serve(async (req) => {
     });
     if (payError) logStep("Payment insert failed", { error: payError });
 
-    logStep("Checkout session created", { bookingId: booking.id, sessionId: session.id });
+    logStep("Checkout session created", { bookingId: booking.id, sessionId: session.id, hasUrl: Boolean(session.url) });
     return jsonResponse(200, { url: session.url, booking_id: booking.id, session_id: session.id });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);

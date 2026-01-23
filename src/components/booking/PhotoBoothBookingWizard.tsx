@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,6 +84,7 @@ export function PhotoBoothBookingWizard({
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const { data: businesses } = useBusinesses();
   const business = businesses?.find((b) => b.type === "photo_booth");
@@ -159,6 +161,15 @@ export function PhotoBoothBookingWizard({
   };
 
   const proceedToPayment = async () => {
+    console.info("[PHOTO_BOOTH_CHECKOUT] Proceed to Payment clicked", {
+      step,
+      selectedHours,
+      selectedDate: selectedDate ? format(selectedDate, "yyyy-MM-dd") : null,
+      selectedSlotId: selectedSlot?.id,
+    });
+
+    setPaymentError(null);
+
     if (!selectedDate || !selectedSlot) {
       toast.error("Please select a date and time.");
       return;
@@ -175,23 +186,28 @@ export function PhotoBoothBookingWizard({
     setIsSubmitting(true);
     try {
       // Slot hold is now created server-side in the edge function
+      const payload = {
+        business_type: "photo_booth",
+        bookable_type_id: bookableType?.id,
+        resource_id: selectedSlot.resource_id,
+        start_datetime: selectedSlot.start_time,
+        end_datetime: selectedSlot.end_time,
+        duration_hours: selectedHours,
+        hourly_rate: HOURLY_RATE,
+        total_amount: total,
+        customer_name: guestInfo.name.trim(),
+        customer_email: guestInfo.email.trim(),
+        customer_phone: guestInfo.phone.trim(),
+      };
+
+      console.info("[PHOTO_BOOTH_CHECKOUT] Invoking experience-checkout", payload);
+
       const { data, error } = await supabase.functions.invoke("experience-checkout", {
-        body: {
-          business_type: "photo_booth",
-          bookable_type_id: bookableType?.id,
-          resource_id: selectedSlot.resource_id,
-          start_datetime: selectedSlot.start_time,
-          end_datetime: selectedSlot.end_time,
-          duration_hours: selectedHours,
-          hourly_rate: HOURLY_RATE,
-          total_amount: total,
-          customer_name: guestInfo.name.trim(),
-          customer_email: guestInfo.email.trim(),
-          customer_phone: guestInfo.phone.trim(),
-        },
+        body: payload,
       });
 
       if (error) {
+        console.error("[PHOTO_BOOTH_CHECKOUT] experience-checkout error", error);
         // Try to extract error message from response context
         const context = (error as any)?.context;
         if (context instanceof Response) {
@@ -207,13 +223,35 @@ export function PhotoBoothBookingWizard({
       }
       
       if (!data?.url) {
+        console.error("[PHOTO_BOOTH_CHECKOUT] Missing checkout URL", data);
         throw new Error(data?.error || "Checkout session failed");
       }
 
-      window.location.href = data.url;
+      const checkoutUrl = String(data.url);
+      console.info("[PHOTO_BOOTH_CHECKOUT] Checkout session created", {
+        booking_id: data?.booking_id,
+        session_id: data?.session_id,
+        url: checkoutUrl,
+      });
+
+      if (!/^https?:\/\//i.test(checkoutUrl)) {
+        throw new Error("Checkout returned an invalid URL");
+      }
+
+      // Match Voice Vault: open in a new tab to avoid losing app state / blank screens
+      console.info("[PHOTO_BOOTH_CHECKOUT] Redirect attempt", { method: "window.open" });
+      const opened = window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+      if (!opened) {
+        console.info("[PHOTO_BOOTH_CHECKOUT] Popup blocked, falling back to same-tab redirect");
+        window.location.assign(checkoutUrl);
+      } else {
+        toast.success("Redirecting to secure payment...");
+      }
     } catch (err: any) {
       const message = err?.message || "Unable to proceed to payment.";
+      console.error("[PHOTO_BOOTH_CHECKOUT] Failed", { message, err });
       toast.error(message);
+      setPaymentError("Payment couldn’t load. Please try again or contact us.");
     } finally {
       setIsSubmitting(false);
     }
@@ -517,6 +555,13 @@ export function PhotoBoothBookingWizard({
               />
             </div>
           </div>
+
+          {paymentError && (
+            <Alert>
+              <AlertTitle>Payment couldn’t load</AlertTitle>
+              <AlertDescription>{paymentError}</AlertDescription>
+            </Alert>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
