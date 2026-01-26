@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useHivePrivateOffices } from "@/hooks/useHivePrivateOffices";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, Calendar, Clock, ImageIcon } from "lucide-react";
+import s1OfficePhoto1 from "@/assets/hive-office-s1.jpg";
+import s1OfficePhoto2 from "@/assets/hive-office-s1-2.jpg";
 import s2OfficePhoto1 from "@/assets/hive-office-s2.jpg";
 import s2OfficePhoto2 from "@/assets/hive-office-s2-2.jpg";
 import p2OfficePhoto1 from "@/assets/hive-office-p2-1.png";
@@ -13,6 +15,7 @@ import { useState } from "react";
 import { OfficePhotoGalleryModal } from "./OfficePhotoGalleryModal";
 
 // Photo arrays - add more photos here as needed
+const S1_PHOTOS = [s1OfficePhoto1, s1OfficePhoto2];
 const S2_PHOTOS = [s2OfficePhoto1, s2OfficePhoto2];
 const P2_PHOTOS = [p2OfficePhoto1, p2OfficePhoto2];
 
@@ -35,6 +38,7 @@ function bookedLabel(bookedUntil: string | null) {
 
 export function HiveOfficeCards({ onRequestOffice }: Props) {
   const { data, isLoading, isError } = useHivePrivateOffices();
+  const [s1GalleryOpen, setS1GalleryOpen] = useState(false);
   const [s2GalleryOpen, setS2GalleryOpen] = useState(false);
   const [p2GalleryOpen, setP2GalleryOpen] = useState(false);
 
@@ -170,10 +174,14 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
       <div className="grid gap-3 sm:grid-cols-2">
         {data.map((office) => {
           const isBooked = office.status === "booked";
+          const isS1 = office.code === "S1";
           const isS2 = office.code === "S2";
           const isP2 = office.code === "P2";
           
-          // Photo cards for S2 and P2
+          // Photo cards for S1, S2, and P2
+          if (isS1) {
+            return renderPhotoCard(office, S1_PHOTOS, setS1GalleryOpen);
+          }
           if (isS2) {
             return renderPhotoCard(office, S2_PHOTOS, setS2GalleryOpen);
           }
@@ -181,7 +189,7 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
             return renderPhotoCard(office, P2_PHOTOS, setP2GalleryOpen);
           }
 
-          // Standard card for P1, S1
+          // Standard card for P1
           const displayLabel = office.label;
           return (
             <Card key={office.code} className="overflow-hidden relative">
@@ -240,6 +248,13 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
       <p className="text-xs text-muted-foreground">
         Request-based — no payment collected now.
       </p>
+
+      {/* S1 Photo Gallery Modal */}
+      <OfficePhotoGalleryModal
+        open={s1GalleryOpen}
+        onOpenChange={setS1GalleryOpen}
+        photos={S1_PHOTOS}
+      />
 
       {/* S2 Photo Gallery Modal */}
       <OfficePhotoGalleryModal
