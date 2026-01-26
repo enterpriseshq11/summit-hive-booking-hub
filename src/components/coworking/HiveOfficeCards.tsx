@@ -75,14 +75,14 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
     );
   }
 
-  // Helper to get display label for each office
-  const getDisplayLabel = (code: string) => {
+  // Helper to get display info for each office (main label + optional subtext)
+  const getDisplayInfo = (code: string): { label: string; subtext?: string } => {
     switch (code) {
-      case "P1": return "Private Office 1";
-      case "P2": return "Private Office 2";
-      case "S1": return "Second Floor S1";
-      case "S2": return "Second Floor S2";
-      default: return code;
+      case "P1": return { label: "Private Office 1" };
+      case "P2": return { label: "Private Office 2" };
+      case "S1": return { label: "Private Office S1", subtext: "Second Floor" };
+      case "S2": return { label: "Private Office S2", subtext: "Second Floor" };
+      default: return { label: code };
     }
   };
 
@@ -93,7 +93,7 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
     setGalleryOpen: (open: boolean) => void
   ) => {
     const isBooked = office.status === "booked";
-    const displayLabel = getDisplayLabel(office.code);
+    const displayInfo = getDisplayInfo(office.code);
 
     return (
       <Card 
@@ -121,7 +121,10 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
                   <Building2 className="h-4 w-4 text-white/90" />
                   <span className="truncate">{office.code}</span>
                 </CardTitle>
-                <p className="text-sm mt-1 text-white/90 font-semibold drop-shadow-md">{displayLabel}</p>
+                <p className="text-sm mt-1 text-white/90 font-semibold drop-shadow-md">{displayInfo.label}</p>
+                {displayInfo.subtext && (
+                  <p className="text-xs mt-0.5 text-white/70 font-medium drop-shadow-sm">{displayInfo.subtext}</p>
+                )}
               </div>
               <Badge
                 variant="outline"
