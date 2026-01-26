@@ -72,14 +72,25 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
     );
   }
 
-  // Helper to render a photo card (S2 or P2)
+  // Helper to get display label for each office
+  const getDisplayLabel = (code: string) => {
+    switch (code) {
+      case "P1": return "Private Office 1";
+      case "P2": return "Private Office 2";
+      case "S1": return "Second Floor S1";
+      case "S2": return "Second Floor S2";
+      default: return code;
+    }
+  };
+
+  // Helper to render a photo card (S1, S2, or P2)
   const renderPhotoCard = (
     office: typeof data[0],
     photos: string[],
     setGalleryOpen: (open: boolean) => void
   ) => {
     const isBooked = office.status === "booked";
-    const displayLabel = office.code === "S2" ? "Second Floor 2" : office.label;
+    const displayLabel = getDisplayLabel(office.code);
 
     return (
       <Card 
@@ -190,7 +201,7 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
           }
 
           // Standard card for P1
-          const displayLabel = office.label;
+          const displayLabel = getDisplayLabel(office.code);
           return (
             <Card key={office.code} className="overflow-hidden relative">
               <CardHeader className="pb-3 relative z-10">
