@@ -160,7 +160,23 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const userInitials = authUser?.profile ? `${authUser.profile.first_name?.[0] || ""}${authUser.profile.last_name?.[0] || ""}`.toUpperCase() || "U" : "U";
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex">
+    <div className="min-h-screen bg-zinc-950 text-white flex relative">
+      {/* Honeycomb Watermark - Subtle background pattern */}
+      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
+        {/* Center honeycomb pattern - very subtle */}
+        <svg className="w-full h-full opacity-[0.04]" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <pattern id="honeycomb-admin-center" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
+            <polygon points="6,0 12,3 12,9 6,12 0,9 0,3" fill="none" stroke="hsl(45 70% 50%)" strokeWidth="0.3"/>
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#honeycomb-admin-center)" />
+        </svg>
+      </div>
+
+      {/* Accent glow spots */}
+      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/[0.03] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-amber-500/[0.02] rounded-full blur-3xl" />
+      </div>
       <aside className={cn("fixed inset-y-0 left-0 z-50 flex flex-col bg-zinc-900 border-r border-zinc-800 transition-all duration-300", collapsed ? "w-16" : "w-64", mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0")}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-800">
           {!collapsed && <Link to="/admin" className="font-bold text-lg text-amber-400">A-Z Command</Link>}
