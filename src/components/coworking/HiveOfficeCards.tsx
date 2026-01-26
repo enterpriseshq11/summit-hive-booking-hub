@@ -3,9 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useHivePrivateOffices } from "@/hooks/useHivePrivateOffices";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Building2, Calendar, Clock } from "lucide-react";
+import { Building2, Calendar, Clock, ImageIcon } from "lucide-react";
 import s2OfficePhoto from "@/assets/hive-office-s2.jpg";
 import { format } from "date-fns";
+import { useState } from "react";
+import { OfficePhotoGalleryModal } from "./OfficePhotoGalleryModal";
+
+// S2 photo array - add more photos here as needed
+const S2_PHOTOS = [s2OfficePhoto];
 
 type Props = {
   onRequestOffice: (officeCode: string) => void;
@@ -26,6 +31,7 @@ function bookedLabel(bookedUntil: string | null) {
 
 export function HiveOfficeCards({ onRequestOffice }: Props) {
   const { data, isLoading, isError } = useHivePrivateOffices();
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -44,7 +50,6 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
   }
 
   if (isError || !data?.length) {
-    // Fallback UI if availability can't load
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -69,37 +74,111 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
         {data.map((office) => {
           const isBooked = office.status === "booked";
           const isS2 = office.code === "S2";
-          
-          // Override label for S2 only
           const displayLabel = isS2 ? "Second Floor 2" : office.label;
           
+          if (isS2) {
+            // S2 card with clickable photo area
+            return (
+              <Card 
+                key={office.code} 
+                className="overflow-hidden relative flex flex-col"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${s2OfficePhoto})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                {/* Clickable photo area */}
+                <div 
+                  className="flex-1 cursor-pointer group"
+                  onClick={() => setGalleryOpen(true)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === "Enter" && setGalleryOpen(true)}
+                  aria-label="View office photos"
+                >
+                  <CardHeader className="pb-3 relative z-10">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <CardTitle className="text-base flex items-center gap-2 text-white font-bold drop-shadow-md">
+                          <Building2 className="h-4 w-4 text-white/90" />
+                          <span className="truncate">{office.code}</span>
+                        </CardTitle>
+                        <p className="text-sm mt-1 text-white/90 font-semibold drop-shadow-md">{displayLabel}</p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={
+                          isBooked
+                            ? "bg-muted/40 text-muted-foreground border-border"
+                            : "bg-accent/30 text-white border-accent/50 font-semibold"
+                        }
+                      >
+                        {isBooked ? "Booked" : "Available"}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="pt-0 space-y-3 relative z-10">
+                    <div className="flex items-center justify-between text-sm text-white/90">
+                      <span className="text-white/80 font-medium drop-shadow-sm">Monthly</span>
+                      <span className="font-bold text-white drop-shadow-md">{formatMonthly(office.monthly_rate)}</span>
+                    </div>
+
+                    {isBooked && (
+                      <div className="flex items-start gap-2 text-xs text-white/80">
+                        <Calendar className="h-3.5 w-3.5 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-white/90 drop-shadow-sm">{bookedLabel(office.booked_until)}</p>
+                          {office.notes ? <p className="mt-0.5">{office.notes}</p> : null}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Photo hint */}
+                    <div className="flex items-center gap-1.5 text-xs text-white/70 group-hover:text-white/90 transition-colors">
+                      <ImageIcon className="h-3.5 w-3.5" />
+                      <span>Click to view photos</span>
+                    </div>
+                  </CardContent>
+                </div>
+
+                {/* Request button - separate from photo click area */}
+                <div className="p-4 pt-0 relative z-10">
+                  <Button
+                    className="w-full font-bold"
+                    variant={isBooked ? "outline" : "default"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRequestOffice(office.code);
+                    }}
+                    data-event="hive_office_card_request_click"
+                  >
+                    Request this Office
+                  </Button>
+                </div>
+              </Card>
+            );
+          }
+
+          // Standard card for P1, P2, S1
           return (
-            <Card 
-              key={office.code} 
-              className="overflow-hidden relative"
-              style={isS2 ? {
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${s2OfficePhoto})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              } : undefined}
-            >
+            <Card key={office.code} className="overflow-hidden relative">
               <CardHeader className="pb-3 relative z-10">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <CardTitle className={`text-base flex items-center gap-2 ${isS2 ? "text-white font-bold drop-shadow-md" : ""}`}>
-                      <Building2 className={`h-4 w-4 ${isS2 ? "text-white/90" : "text-muted-foreground"}`} />
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
                       <span className="truncate">{office.code}</span>
                     </CardTitle>
-                    <p className={`text-sm mt-1 ${isS2 ? "text-white/90 font-semibold drop-shadow-md" : "text-muted-foreground"}`}>{displayLabel}</p>
+                    <p className="text-sm mt-1 text-muted-foreground">{displayLabel}</p>
                   </div>
                   <Badge
                     variant="outline"
                     className={
                       isBooked
                         ? "bg-muted/40 text-muted-foreground border-border"
-                        : isS2
-                          ? "bg-accent/30 text-white border-accent/50 font-semibold"
-                          : "bg-accent/15 text-accent border-accent/30"
+                        : "bg-accent/15 text-accent border-accent/30"
                     }
                   >
                     {isBooked ? "Booked" : "Available"}
@@ -108,23 +187,23 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
               </CardHeader>
 
               <CardContent className="pt-0 space-y-3 relative z-10">
-                <div className={`flex items-center justify-between text-sm ${isS2 ? "text-white/90" : ""}`}>
-                  <span className={isS2 ? "text-white/80 font-medium drop-shadow-sm" : "text-muted-foreground"}>Monthly</span>
-                  <span className={`font-bold ${isS2 ? "text-white drop-shadow-md" : ""}`}>{formatMonthly(office.monthly_rate)}</span>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Monthly</span>
+                  <span className="font-bold">{formatMonthly(office.monthly_rate)}</span>
                 </div>
 
                 {isBooked && (
-                  <div className={`flex items-start gap-2 text-xs ${isS2 ? "text-white/80" : "text-muted-foreground"}`}>
+                  <div className="flex items-start gap-2 text-xs text-muted-foreground">
                     <Calendar className="h-3.5 w-3.5 mt-0.5" />
                     <div>
-                      <p className={`font-medium ${isS2 ? "text-white/90 drop-shadow-sm" : "text-foreground/80"}`}>{bookedLabel(office.booked_until)}</p>
+                      <p className="font-medium text-foreground/80">{bookedLabel(office.booked_until)}</p>
                       {office.notes ? <p className="mt-0.5">{office.notes}</p> : null}
                     </div>
                   </div>
                 )}
 
                 <Button
-                  className={`w-full ${isS2 ? "font-bold" : ""}`}
+                  className="w-full"
                   variant={isBooked ? "outline" : "default"}
                   onClick={() => onRequestOffice(office.code)}
                   data-event="hive_office_card_request_click"
@@ -140,6 +219,13 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
       <p className="text-xs text-muted-foreground">
         Request-based — no payment collected now.
       </p>
+
+      {/* S2 Photo Gallery Modal */}
+      <OfficePhotoGalleryModal
+        open={galleryOpen}
+        onOpenChange={setGalleryOpen}
+        photos={S2_PHOTOS}
+      />
     </div>
   );
 }
