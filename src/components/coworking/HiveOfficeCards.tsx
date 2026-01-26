@@ -4,13 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useHivePrivateOffices } from "@/hooks/useHivePrivateOffices";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building2, Calendar, Clock, ImageIcon } from "lucide-react";
-import s2OfficePhoto from "@/assets/hive-office-s2.jpg";
+import s2OfficePhoto1 from "@/assets/hive-office-s2.jpg";
+import s2OfficePhoto2 from "@/assets/hive-office-s2-2.jpg";
 import { format } from "date-fns";
 import { useState } from "react";
 import { OfficePhotoGalleryModal } from "./OfficePhotoGalleryModal";
 
 // S2 photo array - add more photos here as needed
-const S2_PHOTOS = [s2OfficePhoto];
+const S2_PHOTOS = [s2OfficePhoto1, s2OfficePhoto2];
 
 type Props = {
   onRequestOffice: (officeCode: string) => void;
@@ -83,7 +84,7 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
                 key={office.code} 
                 className="overflow-hidden relative flex flex-col"
                 style={{
-                  backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${s2OfficePhoto})`,
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${s2OfficePhoto1})`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
