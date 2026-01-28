@@ -359,7 +359,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
           }
         }
 
-        window.open(data.url, "_blank", "noopener,noreferrer");
+        // Use location.href instead of window.open to prevent iOS popup blocking
+        window.location.href = data.url;
       } else {
         throw new Error("No checkout URL received");
       }
