@@ -62,7 +62,7 @@ import AdminOfficePhotos from "./pages/admin/OfficePhotos";
 import AdminOfficePromotions from "./pages/admin/OfficePromotions";
 import AdminOfficeInquiries from "./pages/admin/OfficeInquiries";
 import AdminProviderSchedule from "./pages/admin/ProviderSchedule";
-
+import AdminCareerApplications from "./pages/admin/CareerApplications";
 // Command Center Pages (now unified under /admin/*)
 import CommandCenterLeads from "./pages/command-center/Leads";
 import CommandCenterLeadDetail from "./pages/command-center/LeadDetail";
@@ -176,6 +176,9 @@ function AppInner() {
           <Route path="/admin/office-listings/:id/photos" element={<AdminOfficePhotos />} />
           <Route path="/admin/office-promotions" element={<AdminOfficePromotions />} />
           <Route path="/admin/office-inquiries" element={<AdminOfficeInquiries />} />
+          
+          {/* Hiring */}
+          <Route path="/admin/careers" element={<AdminCareerApplications />} />
           
           {/* Marketing */}
           <Route path="/admin/promotions" element={<AdminPromotions />} />
