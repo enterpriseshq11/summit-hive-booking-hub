@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
 import { RescheduleModal } from "@/components/admin/RescheduleModal";
+import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateBookingStatus } from "@/hooks/useBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,6 +68,23 @@ type ApprovalItem =
   | { kind: "hive_lease"; inquiry: any };
 
 export default function AdminApprovals() {
+  const { authUser } = useAuth();
+
+  // Determine if user is spa-only (has spa_lead but not owner/manager)
+  const isSpaLeadOnly = useMemo(() => {
+    const roles = authUser?.roles || [];
+    return roles.includes("spa_lead") && 
+           !roles.includes("owner") && 
+           !roles.includes("manager");
+  }, [authUser?.roles]);
+
+  // Filter business unit tabs for spa_lead users
+  const visibleBusinessTabs = useMemo(() => {
+    if (isSpaLeadOnly) {
+      return BUSINESS_UNIT_TABS.filter(t => t.value === "restoration");
+    }
+    return BUSINESS_UNIT_TABS;
+  }, [isSpaLeadOnly]);
   // IMPORTANT: Dashboard "Pending Approvals" uses bookings.status='pending'.
   // Keep this page on the same source of truth to prevent count/list mismatches.
   const {
@@ -288,8 +306,8 @@ export default function AdminApprovals() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
-  const [businessUnit, setBusinessUnit] = useState<BusinessUnit>("all");
-  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied" | "rescheduled">("pending");
+  const [businessUnit, setBusinessUnit] = useState<BusinessUnit>(isSpaLeadOnly ? "restoration" : "all");
+  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied" | "rescheduled">(isSpaLeadOnly ? "confirmed" : "pending");
   const [viewDenied, setViewDenied] = useState<any>(null);
   const [selectedLease, setSelectedLease] = useState<any>(null);
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
@@ -431,15 +449,18 @@ export default function AdminApprovals() {
           <p className="text-zinc-300">Review pending or requested bookings by business unit</p>
         </div>
 
-        <Tabs value={businessUnit} onValueChange={(v) => setBusinessUnit(v as BusinessUnit)}>
-          <TabsList className="w-full justify-start flex-wrap h-auto">
-            {BUSINESS_UNIT_TABS.map((t) => (
-              <TabsTrigger key={t.value} value={t.value}>
-                {t.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        {/* Business Unit Tabs - Hidden for spa_lead only users */}
+        {!isSpaLeadOnly && (
+          <Tabs value={businessUnit} onValueChange={(v) => setBusinessUnit(v as BusinessUnit)}>
+            <TabsList className="w-full justify-start flex-wrap h-auto">
+              {visibleBusinessTabs.map((t) => (
+                <TabsTrigger key={t.value} value={t.value}>
+                  {t.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        )}
 
         {/* Status Tabs - Different for Spa vs other businesses */}
         {isSpaUnit(businessUnit) ? (
