@@ -10,6 +10,7 @@ import {
   Users, Gift, Info, Eye
 } from "lucide-react";
 import { LindseyAvailabilityCalendar } from "@/components/booking/LindseyAvailabilityCalendar";
+import { useSpaPaymentsConfig } from "@/hooks/usePaymentConfigs";
 
 // Lindsey's pricing menu data for reference/modal only
 const SERVICES = {
@@ -51,6 +52,10 @@ const ADDONS = [
 
 export default function BookWithLindsey() {
   const [showPricingModal, setShowPricingModal] = useState(false);
+  
+  // Get payment config for dynamic CTA labels
+  const { spaPaymentsEnabled } = useSpaPaymentsConfig();
+  const ctaLabel = spaPaymentsEnabled ? "Book & Pay Deposit" : "Book Now";
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,7 +97,7 @@ export default function BookWithLindsey() {
                   className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold"
                 >
                   <Sparkles className="h-5 w-5 mr-2" />
-                  Book Now
+                  {ctaLabel}
                 </Button>
                 <Button 
                   size="lg" 
@@ -253,7 +258,7 @@ export default function BookWithLindsey() {
               document.getElementById("booking-calendar")?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            Book Now
+            {ctaLabel}
           </Button>
         </DialogContent>
       </Dialog>
