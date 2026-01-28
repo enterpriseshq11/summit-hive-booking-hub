@@ -1,6 +1,6 @@
 import { SEOHead } from "@/components/seo";
 import { Link } from "react-router-dom";
-import { Building2, Dumbbell, Sparkles, Wrench, ArrowRight, MapPin, DollarSign, Clock } from "lucide-react";
+import { Building2, Dumbbell, Sparkles, Wrench, ArrowRight, MapPin } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -186,12 +186,6 @@ export default function Careers() {
                             <span className="flex items-center gap-1">
                               <MapPin className="h-4 w-4" />
                               {opening.location}
-                            </span>
-                          )}
-                          {opening.pay_range && (
-                            <span className="flex items-center gap-1">
-                              <DollarSign className="h-4 w-4" />
-                              {opening.pay_range}
                             </span>
                           )}
                         </div>
