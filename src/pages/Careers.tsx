@@ -66,7 +66,7 @@ export default function Careers() {
                 We're looking for passionate individuals to help us deliver exceptional experiences.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Button variant="outline" size="lg" asChild>
+                <Button size="lg" asChild>
                   <a href="#choose-your-team" onClick={(e) => { e.preventDefault(); document.getElementById('choose-your-team')?.scrollIntoView({ behavior: 'smooth' }); }}>
                     Choose Your Team
                   </a>
