@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { AdminLayout, RescheduleModal, DayAvailabilityModal } from "@/components/admin";
 import { useBookings } from "@/hooks/useBookings";
 import { useBusinesses } from "@/hooks/useBusinesses";
+import { useAvailabilityOverrides, formatOverrideDisplay } from "@/hooks/useAvailabilityOverrides";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CalendarDays, Clock, ChevronLeft, ChevronRight, Calendar, CalendarRange, RefreshCw, Settings2 } from "lucide-react";
 import { BookingEditDialog } from "@/components/admin/BookingEditDialog";
 import { 
@@ -89,6 +91,30 @@ export default function AdminSchedule() {
     return spaBusiness?.id;
   }, [businesses]);
 
+  const spaBusinessName = useMemo(() => {
+    const spaBusiness = businesses?.find(b => b.type === "spa");
+    return spaBusiness?.name || "Restoration Lounge";
+  }, [businesses]);
+
+  // Fetch availability overrides for visual indicators
+  const { data: availabilityOverrides, refetch: refetchOverrides } = useAvailabilityOverrides(
+    spaBusinessId,
+    viewMode === "week" ? weekStart : monthViewStart,
+    viewMode === "week" ? weekEnd : monthViewEnd
+  );
+
+  // Map overrides by date for quick lookup
+  const overridesByDate = useMemo(() => {
+    const map = new Map<string, { is_unavailable: boolean; display: string }>();
+    for (const override of availabilityOverrides || []) {
+      map.set(override.override_date, {
+        is_unavailable: override.is_unavailable,
+        display: formatOverrideDisplay(override)
+      });
+    }
+    return map;
+  }, [availabilityOverrides]);
+
   const filteredBookings = useMemo(() => {
     // Hide denied and cancelled bookings to keep the calendar uncluttered.
     return (bookings || []).filter((b: any) => b?.status !== "denied" && b?.status !== "cancelled");
@@ -160,345 +186,382 @@ export default function AdminSchedule() {
     }
   };
 
+  const handleAvailabilitySuccess = () => {
+    refetch();
+    refetchOverrides();
+  };
+
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Schedule</h1>
-            <p className="text-zinc-300">View and manage all bookings across businesses</p>
+      <TooltipProvider>
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
+              <p className="text-muted-foreground">View and manage all bookings across businesses</p>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2">
+              {/* View Mode Toggle */}
+              <div className="flex rounded-lg border border-border overflow-hidden">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewMode("week")}
+                  className={`rounded-none px-3 ${viewMode === "week" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                >
+                  <CalendarRange className="h-4 w-4 mr-1" />
+                  Week
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewMode("month")}
+                  className={`rounded-none px-3 ${viewMode === "month" ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                >
+                  <Calendar className="h-4 w-4 mr-1" />
+                  Month
+                </Button>
+              </div>
+
+              {/* Business Filter */}
+              <Select value={selectedBusiness} onValueChange={setSelectedBusiness}>
+                <SelectTrigger className="w-[160px] bg-card border-border text-foreground">
+                  <SelectValue placeholder="All Businesses" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  <SelectItem value="all" className="text-foreground focus:bg-muted focus:text-foreground">All Businesses</SelectItem>
+                  {businesses?.map((b) => (
+                    <SelectItem key={b.id} value={b.id} className="text-foreground focus:bg-muted focus:text-foreground">{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          
-          <div className="flex flex-wrap items-center gap-2">
-            {/* View Mode Toggle */}
-            <div className="flex rounded-lg border border-zinc-700 overflow-hidden">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setViewMode("week")}
-                className={`rounded-none px-3 ${viewMode === "week" ? "bg-accent text-black" : "text-zinc-300 hover:bg-zinc-700 hover:text-white"}`}
-              >
-                <CalendarRange className="h-4 w-4 mr-1" />
-                Week
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setViewMode("month")}
-                className={`rounded-none px-3 ${viewMode === "month" ? "bg-accent text-black" : "text-zinc-300 hover:bg-zinc-700 hover:text-white"}`}
-              >
-                <Calendar className="h-4 w-4 mr-1" />
-                Month
+
+          {/* Helper Text */}
+          <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
+            <strong className="text-foreground">Tip:</strong> Click any booking to view details.
+            {isSpaBusinessSelected(businesses || [], selectedBusiness) && (
+              <span className="ml-1">
+                <Settings2 className="h-3 w-3 inline mr-1" />
+                Click any day to manage availability for {spaBusinessName}.
+              </span>
+            )}
+          </div>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between bg-card border border-border rounded-lg p-4">
+            <Button variant="outline" size="sm" onClick={navigatePrevious} className="border-border text-foreground hover:bg-muted hover:text-foreground">
+              <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+            </Button>
+            <div className="text-center">
+              <h2 className="font-semibold text-foreground">
+                {getDateRangeLabel()}
+              </h2>
+              <Button variant="link" size="sm" onClick={() => setCurrentDate(new Date())} className="text-accent hover:text-accent/80">
+                Today
               </Button>
             </div>
-
-            {/* Business Filter */}
-            <Select value={selectedBusiness} onValueChange={setSelectedBusiness}>
-              <SelectTrigger className="w-[160px] bg-zinc-800 border-zinc-700 text-white">
-                <SelectValue placeholder="All Businesses" />
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700">
-                <SelectItem value="all" className="text-white focus:bg-zinc-700 focus:text-white">All Businesses</SelectItem>
-                {businesses?.map((b) => (
-                  <SelectItem key={b.id} value={b.id} className="text-white focus:bg-zinc-700 focus:text-white">{b.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Helper Text */}
-        <div className="bg-zinc-800/50 rounded-lg p-3 text-sm text-zinc-300">
-          <strong className="text-white">Tip:</strong> Click any booking to view details. Use the filters to focus on specific staff or locations. Today's date is highlighted with a blue border.
-        </div>
-
-        {/* Navigation */}
-        <div className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-lg p-4">
-          <Button variant="outline" size="sm" onClick={navigatePrevious} className="border-zinc-600 text-white hover:bg-zinc-700 hover:text-white">
-            <ChevronLeft className="h-4 w-4 mr-1" /> Previous
-          </Button>
-          <div className="text-center">
-            <h2 className="font-semibold text-white">
-              {getDateRangeLabel()}
-            </h2>
-            <Button variant="link" size="sm" onClick={() => setCurrentDate(new Date())} className="text-accent hover:text-accent/80">
-              Today
+            <Button variant="outline" size="sm" onClick={navigateNext} className="border-border text-foreground hover:bg-muted hover:text-foreground">
+              Next <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={navigateNext} className="border-zinc-600 text-white hover:bg-zinc-700 hover:text-white">
-            Next <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        </div>
 
-        {/* Calendar Grid */}
-        {isLoading ? (
-          <div className={`grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-7"} gap-2`}>
-            {Array(viewMode === "week" ? 7 : 35).fill(0).map((_, i) => (
-              <Skeleton key={i} className={viewMode === "week" ? "h-48" : "h-24"} />
-            ))}
-          </div>
-        ) : (
-          <>
-            {/* Day Headers for Month View */}
-            {viewMode === "month" && (
-              <div className="grid grid-cols-7 gap-2 mb-2">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                  <div key={day} className="text-center text-sm font-medium text-zinc-400 py-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <div className={`grid grid-cols-7 gap-2`}>
-              {daysToShow.map((day) => {
-                const dayBookings = getBookingsForDay(day);
-                const isToday = isSameDay(day, new Date());
-                const isCurrentMonth = isSameMonth(day, currentDate);
-                const maxBookingsToShow = viewMode === "week" ? 4 : 2;
-                const overflowBookings = dayBookings.slice(maxBookingsToShow);
-                const dayKey = day.toISOString().slice(0, 10);
-                
-                return (
-                  <Card 
-                    key={day.toISOString()} 
-                    className={`
-                      ${viewMode === "week" ? "min-h-[200px]" : "min-h-[100px]"} 
-                      bg-zinc-800 border-zinc-700 
-                      ${isToday ? 'ring-2 ring-primary' : ''} 
-                      ${viewMode === "month" && !isCurrentMonth ? 'opacity-40' : ''}
-                      ${isSpaBusinessSelected(businesses || [], selectedBusiness) ? 'cursor-pointer hover:border-accent/50' : ''}
-                    `}
-                    onClick={(e) => {
-                      // Only trigger if clicking the card itself, not a booking button
-                      if ((e.target as HTMLElement).closest('button')) return;
-                      handleDayClick(day, e);
-                    }}
-                  >
-                    <CardHeader className={viewMode === "week" ? "p-3 pb-2" : "p-2 pb-1"}>
-                      <CardTitle className={`${viewMode === "week" ? "text-sm" : "text-xs"} font-medium flex justify-between items-center text-white`}>
-                        {viewMode === "week" && <span>{format(day, "EEE")}</span>}
-                        <span className={`${viewMode === "week" ? "text-lg" : "text-sm"} ${isToday ? 'text-primary font-bold' : 'text-zinc-300'}`}>
-                          {format(day, "d")}
-                        </span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className={viewMode === "week" ? "p-2 space-y-1" : "p-1 space-y-0.5"}>
-                      {dayBookings.slice(0, maxBookingsToShow).map((booking) => (
-                        <button
-                          key={booking.id}
-                          onClick={() => setSelectedBooking(booking)}
-                          className={`w-full text-left ${viewMode === "week" ? "p-2" : "p-1"} rounded text-xs transition-colors border ${getStatusColor(booking.status || '')} hover:opacity-80`}
-                          aria-label={`View booking for ${booking.guest_name || 'Guest'} at ${format(new Date(booking.start_datetime), "h:mm a")}`}
-                        >
-                          <div className="font-medium truncate">
-                            {booking.guest_name || "Guest"}
-                          </div>
-                          {viewMode === "week" && (
-                            <>
-                              <div className="flex items-center gap-1 opacity-80">
-                                <Clock className="h-3 w-3" />
-                                {format(new Date(booking.start_datetime), "h:mm a")}
-                              </div>
-                              <div className="text-[10px] mt-1 font-medium">
-                                {getStatusLabel(booking.status || '')}
-                              </div>
-                            </>
-                          )}
-                        </button>
-                      ))}
-                      {dayBookings.length > maxBookingsToShow && (
-                        <Popover open={moreOpenDayKey === dayKey} onOpenChange={(open) => setMoreOpenDayKey(open ? dayKey : null)}>
-                          <PopoverTrigger asChild>
-                            <button
-                              type="button"
-                              className={`text-xs text-zinc-400 text-center w-full ${viewMode === "week" ? "pt-1" : ""} hover:underline`}
-                            >
-                              +{dayBookings.length - maxBookingsToShow} more
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent align="center" className="w-72 p-2 bg-zinc-900 border-zinc-700">
-                            <div className="text-xs font-medium text-zinc-200 px-1 pb-2">
-                              {format(day, "MMM d, yyyy")}
-                            </div>
-                            <div className="space-y-1 max-h-64 overflow-auto pr-1">
-                              {overflowBookings.map((booking) => (
-                                <button
-                                  key={booking.id}
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedBooking(booking);
-                                    setMoreOpenDayKey(null);
-                                  }}
-                                  className="w-full text-left rounded border border-zinc-800 hover:bg-zinc-800/60 px-2 py-2"
-                                >
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div className="min-w-0">
-                                      <div className="text-sm font-medium text-white truncate">
-                                        {booking.guest_name || "Guest"}
-                                      </div>
-                                      <div className="text-xs text-zinc-300 flex items-center gap-1 mt-0.5">
-                                        <Clock className="h-3 w-3" />
-                                        {format(new Date(booking.start_datetime), "h:mm a")}
-                                      </div>
-                                    </div>
-                                    <span className={`shrink-0 text-[10px] px-2 py-1 rounded border ${getStatusColor(booking.status || '')}`}>
-                                      {(booking.status || "").toString()}
-                                    </span>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      )}
-                      {dayBookings.length === 0 && viewMode === "week" && (
-                        <div className="text-xs text-zinc-400 text-center py-4">
-                          No bookings
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
+          {/* Calendar Grid */}
+          {isLoading ? (
+            <div className={`grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-7"} gap-2`}>
+              {Array(viewMode === "week" ? 7 : 35).fill(0).map((_, i) => (
+                <Skeleton key={i} className={viewMode === "week" ? "h-48" : "h-24"} />
+              ))}
             </div>
-          </>
-        )}
-
-        {/* Booking Detail Dialog */}
-        <Dialog open={!!selectedBooking} onOpenChange={() => setSelectedBooking(null)}>
-          <DialogContent className="max-w-lg bg-zinc-900 border-zinc-700">
-            <DialogHeader>
-              <DialogTitle className="text-white">Booking Details</DialogTitle>
-            </DialogHeader>
-            {selectedBooking && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-zinc-400">Booking #</label>
-                    <p className="font-mono text-white">{selectedBooking.booking_number}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-zinc-400">Status</label>
-                    <Badge className={getStatusColor(selectedBooking.status || '')}>
-                      {selectedBooking.status}
-                    </Badge>
-                  </div>
+          ) : (
+            <>
+              {/* Day Headers for Month View */}
+              {viewMode === "month" && (
+                <div className="grid grid-cols-7 gap-2 mb-2">
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                    <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
+                      {day}
+                    </div>
+                  ))}
                 </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-zinc-400">Customer</label>
-                  <p className="text-white">{selectedBooking.guest_name || `${selectedBooking.profiles?.first_name} ${selectedBooking.profiles?.last_name}`}</p>
-                  <p className="text-sm text-zinc-300">{selectedBooking.guest_email || selectedBooking.profiles?.email}</p>
-                </div>
+              )}
+              
+              <div className={`grid grid-cols-7 gap-2`}>
+                {daysToShow.map((day) => {
+                  const dayBookings = getBookingsForDay(day);
+                  const isToday = isSameDay(day, new Date());
+                  const isCurrentMonth = isSameMonth(day, currentDate);
+                  const maxBookingsToShow = viewMode === "week" ? 4 : 2;
+                  const overflowBookings = dayBookings.slice(maxBookingsToShow);
+                  const dayKey = format(day, "yyyy-MM-dd");
+                  
+                  // Check for availability override
+                  const override = isSpaBusinessSelected(businesses || [], selectedBusiness) 
+                    ? overridesByDate.get(dayKey) 
+                    : null;
+                  
+                  return (
+                    <Card 
+                      key={day.toISOString()} 
+                      className={`
+                        ${viewMode === "week" ? "min-h-[200px]" : "min-h-[100px]"} 
+                        bg-card border-border 
+                        ${isToday ? 'ring-2 ring-primary' : ''} 
+                        ${viewMode === "month" && !isCurrentMonth ? 'opacity-40' : ''}
+                        ${isSpaBusinessSelected(businesses || [], selectedBusiness) ? 'cursor-pointer hover:border-accent/50 transition-colors' : ''}
+                        ${override?.is_unavailable ? 'bg-destructive/5' : ''}
+                      `}
+                      onClick={(e) => {
+                        // Only trigger if clicking the card itself, not a booking button
+                        if ((e.target as HTMLElement).closest('button')) return;
+                        handleDayClick(day, e);
+                      }}
+                    >
+                      <CardHeader className={viewMode === "week" ? "p-3 pb-2" : "p-2 pb-1"}>
+                        <CardTitle className={`${viewMode === "week" ? "text-sm" : "text-xs"} font-medium flex justify-between items-center text-foreground`}>
+                          {viewMode === "week" && <span>{format(day, "EEE")}</span>}
+                          <div className="flex items-center gap-1">
+                            {override && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className={`w-2 h-2 rounded-full ${override.is_unavailable ? 'bg-destructive' : 'bg-accent'}`} />
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="bg-popover text-popover-foreground">
+                                  <p className="text-xs font-medium">{override.display}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                            <span className={`${viewMode === "week" ? "text-lg" : "text-sm"} ${isToday ? 'text-primary font-bold' : 'text-muted-foreground'}`}>
+                              {format(day, "d")}
+                            </span>
+                          </div>
+                        </CardTitle>
+                        
+                        {/* Availability indicator text for week view */}
+                        {viewMode === "week" && override && (
+                          <p className={`text-[10px] truncate ${override.is_unavailable ? 'text-destructive' : 'text-accent'}`}>
+                            {override.display}
+                          </p>
+                        )}
+                      </CardHeader>
+                      <CardContent className={viewMode === "week" ? "p-2 space-y-1" : "p-1 space-y-0.5"}>
+                        {dayBookings.slice(0, maxBookingsToShow).map((booking) => (
+                          <button
+                            key={booking.id}
+                            onClick={() => setSelectedBooking(booking)}
+                            className={`w-full text-left ${viewMode === "week" ? "p-2" : "p-1"} rounded text-xs transition-colors border ${getStatusColor(booking.status || '')} hover:opacity-80`}
+                            aria-label={`View booking for ${booking.guest_name || 'Guest'} at ${format(new Date(booking.start_datetime), "h:mm a")}`}
+                          >
+                            <div className="font-medium truncate">
+                              {booking.guest_name || "Guest"}
+                            </div>
+                            {viewMode === "week" && (
+                              <>
+                                <div className="flex items-center gap-1 opacity-80">
+                                  <Clock className="h-3 w-3" />
+                                  {format(new Date(booking.start_datetime), "h:mm a")}
+                                </div>
+                                <div className="text-[10px] mt-1 font-medium">
+                                  {getStatusLabel(booking.status || '')}
+                                </div>
+                              </>
+                            )}
+                          </button>
+                        ))}
+                        {dayBookings.length > maxBookingsToShow && (
+                          <Popover open={moreOpenDayKey === dayKey} onOpenChange={(open) => setMoreOpenDayKey(open ? dayKey : null)}>
+                            <PopoverTrigger asChild>
+                              <button
+                                type="button"
+                                className={`text-xs text-muted-foreground text-center w-full ${viewMode === "week" ? "pt-1" : ""} hover:underline`}
+                              >
+                                +{dayBookings.length - maxBookingsToShow} more
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent align="center" className="w-72 p-2 bg-popover border-border">
+                              <div className="text-xs font-medium text-popover-foreground px-1 pb-2">
+                                {format(day, "MMM d, yyyy")}
+                              </div>
+                              <div className="space-y-1 max-h-64 overflow-auto pr-1">
+                                {overflowBookings.map((booking) => (
+                                  <button
+                                    key={booking.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedBooking(booking);
+                                      setMoreOpenDayKey(null);
+                                    }}
+                                    className="w-full text-left rounded border border-border hover:bg-muted px-2 py-2"
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0">
+                                        <div className="text-sm font-medium text-foreground truncate">
+                                          {booking.guest_name || "Guest"}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                          <Clock className="h-3 w-3" />
+                                          {format(new Date(booking.start_datetime), "h:mm a")}
+                                        </div>
+                                      </div>
+                                      <span className={`shrink-0 text-[10px] px-2 py-1 rounded border ${getStatusColor(booking.status || '')}`}>
+                                        {(booking.status || "").toString()}
+                                      </span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                        {dayBookings.length === 0 && viewMode === "week" && (
+                          <div className="text-xs text-muted-foreground text-center py-4">
+                            {override?.is_unavailable ? "Unavailable" : "No bookings"}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
+          )}
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-zinc-400">Date & Time</label>
-                    <p className="flex items-center gap-1 text-white">
-                      <CalendarDays className="h-4 w-4" />
-                      {format(new Date(selectedBooking.start_datetime), "MMM d, yyyy")}
-                    </p>
-                    <p className="flex items-center gap-1 text-sm text-zinc-300">
-                      <Clock className="h-3 w-3" />
-                      {format(new Date(selectedBooking.start_datetime), "h:mm a")} - 
-                      {format(new Date(selectedBooking.end_datetime), "h:mm a")}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-zinc-400">Business</label>
-                    <p className="text-white">{selectedBooking.businesses?.name}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-zinc-400">Total</label>
-                    <p className="text-lg font-bold text-white">{formatMoneyOrEstimate(selectedBooking)}</p>
-                  </div>
-                  {selectedBooking.deposit_amount && (
+          {/* Booking Detail Dialog */}
+          <Dialog open={!!selectedBooking} onOpenChange={() => setSelectedBooking(null)}>
+            <DialogContent className="max-w-lg bg-card border-border">
+              <DialogHeader>
+                <DialogTitle className="text-foreground">Booking Details</DialogTitle>
+              </DialogHeader>
+              {selectedBooking && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-zinc-400">Deposit</label>
-                      <p className="text-white">${selectedBooking.deposit_amount?.toFixed(2)}</p>
+                      <label className="text-sm font-medium text-muted-foreground">Booking #</label>
+                      <p className="font-mono text-foreground">{selectedBooking.booking_number}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Status</label>
+                      <Badge className={getStatusColor(selectedBooking.status || '')}>
+                        {selectedBooking.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Customer</label>
+                    <p className="text-foreground">{selectedBooking.guest_name || `${selectedBooking.profiles?.first_name} ${selectedBooking.profiles?.last_name}`}</p>
+                    <p className="text-sm text-muted-foreground">{selectedBooking.guest_email || selectedBooking.profiles?.email}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Date & Time</label>
+                      <p className="flex items-center gap-1 text-foreground">
+                        <CalendarDays className="h-4 w-4" />
+                        {format(new Date(selectedBooking.start_datetime), "MMM d, yyyy")}
+                      </p>
+                      <p className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {format(new Date(selectedBooking.start_datetime), "h:mm a")} - 
+                        {format(new Date(selectedBooking.end_datetime), "h:mm a")}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Business</label>
+                      <p className="text-foreground">{selectedBooking.businesses?.name}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Total</label>
+                      <p className="text-lg font-bold text-foreground">{formatMoneyOrEstimate(selectedBooking)}</p>
+                    </div>
+                    {selectedBooking.deposit_amount && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Deposit</label>
+                        <p className="text-foreground">${selectedBooking.deposit_amount?.toFixed(2)}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedBooking.notes && (
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Notes</label>
+                      <p className="text-sm text-muted-foreground">{selectedBooking.notes}</p>
                     </div>
                   )}
-                </div>
 
-                {selectedBooking.notes && (
-                  <div>
-                    <label className="text-sm font-medium text-zinc-400">Notes</label>
-                    <p className="text-sm text-zinc-300">{selectedBooking.notes}</p>
-                  </div>
-                )}
-
-                <div className="flex flex-col gap-2 pt-4">
-                  {/* Reschedule button - only for Spa/Restoration bookings that are confirmed */}
-                  {isSpaBooking(selectedBooking) && selectedBooking.status === "confirmed" && (
-                    <Button
-                      variant="outline"
-                      className="w-full border-amber-600 text-amber-400 hover:bg-amber-900/30 hover:text-amber-300"
-                      onClick={() => setRescheduleOpen(true)}
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Reschedule Appointment
-                    </Button>
-                  )}
-                  
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1 border-zinc-600 text-white hover:bg-zinc-700" onClick={() => setSelectedBooking(null)}>
-                      Close
-                    </Button>
-                    <Button
-                      className="flex-1 bg-accent text-black hover:bg-accent/90"
-                      onClick={() => setEditOpen(true)}
-                    >
-                      Edit Booking
-                    </Button>
+                  <div className="flex flex-col gap-2 pt-4">
+                    {/* Reschedule button - only for Spa/Restoration bookings that are confirmed */}
+                    {isSpaBooking(selectedBooking) && selectedBooking.status === "confirmed" && (
+                      <Button
+                        variant="outline"
+                        className="w-full border-amber-600 text-amber-500 hover:bg-amber-900/30 hover:text-amber-400"
+                        onClick={() => setRescheduleOpen(true)}
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Reschedule Appointment
+                      </Button>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="flex-1 border-border text-foreground hover:bg-muted" onClick={() => setSelectedBooking(null)}>
+                        Close
+                      </Button>
+                      <Button
+                        className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90"
+                        onClick={() => setEditOpen(true)}
+                      >
+                        Edit Booking
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+              )}
+            </DialogContent>
+          </Dialog>
 
-        <BookingEditDialog
-          open={editOpen}
-          onOpenChange={setEditOpen}
-          booking={selectedBooking}
-          onUpdated={() => {
-            refetch();
-          }}
-          onCancelled={() => {
-            // Close both modals and refresh the schedule
-            setEditOpen(false);
-            setSelectedBooking(null);
-            refetch();
-          }}
-        />
+          <BookingEditDialog
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            booking={selectedBooking}
+            onUpdated={() => {
+              refetch();
+            }}
+            onCancelled={() => {
+              // Close both modals and refresh the schedule
+              setEditOpen(false);
+              setSelectedBooking(null);
+              refetch();
+            }}
+          />
 
-        {/* Reschedule Modal - Spa only */}
-        <RescheduleModal
-          open={rescheduleOpen}
-          onOpenChange={setRescheduleOpen}
-          booking={selectedBooking}
-          onSuccess={() => {
-            refetch();
-            setSelectedBooking(null);
-          }}
-        />
+          {/* Reschedule Modal - Spa only */}
+          <RescheduleModal
+            open={rescheduleOpen}
+            onOpenChange={setRescheduleOpen}
+            booking={selectedBooking}
+            onSuccess={() => {
+              refetch();
+              setSelectedBooking(null);
+            }}
+          />
 
-        {/* Day Availability Modal - Spa only */}
-        <DayAvailabilityModal
-          open={availabilityOpen}
-          onOpenChange={setAvailabilityOpen}
-          selectedDate={selectedDayForAvailability}
-          businessId={spaBusinessId}
-          existingBookings={bookings || []}
-          onSuccess={() => {
-            refetch();
-          }}
-        />
-      </div>
+          {/* Day Availability Modal - Spa only */}
+          <DayAvailabilityModal
+            open={availabilityOpen}
+            onOpenChange={setAvailabilityOpen}
+            selectedDate={selectedDayForAvailability}
+            businessId={spaBusinessId}
+            businessName={spaBusinessName}
+            existingBookings={bookings || []}
+            onSuccess={handleAvailabilitySuccess}
+          />
+        </div>
+      </TooltipProvider>
     </AdminLayout>
   );
 }
