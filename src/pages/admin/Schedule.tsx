@@ -67,8 +67,8 @@ export default function AdminSchedule() {
   });
 
   const filteredBookings = useMemo(() => {
-    // Hide denied bookings to keep the calendar uncluttered.
-    return (bookings || []).filter((b: any) => b?.status !== "denied");
+    // Hide denied and cancelled bookings to keep the calendar uncluttered.
+    return (bookings || []).filter((b: any) => b?.status !== "denied" && b?.status !== "cancelled");
   }, [bookings]);
 
   const getStatusColor = (status: string) => {

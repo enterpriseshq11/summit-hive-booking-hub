@@ -850,6 +850,97 @@ function buildReminderEmail(
 </html>`;
 }
 
+// ============= CANCELLATION TEMPLATES =============
+function buildCancellationEmail(
+  booking: Record<string, unknown>,
+  businessType: string,
+  staffContact: { email: string; phone?: string; name: string }
+): string {
+  const businessLabel = getBusinessLabel(businessType);
+  const startDate = new Date(booking.start_datetime as string);
+  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Your Appointment";
+  const cancellationReason = (booking as any).cancellation_reason || "";
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .header { background: #2d3748; padding: 20px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 20px; }
+    .badge { display: inline-block; background: #e53e3e; color: white; padding: 4px 12px; font-size: 12px; font-weight: bold; border-radius: 4px; }
+    .content { padding: 20px; background: #ffffff; }
+    .info-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    .info-table td { padding: 10px; border-bottom: 1px solid #eee; }
+    .info-table td:first-child { font-weight: bold; width: 140px; color: #666; }
+    .cancelled-box { background: #fff5f5; border-left: 4px solid #e53e3e; padding: 15px; margin: 15px 0; }
+    .reason-box { background: #f7fafc; padding: 15px; border-radius: 4px; margin: 15px 0; }
+    .footer { background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; }
+    .cta-button { display: inline-block; background: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="badge">Cancelled</span>
+      <h1 style="margin-top: 10px;">${businessLabel}</h1>
+    </div>
+    <div class="content">
+      <div class="cancelled-box">
+        <strong>Your appointment has been cancelled</strong><br>
+        <span style="font-size: 12px; color: #666;">We're sorry for any inconvenience.</span>
+      </div>
+      
+      <p>Hi ${(booking.guest_name as string)?.split(" ")[0] || "there"},</p>
+      <p>Your ${serviceName} appointment scheduled for <strong>${dateStr} at ${startTimeStr}</strong> has been cancelled by our team.</p>
+      
+      ${cancellationReason ? `
+        <div class="reason-box">
+          <strong>Reason:</strong> ${cancellationReason}
+        </div>
+      ` : ""}
+
+      <h2 style="margin-top: 20px;">Cancelled Appointment Details</h2>
+      <table class="info-table">
+        <tr><td>📅 Date</td><td><s>${dateStr}</s></td></tr>
+        <tr><td>⏰ Time</td><td><s>${startTimeStr}</s></td></tr>
+        <tr><td>🧘 Service</td><td>${serviceName}</td></tr>
+      </table>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <p><strong>Would you like to reschedule?</strong></p>
+        <p>We'd love to see you! Book a new appointment at your convenience.</p>
+        <a href="https://summit-hive-booking-hub.lovable.app" class="cta-button">Book Again</a>
+      </div>
+
+      <p style="margin-top: 20px; font-size: 14px; color: #666;">
+        Questions? Contact us at <a href="tel:${BUSINESS_PHONE}">${BUSINESS_PHONE}</a>
+      </p>
+    </div>
+    <div class="footer">
+      <p>Booking #${booking.booking_number || (booking.id as string).slice(0, 8).toUpperCase()}</p>
+      <p>${businessLabel} | A-Z Enterprises</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function buildCancellationSMS(booking: Record<string, unknown>, businessType: string): string {
+  const businessLabel = getBusinessLabel(businessType);
+  const startDate = new Date(booking.start_datetime as string);
+  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  return `❌ CANCELLED
+Your ${businessLabel} appt on ${shortDate} at ${timeStr} has been cancelled.
+To reschedule, book again or call ${BUSINESS_PHONE}`;
+}
+
 // ============= SMS TEMPLATES =============
 function buildCustomerConfirmationSMS(booking: Record<string, unknown>, businessType: string): string {
   const businessLabel = getBusinessLabel(businessType);
@@ -1134,6 +1225,9 @@ serve(async (req) => {
               headline: "Request Denied",
               lead: "We reviewed your request and we’re not able to approve it for the requested time.",
             });
+          } else if (notification_type === "cancellation") {
+            subject = `Appointment Cancelled — ${brandLabel} — ${shortDate} at ${timeStr}`;
+            html = buildCancellationEmail(booking, businessType, staffContact);
           } else {
             const reminderType = reminder_type || "24h";
             const prefix = reminderType === "day_of_morning" ? "Today" : reminderType === "1h" ? "In 1 hour" : reminderType === "2h" ? "In 2 hours" : "Reminder";
@@ -1367,6 +1461,8 @@ serve(async (req) => {
         let smsMessage: string;
         if (notification_type === "confirmation") {
           smsMessage = buildCustomerConfirmationSMS(booking, businessType);
+        } else if (notification_type === "cancellation") {
+          smsMessage = buildCancellationSMS(booking, businessType);
         } else {
           smsMessage = buildReminderSMS(booking, businessType, reminder_type || notification_type);
         }
