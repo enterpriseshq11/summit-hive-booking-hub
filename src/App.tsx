@@ -31,6 +31,10 @@ import PhotoBooth from "./pages/PhotoBooth";
 import PhotoBoothLanding from "./pages/PhotoBoothLanding";
 import BookWithLindsey from "./pages/BookWithLindsey";
 import NotFound from "./pages/NotFound";
+import Careers from "./pages/Careers";
+import CareersSpa from "./pages/careers/CareersSpa";
+import CareersFitness from "./pages/careers/CareersFitness";
+import CareersContracting from "./pages/careers/CareersContracting";
 
 // Debug (public, never redirects)
 import AuthDebug from "./pages/__debug/AuthDebug";
@@ -113,6 +117,15 @@ function AppInner() {
           <Route path="/voice-vault" element={<VoiceVault />} />
           <Route path="/360-photo-booth" element={<PhotoBooth />} />
           <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
+
+          {/* Careers Routes */}
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/careers/spa" element={<CareersSpa />} />
+          <Route path="/careers/spa/:role" element={<CareersSpa />} />
+          <Route path="/careers/fitness" element={<CareersFitness />} />
+          <Route path="/careers/fitness/:role" element={<CareersFitness />} />
+          <Route path="/careers/contracting" element={<CareersContracting />} />
+          <Route path="/careers/contracting/:role" element={<CareersContracting />} />
 
           {/* Protected customer routes */}
           <Route element={<ProtectedRoute />}>

@@ -36,6 +36,7 @@ import {
   Package,
   UserPlus,
   LogIn,
+  Briefcase,
 } from "lucide-react";
 import { useState } from "react";
 import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
@@ -269,7 +270,21 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* 6. Spin & Win - Direct Link */}
+          {/* 6. Careers - Direct Link */}
+          <Link
+            to="/careers"
+            className={cn(
+              "flex items-center gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 py-2 text-xs md:text-xs lg:text-sm font-medium rounded-md transition-colors",
+              location.pathname.startsWith("/careers")
+                ? "bg-accent/20 text-accent"
+                : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+            )}
+          >
+            <Briefcase className="h-4 w-4" />
+            Careers
+          </Link>
+
+          {/* 7. Spin & Win - Direct Link */}
           <Link
             to="/dopamine-drop"
             className={cn(
@@ -482,7 +497,22 @@ export function Header() {
             )}
           </div>
 
-          {/* 6. Spin & Win - Direct Link */}
+          {/* 6. Careers - Direct Link */}
+          <Link
+            to="/careers"
+            onClick={() => setMobileMenuOpen(false)}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors",
+              location.pathname.startsWith("/careers")
+                ? "bg-accent/20 text-accent"
+                : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+            )}
+          >
+            <Briefcase className="h-5 w-5" />
+            Careers
+          </Link>
+
+          {/* 7. Spin & Win - Direct Link */}
           <Link
             to="/dopamine-drop"
             onClick={() => setMobileMenuOpen(false)}
