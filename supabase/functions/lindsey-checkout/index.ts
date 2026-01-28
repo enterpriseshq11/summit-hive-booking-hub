@@ -51,9 +51,10 @@ serve(async (req) => {
       customer_phone,
       consent_no_show_fee,
       consent_timestamp,
+      skip_payment, // New: frontend signals to skip payment when spa_payments_enabled = false
     } = body || {};
 
-    logStep("Request parsed", { service_id, service_name, duration, price, room_id, start_datetime, end_datetime, consent_no_show_fee });
+    logStep("Request parsed", { service_id, service_name, duration, price, room_id, start_datetime, end_datetime, consent_no_show_fee, skip_payment });
 
     // Validate required fields
     if (!service_name || !duration || price === undefined || !start_datetime || !end_datetime) {
@@ -68,6 +69,16 @@ serve(async (req) => {
     if (!emailRegex.test(customer_email.trim())) {
       return jsonResponse(400, { error: "Invalid email format" });
     }
+
+    // Check if spa payments are enabled (fetch from app_config)
+    const { data: configData } = await supabase
+      .from("app_config")
+      .select("value")
+      .eq("key", "spa_payments_enabled")
+      .maybeSingle();
+    
+    const spaPaymentsEnabled = configData?.value === "true";
+    logStep("Spa payments config", { spaPaymentsEnabled });
 
     // Get spa business
     const { data: business, error: bizError } = await supabase
@@ -166,6 +177,107 @@ serve(async (req) => {
       });
     }
 
+    // ============================================================
+    // PAY ON ARRIVAL: Skip payment when spa_payments_enabled = false
+    // ============================================================
+    if (!spaPaymentsEnabled || skip_payment === true) {
+      logStep("Processing as pay-on-arrival (spa payments disabled)");
+      
+      const { data: bookingNumber } = await supabase.rpc("generate_booking_number");
+      const servicePrice = Number(price);
+
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .insert({
+          business_id: business.id,
+          bookable_type_id: bookableType.id,
+          start_datetime,
+          end_datetime,
+          status: "confirmed", // Immediately confirmed
+          subtotal: servicePrice,
+          total_amount: servicePrice,
+          booking_number: bookingNumber || `SPA-${Date.now()}`,
+          guest_name: customer_name.trim(),
+          guest_email: customer_email.trim(),
+          guest_phone: customer_phone?.trim() || null,
+          deposit_amount: 0, // No deposit collected
+          balance_due: servicePrice, // Full amount due on arrival
+          balance_due_date: start_datetime.split("T")[0],
+          notes: `Service: ${service_name}, Duration: ${duration} min | Total: $${servicePrice} | Payment: Due on arrival (payments disabled at booking time)`,
+        })
+        .select("id")
+        .single();
+
+      if (bookingError) throw new Error(bookingError.message);
+
+      // Attach room if provided
+      if (room_id && booking) {
+        await supabase.from("booking_resources").insert({
+          booking_id: booking.id,
+          resource_id: room_id,
+          start_datetime,
+          end_datetime,
+        });
+      }
+
+      // Create payment record with pay_on_arrival status
+      await supabase.from("payments").insert({
+        booking_id: booking.id,
+        amount: servicePrice,
+        payment_type: "full",
+        status: "pending", // Will be marked paid when customer arrives
+        metadata: {
+          payment_method: "pay_on_arrival",
+          payments_enabled_at_booking: false,
+          service_name,
+          duration,
+        },
+      });
+
+      logStep("Pay-on-arrival booking created", { bookingId: booking?.id, servicePrice });
+
+      // Send confirmation email
+      let emailSent = false;
+      let emailError = null;
+      try {
+        const notificationResponse = await fetch(
+          `${supabaseUrl}/functions/v1/lindsey-booking-notification`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${serviceRoleKey}`,
+            },
+            body: JSON.stringify({
+              booking_id: booking?.id,
+              type: "pay_on_arrival",
+            }),
+          }
+        );
+        const notifResult = await notificationResponse.json();
+        emailSent = notifResult.email_sent === true;
+        emailError = notifResult.lindsey_email_error || notifResult.customer_email_error || null;
+        logStep("Pay-on-arrival notification result", { emailSent, emailError });
+      } catch (notifError) {
+        logStep("Notification error (non-fatal)", { error: String(notifError) });
+        emailError = String(notifError);
+      }
+
+      return jsonResponse(200, { 
+        success: true, 
+        booking_id: booking?.id,
+        is_pay_on_arrival: true,
+        service_price: servicePrice,
+        balance_due: servicePrice,
+        email_sent: emailSent,
+        email_error: emailError,
+      });
+    }
+
+    // ============================================================
+    // NORMAL PAYMENT FLOW: $20 booking fee when payments enabled
+    // ============================================================
+    
     // Validate consent for paid bookings
     if (!consent_no_show_fee) {
       return jsonResponse(400, { error: "Consent to booking fee policy is required" });

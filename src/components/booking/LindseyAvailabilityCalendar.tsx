@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLindseyAvailability, isPromoDate, calculateServicePrice } from "@/hooks/useLindseyAvailability";
+import { useSpaPaymentsConfig } from "@/hooks/useSpaPaymentsConfig";
 
 // Service option type
 interface ServiceOption {
@@ -137,7 +138,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const [consentChecked, setConsentChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
-  const [completionType, setCompletionType] = useState<"paid" | "free" | null>(null);
+  const [completionType, setCompletionType] = useState<"paid" | "free" | "pay_on_arrival" | null>(null);
   const [completedBookingId, setCompletedBookingId] = useState<string | null>(null);
   const [completedSummary, setCompletedSummary] = useState<
     | {
@@ -165,6 +166,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
     selectedDate,
     selectedDuration: selectedDuration || 60,
   });
+
+  // Fetch spa payments config (when false, skip payment collection)
+  const { spaPaymentsEnabled } = useSpaPaymentsConfig();
 
   // Handle Stripe return URLs (success/cancel) in the same way other paid flows do.
   useEffect(() => {
@@ -304,12 +308,17 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const isFormValid = (): boolean => {
     const serviceData = getSelectedServiceData();
     const isFreeConsult = serviceData?.isFree === true;
+    const price = calculatePrice();
+    const isPaidService = price !== null && price > 0;
+    
+    // Consent only required for paid services when payments are enabled
+    const needsConsent = isPaidService && spaPaymentsEnabled;
     
     return (
       guestInfo.name.trim().length > 0 &&
       validateEmail(guestInfo.email) &&
       validatePhone(guestInfo.phone) &&
-      (isFreeConsult || consentChecked) // Consent only required for paid services
+      (isFreeConsult || !needsConsent || consentChecked)
     );
   };
 
@@ -341,16 +350,17 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
 
     const serviceData = getSelectedServiceData();
     const isFreeConsult = serviceData?.isFree === true;
+    const price = calculatePrice() || 0;
+    const isPaidService = price > 0;
     
-    // Consent required for paid services
-    if (!isFreeConsult && !consentChecked) {
+    // Consent required for paid services only when payments are enabled
+    if (!isFreeConsult && isPaidService && spaPaymentsEnabled && !consentChecked) {
       toast.error("Please accept the booking fee policy to continue");
       return;
     }
 
     // Use selected room or default to H1
     const roomId = selectedRoom || "11111111-1111-1111-1111-111111111111";
-    const price = calculatePrice() || 0;
     const consentTimestamp = new Date().toISOString();
 
     setIsSubmitting(true);
@@ -366,6 +376,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       const endDatetime = `${format(selectedDate, "yyyy-MM-dd")}T${endTime}:00`;
 
       // Call lindsey-checkout edge function
+      // Pass skip_payment flag when spa payments are disabled
       const { data, error } = await supabase.functions.invoke("lindsey-checkout", {
         body: {
           service_id: selectedService,
@@ -378,8 +389,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
           customer_name: guestInfo.name.trim(),
           customer_email: guestInfo.email.trim(),
           customer_phone: guestInfo.phone.trim(),
-          consent_no_show_fee: !isFreeConsult ? consentChecked : undefined,
-          consent_timestamp: !isFreeConsult ? consentTimestamp : undefined,
+          consent_no_show_fee: isPaidService && spaPaymentsEnabled ? consentChecked : undefined,
+          consent_timestamp: isPaidService && spaPaymentsEnabled ? consentTimestamp : undefined,
+          skip_payment: !spaPaymentsEnabled, // Signal to skip payment when disabled
         },
       });
 
@@ -400,6 +412,36 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
         } else {
           toast.success("Free consultation booked! Confirmation details will be sent shortly.");
           console.warn("Email not sent:", data?.email_error);
+        }
+        
+        onBookingComplete?.();
+        return;
+      }
+
+      // Handle pay-on-arrival bookings (spa payments disabled)
+      if (data?.is_pay_on_arrival) {
+        setCompletionType("pay_on_arrival");
+        setCompletedBookingId(data?.booking_id || null);
+        setBookingComplete(true);
+        setStep("confirm");
+        
+        // Store summary for display
+        const summary = {
+          serviceName: serviceData?.name || "Massage",
+          duration: selectedDuration || undefined,
+          dateLabel: selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy") : undefined,
+          timeLabel: selectedTime ? format(new Date(`2000-01-01T${selectedTime}`), "h:mm a") : undefined,
+          roomName: ROOMS.find((r) => r.id === roomId)?.name || "H1 - Hallway Room",
+          servicePrice: data?.service_price,
+          balanceDue: data?.balance_due,
+          total: price,
+        };
+        setCompletedSummary(summary);
+        
+        if (data?.email_sent) {
+          toast.success("Appointment confirmed! Check your email for details. Payment due on arrival.");
+        } else {
+          toast.success("Appointment confirmed! Payment due on arrival.");
         }
         
         onBookingComplete?.();
@@ -553,11 +595,15 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
             <h2 className="text-2xl font-bold mb-2">
-              {completionType === "paid" ? "Booking Confirmed!" : "Consultation Booked!"}
+              {completionType === "paid" ? "Booking Confirmed!" : 
+               completionType === "pay_on_arrival" ? "Appointment Confirmed!" : 
+               "Consultation Booked!"}
             </h2>
             <p className="text-muted-foreground mb-6">
               {completionType === "paid"
                 ? "Your $20 booking fee has been received. Check your email for your receipt and details."
+                : completionType === "pay_on_arrival"
+                ? "Your appointment is confirmed. Payment is due at arrival."
                 : "This is a free consultation. Check your email for details."}
             </p>
             <div className="bg-muted rounded-lg p-4 text-left max-w-sm mx-auto mb-6">
@@ -578,6 +624,16 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                     </li>
                     <li>
                       <strong>Remaining Due at Appointment:</strong> ${(completedSummary as any)?.balanceDue ?? Math.max(0, (calculatePrice() || 0) - BOOKING_FEE)}
+                    </li>
+                  </>
+                )}
+                {completionType === "pay_on_arrival" && (
+                  <>
+                    <li className="pt-2 border-t border-border mt-2">
+                      <strong>Service Price:</strong> ${(completedSummary as any)?.servicePrice ?? completedSummary?.total ?? calculatePrice()}
+                    </li>
+                    <li className="text-accent font-semibold">
+                      <strong>Payment Due on Arrival:</strong> ${(completedSummary as any)?.balanceDue ?? calculatePrice()}
                     </li>
                   </>
                 )}
@@ -848,6 +904,22 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                           if (!breakdown) {
                             return <p className="text-xl font-bold text-green-600">Free</p>;
                           }
+                          
+                          // Pay on arrival mode (payments disabled)
+                          if (!spaPaymentsEnabled) {
+                            return (
+                              <div className="space-y-1 text-sm">
+                                <p className="text-muted-foreground">
+                                  Service Price: <span className="font-medium text-foreground">${breakdown.servicePrice}</span>
+                                </p>
+                                <p className="text-accent font-semibold">
+                                  Due on Arrival: ${breakdown.servicePrice}
+                                </p>
+                              </div>
+                            );
+                          }
+                          
+                          // Normal payment mode
                           return (
                             <div className="space-y-1 text-sm">
                               <p className="text-muted-foreground">
@@ -926,8 +998,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                   </div>
                 </div>
 
-                {/* Consent Checkbox - Only for paid services */}
-                {calculatePrice() !== null && calculatePrice() !== 0 && (
+                {/* Consent Checkbox - Only for paid services when payments enabled */}
+                {calculatePrice() !== null && calculatePrice() !== 0 && spaPaymentsEnabled && (
                   <div className="flex items-start space-x-3 p-4 rounded-lg bg-muted/50 border border-border">
                     <Checkbox
                       id="consent"
@@ -946,17 +1018,35 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                   </div>
                 )}
 
+                {/* Pay on arrival notice when payments disabled */}
+                {calculatePrice() !== null && calculatePrice() !== 0 && !spaPaymentsEnabled && (
+                  <div className="p-4 rounded-lg bg-accent/10 border border-accent/30">
+                    <p className="text-sm text-foreground">
+                      <strong>Payment due on arrival:</strong> ${calculatePrice()}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      No payment is required to book. Pay when you arrive for your appointment.
+                    </p>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   size="lg"
                   className="w-full bg-accent hover:bg-accent/90 text-primary font-bold"
                   disabled={isSubmitting || !isFormValid()}
                 >
-                  {isSubmitting ? "Processing..." : calculatePrice() === 0 ? "Confirm Booking" : `Pay $20 Booking Fee`}
+                  {isSubmitting 
+                    ? "Processing..." 
+                    : calculatePrice() === 0 
+                      ? "Confirm Booking" 
+                      : spaPaymentsEnabled 
+                        ? `Pay $20 Booking Fee`
+                        : "Confirm Appointment"}
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
 
-                {calculatePrice() !== 0 && (
+                {calculatePrice() !== 0 && spaPaymentsEnabled && (
                   <p className="text-center text-xs text-muted-foreground">
                     You will be redirected to secure payment for your $20 booking fee.
                   </p>
