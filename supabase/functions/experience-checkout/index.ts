@@ -43,6 +43,9 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseUrl || !serviceRoleKey) throw new Error("Backend keys are not set");
@@ -67,7 +70,6 @@ serve(async (req) => {
       duration_hours,
       hourly_rate,
       total_amount: passedTotalAmount,
-      skip_payment, // Optional: if true, skip payment collection
     } = body || {};
 
     logStep("Request parsed", {
@@ -81,7 +83,6 @@ serve(async (req) => {
       hourly_rate,
       has_customer_email: Boolean(customer_email),
       has_customer_phone: Boolean(customer_phone),
-      skip_payment,
     });
 
     if (!business_type || !resource_id || !start_datetime || !end_datetime) {
@@ -90,23 +91,6 @@ serve(async (req) => {
     if (!customer_name || !customer_email || !customer_phone) {
       return jsonResponse(400, { error: "Missing customer details" });
     }
-
-    // Check if payments are enabled for this business type
-    let paymentsEnabled = true;
-    if (business_type === "photo_booth") {
-      const { data: configData } = await supabase
-        .from("app_config")
-        .select("value")
-        .eq("key", "photobooth360_payments_enabled")
-        .maybeSingle();
-      paymentsEnabled = configData?.value === "true";
-    }
-    
-    const shouldSkipPayment = skip_payment === true || !paymentsEnabled;
-    logStep("Payment config check", { business_type, paymentsEnabled, shouldSkipPayment });
-
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey && !shouldSkipPayment) throw new Error("STRIPE_SECRET_KEY is not set");
 
     let pkg: { id: string; name: string; base_price: number; duration_mins: number; bookable_type_id: string } | null = null;
     let bt: { id: string; name: string; business_id: string; deposit_percentage: number | null; deposit_fixed_amount: number | null } | null = null;
@@ -185,24 +169,13 @@ serve(async (req) => {
       productName = `${biz.name} - ${pkg.name}`;
     }
 
-    // Adjust deposit based on whether payments are enabled
-    let deposit: number;
-    let remaining: number;
-    
-    if (shouldSkipPayment) {
-      deposit = 0;
-      remaining = total;
-    } else {
-      const computed = computeDeposit(total, bt!.deposit_percentage, bt!.deposit_fixed_amount);
-      deposit = computed.deposit;
-      remaining = computed.remaining;
-    }
+    const { deposit, remaining } = computeDeposit(total, bt!.deposit_percentage, bt!.deposit_fixed_amount);
 
     // Generate booking number
     const { data: bookingNumber, error: bnError } = await supabase.rpc("generate_booking_number");
     if (bnError) logStep("Booking number generation failed", { error: bnError });
 
-    // Create booking - set status based on whether payment is required
+    // Create booking
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .insert({
@@ -211,7 +184,7 @@ serve(async (req) => {
         package_id: pkg?.id || null,
         start_datetime,
         end_datetime,
-        status: shouldSkipPayment ? "confirmed" : "pending",
+        status: "pending",
         subtotal: total,
         total_amount: total,
         booking_number: bookingNumber || "",
@@ -220,13 +193,10 @@ serve(async (req) => {
         guest_phone: customer_phone,
         deposit_amount: deposit,
         balance_due: remaining,
-        notes: shouldSkipPayment ? "Payment: Due on arrival (payments disabled at booking time)" : null,
       })
       .select("id")
       .single();
     if (bookingError || !booking) throw new Error(bookingError?.message || "Failed to create booking");
-
-    logStep("Booking created", { bookingId: booking.id, status: shouldSkipPayment ? "confirmed" : "pending" });
 
     // Attach resource
     const { error: brError } = await supabase.from("booking_resources").insert({
@@ -236,28 +206,6 @@ serve(async (req) => {
       end_datetime,
     });
     if (brError) throw new Error(brError.message);
-
-    // If skipping payment, return success immediately
-    if (shouldSkipPayment) {
-      logStep("Pay on arrival - skipping Stripe checkout");
-      
-      // Consume the slot hold if provided
-      if (hold_id) {
-        const { error: holdError } = await supabase
-          .from("slot_holds")
-          .update({ status: "consumed" })
-          .eq("id", hold_id);
-        if (holdError) logStep("Hold consume failed", { error: holdError });
-      }
-      
-      return jsonResponse(200, { 
-        success: true, 
-        is_pay_on_arrival: true,
-        booking_id: booking.id,
-        total_amount: total,
-        message: "Booking confirmed. Payment due on arrival."
-      });
-    }
 
     // Create slot hold server-side (using service role bypasses RLS)
     // This prevents double-booking while customer completes payment
@@ -292,7 +240,7 @@ serve(async (req) => {
     }
 
     // Create Stripe checkout for DEPOSIT only
-    const stripe = new Stripe(stripeKey!, { apiVersion: "2025-08-27.basil" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const origin = req.headers.get("origin") || "http://localhost:3000";
 
     // Build success/cancel URLs based on business type
