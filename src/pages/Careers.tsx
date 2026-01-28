@@ -178,9 +178,7 @@ export default function Careers() {
                           <Badge variant="outline" className="capitalize">
                             {opening.team}
                           </Badge>
-                          {opening.employment_type && (
-                            <Badge variant="secondary">{opening.employment_type}</Badge>
-                          )}
+                          <Badge variant="secondary">1099</Badge>
                         </div>
                         <h3 className="text-xl font-semibold mb-2">{opening.role}</h3>
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
