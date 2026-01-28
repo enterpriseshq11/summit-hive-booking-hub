@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { format, addDays, startOfToday, isBefore, startOfDay } from "date-fns";
 import { 
@@ -133,6 +134,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "" });
   const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
+  const [consentChecked, setConsentChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [completionType, setCompletionType] = useState<"paid" | "free" | null>(null);
@@ -300,11 +302,28 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   };
 
   const isFormValid = (): boolean => {
+    const serviceData = getSelectedServiceData();
+    const isFreeConsult = serviceData?.isFree === true;
+    
     return (
       guestInfo.name.trim().length > 0 &&
       validateEmail(guestInfo.email) &&
-      validatePhone(guestInfo.phone)
+      validatePhone(guestInfo.phone) &&
+      (isFreeConsult || consentChecked) // Consent only required for paid services
     );
+  };
+
+  // Booking fee constant
+  const BOOKING_FEE = 20;
+  
+  const getBookingFeeBreakdown = () => {
+    const price = calculatePrice() || 0;
+    if (price <= 0) return null; // Free consultation
+    return {
+      servicePrice: price,
+      bookingFee: BOOKING_FEE,
+      balanceDue: Math.max(0, price - BOOKING_FEE),
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -320,10 +339,19 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       return;
     }
 
+    const serviceData = getSelectedServiceData();
+    const isFreeConsult = serviceData?.isFree === true;
+    
+    // Consent required for paid services
+    if (!isFreeConsult && !consentChecked) {
+      toast.error("Please accept the booking fee policy to continue");
+      return;
+    }
+
     // Use selected room or default to H1
     const roomId = selectedRoom || "11111111-1111-1111-1111-111111111111";
     const price = calculatePrice() || 0;
-    const serviceData = getSelectedServiceData();
+    const consentTimestamp = new Date().toISOString();
 
     setIsSubmitting(true);
 
@@ -349,7 +377,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
           end_datetime: endDatetime,
           customer_name: guestInfo.name.trim(),
           customer_email: guestInfo.email.trim(),
-          customer_phone: guestInfo.phone?.trim() || "",
+          customer_phone: guestInfo.phone.trim(),
+          consent_no_show_fee: !isFreeConsult ? consentChecked : undefined,
+          consent_timestamp: !isFreeConsult ? consentTimestamp : undefined,
         },
       });
 
@@ -376,10 +406,11 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
         return;
       }
 
-      // Paid booking: open Stripe checkout (same pattern as other flows; avoids iframe blank-screen issues)
+      // Paid booking: open Stripe checkout
       if (data?.url) {
         toast.success("Redirecting to secure payment...");
         const bookingId = data?.booking_id as string | undefined;
+        const breakdown = getBookingFeeBreakdown();
         if (bookingId) {
           try {
             const summary = {
@@ -388,6 +419,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
               dateLabel: selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy") : undefined,
               timeLabel: selectedTime ? format(new Date(`2000-01-01T${selectedTime}`), "h:mm a") : undefined,
               roomName: ROOMS.find((r) => r.id === roomId)?.name || "H1 - Hallway Room",
+              servicePrice: breakdown?.servicePrice,
+              depositPaid: breakdown?.bookingFee,
+              balanceDue: breakdown?.balanceDue,
               total: price,
             };
             sessionStorage.setItem(`lindsey_booking_${bookingId}`, JSON.stringify(summary));
@@ -418,6 +452,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
     setSelectedTime("");
     setGuestInfo({ name: "", email: "", phone: "" });
     setFormErrors({});
+    setConsentChecked(false);
     setBookingComplete(false);
     setStep("service");
   };
@@ -518,11 +553,11 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
             <h2 className="text-2xl font-bold mb-2">
-              {completionType === "paid" ? "Payment Successful!" : "Consultation Booked!"}
+              {completionType === "paid" ? "Booking Confirmed!" : "Consultation Booked!"}
             </h2>
             <p className="text-muted-foreground mb-6">
               {completionType === "paid"
-                ? "Your booking is confirmed. Check your email for your receipt and details."
+                ? "Your $20 booking fee has been received. Check your email for your receipt and details."
                 : "This is a free consultation. Check your email for details."}
             </p>
             <div className="bg-muted rounded-lg p-4 text-left max-w-sm mx-auto mb-6">
@@ -533,8 +568,18 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                 <li><strong>Date:</strong> {completedSummary?.dateLabel || (selectedDate && format(selectedDate, "EEEE, MMMM d, yyyy"))}</li>
                 <li><strong>Time:</strong> {completedSummary?.timeLabel || (selectedTime && format(new Date(`2000-01-01T${selectedTime}`), "h:mm a"))}</li>
                 <li><strong>Room:</strong> {completedSummary?.roomName || ROOMS.find(r => r.id === selectedRoom)?.name || "H1 - Hallway Room"}</li>
-                {completionType === "paid" && typeof completedSummary?.total === "number" && (
-                  <li><strong>Total Paid:</strong> ${completedSummary.total}</li>
+                {completionType === "paid" && (
+                  <>
+                    <li className="pt-2 border-t border-border mt-2">
+                      <strong>Service Price:</strong> ${(completedSummary as any)?.servicePrice ?? completedSummary?.total ?? calculatePrice()}
+                    </li>
+                    <li className="text-accent font-medium">
+                      <strong>Booking Fee Paid:</strong> ${(completedSummary as any)?.depositPaid ?? BOOKING_FEE}
+                    </li>
+                    <li>
+                      <strong>Remaining Due at Appointment:</strong> ${(completedSummary as any)?.balanceDue ?? Math.max(0, (calculatePrice() || 0) - BOOKING_FEE)}
+                    </li>
+                  </>
                 )}
               </ul>
             </div>
@@ -783,10 +828,10 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                   <p className="text-muted-foreground text-sm">Enter your contact information to complete the booking</p>
                 </div>
 
-                {/* Summary Card */}
+                {/* Summary Card with Booking Fee Breakdown */}
                 <Card className="bg-accent/5 border-accent/30">
                   <CardContent className="py-4">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-start">
                       <div>
                         <p className="font-semibold">{getSelectedServiceData()?.name}</p>
                         <p className="text-sm text-muted-foreground">
@@ -798,11 +843,25 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                         </p>
                       </div>
                       <div className="text-right">
-                        {calculatePrice() !== null && calculatePrice() !== 0 ? (
-                          <p className="text-2xl font-bold text-accent">${calculatePrice()}</p>
-                        ) : (
-                          <p className="text-xl font-bold text-green-600">Free</p>
-                        )}
+                        {(() => {
+                          const breakdown = getBookingFeeBreakdown();
+                          if (!breakdown) {
+                            return <p className="text-xl font-bold text-green-600">Free</p>;
+                          }
+                          return (
+                            <div className="space-y-1 text-sm">
+                              <p className="text-muted-foreground">
+                                Service Price: <span className="font-medium text-foreground">${breakdown.servicePrice}</span>
+                              </p>
+                              <p className="text-accent font-semibold">
+                                Booking Fee Today: ${breakdown.bookingFee}
+                              </p>
+                              <p className="text-muted-foreground">
+                                Due At Appointment: <span className="font-medium text-foreground">${breakdown.balanceDue}</span>
+                              </p>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   </CardContent>
@@ -867,19 +926,39 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                   </div>
                 </div>
 
+                {/* Consent Checkbox - Only for paid services */}
+                {calculatePrice() !== null && calculatePrice() !== 0 && (
+                  <div className="flex items-start space-x-3 p-4 rounded-lg bg-muted/50 border border-border">
+                    <Checkbox
+                      id="consent"
+                      checked={consentChecked}
+                      onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                      className="mt-0.5"
+                    />
+                    <Label 
+                      htmlFor="consent" 
+                      className="text-sm leading-relaxed cursor-pointer"
+                    >
+                      I understand there is a <span className="font-semibold text-accent">$20 booking fee</span> charged today to hold my appointment. 
+                      This fee is applied toward my service total if I attend. 
+                      If I do not show up (or cancel outside the policy window), the $20 is non-refundable.
+                    </Label>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   size="lg"
                   className="w-full bg-accent hover:bg-accent/90 text-primary font-bold"
                   disabled={isSubmitting || !isFormValid()}
                 >
-                  {isSubmitting ? "Processing..." : calculatePrice() === 0 ? "Confirm Booking" : "Proceed to Payment"}
+                  {isSubmitting ? "Processing..." : calculatePrice() === 0 ? "Confirm Booking" : `Pay $20 Booking Fee`}
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
 
                 {calculatePrice() !== 0 && (
                   <p className="text-center text-xs text-muted-foreground">
-                    You will be redirected to secure payment.
+                    You will be redirected to secure payment for your $20 booking fee.
                   </p>
                 )}
               </form>
