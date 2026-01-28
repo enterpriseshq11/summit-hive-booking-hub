@@ -17,6 +17,7 @@ import { VoiceVaultBookingModal } from "@/components/booking/VoiceVaultBookingMo
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
+import { useVoiceVaultPaymentsConfig } from "@/hooks/usePaymentConfigs";
 
 // Gallery is currently in "Coming Soon" state - real images to be added
 const galleryComingSoon = true;
@@ -137,6 +138,10 @@ export default function VoiceVault() {
     message: ""
   });
   const [submitting, setSubmitting] = useState(false);
+  
+  // Get payment config for dynamic CTA labels
+  const { voiceVaultPaymentsEnabled } = useVoiceVaultPaymentsConfig();
+  const ctaLabel = voiceVaultPaymentsEnabled ? "Book & Pay Deposit" : "Book Appointment";
 
   // Handle success/cancelled URL params from Stripe
   useEffect(() => {
@@ -268,7 +273,7 @@ export default function VoiceVault() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-primary font-bold text-lg px-10 h-14 shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-shadow" onClick={handleBookingClick}>
                 <Calendar className="w-5 h-5 mr-2" />
-                Reserve Studio
+                {ctaLabel}
               </Button>
               <Button size="lg" variant="outline" className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold text-lg px-8 h-14" onClick={scrollToPackages}>
                 <Sparkles className="w-5 h-5 mr-2" />
@@ -462,7 +467,7 @@ export default function VoiceVault() {
                       <p className="text-5xl font-bold text-accent mb-1">$45</p>
                       <p className="text-primary-foreground/70 mb-4">per hour</p>
                       <Button size="lg" className="bg-accent hover:bg-accent/90 text-primary font-bold px-8 h-12 w-full shadow-gold-lg" onClick={handleBookingClick}>
-                        Reserve Studio
+                        {ctaLabel}
                         <ArrowRight className="w-5 h-5 ml-2" />
                       </Button>
                       <p className="text-xs text-primary-foreground/60 mt-3">2-hour minimum</p>
@@ -545,7 +550,7 @@ export default function VoiceVault() {
                   <div className="flex flex-col gap-2">
                     <Button size="lg" className="bg-accent hover:bg-accent/90 text-primary font-bold h-12 shadow-gold-lg" onClick={handleBookingClick}>
                       <Calendar className="w-5 h-5 mr-2" />
-                      Reserve Studio
+                      {ctaLabel}
                     </Button>
                     <p className="text-xs text-muted-foreground text-center">
                       By booking, you agree to the{" "}
