@@ -29,6 +29,11 @@ interface AvailableSlot {
   is_available: boolean;
 }
 
+interface TimeWindow {
+  start: string;
+  end: string;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -124,11 +129,28 @@ serve(async (req) => {
     const { data: resources, error: resError } = await resourcesQuery;
     if (resError) throw resError;
 
-    // Get ALL availability windows (for all days of week)
+    // Get ALL availability windows (for all days of week) - these are the defaults
     const { data: availabilityWindows } = await supabase
       .from("availability_windows")
       .select("*")
       .eq("is_active", true);
+
+    // Get availability overrides for the date range - these override defaults
+    const { data: availabilityOverrides } = await supabase
+      .from("availability_overrides")
+      .select("*")
+      .gte("override_date", queryDate)
+      .lte("override_date", endQueryDate);
+
+    // Build a map of overrides by date and business
+    const overridesByDateBusiness = new Map<string, { is_unavailable: boolean; windows: TimeWindow[] }>();
+    for (const override of availabilityOverrides || []) {
+      const key = `${override.override_date}-${override.business_id}`;
+      overridesByDateBusiness.set(key, {
+        is_unavailable: override.is_unavailable,
+        windows: (override.availability_windows as TimeWindow[] || [])
+      });
+    }
 
     // Get existing bookings for the date range
     const { data: existingBookings } = await supabase
@@ -153,7 +175,7 @@ serve(async (req) => {
       .gte("expires_at", new Date().toISOString())
       .eq("status", "active");
 
-    // Get blackout dates
+    // Get blackout dates (legacy - still support these)
     const { data: blackouts } = await supabase
       .from("blackout_dates")
       .select("*")
@@ -207,7 +229,7 @@ serve(async (req) => {
       holdsByResource.set(hold.resource_id, arr);
     }
 
-    // Process blackouts - map by date/resource
+    // Process blackouts - map by date/resource (legacy support)
     const blackoutsByDateResource = new Map<string, boolean>();
     blackouts?.forEach((blackout: any) => {
       const blackoutStart = new Date(blackout.start_datetime);
@@ -237,88 +259,119 @@ serve(async (req) => {
       const dateObj = new Date(dateStr + "T12:00:00"); // Use noon to avoid timezone issues
       const dayOfWeek = dateObj.getDay();
       
-      // Find windows for this day of week
-      const windowsForDay = availabilityWindows?.filter((w: any) => w.day_of_week === dayOfWeek) || [];
-      
-      for (const window of windowsForDay) {
-        const startHour = parseInt(window.start_time.split(":")[0]);
-        const startMinute = parseInt(window.start_time.split(":")[1] || "0");
-        const endHour = parseInt(window.end_time.split(":")[0]);
-        const endMinute = parseInt(window.end_time.split(":")[1] || "0");
+      // For each bookable type, determine its availability windows for this date
+      for (const bt of bookableTypes || []) {
+        const btBusinessId = bt.business_id;
         
-        const windowStartMins = startHour * 60 + startMinute;
-        const windowEndMins = endHour * 60 + endMinute;
-
-        // Check which resources or bookable types this window applies to
-        let applicableResources: any[] = [];
-        let applicableBookableType: any = null;
+        // Check for date-specific override first
+        const overrideKey = `${dateStr}-${btBusinessId}`;
+        const override = overridesByDateBusiness.get(overrideKey);
         
-        if (window.resource_id) {
-          const res = resources?.find((r: any) => r.id === window.resource_id);
-          if (res) applicableResources = [res];
-          applicableBookableType = bookableTypes?.find((bt: any) => bt.business_id === res?.business_id);
-        } else if (window.bookable_type_id) {
-          applicableBookableType = bookableTypes?.find((bt: any) => bt.id === window.bookable_type_id);
-          if (applicableBookableType) {
-            applicableResources = resources?.filter((r: any) => r.business_id === applicableBookableType.business_id) || [];
+        let windowsForDay: { startMins: number; endMins: number }[] = [];
+        
+        if (override) {
+          // Use override if exists
+          if (override.is_unavailable) {
+            // Full day unavailable - no windows
+            continue;
+          }
+          
+          // Use the override windows
+          windowsForDay = override.windows.map(w => {
+            const [startH, startM] = w.start.split(":").map(Number);
+            const [endH, endM] = w.end.split(":").map(Number);
+            return {
+              startMins: startH * 60 + (startM || 0),
+              endMins: endH * 60 + (endM || 0)
+            };
+          });
+        } else {
+          // Fall back to default availability windows for this day of week
+          const defaultWindows = (availabilityWindows || []).filter((w: any) => {
+            if (w.day_of_week !== dayOfWeek) return false;
+            // Check if window applies to this bookable type or its business
+            if (w.bookable_type_id === bt.id) return true;
+            if (!w.bookable_type_id && !w.resource_id) return true; // Generic window
+            return false;
+          });
+          
+          if (defaultWindows.length === 0) {
+            // Default to 9am-9pm if no windows configured
+            windowsForDay = [{ startMins: 9 * 60, endMins: 21 * 60 }];
+          } else {
+            windowsForDay = defaultWindows.map((w: any) => {
+              const startH = parseInt(w.start_time.split(":")[0]);
+              const startM = parseInt(w.start_time.split(":")[1] || "0");
+              const endH = parseInt(w.end_time.split(":")[0]);
+              const endM = parseInt(w.end_time.split(":")[1] || "0");
+              return {
+                startMins: startH * 60 + startM,
+                endMins: endH * 60 + endM
+              };
+            });
           }
         }
 
-        if (!applicableBookableType || applicableResources.length === 0) continue;
+        // Get applicable resources for this bookable type
+        const applicableResources = resources?.filter((r: any) => r.business_id === btBusinessId) || [];
+        if (applicableResources.length === 0) continue;
 
         // Get buffer for this bookable type
-        const bufferAfterMins = applicableBookableType.buffer_after_mins || 0;
+        const bufferAfterMins = bt.buffer_after_mins || 0;
 
-        for (let minutesFromMidnight = windowStartMins; minutesFromMidnight < windowEndMins; minutesFromMidnight += stepMins) {
-          const slotStartMins = minutesFromMidnight;
-          const slotEndMins = minutesFromMidnight + slotLengthMins;
+        // Generate slots for each window
+        for (const window of windowsForDay) {
+          for (let minutesFromMidnight = window.startMins; minutesFromMidnight < window.endMins; minutesFromMidnight += stepMins) {
+            const slotStartMins = minutesFromMidnight;
+            const slotEndMins = minutesFromMidnight + slotLengthMins;
 
-          // Slot must fit within the window
-          if (slotEndMins > windowEndMins) continue;
+            // Slot must fit within the window
+            if (slotEndMins > window.endMins) continue;
 
-          const pad2 = (n: number) => String(n).padStart(2, "0");
-          const startH = Math.floor(slotStartMins / 60);
-          const startM = slotStartMins % 60;
-          const endH = Math.floor(slotEndMins / 60);
-          const endM = slotEndMins % 60;
+            const pad2 = (n: number) => String(n).padStart(2, "0");
+            const startH = Math.floor(slotStartMins / 60);
+            const startM = slotStartMins % 60;
+            const endH = Math.floor(slotEndMins / 60);
+            const endM = slotEndMins % 60;
 
-          const slotStart = `${dateStr}T${pad2(startH)}:${pad2(startM)}:00`;
-          const slotEnd = `${dateStr}T${pad2(endH)}:${pad2(endM)}:00`;
+            const slotStart = `${dateStr}T${pad2(startH)}:${pad2(startM)}:00`;
+            const slotEnd = `${dateStr}T${pad2(endH)}:${pad2(endM)}:00`;
 
-          for (const resource of applicableResources) {
-            const slotStartMs = new Date(slotStart).getTime();
-            const slotEndMs = new Date(slotEnd).getTime();
-            // Add buffer when checking for conflicts (the new booking needs buffer room after it)
-            const slotEndWithBufferMs = slotEndMs + (bufferAfterMins * 60 * 1000);
+            for (const resource of applicableResources) {
+              const slotStartMs = new Date(slotStart).getTime();
+              const slotEndMs = new Date(slotEnd).getTime();
+              // Add buffer when checking for conflicts (the new booking needs buffer room after it)
+              const slotEndWithBufferMs = slotEndMs + (bufferAfterMins * 60 * 1000);
 
-            // Check blackout
-            const isBlackout = blackoutsByDateResource.get(`${dateStr}-${resource.id}`) === true;
+              // Check blackout (legacy)
+              const isBlackout = blackoutsByDateResource.get(`${dateStr}-${resource.id}`) === true;
 
-            // Check overlap with existing bookings (which already include their buffer)
-            const overlaps = (intervals: { start: number; end: number }[]) =>
-              intervals.some((i) => slotStartMs < i.end && slotEndWithBufferMs > i.start);
+              // Check overlap with existing bookings (which already include their buffer)
+              const overlaps = (intervals: { start: number; end: number }[]) =>
+                intervals.some((i) => slotStartMs < i.end && slotEndWithBufferMs > i.start);
 
-            const isBooked = overlaps(bookedByResource.get(resource.id) || []);
-            const isHeld = overlaps(holdsByResource.get(resource.id) || []);
-            const isBlocked = isBlackout || isBooked || isHeld;
+              const isBooked = overlaps(bookedByResource.get(resource.id) || []);
+              const isHeld = overlaps(holdsByResource.get(resource.id) || []);
+              const isBlocked = isBlackout || isBooked || isHeld;
 
-            // Check capacity if party_size specified
-            const hasCapacity = !party_size || (resource.capacity && resource.capacity >= party_size);
+              // Check capacity if party_size specified
+              const hasCapacity = !party_size || (resource.capacity && resource.capacity >= party_size);
 
-            // Find package pricing
-            const pkg = packages?.find((p: any) => p.bookable_type_id === applicableBookableType.id);
+              // Find package pricing
+              const pkg = packages?.find((p: any) => p.bookable_type_id === bt.id);
 
-            availableSlots.push({
-              id: `${resource.id}-${slotStart}`,
-              start_time: slotStart,
-              end_time: slotEnd,
-              resource_id: resource.id,
-              resource_name: resource.name,
-              bookable_type_id: applicableBookableType.id,
-              bookable_type_name: applicableBookableType.name,
-              base_price: pkg?.base_price || 0,
-              is_available: !isBlocked && hasCapacity,
-            });
+              availableSlots.push({
+                id: `${resource.id}-${slotStart}`,
+                start_time: slotStart,
+                end_time: slotEnd,
+                resource_id: resource.id,
+                resource_name: resource.name,
+                bookable_type_id: bt.id,
+                bookable_type_name: bt.name,
+                base_price: pkg?.base_price || 0,
+                is_available: !isBlocked && hasCapacity,
+              });
+            }
           }
         }
       }

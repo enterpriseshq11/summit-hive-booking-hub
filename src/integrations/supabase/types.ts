@@ -203,6 +203,60 @@ export type Database = {
         }
         Relationships: []
       }
+      availability_overrides: {
+        Row: {
+          availability_windows: Json | null
+          business_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_unavailable: boolean
+          notes: string | null
+          override_date: string
+          provider_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          availability_windows?: Json | null
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_unavailable?: boolean
+          notes?: string | null
+          override_date: string
+          provider_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          availability_windows?: Json | null
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_unavailable?: boolean
+          notes?: string | null
+          override_date?: string
+          provider_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_overrides_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "availability_overrides_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       availability_windows: {
         Row: {
           bookable_type_id: string | null
