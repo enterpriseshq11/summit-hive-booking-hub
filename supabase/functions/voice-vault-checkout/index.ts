@@ -79,9 +79,10 @@ serve(async (req) => {
       start_time,
       end_time,
       duration_hours,
+      skip_payment, // Optional: if true, skip payment collection
     } = await req.json();
 
-    logStep("Request parsed", { type, payment_plan, white_glove_option, customer_email });
+    logStep("Request parsed", { type, payment_plan, white_glove_option, customer_email, skip_payment });
 
     if (!type || !customer_name || !customer_email) {
       return jsonResponse(400, {
@@ -93,12 +94,6 @@ serve(async (req) => {
       return jsonResponse(400, { error: `Invalid email address: ${customer_email}` });
     }
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) {
-      // Misconfiguration: return explicit message for faster debugging.
-      return jsonResponse(500, { error: "Server misconfigured: STRIPE_SECRET_KEY is not set" });
-    }
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseUrl || !serviceRoleKey) {
@@ -107,25 +102,45 @@ serve(async (req) => {
       });
     }
 
-    const stripe = new Stripe(stripeKey, {
-      apiVersion: "2025-08-27.basil",
-    });
-
     const supabaseClient = createClient(
       supabaseUrl,
       serviceRoleKey
     );
 
-    // Check if customer exists in Stripe
-    const customers = await stripe.customers.list({ email: customer_email, limit: 1 });
+    // Check if payments are enabled for Voice Vault
+    const { data: configData } = await supabaseClient
+      .from("app_config")
+      .select("value")
+      .eq("key", "voice_vault_payments_enabled")
+      .maybeSingle();
+    
+    const paymentsEnabled = configData?.value === "true";
+    const shouldSkipPayment = skip_payment === true || !paymentsEnabled;
+    
+    logStep("Payment config check", { paymentsEnabled, shouldSkipPayment });
+
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey && !shouldSkipPayment) {
+      // Misconfiguration: return explicit message for faster debugging.
+      return jsonResponse(500, { error: "Server misconfigured: STRIPE_SECRET_KEY is not set" });
+    }
+
+    const stripe = shouldSkipPayment ? null : new Stripe(stripeKey!, {
+      apiVersion: "2025-08-27.basil",
+    });
+
+    // Check if customer exists in Stripe (only if we need Stripe)
     let customerId: string | undefined;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Found existing Stripe customer", { customerId });
+    if (!shouldSkipPayment && stripe) {
+      const customers = await stripe.customers.list({ email: customer_email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        logStep("Found existing Stripe customer", { customerId });
+      }
     }
 
     const origin = req.headers.get("origin") || "https://560e7915-0309-4073-b876-712415397260.lovableproject.com";
-    let session: Stripe.Checkout.Session;
+    let session: Stripe.Checkout.Session | null = null;
     let recordId: string;
 
     if (type === "hourly") {
@@ -154,18 +169,19 @@ serve(async (req) => {
 
       const totalAmount = duration_hours * PRICING.hourly.ratePerHour;
       
-      // Calculate 1/3 deposit (rounded to cents)
-      const depositAmount = Math.round((totalAmount / 3) * 100) / 100;
-      const remainingBalance = Math.round((totalAmount - depositAmount) * 100) / 100;
+      // Calculate 1/3 deposit (rounded to cents) - used for display even when payments disabled
+      const depositAmount = shouldSkipPayment ? 0 : Math.round((totalAmount / 3) * 100) / 100;
+      const remainingBalance = shouldSkipPayment ? totalAmount : Math.round((totalAmount - depositAmount) * 100) / 100;
       
-      logStep("Creating hourly booking with deposit", { 
+      logStep("Creating hourly booking", { 
         duration_hours, 
         totalAmount, 
         depositAmount, 
-        remainingBalance 
+        remainingBalance,
+        shouldSkipPayment 
       });
 
-      // Create booking record with deposit tracking
+      // Create booking record - set status based on whether payment is required
       const { data: booking, error: bookingError } = await supabaseClient
         .from("voice_vault_bookings")
         .insert({
@@ -180,7 +196,7 @@ serve(async (req) => {
           total_amount: totalAmount,
           deposit_amount: depositAmount,
           remaining_balance: remainingBalance,
-          payment_status: "pending",
+          payment_status: shouldSkipPayment ? "pay_on_arrival" : "pending",
         })
         .select()
         .single();
@@ -191,10 +207,22 @@ serve(async (req) => {
       }
 
       recordId = booking.id;
-      logStep("Booking created", { recordId });
+      logStep("Booking created", { recordId, paymentStatus: shouldSkipPayment ? "pay_on_arrival" : "pending" });
+
+      // If skipping payment, return success immediately
+      if (shouldSkipPayment) {
+        logStep("Pay on arrival - skipping Stripe checkout");
+        return jsonResponse(200, { 
+          success: true, 
+          is_pay_on_arrival: true,
+          record_id: recordId,
+          total_amount: totalAmount,
+          message: "Booking confirmed. Payment due on arrival."
+        });
+      }
 
       // Create Stripe checkout session for DEPOSIT ONLY (1/3 of total)
-      session = await stripe.checkout.sessions.create({
+      session = await stripe!.checkout.sessions.create({
         customer: customerId,
         customer_email: customerId ? undefined : customer_email,
         line_items: [
@@ -302,6 +330,11 @@ serve(async (req) => {
         }
       }
 
+      // Package purchases always require payment (no pay-on-arrival for packages)
+      if (!stripe) {
+        throw new Error("Payment is required for package purchases");
+      }
+
       if (plan === "weekly") {
         // Weekly subscription
         session = await stripe.checkout.sessions.create({
@@ -327,30 +360,35 @@ serve(async (req) => {
       }
     }
 
-    // Update record with checkout session ID
-    if (type === "hourly") {
-      const { error: updateError } = await supabaseClient
-        .from("voice_vault_bookings")
-        .update({ stripe_checkout_session_id: session.id })
-        .eq("id", recordId);
+    // Update record with checkout session ID (only if we have a session)
+    if (session) {
+      if (type === "hourly") {
+        const { error: updateError } = await supabaseClient
+          .from("voice_vault_bookings")
+          .update({ stripe_checkout_session_id: session.id })
+          .eq("id", recordId);
 
-      if (updateError) {
-        logStep("Error updating booking with session id", { error: updateError, recordId });
-      }
-    } else {
-      const { error: updateError } = await supabaseClient
-        .from("voice_vault_packages")
-        .update({ stripe_checkout_session_id: session.id })
-        .eq("id", recordId);
+        if (updateError) {
+          logStep("Error updating booking with session id", { error: updateError, recordId });
+        }
+      } else {
+        const { error: updateError } = await supabaseClient
+          .from("voice_vault_packages")
+          .update({ stripe_checkout_session_id: session.id })
+          .eq("id", recordId);
 
-      if (updateError) {
-        logStep("Error updating package with session id", { error: updateError, recordId });
+        if (updateError) {
+          logStep("Error updating package with session id", { error: updateError, recordId });
+        }
       }
+
+      logStep("Checkout session created", { sessionId: session.id, url: session.url });
+
+      return jsonResponse(200, { url: session.url, record_id: recordId });
     }
 
-    logStep("Checkout session created", { sessionId: session.id, url: session.url });
-
-    return jsonResponse(200, { url: session.url, record_id: recordId });
+    // Fallback (shouldn't reach here for normal flow)
+    return jsonResponse(200, { record_id: recordId });
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
