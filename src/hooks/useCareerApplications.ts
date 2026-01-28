@@ -165,6 +165,8 @@ export function useSubmitCareerApplication() {
             role: data.role,
             applicantEmail: data.applicant.email,
             applicantName: `${data.applicant.firstName} ${data.applicant.lastName}`,
+            applicantPhone: data.applicant.phone || undefined,
+            submittedAt: result.created_at,
           },
         });
       } catch (notifyError) {

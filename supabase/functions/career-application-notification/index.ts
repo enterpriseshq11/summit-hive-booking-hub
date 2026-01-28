@@ -7,12 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Team email routing
-const TEAM_EMAILS: Record<string, string> = {
-  spa: Deno.env.get("LINDSEY_NOTIFY_EMAIL") || "spa@a-zenterpriseshq.com",
-  fitness: Deno.env.get("DYLAN_NOTIFY_EMAIL") || "fitness@a-zenterpriseshq.com",
-  contracting: Deno.env.get("VICTORIA_NOTIFY_EMAIL") || "contracting@a-zenterpriseshq.com",
-};
+// Centralized careers notification inbox
+const CAREERS_NOTIFY_EMAIL = "info@a-zenterpriseshq.com";
 
 interface NotificationRequest {
   applicationId: string;
@@ -20,6 +16,8 @@ interface NotificationRequest {
   role: string;
   applicantEmail: string;
   applicantName: string;
+  applicantPhone?: string;
+  submittedAt?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -39,12 +37,21 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const resend = new Resend(resendApiKey);
-    const { applicationId, team, role, applicantEmail, applicantName }: NotificationRequest = await req.json();
+    const { applicationId, team, role, applicantEmail, applicantName, applicantPhone, submittedAt }: NotificationRequest = await req.json();
 
-    const fromEmail = Deno.env.get("FROM_EMAIL") || "noreply@a-zenterpriseshq.com";
+    const fromEmail = Deno.env.get("FROM_EMAIL") || "noreply@azenterpriseshq.com";
     const fromName = Deno.env.get("FROM_NAME") || "A-Z Enterprises";
     const shortId = applicationId.slice(0, 8).toUpperCase();
     const teamName = team === "spa" ? "Restoration Lounge (Spa)" : team === "fitness" ? "A-Z Total Fitness" : "A-Z Contracting";
+    const submissionDate = submittedAt ? new Date(submittedAt).toLocaleString('en-US', { 
+      dateStyle: 'medium', 
+      timeStyle: 'short',
+      timeZone: 'America/New_York'
+    }) : new Date().toLocaleString('en-US', { 
+      dateStyle: 'medium', 
+      timeStyle: 'short',
+      timeZone: 'America/New_York'
+    });
 
     // Send confirmation to applicant
     try {
@@ -81,51 +88,73 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Failed to send applicant confirmation:", emailErr);
     }
 
-    // Send internal notification
-    const internalEmail = TEAM_EMAILS[team];
-    if (internalEmail) {
-      try {
-        await resend.emails.send({
-          from: `${fromName} <${fromEmail}>`,
-          to: [internalEmail],
-          subject: `New Application: ${role} - ${applicantName}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h1 style="color: #333;">New Job Application</h1>
-              
-              <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <table style="width: 100%; border-collapse: collapse;">
-                  <tr>
-                    <td style="padding: 8px 0; color: #666; width: 120px;">Confirmation:</td>
-                    <td style="padding: 8px 0; font-weight: bold; font-family: monospace;">${shortId}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; color: #666;">Team:</td>
-                    <td style="padding: 8px 0; font-weight: bold;">${teamName}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; color: #666;">Position:</td>
-                    <td style="padding: 8px 0; font-weight: bold;">${role}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; color: #666;">Applicant:</td>
-                    <td style="padding: 8px 0; font-weight: bold;">${applicantName}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; color: #666;">Email:</td>
-                    <td style="padding: 8px 0;"><a href="mailto:${applicantEmail}">${applicantEmail}</a></td>
-                  </tr>
-                </table>
-              </div>
-              
-              <p style="color: #666;">View the full application in the admin dashboard.</p>
+    // Send internal notification to centralized careers inbox
+    try {
+      await resend.emails.send({
+        from: `${fromName} <${fromEmail}>`,
+        to: [CAREERS_NOTIFY_EMAIL],
+        subject: `New Careers Application: ${role} - ${applicantName}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #333;">New Job Application Received</h1>
+            
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666; width: 140px;">Application ID:</td>
+                  <td style="padding: 8px 0; font-weight: bold; font-family: monospace;">${shortId}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Submitted:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">${submissionDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Team:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">${teamName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Position:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">${role}</td>
+                </tr>
+              </table>
             </div>
-          `,
-        });
-        console.log("Internal notification sent to:", internalEmail);
-      } catch (emailErr) {
-        console.error("Failed to send internal notification:", emailErr);
-      }
+            
+            <h2 style="color: #333; font-size: 18px; margin-top: 24px;">Applicant Details</h2>
+            <div style="background: #fff; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #666; width: 140px;">Full Name:</td>
+                  <td style="padding: 8px 0; font-weight: bold;">${applicantName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Email:</td>
+                  <td style="padding: 8px 0;"><a href="mailto:${applicantEmail}" style="color: #1a73e8;">${applicantEmail}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #666;">Phone:</td>
+                  <td style="padding: 8px 0;">${applicantPhone ? `<a href="tel:${applicantPhone}" style="color: #1a73e8;">${applicantPhone}</a>` : 'Not provided'}</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div style="margin-top: 24px; padding: 16px; background: #e8f4fd; border-radius: 8px;">
+              <p style="margin: 0; color: #333;">
+                <strong>View Full Application:</strong><br>
+                <a href="https://summit-hive-booking-hub.lovable.app/admin/careers?search=${shortId}" style="color: #1a73e8;">
+                  Open in Admin Dashboard →
+                </a>
+              </p>
+            </div>
+            
+            <p style="color: #999; font-size: 12px; margin-top: 24px;">
+              This is an automated notification from the A-Z Enterprises Careers system.
+            </p>
+          </div>
+        `,
+      });
+      console.log("Internal notification sent to:", CAREERS_NOTIFY_EMAIL);
+    } catch (emailErr) {
+      console.error("Failed to send internal notification:", emailErr);
     }
 
     return new Response(
