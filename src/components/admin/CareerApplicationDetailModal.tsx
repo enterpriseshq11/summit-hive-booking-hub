@@ -225,7 +225,19 @@ export function CareerApplicationDetailModal({
                   asChild
                   className="border-zinc-700 text-zinc-300 hover:text-white"
                 >
-                  <a href={`mailto:${applicant.email}`}>
+                  <a
+                    href={(() => {
+                      const subject = encodeURIComponent(
+                        `A-Z Enterprises Application – ${application.role} – ${applicant.firstName} ${applicant.lastName}`
+                      );
+                      const body = encodeURIComponent(
+                        `Hi ${applicant.firstName},\n\nThanks for applying for ${application.role} at A-Z Enterprises.\n\nWe'd like to set up a quick call/interview. What times work best for you?\n\n— A-Z Enterprises Team`
+                      );
+                      return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(applicant.email)}&su=${subject}&body=${body}`;
+                    })()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Mail className="h-4 w-4 mr-1" />
                     Email
                   </a>
