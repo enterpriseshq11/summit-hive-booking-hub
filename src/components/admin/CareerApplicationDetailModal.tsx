@@ -197,21 +197,25 @@ export function CareerApplicationDetailModal({
             {/* Status & Quick Actions */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-zinc-800/50 rounded-lg p-4">
               <div className="flex items-center gap-4">
-                <span className="text-sm text-zinc-400">Status:</span>
+                <span className="text-sm text-zinc-200 font-medium">Status:</span>
                 <Select
                   value={application.status}
                   onValueChange={(value) => handleStatusChange(value as CareerApplicationStatus)}
                   disabled={updateStatus.isPending}
                 >
-                  <SelectTrigger className="w-40 bg-zinc-800 border-zinc-700">
+                  <SelectTrigger className="w-44 bg-zinc-700 border-zinc-600 text-white hover:bg-zinc-600 focus:ring-zinc-500 [&>svg]:text-zinc-300">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectContent className="bg-zinc-700 border-zinc-600 z-50">
                     {statusOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                      <SelectItem 
+                        key={option.value} 
+                        value={option.value}
+                        className="text-white hover:bg-zinc-600 focus:bg-zinc-600 focus:text-white cursor-pointer"
+                      >
                         <div className="flex items-center gap-2">
-                          <div className={`h-2 w-2 rounded-full ${option.color}`} />
-                          {option.label}
+                          <div className={`h-2.5 w-2.5 rounded-full ${option.color}`} />
+                          <span className="font-medium">{option.label}</span>
                         </div>
                       </SelectItem>
                     ))}
