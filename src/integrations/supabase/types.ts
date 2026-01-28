@@ -701,6 +701,134 @@ export type Database = {
         }
         Relationships: []
       }
+      career_application_activity: {
+        Row: {
+          action: string
+          actor: string | null
+          application_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          application_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          application_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_application_activity_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "career_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      career_applications: {
+        Row: {
+          applicant: Json
+          attachments: Json | null
+          availability: Json | null
+          consents: Json
+          created_at: string
+          form_version: string | null
+          id: string
+          role: string
+          role_specific: Json | null
+          source_url: string | null
+          status: Database["public"]["Enums"]["career_application_status"]
+          team: Database["public"]["Enums"]["career_team"]
+          updated_at: string
+        }
+        Insert: {
+          applicant?: Json
+          attachments?: Json | null
+          availability?: Json | null
+          consents?: Json
+          created_at?: string
+          form_version?: string | null
+          id?: string
+          role: string
+          role_specific?: Json | null
+          source_url?: string | null
+          status?: Database["public"]["Enums"]["career_application_status"]
+          team: Database["public"]["Enums"]["career_team"]
+          updated_at?: string
+        }
+        Update: {
+          applicant?: Json
+          attachments?: Json | null
+          availability?: Json | null
+          consents?: Json
+          created_at?: string
+          form_version?: string | null
+          id?: string
+          role?: string
+          role_specific?: Json | null
+          source_url?: string | null
+          status?: Database["public"]["Enums"]["career_application_status"]
+          team?: Database["public"]["Enums"]["career_team"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      career_openings: {
+        Row: {
+          apply_route: string | null
+          created_at: string
+          description: string | null
+          employment_type: string | null
+          id: string
+          is_active: boolean
+          location: string | null
+          pay_range: string | null
+          role: string
+          sort_order: number | null
+          team: Database["public"]["Enums"]["career_team"]
+          updated_at: string
+        }
+        Insert: {
+          apply_route?: string | null
+          created_at?: string
+          description?: string | null
+          employment_type?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          pay_range?: string | null
+          role: string
+          sort_order?: number | null
+          team: Database["public"]["Enums"]["career_team"]
+          updated_at?: string
+        }
+        Update: {
+          apply_route?: string | null
+          created_at?: string
+          description?: string | null
+          employment_type?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          pay_range?: string | null
+          role?: string
+          sort_order?: number | null
+          team?: Database["public"]["Enums"]["career_team"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       checklist_templates: {
         Row: {
           bookable_type_id: string | null
@@ -4494,6 +4622,14 @@ export type Database = {
         | "fitness"
         | "voice_vault"
         | "photo_booth"
+      career_application_status:
+        | "new"
+        | "reviewing"
+        | "interview"
+        | "offer"
+        | "hired"
+        | "rejected"
+      career_team: "spa" | "contracting" | "fitness"
       claim_status:
         | "pending"
         | "verified"
@@ -4769,6 +4905,15 @@ export const Constants = {
         "voice_vault",
         "photo_booth",
       ],
+      career_application_status: [
+        "new",
+        "reviewing",
+        "interview",
+        "offer",
+        "hired",
+        "rejected",
+      ],
+      career_team: ["spa", "contracting", "fitness"],
       claim_status: [
         "pending",
         "verified",
