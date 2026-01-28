@@ -16,7 +16,7 @@ const teamCards: {
 }[] = [
   {
     team: "spa",
-    title: "Restoration Lounge (Spa)",
+    title: "A-Z Restoration (Spa)",
     description: "Join our wellness team as a massage therapist, yoga instructor, esthetician, or front desk specialist.",
     icon: Sparkles,
     href: "/careers/spa",
