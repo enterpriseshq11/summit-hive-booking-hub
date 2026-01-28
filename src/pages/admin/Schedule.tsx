@@ -214,8 +214,8 @@ export default function AdminSchedule() {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
-              <p className="text-muted-foreground">View and manage all bookings across businesses</p>
+              <h1 className="text-2xl font-bold text-white">Schedule</h1>
+              <p className="text-zinc-300">View and manage all bookings across businesses</p>
             </div>
             
             <div className="flex flex-wrap items-center gap-2">
