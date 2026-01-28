@@ -70,7 +70,23 @@ serve(async (req) => {
       duration_hours,
       hourly_rate,
       total_amount: passedTotalAmount,
+      // Pay on arrival flag (skip payment when toggle is OFF)
+      skip_payment,
     } = body || {};
+
+    // Check if payments are enabled for 360 Photo Booth
+    let paymentsEnabled = true;
+    if (business_type === "photo_booth") {
+      const { data: configData } = await supabase
+        .from("app_config")
+        .select("value")
+        .eq("key", "photobooth360_payments_enabled")
+        .maybeSingle();
+      
+      // Default to true if not found
+      paymentsEnabled = configData?.value !== "false";
+      logStep("Photo Booth payments config", { paymentsEnabled, configValue: configData?.value });
+    }
 
     logStep("Request parsed", {
       business_type,
@@ -175,7 +191,10 @@ serve(async (req) => {
     const { data: bookingNumber, error: bnError } = await supabase.rpc("generate_booking_number");
     if (bnError) logStep("Booking number generation failed", { error: bnError });
 
-    // Create booking
+    // Check if this is a pay-on-arrival booking (payments disabled)
+    const isPayOnArrival = !paymentsEnabled || skip_payment === true;
+
+    // Create booking with appropriate status
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .insert({
@@ -184,15 +203,16 @@ serve(async (req) => {
         package_id: pkg?.id || null,
         start_datetime,
         end_datetime,
-        status: "pending",
+        status: isPayOnArrival ? "confirmed" : "pending",
         subtotal: total,
         total_amount: total,
         booking_number: bookingNumber || "",
         guest_name: customer_name,
         guest_email: customer_email,
         guest_phone: customer_phone,
-        deposit_amount: deposit,
-        balance_due: remaining,
+        deposit_amount: isPayOnArrival ? 0 : deposit,
+        balance_due: isPayOnArrival ? total : remaining,
+        notes: isPayOnArrival ? `Payment: Due on arrival (payments disabled at booking time). Amount due: $${total}` : null,
       })
       .select("id")
       .single();
@@ -206,6 +226,19 @@ serve(async (req) => {
       end_datetime,
     });
     if (brError) throw new Error(brError.message);
+
+    // If pay-on-arrival, return success immediately without Stripe
+    if (isPayOnArrival) {
+      logStep("Pay-on-arrival booking confirmed", { bookingId: booking.id, total, businessType: business_type });
+      
+      return jsonResponse(200, { 
+        success: true, 
+        is_pay_on_arrival: true, 
+        booking_id: booking.id, 
+        total_amount: total,
+        amount_due_on_arrival: total,
+      });
+    }
 
     // Create slot hold server-side (using service role bypasses RLS)
     // This prevents double-booking while customer completes payment

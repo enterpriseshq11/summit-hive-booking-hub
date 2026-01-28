@@ -19,10 +19,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, ArrowLeft, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useVoiceVaultPaymentsConfig } from "@/hooks/usePaymentConfigs";
 import { 
   VOICE_VAULT_PRICING, 
   getPackageDisplayPrice,
@@ -63,7 +64,7 @@ interface VoiceVaultBookingModalProps {
   initialType?: "hourly" | "core_series" | "white_glove";
 }
 
-type Step = "type" | "details" | "contact" | "payment";
+type Step = "type" | "details" | "contact" | "payment" | "confirmed";
 
 export function VoiceVaultBookingModal({
   open,
@@ -72,6 +73,10 @@ export function VoiceVaultBookingModal({
 }: VoiceVaultBookingModalProps) {
   const [step, setStep] = useState<Step>("type");
   const [loading, setLoading] = useState(false);
+  const [confirmedBookingId, setConfirmedBookingId] = useState<string | null>(null);
+  
+  // Get payment config
+  const { voiceVaultPaymentsEnabled } = useVoiceVaultPaymentsConfig();
 
   // Form state
   const [bookingType, setBookingType] = useState<"hourly" | "core_series" | "white_glove">(
@@ -135,6 +140,7 @@ export function VoiceVaultBookingModal({
         customer_name: customerName.trim(),
         customer_email: customerEmail.trim(),
         customer_phone: customerPhone.trim() || null,
+        skip_payment: bookingType === "hourly" && !voiceVaultPaymentsEnabled,
       };
 
       if (bookingType === "hourly") {
@@ -154,6 +160,14 @@ export function VoiceVaultBookingModal({
       });
 
       if (error) throw error;
+
+      // Handle pay-on-arrival response
+      if (data?.is_pay_on_arrival) {
+        setConfirmedBookingId(data.record_id);
+        setStep("confirmed");
+        toast.success("Booking confirmed! Payment is due on arrival.");
+        return;
+      }
 
       if (data?.url) {
         window.open(data.url, "_blank");

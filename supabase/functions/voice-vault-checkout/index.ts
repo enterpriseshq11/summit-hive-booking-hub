@@ -79,9 +79,33 @@ serve(async (req) => {
       start_time,
       end_time,
       duration_hours,
+      // Pay on arrival flag (skip payment when toggle is OFF)
+      skip_payment,
     } = await req.json();
 
-    logStep("Request parsed", { type, payment_plan, white_glove_option, customer_email });
+    logStep("Request parsed", { type, payment_plan, white_glove_option, customer_email, skip_payment });
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) {
+      return jsonResponse(500, {
+        error: "Server misconfigured: backend keys are not set",
+      });
+    }
+
+    const supabaseClient = createClient(supabaseUrl, serviceRoleKey);
+
+    // Check if payments are enabled for Voice Vault
+    let paymentsEnabled = true;
+    const { data: configData } = await supabaseClient
+      .from("app_config")
+      .select("value")
+      .eq("key", "voice_vault_payments_enabled")
+      .maybeSingle();
+    
+    // Default to true if not found
+    paymentsEnabled = configData?.value !== "false";
+    logStep("Voice Vault payments config", { paymentsEnabled, configValue: configData?.value });
 
     if (!type || !customer_name || !customer_email) {
       return jsonResponse(400, {
@@ -94,27 +118,14 @@ serve(async (req) => {
     }
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) {
+    if (!stripeKey && paymentsEnabled) {
       // Misconfiguration: return explicit message for faster debugging.
       return jsonResponse(500, { error: "Server misconfigured: STRIPE_SECRET_KEY is not set" });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!supabaseUrl || !serviceRoleKey) {
-      return jsonResponse(500, {
-        error: "Server misconfigured: backend keys are not set",
-      });
-    }
-
-    const stripe = new Stripe(stripeKey, {
+    const stripe = stripeKey ? new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
-    });
-
-    const supabaseClient = createClient(
-      supabaseUrl,
-      serviceRoleKey
-    );
+    }) : null;
 
     // Check if customer exists in Stripe
     const customers = await stripe.customers.list({ email: customer_email, limit: 1 });
@@ -158,14 +169,18 @@ serve(async (req) => {
       const depositAmount = Math.round((totalAmount / 3) * 100) / 100;
       const remainingBalance = Math.round((totalAmount - depositAmount) * 100) / 100;
       
-      logStep("Creating hourly booking with deposit", { 
+      // Check if this is a pay-on-arrival booking (payments disabled)
+      const isPayOnArrival = !paymentsEnabled || skip_payment === true;
+      
+      logStep("Creating hourly booking", { 
         duration_hours, 
         totalAmount, 
         depositAmount, 
-        remainingBalance 
+        remainingBalance,
+        isPayOnArrival,
       });
 
-      // Create booking record with deposit tracking
+      // Create booking record with appropriate payment status
       const { data: booking, error: bookingError } = await supabaseClient
         .from("voice_vault_bookings")
         .insert({
@@ -178,9 +193,9 @@ serve(async (req) => {
           duration_hours,
           hourly_rate: PRICING.hourly.ratePerHour,
           total_amount: totalAmount,
-          deposit_amount: depositAmount,
-          remaining_balance: remainingBalance,
-          payment_status: "pending",
+          deposit_amount: isPayOnArrival ? 0 : depositAmount,
+          remaining_balance: isPayOnArrival ? totalAmount : remainingBalance,
+          payment_status: isPayOnArrival ? "pay_on_arrival" : "pending",
         })
         .select()
         .single();
@@ -191,10 +206,22 @@ serve(async (req) => {
       }
 
       recordId = booking.id;
-      logStep("Booking created", { recordId });
+      logStep("Booking created", { recordId, isPayOnArrival });
+
+      // If pay-on-arrival, return success immediately without Stripe
+      if (isPayOnArrival) {
+        logStep("Pay-on-arrival booking confirmed", { recordId, totalAmount });
+        return jsonResponse(200, { 
+          success: true, 
+          is_pay_on_arrival: true, 
+          record_id: recordId, 
+          total_amount: totalAmount,
+          amount_due_on_arrival: totalAmount,
+        });
+      }
 
       // Create Stripe checkout session for DEPOSIT ONLY (1/3 of total)
-      session = await stripe.checkout.sessions.create({
+      session = await stripe!.checkout.sessions.create({
         customer: customerId,
         customer_email: customerId ? undefined : customer_email,
         line_items: [
