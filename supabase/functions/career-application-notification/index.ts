@@ -7,8 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// All careers notifications go to Dylan Legg
-const CAREERS_NOTIFY_EMAIL = Deno.env.get("DYLAN_NOTIFY_EMAIL") || "Dylan@a-zenterpriseshq.com";
+// Team email routing
+const TEAM_EMAILS: Record<string, string> = {
+  spa: Deno.env.get("LINDSEY_NOTIFY_EMAIL") || "spa@a-zenterpriseshq.com",
+  fitness: Deno.env.get("DYLAN_NOTIFY_EMAIL") || "fitness@a-zenterpriseshq.com",
+  contracting: Deno.env.get("VICTORIA_NOTIFY_EMAIL") || "contracting@a-zenterpriseshq.com",
+};
 
 interface NotificationRequest {
   applicationId: string;
@@ -16,7 +20,6 @@ interface NotificationRequest {
   role: string;
   applicantEmail: string;
   applicantName: string;
-  applicantPhone?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -36,18 +39,12 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const resend = new Resend(resendApiKey);
-    const { applicationId, team, role, applicantEmail, applicantName, applicantPhone }: NotificationRequest = await req.json();
+    const { applicationId, team, role, applicantEmail, applicantName }: NotificationRequest = await req.json();
 
-    const fromEmail = Deno.env.get("FROM_EMAIL") || "noreply@azenterpriseshq.com";
+    const fromEmail = Deno.env.get("FROM_EMAIL") || "noreply@a-zenterpriseshq.com";
     const fromName = Deno.env.get("FROM_NAME") || "A-Z Enterprises";
     const shortId = applicationId.slice(0, 8).toUpperCase();
     const teamName = team === "spa" ? "Restoration Lounge (Spa)" : team === "fitness" ? "A-Z Total Fitness" : "A-Z Contracting";
-    const submittedAt = new Date().toLocaleString("en-US", { 
-      timeZone: "America/New_York", 
-      dateStyle: "full", 
-      timeStyle: "short" 
-    });
-    const adminUrl = `https://summit-hive-booking-hub.lovable.app/admin/careers`;
 
     // Send confirmation to applicant
     try {
@@ -84,60 +81,51 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Failed to send applicant confirmation:", emailErr);
     }
 
-    // Send internal notification to Dylan
-    try {
-      await resend.emails.send({
-        from: `${fromName} <${fromEmail}>`,
-        to: [CAREERS_NOTIFY_EMAIL],
-        subject: `New Application: ${role} - ${applicantName}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #333;">New Job Application</h1>
-            
-            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td style="padding: 8px 0; color: #666; width: 140px;">Application ID:</td>
-                  <td style="padding: 8px 0; font-weight: bold; font-family: monospace;">${shortId}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; color: #666;">Team:</td>
-                  <td style="padding: 8px 0; font-weight: bold;">${teamName}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; color: #666;">Position:</td>
-                  <td style="padding: 8px 0; font-weight: bold;">${role}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; color: #666;">Applicant:</td>
-                  <td style="padding: 8px 0; font-weight: bold;">${applicantName}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; color: #666;">Email:</td>
-                  <td style="padding: 8px 0;"><a href="mailto:${applicantEmail}">${applicantEmail}</a></td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; color: #666;">Phone:</td>
-                  <td style="padding: 8px 0;">${applicantPhone || "Not provided"}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; color: #666;">Submitted:</td>
-                  <td style="padding: 8px 0;">${submittedAt}</td>
-                </tr>
-              </table>
+    // Send internal notification
+    const internalEmail = TEAM_EMAILS[team];
+    if (internalEmail) {
+      try {
+        await resend.emails.send({
+          from: `${fromName} <${fromEmail}>`,
+          to: [internalEmail],
+          subject: `New Application: ${role} - ${applicantName}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #333;">New Job Application</h1>
+              
+              <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666; width: 120px;">Confirmation:</td>
+                    <td style="padding: 8px 0; font-weight: bold; font-family: monospace;">${shortId}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Team:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${teamName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Position:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${role}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Applicant:</td>
+                    <td style="padding: 8px 0; font-weight: bold;">${applicantName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666;">Email:</td>
+                    <td style="padding: 8px 0;"><a href="mailto:${applicantEmail}">${applicantEmail}</a></td>
+                  </tr>
+                </table>
+              </div>
+              
+              <p style="color: #666;">View the full application in the admin dashboard.</p>
             </div>
-            
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${adminUrl}" style="display: inline-block; background: #2563eb; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">View in Admin Dashboard</a>
-            </div>
-            
-            <p style="color: #666; font-size: 12px;">Full Application ID: ${applicationId}</p>
-          </div>
-        `,
-      });
-      console.log("Internal notification sent to Dylan:", CAREERS_NOTIFY_EMAIL);
-    } catch (emailErr) {
-      console.error("Failed to send internal notification:", emailErr);
+          `,
+        });
+        console.log("Internal notification sent to:", internalEmail);
+      } catch (emailErr) {
+        console.error("Failed to send internal notification:", emailErr);
+      }
     }
 
     return new Response(
