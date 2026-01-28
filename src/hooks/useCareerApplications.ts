@@ -192,9 +192,11 @@ export function useUpdateApplicationStatus() {
     mutationFn: async ({
       id,
       status,
+      previousStatus,
     }: {
       id: string;
       status: CareerApplicationStatus;
+      previousStatus?: CareerApplicationStatus;
     }) => {
       const { data, error } = await supabase
         .from("career_applications")
@@ -204,6 +206,19 @@ export function useUpdateApplicationStatus() {
         .single();
 
       if (error) throw error;
+
+      // Log the status change activity
+      await supabase.from("career_application_activity").insert([
+        {
+          application_id: id,
+          action: "status_changed",
+          metadata: {
+            from_status: previousStatus || "unknown",
+            to_status: status,
+          },
+        },
+      ]);
+
       return data;
     },
     onSuccess: () => {

@@ -102,6 +102,12 @@ const navSections = [
     ],
   },
   {
+    label: "Hiring",
+    items: [
+      { title: "Careers Applications", href: "/admin/careers", icon: Users },
+    ],
+  },
+  {
     label: "Marketing",
     items: [
       { title: "Promotions", href: "/admin/promotions", icon: Tag },
