@@ -187,10 +187,18 @@ export function VoiceVaultBookingModal({
       case "contact":
         return "Your Information";
       case "payment":
-        return "Review & Pay";
+        return "Review & Pay Deposit";
       default:
         return "";
     }
+  };
+
+  // Calculate deposit amounts for hourly bookings
+  const getHourlyPricing = () => {
+    const total = parseInt(durationHours) * hourly.ratePerHour;
+    const deposit = Math.round((total / 3) * 100) / 100;
+    const remaining = Math.round((total - deposit) * 100) / 100;
+    return { total, deposit, remaining };
   };
 
   const getPackagePrice = () => {
@@ -335,11 +343,24 @@ export function VoiceVaultBookingModal({
                 </div>
               </div>
 
-              <div className="bg-secondary/50 rounded-lg p-4 border border-border">
+              {/* Deposit pricing breakdown for hourly bookings */}
+              <div className="bg-secondary/50 rounded-lg p-4 border border-border space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Total</span>
-                  <span className="text-2xl font-bold text-accent">
-                    ${parseInt(durationHours) * hourly.ratePerHour}
+                  <span className="text-muted-foreground">Total Price</span>
+                  <span className="font-medium text-foreground">
+                    ${getHourlyPricing().total.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-accent">
+                  <span className="font-medium">Deposit Due Today (1/3)</span>
+                  <span className="text-xl font-bold">
+                    ${getHourlyPricing().deposit.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground text-sm">
+                  <span>Remaining Balance Due on Arrival</span>
+                  <span className="font-medium">
+                    ${getHourlyPricing().remaining.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -516,13 +537,43 @@ export function VoiceVaultBookingModal({
                   <span className="text-muted-foreground">Email</span>
                   <span className="font-medium text-foreground">{customerEmail}</span>
                 </div>
-                <div className="pt-3 border-t border-border flex justify-between">
-                  <span className="font-semibold text-foreground">
-                    {paymentPlan === "weekly" && bookingType !== "hourly" ? "Payment" : "Total"}
-                  </span>
-                  <span className="text-xl font-bold text-accent">{getPackagePrice()}</span>
+
+                {/* Payment breakdown */}
+                <div className="pt-3 border-t border-border space-y-2">
+                  {bookingType === "hourly" ? (
+                    <>
+                      {/* Hourly deposit breakdown */}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Total Price</span>
+                        <span className="font-medium text-foreground">${getHourlyPricing().total.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-accent">
+                        <span className="font-semibold">Deposit Due Today</span>
+                        <span className="text-xl font-bold">${getHourlyPricing().deposit.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Remaining Balance Due on Arrival</span>
+                        <span className="font-medium text-muted-foreground">${getHourlyPricing().remaining.toFixed(2)}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-foreground">
+                        {paymentPlan === "weekly" ? "Payment" : "Total"}
+                      </span>
+                      <span className="text-xl font-bold text-accent">{getPackagePrice()}</span>
+                    </div>
+                  )}
                 </div>
               </div>
+
+              {bookingType === "hourly" && (
+                <div className="bg-accent/10 rounded-lg p-3 border border-accent/30">
+                  <p className="text-sm text-foreground text-center">
+                    <strong>Note:</strong> A 1/3 deposit secures your booking. The remaining balance is due on arrival.
+                  </p>
+                </div>
+              )}
 
               <p className="text-xs text-muted-foreground text-center">
                 By proceeding, you agree to the Voice Vault Studio & Content Terms.

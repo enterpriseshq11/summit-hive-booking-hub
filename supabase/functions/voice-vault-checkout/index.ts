@@ -153,9 +153,19 @@ serve(async (req) => {
       }
 
       const totalAmount = duration_hours * PRICING.hourly.ratePerHour;
-      logStep("Creating hourly booking", { duration_hours, totalAmount });
+      
+      // Calculate 1/3 deposit (rounded to cents)
+      const depositAmount = Math.round((totalAmount / 3) * 100) / 100;
+      const remainingBalance = Math.round((totalAmount - depositAmount) * 100) / 100;
+      
+      logStep("Creating hourly booking with deposit", { 
+        duration_hours, 
+        totalAmount, 
+        depositAmount, 
+        remainingBalance 
+      });
 
-      // Create booking record
+      // Create booking record with deposit tracking
       const { data: booking, error: bookingError } = await supabaseClient
         .from("voice_vault_bookings")
         .insert({
@@ -168,6 +178,8 @@ serve(async (req) => {
           duration_hours,
           hourly_rate: PRICING.hourly.ratePerHour,
           total_amount: totalAmount,
+          deposit_amount: depositAmount,
+          remaining_balance: remainingBalance,
           payment_status: "pending",
         })
         .select()
@@ -181,7 +193,7 @@ serve(async (req) => {
       recordId = booking.id;
       logStep("Booking created", { recordId });
 
-      // Create Stripe checkout session
+      // Create Stripe checkout session for DEPOSIT ONLY (1/3 of total)
       session = await stripe.checkout.sessions.create({
         customer: customerId,
         customer_email: customerId ? undefined : customer_email,
@@ -190,10 +202,10 @@ serve(async (req) => {
             price_data: {
               currency: "usd",
               product_data: {
-                name: `Voice Vault Studio Rental - ${duration_hours} hours`,
-                description: `${booking_date} from ${start_time} to ${end_time}`,
+                name: `Voice Vault Studio Deposit - ${duration_hours} hours`,
+                description: `Deposit for ${booking_date} from ${start_time} to ${end_time}. Remaining $${remainingBalance.toFixed(2)} due on arrival.`,
               },
-              unit_amount: Math.round(totalAmount * 100),
+              unit_amount: Math.round(depositAmount * 100),
             },
             quantity: 1,
           },
@@ -203,11 +215,14 @@ serve(async (req) => {
         cancel_url: `${origin}/#/voice-vault?booking=cancelled`,
         metadata: {
           product_type: "hourly",
-          plan_type: "one_time",
+          plan_type: "deposit",
           record_id: recordId,
           customer_email,
           booking_date,
           duration_hours: String(duration_hours),
+          total_amount: String(totalAmount),
+          deposit_amount: String(depositAmount),
+          remaining_balance: String(remainingBalance),
         },
       });
 

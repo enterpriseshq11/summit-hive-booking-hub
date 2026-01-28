@@ -4173,12 +4173,14 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string | null
+          deposit_amount: number | null
           duration_hours: number
           end_time: string
           hourly_rate: number
           id: string
           internal_notes: string | null
           payment_status: Database["public"]["Enums"]["voice_vault_payment_status"]
+          remaining_balance: number | null
           start_time: string
           stripe_checkout_session_id: string | null
           stripe_payment_intent_id: string | null
@@ -4195,12 +4197,14 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone?: string | null
+          deposit_amount?: number | null
           duration_hours: number
           end_time: string
           hourly_rate?: number
           id?: string
           internal_notes?: string | null
           payment_status?: Database["public"]["Enums"]["voice_vault_payment_status"]
+          remaining_balance?: number | null
           start_time: string
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
@@ -4217,12 +4221,14 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string | null
+          deposit_amount?: number | null
           duration_hours?: number
           end_time?: string
           hourly_rate?: number
           id?: string
           internal_notes?: string | null
           payment_status?: Database["public"]["Enums"]["voice_vault_payment_status"]
+          remaining_balance?: number | null
           start_time?: string
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
@@ -4751,6 +4757,7 @@ export type Database = {
         | "paid_in_full"
         | "defaulted"
         | "canceled"
+        | "deposit_paid"
       voice_vault_product_type: "hourly" | "core_series" | "white_glove"
     }
     CompositeTypes: {
@@ -5047,6 +5054,7 @@ export const Constants = {
         "paid_in_full",
         "defaulted",
         "canceled",
+        "deposit_paid",
       ],
       voice_vault_product_type: ["hourly", "core_series", "white_glove"],
     },

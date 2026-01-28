@@ -161,7 +161,7 @@ serve(async (req) => {
           // IDEMPOTENCY: Check current status before updating
           const { data: existingBooking, error: fetchBookingError } = await supabaseClient
             .from("voice_vault_bookings")
-            .select("payment_status")
+            .select("payment_status, total_amount, deposit_amount, remaining_balance")
             .eq("id", recordId)
             .single();
 
@@ -178,10 +178,14 @@ serve(async (req) => {
             break;
           }
 
+          // Determine if this is a deposit payment or full payment
+          const isDeposit = planType === "deposit";
+          const newStatus = isDeposit ? "deposit_paid" : "paid_in_full";
+
           const { error } = await supabaseClient
             .from("voice_vault_bookings")
             .update({
-              payment_status: "paid_in_full",
+              payment_status: newStatus,
               stripe_payment_intent_id: session.payment_intent as string,
             })
             .eq("id", recordId);
@@ -192,17 +196,25 @@ serve(async (req) => {
             throw error;
           }
 
-          logStep("SUCCESS - Hourly booking marked as paid_in_full", { recordId });
+          logStep(`SUCCESS - Hourly booking marked as ${newStatus}`, { 
+            recordId,
+            isDeposit,
+            depositAmount: metadata.deposit_amount,
+            remainingBalance: metadata.remaining_balance,
+          });
           
-          // Create revenue event for hourly booking
+          // Create revenue event for the deposit amount (what was actually charged)
           const bookingAmount = (session.amount_total || 0) / 100;
+          const revenueDesc = isDeposit 
+            ? `Voice Vault Hourly Booking Deposit` 
+            : `Voice Vault Hourly Booking`;
           await createRevenueEvent(
             bookingAmount,
-            `Voice Vault Hourly Booking`,
+            revenueDesc,
             recordId || 'unknown'
           );
           
-          await logWebhookEvent(eventType, stripeEventId, recordId, recordType, metadata, "success", "Booking updated to paid_in_full");
+          await logWebhookEvent(eventType, stripeEventId, recordId, recordType, metadata, "success", `Booking updated to ${newStatus}`);
 
         } else if (productType === "core_series" || productType === "white_glove") {
           const packagePrice = PACKAGE_PRICES[productType as keyof typeof PACKAGE_PRICES];
