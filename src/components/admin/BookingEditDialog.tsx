@@ -27,8 +27,10 @@ export function BookingEditDialog(props: {
   onOpenChange: (open: boolean) => void;
   booking: any | null;
   onUpdated?: () => void;
+  /** Called after a successful cancellation - use to close parent modals and refresh */
+  onCancelled?: () => void;
 }) {
-  const { open, onOpenChange, booking, onUpdated } = props;
+  const { open, onOpenChange, booking, onUpdated, onCancelled } = props;
 
   const initial = useMemo(() => {
     if (!booking) return null;
@@ -158,8 +160,16 @@ export function BookingEditDialog(props: {
         toast.warning("Booking cancelled, but notification may not have sent");
       }
 
-      onUpdated?.();
+      // Close this dialog first
       onOpenChange(false);
+      
+      // Use onCancelled if provided (closes parent modal + refetches), otherwise fall back to onUpdated
+      if (onCancelled) {
+        onCancelled();
+      } else {
+        onUpdated?.();
+      }
+      return; // Exit early since we handled closing above
     } catch (e: any) {
       toast.error(`Failed to cancel booking: ${e?.message ?? "Unknown error"}`);
     } finally {

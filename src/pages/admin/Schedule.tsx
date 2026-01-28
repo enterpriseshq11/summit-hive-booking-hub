@@ -414,6 +414,12 @@ export default function AdminSchedule() {
           onUpdated={() => {
             refetch();
           }}
+          onCancelled={() => {
+            // Close both modals and refresh the schedule
+            setEditOpen(false);
+            setSelectedBooking(null);
+            refetch();
+          }}
         />
       </div>
     </AdminLayout>
