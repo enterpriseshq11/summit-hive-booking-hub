@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/admin";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -60,6 +62,8 @@ import {
   AlertTriangle,
   Copy,
   Check,
+  CreditCard,
+  Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -138,6 +142,7 @@ const contentStatusConfig: Record<ContentStatus, { label: string; icon: typeof L
 };
 
 export default function VoiceVaultAdmin() {
+  const queryClient = useQueryClient();
   const [hourlyBookings, setHourlyBookings] = useState<HourlyBooking[]>([]);
   const [packageOrders, setPackageOrders] = useState<PackageOrder[]>([]);
   const [webhookEvents, setWebhookEvents] = useState<WebhookEvent[]>([]);
@@ -151,8 +156,63 @@ export default function VoiceVaultAdmin() {
   const [notesModalOpen, setNotesModalOpen] = useState(false);
   const [cancelBookingModalOpen, setCancelBookingModalOpen] = useState(false);
   const [selectedNotes, setSelectedNotes] = useState("");
-const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
+  const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
   const [showCanceledBookings, setShowCanceledBookings] = useState(false);
+  const [isUpdatingPayments, setIsUpdatingPayments] = useState(false);
+
+  // Fetch voice_vault_payments_enabled config
+  const { data: voiceVaultPaymentsEnabled, isLoading: loadingPaymentsConfig } = useQuery({
+    queryKey: ["voice-vault-payments-config"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("app_config")
+        .select("value")
+        .eq("key", "voice_vault_payments_enabled")
+        .maybeSingle();
+
+      if (error) {
+        console.error("Failed to fetch voice_vault_payments_enabled config:", error);
+        return true; // Default to payments enabled
+      }
+
+      return data?.value === "true";
+    },
+  });
+
+  // Mutation to update voice_vault_payments_enabled
+  const updatePaymentsSetting = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const { error } = await supabase
+        .from("app_config")
+        .update({ value: enabled ? "true" : "false", updated_at: new Date().toISOString() })
+        .eq("key", "voice_vault_payments_enabled");
+
+      if (error) throw error;
+      return enabled;
+    },
+    onMutate: () => {
+      setIsUpdatingPayments(true);
+    },
+    onSuccess: (enabled) => {
+      queryClient.invalidateQueries({ queryKey: ["voice-vault-payments-config"] });
+      toast.success(
+        enabled
+          ? "Voice Vault payments enabled. Customers will pay 1/3 deposit at booking."
+          : "Voice Vault payments disabled. Customers will pay on arrival."
+      );
+    },
+    onError: (error) => {
+      console.error("Failed to update voice vault payments setting:", error);
+      toast.error("Failed to update setting. Please try again.");
+    },
+    onSettled: () => {
+      setIsUpdatingPayments(false);
+    },
+  });
+
+  const handlePaymentsToggle = (checked: boolean) => {
+    updatePaymentsSetting.mutate(checked);
+  };
 
   const handleCopyWebhookUrl = () => {
     navigator.clipboard.writeText(WEBHOOK_URL);
@@ -567,6 +627,50 @@ const [webhookUrlCopied, setWebhookUrlCopied] = useState(false);
             </Button>
           </div>
         </div>
+
+        {/* Payment Settings Card */}
+        <Card className="border-accent/30">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-accent" />
+              Payment Settings
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Control how payments are collected for Voice Vault hourly bookings
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingPaymentsConfig ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading settings...
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
+                <div className="space-y-1">
+                  <Label htmlFor="voice-vault-payments" className="text-foreground font-medium">
+                    Require Payment at Checkout (Voice Vault)
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {voiceVaultPaymentsEnabled
+                      ? "Customers pay a 1/3 deposit when booking online"
+                      : "Customers pay on arrival (no upfront payment required)"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {isUpdatingPayments && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                  <Switch
+                    id="voice-vault-payments"
+                    checked={voiceVaultPaymentsEnabled ?? true}
+                    onCheckedChange={handlePaymentsToggle}
+                    disabled={isUpdatingPayments}
+                    className="data-[state=checked]:bg-accent"
+                  />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
