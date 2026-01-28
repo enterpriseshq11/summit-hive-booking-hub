@@ -3651,6 +3651,71 @@ export type Database = {
           },
         ]
       }
+      reschedule_requests: {
+        Row: {
+          booking_id: string
+          confirmation_token: string | null
+          confirmed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          initiated_by: string | null
+          new_end_datetime: string | null
+          new_start_datetime: string | null
+          original_end_datetime: string
+          original_start_datetime: string
+          proposed_times: Json
+          reason: string | null
+          selected_time_index: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          confirmation_token?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          initiated_by?: string | null
+          new_end_datetime?: string | null
+          new_start_datetime?: string | null
+          original_end_datetime: string
+          original_start_datetime: string
+          proposed_times?: Json
+          reason?: string | null
+          selected_time_index?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          confirmation_token?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          initiated_by?: string | null
+          new_end_datetime?: string | null
+          new_start_datetime?: string | null
+          original_end_datetime?: string
+          original_start_datetime?: string
+          proposed_times?: Json
+          reason?: string | null
+          selected_time_index?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reschedule_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resource_bookable_types: {
         Row: {
           bookable_type_id: string
@@ -4627,6 +4692,8 @@ export type Database = {
         | "denied"
         | "cancelled"
         | "no_show"
+        | "reschedule_requested"
+        | "rescheduled"
       business_type:
         | "summit"
         | "coworking"
@@ -4909,6 +4976,8 @@ export const Constants = {
         "denied",
         "cancelled",
         "no_show",
+        "reschedule_requested",
+        "rescheduled",
       ],
       business_type: [
         "summit",
