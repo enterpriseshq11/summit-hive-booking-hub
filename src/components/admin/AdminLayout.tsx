@@ -46,6 +46,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useUnreadApplicationsCount } from "@/hooks/useCareerApplications";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -133,6 +134,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadAlerts, setUnreadAlerts] = useState(0);
+  const { data: unreadCareersCount = 0 } = useUnreadApplicationsCount();
 
   const rolesLength = authUser?.roles?.length ?? 0;
   const hasAccess = isRolesLoaded && rolesLength
@@ -199,12 +201,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   if (item.adminOnly && !isAdmin) return null;
                   if (item.ownerOnly && !isOwner) return null;
                   const isActive = item.end ? location.pathname === item.href : location.pathname === item.href || location.pathname.startsWith(item.href + "/");
+                  const showAlertsBadge = item.title === "Alerts" && unreadAlerts > 0 && !collapsed;
+                  const showCareersBadge = item.title === "Careers Applications" && unreadCareersCount > 0 && !collapsed;
                   return (
                     <li key={item.href}>
                       <Link to={item.href} className={cn("flex items-center gap-3 px-3 py-2 rounded-lg transition-colors", isActive ? "bg-amber-500/15 text-amber-400 font-medium" : "text-zinc-300 hover:text-white hover:bg-zinc-800")} onClick={() => setMobileOpen(false)} title={collapsed ? item.title : undefined}>
                         <item.icon className="h-5 w-5 flex-shrink-0" />
                         {!collapsed && <span>{item.title}</span>}
-                        {item.title === "Alerts" && unreadAlerts > 0 && !collapsed && <Badge variant="destructive" className="ml-auto text-xs">{unreadAlerts}</Badge>}
+                        {showAlertsBadge && <Badge variant="destructive" className="ml-auto text-xs">{unreadAlerts}</Badge>}
+                        {showCareersBadge && <Badge className="ml-auto text-xs bg-blue-500 hover:bg-blue-600">{unreadCareersCount}</Badge>}
                       </Link>
                     </li>
                   );

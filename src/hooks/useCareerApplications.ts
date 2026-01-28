@@ -61,6 +61,8 @@ export interface CareerApplication {
   availability: CareerAvailability;
   consents: CareerConsents;
   attachments: Record<string, unknown>;
+  is_read: boolean;
+  tags: string[];
 }
 
 export interface CareerOpening {
@@ -230,6 +232,43 @@ export function useUpdateApplicationStatus() {
     onError: (error) => {
       console.error("Failed to update status:", error);
       toast.error("Failed to update status");
+    },
+  });
+}
+
+export function useMarkApplicationRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from("career_applications")
+        .update({ is_read: true })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["career-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["career-applications-unread-count"] });
+    },
+  });
+}
+
+export function useUnreadApplicationsCount() {
+  return useQuery({
+    queryKey: ["career-applications-unread-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("career_applications")
+        .select("*", { count: "exact", head: true })
+        .eq("is_read", false);
+
+      if (error) throw error;
+      return count || 0;
     },
   });
 }

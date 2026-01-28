@@ -745,10 +745,12 @@ export type Database = {
           created_at: string
           form_version: string | null
           id: string
+          is_read: boolean
           role: string
           role_specific: Json | null
           source_url: string | null
           status: Database["public"]["Enums"]["career_application_status"]
+          tags: string[]
           team: Database["public"]["Enums"]["career_team"]
           updated_at: string
         }
@@ -760,10 +762,12 @@ export type Database = {
           created_at?: string
           form_version?: string | null
           id?: string
+          is_read?: boolean
           role: string
           role_specific?: Json | null
           source_url?: string | null
           status?: Database["public"]["Enums"]["career_application_status"]
+          tags?: string[]
           team: Database["public"]["Enums"]["career_team"]
           updated_at?: string
         }
@@ -775,10 +779,12 @@ export type Database = {
           created_at?: string
           form_version?: string | null
           id?: string
+          is_read?: boolean
           role?: string
           role_specific?: Json | null
           source_url?: string | null
           status?: Database["public"]["Enums"]["career_application_status"]
+          tags?: string[]
           team?: Database["public"]["Enums"]["career_team"]
           updated_at?: string
         }
