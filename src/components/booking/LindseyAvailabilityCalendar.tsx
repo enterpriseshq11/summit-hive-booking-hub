@@ -132,6 +132,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "" });
+  const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [completionType, setCompletionType] = useState<"paid" | "free" | null>(null);
@@ -263,6 +264,49 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
     setStep("contact");
   };
 
+  // Validation helpers
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim());
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    // Strip non-digits and check for 10+ digits (basic US validation)
+    const digits = phone.replace(/\D/g, "");
+    return digits.length >= 10;
+  };
+
+  const validateForm = (): boolean => {
+    const errors: { name?: string; email?: string; phone?: string } = {};
+    
+    if (!guestInfo.name.trim()) {
+      errors.name = "Name is required";
+    }
+    
+    if (!guestInfo.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!validateEmail(guestInfo.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+    
+    if (!guestInfo.phone.trim()) {
+      errors.phone = "Phone number is required";
+    } else if (!validatePhone(guestInfo.phone)) {
+      errors.phone = "Please enter a valid phone number (10+ digits)";
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const isFormValid = (): boolean => {
+    return (
+      guestInfo.name.trim().length > 0 &&
+      validateEmail(guestInfo.email) &&
+      validatePhone(guestInfo.phone)
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -271,15 +315,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
       return;
     }
 
-    if (!guestInfo.name || !guestInfo.email) {
-      toast.error("Please provide your name and email");
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(guestInfo.email.trim())) {
-      toast.error("Please enter a valid email address");
+    if (!validateForm()) {
+      toast.error("Please fill in all required fields correctly");
       return;
     }
 
@@ -380,6 +417,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
     setSelectedDate(undefined);
     setSelectedTime("");
     setGuestInfo({ name: "", email: "", phone: "" });
+    setFormErrors({});
     setBookingComplete(false);
     setStep("service");
   };
@@ -778,10 +816,17 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                       <Input
                         id="name"
                         value={guestInfo.name}
-                        onChange={(e) => setGuestInfo(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) => {
+                          setGuestInfo(prev => ({ ...prev, name: e.target.value }));
+                          if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined }));
+                        }}
                         placeholder="Your full name"
                         required
+                        className={formErrors.name ? "border-destructive" : ""}
                       />
+                      {formErrors.name && (
+                        <p className="text-sm text-destructive">{formErrors.name}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email *</Label>
@@ -789,21 +834,36 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                         id="email"
                         type="email"
                         value={guestInfo.email}
-                        onChange={(e) => setGuestInfo(prev => ({ ...prev, email: e.target.value }))}
+                        onChange={(e) => {
+                          setGuestInfo(prev => ({ ...prev, email: e.target.value }));
+                          if (formErrors.email) setFormErrors(prev => ({ ...prev, email: undefined }));
+                        }}
                         placeholder="you@email.com"
                         required
+                        className={formErrors.email ? "border-destructive" : ""}
                       />
+                      {formErrors.email && (
+                        <p className="text-sm text-destructive">{formErrors.email}</p>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone (optional)</Label>
+                    <Label htmlFor="phone">Phone *</Label>
                     <Input
                       id="phone"
                       type="tel"
                       value={guestInfo.phone}
-                      onChange={(e) => setGuestInfo(prev => ({ ...prev, phone: e.target.value }))}
+                      onChange={(e) => {
+                        setGuestInfo(prev => ({ ...prev, phone: e.target.value }));
+                        if (formErrors.phone) setFormErrors(prev => ({ ...prev, phone: undefined }));
+                      }}
                       placeholder="(555) 123-4567"
+                      required
+                      className={formErrors.phone ? "border-destructive" : ""}
                     />
+                    {formErrors.phone && (
+                      <p className="text-sm text-destructive">{formErrors.phone}</p>
+                    )}
                   </div>
                 </div>
 
@@ -811,7 +871,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
                   type="submit"
                   size="lg"
                   className="w-full bg-accent hover:bg-accent/90 text-primary font-bold"
-                  disabled={isSubmitting || !guestInfo.name || !guestInfo.email}
+                  disabled={isSubmitting || !isFormValid()}
                 >
                   {isSubmitting ? "Processing..." : calculatePrice() === 0 ? "Confirm Booking" : "Proceed to Payment"}
                   <ArrowRight className="h-5 w-5 ml-2" />
