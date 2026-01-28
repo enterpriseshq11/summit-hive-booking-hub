@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { AdminLayout, RescheduleModal, DayAvailabilityModal } from "@/components/admin";
 import { useBookings } from "@/hooks/useBookings";
 import { useBusinesses } from "@/hooks/useBusinesses";
@@ -54,6 +55,7 @@ function formatMoneyOrEstimate(b: any) {
 }
 
 export default function AdminSchedule() {
+  const { authUser } = useAuth();
   const [selectedBusiness, setSelectedBusiness] = useState<string>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("week");
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -63,6 +65,14 @@ export default function AdminSchedule() {
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [selectedDayForAvailability, setSelectedDayForAvailability] = useState<Date | null>(null);
+
+  // Determine if user is spa-only (has spa_lead but not owner/manager)
+  const isSpaLeadOnly = useMemo(() => {
+    const roles = authUser?.roles || [];
+    return roles.includes("spa_lead") && 
+           !roles.includes("owner") && 
+           !roles.includes("manager");
+  }, [authUser?.roles]);
 
   // Calculate date ranges based on view mode
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
@@ -85,7 +95,7 @@ export default function AdminSchedule() {
     endDate: (viewMode === "week" ? weekEnd : monthViewEnd).toISOString(),
   });
 
-  // Get the current Spa business ID for availability modal
+  // Get the current Spa business ID for availability modal and role filtering
   const spaBusinessId = useMemo(() => {
     const spaBusiness = businesses?.find(b => b.type === "spa");
     return spaBusiness?.id;
@@ -95,6 +105,13 @@ export default function AdminSchedule() {
     const spaBusiness = businesses?.find(b => b.type === "spa");
     return spaBusiness?.name || "Restoration Lounge";
   }, [businesses]);
+
+  // For spa_lead, force selection to Spa business
+  useEffect(() => {
+    if (isSpaLeadOnly && spaBusinessId && selectedBusiness === "all") {
+      setSelectedBusiness(spaBusinessId);
+    }
+  }, [isSpaLeadOnly, spaBusinessId, selectedBusiness]);
 
   // Fetch availability overrides for visual indicators
   const { data: availabilityOverrides, refetch: refetchOverrides } = useAvailabilityOverrides(
@@ -224,18 +241,20 @@ export default function AdminSchedule() {
                 </Button>
               </div>
 
-              {/* Business Filter */}
-              <Select value={selectedBusiness} onValueChange={setSelectedBusiness}>
-                <SelectTrigger className="w-[160px] bg-card border-border text-foreground">
-                  <SelectValue placeholder="All Businesses" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-border">
-                  <SelectItem value="all" className="text-foreground focus:bg-muted focus:text-foreground">All Businesses</SelectItem>
-                  {businesses?.map((b) => (
-                    <SelectItem key={b.id} value={b.id} className="text-foreground focus:bg-muted focus:text-foreground">{b.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* Business Filter - Hidden for spa_lead only users */}
+              {!isSpaLeadOnly && (
+                <Select value={selectedBusiness} onValueChange={setSelectedBusiness}>
+                  <SelectTrigger className="w-[160px] bg-card border-border text-foreground">
+                    <SelectValue placeholder="All Businesses" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border">
+                    <SelectItem value="all" className="text-foreground focus:bg-muted focus:text-foreground">All Businesses</SelectItem>
+                    {businesses?.map((b) => (
+                      <SelectItem key={b.id} value={b.id} className="text-foreground focus:bg-muted focus:text-foreground">{b.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
 
