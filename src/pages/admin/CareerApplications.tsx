@@ -246,19 +246,31 @@ export default function CareerApplicationsAdmin() {
 
         {/* Team Tabs */}
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="bg-zinc-800">
-            <TabsTrigger value="all" className="data-[state=active]:bg-amber-500/20">
+          <TabsList className="bg-zinc-800/80 border border-zinc-700 p-1">
+            <TabsTrigger 
+              value="all" 
+              className="text-zinc-200 data-[state=inactive]:hover:bg-zinc-700/50 data-[state=inactive]:hover:text-white data-[state=active]:bg-amber-500/30 data-[state=active]:text-amber-200 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-amber-500/50"
+            >
               All Applications
             </TabsTrigger>
-            <TabsTrigger value="spa" className="data-[state=active]:bg-pink-500/20 gap-2">
+            <TabsTrigger 
+              value="spa" 
+              className="gap-2 text-zinc-200 data-[state=inactive]:hover:bg-zinc-700/50 data-[state=inactive]:hover:text-white data-[state=active]:bg-pink-500/30 data-[state=active]:text-pink-200 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-pink-500/50"
+            >
               <Users className="h-4 w-4" />
               Spa
             </TabsTrigger>
-            <TabsTrigger value="fitness" className="data-[state=active]:bg-green-500/20 gap-2">
+            <TabsTrigger 
+              value="fitness" 
+              className="gap-2 text-zinc-200 data-[state=inactive]:hover:bg-zinc-700/50 data-[state=inactive]:hover:text-white data-[state=active]:bg-green-500/30 data-[state=active]:text-green-200 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-green-500/50"
+            >
               <Dumbbell className="h-4 w-4" />
               Fitness
             </TabsTrigger>
-            <TabsTrigger value="contracting" className="data-[state=active]:bg-orange-500/20 gap-2">
+            <TabsTrigger 
+              value="contracting" 
+              className="gap-2 text-zinc-200 data-[state=inactive]:hover:bg-zinc-700/50 data-[state=inactive]:hover:text-white data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-200 data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-orange-500/50"
+            >
               <Wrench className="h-4 w-4" />
               Contracting
             </TabsTrigger>
