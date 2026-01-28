@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info } from "lucide-react";
+import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +24,9 @@ const BUSINESS_UNIT_TABS: { value: BusinessUnit; label: string }[] = [
   { value: "voice_vault", label: "Voice Vault" },
   { value: "all", label: "All" },
 ];
+
+// Spa/Restoration uses different status tabs
+const isSpaUnit = (unit: BusinessUnit) => unit === "restoration";
 
 function matchesUnit(b: any, unit: BusinessUnit) {
   if (unit === "all") return true;
@@ -149,6 +152,42 @@ export default function AdminApprovals() {
     },
   });
 
+  // NEW: Query for reschedule_requested bookings (Spa only)
+  const { data: rescheduledBookings, isLoading: rescheduledLoading } = useQuery({
+    queryKey: ["bookings", "approvals", "reschedule_requested"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select(
+          `
+          *,
+          businesses(name, type),
+          bookable_types(name),
+          packages(name)
+        `
+        )
+        .eq("status", "reschedule_requested")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Query reschedule_requests for additional details
+  const { data: rescheduleRequests } = useQuery({
+    queryKey: ["reschedule_requests"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reschedule_requests")
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const { data: deniedLeaseRequests, isLoading: leaseDeniedLoading } = useQuery({
     queryKey: ["office_inquiries", "lease_request", "denied"],
     queryFn: async () => {
@@ -249,9 +288,16 @@ export default function AdminApprovals() {
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
   const [businessUnit, setBusinessUnit] = useState<BusinessUnit>("all");
-  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied">("pending");
+  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied" | "rescheduled">("pending");
   const [viewDenied, setViewDenied] = useState<any>(null);
   const [selectedLease, setSelectedLease] = useState<any>(null);
+
+  // Auto-switch to confirmed tab when switching to Restoration (since they don't use pending)
+  useEffect(() => {
+    if (isSpaUnit(businessUnit) && (statusTab === "pending" || statusTab === "denied")) {
+      setStatusTab("confirmed");
+    }
+  }, [businessUnit, statusTab]);
 
   const filteredPending = useMemo(() => {
     const bookingItems: ApprovalItem[] = (pendingBookings || [])
@@ -291,6 +337,18 @@ export default function AdminApprovals() {
 
     return [...bookingItems, ...leaseItems];
   }, [confirmedBookings, confirmedLeaseRequests, businessUnit]);
+
+  // NEW: Filtered rescheduled bookings (Spa only)
+  const filteredRescheduled = useMemo(() => {
+    return (rescheduledBookings || [])
+      .filter((b: any) => matchesUnit(b, businessUnit))
+      .map((b: any) => ({ kind: "booking" as const, booking: b }));
+  }, [rescheduledBookings, businessUnit]);
+
+  // Helper to get reschedule request details for a booking
+  const getRescheduleRequest = (bookingId: string) => {
+    return (rescheduleRequests || []).find((r: any) => r.booking_id === bookingId);
+  };
 
   // Deep link support from staff email: /admin/approvals?id=<booking_id>
   useEffect(() => {
@@ -367,13 +425,33 @@ export default function AdminApprovals() {
           </TabsList>
         </Tabs>
 
-        <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "pending" | "confirmed" | "denied")}>
-          <TabsList className="w-full justify-start flex-wrap h-auto">
-            <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
-            <TabsTrigger value="denied">Denied</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Status Tabs - Different for Spa vs other businesses */}
+        {isSpaUnit(businessUnit) ? (
+          // Spa/Restoration: Only Confirmed and Rescheduled tabs
+          <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "confirmed" | "rescheduled")}>
+            <TabsList className="w-full justify-start flex-wrap h-auto">
+              <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
+              <TabsTrigger value="rescheduled" className="flex items-center gap-1">
+                <RefreshCw className="h-3 w-3" />
+                Rescheduled
+                {filteredRescheduled.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                    {filteredRescheduled.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ) : (
+          // All other businesses: Standard Pending/Confirmed/Denied tabs
+          <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "pending" | "confirmed" | "denied")}>
+            <TabsList className="w-full justify-start flex-wrap h-auto">
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
+              <TabsTrigger value="denied">Denied</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
 
         {/* Helper Text */}
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-4 text-sm">
@@ -403,6 +481,12 @@ export default function AdminApprovals() {
             ))}
           </div>
         ) : statusTab === "denied" && (deniedLoading || leaseDeniedLoading) ? (
+          <div className="space-y-4">
+            {Array(3).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
+          </div>
+        ) : statusTab === "rescheduled" && rescheduledLoading ? (
           <div className="space-y-4">
             {Array(3).fill(0).map((_, i) => (
               <Skeleton key={i} className="h-32" />
@@ -441,6 +525,92 @@ export default function AdminApprovals() {
               <p className="text-muted-foreground">Denied requests will show here.</p>
             </CardContent>
           </Card>
+        ) : statusTab === "rescheduled" && filteredRescheduled.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium">No pending reschedule requests</h3>
+              <p className="text-muted-foreground">When you request a reschedule from the Schedule page, it will appear here until the customer confirms.</p>
+            </CardContent>
+          </Card>
+        ) : statusTab === "rescheduled" ? (
+          // Special rendering for rescheduled items
+          <div className="space-y-4">
+            {filteredRescheduled.map((item) => {
+              const rescheduleReq = getRescheduleRequest(item.booking.id);
+              const proposedTimes = Array.isArray(rescheduleReq?.proposed_times) ? rescheduleReq.proposed_times : [];
+              
+              return (
+                <Card key={item.booking.id} className="hover:shadow-md transition-shadow border-amber-200 dark:border-amber-800">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row justify-between gap-4">
+                      <div className="space-y-3 flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-lg">{item.booking.guest_name || "Customer"}</h3>
+                            <p className="text-sm text-muted-foreground">{item.booking.guest_email || "No email"}</p>
+                          </div>
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                            Awaiting Customer
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="line-through text-muted-foreground">
+                              {format(new Date(item.booking.start_datetime), "MMM d, yyyy")}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span className="line-through text-muted-foreground">
+                              {format(new Date(item.booking.start_datetime), "h:mm a")}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span>{item.booking.guest_count || 1} guests</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <span>{formatEstimate(item.booking)}</span>
+                          </div>
+                        </div>
+
+                        {/* Proposed times */}
+                        {proposedTimes.length > 0 && (
+                          <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 text-sm">
+                            <p className="font-medium text-amber-700 dark:text-amber-300 mb-2">Proposed New Times:</p>
+                            <ul className="space-y-1">
+                              {proposedTimes.map((pt: any, idx: number) => (
+                                <li key={idx} className="text-amber-600 dark:text-amber-400">
+                                  Option {idx + 1}: {pt.formatted || format(new Date(pt.start), "EEEE, MMM d 'at' h:mm a")}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {rescheduleReq?.reason && (
+                          <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                            <p className="text-muted-foreground">Reason:</p>
+                            <p>{rescheduleReq.reason}</p>
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="secondary">{item.booking.businesses?.name}</Badge>
+                          <Badge variant="outline">{item.booking.bookable_types?.name}</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         ) : (
           <div className="space-y-4">
             {(statusTab === "pending"

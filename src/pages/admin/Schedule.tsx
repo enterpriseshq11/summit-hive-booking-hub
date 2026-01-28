@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { AdminLayout } from "@/components/admin";
+import { AdminLayout, RescheduleModal, DayAvailabilityModal } from "@/components/admin";
 import { useBookings } from "@/hooks/useBookings";
 import { useBusinesses } from "@/hooks/useBusinesses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarDays, Clock, ChevronLeft, ChevronRight, Calendar, CalendarRange } from "lucide-react";
+import { CalendarDays, Clock, ChevronLeft, ChevronRight, Calendar, CalendarRange, RefreshCw, Settings2 } from "lucide-react";
 import { BookingEditDialog } from "@/components/admin/BookingEditDialog";
 import { 
   format, 
@@ -28,6 +28,20 @@ import {
 
 type ViewMode = "week" | "month";
 
+// Check if a business is Spa/Restoration for reschedule functionality
+const isSpaBooking = (booking: any) => {
+  const type = booking?.businesses?.type;
+  const sourceBrand = booking?.source_brand;
+  return type === "spa" || sourceBrand === "restoration";
+};
+
+// Check if the current selected business is Spa
+const isSpaBusinessSelected = (businesses: any[], selectedBusinessId: string) => {
+  if (selectedBusinessId === "all") return false;
+  const business = businesses?.find(b => b.id === selectedBusinessId);
+  return business?.type === "spa";
+};
+
 function formatMoneyOrEstimate(b: any) {
   const t = b?.businesses?.type ?? b?.source_brand;
   const isSummit = t === "summit";
@@ -44,6 +58,9 @@ export default function AdminSchedule() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [moreOpenDayKey, setMoreOpenDayKey] = useState<string | null>(null);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [selectedDayForAvailability, setSelectedDayForAvailability] = useState<Date | null>(null);
 
   // Calculate date ranges based on view mode
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
@@ -66,6 +83,12 @@ export default function AdminSchedule() {
     endDate: (viewMode === "week" ? weekEnd : monthViewEnd).toISOString(),
   });
 
+  // Get the current Spa business ID for availability modal
+  const spaBusinessId = useMemo(() => {
+    const spaBusiness = businesses?.find(b => b.type === "spa");
+    return spaBusiness?.id;
+  }, [businesses]);
+
   const filteredBookings = useMemo(() => {
     // Hide denied and cancelled bookings to keep the calendar uncluttered.
     return (bookings || []).filter((b: any) => b?.status !== "denied" && b?.status !== "cancelled");
@@ -75,6 +98,7 @@ export default function AdminSchedule() {
     switch (status) {
       case "confirmed": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800";
       case "pending": return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800";
+      case "reschedule_requested": return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-800";
       case "denied": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800";
       case "cancelled": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800";
       case "completed": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800";
@@ -87,11 +111,21 @@ export default function AdminSchedule() {
     switch (status) {
       case "confirmed": return "✓ Confirmed";
       case "pending": return "⏳ Pending";
+      case "reschedule_requested": return "🔄 Reschedule Pending";
       case "denied": return "✗ Denied";
       case "cancelled": return "✗ Cancelled";
       case "completed": return "✓ Complete";
       case "no_show": return "– No Show";
       default: return status;
+    }
+  };
+
+  const handleDayClick = (day: Date, e: React.MouseEvent) => {
+    // Only show availability modal for Spa when clicking on empty area
+    if (isSpaBusinessSelected(businesses || [], selectedBusiness)) {
+      e.stopPropagation();
+      setSelectedDayForAvailability(day);
+      setAvailabilityOpen(true);
     }
   };
 
@@ -233,7 +267,13 @@ export default function AdminSchedule() {
                       bg-zinc-800 border-zinc-700 
                       ${isToday ? 'ring-2 ring-primary' : ''} 
                       ${viewMode === "month" && !isCurrentMonth ? 'opacity-40' : ''}
+                      ${isSpaBusinessSelected(businesses || [], selectedBusiness) ? 'cursor-pointer hover:border-accent/50' : ''}
                     `}
+                    onClick={(e) => {
+                      // Only trigger if clicking the card itself, not a booking button
+                      if ((e.target as HTMLElement).closest('button')) return;
+                      handleDayClick(day, e);
+                    }}
                   >
                     <CardHeader className={viewMode === "week" ? "p-3 pb-2" : "p-2 pb-1"}>
                       <CardTitle className={`${viewMode === "week" ? "text-sm" : "text-xs"} font-medium flex justify-between items-center text-white`}>
@@ -391,16 +431,30 @@ export default function AdminSchedule() {
                   </div>
                 )}
 
-                <div className="flex gap-2 pt-4">
-                  <Button variant="outline" className="flex-1 border-zinc-600 text-white hover:bg-zinc-700" onClick={() => setSelectedBooking(null)}>
-                    Close
-                  </Button>
-                  <Button
-                    className="flex-1 bg-accent text-black hover:bg-accent/90"
-                    onClick={() => setEditOpen(true)}
-                  >
-                    Edit Booking
-                  </Button>
+                <div className="flex flex-col gap-2 pt-4">
+                  {/* Reschedule button - only for Spa/Restoration bookings that are confirmed */}
+                  {isSpaBooking(selectedBooking) && selectedBooking.status === "confirmed" && (
+                    <Button
+                      variant="outline"
+                      className="w-full border-amber-600 text-amber-400 hover:bg-amber-900/30 hover:text-amber-300"
+                      onClick={() => setRescheduleOpen(true)}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Reschedule Appointment
+                    </Button>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1 border-zinc-600 text-white hover:bg-zinc-700" onClick={() => setSelectedBooking(null)}>
+                      Close
+                    </Button>
+                    <Button
+                      className="flex-1 bg-accent text-black hover:bg-accent/90"
+                      onClick={() => setEditOpen(true)}
+                    >
+                      Edit Booking
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -418,6 +472,29 @@ export default function AdminSchedule() {
             // Close both modals and refresh the schedule
             setEditOpen(false);
             setSelectedBooking(null);
+            refetch();
+          }}
+        />
+
+        {/* Reschedule Modal - Spa only */}
+        <RescheduleModal
+          open={rescheduleOpen}
+          onOpenChange={setRescheduleOpen}
+          booking={selectedBooking}
+          onSuccess={() => {
+            refetch();
+            setSelectedBooking(null);
+          }}
+        />
+
+        {/* Day Availability Modal - Spa only */}
+        <DayAvailabilityModal
+          open={availabilityOpen}
+          onOpenChange={setAvailabilityOpen}
+          selectedDate={selectedDayForAvailability}
+          businessId={spaBusinessId}
+          existingBookings={bookings || []}
+          onSuccess={() => {
             refetch();
           }}
         />
