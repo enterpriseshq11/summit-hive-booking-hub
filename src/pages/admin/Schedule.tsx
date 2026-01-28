@@ -259,8 +259,8 @@ export default function AdminSchedule() {
           </div>
 
           {/* Helper Text */}
-          <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
-            <strong className="text-foreground">Tip:</strong> Click any booking to view details.
+          <div className="bg-zinc-800/50 rounded-lg p-3 text-sm text-zinc-300">
+            <strong className="text-white">Tip:</strong> Click any booking to view details.
             {isSpaBusinessSelected(businesses || [], selectedBusiness) && (
               <span className="ml-1">
                 <Settings2 className="h-3 w-3 inline mr-1" />
