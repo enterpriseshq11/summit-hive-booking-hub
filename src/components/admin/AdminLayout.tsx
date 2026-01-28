@@ -86,6 +86,7 @@ const navSections = [
     label: "Spa (Restoration Lounge)",
     items: [
       { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
+      { title: "Spa Settings", href: "/admin/spa-settings", icon: Settings, adminOnly: true },
     ],
   },
   {
