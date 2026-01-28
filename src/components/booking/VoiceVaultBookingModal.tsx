@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -94,6 +95,7 @@ export function VoiceVaultBookingModal({
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [depositConsent, setDepositConsent] = useState(false);
 
   const resetForm = () => {
     setStep("type");
@@ -106,6 +108,7 @@ export function VoiceVaultBookingModal({
     setCustomerName("");
     setCustomerEmail("");
     setCustomerPhone("");
+    setDepositConsent(false);
   };
 
   const today = startOfToday();
@@ -581,11 +584,21 @@ export function VoiceVaultBookingModal({
                 </div>
               </div>
 
-              {bookingType === "hourly" && (
-                <div className="bg-accent/10 rounded-lg p-3 border border-accent/30">
-                  <p className="text-sm text-foreground text-center">
-                    <strong>Note:</strong> A 1/3 deposit secures your booking. The remaining balance is due on arrival.
-                  </p>
+              {/* Deposit consent checkbox - only shown when payments enabled for hourly */}
+              {bookingType === "hourly" && voiceVaultPaymentsEnabled && (
+                <div className="flex items-start gap-3 p-4 rounded-lg border border-border bg-muted/30">
+                  <Checkbox
+                    id="vv-deposit-consent"
+                    checked={depositConsent}
+                    onCheckedChange={(checked) => setDepositConsent(checked === true)}
+                    className="mt-0.5"
+                  />
+                  <Label 
+                    htmlFor="vv-deposit-consent" 
+                    className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
+                  >
+                    I understand there is a 1/3 deposit charged today to hold my booking. This deposit is applied toward my total if I attend. If I do not show up (or cancel outside the policy window), the deposit is non-refundable. The remaining balance is due at arrival.
+                  </Label>
                 </div>
               )}
 
@@ -618,7 +631,8 @@ export function VoiceVaultBookingModal({
                 loading ||
                 (step === "type" && !canProceedFromType) ||
                 (step === "details" && !canProceedFromDetails) ||
-                (step === "contact" && !canProceedFromContact)
+                (step === "contact" && !canProceedFromContact) ||
+                (step === "payment" && bookingType === "hourly" && voiceVaultPaymentsEnabled && !depositConsent)
               }
               onClick={() => {
                 if (step === "type") setStep("details");
