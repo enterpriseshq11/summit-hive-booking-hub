@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
+import { RescheduleModal } from "@/components/admin/RescheduleModal";
 import { useUpdateBookingStatus } from "@/hooks/useBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -291,6 +292,21 @@ export default function AdminApprovals() {
   const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied" | "rescheduled">("pending");
   const [viewDenied, setViewDenied] = useState<any>(null);
   const [selectedLease, setSelectedLease] = useState<any>(null);
+  const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
+
+  // Helper to check if a booking is Spa/Restoration
+  const isSpaBooking = (booking: any) => {
+    const t = booking?.businesses?.type;
+    const sb = booking?.source_brand;
+    return t === "spa" || sb === "restoration";
+  };
+
+  // Handle reschedule success
+  const handleRescheduleSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["bookings", "approvals", "confirmed"] });
+    queryClient.invalidateQueries({ queryKey: ["bookings", "approvals", "reschedule_requested"] });
+    queryClient.invalidateQueries({ queryKey: ["reschedule_requests"] });
+  };
 
   // Auto-switch to confirmed tab when switching to Restoration (since they don't use pending)
   useEffect(() => {
@@ -802,6 +818,22 @@ export default function AdminApprovals() {
                           View Details
                         </Button>
                       </div>
+                    ) : statusTab === "confirmed" ? (
+                      // Show Reschedule button only for Spa/Restoration bookings
+                      item.kind === "booking" && isSpaBooking(item.booking) ? (
+                        <div className="flex lg:flex-col gap-2 lg:justify-center">
+                          <Button
+                            variant="outline"
+                            className="flex-1 lg:flex-none"
+                            onClick={() => setRescheduleBooking(item.booking)}
+                          >
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Reschedule
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="hidden lg:block" />
+                      )
                     ) : (
                       <div className="hidden lg:block" />
                     )}
@@ -919,6 +951,14 @@ export default function AdminApprovals() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Reschedule Modal - reuses same component as Schedule page */}
+        <RescheduleModal
+          open={!!rescheduleBooking}
+          onOpenChange={(open) => !open && setRescheduleBooking(null)}
+          booking={rescheduleBooking}
+          onSuccess={handleRescheduleSuccess}
+        />
       </div>
     </AdminLayout>
   );
