@@ -32,7 +32,7 @@ const teamCards: {
   },
   {
     team: "contracting",
-    title: "Contracting",
+    title: "A-Z Contracting",
     description: "Join our contractor network for residential and commercial projects across Northwest Ohio.",
     icon: Wrench,
     href: "/careers/contracting",
