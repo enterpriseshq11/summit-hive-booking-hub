@@ -35,7 +35,7 @@ serve(async (req) => {
         reminder_type,
         recipient_type,
         scheduled_for,
-        bookings(status)
+        bookings(status, businesses(type), source_brand)
       `)
       .eq("status", "pending")
       .lte("scheduled_for", now)
@@ -53,7 +53,15 @@ serve(async (req) => {
     for (const reminder of dueReminders || []) {
       try {
         // Check if booking is still valid (not cancelled)
-        const bookingStatus = (reminder.bookings as { status?: string })?.status;
+        const bookingData = reminder.bookings as { 
+          status?: string; 
+          businesses?: { type?: string };
+          source_brand?: string;
+        } | null;
+        const bookingStatus = bookingData?.status;
+        const businessType = bookingData?.businesses?.type || "default";
+        const sourceBrand = bookingData?.source_brand;
+        
         if (bookingStatus === "cancelled" || bookingStatus === "no_show") {
           // Cancel the reminder
           await supabase
@@ -66,6 +74,28 @@ serve(async (req) => {
         }
 
         const recipientType = (reminder as { recipient_type?: string }).recipient_type || "customer";
+        const reminderType = reminder.reminder_type || "24h";
+
+        // Determine if this is a Spa booking (Lindsey)
+        const isSpa = businessType === "spa" || 
+          (typeof sourceBrand === "string" && ["spa", "restoration_lounge", "massage"].includes(sourceBrand.toLowerCase()));
+
+        // For Spa bookings, send to both customer AND staff
+        // For other bookings, follow the recipient_type in the reminder record
+        const recipients: string[] = [recipientType];
+        
+        // Spa reminders go to both customer and staff
+        // The scheduled_reminders table already has separate entries for customer and staff
+        // so we just need to send based on recipient_type
+
+        logStep("Processing reminder", { 
+          id: reminder.id, 
+          booking_id: reminder.booking_id, 
+          reminderType, 
+          recipientType,
+          isSpa,
+          businessType
+        });
 
         // Call the notification function
         const notificationUrl = `${supabaseUrl}/functions/v1/send-booking-notification`;
@@ -78,10 +108,11 @@ serve(async (req) => {
           body: JSON.stringify({
             booking_id: reminder.booking_id,
             notification_type: "reminder",
-            reminder_type: reminder.reminder_type,
-            // Customer: email only. Staff (Victoria): email + sms.
-            channels: recipientType === "staff" ? ["email", "sms"] : ["email"],
-            recipients: recipientType === "staff" ? ["staff"] : ["customer"],
+            reminder_type: reminderType,
+            // Customer: email + sms for Spa, email only for others
+            // Staff: email + sms
+            channels: recipientType === "staff" ? ["email", "sms"] : (isSpa ? ["email", "sms"] : ["email"]),
+            recipients: [recipientType],
           }),
         });
 
@@ -92,7 +123,7 @@ serve(async (req) => {
             .update({ status: "sent", processed_at: new Date().toISOString() })
             .eq("id", reminder.id);
           results.success++;
-          logStep("Reminder sent", { id: reminder.id, booking_id: reminder.booking_id });
+          logStep("Reminder sent", { id: reminder.id, booking_id: reminder.booking_id, reminderType, recipientType });
         } else {
           const errText = await response.text();
           await supabase
