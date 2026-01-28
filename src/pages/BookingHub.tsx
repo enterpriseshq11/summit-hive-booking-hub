@@ -289,7 +289,7 @@ export default function BookingHub() {
             
             {/* H1 - Updated copy */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary-foreground leading-tight">
-              Book in Minutes.<br className="hidden sm:block" /> Arrive to Excellence.
+              Book In Minutes.<br className="hidden sm:block" /> Arrive To Excellence.
             </h1>
             
             {/* Subtext - Updated copy */}
