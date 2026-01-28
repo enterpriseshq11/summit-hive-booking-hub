@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,6 +89,7 @@ export function PhotoBoothBookingWizard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [confirmedBookingId, setConfirmedBookingId] = useState<string | null>(null);
+  const [depositConsent, setDepositConsent] = useState(false);
 
   // Get payment config
   const { photoBooth360PaymentsEnabled, isLoading: isLoadingPaymentConfig } = usePhotoBooth360PaymentsConfig();
@@ -596,11 +598,32 @@ export function PhotoBoothBookingWizard({
             </Alert>
           )}
 
+          {/* Deposit consent checkbox - only shown when payments enabled */}
+          {photoBooth360PaymentsEnabled && (
+            <div className="flex items-start gap-3 p-4 rounded-lg border border-border bg-muted/30">
+              <Checkbox
+                id="deposit-consent"
+                checked={depositConsent}
+                onCheckedChange={(checked) => setDepositConsent(checked === true)}
+                className="mt-0.5"
+              />
+              <Label 
+                htmlFor="deposit-consent" 
+                className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
+              >
+                I understand there is a 1/3 deposit charged today to hold my booking. This deposit is applied toward my total if I attend. If I do not show up (or cancel outside the policy window), the deposit is non-refundable. The remaining balance is due at arrival.
+              </Label>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
               type="button"
               variant="outline"
-              onClick={() => setStep("time")}
+              onClick={() => {
+                setStep("time");
+                setDepositConsent(false);
+              }}
               disabled={isSubmitting}
             >
               Back
@@ -609,7 +632,7 @@ export function PhotoBoothBookingWizard({
               type="button"
               className="bg-accent text-primary hover:bg-accent/90 flex-1"
               onClick={proceedToPayment}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (photoBooth360PaymentsEnabled && !depositConsent)}
             >
               {isSubmitting 
                 ? "Processing..." 
