@@ -49,9 +49,11 @@ serve(async (req) => {
       customer_name,
       customer_email,
       customer_phone,
+      consent_no_show_fee,
+      consent_timestamp,
     } = body || {};
 
-    logStep("Request parsed", { service_id, service_name, duration, price, room_id, start_datetime, end_datetime });
+    logStep("Request parsed", { service_id, service_name, duration, price, room_id, start_datetime, end_datetime, consent_no_show_fee });
 
     // Validate required fields
     if (!service_name || !duration || price === undefined || !start_datetime || !end_datetime) {
@@ -164,11 +166,22 @@ serve(async (req) => {
       });
     }
 
+    // Validate consent for paid bookings
+    if (!consent_no_show_fee) {
+      return jsonResponse(400, { error: "Consent to booking fee policy is required" });
+    }
+
+    // BOOKING FEE: Always charge $20 flat deposit
+    const BOOKING_FEE = 20;
+    const servicePrice = Number(price);
+    const depositAmount = BOOKING_FEE;
+    const balanceDue = Math.max(0, servicePrice - depositAmount);
+
     // Generate booking number
     const { data: bookingNumber, error: bnError } = await supabase.rpc("generate_booking_number");
     if (bnError) logStep("Booking number generation warning", { error: bnError });
 
-    // Create pending booking
+    // Create pending booking with booking fee breakdown
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .insert({
@@ -177,15 +190,16 @@ serve(async (req) => {
         start_datetime,
         end_datetime,
         status: "pending",
-        subtotal: total,
-        total_amount: total,
+        subtotal: servicePrice,
+        total_amount: servicePrice,
         booking_number: bookingNumber || `SPA-${Date.now()}`,
         guest_name: customer_name.trim(),
         guest_email: customer_email.trim(),
         guest_phone: customer_phone?.trim() || null,
-        deposit_amount: total, // Full payment
-        balance_due: 0,
-        notes: `Service: ${service_name}, Duration: ${duration} min`,
+        deposit_amount: depositAmount,
+        balance_due: balanceDue,
+        balance_due_date: start_datetime.split("T")[0], // Due on appointment date
+        notes: `Service: ${service_name}, Duration: ${duration} min | Service Price: $${servicePrice} | Booking Fee Paid: $${depositAmount} | Balance Due: $${balanceDue} | No-Show Fee Consent: ${consent_timestamp}`,
       })
       .select("id")
       .single();
@@ -203,7 +217,7 @@ serve(async (req) => {
       if (brError) logStep("Room attachment warning", { error: brError });
     }
 
-    // Create Stripe checkout for full payment
+    // Create Stripe checkout for $20 booking fee only
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const origin = req.headers.get("origin") || "http://localhost:3000";
 
@@ -213,15 +227,15 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `${service_name} - ${duration} min`,
-              description: `Massage with Lindsey at The Hive Restoration Lounge`,
+              name: `Booking Fee - ${service_name} (${duration} min)`,
+              description: `$20 booking fee to hold your appointment. Applied toward your $${servicePrice} service. Remaining $${balanceDue} due at appointment.`,
               metadata: {
                 booking_id: booking.id,
                 service_id: service_id || "",
                 duration: String(duration),
               },
             },
-            unit_amount: Math.round(total * 100),
+            unit_amount: depositAmount * 100, // $20 in cents
           },
           quantity: 1,
         },
@@ -234,30 +248,52 @@ serve(async (req) => {
         booking_id: booking.id,
         business_type: "spa",
         service_name,
+        service_price: String(servicePrice),
+        deposit_paid: String(depositAmount),
+        balance_due: String(balanceDue),
         duration: String(duration),
+        customer_phone: customer_phone?.trim() || "",
+        appointment_datetime: start_datetime,
+        consent_no_show_fee: "true",
+        consent_timestamp: consent_timestamp || new Date().toISOString(),
       },
     });
 
-    // Create pending payment record
+    // Create pending payment record for booking fee
     const { error: payError } = await supabase.from("payments").insert({
       booking_id: booking.id,
-      amount: total,
-      payment_type: "full",
+      amount: depositAmount,
+      payment_type: "deposit",
       status: "pending",
       stripe_payment_intent_id: session.payment_intent as string,
       metadata: {
         checkout_session_id: session.id,
         service_name,
+        service_price: servicePrice,
+        deposit_paid: depositAmount,
+        balance_due: balanceDue,
         duration,
+        consent_no_show_fee: true,
+        consent_timestamp: consent_timestamp || new Date().toISOString(),
       },
     });
     if (payError) logStep("Payment insert warning", { error: payError });
 
-    logStep("Checkout session created", { bookingId: booking.id, sessionId: session.id });
+    logStep("Checkout session created", { 
+      bookingId: booking.id, 
+      sessionId: session.id,
+      servicePrice,
+      depositAmount,
+      balanceDue,
+    });
+    
     return jsonResponse(200, { 
       url: session.url, 
       booking_id: booking.id, 
-      session_id: session.id 
+      session_id: session.id,
+      service_price: servicePrice,
+      deposit_paid: depositAmount,
+      balance_due: balanceDue,
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
