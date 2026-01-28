@@ -26,6 +26,7 @@ import { SITE_CONFIG } from "@/config/siteConfig";
 import photoBoothLogo from "@/assets/360-photo-booth-logo.png";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
 import { PhotoBoothBookingWizard } from "@/components/booking/PhotoBoothBookingWizard";
+import { usePhotoBooth360PaymentsConfig } from "@/hooks/usePaymentConfigs";
 
 const FEATURES = [
   { icon: Camera, text: "360 platform + pro lighting setup" },
@@ -69,6 +70,10 @@ const FAQS = [
 export default function PhotoBooth() {
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  
+  // Get payment config for dynamic CTA labels
+  const { photoBooth360PaymentsEnabled } = usePhotoBooth360PaymentsConfig();
+  const ctaLabel = photoBooth360PaymentsEnabled ? "Book & Pay Deposit" : "Book Appointment";
 
   const scrollToBooking = () => {
     const el = document.getElementById("photo-booth-booking");
@@ -171,7 +176,7 @@ export default function PhotoBooth() {
                   className="bg-accent text-primary hover:bg-accent/90 font-semibold px-8 py-6 text-lg shadow-lg shadow-accent/30"
                   onClick={scrollToBooking}
                 >
-                  Book & Pay Deposit
+                  {ctaLabel}
                 </Button>
                 <Button
                   size="lg"
@@ -381,7 +386,7 @@ export default function PhotoBooth() {
               className="bg-accent text-primary hover:bg-accent/90 font-semibold px-10 py-6 text-lg shadow-lg shadow-accent/30"
               onClick={scrollToBooking}
             >
-              Book & Pay Deposit
+              {ctaLabel}
             </Button>
             <a
               href={SITE_CONFIG.contact.phoneLink}
