@@ -1,136 +1,99 @@
 
-# Simplified Admin Navigation for Lindsey (Spa Lead Role)
+# Filter Schedule Page Business Dropdown for Spa Lead Role
 
-## Overview
+## Problem
 
-Create a streamlined admin view for Lindsey where she only sees the pages relevant to Spa/Restoration operations. This is purely a UX improvement — not a security restriction.
+When Lindsey (with `spa_lead` role) visits Admin → Schedule, she sees all business units in the dropdown filter:
+- 360 Photo Booth
+- The Hive Coworking
+- The Hive Restoration Lounge (← the only one she needs)
+- The Summit
+- Total Fitness by A-Z
+- Voice Vault by The Hive
 
-## Current State
-
-- Lindsey has the `owner` role, which shows all admin sections
-- The `spa_lead` role exists in the database but is not yet used for nav filtering
-- The AdminLayout navigation already supports `adminOnly` and `ownerOnly` flags
+She only needs to see and manage **The Hive Restoration Lounge** (Spa).
 
 ## Solution
 
-### Step 1: Change Lindsey's Role from `owner` to `spa_lead`
+Update the Schedule page to detect the user's role and filter the business dropdown accordingly. For users with only the `spa_lead` role (and not `owner` or `manager`), the page will:
 
-Run this SQL in the database (or update via Users & Roles page):
+1. **Auto-select** the Spa business instead of "All Businesses"
+2. **Hide** the business dropdown entirely (since there's only one option)
+3. **Show** only Spa bookings on the calendar
 
-```text
--- Remove owner role
-DELETE FROM user_roles 
-WHERE user_id = 'c1793168-1822-40f2-a227-9d8cb54bfe1b' 
-AND role = 'owner';
+## Technical Implementation
 
--- Add spa_lead role
-INSERT INTO user_roles (user_id, role) 
-VALUES ('c1793168-1822-40f2-a227-9d8cb54bfe1b', 'spa_lead')
-ON CONFLICT (user_id, role) DO NOTHING;
-```
+### File: `src/pages/admin/Schedule.tsx`
 
-### Step 2: Update AdminLayout Navigation Filtering
+**Changes:**
 
-Add role-based filtering to the navigation configuration. For users with `spa_lead` role (and not `owner`/`manager`), only show:
-
-**Visible Sections for `spa_lead`:**
-- Spa (Restoration Lounge) section
-  - My Schedule
-- Booking Operations (filtered)
-  - Schedule
-  - Approvals
-  - Blackouts
-
-**Hidden Sections for `spa_lead`:**
-- Command Center (Leads, Pipeline, Employees, Revenue, etc.)
-- Voice Vault
-- Coworking (The Hive)
-- Hiring
-- Marketing
-- System
-
-### Technical Implementation
-
-Update `src/components/admin/AdminLayout.tsx`:
-
-1. Add `allowedRoles` property to navigation items/sections:
+1. Import `useAuth` to access user roles
+2. Add role-based logic to determine if user is "spa-only"
+3. Auto-set the Spa business ID as the default selection for spa_lead users
+4. Conditionally hide the business dropdown for spa_lead users
 
 ```text
-// Navigation sections with role visibility
-const navSections = [
-  {
-    label: "Command Center",
-    visibleToRoles: ["owner", "manager"],  // Only full admins
-    items: [...],
-  },
-  {
-    label: "Booking Operations",
-    items: [
-      { title: "Schedule", href: "/admin/schedule", icon: CalendarDays },
-      { title: "Approvals", href: "/admin/approvals", icon: ClipboardList },
-      { title: "Resources", href: "/admin/resources", visibleToRoles: ["owner", "manager"] },
-      { title: "Packages", href: "/admin/packages", visibleToRoles: ["owner", "manager"] },
-      { title: "Pricing Rules", href: "/admin/pricing-rules", visibleToRoles: ["owner", "manager"] },
-      { title: "Blackouts", href: "/admin/blackouts", icon: CalendarX },
-      { title: "Documents", href: "/admin/documents", visibleToRoles: ["owner", "manager"] },
-      { title: "Reviews", href: "/admin/reviews", visibleToRoles: ["owner", "manager"] },
-      { title: "Leads & Waitlists", href: "/admin/leads-waitlists", visibleToRoles: ["owner", "manager"] },
-    ],
-  },
-  {
-    label: "Spa (Restoration Lounge)",
-    visibleToRoles: ["owner", "manager", "spa_lead"],  // Spa section visible to spa_lead
-    items: [
-      { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
-    ],
-  },
-  // Other sections hidden from spa_lead...
-];
+// Add import
+import { useAuth } from "@/contexts/AuthContext";
+
+// Inside the component
+const { authUser } = useAuth();
+
+// Determine if user is spa-only (has spa_lead but not owner/manager)
+const isSpaLeadOnly = useMemo(() => {
+  const roles = authUser?.roles || [];
+  return roles.includes("spa_lead") && 
+         !roles.includes("owner") && 
+         !roles.includes("manager");
+}, [authUser?.roles]);
+
+// Find Spa business ID
+const spaBusinessId = useMemo(() => {
+  return businesses?.find(b => b.type === "spa")?.id;
+}, [businesses]);
+
+// For spa_lead, force selection to Spa business
+useEffect(() => {
+  if (isSpaLeadOnly && spaBusinessId && selectedBusiness === "all") {
+    setSelectedBusiness(spaBusinessId);
+  }
+}, [isSpaLeadOnly, spaBusinessId, selectedBusiness]);
+
+// In the render, conditionally show the dropdown:
+{!isSpaLeadOnly && (
+  <Select value={selectedBusiness} onValueChange={setSelectedBusiness}>
+    ...
+  </Select>
+)}
 ```
 
-2. Add filtering logic in the render:
+## Result for Lindsey
+
+After this change, when Lindsey visits the Schedule page:
 
 ```text
-const userRoles = authUser?.roles || [];
-const isSpaLeadOnly = userRoles.includes("spa_lead") && 
-                      !userRoles.includes("owner") && 
-                      !userRoles.includes("manager");
-
-// Filter sections based on roles
-const visibleSections = navSections.filter(section => {
-  if (!section.visibleToRoles) return true; // No restriction
-  return section.visibleToRoles.some(role => userRoles.includes(role));
-});
+┌─────────────────────────────────────────────┐
+│  Schedule                                   │
+│  View and manage all bookings               │
+│                                             │
+│  [Week] [Month]  ← No business dropdown     │
+│                                             │
+│  ┌─────────────────────────────────────┐    │
+│  │  Calendar shows ONLY Spa bookings   │    │
+│  └─────────────────────────────────────┘    │
+└─────────────────────────────────────────────┘
 ```
 
-### Result for Lindsey
-
-After implementation, Lindsey's admin sidebar will only show:
-
-```text
-┌─────────────────────────┐
-│  A-Z Command            │
-├─────────────────────────┤
-│  BOOKING OPERATIONS     │
-│    • Schedule           │
-│    • Approvals          │
-│    • Blackouts          │
-├─────────────────────────┤
-│  SPA (RESTORATION)      │
-│    • My Schedule        │
-└─────────────────────────┘
-```
+- No "All Businesses" dropdown clutter
+- Calendar pre-filtered to Restoration Lounge
+- Day-click availability management still works (since Spa is selected)
 
 ## Files to Modify
 
-1. `src/components/admin/AdminLayout.tsx` — Add role-based visibility filtering to navigation
-
-## Database Change
-
-Update Lindsey's role from `owner` to `spa_lead` (can be done via SQL or the Users & Roles admin page)
+1. `src/pages/admin/Schedule.tsx` — Add role-based business filtering
 
 ## Notes
 
-- This is a UX improvement only — Lindsey can still technically access other pages via URL if needed
-- If you want Lindsey to keep owner privileges but just have a simpler view, an alternative approach would be adding a "simple view" toggle or a separate "My Dashboard" landing page
-- The `spa_lead` role already has access to the admin area (per AuthContext)
+- Owners and managers continue to see all businesses as before
+- This is a UX improvement only — Lindsey could theoretically access other businesses via URL parameters if needed
+- The Approvals page already has similar filtering since we just added role-based navigation
