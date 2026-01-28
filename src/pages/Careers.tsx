@@ -59,7 +59,7 @@ export default function Careers() {
                 Now Hiring
               </Badge>
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Build Your Career with A-Z Enterprises
+                Build Your Career With A-Z Enterprises
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
                 Join a growing team that values excellence, community, and personal growth. 
