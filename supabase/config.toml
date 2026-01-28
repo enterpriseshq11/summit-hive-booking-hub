@@ -56,3 +56,9 @@ verify_jwt = false
 
 [functions.lindsey-booking-notification]
 verify_jwt = false
+
+[functions.send-booking-notification]
+verify_jwt = false
+
+[functions.process-reminders]
+verify_jwt = false

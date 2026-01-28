@@ -117,13 +117,21 @@ interface NotificationRequest {
     | "reminder_2h"
     | "reminder_1h"
     | "reminder_day_of"
+    | "reminder_30m"
     | "cancellation"
-    | "reschedule";
+    | "reschedule"
+    | "reschedule_request";
   reminder_type?: string;
   channels?: ("email" | "sms")[];
   recipients?: ("customer" | "staff")[];
   stripe_session_id?: string;
   stripe_payment_intent?: string;
+  extra_data?: {
+    reschedule_request_id?: string;
+    proposed_times?: Array<{ start: string; end: string; formatted: string }>;
+    reason?: string;
+    confirmation_token?: string;
+  };
 
   // Admin-only overrides for manual testing
   test_customer_email?: string;
@@ -209,7 +217,7 @@ async function scheduleReminders(
   startDatetime: string,
   opts: {
     recipientTypes: Array<"customer" | "staff">;
-    reminderTypes: Array<"24h" | "2h" | "day_of_morning" | "1h">;
+    reminderTypes: Array<"24h" | "2h" | "day_of_morning" | "1h" | "30m">;
     timezone: string;
   }
 ) {
@@ -267,12 +275,13 @@ async function scheduleReminders(
   const m = Number(partsMap.month);
   const d = Number(partsMap.day);
 
-  const scheduleForType = (type: "24h" | "2h" | "day_of_morning" | "1h") => {
+  const scheduleForType = (type: "24h" | "2h" | "day_of_morning" | "1h" | "30m") => {
     if (type === "24h") return new Date(start.getTime() - 24 * 60 * 60 * 1000);
     if (type === "2h") return new Date(start.getTime() - 2 * 60 * 60 * 1000);
     if (type === "1h") return new Date(start.getTime() - 1 * 60 * 60 * 1000);
-    // Morning-of at 9:00 AM local
-    return makeZonedTime(y, m, d, 9, 0, 0, opts.timezone);
+    if (type === "30m") return new Date(start.getTime() - 30 * 60 * 1000);
+    // Morning-of at 7:00 AM local (updated from 9 AM)
+    return makeZonedTime(y, m, d, 7, 0, 0, opts.timezone);
   };
 
   let scheduledCount = 0;
@@ -340,13 +349,24 @@ function isVictoriaBrand(sourceBrand: string | undefined) {
   return ownerFromSourceBrand(sourceBrand) === "victoria";
 }
 
+function isLindseyBrand(sourceBrand: string | undefined, businessType?: string) {
+  // Check source_brand first
+  const owner = ownerFromSourceBrand(sourceBrand);
+  if (owner === "lindsey") return true;
+  // Also check business type
+  if (businessType === "spa") return true;
+  return false;
+}
+
 function normalizeNotificationType(input: NotificationRequest["notification_type"], reminderType?: string) {
   if (input === "booking_confirmed") return { notification_type: "confirmation" as const, reminder_type: reminderType };
   if (input === "denied") return { notification_type: "denied" as const, reminder_type: reminderType };
   if (input === "reminder_24h") return { notification_type: "reminder" as const, reminder_type: reminderType || "24h" };
   if (input === "reminder_2h") return { notification_type: "reminder" as const, reminder_type: reminderType || "2h" };
   if (input === "reminder_1h") return { notification_type: "reminder" as const, reminder_type: reminderType || "1h" };
+  if (input === "reminder_30m") return { notification_type: "reminder" as const, reminder_type: reminderType || "30m" };
   if (input === "reminder_day_of") return { notification_type: "reminder" as const, reminder_type: reminderType || "day_of_morning" };
+  if (input === "reschedule_request") return { notification_type: "reschedule_request" as const, reminder_type: reminderType };
   return { notification_type: input as any, reminder_type: reminderType };
 }
 
@@ -494,7 +514,6 @@ async function resolveStaffContact(params: {
   debug.branch = "E_final_fallback";
   debug.staff_email = replyToEmail;
   debug.staff_name = "A-Z Team";
-  debug.notes?.push("staff routing unresolved; falling back to REPLY_TO_EMAIL");
   return { contact: { email: replyToEmail, name: "A-Z Team" }, debug };
 }
 
@@ -564,7 +583,7 @@ function buildCustomerConfirmationEmail(
     (mode === "requested"
       ? "We received your request. It is pending approval from our team."
       : mode === "denied"
-        ? "We reviewed your request and we’re not able to approve it for the requested time."
+        ? "We reviewed your request and we're not able to approve it for the requested time."
         : "Great news! Your appointment has been confirmed. Here are your details:");
   const badgeColor = opts?.badgeColor || (mode === "denied" ? "#e53e3e" : mode === "requested" ? "#d69e2e" : "#48bb78");
 
@@ -652,7 +671,7 @@ function buildCustomerConfirmationEmail(
       </div>
 
       <p style="margin-top: 30px;">
-        ${mode === "denied" ? "If you’d like to request a different date or time, reply to this email or call us." : "We look forward to seeing you!"}<br><br>
+        ${mode === "denied" ? "If you'd like to request a different date or time, reply to this email or call us." : "We look forward to seeing you!"}<br><br>
         <strong>${staffContact.name}</strong><br>
         ${businessLabel}
       </p>
@@ -765,7 +784,8 @@ function buildReminderEmail(
   booking: Record<string, unknown>, 
   businessType: string, 
   reminderType: string,
-  staffContact: { email: string; phone?: string; name: string }
+  staffContact: { email: string; phone?: string; name: string },
+  recipientType: "customer" | "staff" = "customer"
 ): string {
   const businessLabel = getBusinessLabel(businessType);
   
@@ -773,10 +793,31 @@ function buildReminderEmail(
   const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
   
-  const reminderText = reminderType === "24h" ? "tomorrow" : "in 2 hours";
+  // Updated reminder text for new timing
+  let reminderText: string;
+  if (reminderType === "day_of_morning") {
+    reminderText = "today";
+  } else if (reminderType === "30m") {
+    reminderText = "in 30 minutes";
+  } else if (reminderType === "1h") {
+    reminderText = "in 1 hour";
+  } else if (reminderType === "2h") {
+    reminderText = "in 2 hours";
+  } else {
+    reminderText = "tomorrow";
+  }
   
   const roomName = ((booking.booking_resources as Array<{ resources?: { name?: string } }>)?.[0]?.resources?.name) || "TBD";
   const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Your Appointment";
+  
+  // Staff reminder uses different greeting
+  const greeting = recipientType === "staff" 
+    ? `Hi ${staffContact.name},` 
+    : `Hi ${(booking.guest_name as string)?.split(" ")[0] || "there"},`;
+  
+  const introText = recipientType === "staff"
+    ? `Reminder: You have an appointment ${reminderText}:`
+    : `Just a friendly reminder about your upcoming appointment:`;
 
   return `
 <!DOCTYPE html>
@@ -803,15 +844,16 @@ function buildReminderEmail(
     <div class="content">
       <div style="text-align: center;">
         <span class="reminder-badge">⏰ Reminder</span>
-        <h2 style="margin: 10px 0;">Your appointment is ${reminderText}!</h2>
+        <h2 style="margin: 10px 0;">${recipientType === "staff" ? "Upcoming Appointment" : `Your appointment is ${reminderText}!`}</h2>
       </div>
       
-      <p>Hi ${(booking.guest_name as string)?.split(" ")[0] || "there"},</p>
-      <p>Just a friendly reminder about your upcoming appointment:</p>
+      <p>${greeting}</p>
+      <p>${introText}</p>
 
       <div class="appointment-box">
         <h3 style="margin-top: 0;">📅 Appointment Details</h3>
         <table style="width: 100%;">
+          ${recipientType === "staff" ? `<tr><td style="padding: 8px 0; color: #666;">Client:</td><td style="padding: 8px 0; font-weight: bold;">${booking.guest_name}</td></tr>` : ""}
           <tr><td style="padding: 8px 0; color: #666;">Service:</td><td style="padding: 8px 0; font-weight: bold;">${serviceName}</td></tr>
           <tr><td style="padding: 8px 0; color: #666;">Date:</td><td style="padding: 8px 0; font-weight: bold;">${dateStr}</td></tr>
           <tr><td style="padding: 8px 0; color: #666;">Time:</td><td style="padding: 8px 0; font-weight: bold;">${startTimeStr}</td></tr>
@@ -850,6 +892,133 @@ function buildReminderEmail(
 </html>`;
 }
 
+// ============= RESCHEDULE REQUEST TEMPLATES =============
+function buildRescheduleRequestEmail(
+  booking: Record<string, unknown>,
+  businessType: string,
+  staffContact: { email: string; phone?: string; name: string },
+  proposedTimes: Array<{ start: string; end: string; formatted: string }>,
+  reason?: string
+): string {
+  const businessLabel = getBusinessLabel(businessType);
+  
+  const originalStart = new Date(booking.start_datetime as string);
+  const originalDateStr = originalStart.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const originalTimeStr = originalStart.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Your Appointment";
+
+  const proposedTimesHtml = proposedTimes.map((pt, i) => `
+    <tr>
+      <td style="padding: 12px; background: ${i % 2 === 0 ? '#f8f8f8' : '#fff'}; border-radius: 4px;">
+        <strong>Option ${i + 1}:</strong> ${pt.formatted}
+      </td>
+    </tr>
+  `).join("");
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2d3748; padding: 30px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 24px; }
+    .content { padding: 30px 20px; background: #ffffff; }
+    .reschedule-badge { display: inline-block; background: #ed8936; color: white; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 20px; margin-bottom: 20px; }
+    .original-box { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 15px; margin: 20px 0; }
+    .proposed-box { background: #f0fff4; border: 2px solid #48bb78; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .cta-button { display: inline-block; background: #48bb78; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 10px 0; }
+    .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${businessLabel}</h1>
+      <p style="color: #a0aec0; margin: 5px 0 0 0;">by A-Z Enterprises</p>
+    </div>
+    <div class="content">
+      <div style="text-align: center;">
+        <span class="reschedule-badge">📅 Reschedule Request</span>
+        <h2 style="margin: 10px 0;">We Need to Reschedule Your Appointment</h2>
+      </div>
+      
+      <p>Hi ${(booking.guest_name as string)?.split(" ")[0] || "there"},</p>
+      <p>${staffContact.name} has requested to reschedule your upcoming appointment. We apologize for any inconvenience.</p>
+
+      ${reason ? `
+        <div style="background: #fffbeb; border-left: 4px solid #d69e2e; padding: 12px 14px; margin: 16px 0;">
+          <strong>Reason:</strong> ${reason}
+        </div>
+      ` : ""}
+
+      <div class="original-box">
+        <h3 style="margin-top: 0; color: #c53030;">❌ Original Appointment</h3>
+        <table style="width: 100%;">
+          <tr><td style="padding: 6px 0; color: #666;">Service:</td><td style="padding: 6px 0;">${serviceName}</td></tr>
+          <tr><td style="padding: 6px 0; color: #666;">Date:</td><td style="padding: 6px 0;"><s>${originalDateStr}</s></td></tr>
+          <tr><td style="padding: 6px 0; color: #666;">Time:</td><td style="padding: 6px 0;"><s>${originalTimeStr}</s></td></tr>
+        </table>
+      </div>
+
+      <div class="proposed-box">
+        <h3 style="margin-top: 0; color: #276749;">✅ Proposed New Times</h3>
+        <p style="margin-bottom: 15px; color: #666;">Please choose one of the following options:</p>
+        <table style="width: 100%;">
+          ${proposedTimesHtml}
+        </table>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <p><strong>Please contact us to confirm your new time:</strong></p>
+        <p style="font-size: 20px; margin: 10px 0;">
+          <a href="tel:${BUSINESS_PHONE}" style="color: #2d3748; text-decoration: none;">${BUSINESS_PHONE}</a>
+        </p>
+        <p style="font-size: 14px; color: #666;">or reply to this email</p>
+      </div>
+
+      <p style="margin-top: 30px; font-size: 14px; color: #666;">
+        If none of these times work for you, please let us know and we'll find an alternative.
+      </p>
+
+      <p style="margin-top: 20px;">
+        We appreciate your understanding!<br><br>
+        <strong>${staffContact.name}</strong><br>
+        ${businessLabel}
+      </p>
+    </div>
+    <div class="footer">
+      <p>Booking #${booking.booking_number || (booking.id as string).slice(0, 8).toUpperCase()}</p>
+      <p>${businessLabel} | A-Z Enterprises | Wapakoneta, Ohio</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function buildRescheduleRequestSMS(
+  booking: Record<string, unknown>,
+  businessType: string,
+  proposedTimes: Array<{ start: string; end: string; formatted: string }>
+): string {
+  const businessLabel = getBusinessLabel(businessType);
+  const originalStart = new Date(booking.start_datetime as string);
+  const originalShortDate = originalStart.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const originalTimeStr = originalStart.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  const firstOption = proposedTimes[0];
+  const optionDate = new Date(firstOption.start);
+  const optionShortDate = optionDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const optionTimeStr = optionDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  
+  return `📅 RESCHEDULE REQUEST
+${businessLabel} needs to reschedule your ${originalShortDate} ${originalTimeStr} appt.
+New option: ${optionShortDate} ${optionTimeStr}${proposedTimes.length > 1 ? ` (+${proposedTimes.length - 1} more)` : ""}
+Reply or call ${BUSINESS_PHONE} to confirm.`;
+}
+
 // ============= CANCELLATION TEMPLATES =============
 function buildCancellationEmail(
   booking: Record<string, unknown>,
@@ -861,7 +1030,11 @@ function buildCancellationEmail(
   const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
   const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Your Appointment";
-  const cancellationReason = (booking as any).cancellation_reason || "";
+
+  const cancellationReason =
+    typeof (booking as any).cancellation_reason === "string" && (booking as any).cancellation_reason.trim()
+      ? (booking as any).cancellation_reason.trim().slice(0, 400)
+      : "";
 
   return `
 <!DOCTYPE html>
@@ -869,34 +1042,33 @@ function buildCancellationEmail(
 <head>
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
-    .container { max-width: 600px; margin: 0 auto; }
-    .header { background: #2d3748; padding: 20px; text-align: center; }
-    .header h1 { color: #d4af37; margin: 0; font-size: 20px; }
-    .badge { display: inline-block; background: #e53e3e; color: white; padding: 4px 12px; font-size: 12px; font-weight: bold; border-radius: 4px; }
-    .content { padding: 20px; background: #ffffff; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2d3748; padding: 30px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 24px; }
+    .content { padding: 30px 20px; background: #ffffff; }
+    .cancel-badge { display: inline-block; background: #e53e3e; color: white; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 20px; margin-bottom: 20px; }
     .info-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
     .info-table td { padding: 10px; border-bottom: 1px solid #eee; }
-    .info-table td:first-child { font-weight: bold; width: 140px; color: #666; }
-    .cancelled-box { background: #fff5f5; border-left: 4px solid #e53e3e; padding: 15px; margin: 15px 0; }
-    .reason-box { background: #f7fafc; padding: 15px; border-radius: 4px; margin: 15px 0; }
-    .footer { background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; }
-    .cta-button { display: inline-block; background: #d4af37; color: #1a1a1a; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; margin: 10px 0; }
+    .info-table td:first-child { font-weight: bold; width: 100px; color: #666; }
+    .reason-box { background: #fff5f5; border-left: 4px solid #e53e3e; padding: 12px 14px; margin: 16px 0; }
+    .cta-button { display: inline-block; background: #48bb78; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; }
+    .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 14px; color: #666; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <span class="badge">Cancelled</span>
-      <h1 style="margin-top: 10px;">${businessLabel}</h1>
+      <h1>${businessLabel}</h1>
+      <p style="color: #a0aec0; margin: 5px 0 0 0;">by A-Z Enterprises</p>
     </div>
     <div class="content">
-      <div class="cancelled-box">
-        <strong>Your appointment has been cancelled</strong><br>
-        <span style="font-size: 12px; color: #666;">We're sorry for any inconvenience.</span>
+      <div style="text-align: center;">
+        <span class="cancel-badge">❌ Appointment Cancelled</span>
+        <h2 style="margin: 10px 0;">Your appointment has been cancelled</h2>
       </div>
       
       <p>Hi ${(booking.guest_name as string)?.split(" ")[0] || "there"},</p>
-      <p>Your ${serviceName} appointment scheduled for <strong>${dateStr} at ${startTimeStr}</strong> has been cancelled by our team.</p>
+      <p>We're writing to confirm that your appointment has been cancelled.</p>
       
       ${cancellationReason ? `
         <div class="reason-box">
@@ -980,7 +1152,19 @@ function buildReminderSMS(booking: Record<string, unknown>, businessType: string
   const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
   
-  const reminderText = reminderType === "24h" ? "tomorrow" : "in 2 hours";
+  // Updated reminder text for new timing
+  let reminderText: string;
+  if (reminderType === "day_of_morning") {
+    reminderText = "today";
+  } else if (reminderType === "30m") {
+    reminderText = "in 30 minutes";
+  } else if (reminderType === "1h") {
+    reminderText = "in 1 hour";
+  } else if (reminderType === "2h") {
+    reminderText = "in 2 hours";
+  } else {
+    reminderText = "tomorrow";
+  }
   
   return `⏰ REMINDER: Your ${businessLabel} appointment is ${reminderText}!
 ${shortDate} at ${timeStr}
@@ -1027,13 +1211,14 @@ serve(async (req) => {
       recipients = ["customer", "staff"],
       stripe_session_id,
       stripe_payment_intent,
+      extra_data,
       test_customer_email,
       test_staff_email,
     }: NotificationRequest = await req.json();
 
     const { notification_type, reminder_type } = normalizeNotificationType(raw_notification_type, raw_reminder_type);
 
-    logStep("Request received", { booking_id, notification_type, reminder_type, channels, recipients });
+    logStep("Request received", { booking_id, notification_type, reminder_type, channels, recipients, extra_data: !!extra_data });
 
     if (!booking_id) {
       return new Response(JSON.stringify({ error: "booking_id is required" }), {
@@ -1189,7 +1374,16 @@ serve(async (req) => {
           let subject: string;
           let html: string;
 
-          if (notification_type === "request") {
+          if (notification_type === "reschedule_request") {
+            // Handle reschedule request notification
+            const proposedTimes = extra_data?.proposed_times || [];
+            const reason = extra_data?.reason;
+            
+            subject = `Reschedule Request — ${brandLabel} — ${shortDate} at ${timeStr}`;
+            html = buildRescheduleRequestEmail(booking, businessType, staffContact, proposedTimes, reason);
+            
+            logStep("Building reschedule request email", { proposedTimes: proposedTimes.length, reason: !!reason });
+          } else if (notification_type === "request") {
             subject = `Booking Requested — ${brandLabel} — ${shortDate} at ${timeStr}`;
             html = buildCustomerConfirmationEmail(
               {
@@ -1223,16 +1417,28 @@ serve(async (req) => {
               mode: "denied",
               badgeText: "Request Denied",
               headline: "Request Denied",
-              lead: "We reviewed your request and we’re not able to approve it for the requested time.",
+              lead: "We reviewed your request and we're not able to approve it for the requested time.",
             });
           } else if (notification_type === "cancellation") {
             subject = `Appointment Cancelled — ${brandLabel} — ${shortDate} at ${timeStr}`;
             html = buildCancellationEmail(booking, businessType, staffContact);
           } else {
-            const reminderType = reminder_type || "24h";
-            const prefix = reminderType === "day_of_morning" ? "Today" : reminderType === "1h" ? "In 1 hour" : reminderType === "2h" ? "In 2 hours" : "Reminder";
+            // Reminder
+            const rType = reminder_type || "24h";
+            let prefix: string;
+            if (rType === "day_of_morning") {
+              prefix = "Today";
+            } else if (rType === "30m") {
+              prefix = "In 30 min";
+            } else if (rType === "1h") {
+              prefix = "In 1 hour";
+            } else if (rType === "2h") {
+              prefix = "In 2 hours";
+            } else {
+              prefix = "Reminder";
+            }
             subject = `${prefix}: ${brandLabel} — ${shortDate} at ${timeStr}`;
-            html = buildReminderEmail(booking, businessType, reminderType, staffContact);
+            html = buildReminderEmail(booking, businessType, rType, staffContact, "customer");
           }
 
           logStep("EMAIL: customer send starting", {
@@ -1315,7 +1521,7 @@ serve(async (req) => {
         }
       }
 
-      // Staff email
+      // Staff email (for reminders, include staff as recipient)
       if (recipients.includes("staff")) {
         const staffEmail = test_staff_email || staffContact.email;
         if (!staffEmail) {
@@ -1347,25 +1553,47 @@ serve(async (req) => {
           const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
           const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 
-          const kind = notification_type === "request" ? "Request" : notification_type === "confirmation" ? "Booking" : notification_type === "denied" ? "Request" : "Reminder";
-          const subject = `${kind}: ${brandLabel} — ${booking.guest_name || "Guest"} — ${shortDate} ${timeStr}`;
+          let subject: string;
+          let html: string;
+          
+          if (notification_type === "reminder") {
+            // Staff reminder email
+            const rType = reminder_type || "24h";
+            let prefix: string;
+            if (rType === "day_of_morning") {
+              prefix = "Today";
+            } else if (rType === "30m") {
+              prefix = "In 30 min";
+            } else if (rType === "1h") {
+              prefix = "In 1 hour";
+            } else if (rType === "2h") {
+              prefix = "In 2 hours";
+            } else {
+              prefix = "Reminder";
+            }
+            subject = `${prefix}: ${booking.guest_name || "Client"} — ${brandLabel} — ${shortDate} ${timeStr}`;
+            html = buildReminderEmail(booking, businessType, rType, staffContact, "staff");
+          } else {
+            const kind = notification_type === "request" ? "Request" : notification_type === "confirmation" ? "Booking" : notification_type === "denied" ? "Request" : "Notification";
+            subject = `${kind}: ${brandLabel} — ${booking.guest_name || "Guest"} — ${shortDate} ${timeStr}`;
 
-          const adminLink = `https://summit-hive-booking-hub.lovable.app/#/admin/approvals?id=${booking_id}`;
-          const html = buildStaffConfirmationEmail(
-            {
-              ...booking,
-              admin_link: adminLink,
-              email_kind: notification_type === "request" ? "REQUEST" : "BOOKING",
-              notes: [
-                booking.notes,
-                `Source: ${brandLabel}`,
-                `Type: ${kind}`,
-                `Duration: ${durationMins} minutes`,
-                `Payment: ${paymentLabel}`,
-              ].filter(Boolean).join("\n"),
-            },
-            businessType
-          );
+            const adminLink = `https://summit-hive-booking-hub.lovable.app/#/admin/approvals?id=${booking_id}`;
+            html = buildStaffConfirmationEmail(
+              {
+                ...booking,
+                admin_link: adminLink,
+                email_kind: notification_type === "request" ? "REQUEST" : "BOOKING",
+                notes: [
+                  booking.notes,
+                  `Source: ${brandLabel}`,
+                  `Type: ${kind}`,
+                  `Duration: ${durationMins} minutes`,
+                  `Payment: ${paymentLabel}`,
+                ].filter(Boolean).join("\n"),
+              },
+              businessType
+            );
+          }
 
           logStep("EMAIL: staff send starting", {
             booking_id,
@@ -1459,7 +1687,10 @@ serve(async (req) => {
       const allowCustomerSms = !isVictoriaBrand(sourceBrand);
       if (allowCustomerSms && recipients.includes("customer") && booking.guest_phone) {
         let smsMessage: string;
-        if (notification_type === "confirmation") {
+        if (notification_type === "reschedule_request") {
+          const proposedTimes = extra_data?.proposed_times || [];
+          smsMessage = buildRescheduleRequestSMS(booking, businessType, proposedTimes);
+        } else if (notification_type === "confirmation") {
           smsMessage = buildCustomerConfirmationSMS(booking, businessType);
         } else if (notification_type === "cancellation") {
           smsMessage = buildCancellationSMS(booking, businessType);
@@ -1545,13 +1776,34 @@ serve(async (req) => {
     }
 
     // Schedule reminders for requests + confirmations
+    // UPDATED: Different schedules for Lindsey/Spa vs Victoria brands
     if (notification_type === "request" || notification_type === "confirmation") {
+      const isSpa = isLindseyBrand(sourceBrand, businessType);
       const victoria = isVictoriaBrand(sourceBrand);
-      await scheduleReminders(supabase, booking_id, booking.start_datetime, {
-        timezone,
-        reminderTypes: victoria ? ["day_of_morning", "1h"] : ["24h", "2h"],
-        recipientTypes: victoria ? ["customer", "staff"] : ["customer"],
-      });
+      
+      if (isSpa) {
+        // SPA (Lindsey): 7:00 AM day-of + 30 min before, BOTH to customer AND staff
+        await scheduleReminders(supabase, booking_id, booking.start_datetime, {
+          timezone,
+          reminderTypes: ["day_of_morning", "30m"],
+          recipientTypes: ["customer", "staff"],
+        });
+        logStep("Scheduled Spa reminders", { reminderTypes: ["day_of_morning", "30m"], recipientTypes: ["customer", "staff"] });
+      } else if (victoria) {
+        // Victoria brands: day-of morning + 1h before
+        await scheduleReminders(supabase, booking_id, booking.start_datetime, {
+          timezone,
+          reminderTypes: ["day_of_morning", "1h"],
+          recipientTypes: ["customer", "staff"],
+        });
+      } else {
+        // Default: 24h + 2h, customer only
+        await scheduleReminders(supabase, booking_id, booking.start_datetime, {
+          timezone,
+          reminderTypes: ["24h", "2h"],
+          recipientTypes: ["customer"],
+        });
+      }
     }
 
     logStep("Notification complete", results);
