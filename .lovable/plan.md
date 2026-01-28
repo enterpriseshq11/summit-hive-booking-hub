@@ -1,118 +1,136 @@
 
-# Fix Plan: Spa Confirmation Emails + Approvals Tab
+# Simplified Admin Navigation for Lindsey (Spa Lead Role)
 
-## Problem Summary
+## Overview
 
-### Bug 1: No confirmation emails for pay-on-arrival Spa bookings
-When the admin toggles Spa payments OFF, customers complete bookings but receive no confirmation email. The booking is created correctly, but the notification fails silently.
+Create a streamlined admin view for Lindsey where she only sees the pages relevant to Spa/Restoration operations. This is purely a UX improvement — not a security restriction.
 
-**Root cause**: The `lindsey-booking-notification` edge function only handles two types: `confirmed` and `free_consultation`. When `lindsey-checkout` calls it with `type: "pay_on_arrival"`, the function returns early with "No action for this type" and no email is sent.
+## Current State
 
-### Bug 2: Restoration approvals missing from Approvals tab
-Spa bookings no longer appear in Admin > Approvals when payments are OFF.
-
-**Root cause**: When payments are disabled, `lindsey-checkout` sets `status: "confirmed"` immediately, bypassing the approval queue. The Approvals tab only queries for `status = 'pending'`.
-
----
+- Lindsey has the `owner` role, which shows all admin sections
+- The `spa_lead` role exists in the database but is not yet used for nav filtering
+- The AdminLayout navigation already supports `adminOnly` and `ownerOnly` flags
 
 ## Solution
 
-### Part 1: Add pay-on-arrival email template to lindsey-booking-notification
+### Step 1: Change Lindsey's Role from `owner` to `spa_lead`
 
-Add a new handler block in `supabase/functions/lindsey-booking-notification/index.ts` for `type === "pay_on_arrival"` that:
-
-1. Sends customer a confirmation email with:
-   - Service name, date, time, duration, room
-   - "Amount due on arrival: $X"
-   - No deposit wording
-   - Location and cancellation policy
-
-2. Sends Lindsey/staff an email with:
-   - Customer details
-   - "PAY ON ARRIVAL" badge
-   - Full booking details
-
-3. Sends SMS to Lindsey (if Twilio configured)
-
-4. Updates idempotency markers on the booking record
-
-### Part 2: Determine business rule for Spa approvals
-
-There are two possible approaches for how Spa bookings should work with payments OFF:
-
-**Option A (Recommended): Keep current behavior - auto-confirm**
-- When payments are OFF, Spa bookings are immediately confirmed (no approval needed)
-- This makes sense because the customer is committing to show up and pay on arrival
-- The Approvals tab correctly shows no pending Spa items because they are already confirmed
-- The "Confirmed" tab will show these bookings
-
-**Option B: Require approval even with payments OFF**
-- Change `lindsey-checkout` to set `status: "pending"` instead of `status: "confirmed"`
-- Spa bookings would then require manual admin approval
-- After approval, send the "pay on arrival" confirmation email
-
-Based on typical business operations, **Option A is recommended** because:
-- Reduces admin overhead
-- Customers expect immediate confirmation when booking
-- Pay-on-arrival is a trust-based model anyway
-- The Confirmed tab already shows these for visibility
-
-If you prefer Option B (require approval), let me know and I will adjust the plan.
-
----
-
-## Technical Changes
-
-### File 1: `supabase/functions/lindsey-booking-notification/index.ts`
-
-Add a new section after the `free_consultation` handler (around line 675) to handle `pay_on_arrival`:
+Run this SQL in the database (or update via Users & Roles page):
 
 ```text
-// ============= PAY ON ARRIVAL BOOKING =============
-if (type === "pay_on_arrival") {
-  logStep("Processing pay-on-arrival notification");
+-- Remove owner role
+DELETE FROM user_roles 
+WHERE user_id = 'c1793168-1822-40f2-a227-9d8cb54bfe1b' 
+AND role = 'owner';
 
-  // Build email content with "Amount due on arrival" messaging
-  // Similar structure to "confirmed" but:
-  // - Badge shows "PAY ON ARRIVAL" instead of "PAID"
-  // - No deposit/payment section
-  // - Clear "Amount due on arrival: $X" callout
-  
-  // Send:
-  // 1. SMS to Lindsey
-  // 2. Email to Lindsey
-  // 3. Email to customer
-  
-  // Update idempotency markers
-}
+-- Add spa_lead role
+INSERT INTO user_roles (user_id, role) 
+VALUES ('c1793168-1822-40f2-a227-9d8cb54bfe1b', 'spa_lead')
+ON CONFLICT (user_id, role) DO NOTHING;
 ```
 
-The email templates will:
-- **Customer email**: Confirm appointment, show service details, state "Amount due on arrival: $X", include location and arrival instructions
-- **Staff email**: Show booking details with "PAY ON ARRIVAL" badge, customer contact info, admin dashboard link
+### Step 2: Update AdminLayout Navigation Filtering
 
-### File 2: No changes needed for Approvals (Option A)
+Add role-based filtering to the navigation configuration. For users with `spa_lead` role (and not `owner`/`manager`), only show:
 
-The Approvals tab is working correctly. Spa bookings with payments OFF are auto-confirmed and appear in the "Confirmed" tab. The "Restoration" filter on the Confirmed tab will show these bookings.
+**Visible Sections for `spa_lead`:**
+- Spa (Restoration Lounge) section
+  - My Schedule
+- Booking Operations (filtered)
+  - Schedule
+  - Approvals
+  - Blackouts
 
----
+**Hidden Sections for `spa_lead`:**
+- Command Center (Leads, Pipeline, Employees, Revenue, etc.)
+- Voice Vault
+- Coworking (The Hive)
+- Hiring
+- Marketing
+- System
 
-## Testing Checklist
+### Technical Implementation
 
-After implementation:
+Update `src/components/admin/AdminLayout.tsx`:
 
-1. Toggle Spa payments OFF in Admin > Payment Settings
-2. Book a Spa appointment on the Lindsey page
-3. Verify customer receives confirmation email with "Amount due on arrival"
-4. Verify Lindsey receives staff notification (email + SMS if configured)
-5. Check notification_logs table for successful send status
-6. Verify the booking appears in Admin > Schedule
-7. Verify the booking appears in Admin > Approvals > Confirmed tab > Restoration filter
-8. Toggle Spa payments ON and book another appointment
-9. Verify the paid flow still works (deposit collected, confirmation email sent)
+1. Add `allowedRoles` property to navigation items/sections:
 
----
+```text
+// Navigation sections with role visibility
+const navSections = [
+  {
+    label: "Command Center",
+    visibleToRoles: ["owner", "manager"],  // Only full admins
+    items: [...],
+  },
+  {
+    label: "Booking Operations",
+    items: [
+      { title: "Schedule", href: "/admin/schedule", icon: CalendarDays },
+      { title: "Approvals", href: "/admin/approvals", icon: ClipboardList },
+      { title: "Resources", href: "/admin/resources", visibleToRoles: ["owner", "manager"] },
+      { title: "Packages", href: "/admin/packages", visibleToRoles: ["owner", "manager"] },
+      { title: "Pricing Rules", href: "/admin/pricing-rules", visibleToRoles: ["owner", "manager"] },
+      { title: "Blackouts", href: "/admin/blackouts", icon: CalendarX },
+      { title: "Documents", href: "/admin/documents", visibleToRoles: ["owner", "manager"] },
+      { title: "Reviews", href: "/admin/reviews", visibleToRoles: ["owner", "manager"] },
+      { title: "Leads & Waitlists", href: "/admin/leads-waitlists", visibleToRoles: ["owner", "manager"] },
+    ],
+  },
+  {
+    label: "Spa (Restoration Lounge)",
+    visibleToRoles: ["owner", "manager", "spa_lead"],  // Spa section visible to spa_lead
+    items: [
+      { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
+    ],
+  },
+  // Other sections hidden from spa_lead...
+];
+```
 
-## Files to be Modified
+2. Add filtering logic in the render:
 
-1. `supabase/functions/lindsey-booking-notification/index.ts` - Add pay_on_arrival handler with email/SMS templates
+```text
+const userRoles = authUser?.roles || [];
+const isSpaLeadOnly = userRoles.includes("spa_lead") && 
+                      !userRoles.includes("owner") && 
+                      !userRoles.includes("manager");
+
+// Filter sections based on roles
+const visibleSections = navSections.filter(section => {
+  if (!section.visibleToRoles) return true; // No restriction
+  return section.visibleToRoles.some(role => userRoles.includes(role));
+});
+```
+
+### Result for Lindsey
+
+After implementation, Lindsey's admin sidebar will only show:
+
+```text
+┌─────────────────────────┐
+│  A-Z Command            │
+├─────────────────────────┤
+│  BOOKING OPERATIONS     │
+│    • Schedule           │
+│    • Approvals          │
+│    • Blackouts          │
+├─────────────────────────┤
+│  SPA (RESTORATION)      │
+│    • My Schedule        │
+└─────────────────────────┘
+```
+
+## Files to Modify
+
+1. `src/components/admin/AdminLayout.tsx` — Add role-based visibility filtering to navigation
+
+## Database Change
+
+Update Lindsey's role from `owner` to `spa_lead` (can be done via SQL or the Users & Roles admin page)
+
+## Notes
+
+- This is a UX improvement only — Lindsey can still technically access other pages via URL if needed
+- If you want Lindsey to keep owner privileges but just have a simpler view, an alternative approach would be adding a "simple view" toggle or a separate "My Dashboard" landing page
+- The `spa_lead` role already has access to the admin area (per AuthContext)
