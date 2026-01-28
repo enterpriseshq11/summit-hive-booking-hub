@@ -86,7 +86,6 @@ const navSections = [
     label: "Spa (Restoration Lounge)",
     items: [
       { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
-      { title: "Spa Settings", href: "/admin/spa-settings", icon: Settings, adminOnly: true },
     ],
   },
   {
@@ -120,6 +119,7 @@ const navSections = [
     label: "System",
     items: [
       { title: "Users & Roles", href: "/admin/users-roles", icon: UserCog, ownerOnly: true },
+      { title: "Payment Settings", href: "/admin/payment-settings", icon: DollarSign, adminOnly: true },
       { title: "Audit Log", href: "/admin/audit-log", icon: Shield },
       { title: "Assumptions", href: "/admin/assumptions", icon: Lightbulb },
       { title: "Settings", href: "/admin/settings", icon: Settings, adminOnly: true },
