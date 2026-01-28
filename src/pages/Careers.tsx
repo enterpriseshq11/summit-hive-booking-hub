@@ -66,11 +66,15 @@ export default function Careers() {
                 We're looking for passionate individuals to help us deliver exceptional experiences.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Button asChild size="lg">
-                  <a href="#open-positions">View Open Positions</a>
-                </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link to="/careers/spa">Apply to Spa</Link>
+                  <a href="#choose-your-team" onClick={(e) => { e.preventDefault(); document.getElementById('choose-your-team')?.scrollIntoView({ behavior: 'smooth' }); }}>
+                    Choose Your Team
+                  </a>
+                </Button>
+                <Button asChild size="lg">
+                  <a href="#open-positions" onClick={(e) => { e.preventDefault(); document.getElementById('open-positions')?.scrollIntoView({ behavior: 'smooth' }); }}>
+                    View Open Positions
+                  </a>
                 </Button>
               </div>
             </div>
@@ -115,7 +119,7 @@ export default function Careers() {
         </section>
 
         {/* Choose a Team */}
-        <section className="py-16 bg-muted/30">
+        <section id="choose-your-team" className="py-16 bg-muted/30">
           <div className="container">
             <h2 className="text-3xl font-bold text-center mb-4">Choose Your Team</h2>
             <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
