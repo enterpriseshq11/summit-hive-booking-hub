@@ -52,10 +52,28 @@ interface AdminLayoutProps {
   children: ReactNode;
 }
 
-// Unified navigation configuration
-const navSections = [
+// Type for navigation items with role visibility
+interface NavItem {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  end?: boolean;
+  adminOnly?: boolean;
+  ownerOnly?: boolean;
+  visibleToRoles?: string[];
+}
+
+interface NavSection {
+  label: string;
+  visibleToRoles?: string[];
+  items: NavItem[];
+}
+
+// Unified navigation configuration with role-based visibility
+const navSections: NavSection[] = [
   {
     label: "Command Center",
+    visibleToRoles: ["owner", "manager"],
     items: [
       { title: "Dashboard", href: "/admin", icon: LayoutDashboard, end: true },
       { title: "Leads", href: "/admin/leads", icon: Target },
@@ -73,29 +91,32 @@ const navSections = [
     items: [
       { title: "Schedule", href: "/admin/schedule", icon: CalendarDays },
       { title: "Approvals", href: "/admin/approvals", icon: ClipboardList },
-      { title: "Resources", href: "/admin/resources", icon: Box },
-      { title: "Packages", href: "/admin/packages", icon: Package },
-      { title: "Pricing Rules", href: "/admin/pricing-rules", icon: DollarSign },
+      { title: "Resources", href: "/admin/resources", icon: Box, visibleToRoles: ["owner", "manager"] },
+      { title: "Packages", href: "/admin/packages", icon: Package, visibleToRoles: ["owner", "manager"] },
+      { title: "Pricing Rules", href: "/admin/pricing-rules", icon: DollarSign, visibleToRoles: ["owner", "manager"] },
       { title: "Blackouts", href: "/admin/blackouts", icon: CalendarX },
-      { title: "Documents", href: "/admin/documents", icon: FileText },
-      { title: "Reviews", href: "/admin/reviews", icon: Star },
-      { title: "Leads & Waitlists", href: "/admin/leads-waitlists", icon: Users },
+      { title: "Documents", href: "/admin/documents", icon: FileText, visibleToRoles: ["owner", "manager"] },
+      { title: "Reviews", href: "/admin/reviews", icon: Star, visibleToRoles: ["owner", "manager"] },
+      { title: "Leads & Waitlists", href: "/admin/leads-waitlists", icon: Users, visibleToRoles: ["owner", "manager"] },
     ],
   },
   {
     label: "Spa (Restoration Lounge)",
+    visibleToRoles: ["owner", "manager", "spa_lead"],
     items: [
       { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
     ],
   },
   {
     label: "Voice Vault",
+    visibleToRoles: ["owner", "manager"],
     items: [
       { title: "Voice Vault", href: "/admin/voice-vault", icon: Mic },
     ],
   },
   {
     label: "Coworking (The Hive)",
+    visibleToRoles: ["owner", "manager", "coworking_manager"],
     items: [
       { title: "Office Listings", href: "/admin/office-listings", icon: Building2 },
       { title: "Office Promotions", href: "/admin/office-promotions", icon: Tag },
@@ -104,12 +125,14 @@ const navSections = [
   },
   {
     label: "Hiring",
+    visibleToRoles: ["owner", "manager"],
     items: [
       { title: "Careers Applications", href: "/admin/careers", icon: Users },
     ],
   },
   {
     label: "Marketing",
+    visibleToRoles: ["owner", "manager"],
     items: [
       { title: "Promotions", href: "/admin/promotions", icon: Tag },
       { title: "Dopamine Drop", href: "/admin/dopamine-drop", icon: Gift },
@@ -117,6 +140,7 @@ const navSections = [
   },
   {
     label: "System",
+    visibleToRoles: ["owner", "manager"],
     items: [
       { title: "Users & Roles", href: "/admin/users-roles", icon: UserCog, ownerOnly: true },
       { title: "Payment Settings", href: "/admin/payment-settings", icon: DollarSign, adminOnly: true },
@@ -126,6 +150,12 @@ const navSections = [
     ],
   },
 ];
+
+// Helper to check if user can see a section or item based on roles
+function canSeeByRoles(visibleToRoles: string[] | undefined, userRoles: string[]): boolean {
+  if (!visibleToRoles || visibleToRoles.length === 0) return true;
+  return visibleToRoles.some(role => userRoles.includes(role));
+}
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const { authUser, isLoading, isRolesLoaded, signOut } = useAuth();
@@ -194,30 +224,43 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </Button>
         </div>
         <nav className="flex-1 overflow-y-auto py-4">
-          {navSections.map((section) => (
-            <div key={section.label} className="mb-4">
-              {!collapsed && <div className="px-4 mb-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">{section.label}</div>}
-              <ul className="space-y-1 px-2">
-                {section.items.map((item) => {
-                  if (item.adminOnly && !isAdmin) return null;
-                  if (item.ownerOnly && !isOwner) return null;
-                  const isActive = item.end ? location.pathname === item.href : location.pathname === item.href || location.pathname.startsWith(item.href + "/");
-                  const showAlertsBadge = item.title === "Alerts" && unreadAlerts > 0 && !collapsed;
-                  const showCareersBadge = item.title === "Careers Applications" && unreadCareersCount > 0 && !collapsed;
-                  return (
-                    <li key={item.href}>
-                      <Link to={item.href} className={cn("flex items-center gap-3 px-3 py-2 rounded-lg transition-colors", isActive ? "bg-amber-500/15 text-amber-400 font-medium" : "text-zinc-300 hover:text-white hover:bg-zinc-800")} onClick={() => setMobileOpen(false)} title={collapsed ? item.title : undefined}>
-                        <item.icon className="h-5 w-5 flex-shrink-0" />
-                        {!collapsed && <span>{item.title}</span>}
-                        {showAlertsBadge && <Badge variant="destructive" className="ml-auto text-xs">{unreadAlerts}</Badge>}
-                        {showCareersBadge && <Badge className="ml-auto text-xs bg-blue-500 hover:bg-blue-600">{unreadCareersCount}</Badge>}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+          {navSections
+            .filter(section => canSeeByRoles(section.visibleToRoles, authUser?.roles || []))
+            .map((section) => {
+              // Filter items within the section based on role visibility
+              const visibleItems = section.items.filter(item => {
+                if (item.adminOnly && !isAdmin) return false;
+                if (item.ownerOnly && !isOwner) return false;
+                if (!canSeeByRoles(item.visibleToRoles, authUser?.roles || [])) return false;
+                return true;
+              });
+              
+              // Don't render empty sections
+              if (visibleItems.length === 0) return null;
+              
+              return (
+                <div key={section.label} className="mb-4">
+                  {!collapsed && <div className="px-4 mb-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider">{section.label}</div>}
+                  <ul className="space-y-1 px-2">
+                    {visibleItems.map((item) => {
+                      const isActive = item.end ? location.pathname === item.href : location.pathname === item.href || location.pathname.startsWith(item.href + "/");
+                      const showAlertsBadge = item.title === "Alerts" && unreadAlerts > 0 && !collapsed;
+                      const showCareersBadge = item.title === "Careers Applications" && unreadCareersCount > 0 && !collapsed;
+                      return (
+                        <li key={item.href}>
+                          <Link to={item.href} className={cn("flex items-center gap-3 px-3 py-2 rounded-lg transition-colors", isActive ? "bg-amber-500/15 text-amber-400 font-medium" : "text-zinc-300 hover:text-white hover:bg-zinc-800")} onClick={() => setMobileOpen(false)} title={collapsed ? item.title : undefined}>
+                            <item.icon className="h-5 w-5 flex-shrink-0" />
+                            {!collapsed && <span>{item.title}</span>}
+                            {showAlertsBadge && <Badge variant="destructive" className="ml-auto text-xs">{unreadAlerts}</Badge>}
+                            {showCareersBadge && <Badge className="ml-auto text-xs bg-blue-500 hover:bg-blue-600">{unreadCareersCount}</Badge>}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
         </nav>
         <div className="p-4 border-t border-zinc-800">
           {!collapsed && (
