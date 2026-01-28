@@ -63,7 +63,6 @@ import AdminOfficePromotions from "./pages/admin/OfficePromotions";
 import AdminOfficeInquiries from "./pages/admin/OfficeInquiries";
 import AdminProviderSchedule from "./pages/admin/ProviderSchedule";
 import AdminSpaSettings from "./pages/admin/SpaSettings";
-import AdminWhatsIncluded from "./pages/admin/WhatsIncluded";
 import AdminCareerApplications from "./pages/admin/CareerApplications";
 // Command Center Pages (now unified under /admin/*)
 import CommandCenterLeads from "./pages/command-center/Leads";
@@ -191,7 +190,6 @@ function AppInner() {
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
           <Route path="/admin/audit-log" element={<AdminAuditLog />} />
           <Route path="/admin/assumptions" element={<AdminAssumptions />} />
-          <Route path="/admin/whats-included" element={<AdminWhatsIncluded />} />
         </Route>
 
         {/* Legacy command-center redirects (for backwards compatibility) */}

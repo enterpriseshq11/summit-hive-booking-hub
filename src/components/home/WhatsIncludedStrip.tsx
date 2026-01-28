@@ -1,49 +1,13 @@
-import { CalendarCheck, Headphones, ShieldCheck, Award, Camera, Mic } from "lucide-react";
-import { useIncludedItemsConfig } from "@/hooks/useIncludedItemsConfig";
+import { CalendarCheck, Headphones, ShieldCheck, Award } from "lucide-react";
 
-const baseFeatures = [
+const features = [
   { icon: CalendarCheck, label: "Easy Booking", description: "Book in minutes online" },
   { icon: Headphones, label: "Local Support", description: "Real people, fast responses" },
   { icon: ShieldCheck, label: "Secure Deposits", description: "Safe & transparent payments" },
   { icon: Award, label: "Premium Experience", description: "Quality you can count on" },
 ];
 
-const photoBoothFeature = { 
-  icon: Camera, 
-  label: "360 Photo Booth", 
-  description: "Included with Summit events",
-  key: "photoBooth" as const
-};
-
-const voiceVaultFeature = { 
-  icon: Mic, 
-  label: "Voice Vault", 
-  description: "Podcast studio access",
-  key: "voiceVault" as const
-};
-
 export function WhatsIncludedStrip() {
-  const { data: config, isLoading } = useIncludedItemsConfig();
-
-  // Build features array based on config
-  const features = [...baseFeatures];
-  
-  if (!isLoading && config) {
-    if (config.photoBoothEnabled) {
-      features.push(photoBoothFeature);
-    }
-    if (config.voiceVaultEnabled) {
-      features.push(voiceVaultFeature);
-    }
-  }
-
-  // Adjust grid columns based on feature count
-  const gridCols = features.length <= 4 
-    ? "grid-cols-2 md:grid-cols-4" 
-    : features.length === 5 
-      ? "grid-cols-2 md:grid-cols-5" 
-      : "grid-cols-2 md:grid-cols-3 lg:grid-cols-6";
-
   return (
     <section className="py-16 bg-muted/30 border-y">
       <div className="container">
@@ -54,7 +18,7 @@ export function WhatsIncludedStrip() {
           <p className="text-muted-foreground mt-2">Every booking comes with these guarantees</p>
         </div>
         
-        <div className={`grid ${gridCols} gap-6 max-w-6xl mx-auto`}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {features.map((feature, index) => (
             <div 
               key={index}
