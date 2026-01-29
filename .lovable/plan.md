@@ -1,128 +1,41 @@
 
-# Plan: Add Worker Calendars Tab for Lindsey (spa_lead)
 
-## Overview
+# Fix: Worker Calendars Page Crashing
 
-Add a new admin page "Worker Calendars" that allows Lindsey (spa_lead) to view any spa worker's confirmed bookings on a calendar. This helps her monitor worker availability and manage scheduling across the team.
-
-## User Experience
-
-1. Lindsey navigates to Admin → My Spa → Worker Calendars
-2. She sees a dropdown to select a worker (e.g., "Dillon bowling")
-3. The calendar displays that worker's confirmed bookings showing:
-   - Date and time
-   - Service name
-   - Customer name
-   - Duration
-   - Status badge
-4. She can switch between week/month views
-5. She can click a booking to see full details
-
----
-
-## Technical Implementation
-
-### 1. Add Navigation Item
-
-**File**: `src/components/admin/AdminLayout.tsx`
-
-Add "Worker Calendars" to the "My Spa" section, visible only to spa_lead, owner, and manager:
-
-```typescript
-{
-  label: "My Spa",
-  visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker"],
-  items: [
-    { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
-    { title: "Workers", href: "/admin/spa-workers", icon: Users, visibleToRoles: ["owner", "manager", "spa_lead"] },
-    { title: "Worker Calendars", href: "/admin/worker-calendars", icon: CalendarRange, visibleToRoles: ["owner", "manager", "spa_lead"] }, // NEW
-  ],
-}
+## Problem
+The page crashes because Radix UI's `<SelectItem>` component does not allow empty string values. The current code has:
+```tsx
+<SelectItem value="" disabled>Loading workers...</SelectItem>
+<SelectItem value="" disabled>No active workers</SelectItem>
 ```
 
-### 2. Create New Page
+## Solution
+Replace the disabled `<SelectItem>` elements with plain `<div>` elements for loading/empty states, since these aren't meant to be selectable anyway.
 
-**File**: `src/pages/admin/WorkerCalendars.tsx`
+## Changes
 
-Components:
-- Worker selector dropdown (fetches from `useSpaWorkers()`)
-- Week/Month view toggle
-- Calendar grid (similar to Schedule.tsx)
-- Booking detail modal
+**File: `src/pages/admin/WorkerCalendars.tsx`**
 
-Key hooks to use:
-- `useSpaWorkers()` - Get list of all active workers (admin-only, has PII access)
-- `useBookings({ spa_worker_id })` - Filter bookings by selected worker
-- Date-fns for calendar calculations
-
-Data flow:
-```text
-1. Fetch all workers → populate dropdown
-2. User selects worker → store workerId in state
-3. Fetch bookings for that worker in date range
-4. Display on calendar grid with booking cards
-5. Click booking → show modal with full details
+Replace lines 188-203:
+```tsx
+<SelectContent className="bg-popover border-border">
+  {workersLoading ? (
+    <div className="px-2 py-1.5 text-sm text-muted-foreground">Loading workers...</div>
+  ) : workers.filter(w => w.is_active).length === 0 ? (
+    <div className="px-2 py-1.5 text-sm text-muted-foreground">No active workers</div>
+  ) : (
+    workers.filter(w => w.is_active).map(worker => (
+      <SelectItem 
+        key={worker.id} 
+        value={worker.id}
+        className="text-foreground focus:bg-accent"
+      >
+        {worker.display_name}
+      </SelectItem>
+    ))
+  )}
+</SelectContent>
 ```
 
-### 3. Add Route
+This removes the invalid empty-value SelectItems and uses non-interactive div elements for the loading and empty states instead.
 
-**File**: `src/App.tsx`
-
-Add route for the new page:
-```typescript
-<Route path="/admin/worker-calendars" element={<WorkerCalendars />} />
-```
-
----
-
-## Calendar Display Details
-
-Each booking card on the calendar will show:
-- Time (e.g., "2:00 PM")
-- Service name from `booking.packages?.name` or booking notes
-- Customer first name from `booking.customer_name`
-- Status badge (Confirmed, Pending, etc.)
-- Duration indicator
-
-Color coding:
-- Green: Confirmed
-- Amber: Pending
-- Orange: Reschedule Requested
-- Blue: Completed
-
----
-
-## Files to Create/Modify
-
-| File | Action |
-|------|--------|
-| `src/pages/admin/WorkerCalendars.tsx` | CREATE - New page with calendar view |
-| `src/components/admin/AdminLayout.tsx` | MODIFY - Add nav item for Worker Calendars |
-| `src/App.tsx` | MODIFY - Add route |
-
----
-
-## Filter Enhancements
-
-The page will include:
-1. **Worker Filter** - Dropdown of all active spa workers
-2. **Date Navigation** - Previous/Next week/month buttons
-3. **View Toggle** - Week vs Month view
-4. **Quick Jump** - "Today" button to return to current week
-
-When Lindsey selects a worker, the calendar will automatically update to show only that worker's bookings for the visible date range.
-
----
-
-## Booking Detail Modal
-
-When clicking a booking on the calendar, show:
-- Customer full name
-- Phone and email
-- Service/package name
-- Date and time
-- Duration
-- Total amount
-- Status
-- Any internal notes
-- Quick actions: View full booking, mark status
