@@ -6,6 +6,22 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/**
+ * Booking statuses that should BLOCK a time slot (active pipeline states).
+ * Any status NOT in this list will NOT block availability.
+ * Matches src/constants/bookingStatuses.ts BLOCKING_BOOKING_STATUSES
+ */
+const BLOCKING_BOOKING_STATUSES = [
+  "pending",
+  "pending_payment",
+  "pending_documents",
+  "approved",
+  "confirmed",
+  "in_progress",
+  "reschedule_requested",
+  "rescheduled",
+];
+
 interface AvailabilityRequest {
   business_type?: string;
   bookable_type_id?: string;
