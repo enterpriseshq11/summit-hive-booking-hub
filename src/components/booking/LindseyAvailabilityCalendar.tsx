@@ -105,7 +105,7 @@ const SERVICES: Service[] = [
 const ROOMS = [
   { 
     id: "11111111-1111-1111-1111-111111111111", 
-    name: "H1 - Main Spa Area", 
+    name: "M1 - Main Spa Area",
     description: "Calm and quiet, perfect for focused recovery.",
     capacity: 1,
   },
