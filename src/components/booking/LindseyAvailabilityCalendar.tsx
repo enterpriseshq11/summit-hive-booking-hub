@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLindseyAvailability, isPromoDate, calculateServicePrice } from "@/hooks/useLindseyAvailability";
 import { useSpaPaymentsConfig } from "@/hooks/useSpaPaymentsConfig";
+import { SpaWorkerService } from "@/hooks/useSpaWorkerServices";
 
 // Service option type
 interface ServiceOption {
@@ -38,8 +39,8 @@ interface Service {
   isFree?: boolean;
 }
 
-// Services data - Updated per spec
-const SERVICES: Service[] = [
+// Default services for Lindsey (when no workerId provided)
+const DEFAULT_SERVICES: Service[] = [
   {
     id: "swedish",
     name: "Swedish Massage",
@@ -121,9 +122,32 @@ type BookingStep = "service" | "calendar" | "time" | "contact" | "confirm";
 
 interface LindseyAvailabilityCalendarProps {
   onBookingComplete?: () => void;
+  workerId?: string; // If provided, use this worker instead of Lindsey
+  workerServices?: SpaWorkerService[]; // Services from database for non-Lindsey workers
 }
 
-export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvailabilityCalendarProps) {
+// Convert database services to component format
+function convertWorkerServices(services: SpaWorkerService[]): Service[] {
+  return services.map(svc => {
+    const hasPromo = svc.promo_price && svc.promo_ends_at && new Date(svc.promo_ends_at) > new Date();
+    return {
+      id: svc.id,
+      name: svc.name,
+      description: svc.description || "",
+      icon: Heart, // Default icon
+      isFree: svc.is_free,
+      isPromo: hasPromo,
+      options: [{
+        duration: svc.duration_mins,
+        price: Number(svc.price),
+        promoPrice: hasPromo ? Number(svc.promo_price) : undefined,
+        label: svc.is_free ? "Free" : `${svc.duration_mins} min`,
+      }],
+    };
+  });
+}
+
+export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, workerServices }: LindseyAvailabilityCalendarProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -210,6 +234,14 @@ export function LindseyAvailabilityCalendar({ onBookingComplete }: LindseyAvaila
     const dateKey = format(date, "yyyy-MM-dd");
     return availability[dateKey];
   };
+
+  // Use worker services if provided, otherwise use defaults (Lindsey's)
+  const SERVICES = useMemo(() => {
+    if (workerServices && workerServices.length > 0) {
+      return convertWorkerServices(workerServices);
+    }
+    return DEFAULT_SERVICES;
+  }, [workerServices]);
 
   const getSelectedServiceData = () => {
     if (!selectedService) return null;

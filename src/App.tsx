@@ -30,6 +30,7 @@ import VoiceVault from "./pages/VoiceVault";
 import PhotoBooth from "./pages/PhotoBooth";
 import PhotoBoothLanding from "./pages/PhotoBoothLanding";
 import BookWithLindsey from "./pages/BookWithLindsey";
+import BookWithWorker from "./pages/BookWithWorker";
 import NotFound from "./pages/NotFound";
 import Careers from "./pages/Careers";
 import CareersSpa from "./pages/careers/CareersSpa";
@@ -110,6 +111,7 @@ function AppInner() {
           <Route path="/coworking/offices/:slug" element={<OfficeDetailPage />} />
           <Route path="/spa" element={<Spa />} />
           <Route path="/book-with-lindsey" element={<BookWithLindsey />} />
+          <Route path="/book-with/:slug" element={<BookWithWorker />} />
           <Route path="/fitness" element={<Fitness />} />
           <Route path="/gift-cards" element={<GiftCards />} />
           <Route path="/promotions" element={<Promotions />} />

@@ -14,8 +14,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Clock, Calendar as CalendarIcon, Plus, Trash2, Save, User, AlertCircle, 
-  Settings, RefreshCw, Mail, Phone, X, CheckCircle, Sparkles
+  Settings, RefreshCw, Mail, Phone, X, CheckCircle, Sparkles, Heart
 } from 'lucide-react';
+import { SpaWorkerServicesManager } from '@/components/admin/SpaWorkerServicesManager';
 import { useProviderScheduleManagement } from '@/hooks/useProviderScheduleManagement';
 import { useBookings, useUpdateBookingStatus } from '@/hooks/useBookings';
 import { useSpaWorkerAvailability } from '@/hooks/useSpaWorkerAvailability';
@@ -365,7 +366,7 @@ export default function ProviderSchedule() {
       </div>
       
       <Tabs defaultValue="hours" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 lg:w-auto lg:inline-grid">
           <TabsTrigger value="hours" className="text-base">
             <Clock className="h-4 w-4 mr-2" />
             Hours
@@ -382,6 +383,10 @@ export default function ProviderSchedule() {
                 {pendingBookings.length}
               </Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="services" className="text-base">
+            <Heart className="h-4 w-4 mr-2" />
+            My Services
           </TabsTrigger>
           <TabsTrigger value="settings" className="text-base">
             <Settings className="h-4 w-4 mr-2" />
@@ -922,6 +927,11 @@ export default function ProviderSchedule() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+        </TabsContent>
+
+        {/* My Services Tab */}
+        <TabsContent value="services">
+          <SpaWorkerServicesManager />
         </TabsContent>
 
         {/* Settings Tab */}
