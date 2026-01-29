@@ -4195,6 +4195,65 @@ export type Database = {
           },
         ]
       }
+      spa_worker_services: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_mins: number
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          is_free: boolean | null
+          name: string
+          price: number
+          promo_ends_at: string | null
+          promo_price: number | null
+          sort_order: number | null
+          updated_at: string | null
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_mins: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_free?: boolean | null
+          name: string
+          price: number
+          promo_ends_at?: string | null
+          promo_price?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+          worker_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_mins?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_free?: boolean | null
+          name?: string
+          price?: number
+          promo_ends_at?: string | null
+          promo_price?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spa_worker_services_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "spa_workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spa_workers: {
         Row: {
           created_at: string
@@ -4216,6 +4275,8 @@ export type Database = {
           notes: string | null
           onboarding_complete: boolean
           phone: string | null
+          slug: string | null
+          title: string | null
           updated_at: string
           user_id: string | null
         }
@@ -4239,6 +4300,8 @@ export type Database = {
           notes?: string | null
           onboarding_complete?: boolean
           phone?: string | null
+          slug?: string | null
+          title?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -4262,6 +4325,8 @@ export type Database = {
           notes?: string | null
           onboarding_complete?: boolean
           phone?: string | null
+          slug?: string | null
+          title?: string | null
           updated_at?: string
           user_id?: string | null
         }

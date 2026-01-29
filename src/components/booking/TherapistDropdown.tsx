@@ -42,8 +42,8 @@ export function TherapistDropdown({ className }: TherapistDropdownProps) {
       .map(w => ({
         id: w.id,
         name: w.display_name,
-        subtitle: "Massage Therapist",
-        route: `/book-spa?therapist=${w.id}#availability-calendar`,
+        subtitle: (w as any).title || "Massage Therapist",
+        route: `/book-with/${(w as any).slug || w.id}#availability-calendar`,
         available: true,
       })),
   ];
