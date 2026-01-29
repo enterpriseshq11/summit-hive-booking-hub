@@ -454,10 +454,10 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
                   </CardContent>
                 </Card>
               ) : (
-                <Button
+              <Button
                   variant="outline"
                   onClick={() => setShowServiceForm(true)}
-                  className="w-full border-dashed border-zinc-700 hover:bg-zinc-800 gap-2"
+                  className="w-full border-dashed border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-amber-200 gap-2"
                 >
                   <Plus className="h-4 w-4" />
                   Add Service
