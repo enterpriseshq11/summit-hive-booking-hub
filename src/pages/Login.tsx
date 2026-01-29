@@ -25,6 +25,15 @@ async function getRedirectPathForUser(userId: string, defaultPath: string): Prom
 
     const userRoles = roles?.map((r) => r.role as string) || [];
 
+    // If the default path is already an admin route, respect it (e.g., from invite flow)
+    if (defaultPath.startsWith("/admin")) {
+      // But spa_worker must always go to my-schedule, not other admin pages
+      if (userRoles.includes("spa_worker") && !userRoles.some(r => ["owner", "manager", "spa_lead"].includes(r))) {
+        return "/admin/my-schedule";
+      }
+      return defaultPath;
+    }
+
     // spa_worker goes directly to their schedule
     if (userRoles.includes("spa_worker") && !userRoles.some(r => ["owner", "manager", "spa_lead"].includes(r))) {
       return "/admin/my-schedule";

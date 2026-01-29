@@ -89,6 +89,7 @@ const navSections: NavSection[] = [
   },
   {
     label: "Booking Operations",
+    // spa_worker should NOT see this section - they only see "My Spa"
     visibleToRoles: ["owner", "manager", "spa_lead", "coworking_manager", "fitness_lead", "event_coordinator", "front_desk"],
     items: [
       { title: "Schedule", href: "/admin/schedule", icon: CalendarDays },
@@ -107,6 +108,7 @@ const navSections: NavSection[] = [
     visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker"],
     items: [
       { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
+      // Workers tab is Lindsey-only (spa_lead) + admin roles - NOT visible to spa_worker
       { title: "Workers", href: "/admin/spa-workers", icon: Users, visibleToRoles: ["owner", "manager", "spa_lead"] },
     ],
   },

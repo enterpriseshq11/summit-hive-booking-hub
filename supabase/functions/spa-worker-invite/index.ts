@@ -70,9 +70,10 @@ const handler = async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
-    // Build signup URL - points to a special worker signup page
+    // Build signup URL - points to worker-signup page with hash router
     const baseUrl = Deno.env.get("SITE_URL") || "https://summit-hive-booking-hub.lovable.app";
-    const signupUrl = `${baseUrl}/worker-signup?token=${inviteToken}`;
+    // Use hash routing: /#/worker-signup?token=...
+    const signupUrl = `${baseUrl}/#/worker-signup?token=${inviteToken}`;
 
     // Send invite email
     const emailResult = await resend.emails.send({
