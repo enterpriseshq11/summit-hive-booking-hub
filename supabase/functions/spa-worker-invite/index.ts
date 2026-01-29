@@ -75,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Use hash routing: /#/worker-signup?token=...
     const signupUrl = `${baseUrl}/#/worker-signup?token=${inviteToken}`;
 
-    // Send invite email
+    // Send invite email - using inline styles for maximum email client compatibility
     const emailResult = await resend.emails.send({
       from: "A-Z Enterprises <noreply@azenterpriseshq.com>",
       to: [worker.email],
@@ -84,44 +84,70 @@ const handler = async (req: Request): Promise<Response> => {
         <!DOCTYPE html>
         <html>
         <head>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .logo { font-size: 24px; font-weight: bold; color: #d4af37; }
-            .content { background: #f9f9f9; border-radius: 12px; padding: 30px; margin-bottom: 30px; }
-            .btn { display: inline-block; background: #d4af37; color: #1a1a1a !important; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; margin: 20px 0; }
-            .footer { text-align: center; font-size: 12px; color: #666; }
-          </style>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Join Restoration Lounge</title>
         </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <div class="logo">Restoration Lounge</div>
-              <p style="color: #666; margin: 0;">by A-Z Enterprises</p>
-            </div>
-            
-            <div class="content">
-              <h2 style="margin-top: 0;">Welcome to the Team, ${worker.first_name}!</h2>
-              
-              <p>You've been invited to join Restoration Lounge as a massage therapist.</p>
-              
-              <p>Click the button below to create your account and set up your password:</p>
-              
-              <div style="text-align: center;">
-                <a href="${signupUrl}" class="btn">Create Your Account</a>
-              </div>
-              
-              <p style="font-size: 14px; color: #666;">
-                This link will expire in 48 hours. If it expires, please contact your manager for a new invite.
-              </p>
-            </div>
-            
-            <div class="footer">
-              <p>Restoration Lounge | A-Z Enterprises</p>
-              <p>If you didn't expect this invitation, please ignore this email.</p>
-            </div>
-          </div>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333333; background-color: #ffffff;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+              <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; width: 100%;">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td align="center" style="padding-bottom: 30px;">
+                      <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #d4af37;">Restoration Lounge</h1>
+                      <p style="margin: 5px 0 0 0; font-size: 14px; color: #666666;">by A-Z Enterprises</p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content Box -->
+                  <tr>
+                    <td style="background-color: #f9f9f9; border-radius: 12px; padding: 30px;">
+                      <h2 style="margin: 0 0 20px 0; font-size: 20px; color: #333333;">Welcome to the Team, ${worker.first_name}!</h2>
+                      
+                      <p style="margin: 0 0 16px 0; font-size: 16px; color: #333333;">You've been invited to join Restoration Lounge as a massage therapist.</p>
+                      
+                      <p style="margin: 0 0 24px 0; font-size: 16px; color: #333333;">Click the button below to create your account and set up your password:</p>
+                      
+                      <!-- CTA Button - Using table for maximum compatibility -->
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                          <td align="center" style="padding: 20px 0;">
+                            <a href="${signupUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #d4af37; color: #1a1a1a; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; mso-padding-alt: 0; text-align: center;">
+                              <!--[if mso]><i style="letter-spacing: 32px; mso-font-width: -100%; mso-text-raise: 30pt;">&nbsp;</i><![endif]-->
+                              <span style="mso-text-raise: 15pt;">Create Your Account</span>
+                              <!--[if mso]><i style="letter-spacing: 32px; mso-font-width: -100%;">&nbsp;</i><![endif]-->
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <!-- Fallback Link -->
+                      <p style="margin: 16px 0 0 0; font-size: 14px; color: #666666;">If the button doesn't work, copy and paste this link into your browser:</p>
+                      <p style="margin: 8px 0 0 0; font-size: 14px; word-break: break-all;">
+                        <a href="${signupUrl}" target="_blank" rel="noopener noreferrer" style="color: #d4af37; text-decoration: underline;">${signupUrl}</a>
+                      </p>
+                      
+                      <p style="margin: 24px 0 0 0; font-size: 14px; color: #666666;">
+                        This link will expire in 48 hours. If it expires, please contact your manager for a new invite.
+                      </p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td align="center" style="padding-top: 30px;">
+                      <p style="margin: 0; font-size: 12px; color: #666666;">Restoration Lounge | A-Z Enterprises</p>
+                      <p style="margin: 8px 0 0 0; font-size: 12px; color: #888888;">If you didn't expect this invitation, please ignore this email.</p>
+                    </td>
+                  </tr>
+                  
+                </table>
+              </td>
+            </tr>
+          </table>
         </body>
         </html>
       `,
