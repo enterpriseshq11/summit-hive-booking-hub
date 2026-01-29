@@ -97,6 +97,11 @@ export default function WorkerCalendars() {
 
   const { data: workers = [], isLoading: workersLoading } = useSpaWorkers();
 
+  const activeWorkers = useMemo(
+    () => workers.filter((w) => Boolean(w?.is_active) && Boolean(w?.id)),
+    [workers],
+  );
+
   // Calculate date range based on view mode
   const dateRange = useMemo(() => {
     if (viewMode === "week") {
@@ -180,7 +185,7 @@ export default function WorkerCalendars() {
               <div className="w-full sm:w-64">
                 <Select
                   value={selectedWorkerId || ""}
-                  onValueChange={(value) => setSelectedWorkerId(value || null)}
+                  onValueChange={(value) => setSelectedWorkerId(value ? value : null)}
                 >
                   <SelectTrigger className="bg-muted border-border text-foreground">
                     <SelectValue placeholder="Select a worker..." />
@@ -188,10 +193,10 @@ export default function WorkerCalendars() {
                   <SelectContent className="bg-popover border-border">
                     {workersLoading ? (
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">Loading workers...</div>
-                    ) : workers.filter(w => w.is_active).length === 0 ? (
+                    ) : activeWorkers.length === 0 ? (
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">No active workers</div>
                     ) : (
-                      workers.filter(w => w.is_active).map(worker => (
+                      activeWorkers.map((worker) => (
                         <SelectItem 
                           key={worker.id} 
                           value={worker.id}
