@@ -4332,6 +4332,36 @@ export type Database = {
         }
         Relationships: []
       }
+      spa_workers_public: {
+        Row: {
+          display_name: string
+          is_active: boolean
+          onboarding_complete: boolean
+          slug: string | null
+          title: string | null
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          display_name: string
+          is_active?: boolean
+          onboarding_complete?: boolean
+          slug?: string | null
+          title?: string | null
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          display_name?: string
+          is_active?: boolean
+          onboarding_complete?: boolean
+          slug?: string | null
+          title?: string | null
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: []
+      }
       spins: {
         Row: {
           created_at: string | null

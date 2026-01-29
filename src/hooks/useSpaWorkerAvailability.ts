@@ -110,37 +110,35 @@ export function useSpaWorkerAvailability(workerId?: string) {
     },
   });
 
-  // Complete onboarding (mark complete and generate slug)
+  // Complete onboarding via edge function (has elevated privileges)
   const completeOnboardingMutation = useMutation({
     mutationFn: async () => {
       if (!effectiveWorkerId || !currentWorker) throw new Error("No worker ID");
 
-      // Generate slug from display_name
-      const slugValue = currentWorker.display_name
-        ?.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '') || `worker-${effectiveWorkerId.slice(0, 8)}`;
+      const { data, error } = await supabase.functions.invoke("spa-worker-complete-onboarding");
 
-      // Mark onboarding as complete and set slug
-      const { error: updateError } = await supabase
-        .from("spa_workers")
-        .update({ 
-          onboarding_complete: true,
-          slug: slugValue 
-        })
-        .eq("id", effectiveWorkerId);
+      if (error) {
+        console.error("Edge function error:", error);
+        throw new Error(error.message || "Failed to complete onboarding");
+      }
 
-      if (updateError) throw updateError;
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["current-spa-worker"] });
+    onSuccess: (data) => {
+      // Fix: use exact query keys to ensure proper invalidation
+      queryClient.invalidateQueries({ queryKey: ["current-spa-worker", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["spa_workers"] });
-      queryClient.invalidateQueries({ queryKey: ["active-spa-workers"] });
-      toast.success("You're all set! Customers can now book with you.");
+      queryClient.invalidateQueries({ queryKey: ["spa_workers", "active", "bookable"] });
+      queryClient.invalidateQueries({ queryKey: ["spa_workers_public"] });
+      toast.success(data?.message || "You're all set! Customers can now book with you.");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Failed to complete onboarding:", error);
-      toast.error("Failed to complete setup. Please try again.");
+      toast.error(error.message || "Failed to complete setup. Please try again.");
     },
   });
 
