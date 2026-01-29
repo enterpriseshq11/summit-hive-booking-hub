@@ -1,99 +1,70 @@
 
-# Filter Schedule Page Business Dropdown for Spa Lead Role
+Goal: Cancelled (and denied/no-show) appointments must stop blocking time slots everywhere. The “Booked” label in the public Lindsey calendar (and any other availability views) should immediately flip back to “Open” after cancellation, while still respecting hours, overrides, blackouts, and capacity.
 
-## Problem
+What’s happening now (based on your screenshot + backend data)
+- The Lindsey booking page is not using the shared availability engine; it uses `useLindseyAvailability`.
+- That hook currently fetches bookings with a “NOT IN” filter that is unreliable in our client query style, and it only excludes `cancelled` / `no_show` (it does not exclude `denied`).
+- In your example date (Jan 31, 2026), the backend has bookings at those times with statuses `cancelled` and `denied`, which should NOT block slots, but they are still being included in the “busy” list → UI shows “Booked”.
 
-When Lindsey (with `spa_lead` role) visits Admin → Schedule, she sees all business units in the dropdown filter:
-- 360 Photo Booth
-- The Hive Coworking
-- The Hive Restoration Lounge (← the only one she needs)
-- The Summit
-- Total Fitness by A-Z
-- Voice Vault by The Hive
+Implementation approach
+A) Standardize which booking statuses “block” a timeslot
+- Create one shared list of blocking statuses (an allowlist) and use it everywhere availability is computed.
+- Blocking statuses should include the “active” pipeline states, and exclude anything that should free the slot:
+  - Block: `pending`, `pending_payment`, `pending_documents`, `approved`, `confirmed`, `in_progress`, `reschedule_requested`, `rescheduled`
+  - Do NOT block: `cancelled`, `denied`, `no_show`, `completed` (completed is historical)
 
-She only needs to see and manage **The Hive Restoration Lounge** (Spa).
+B) Fix Lindsey public calendar (the screenshot issue)
+Files:
+- `src/hooks/useLindseyAvailability.ts`
+Changes:
+1) Replace the current `.not("status", "in", ...)` filter with an allowlist:
+   - Use `.in("status", BLOCKING_BOOKING_STATUSES)` so cancelled/denied/no_show never come back in the bookings query.
+2) Keep the rest of the logic intact (hours, blackout checks, slot-fit logic), so cancellation only removes the “busy” block.
 
-## Solution
+Expected result:
+- Those 10:30, 11:00, 1:00, 1:30, 2:00 slots that are only blocked by `cancelled`/`denied` records will become “Open” immediately after refetch.
 
-Update the Schedule page to detect the user's role and filter the business dropdown accordingly. For users with only the `spa_lead` role (and not `owner` or `manager`), the page will:
+C) Fix provider availability (prevents “phantom busy” for staff assignment)
+Files:
+- `src/hooks/useProviders.ts` (function `useAvailableProviders`)
+Changes:
+1) Replace `.not("status", "in", ...)` with the same allowlist `.in("status", BLOCKING_BOOKING_STATUSES)`
+2) This ensures a cancelled/denied booking does not mark a provider as unavailable.
 
-1. **Auto-select** the Spa business instead of "All Businesses"
-2. **Hide** the business dropdown entirely (since there's only one option)
-3. **Show** only Spa bookings on the calendar
+D) Harden the global availability engine (applies to Spa/360/Voice Vault/etc.)
+Files:
+- `supabase/functions/check-availability/index.ts`
+Changes:
+1) Update the booking status filter to use the same allowlist (currently it only blocks 4 statuses, and it should block additional active states like `pending_payment`, `approved`, `reschedule_requested`, etc.).
+2) Improve the date overlap logic (recommended):
+   - Right now it filters by `start_datetime` within the range only.
+   - Safer: fetch any booking that overlaps the range:
+     - `start_datetime <= range_end` AND `end_datetime >= range_start`
+   - This prevents edge cases where a booking starts before the date boundary but overlaps into it.
 
-## Technical Implementation
+E) Verification checklist (acceptance criteria)
+1) Create a booking at 2:00 PM.
+2) Cancel it (admin cancellation flow).
+3) Without refreshing the page:
+   - Lindsey public booking calendar shows 2:00 PM as Open again.
+   - Admin Schedule removes the event (already supported by realtime invalidation).
+4) Repeat the test on another business using the shared availability engine (e.g., Photo Booth / Voice Vault) to confirm:
+   - Cancelled booking disappears from “busy” and the time slot reopens.
+5) Confirm the slot still respects:
+   - day-level overrides
+   - blackouts
+   - staff hours
+   - buffer rules
 
-### File: `src/pages/admin/Schedule.tsx`
+Notes / edge cases we will handle
+- “Denied” should not block time. We’ll ensure it’s excluded everywhere by using the allowlist.
+- Multiple cancelled duplicates at the same time will no longer matter because they won’t be returned by the availability queries.
+- This change does not relax business-hour rules; it only fixes which booking records are considered “busy”.
 
-**Changes:**
+Files to change
+- `src/hooks/useLindseyAvailability.ts`
+- `src/hooks/useProviders.ts`
+- `supabase/functions/check-availability/index.ts`
 
-1. Import `useAuth` to access user roles
-2. Add role-based logic to determine if user is "spa-only"
-3. Auto-set the Spa business ID as the default selection for spa_lead users
-4. Conditionally hide the business dropdown for spa_lead users
-
-```text
-// Add import
-import { useAuth } from "@/contexts/AuthContext";
-
-// Inside the component
-const { authUser } = useAuth();
-
-// Determine if user is spa-only (has spa_lead but not owner/manager)
-const isSpaLeadOnly = useMemo(() => {
-  const roles = authUser?.roles || [];
-  return roles.includes("spa_lead") && 
-         !roles.includes("owner") && 
-         !roles.includes("manager");
-}, [authUser?.roles]);
-
-// Find Spa business ID
-const spaBusinessId = useMemo(() => {
-  return businesses?.find(b => b.type === "spa")?.id;
-}, [businesses]);
-
-// For spa_lead, force selection to Spa business
-useEffect(() => {
-  if (isSpaLeadOnly && spaBusinessId && selectedBusiness === "all") {
-    setSelectedBusiness(spaBusinessId);
-  }
-}, [isSpaLeadOnly, spaBusinessId, selectedBusiness]);
-
-// In the render, conditionally show the dropdown:
-{!isSpaLeadOnly && (
-  <Select value={selectedBusiness} onValueChange={setSelectedBusiness}>
-    ...
-  </Select>
-)}
-```
-
-## Result for Lindsey
-
-After this change, when Lindsey visits the Schedule page:
-
-```text
-┌─────────────────────────────────────────────┐
-│  Schedule                                   │
-│  View and manage all bookings               │
-│                                             │
-│  [Week] [Month]  ← No business dropdown     │
-│                                             │
-│  ┌─────────────────────────────────────┐    │
-│  │  Calendar shows ONLY Spa bookings   │    │
-│  └─────────────────────────────────────┘    │
-└─────────────────────────────────────────────┘
-```
-
-- No "All Businesses" dropdown clutter
-- Calendar pre-filtered to Restoration Lounge
-- Day-click availability management still works (since Spa is selected)
-
-## Files to Modify
-
-1. `src/pages/admin/Schedule.tsx` — Add role-based business filtering
-
-## Notes
-
-- Owners and managers continue to see all businesses as before
-- This is a UX improvement only — Lindsey could theoretically access other businesses via URL parameters if needed
-- The Approvals page already has similar filtering since we just added role-based navigation
+Out of scope (unless you want it next)
+- Converting Lindsey availability to use the unified availability engine with resources/capacity per room (right now Lindsey is “single calendar”; it doesn’t model two rooms as parallel capacity). If you want “one room booked but the other still open,” that’s a follow-up enhancement.
