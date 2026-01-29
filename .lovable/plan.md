@@ -1,227 +1,204 @@
 
-# Plan: Dynamic Worker Booking Pages with Service Management
 
-## Overview
+# Plan: Fix Worker Dropdown and Add Services Onboarding Step
 
-This plan enables therapists to appear in the booking dropdown and have their own dedicated booking pages like Lindsey's. Workers will manage their services (massage types, pricing, descriptions) from their admin dashboard, and the system will auto-generate a public booking page matching Lindsey's design.
+## Problems Identified
 
----
+1. **Workers not appearing in dropdown**: The `useActiveSpaWorkers` hook does not select the `slug` or `title` columns, so workers can't route to their booking pages
+2. **Slug is null**: The worker "Dillon bowling" has `slug: null` - the backfill didn't run or happened before their creation
+3. **Onboarding only prompts for schedule**: The wizard only covers availability hours, not services
+4. **No services requirement**: Workers are marked as "onboarding complete" after just setting hours, but they need services too to have a booking page
 
-## Current State
+## Solution Overview
 
-1. **Dropdown**: `TherapistDropdown.tsx` already pulls from `useActiveSpaWorkers()` and routes to `/book-spa?therapist={id}`
-2. **Worker visibility**: Only workers with `onboarding_complete=true` appear in the dropdown
-3. **Missing**: No `/book-spa` page exists, no worker services table, no service management UI
-
-## Target State
-
-1. **Database**: New `spa_worker_services` table to store each worker's offered services and pricing
-2. **Admin UI**: "My Services" section in worker dashboard to add/edit services
-3. **Public Page**: Dynamic `/book-with/:workerSlug` page matching Lindsey's design
-4. **Dropdown**: Routes updated to use worker slug for SEO-friendly URLs
+Extend the onboarding flow to include a services step, fix the slug generation, and update the dropdown query to include all required fields.
 
 ---
 
 ## Technical Implementation
 
-### Step 1: Database Migration
+### Step 1: Update `useActiveSpaWorkers` Hook
 
-Create `spa_worker_services` table to store worker-specific services:
+Add `slug` and `title` to the query so the dropdown can properly route and display workers.
 
-```sql
-CREATE TABLE public.spa_worker_services (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  worker_id uuid NOT NULL REFERENCES spa_workers(id) ON DELETE CASCADE,
-  name text NOT NULL,
-  description text,
-  duration_mins integer NOT NULL,
-  price numeric(10,2) NOT NULL,
-  promo_price numeric(10,2),
-  promo_ends_at timestamptz,
-  is_free boolean DEFAULT false,
-  is_active boolean DEFAULT true,
-  sort_order integer DEFAULT 0,
-  icon_name text DEFAULT 'heart',
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
-
-ALTER TABLE spa_worker_services ENABLE ROW LEVEL SECURITY;
-
--- Workers can manage their own services
-CREATE POLICY "Workers can manage own services"
-ON spa_worker_services FOR ALL TO authenticated
-USING (
-  worker_id IN (
-    SELECT id FROM spa_workers WHERE user_id = auth.uid()
-  )
-);
-
--- Public can read active services for bookable workers
-CREATE POLICY "Public can read active services"
-ON spa_worker_services FOR SELECT TO anon, authenticated
-USING (
-  is_active = true AND
-  worker_id IN (
-    SELECT id FROM spa_workers 
-    WHERE is_active = true 
-    AND onboarding_complete = true 
-    AND deleted_at IS NULL
-  )
-);
-```
-
-Also add a `slug` column to `spa_workers` for SEO-friendly URLs:
-
-```sql
-ALTER TABLE spa_workers 
-ADD COLUMN slug text UNIQUE;
-
--- Backfill slugs from display_name (lowercase, hyphenated)
-UPDATE spa_workers 
-SET slug = lower(regexp_replace(display_name, '[^a-zA-Z0-9]+', '-', 'g'))
-WHERE slug IS NULL;
-```
-
-### Step 2: Create Hooks
-
-**New file**: `src/hooks/useSpaWorkerServices.ts`
+**File**: `src/hooks/useSpaWorkers.ts`
 
 ```typescript
-// CRUD operations for spa_worker_services
-// - useWorkerServices(workerId) - fetch services for a worker
-// - useMyServices() - fetch current logged-in worker's services
-// - useCreateService() - add new service
-// - useUpdateService() - edit service
-// - useDeleteService() - remove service
-// - useSpaWorkerBySlug(slug) - fetch worker by URL slug
+// Line 72: Update the select query
+const { data, error } = await supabase
+  .from("spa_workers")
+  .select("id, display_name, first_name, last_name, user_id, onboarding_complete, slug, title")
+  //...
 ```
 
-### Step 3: Admin UI - "My Services" Tab
+### Step 2: Add Slug Generation on Onboarding Complete
 
-**New file**: `src/components/admin/SpaWorkerServicesManager.tsx`
+When a worker completes onboarding, auto-generate a slug from their display_name if one doesn't exist.
 
-Add a new section/tab in the worker's admin dashboard (ProviderSchedule.tsx) that allows them to:
+**File**: `src/hooks/useSpaWorkerAvailability.ts`
 
-- View list of their services in a table/card format
-- Add new service with form:
-  - Service Name (e.g., "Swedish Massage")
-  - Description (short text)
-  - Duration (dropdown: 30, 45, 60, 90, 120 mins)
-  - Price ($)
-  - Optional: Promo Price + End Date
-  - Icon (dropdown of available icons)
-- Edit existing services inline
-- Toggle active/inactive
-- Reorder via drag or sort_order
+```typescript
+// In saveScheduleMutation: Generate slug when marking onboarding complete
+const slugValue = currentWorker?.display_name
+  ?.toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-|-$/g, '');
 
-**UI Layout in ProviderSchedule.tsx**:
+const { error: updateError } = await supabase
+  .from("spa_workers")
+  .update({ 
+    onboarding_complete: true,
+    slug: slugValue  // Auto-generate slug
+  })
+  .eq("id", effectiveWorkerId);
+```
+
+### Step 3: Update Onboarding Wizard - Add Services Step
+
+Extend the wizard from 3 steps to 4 steps: Welcome → Schedule → Services → Confirm
+
+**File**: `src/components/admin/SpaWorkerOnboardingWizard.tsx`
+
+**New Steps**:
 ```text
-TABS:
-[Hours] [Time Off] [Appointments] [My Services] [Settings]
-
-MY SERVICES TAB:
-+------------------------+
-| + Add Service          |
-+------------------------+
-| Swedish Massage        | 30 min | $45 | Active | [Edit] [Delete]
-| Deep Tissue            | 60 min | $80 | Active | [Edit] [Delete]
-| ... 
+1. Welcome - "Let's set up your profile"
+2. Schedule - Set weekly availability hours
+3. Services - Add at least one service with name, duration, price, description
+4. Confirm - Review everything and activate
 ```
 
-### Step 4: Dynamic Public Booking Page
+**Key Changes**:
+- Import `useMyServices`, `useCreateService` from `useSpaWorkerServices`
+- Add `step: "services"` to the state machine
+- Add inline service creation form (simplified version of SpaWorkerServicesManager)
+- Require at least 1 service before proceeding to confirmation
+- Save schedule + services together at the end
 
-**New file**: `src/pages/BookWithWorker.tsx`
+### Step 4: Track Services Completion Separately
 
-Create a page at `/book-with/:slug` that:
+Update the "needsOnboarding" check to verify both:
+1. Schedule is set (availability windows exist)
+2. At least one service exists
 
-1. Fetches worker by slug using `useSpaWorkerBySlug(slug)`
-2. Fetches worker's services using `useWorkerServices(workerId)`
-3. Renders the same layout as `BookWithLindsey.tsx`:
-   - Hero with "Book With {DisplayName}"
-   - Subtitle: "Licensed Massage Therapist" (or custom from worker profile)
-   - Same honeycomb background pattern
-   - Dynamic service list pulled from database
-   - Booking calendar (reuse `LindseyAvailabilityCalendar` with worker filtering)
-4. Falls back to 404 if worker not found or inactive
+**File**: `src/hooks/useSpaWorkerAvailability.ts`
 
-**Route updates in App.tsx**:
+Add query for services count:
 ```typescript
-<Route path="/book-with/:slug" element={<BookWithWorker />} />
+const { data: servicesCount } = useQuery({
+  queryKey: ["spa-worker-services-count", effectiveWorkerId],
+  queryFn: async () => {
+    const { count, error } = await supabase
+      .from("spa_worker_services")
+      .select("*", { count: "exact", head: true })
+      .eq("worker_id", effectiveWorkerId)
+      .eq("is_active", true);
+    return count || 0;
+  },
+  enabled: !!effectiveWorkerId,
+});
+
+// Update needsOnboarding check
+const needsOnboarding = currentWorker && (!currentWorker.onboarding_complete || servicesCount === 0);
+const needsScheduleOnly = currentWorker?.onboarding_complete && servicesCount === 0;
 ```
 
-### Step 5: Update TherapistDropdown Routes
+### Step 5: Update Dropdown to Filter by Services
 
-Change the routing from query param to slug-based:
+Only show workers in the dropdown if they have at least one active service.
 
+**File**: `src/hooks/useSpaWorkers.ts`
+
+Option A (simple - just check onboarding_complete):
 ```typescript
-// Before
-route: `/book-spa?therapist=${w.id}#availability-calendar`
-
-// After
-route: `/book-with/${w.slug || w.id}#availability-calendar`
+// Keep current query but ensure slug/title are included
+.eq("onboarding_complete", true)
 ```
 
-### Step 6: Extend LindseyAvailabilityCalendar for Worker Support
-
-Modify `LindseyAvailabilityCalendar.tsx` to accept an optional `workerId` prop:
-
+Option B (strict - verify services exist via join):
 ```typescript
-interface LindseyAvailabilityCalendarProps {
-  workerId?: string; // If provided, show this worker's availability/services
-  onBookingComplete?: () => void;
-}
+// Use a view or function to check services count
+// This ensures workers without services don't appear
 ```
 
-When `workerId` is passed:
-- Fetch services from `spa_worker_services` instead of hardcoded `SERVICES`
-- Check availability against that worker's schedule (`spa_worker_availability`)
-- Route checkout to the appropriate edge function with `spa_worker_id`
-
-### Step 7: Update Booking Flow
-
-Ensure bookings created through worker pages include `spa_worker_id`:
-- Update `lindsey-checkout` edge function or create a generic `spa-checkout` that accepts `worker_id`
-- Store `spa_worker_id` on the booking record
+For simplicity, Option A is recommended since we're updating onboarding to require services before marking complete.
 
 ---
 
-## Files Summary
+## Files to Modify
 
-| File | Action |
-|------|--------|
-| New SQL Migration | Create `spa_worker_services` table, add `slug` to `spa_workers` |
-| `src/hooks/useSpaWorkerServices.ts` | New hook for service CRUD |
-| `src/components/admin/SpaWorkerServicesManager.tsx` | New admin UI for managing services |
-| `src/pages/admin/ProviderSchedule.tsx` | Add "My Services" tab |
-| `src/pages/BookWithWorker.tsx` | New dynamic booking page |
-| `src/App.tsx` | Add route `/book-with/:slug` |
-| `src/components/booking/TherapistDropdown.tsx` | Update route to use slug |
-| `src/components/booking/LindseyAvailabilityCalendar.tsx` | Add worker support |
-| `supabase/functions/lindsey-checkout/index.ts` | Add `spa_worker_id` support |
+| File | Changes |
+|------|---------|
+| `src/hooks/useSpaWorkers.ts` | Add `slug`, `title` to `useActiveSpaWorkers` select |
+| `src/hooks/useSpaWorkerAvailability.ts` | Add slug generation, add services count check |
+| `src/components/admin/SpaWorkerOnboardingWizard.tsx` | Add "Services" step between schedule and confirm |
+| Database Migration | Backfill slugs for existing workers with null slugs |
+
+---
+
+## Updated Onboarding Flow
+
+**Step 1 - Welcome**
+```text
+"Welcome to Restoration Lounge, {Name}!"
+"Let's set up your profile so customers can start booking with you."
+What you'll set up:
+- Your weekly working hours
+- Your services and pricing
+```
+
+**Step 2 - Schedule**
+(Existing schedule picker - no changes)
+
+**Step 3 - Services** (NEW)
+```text
+"Add Your Services"
+"Add at least one service to display on your booking page."
+
+[+ Add Service]
+Form fields:
+- Service Name (required)
+- Duration (dropdown)
+- Price (required)
+- Description (optional)
+
+[Service list preview]
+Swedish Massage | 60 min | $80 | [Edit] [Delete]
+```
+
+**Step 4 - Confirm**
+```text
+"Your Profile is Ready!"
+
+Working Hours:
+Monday: 9:00 AM - 6:00 PM
+...
+
+Services:
+- Swedish Massage - 60 min - $80
+- Deep Tissue - 90 min - $100
+
+[Edit Schedule] [Edit Services] [Save & Go Live]
+```
 
 ---
 
 ## User Flow After Implementation
 
-**Admin (Worker)**:
-1. Log in as worker
-2. Navigate to "My Schedule" → "My Services" tab
-3. Click "Add Service"
-4. Enter: Swedish Massage, 30 min, $45, description
-5. Save → Service now visible in their booking dropdown
-
-**Customer**:
-1. Visit /spa → Click "Book Massage"
-2. Dropdown shows: Lindsey, [New Worker Name]
-3. Click worker name → Redirected to `/book-with/worker-name`
-4. Page shows: "Book With {Name}", their services, their calendar
-5. Complete booking → Booking assigned to that worker
+1. New worker receives invite and creates account
+2. On first login, sees onboarding wizard (cannot dismiss)
+3. Sets weekly availability hours
+4. Adds at least one service (name, duration, price)
+5. Reviews and confirms
+6. Worker marked as `onboarding_complete: true` and `slug` is generated
+7. Worker now appears in "Book Massage" dropdown
+8. Customer clicks worker name → routes to `/book-with/{slug}`
+9. On subsequent logins, wizard does NOT appear again
 
 ---
 
-## Notes
+## Edge Cases
 
-- Lindsey's existing hardcoded page at `/book-with-lindsey` can remain for backwards compatibility, or be migrated to the dynamic system
-- Each worker's subtitle/title can be stored in `spa_workers` table (optional enhancement: add `title` column)
-- Icons can be stored as lucide icon names and mapped in the component
+- **Worker already completed schedule but no services**: Show wizard starting at services step
+- **Worker tries to skip services**: Disable "Continue" button until at least 1 service added
+- **Slug collision**: Add numeric suffix if slug already exists (e.g., `john-doe-2`)
+
