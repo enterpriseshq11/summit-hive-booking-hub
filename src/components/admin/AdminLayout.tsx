@@ -89,6 +89,7 @@ const navSections: NavSection[] = [
   },
   {
     label: "Booking Operations",
+    visibleToRoles: ["owner", "manager", "spa_lead", "coworking_manager", "fitness_lead", "event_coordinator", "front_desk"],
     items: [
       { title: "Schedule", href: "/admin/schedule", icon: CalendarDays },
       { title: "Approvals", href: "/admin/approvals", icon: ClipboardList },
@@ -102,7 +103,7 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    label: "Spa (Restoration Lounge)",
+    label: "My Spa",
     visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker"],
     items: [
       { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },

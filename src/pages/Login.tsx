@@ -15,6 +15,34 @@ type AuthView = "signin" | "signup" | "forgot" | "reset-sent";
 
 const PASSWORD_MIN_LENGTH = 8;
 
+// Helper to determine redirect path based on user roles
+async function getRedirectPathForUser(userId: string, defaultPath: string): Promise<string> {
+  try {
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+
+    const userRoles = roles?.map((r) => r.role as string) || [];
+
+    // spa_worker goes directly to their schedule
+    if (userRoles.includes("spa_worker") && !userRoles.some(r => ["owner", "manager", "spa_lead"].includes(r))) {
+      return "/admin/my-schedule";
+    }
+
+    // Other staff roles go to admin dashboard
+    if (userRoles.some(r => ["owner", "manager", "spa_lead", "coworking_manager", "fitness_lead", "event_coordinator", "front_desk"].includes(r))) {
+      return "/admin";
+    }
+
+    // Regular users go to default path (usually /account)
+    return defaultPath;
+  } catch (error) {
+    console.error("Error fetching user roles for redirect:", error);
+    return defaultPath;
+  }
+}
+
 export default function Login() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -107,13 +135,23 @@ export default function Login() {
           description: "Incorrect email, username, or password.",
           variant: "destructive",
         });
+        setIsLoading(false);
       } else {
         trackEvent("signin_success");
         toast({
           title: "Welcome back!",
           description: "You've successfully signed in.",
         });
-        navigate(from, { replace: true });
+        
+        // Fetch user to determine role-based redirect
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const redirectPath = await getRedirectPathForUser(user.id, from);
+          navigate(redirectPath, { replace: true });
+        } else {
+          navigate(from, { replace: true });
+        }
+        setIsLoading(false);
       }
     } catch (err) {
       toast({
@@ -121,7 +159,6 @@ export default function Login() {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
