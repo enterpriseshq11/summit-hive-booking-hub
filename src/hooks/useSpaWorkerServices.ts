@@ -160,7 +160,18 @@ export function useDeleteService() {
   });
 }
 
+// Public-safe worker type for slug lookup (no PII)
+export interface SpaWorkerPublicProfile {
+  worker_id: string;
+  display_name: string;
+  slug: string | null;
+  title: string | null;
+  is_active: boolean;
+  onboarding_complete: boolean;
+}
+
 // Fetch worker by slug (for public booking page)
+// Uses spa_workers_public table to avoid exposing PII
 export function useSpaWorkerBySlug(slug: string | undefined) {
   return useQuery({
     queryKey: ["spa_worker_by_slug", slug],
@@ -168,12 +179,11 @@ export function useSpaWorkerBySlug(slug: string | undefined) {
       if (!slug) return null;
       
       const { data, error } = await supabase
-        .from("spa_workers")
-        .select("*")
+        .from("spa_workers_public")
+        .select("worker_id, display_name, slug, title, is_active, onboarding_complete")
         .eq("slug", slug)
         .eq("is_active", true)
         .eq("onboarding_complete", true)
-        .is("deleted_at", null)
         .single();
       
       if (error) {
@@ -181,7 +191,19 @@ export function useSpaWorkerBySlug(slug: string | undefined) {
         throw error;
       }
       
-      return data as SpaWorkerWithSlug;
+      // Map to compatible format
+      return {
+        id: data.worker_id,
+        user_id: null, // Not exposed publicly
+        display_name: data.display_name,
+        slug: data.slug,
+        title: data.title,
+        phone: null, // Not exposed publicly
+        is_active: data.is_active,
+        onboarding_complete: data.onboarding_complete,
+        deleted_at: null,
+        created_at: "",
+      } as SpaWorkerWithSlug;
     },
     enabled: !!slug,
   });

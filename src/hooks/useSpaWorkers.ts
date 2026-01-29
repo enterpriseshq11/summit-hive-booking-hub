@@ -61,22 +61,39 @@ export function useSpaWorkers() {
   });
 }
 
+// Public-safe worker type (no PII)
+export interface SpaWorkerPublic {
+  worker_id: string;
+  display_name: string;
+  slug: string | null;
+  title: string | null;
+  is_active: boolean;
+  onboarding_complete: boolean;
+}
+
 // Fetch active spa workers who have completed onboarding (for booking dropdown)
-// Workers without availability set won't appear in the public booking flow
+// Uses spa_workers_public table which only exposes safe fields (no email/phone/tokens)
 export function useActiveSpaWorkers() {
   return useQuery({
     queryKey: ["spa_workers", "active", "bookable"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("spa_workers")
-        .select("id, display_name, first_name, last_name, user_id, onboarding_complete, slug, title")
+        .from("spa_workers_public")
+        .select("worker_id, display_name, slug, title, is_active, onboarding_complete")
         .eq("is_active", true)
-        .eq("onboarding_complete", true) // Only show workers who have set their availability and services
-        .is("deleted_at", null)
+        .eq("onboarding_complete", true)
         .order("display_name");
 
       if (error) throw error;
-      return data;
+      
+      // Map worker_id to id for compatibility with existing code
+      return data?.map(w => ({
+        id: w.worker_id,
+        display_name: w.display_name,
+        slug: w.slug,
+        title: w.title,
+        onboarding_complete: w.onboarding_complete,
+      })) || [];
     },
   });
 }

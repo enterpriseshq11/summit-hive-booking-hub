@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.summit-request]
 verify_jwt = false
+
+[functions.spa-worker-complete-onboarding]
+verify_jwt = false
