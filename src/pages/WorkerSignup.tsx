@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
-type InviteStatus = "loading" | "valid" | "expired" | "invalid" | "already_used";
+type InviteStatus = "loading" | "valid" | "expired" | "invalid" | "already_used" | "success";
 
 interface WorkerInvite {
   id: string;
@@ -153,12 +153,13 @@ export default function WorkerSignupPage() {
         console.error("Failed to create profile:", profileError);
       }
 
+      // Sign out immediately so user must explicitly sign in
+      await supabase.auth.signOut();
+
       toast.success("Account created successfully!");
       
-      // Redirect to admin after a short delay
-      setTimeout(() => {
-        navigate("/admin/my-schedule");
-      }, 1500);
+      // Show success state with sign-in prompt
+      setInviteStatus("success");
     } catch (err: any) {
       console.error("Signup error:", err);
       if (err.message?.includes("already registered")) {
@@ -204,9 +205,14 @@ export default function WorkerSignupPage() {
             <AlertCircle className="h-12 w-12 text-orange-400 mx-auto mb-4" />
             <CardTitle className="text-white">Invite Expired</CardTitle>
             <CardDescription className="text-zinc-400">
-              This invite link has expired. Please contact your manager for a new invitation.
+              This invite link has expired. Please contact your manager to resend the invitation.
             </CardDescription>
           </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-sm text-zinc-500">
+              Invites expire 48 hours after being sent. Ask Lindsey or your manager to send a new invite from the admin panel.
+            </p>
+          </CardContent>
         </Card>
       </div>
     );
@@ -230,6 +236,34 @@ export default function WorkerSignupPage() {
             >
               Go to Sign In
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Success state - account created, prompt to sign in
+  if (inviteStatus === "success") {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-zinc-900 border-zinc-800">
+          <CardHeader className="text-center">
+            <CheckCircle className="h-16 w-16 text-green-400 mx-auto mb-4" />
+            <CardTitle className="text-2xl text-white">Account Created!</CardTitle>
+            <CardDescription className="text-zinc-400 text-base mt-2">
+              Your account has been set up successfully. Please sign in to access your schedule and manage your bookings.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={() => navigate("/login")} 
+              className="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold h-12 text-lg"
+            >
+              Sign In Now
+            </Button>
+            <p className="text-sm text-zinc-500 text-center">
+              Use your email <span className="text-white font-medium">{worker?.email}</span> and the password you just created.
+            </p>
           </CardContent>
         </Card>
       </div>
