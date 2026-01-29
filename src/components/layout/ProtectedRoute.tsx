@@ -80,9 +80,11 @@ export function ProtectedRoute({
     );
   }
 
-  // If this route requires auth, redirect unauthenticated users to login
+  // If this route requires auth, redirect unauthenticated users to login with redirect param
   if (requireAuth && !user) {
-    return <Navigate to={redirectTo} state={{ from: location }} replace />;
+    const currentPath = location.pathname + location.search;
+    const loginUrl = `${redirectTo}?redirect=${encodeURIComponent(currentPath)}`;
+    return <Navigate to={loginUrl} replace />;
   }
 
   // If staff/admin is required, wait for role hydration before deciding access

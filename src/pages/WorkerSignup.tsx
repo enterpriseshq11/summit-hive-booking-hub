@@ -231,7 +231,7 @@ export default function WorkerSignupPage() {
           </CardHeader>
           <CardContent>
             <Button 
-              onClick={() => navigate("/login")} 
+              onClick={() => navigate("/login?redirect=%2Fadmin%2Fmy-schedule")} 
               className="w-full bg-amber-500 hover:bg-amber-600 text-black"
             >
               Go to Sign In
@@ -256,7 +256,7 @@ export default function WorkerSignupPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Button 
-              onClick={() => navigate("/login")} 
+              onClick={() => navigate("/login?redirect=%2Fadmin%2Fmy-schedule")} 
               className="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold h-12 text-lg"
             >
               Sign In Now
