@@ -93,15 +93,16 @@ export function useSpaWorker(workerId: string | undefined) {
   });
 }
 
-// Create spa worker
+// Create spa worker and automatically send invite
 export function useCreateSpaWorker() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: SpaWorkerFormData) => {
+    mutationFn: async (formData: SpaWorkerFormData): Promise<{ worker: SpaWorker; inviteResult: { success: boolean; message?: string; error?: string } }> => {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const { data, error } = await supabase
+      // Step 1: Create the worker record
+      const { data: worker, error: createError } = await supabase
         .from("spa_workers")
         .insert({
           first_name: formData.first_name,
@@ -116,12 +117,39 @@ export function useCreateSpaWorker() {
         .select()
         .single();
 
-      if (error) throw error;
-      return data as SpaWorker;
+      if (createError) throw createError;
+
+      // Step 2: Automatically send the invite
+      let inviteResult: { success: boolean; message?: string; error?: string } = { success: false };
+      try {
+        const { data: inviteData, error: inviteError } = await supabase.functions.invoke("spa-worker-invite", {
+          body: { workerId: worker.id },
+        });
+
+        if (inviteError) {
+          console.error("Invite error:", inviteError);
+          inviteResult = { success: false, error: inviteError.message };
+        } else if (inviteData?.error) {
+          console.error("Invite response error:", inviteData.error);
+          inviteResult = { success: false, error: inviteData.error };
+        } else {
+          inviteResult = { success: true, message: inviteData?.message };
+        }
+      } catch (err: any) {
+        console.error("Invite exception:", err);
+        inviteResult = { success: false, error: err.message };
+      }
+
+      return { worker: worker as SpaWorker, inviteResult };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["spa_workers"] });
-      toast.success("Worker created successfully");
+      
+      if (result.inviteResult.success) {
+        toast.success("Worker created and invite email sent!");
+      } else {
+        toast.warning(`Worker created but invite failed: ${result.inviteResult.error || "Unknown error"}. You can resend the invite from the actions menu.`);
+      }
     },
     onError: (error: any) => {
       if (error.message?.includes("duplicate key")) {
@@ -229,21 +257,39 @@ export function useSendWorkerInvite() {
 
   return useMutation({
     mutationFn: async (workerId: string) => {
+      console.log("Sending worker invite for:", workerId);
+      
       const { data, error } = await supabase.functions.invoke("spa-worker-invite", {
         body: { workerId },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      console.log("Invite response:", { data, error });
+
+      if (error) {
+        console.error("Edge function error:", error);
+        throw new Error(error.message || "Failed to call invite function");
+      }
+      
+      if (data?.error) {
+        console.error("Invite error from function:", data.error);
+        throw new Error(data.error);
+      }
       
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["spa_workers"] });
-      toast.success(data.message || "Invite sent successfully");
+      toast.success(data?.message || "Invite email sent successfully!");
     },
     onError: (error: any) => {
-      toast.error("Failed to send invite: " + error.message);
+      console.error("useSendWorkerInvite error:", error);
+      const errorMessage = error.message || "Unknown error";
+      
+      if (errorMessage.includes("RESEND_API_KEY")) {
+        toast.error("Email service not configured. Please check RESEND_API_KEY.");
+      } else {
+        toast.error(`Failed to send invite: ${errorMessage}`);
+      }
     },
   });
 }
