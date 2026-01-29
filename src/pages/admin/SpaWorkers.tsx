@@ -5,10 +5,12 @@ import {
   useDeactivateSpaWorker, 
   useReactivateSpaWorker,
   useSendWorkerInvite,
+  useDeleteSpaWorker,
   type SpaWorker 
 } from "@/hooks/useSpaWorkers";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -34,6 +36,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
   Plus, 
   MoreHorizontal, 
@@ -46,6 +56,7 @@ import {
   XCircle,
   Loader2,
   Send,
+  Trash2,
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { SpaWorkerFormModal } from "@/components/admin/SpaWorkerFormModal";
@@ -56,6 +67,7 @@ export default function SpaWorkersPage() {
   const deactivateMutation = useDeactivateSpaWorker();
   const reactivateMutation = useReactivateSpaWorker();
   const sendInviteMutation = useSendWorkerInvite();
+  const deleteMutation = useDeleteSpaWorker();
 
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [editingWorker, setEditingWorker] = useState<SpaWorker | null>(null);
@@ -63,6 +75,11 @@ export default function SpaWorkersPage() {
   const [selectedWorkerForAvailability, setSelectedWorkerForAvailability] = useState<SpaWorker | null>(null);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [workerToDeactivate, setWorkerToDeactivate] = useState<SpaWorker | null>(null);
+  
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [workerToDelete, setWorkerToDelete] = useState<SpaWorker | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   const handleAddWorker = () => {
     setEditingWorker(null);
@@ -94,6 +111,21 @@ export default function SpaWorkersPage() {
     }
     setDeactivateDialogOpen(false);
     setWorkerToDeactivate(null);
+  };
+
+  const handleDelete = (worker: SpaWorker) => {
+    setWorkerToDelete(worker);
+    setDeleteConfirmText("");
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (workerToDelete && deleteConfirmText === "DELETE") {
+      deleteMutation.mutate(workerToDelete.id);
+      setDeleteDialogOpen(false);
+      setWorkerToDelete(null);
+      setDeleteConfirmText("");
+    }
   };
 
   const handleReactivate = (worker: SpaWorker) => {
@@ -260,7 +292,7 @@ export default function SpaWorkersPage() {
                           <DropdownMenuSeparator className="bg-zinc-700" />
                           {worker.is_active ? (
                             <DropdownMenuItem 
-                              className="text-red-400 focus:bg-zinc-700 focus:text-red-400 cursor-pointer"
+                              className="text-orange-400 focus:bg-zinc-700 focus:text-orange-400 cursor-pointer"
                               onClick={() => handleDeactivate(worker)}
                             >
                               <UserX className="h-4 w-4 mr-2" />
@@ -275,6 +307,13 @@ export default function SpaWorkersPage() {
                               Reactivate
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuItem 
+                            className="text-red-400 focus:bg-zinc-700 focus:text-red-400 cursor-pointer"
+                            onClick={() => handleDelete(worker)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Worker
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -329,6 +368,62 @@ export default function SpaWorkersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={(open) => {
+        setDeleteDialogOpen(open);
+        if (!open) {
+          setDeleteConfirmText("");
+          setWorkerToDelete(null);
+        }
+      }}>
+        <DialogContent className="bg-zinc-900 border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white">Delete worker?</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              This will remove <span className="font-semibold text-white">{workerToDelete?.first_name} {workerToDelete?.last_name}</span> from the Spa Workers list and the website booking dropdown.
+              <br /><br />
+              Historical bookings will be preserved.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3 py-2">
+            <p className="text-sm text-zinc-400">
+              Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm:
+            </p>
+            <Input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type DELETE to confirm"
+              className="bg-zinc-800 border-zinc-700 text-white font-mono"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDelete}
+              disabled={deleteConfirmText !== "DELETE" || deleteMutation.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Worker"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }

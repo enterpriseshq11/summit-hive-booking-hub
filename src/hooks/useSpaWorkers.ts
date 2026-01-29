@@ -20,6 +20,8 @@ export interface SpaWorker {
   updated_at: string;
   deactivated_at: string | null;
   deactivated_by: string | null;
+  deleted_at: string | null;
+  deleted_by: string | null;
   notes: string | null;
 }
 
@@ -41,7 +43,7 @@ export interface SpaWorkerAvailability {
   is_active: boolean;
 }
 
-// Fetch all spa workers
+// Fetch all spa workers (excluding soft-deleted)
 export function useSpaWorkers() {
   return useQuery({
     queryKey: ["spa_workers"],
@@ -49,6 +51,7 @@ export function useSpaWorkers() {
       const { data, error } = await supabase
         .from("spa_workers")
         .select("*")
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -57,7 +60,7 @@ export function useSpaWorkers() {
   });
 }
 
-// Fetch active spa workers (for booking dropdown)
+// Fetch active spa workers (for booking dropdown - excludes deleted and inactive)
 export function useActiveSpaWorkers() {
   return useQuery({
     queryKey: ["spa_workers", "active"],
@@ -66,6 +69,7 @@ export function useActiveSpaWorkers() {
         .from("spa_workers")
         .select("id, display_name, first_name, last_name, user_id")
         .eq("is_active", true)
+        .is("deleted_at", null)
         .order("display_name");
 
       if (error) throw error;
@@ -247,6 +251,38 @@ export function useReactivateSpaWorker() {
     },
     onError: (error: any) => {
       toast.error("Failed to reactivate worker: " + error.message);
+    },
+  });
+}
+
+// Soft delete spa worker
+export function useDeleteSpaWorker() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (workerId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Soft delete - set deleted_at and also deactivate
+      const { error } = await supabase
+        .from("spa_workers")
+        .update({
+          deleted_at: new Date().toISOString(),
+          deleted_by: user?.id || null,
+          is_active: false,
+          deactivated_at: new Date().toISOString(),
+          deactivated_by: user?.id || null,
+        })
+        .eq("id", workerId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spa_workers"] });
+      toast.success("Worker deleted");
+    },
+    onError: (error: any) => {
+      toast.error("Failed to delete worker: " + error.message);
     },
   });
 }
