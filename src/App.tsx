@@ -35,6 +35,7 @@ import Careers from "./pages/Careers";
 import CareersSpa from "./pages/careers/CareersSpa";
 import CareersFitness from "./pages/careers/CareersFitness";
 import CareersContracting from "./pages/careers/CareersContracting";
+import WorkerSignup from "./pages/WorkerSignup";
 
 // Debug (public, never redirects)
 import AuthDebug from "./pages/__debug/AuthDebug";
@@ -64,6 +65,7 @@ import AdminOfficeInquiries from "./pages/admin/OfficeInquiries";
 import AdminProviderSchedule from "./pages/admin/ProviderSchedule";
 import AdminPaymentSettings from "./pages/admin/PaymentSettings";
 import AdminCareerApplications from "./pages/admin/CareerApplications";
+import AdminSpaWorkers from "./pages/admin/SpaWorkers";
 // Command Center Pages (now unified under /admin/*)
 import CommandCenterLeads from "./pages/command-center/Leads";
 import CommandCenterLeadDetail from "./pages/command-center/LeadDetail";
@@ -136,6 +138,7 @@ function AppInner() {
 
         {/* Auth routes (no layout) */}
         <Route path="/login" element={<Login />} />
+        <Route path="/worker-signup" element={<WorkerSignup />} />
 
         {/* Unified Admin routes - all under /admin/* with staff protection */}
         <Route element={<ProtectedRoute requireStaff />}>
@@ -171,6 +174,7 @@ function AppInner() {
           
           {/* Spa / Provider Schedule */}
           <Route path="/admin/my-schedule" element={<AdminProviderSchedule />} />
+          <Route path="/admin/spa-workers" element={<AdminSpaWorkers />} />
           <Route path="/admin/payment-settings" element={<AdminPaymentSettings />} />
           
           {/* Coworking (The Hive) */}

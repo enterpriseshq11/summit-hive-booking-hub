@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Sparkles, User } from "lucide-react";
+import { ChevronDown, Sparkles, User, Loader2 } from "lucide-react";
+import { useActiveSpaWorkers } from "@/hooks/useSpaWorkers";
 
-// Scalable therapist config - add new therapists here
+// Scalable therapist config - now pulled from database
 export interface Therapist {
   id: string;
   name: string;
@@ -12,23 +13,14 @@ export interface Therapist {
   available: boolean;
 }
 
-export const THERAPISTS: Therapist[] = [
-  {
-    id: "lindsey",
-    name: "Lindsey",
-    subtitle: "Licensed Massage Therapist",
-    route: "/book-with-lindsey#availability-calendar",
-    available: true,
-  },
-  // Add more therapists here as they join:
-  // {
-  //   id: "new-therapist",
-  //   name: "New Therapist Name",
-  //   subtitle: "Massage Therapist",
-  //   route: "/book-with-new-therapist#availability-calendar",
-  //   available: true,
-  // },
-];
+// Static fallback for Lindsey (always available as spa_lead)
+const LINDSEY_FALLBACK: Therapist = {
+  id: "lindsey",
+  name: "Lindsey",
+  subtitle: "Licensed Massage Therapist",
+  route: "/book-with-lindsey#availability-calendar",
+  available: true,
+};
 
 interface TherapistDropdownProps {
   className?: string;
@@ -40,7 +32,21 @@ export function TherapistDropdown({ className }: TherapistDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const availableTherapists = THERAPISTS.filter((t) => t.available);
+  const { data: spaWorkers = [], isLoading } = useActiveSpaWorkers();
+
+  // Build therapist list from database + always include Lindsey
+  const therapists: Therapist[] = [
+    LINDSEY_FALLBACK,
+    ...spaWorkers
+      .filter(w => w.display_name.toLowerCase() !== "lindsey") // Avoid duplicate Lindsey
+      .map(w => ({
+        id: w.id,
+        name: w.display_name,
+        subtitle: "Massage Therapist",
+        route: `/book-spa?therapist=${w.id}#availability-calendar`,
+        available: true,
+      })),
+  ];
 
   // Close on click outside
   useEffect(() => {
@@ -112,30 +118,39 @@ export function TherapistDropdown({ className }: TherapistDropdownProps) {
           className="absolute top-full left-0 mt-2 w-full min-w-[200px] z-50 rounded-lg border-2 border-accent/50 bg-primary shadow-gold-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
           role="listbox"
         >
-          {availableTherapists.map((therapist) => (
-            <button
-              key={therapist.id}
-              onClick={() => handleSelect(therapist)}
-              className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-accent/20 transition-colors border-b border-accent/20 last:border-b-0 focus:outline-none focus:bg-accent/20"
-              role="option"
-            >
-              <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-                <User className="h-4 w-4 text-accent" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="block text-primary-foreground font-semibold">
-                  {therapist.name}
-                </span>
-                {therapist.subtitle && (
-                  <span className="block text-xs text-primary-foreground/60">
-                    {therapist.subtitle}
+          {isLoading ? (
+            <div className="px-4 py-3 flex items-center justify-center">
+              <Loader2 className="h-4 w-4 animate-spin text-accent" />
+            </div>
+          ) : (
+            therapists.map((therapist) => (
+              <button
+                key={therapist.id}
+                onClick={() => handleSelect(therapist)}
+                className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-accent/20 transition-colors border-b border-accent/20 last:border-b-0 focus:outline-none focus:bg-accent/20"
+                role="option"
+              >
+                <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                  <User className="h-4 w-4 text-accent" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-primary-foreground font-semibold">
+                    {therapist.name}
                   </span>
-                )}
-              </div>
-            </button>
-          ))}
+                  {therapist.subtitle && (
+                    <span className="block text-xs text-primary-foreground/60">
+                      {therapist.subtitle}
+                    </span>
+                  )}
+                </div>
+              </button>
+            ))
+          )}
         </div>
       )}
     </div>
   );
 }
+
+// Export static list for backwards compatibility
+export const THERAPISTS: Therapist[] = [LINDSEY_FALLBACK];

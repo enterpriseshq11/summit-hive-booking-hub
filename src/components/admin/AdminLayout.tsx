@@ -103,9 +103,10 @@ const navSections: NavSection[] = [
   },
   {
     label: "Spa (Restoration Lounge)",
-    visibleToRoles: ["owner", "manager", "spa_lead"],
+    visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker"],
     items: [
       { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
+      { title: "Workers", href: "/admin/spa-workers", icon: Users, visibleToRoles: ["owner", "manager", "spa_lead"] },
     ],
   },
   {
@@ -173,7 +174,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   const rolesLength = authUser?.roles?.length ?? 0;
   const hasAccess = isRolesLoaded && rolesLength
-    ? authUser!.roles.some((r) => ["owner", "manager", "department_lead", "front_desk", "read_only", "spa_lead", "fitness_lead", "coworking_manager", "event_coordinator"].includes(r))
+    ? authUser!.roles.some((r) => ["owner", "manager", "department_lead", "front_desk", "read_only", "spa_lead", "fitness_lead", "coworking_manager", "event_coordinator", "spa_worker"].includes(r))
     : false;
 
   const isAdmin = authUser?.roles?.some((r) => ["owner", "manager"].includes(r)) ?? false;
