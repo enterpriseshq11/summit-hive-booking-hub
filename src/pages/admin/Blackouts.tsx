@@ -382,11 +382,11 @@ export default function AdminBlackouts() {
               {!isSpaRoleOnly && (
                 <div>
                   <Label>Business (leave empty for all)</Label>
-                  <Select value={form.business_id || "all"} onValueChange={(v) => setForm({ ...form, business_id: v === "all" ? "" : v })}>
+                <Select value={form.business_id || "all"} onValueChange={(v) => setForm({ ...form, business_id: v === "all" ? "" : v })}>
                     <SelectTrigger><SelectValue placeholder="All businesses" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Businesses</SelectItem>
-                      {businesses?.map((b) => (
+                      {businesses?.filter(b => Boolean(b?.id)).map((b) => (
                         <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                       ))}
                     </SelectContent>
@@ -397,11 +397,11 @@ export default function AdminBlackouts() {
               {!isSpaWorkerOnly && (
                 <div>
                   <Label>Resource (leave empty for all)</Label>
-                  <Select value={form.resource_id || "all"} onValueChange={(v) => setForm({ ...form, resource_id: v === "all" ? "" : v })}>
+                <Select value={form.resource_id || "all"} onValueChange={(v) => setForm({ ...form, resource_id: v === "all" ? "" : v })}>
                     <SelectTrigger><SelectValue placeholder="All resources" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Resources</SelectItem>
-                      {resources?.map((r) => (
+                      {resources?.filter(r => Boolean(r?.id)).map((r) => (
                         <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                       ))}
                     </SelectContent>
