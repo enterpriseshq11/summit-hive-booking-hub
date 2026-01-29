@@ -8,6 +8,7 @@ import {
   useDeleteSpaWorker,
   type SpaWorker 
 } from "@/hooks/useSpaWorkers";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -81,6 +82,10 @@ export default function SpaWorkersPage() {
   const [workerToDelete, setWorkerToDelete] = useState<SpaWorker | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
+  // Resend invite dialog state
+  const [resendInviteDialogOpen, setResendInviteDialogOpen] = useState(false);
+  const [workerToResendInvite, setWorkerToResendInvite] = useState<SpaWorker | null>(null);
+
   const handleAddWorker = () => {
     setEditingWorker(null);
     setFormModalOpen(true);
@@ -96,8 +101,28 @@ export default function SpaWorkersPage() {
     setAvailabilityModalOpen(true);
   };
 
-  const handleSendInvite = (worker: SpaWorker) => {
-    sendInviteMutation.mutate(worker.id);
+  const handleResendInvite = (worker: SpaWorker) => {
+    // Check if worker already activated
+    if (worker.invite_accepted_at) {
+      toast.info("This worker has already completed signup");
+      return;
+    }
+    setWorkerToResendInvite(worker);
+    setResendInviteDialogOpen(true);
+  };
+
+  const confirmResendInvite = () => {
+    if (workerToResendInvite) {
+      sendInviteMutation.mutate(workerToResendInvite.id, {
+        onSuccess: () => {
+          setResendInviteDialogOpen(false);
+          setWorkerToResendInvite(null);
+        },
+        onError: () => {
+          // Keep dialog open on error so user can retry
+        }
+      });
+    }
   };
 
   const handleDeactivate = (worker: SpaWorker) => {
@@ -279,10 +304,10 @@ export default function SpaWorkersPage() {
                             <Clock className="h-4 w-4 mr-2" />
                             Manage Availability
                           </DropdownMenuItem>
-                          {worker.is_active && !worker.invite_accepted_at && (
+                          {!worker.invite_accepted_at && (
                             <DropdownMenuItem 
-                              className="text-white focus:bg-zinc-700 cursor-pointer"
-                              onClick={() => handleSendInvite(worker)}
+                              className="text-blue-400 focus:bg-zinc-700 focus:text-blue-400 cursor-pointer"
+                              onClick={() => handleResendInvite(worker)}
                               disabled={sendInviteMutation.isPending}
                             >
                               <Send className="h-4 w-4 mr-2" />
@@ -424,6 +449,43 @@ export default function SpaWorkersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Resend Invite Confirmation Dialog */}
+      <AlertDialog open={resendInviteDialogOpen} onOpenChange={(open) => {
+        setResendInviteDialogOpen(open);
+        if (!open) setWorkerToResendInvite(null);
+      }}>
+        <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Resend invite?</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Send a new signup invitation to{" "}
+              <span className="font-semibold text-white">{workerToResendInvite?.email}</span>?
+              <br /><br />
+              This will send a fresh signup link that expires in 48 hours.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmResendInvite}
+              disabled={sendInviteMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {sendInviteMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Resend Invite"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
