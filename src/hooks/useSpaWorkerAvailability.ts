@@ -99,24 +99,48 @@ export function useSpaWorkerAvailability(workerId?: string) {
 
         if (insertError) throw insertError;
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spa-worker-availability", effectiveWorkerId] });
+      toast.success("Your availability has been saved!");
+    },
+    onError: (error) => {
+      console.error("Failed to save availability:", error);
+      toast.error("Failed to save availability. Please try again.");
+    },
+  });
 
-      // Mark onboarding as complete
+  // Complete onboarding (mark complete and generate slug)
+  const completeOnboardingMutation = useMutation({
+    mutationFn: async () => {
+      if (!effectiveWorkerId || !currentWorker) throw new Error("No worker ID");
+
+      // Generate slug from display_name
+      const slugValue = currentWorker.display_name
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || `worker-${effectiveWorkerId.slice(0, 8)}`;
+
+      // Mark onboarding as complete and set slug
       const { error: updateError } = await supabase
         .from("spa_workers")
-        .update({ onboarding_complete: true })
+        .update({ 
+          onboarding_complete: true,
+          slug: slugValue 
+        })
         .eq("id", effectiveWorkerId);
 
       if (updateError) throw updateError;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["spa-worker-availability", effectiveWorkerId] });
       queryClient.invalidateQueries({ queryKey: ["current-spa-worker"] });
+      queryClient.invalidateQueries({ queryKey: ["spa_workers"] });
       queryClient.invalidateQueries({ queryKey: ["active-spa-workers"] });
-      toast.success("Your availability has been saved! Customers can now book with you.");
+      toast.success("You're all set! Customers can now book with you.");
     },
     onError: (error) => {
-      console.error("Failed to save availability:", error);
-      toast.error("Failed to save availability. Please try again.");
+      console.error("Failed to complete onboarding:", error);
+      toast.error("Failed to complete setup. Please try again.");
     },
   });
 
@@ -170,8 +194,10 @@ export function useSpaWorkerAvailability(workerId?: string) {
     needsOnboarding,
     hasAvailability,
     saveSchedule: saveScheduleMutation.mutateAsync,
+    completeOnboarding: completeOnboardingMutation.mutateAsync,
     updateDay: updateDayMutation.mutateAsync,
     isSaving: saveScheduleMutation.isPending || updateDayMutation.isPending,
+    isCompletingOnboarding: completeOnboardingMutation.isPending,
     refetchAvailability,
   };
 }

@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle, Copy, Calendar, Clock, ArrowRight, Sparkles } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2, CheckCircle, Copy, Calendar, Clock, ArrowRight, Sparkles, Plus, Trash2, DollarSign, Heart } from "lucide-react";
 import { useSpaWorkerAvailability } from "@/hooks/useSpaWorkerAvailability";
+import { useMyServices, useCreateService, useDeleteService } from "@/hooks/useSpaWorkerServices";
 import { format } from "date-fns";
 
 const DAYS_OF_WEEK = [
@@ -28,6 +32,14 @@ const TIME_OPTIONS = Array.from({ length: 33 }, (_, i) => {
   return { value: time, label: display };
 });
 
+const DURATION_OPTIONS = [
+  { value: 30, label: "30 minutes" },
+  { value: 45, label: "45 minutes" },
+  { value: 60, label: "60 minutes" },
+  { value: 90, label: "90 minutes" },
+  { value: 120, label: "2 hours" },
+];
+
 interface DaySchedule {
   enabled: boolean;
   start: string;
@@ -46,6 +58,20 @@ const DEFAULT_SCHEDULE: WeeklySchedule = {
   6: { enabled: false, start: "10:00", end: "16:00" },
 };
 
+interface NewServiceForm {
+  name: string;
+  description: string;
+  duration_mins: number;
+  price: string;
+}
+
+const EMPTY_SERVICE: NewServiceForm = {
+  name: "",
+  description: "",
+  duration_mins: 60,
+  price: "",
+};
+
 interface SpaWorkerOnboardingWizardProps {
   open: boolean;
   onComplete: () => void;
@@ -53,9 +79,23 @@ interface SpaWorkerOnboardingWizardProps {
 }
 
 export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaWorkerOnboardingWizardProps) {
-  const { currentWorker, saveSchedule, isSaving } = useSpaWorkerAvailability();
-  const [step, setStep] = useState<"welcome" | "schedule" | "confirm">("welcome");
+  const { currentWorker, saveSchedule, completeOnboarding, isSaving, isCompletingOnboarding, hasAvailability } = useSpaWorkerAvailability();
+  const { data: myServices = [], isLoading: isLoadingServices } = useMyServices();
+  const createServiceMutation = useCreateService();
+  const deleteServiceMutation = useDeleteService();
+  
+  // Determine starting step based on existing data
+  const [step, setStep] = useState<"welcome" | "schedule" | "services" | "confirm">("welcome");
   const [schedule, setSchedule] = useState<WeeklySchedule>(DEFAULT_SCHEDULE);
+  const [newService, setNewService] = useState<NewServiceForm>(EMPTY_SERVICE);
+  const [showServiceForm, setShowServiceForm] = useState(false);
+
+  // Start at services step if schedule already set
+  useEffect(() => {
+    if (hasAvailability && myServices.length === 0 && step === "welcome") {
+      setStep("services");
+    }
+  }, [hasAvailability, myServices.length, step]);
 
   const displayName = workerName || currentWorker?.first_name || "there";
 
@@ -78,7 +118,7 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
     }));
   };
 
-  const handleSaveAndComplete = async () => {
+  const handleSaveSchedule = async () => {
     if (!currentWorker?.id) return;
 
     const entries = Object.entries(schedule).map(([dayStr, config]) => ({
@@ -90,10 +130,41 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
     }));
 
     await saveSchedule(entries);
+    setStep("services");
+  };
+
+  const handleAddService = async () => {
+    if (!currentWorker?.id || !newService.name || !newService.price) return;
+
+    await createServiceMutation.mutateAsync({
+      worker_id: currentWorker.id,
+      name: newService.name,
+      description: newService.description || null,
+      duration_mins: newService.duration_mins,
+      price: parseFloat(newService.price),
+      promo_price: null,
+      promo_ends_at: null,
+      is_free: false,
+      is_active: true,
+      sort_order: myServices.length,
+      icon_name: "heart",
+    });
+
+    setNewService(EMPTY_SERVICE);
+    setShowServiceForm(false);
+  };
+
+  const handleDeleteService = async (serviceId: string) => {
+    await deleteServiceMutation.mutateAsync(serviceId);
+  };
+
+  const handleFinalComplete = async () => {
+    await completeOnboarding();
     onComplete();
   };
 
   const activeDays = Object.entries(schedule).filter(([_, config]) => config.enabled).length;
+  const hasServices = myServices.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
@@ -107,7 +178,7 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
               </div>
               <DialogTitle className="text-2xl text-white">Welcome to Restoration Lounge, {displayName}!</DialogTitle>
               <DialogDescription className="text-zinc-400 text-base mt-2">
-                Let's set up your schedule so customers can start booking appointments with you.
+                Let's set up your profile so customers can start booking appointments with you.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -119,6 +190,7 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
                   </h3>
                   <ul className="text-sm text-zinc-400 space-y-1">
                     <li>• Your weekly working hours (days and times)</li>
+                    <li>• Your services and pricing</li>
                     <li>• Customers will only see slots during your available hours</li>
                     <li>• You can change this anytime from your schedule page</li>
                   </ul>
@@ -148,7 +220,6 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
             </DialogHeader>
 
             <div className="py-4 space-y-4">
-              {/* Quick action */}
               <div className="flex justify-end">
                 <Button
                   variant="outline"
@@ -161,7 +232,6 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
                 </Button>
               </div>
 
-              {/* Days list */}
               <div className="space-y-2">
                 {DAYS_OF_WEEK.map(day => (
                   <div
@@ -233,11 +303,188 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
                 Back
               </Button>
               <Button
-                onClick={() => setStep("confirm")}
-                disabled={activeDays === 0}
+                onClick={handleSaveSchedule}
+                disabled={activeDays === 0 || isSaving}
                 className="bg-amber-500 hover:bg-amber-600 text-black gap-2"
               >
-                Review & Save
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    Next: Add Services
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {/* Services Step */}
+        {step === "services" && (
+          <>
+            <DialogHeader className="pb-2">
+              <DialogTitle className="text-xl text-white flex items-center gap-2">
+                <Heart className="h-5 w-5 text-amber-400" />
+                Add Your Services
+              </DialogTitle>
+              <DialogDescription className="text-zinc-400">
+                Add at least one service to display on your booking page.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              {/* Existing services list */}
+              {myServices.length > 0 && (
+                <div className="space-y-2">
+                  {myServices.map(service => (
+                    <div key={service.id} className="flex items-center justify-between p-3 rounded-lg border border-zinc-700 bg-zinc-800/50">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-white">{service.name}</span>
+                          <Badge variant="secondary" className="text-xs">{service.duration_mins} min</Badge>
+                        </div>
+                        {service.description && (
+                          <p className="text-sm text-zinc-400 mt-1">{service.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-amber-400 font-semibold">${Number(service.price).toFixed(0)}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteService(service.id)}
+                          disabled={deleteServiceMutation.isPending}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add service form */}
+              {showServiceForm ? (
+                <Card className="bg-zinc-800/50 border-zinc-700">
+                  <CardContent className="p-4 space-y-4">
+                    <div className="grid gap-4">
+                      <div>
+                        <Label htmlFor="service-name" className="text-white">Service Name *</Label>
+                        <Input
+                          id="service-name"
+                          placeholder="e.g., Swedish Massage"
+                          value={newService.name}
+                          onChange={(e) => setNewService(prev => ({ ...prev, name: e.target.value }))}
+                          className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-white">Duration *</Label>
+                          <Select
+                            value={newService.duration_mins.toString()}
+                            onValueChange={(value) => setNewService(prev => ({ ...prev, duration_mins: parseInt(value) }))}
+                          >
+                            <SelectTrigger className="bg-zinc-800 border-zinc-700 mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-800 border-zinc-700">
+                              {DURATION_OPTIONS.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value.toString()}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="service-price" className="text-white">Price *</Label>
+                          <div className="relative mt-1">
+                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                            <Input
+                              id="service-price"
+                              type="number"
+                              placeholder="80"
+                              value={newService.price}
+                              onChange={(e) => setNewService(prev => ({ ...prev, price: e.target.value }))}
+                              className="bg-zinc-800 border-zinc-700 text-white pl-8"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="service-description" className="text-white">Description (optional)</Label>
+                        <Textarea
+                          id="service-description"
+                          placeholder="Relaxing full-body massage using long flowing strokes..."
+                          value={newService.description}
+                          onChange={(e) => setNewService(prev => ({ ...prev, description: e.target.value }))}
+                          className="bg-zinc-800 border-zinc-700 text-white mt-1 h-20"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setNewService(EMPTY_SERVICE);
+                          setShowServiceForm(false);
+                        }}
+                        className="text-zinc-400"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleAddService}
+                        disabled={!newService.name || !newService.price || createServiceMutation.isPending}
+                        className="bg-amber-500 hover:bg-amber-600 text-black"
+                      >
+                        {createServiceMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Add Service"
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowServiceForm(true)}
+                  className="w-full border-dashed border-zinc-700 hover:bg-zinc-800 gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Service
+                </Button>
+              )}
+
+              {!hasServices && (
+                <p className="text-sm text-orange-400 text-center">
+                  Add at least one service to continue.
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-between pt-4 border-t border-zinc-800">
+              <Button 
+                variant="ghost" 
+                onClick={() => setStep(hasAvailability ? "welcome" : "schedule")} 
+                className="text-zinc-400"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={() => setStep("confirm")}
+                disabled={!hasServices}
+                className="bg-amber-500 hover:bg-amber-600 text-black gap-2"
+              >
+                Review & Finish
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -251,49 +498,66 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
               <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center">
                 <CheckCircle className="h-8 w-8 text-green-400" />
               </div>
-              <DialogTitle className="text-2xl text-white text-center">Your Schedule is Ready!</DialogTitle>
+              <DialogTitle className="text-2xl text-white text-center">Your Profile is Ready!</DialogTitle>
               <DialogDescription className="text-zinc-400 text-center text-base">
-                Here's a summary of your availability. Customers will be able to book during these times.
+                Here's a summary. Once you save, customers can start booking with you.
               </DialogDescription>
             </DialogHeader>
 
-            <Card className="bg-zinc-800/50 border-zinc-700">
-              <CardContent className="p-4">
-                <h3 className="font-medium text-white mb-3">Your Working Hours</h3>
-                <div className="space-y-2">
-                  {DAYS_OF_WEEK.map(day => {
-                    const config = schedule[day.value];
-                    if (!config?.enabled) return null;
+            <div className="space-y-4">
+              <Card className="bg-zinc-800/50 border-zinc-700">
+                <CardContent className="p-4">
+                  <h3 className="font-medium text-white mb-3 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-amber-400" />
+                    Working Hours
+                  </h3>
+                  <div className="space-y-2">
+                    {DAYS_OF_WEEK.map(day => {
+                      const config = schedule[day.value];
+                      if (!config?.enabled) return null;
 
-                    const startDisplay = TIME_OPTIONS.find(t => t.value === config.start)?.label || config.start;
-                    const endDisplay = TIME_OPTIONS.find(t => t.value === config.end)?.label || config.end;
+                      const startDisplay = TIME_OPTIONS.find(t => t.value === config.start)?.label || config.start;
+                      const endDisplay = TIME_OPTIONS.find(t => t.value === config.end)?.label || config.end;
 
-                    return (
-                      <div key={day.value} className="flex justify-between text-sm">
-                        <span className="text-zinc-400">{day.label}</span>
-                        <span className="text-white">{startDisplay} – {endDisplay}</span>
+                      return (
+                        <div key={day.value} className="flex justify-between text-sm">
+                          <span className="text-zinc-400">{day.label}</span>
+                          <span className="text-white">{startDisplay} – {endDisplay}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-zinc-800/50 border-zinc-700">
+                <CardContent className="p-4">
+                  <h3 className="font-medium text-white mb-3 flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-amber-400" />
+                    Your Services
+                  </h3>
+                  <div className="space-y-2">
+                    {myServices.map(service => (
+                      <div key={service.id} className="flex justify-between text-sm">
+                        <span className="text-zinc-400">{service.name} ({service.duration_mins} min)</span>
+                        <span className="text-amber-400">${Number(service.price).toFixed(0)}</span>
                       </div>
-                    );
-                  })}
-                </div>
-                <div className="mt-4 pt-3 border-t border-zinc-700">
-                  <p className="text-sm text-zinc-400">
-                    <strong className="text-amber-400">{activeDays} days</strong> per week
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             <div className="flex justify-between pt-4 border-t border-zinc-800 mt-4">
-              <Button variant="ghost" onClick={() => setStep("schedule")} className="text-zinc-400">
-                Edit Schedule
+              <Button variant="ghost" onClick={() => setStep("services")} className="text-zinc-400">
+                Edit Services
               </Button>
               <Button
-                onClick={handleSaveAndComplete}
-                disabled={isSaving}
+                onClick={handleFinalComplete}
+                disabled={isCompletingOnboarding}
                 className="bg-green-600 hover:bg-green-700 text-white gap-2"
               >
-                {isSaving ? (
+                {isCompletingOnboarding ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Saving...
@@ -301,7 +565,7 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
                 ) : (
                   <>
                     <CheckCircle className="h-4 w-4" />
-                    Save & Start Booking
+                    Save & Go Live
                   </>
                 )}
               </Button>

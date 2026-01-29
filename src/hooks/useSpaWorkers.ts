@@ -69,9 +69,9 @@ export function useActiveSpaWorkers() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("spa_workers")
-        .select("id, display_name, first_name, last_name, user_id, onboarding_complete")
+        .select("id, display_name, first_name, last_name, user_id, onboarding_complete, slug, title")
         .eq("is_active", true)
-        .eq("onboarding_complete", true) // Only show workers who have set their availability
+        .eq("onboarding_complete", true) // Only show workers who have set their availability and services
         .is("deleted_at", null)
         .order("display_name");
 
