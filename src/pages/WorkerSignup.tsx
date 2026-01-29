@@ -100,7 +100,7 @@ export default function WorkerSignupPage() {
 
     try {
       // Get current origin for email redirect
-      const redirectUrl = `${window.location.origin}/#/auth/callback`;
+      const redirectUrl = `${window.location.origin}/#/auth/callback?redirect=/admin/my-schedule`;
 
       // 1. Create auth user WITH email confirmation required
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -118,43 +118,23 @@ export default function WorkerSignupPage() {
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error("Failed to create account");
 
-      // 2. Update spa_worker record with user_id and mark invite as accepted
-      const { error: updateError } = await supabase
-        .from("spa_workers")
-        .update({
-          user_id: authData.user.id,
-          invite_accepted_at: new Date().toISOString(),
-          invite_token: null, // Clear the token
-        })
-        .eq("id", worker.id);
+      // 2. Call edge function to activate worker (bypasses RLS with service role)
+      const { data: activationResult, error: activationError } = await supabase.functions.invoke(
+        "activate-spa-worker",
+        {
+          body: {
+            invite_token: token,
+            user_id: authData.user.id,
+          },
+        }
+      );
 
-      if (updateError) throw updateError;
-
-      // 3. Assign spa_worker role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({
-          user_id: authData.user.id,
-          role: "spa_worker" as any,
-        });
-
-      if (roleError) {
-        console.error("Failed to assign role:", roleError);
-        // Don't throw - account was created, role can be assigned manually
-      }
-
-      // 4. Create profile
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .upsert({
-          id: authData.user.id,
-          first_name: worker.first_name,
-          last_name: worker.last_name,
-          email: worker.email,
-        });
-
-      if (profileError) {
-        console.error("Failed to create profile:", profileError);
+      if (activationError) {
+        console.error("Activation error:", activationError);
+        // Don't throw - account was created, activation can be retried
+        // The database trigger will handle role assignment as a fallback
+      } else {
+        console.log("Worker activation successful:", activationResult);
       }
 
       // Sign out immediately so user must verify email first
