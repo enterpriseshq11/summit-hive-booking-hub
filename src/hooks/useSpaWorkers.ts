@@ -23,6 +23,7 @@ export interface SpaWorker {
   deleted_at: string | null;
   deleted_by: string | null;
   notes: string | null;
+  onboarding_complete: boolean;
 }
 
 export interface SpaWorkerFormData {
@@ -60,15 +61,17 @@ export function useSpaWorkers() {
   });
 }
 
-// Fetch active spa workers (for booking dropdown - excludes deleted and inactive)
+// Fetch active spa workers who have completed onboarding (for booking dropdown)
+// Workers without availability set won't appear in the public booking flow
 export function useActiveSpaWorkers() {
   return useQuery({
-    queryKey: ["spa_workers", "active"],
+    queryKey: ["spa_workers", "active", "bookable"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("spa_workers")
-        .select("id, display_name, first_name, last_name, user_id")
+        .select("id, display_name, first_name, last_name, user_id, onboarding_complete")
         .eq("is_active", true)
+        .eq("onboarding_complete", true) // Only show workers who have set their availability
         .is("deleted_at", null)
         .order("display_name");
 

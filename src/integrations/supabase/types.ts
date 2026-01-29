@@ -4214,6 +4214,7 @@ export type Database = {
           is_active: boolean
           last_name: string
           notes: string | null
+          onboarding_complete: boolean
           phone: string | null
           updated_at: string
           user_id: string | null
@@ -4236,6 +4237,7 @@ export type Database = {
           is_active?: boolean
           last_name: string
           notes?: string | null
+          onboarding_complete?: boolean
           phone?: string | null
           updated_at?: string
           user_id?: string | null
@@ -4258,6 +4260,7 @@ export type Database = {
           is_active?: boolean
           last_name?: string
           notes?: string | null
+          onboarding_complete?: boolean
           phone?: string | null
           updated_at?: string
           user_id?: string | null
