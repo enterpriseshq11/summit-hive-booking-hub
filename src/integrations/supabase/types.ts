@@ -4201,6 +4201,8 @@ export type Database = {
           created_by: string | null
           deactivated_at: string | null
           deactivated_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           display_name: string
           email: string
           first_name: string
@@ -4221,6 +4223,8 @@ export type Database = {
           created_by?: string | null
           deactivated_at?: string | null
           deactivated_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           display_name: string
           email: string
           first_name: string
@@ -4241,6 +4245,8 @@ export type Database = {
           created_by?: string | null
           deactivated_at?: string | null
           deactivated_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           display_name?: string
           email?: string
           first_name?: string
