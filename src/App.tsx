@@ -68,6 +68,7 @@ import AdminProviderSchedule from "./pages/admin/ProviderSchedule";
 import AdminPaymentSettings from "./pages/admin/PaymentSettings";
 import AdminCareerApplications from "./pages/admin/CareerApplications";
 import AdminSpaWorkers from "./pages/admin/SpaWorkers";
+import AdminWorkerCalendars from "./pages/admin/WorkerCalendars";
 // Command Center Pages (now unified under /admin/*)
 import CommandCenterLeads from "./pages/command-center/Leads";
 import CommandCenterLeadDetail from "./pages/command-center/LeadDetail";
@@ -179,6 +180,7 @@ function AppInner() {
           {/* Spa / Provider Schedule */}
           <Route path="/admin/my-schedule" element={<AdminProviderSchedule />} />
           <Route path="/admin/spa-workers" element={<AdminSpaWorkers />} />
+          <Route path="/admin/worker-calendars" element={<AdminWorkerCalendars />} />
           <Route path="/admin/payment-settings" element={<AdminPaymentSettings />} />
           
           {/* Coworking (The Hive) */}
