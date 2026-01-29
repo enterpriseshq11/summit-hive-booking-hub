@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.summit-request]
 verify_jwt = false
+
+[functions.activate-spa-worker]
+verify_jwt = false
