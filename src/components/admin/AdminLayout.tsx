@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBookingsRealtime } from "@/hooks/useBookingsRealtime";
 import {
   LayoutDashboard,
   Users,
@@ -166,6 +167,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadAlerts, setUnreadAlerts] = useState(0);
   const { data: unreadCareersCount = 0 } = useUnreadApplicationsCount();
+
+  // Enable real-time booking updates for all admin calendar views
+  useBookingsRealtime();
 
   const rolesLength = authUser?.roles?.length ?? 0;
   const hasAccess = isRolesLoaded && rolesLength

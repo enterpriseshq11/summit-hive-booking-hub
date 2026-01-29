@@ -160,8 +160,27 @@ export function useUpdateBookingStatus() {
       return data;
     },
     onSuccess: (_, variables) => {
+      // Aggressively invalidate all booking-related queries
+      // This ensures all calendars (admin, public, my-schedule) update immediately
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
       queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["booking"] });
+      
+      // Lindsey/Spa-specific booking queries
+      queryClient.invalidateQueries({ queryKey: ["lindsey-bookings"] });
+      
+      // Invalidate admin dashboard stats
+      queryClient.invalidateQueries({ queryKey: ["admin_stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_alerts"] });
+      
+      // Invalidate availability so freed slots become bookable
+      queryClient.invalidateQueries({ queryKey: ["availability"] });
+      queryClient.invalidateQueries({ queryKey: ["next-available"] });
+      queryClient.invalidateQueries({ queryKey: ["slot_holds"] });
+      
+      // Invalidate reschedule-related queries
+      queryClient.invalidateQueries({ queryKey: ["reschedule_requests"] });
+      
       toast.success(`Booking ${variables.status}`);
     },
     onError: (error) => {

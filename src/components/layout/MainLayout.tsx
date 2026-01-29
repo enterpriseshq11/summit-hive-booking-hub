@@ -2,12 +2,15 @@ import { ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { useBookingsRealtime } from "@/hooks/useBookingsRealtime";
 
 interface MainLayoutProps {
   children?: ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
+  // Enable real-time booking updates for all public calendars
+  useBookingsRealtime();
   return (
     <div className="flex min-h-screen flex-col">
       {/* Skip to content link for keyboard users */}
