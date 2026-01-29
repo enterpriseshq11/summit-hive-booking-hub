@@ -187,9 +187,9 @@ export default function WorkerCalendars() {
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
                     {workersLoading ? (
-                      <SelectItem value="" disabled>Loading workers...</SelectItem>
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">Loading workers...</div>
                     ) : workers.filter(w => w.is_active).length === 0 ? (
-                      <SelectItem value="" disabled>No active workers</SelectItem>
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">No active workers</div>
                     ) : (
                       workers.filter(w => w.is_active).map(worker => (
                         <SelectItem 
