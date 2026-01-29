@@ -1,118 +1,190 @@
 
-# Fix: Worker Invite Role Assignment - Type Mismatch Bug
 
-## Problem Summary
+# Plan: Spa Worker Dashboard - Match Lindsey's View
 
-The worker invite flow is completely broken due to a **type mismatch error** in the database trigger. When a worker creates their account:
+## Overview
 
-1. The `activate-spa-worker` edge function tries to update `spa_workers.user_id`
-2. This triggers `on_spa_worker_user_linked()` 
-3. The trigger tries to insert `NEW.id::text` into `audit_log.entity_id` which is a `uuid` column
-4. PostgreSQL throws: `column "entity_id" is of type uuid but expression is of type text`
-5. The entire transaction rolls back
-6. Worker has no `user_id` linked, no role assigned
-7. Login routing treats them as a customer
+Give spa workers the same admin navigation and dashboard experience as Lindsey (spa_lead), minus the Workers management tab. Workers will see their own calendar, their own bookings in Approvals, and manage their own blackouts.
 
-**Evidence from logs:**
-```
-ERROR Failed to update worker: {
-  code: "42804",
-  message: 'column "entity_id" is of type uuid but expression is of type text'
-}
-```
+## Current State
 
-**Current database state:** All test workers have `user_id: null` and `role: null` - the activation never completed.
+**Lindsey (spa_lead) sees:**
+- **Booking Operations**: Schedule, Approvals, Blackouts
+- **My Spa**: My Schedule, Workers
 
----
+**Spa workers currently see:**
+- **My Spa**: My Schedule only
 
-## Solution
+## Target State
 
-Fix the type mismatch in both the database trigger and the edge function by removing the `::text` cast.
+**Spa workers will see:**
+- **Booking Operations**: Schedule, Approvals, Blackouts
+- **My Spa**: My Schedule only (no Workers tab)
+
+All views will be filtered to show only the worker's own data.
 
 ---
 
 ## Technical Implementation
 
-### Step 1: Database Migration - Fix Trigger Function
+### Step 1: Update AdminLayout.tsx Navigation
 
-Update `on_spa_worker_user_linked()` to use `NEW.id` directly (it's already a uuid):
-
-```sql
-CREATE OR REPLACE FUNCTION public.on_spa_worker_user_linked()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-  IF OLD.user_id IS NULL AND NEW.user_id IS NOT NULL THEN
-    INSERT INTO public.user_roles (user_id, role, department)
-    VALUES (NEW.user_id, 'spa_worker', NULL)
-    ON CONFLICT (user_id, role, department) DO NOTHING;
-    
-    INSERT INTO public.audit_log (
-      action_type,
-      entity_type,
-      entity_id,           -- uuid column
-      actor_user_id,
-      after_json
-    ) VALUES (
-      'spa_worker_role_auto_assigned',
-      'user_roles',
-      NEW.id,              -- Remove ::text cast - already uuid
-      NEW.user_id,
-      jsonb_build_object(
-        'worker_id', NEW.id,
-        'user_id', NEW.user_id,
-        'trigger', 'on_spa_worker_user_linked'
-      )
-    );
-  END IF;
-  
-  RETURN NEW;
-END;
-$$;
-```
-
-### Step 2: Update Edge Function
-
-Fix `supabase/functions/activate-spa-worker/index.ts` line 124 - the `entity_id` should not have the `worker.id` wrapped in any way, just pass it as-is since it's already a uuid:
+Modify the navigation configuration to include `spa_worker` in the Booking Operations section, but restrict them to only Schedule, Approvals, and Blackouts:
 
 ```typescript
-// Line 122-133: No change needed - worker.id is already a uuid string
-// The edge function passes it correctly, the issue is only in the trigger
+// Line 91-105: Add spa_worker to Booking Operations
+{
+  label: "Booking Operations",
+  visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker", ...],
+  items: [
+    { title: "Schedule", href: "/admin/schedule", icon: CalendarDays },
+    { title: "Approvals", href: "/admin/approvals", icon: ClipboardList },
+    // Resources, Packages, etc. remain owner/manager only
+    { title: "Blackouts", href: "/admin/blackouts", icon: CalendarX },
+    // Other items filtered by visibleToRoles
+  ],
+}
 ```
 
-Actually, reviewing the edge function - it passes `worker.id` directly which is correct. The only fix needed is the database trigger.
+**Specific item visibility:**
+- Schedule: Add `spa_worker` 
+- Approvals: Add `spa_worker`
+- Blackouts: Add `spa_worker`
+- Resources, Packages, Pricing Rules, Documents, Reviews, Leads & Waitlists: Remain owner/manager only
 
-### Step 3: Redeploy Edge Function
+### Step 2: Update Schedule.tsx for Worker Filtering
 
-After the trigger is fixed, redeploy the edge function (or just test - the fix is in the database).
+Add logic to detect if the user is a `spa_worker` and filter bookings to only show their own:
+
+```typescript
+// Add helper similar to isSpaLeadOnly
+const isSpaWorkerOnly = useMemo(() => {
+  const roles = authUser?.roles || [];
+  return roles.includes("spa_worker") && 
+    !roles.includes("owner") && 
+    !roles.includes("manager") &&
+    !roles.includes("spa_lead");
+}, [authUser?.roles]);
+
+// Fetch current worker ID from spa_workers table
+const { currentWorker } = useSpaWorkerAvailability();
+
+// Filter bookings by spa_worker_id when in worker view
+const filteredBookings = useMemo(() => {
+  let filtered = (bookings || []).filter((b) => 
+    b?.status !== "denied" && b?.status !== "cancelled"
+  );
+  
+  // If spa_worker, only show their assigned bookings
+  if (isSpaWorkerOnly && currentWorker?.id) {
+    filtered = filtered.filter((b) => b.spa_worker_id === currentWorker.id);
+  }
+  
+  return filtered;
+}, [bookings, isSpaWorkerOnly, currentWorker?.id]);
+```
+
+**Additional changes:**
+- Hide business filter dropdown for `spa_worker` (like we do for `spa_lead`)
+- Auto-select Spa business
+- Remove day-click availability management (they use My Schedule for that)
+
+### Step 3: Update Approvals.tsx for Worker Filtering
+
+Similar changes to filter bookings by the worker's `spa_worker_id`:
+
+```typescript
+// Add spa_worker detection
+const isSpaWorkerOnly = useMemo(() => {
+  const roles = authUser?.roles || [];
+  return roles.includes("spa_worker") && 
+    !roles.includes("owner") && 
+    !roles.includes("manager") &&
+    !roles.includes("spa_lead");
+}, [authUser?.roles]);
+
+// Fetch worker ID
+const { currentWorker } = useSpaWorkerAvailability();
+
+// Filter confirmed bookings to only show worker's own
+const filteredConfirmed = useMemo(() => {
+  let items = (confirmedBookings || [])
+    .filter((b) => matchesUnit(b, businessUnit));
+    
+  // Spa workers only see their own bookings
+  if (isSpaWorkerOnly && currentWorker?.id) {
+    items = items.filter((b) => b.spa_worker_id === currentWorker.id);
+  }
+  
+  return items.map((b) => ({ kind: "booking", booking: b }));
+}, [confirmedBookings, businessUnit, isSpaWorkerOnly, currentWorker?.id]);
+```
+
+**Additional changes:**
+- Hide business unit tabs for `spa_worker` (like `spa_lead`)
+- Force `restoration` filter
+- Show only Confirmed + Rescheduled tabs (remove Pending/Denied)
+
+### Step 4: Update Blackouts.tsx for Worker Filtering
+
+Workers should only see and manage their own blackout dates:
+
+```typescript
+// Add spa_worker detection
+const isSpaWorkerOnly = useMemo(() => {
+  const roles = authUser?.roles || [];
+  return roles.includes("spa_worker") && 
+    !roles.includes("owner") && 
+    !roles.includes("manager") &&
+    !roles.includes("spa_lead");
+}, [authUser?.roles]);
+
+// When creating blackouts, associate with worker's spa_worker_id
+// When listing blackouts, filter to only show worker's own
+```
 
 ---
 
-## Files to Modify
+## Summary of Files to Modify
 
-| File | Action |
-|------|--------|
-| New SQL Migration | Fix `on_spa_worker_user_linked()` - remove `::text` cast |
-| No edge function changes needed | The function itself is correct |
-
----
-
-## Testing After Fix
-
-1. Create a **new worker invite** from Admin → Workers
-2. Open invite link → Create Account → Set password
-3. Verify email (click link in email)
-4. Sign in with worker credentials
-5. **Expected**: Land on `/admin/my-schedule` (restricted worker dashboard)
-6. **Verify**: Worker does NOT see "Workers" tab, only their own schedule
+| File | Changes |
+|------|---------|
+| `src/components/admin/AdminLayout.tsx` | Add `spa_worker` to Booking Operations visibility for Schedule, Approvals, Blackouts |
+| `src/pages/admin/Schedule.tsx` | Add worker detection + booking filter by `spa_worker_id`, hide business dropdown |
+| `src/pages/admin/Approvals.tsx` | Add worker detection + booking filter by `spa_worker_id`, hide business tabs |
+| `src/pages/admin/Blackouts.tsx` | Add worker detection + filter blackouts to worker's own |
 
 ---
 
-## Root Cause Summary
+## User Experience After Implementation
 
-The trigger function was incorrectly casting a uuid to text before inserting into a uuid column:
-- **Wrong**: `NEW.id::text` → text type
-- **Correct**: `NEW.id` → uuid type (matches `audit_log.entity_id`)
+A spa worker logs in and sees:
+
+**Sidebar Navigation:**
+```text
+BOOKING OPERATIONS
+  📅 Schedule
+  📋 Approvals  
+  🗓️ Blackouts
+
+MY SPA
+  📅 My Schedule
+```
+
+**Schedule Page:**
+- Shows only their assigned bookings on the calendar
+- No business filter dropdown
+- Auto-filtered to Restoration Lounge
+
+**Approvals Page:**
+- Shows Confirmed + Rescheduled tabs only
+- Lists only bookings assigned to them
+- Can initiate reschedule for their own confirmed bookings
+
+**Blackouts Page:**
+- Shows only their blackout dates
+- Can add/remove their own time off
+
+**My Schedule Page:**
+- Remains the same (manage hours, time off, appointments, settings)
+
