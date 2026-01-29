@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, addMinutes, parseISO, isBefore, isAfter, startOfDay, addDays, getDay } from "date-fns";
+import { BLOCKING_BOOKING_STATUSES } from "@/constants/bookingStatuses";
 
 // Lindsey's default working hours (9 AM - 9 PM, 7 days/week)
 const DEFAULT_WORKING_HOURS = {
@@ -88,7 +89,7 @@ export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: 
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Fetch bookings for the next 60 days
+  // Fetch bookings for the next 60 days - ONLY active/blocking statuses
   const { data: bookings } = useQuery({
     queryKey: ["lindsey-bookings"],
     queryFn: async () => {
@@ -101,7 +102,7 @@ export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: 
         .eq("business_id", spaBusinessId)
         .gte("start_datetime", `${startDate}T00:00:00`)
         .lte("start_datetime", `${endDate}T23:59:59`)
-        .not("status", "in", '("cancelled","no_show")');
+        .in("status", [...BLOCKING_BOOKING_STATUSES]);
       
       if (error) throw error;
       return (data || []) as BookingRecord[];

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
+import { BLOCKING_BOOKING_STATUSES } from "@/constants/bookingStatuses";
 
 type Provider = Database["public"]["Tables"]["providers"]["Row"];
 type ProviderSchedule = Database["public"]["Tables"]["provider_schedules"]["Row"];
@@ -92,13 +93,13 @@ export function useAvailableProviders(params: {
 
       if (pError) throw pError;
 
-      // Check for existing bookings
+      // Check for existing bookings - ONLY blocking statuses
       const { data: existingBookings } = await supabase
         .from("bookings")
         .select("assigned_provider_id")
         .gte("start_datetime", `${params.date}T${params.startTime}`)
         .lt("end_datetime", `${params.date}T${params.endTime}`)
-        .not("status", "in", '("cancelled","no_show")');
+        .in("status", [...BLOCKING_BOOKING_STATUSES]);
 
       const bookedProviderIds = new Set(
         existingBookings?.map((b) => b.assigned_provider_id).filter(Boolean)
