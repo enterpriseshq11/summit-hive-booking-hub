@@ -587,6 +587,7 @@ export type Database = {
           package_id: string | null
           promo_code_id: string | null
           source_brand: string | null
+          spa_worker_id: string | null
           start_datetime: string
           status: Database["public"]["Enums"]["booking_status"] | null
           subtotal: number
@@ -623,6 +624,7 @@ export type Database = {
           package_id?: string | null
           promo_code_id?: string | null
           source_brand?: string | null
+          spa_worker_id?: string | null
           start_datetime: string
           status?: Database["public"]["Enums"]["booking_status"] | null
           subtotal?: number
@@ -659,6 +661,7 @@ export type Database = {
           package_id?: string | null
           promo_code_id?: string | null
           source_brand?: string | null
+          spa_worker_id?: string | null
           start_datetime?: string
           status?: Database["public"]["Enums"]["booking_status"] | null
           subtotal?: number
@@ -700,6 +703,13 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_spa_worker_id_fkey"
+            columns: ["spa_worker_id"]
+            isOneToOne: false
+            referencedRelation: "spa_workers"
             referencedColumns: ["id"]
           },
         ]
@@ -4106,6 +4116,148 @@ export type Database = {
           },
         ]
       }
+      spa_worker_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          start_time: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          start_time: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          start_time?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spa_worker_availability_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "spa_workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spa_worker_blackouts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_datetime: string
+          id: string
+          reason: string | null
+          start_datetime: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_datetime: string
+          id?: string
+          reason?: string | null
+          start_datetime: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_datetime?: string
+          id?: string
+          reason?: string | null
+          start_datetime?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spa_worker_blackouts_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "spa_workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spa_workers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deactivated_at: string | null
+          deactivated_by: string | null
+          display_name: string
+          email: string
+          first_name: string
+          id: string
+          invite_accepted_at: string | null
+          invite_expires_at: string | null
+          invite_token: string | null
+          invited_at: string | null
+          is_active: boolean
+          last_name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          deactivated_by?: string | null
+          display_name: string
+          email: string
+          first_name: string
+          id?: string
+          invite_accepted_at?: string | null
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_at?: string | null
+          is_active?: boolean
+          last_name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          deactivated_by?: string | null
+          display_name?: string
+          email?: string
+          first_name?: string
+          id?: string
+          invite_accepted_at?: string | null
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_at?: string | null
+          is_active?: boolean
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       spins: {
         Row: {
           created_at: string | null
@@ -4706,6 +4858,7 @@ export type Database = {
         Returns: boolean
       }
       generate_booking_number: { Args: never; Returns: string }
+      get_spa_worker_id: { Args: { _user_id: string }; Returns: string }
       has_department_access: {
         Args: {
           _business_type: Database["public"]["Enums"]["business_type"]
@@ -4721,6 +4874,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_spa_worker: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
@@ -4734,6 +4888,7 @@ export type Database = {
         | "fitness_lead"
         | "front_desk"
         | "read_only"
+        | "spa_worker"
       booking_mode: "instant" | "request"
       booking_status:
         | "pending"
@@ -5017,6 +5172,7 @@ export const Constants = {
         "fitness_lead",
         "front_desk",
         "read_only",
+        "spa_worker",
       ],
       booking_mode: ["instant", "request"],
       booking_status: [
