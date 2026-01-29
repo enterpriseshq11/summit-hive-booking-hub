@@ -4,6 +4,7 @@ import { AdminLayout, RescheduleModal, DayAvailabilityModal } from "@/components
 import { useBookings } from "@/hooks/useBookings";
 import { useBusinesses } from "@/hooks/useBusinesses";
 import { useAvailabilityOverrides, formatOverrideDisplay } from "@/hooks/useAvailabilityOverrides";
+import { useSpaWorkerAvailability } from "@/hooks/useSpaWorkerAvailability";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +75,21 @@ export default function AdminSchedule() {
            !roles.includes("manager");
   }, [authUser?.roles]);
 
+  // Determine if user is spa_worker only (not lead/manager/owner)
+  const isSpaWorkerOnly = useMemo(() => {
+    const roles = authUser?.roles || [];
+    return roles.includes("spa_worker") && 
+           !roles.includes("owner") && 
+           !roles.includes("manager") &&
+           !roles.includes("spa_lead");
+  }, [authUser?.roles]);
+
+  // Should auto-filter to Spa business (lead OR worker)
+  const isSpaRoleOnly = isSpaLeadOnly || isSpaWorkerOnly;
+
+  // Fetch current worker ID for filtering (spa_worker role)
+  const { currentWorker } = useSpaWorkerAvailability();
+
   // Calculate date ranges based on view mode
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
   const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
@@ -106,12 +122,12 @@ export default function AdminSchedule() {
     return spaBusiness?.name || "Restoration Lounge";
   }, [businesses]);
 
-  // For spa_lead, force selection to Spa business
+  // For spa_lead or spa_worker, force selection to Spa business
   useEffect(() => {
-    if (isSpaLeadOnly && spaBusinessId && selectedBusiness === "all") {
+    if (isSpaRoleOnly && spaBusinessId && selectedBusiness === "all") {
       setSelectedBusiness(spaBusinessId);
     }
-  }, [isSpaLeadOnly, spaBusinessId, selectedBusiness]);
+  }, [isSpaRoleOnly, spaBusinessId, selectedBusiness]);
 
   // Fetch availability overrides for visual indicators
   const { data: availabilityOverrides, refetch: refetchOverrides } = useAvailabilityOverrides(
@@ -134,8 +150,15 @@ export default function AdminSchedule() {
 
   const filteredBookings = useMemo(() => {
     // Hide denied and cancelled bookings to keep the calendar uncluttered.
-    return (bookings || []).filter((b: any) => b?.status !== "denied" && b?.status !== "cancelled");
-  }, [bookings]);
+    let filtered = (bookings || []).filter((b: any) => b?.status !== "denied" && b?.status !== "cancelled");
+    
+    // If spa_worker, only show their assigned bookings
+    if (isSpaWorkerOnly && currentWorker?.id) {
+      filtered = filtered.filter((b: any) => b.spa_worker_id === currentWorker.id);
+    }
+    
+    return filtered;
+  }, [bookings, isSpaWorkerOnly, currentWorker?.id]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -241,8 +264,8 @@ export default function AdminSchedule() {
                 </Button>
               </div>
 
-              {/* Business Filter - Hidden for spa_lead only users */}
-              {!isSpaLeadOnly && (
+              {/* Business Filter - Hidden for spa_lead and spa_worker only users */}
+              {!isSpaRoleOnly && (
                 <Select value={selectedBusiness} onValueChange={setSelectedBusiness}>
                   <SelectTrigger className="w-[160px] bg-card border-border text-foreground">
                     <SelectValue placeholder="All Businesses" />

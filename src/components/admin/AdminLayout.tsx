@@ -89,15 +89,15 @@ const navSections: NavSection[] = [
   },
   {
     label: "Booking Operations",
-    // spa_worker should NOT see this section - they only see "My Spa"
-    visibleToRoles: ["owner", "manager", "spa_lead", "coworking_manager", "fitness_lead", "event_coordinator", "front_desk"],
+    // spa_worker can now see Schedule, Approvals, Blackouts (filtered to their own data)
+    visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "event_coordinator", "front_desk"],
     items: [
-      { title: "Schedule", href: "/admin/schedule", icon: CalendarDays },
-      { title: "Approvals", href: "/admin/approvals", icon: ClipboardList },
+      { title: "Schedule", href: "/admin/schedule", icon: CalendarDays, visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "event_coordinator", "front_desk"] },
+      { title: "Approvals", href: "/admin/approvals", icon: ClipboardList, visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "event_coordinator", "front_desk"] },
       { title: "Resources", href: "/admin/resources", icon: Box, visibleToRoles: ["owner", "manager"] },
       { title: "Packages", href: "/admin/packages", icon: Package, visibleToRoles: ["owner", "manager"] },
       { title: "Pricing Rules", href: "/admin/pricing-rules", icon: DollarSign, visibleToRoles: ["owner", "manager"] },
-      { title: "Blackouts", href: "/admin/blackouts", icon: CalendarX },
+      { title: "Blackouts", href: "/admin/blackouts", icon: CalendarX, visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "event_coordinator", "front_desk"] },
       { title: "Documents", href: "/admin/documents", icon: FileText, visibleToRoles: ["owner", "manager"] },
       { title: "Reviews", href: "/admin/reviews", icon: Star, visibleToRoles: ["owner", "manager"] },
       { title: "Leads & Waitlists", href: "/admin/leads-waitlists", icon: Users, visibleToRoles: ["owner", "manager"] },

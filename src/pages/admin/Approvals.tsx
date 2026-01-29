@@ -4,6 +4,7 @@ import { AdminLayout } from "@/components/admin";
 import { RescheduleModal } from "@/components/admin/RescheduleModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateBookingStatus } from "@/hooks/useBookings";
+import { useSpaWorkerAvailability } from "@/hooks/useSpaWorkerAvailability";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,13 +79,28 @@ export default function AdminApprovals() {
            !roles.includes("manager");
   }, [authUser?.roles]);
 
-  // Filter business unit tabs for spa_lead users
+  // Determine if user is spa_worker only (not lead/manager/owner)
+  const isSpaWorkerOnly = useMemo(() => {
+    const roles = authUser?.roles || [];
+    return roles.includes("spa_worker") && 
+           !roles.includes("owner") && 
+           !roles.includes("manager") &&
+           !roles.includes("spa_lead");
+  }, [authUser?.roles]);
+
+  // Should auto-filter to Spa business (lead OR worker)
+  const isSpaRoleOnly = isSpaLeadOnly || isSpaWorkerOnly;
+
+  // Fetch current worker ID for filtering (spa_worker role)
+  const { currentWorker } = useSpaWorkerAvailability();
+
+  // Filter business unit tabs for spa_lead and spa_worker users
   const visibleBusinessTabs = useMemo(() => {
-    if (isSpaLeadOnly) {
+    if (isSpaRoleOnly) {
       return BUSINESS_UNIT_TABS.filter(t => t.value === "restoration");
     }
     return BUSINESS_UNIT_TABS;
-  }, [isSpaLeadOnly]);
+  }, [isSpaRoleOnly]);
   // IMPORTANT: Dashboard "Pending Approvals" uses bookings.status='pending'.
   // Keep this page on the same source of truth to prevent count/list mismatches.
   const {
@@ -306,8 +322,8 @@ export default function AdminApprovals() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
-  const [businessUnit, setBusinessUnit] = useState<BusinessUnit>(isSpaLeadOnly ? "restoration" : "all");
-  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied" | "rescheduled">(isSpaLeadOnly ? "confirmed" : "pending");
+  const [businessUnit, setBusinessUnit] = useState<BusinessUnit>(isSpaRoleOnly ? "restoration" : "all");
+  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied" | "rescheduled">(isSpaRoleOnly ? "confirmed" : "pending");
   const [viewDenied, setViewDenied] = useState<any>(null);
   const [selectedLease, setSelectedLease] = useState<any>(null);
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
@@ -360,24 +376,36 @@ export default function AdminApprovals() {
   }, [deniedBookings, businessUnit]);
 
   const filteredConfirmed = useMemo(() => {
-    const bookingItems: ApprovalItem[] = (confirmedBookings || [])
-      .filter((b: any) => matchesUnit(b, businessUnit))
-      .map((b: any) => ({ kind: "booking", booking: b }));
+    let items = (confirmedBookings || [])
+      .filter((b: any) => matchesUnit(b, businessUnit));
+    
+    // Spa workers only see their own bookings
+    if (isSpaWorkerOnly && currentWorker?.id) {
+      items = items.filter((b: any) => b.spa_worker_id === currentWorker.id);
+    }
+    
+    const bookingItems: ApprovalItem[] = items.map((b: any) => ({ kind: "booking", booking: b }));
 
     const shouldIncludeHiveLease = businessUnit === "all" || businessUnit === "hive";
-    const leaseItems: ApprovalItem[] = shouldIncludeHiveLease
+    const leaseItems: ApprovalItem[] = shouldIncludeHiveLease && !isSpaWorkerOnly
       ? (confirmedLeaseRequests || []).map((i: any) => ({ kind: "hive_lease", inquiry: i }))
       : [];
 
     return [...bookingItems, ...leaseItems];
-  }, [confirmedBookings, confirmedLeaseRequests, businessUnit]);
+  }, [confirmedBookings, confirmedLeaseRequests, businessUnit, isSpaWorkerOnly, currentWorker?.id]);
 
   // NEW: Filtered rescheduled bookings (Spa only)
   const filteredRescheduled = useMemo(() => {
-    return (rescheduledBookings || [])
-      .filter((b: any) => matchesUnit(b, businessUnit))
-      .map((b: any) => ({ kind: "booking" as const, booking: b }));
-  }, [rescheduledBookings, businessUnit]);
+    let items = (rescheduledBookings || [])
+      .filter((b: any) => matchesUnit(b, businessUnit));
+    
+    // Spa workers only see their own bookings
+    if (isSpaWorkerOnly && currentWorker?.id) {
+      items = items.filter((b: any) => b.spa_worker_id === currentWorker.id);
+    }
+    
+    return items.map((b: any) => ({ kind: "booking" as const, booking: b }));
+  }, [rescheduledBookings, businessUnit, isSpaWorkerOnly, currentWorker?.id]);
 
   // Helper to get reschedule request details for a booking
   const getRescheduleRequest = (bookingId: string) => {
@@ -449,8 +477,8 @@ export default function AdminApprovals() {
           <p className="text-zinc-300">Review pending or requested bookings by business unit</p>
         </div>
 
-        {/* Business Unit Tabs - Hidden for spa_lead only users */}
-        {!isSpaLeadOnly && (
+        {/* Business Unit Tabs - Hidden for spa_lead and spa_worker only users */}
+        {!isSpaRoleOnly && (
           <Tabs value={businessUnit} onValueChange={(v) => setBusinessUnit(v as BusinessUnit)}>
             <TabsList className="w-full justify-start flex-wrap h-auto">
               {visibleBusinessTabs.map((t) => (
