@@ -82,12 +82,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Worker updated, now assigning role...");
 
-    // 4. Insert spa_worker role into user_roles
+    // 4. Insert spa_worker role into user_roles (include department to match 3-column constraint)
     const { error: roleError } = await supabase
       .from("user_roles")
       .insert({
         user_id: user_id,
         role: "spa_worker",
+        department: null,
       });
 
     if (roleError) {
