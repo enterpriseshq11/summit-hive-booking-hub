@@ -1,190 +1,227 @@
 
-
-# Plan: Spa Worker Dashboard - Match Lindsey's View
+# Plan: Dynamic Worker Booking Pages with Service Management
 
 ## Overview
 
-Give spa workers the same admin navigation and dashboard experience as Lindsey (spa_lead), minus the Workers management tab. Workers will see their own calendar, their own bookings in Approvals, and manage their own blackouts.
+This plan enables therapists to appear in the booking dropdown and have their own dedicated booking pages like Lindsey's. Workers will manage their services (massage types, pricing, descriptions) from their admin dashboard, and the system will auto-generate a public booking page matching Lindsey's design.
+
+---
 
 ## Current State
 
-**Lindsey (spa_lead) sees:**
-- **Booking Operations**: Schedule, Approvals, Blackouts
-- **My Spa**: My Schedule, Workers
-
-**Spa workers currently see:**
-- **My Spa**: My Schedule only
+1. **Dropdown**: `TherapistDropdown.tsx` already pulls from `useActiveSpaWorkers()` and routes to `/book-spa?therapist={id}`
+2. **Worker visibility**: Only workers with `onboarding_complete=true` appear in the dropdown
+3. **Missing**: No `/book-spa` page exists, no worker services table, no service management UI
 
 ## Target State
 
-**Spa workers will see:**
-- **Booking Operations**: Schedule, Approvals, Blackouts
-- **My Spa**: My Schedule only (no Workers tab)
-
-All views will be filtered to show only the worker's own data.
+1. **Database**: New `spa_worker_services` table to store each worker's offered services and pricing
+2. **Admin UI**: "My Services" section in worker dashboard to add/edit services
+3. **Public Page**: Dynamic `/book-with/:workerSlug` page matching Lindsey's design
+4. **Dropdown**: Routes updated to use worker slug for SEO-friendly URLs
 
 ---
 
 ## Technical Implementation
 
-### Step 1: Update AdminLayout.tsx Navigation
+### Step 1: Database Migration
 
-Modify the navigation configuration to include `spa_worker` in the Booking Operations section, but restrict them to only Schedule, Approvals, and Blackouts:
+Create `spa_worker_services` table to store worker-specific services:
+
+```sql
+CREATE TABLE public.spa_worker_services (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  worker_id uuid NOT NULL REFERENCES spa_workers(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  description text,
+  duration_mins integer NOT NULL,
+  price numeric(10,2) NOT NULL,
+  promo_price numeric(10,2),
+  promo_ends_at timestamptz,
+  is_free boolean DEFAULT false,
+  is_active boolean DEFAULT true,
+  sort_order integer DEFAULT 0,
+  icon_name text DEFAULT 'heart',
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE spa_worker_services ENABLE ROW LEVEL SECURITY;
+
+-- Workers can manage their own services
+CREATE POLICY "Workers can manage own services"
+ON spa_worker_services FOR ALL TO authenticated
+USING (
+  worker_id IN (
+    SELECT id FROM spa_workers WHERE user_id = auth.uid()
+  )
+);
+
+-- Public can read active services for bookable workers
+CREATE POLICY "Public can read active services"
+ON spa_worker_services FOR SELECT TO anon, authenticated
+USING (
+  is_active = true AND
+  worker_id IN (
+    SELECT id FROM spa_workers 
+    WHERE is_active = true 
+    AND onboarding_complete = true 
+    AND deleted_at IS NULL
+  )
+);
+```
+
+Also add a `slug` column to `spa_workers` for SEO-friendly URLs:
+
+```sql
+ALTER TABLE spa_workers 
+ADD COLUMN slug text UNIQUE;
+
+-- Backfill slugs from display_name (lowercase, hyphenated)
+UPDATE spa_workers 
+SET slug = lower(regexp_replace(display_name, '[^a-zA-Z0-9]+', '-', 'g'))
+WHERE slug IS NULL;
+```
+
+### Step 2: Create Hooks
+
+**New file**: `src/hooks/useSpaWorkerServices.ts`
 
 ```typescript
-// Line 91-105: Add spa_worker to Booking Operations
-{
-  label: "Booking Operations",
-  visibleToRoles: ["owner", "manager", "spa_lead", "spa_worker", ...],
-  items: [
-    { title: "Schedule", href: "/admin/schedule", icon: CalendarDays },
-    { title: "Approvals", href: "/admin/approvals", icon: ClipboardList },
-    // Resources, Packages, etc. remain owner/manager only
-    { title: "Blackouts", href: "/admin/blackouts", icon: CalendarX },
-    // Other items filtered by visibleToRoles
-  ],
+// CRUD operations for spa_worker_services
+// - useWorkerServices(workerId) - fetch services for a worker
+// - useMyServices() - fetch current logged-in worker's services
+// - useCreateService() - add new service
+// - useUpdateService() - edit service
+// - useDeleteService() - remove service
+// - useSpaWorkerBySlug(slug) - fetch worker by URL slug
+```
+
+### Step 3: Admin UI - "My Services" Tab
+
+**New file**: `src/components/admin/SpaWorkerServicesManager.tsx`
+
+Add a new section/tab in the worker's admin dashboard (ProviderSchedule.tsx) that allows them to:
+
+- View list of their services in a table/card format
+- Add new service with form:
+  - Service Name (e.g., "Swedish Massage")
+  - Description (short text)
+  - Duration (dropdown: 30, 45, 60, 90, 120 mins)
+  - Price ($)
+  - Optional: Promo Price + End Date
+  - Icon (dropdown of available icons)
+- Edit existing services inline
+- Toggle active/inactive
+- Reorder via drag or sort_order
+
+**UI Layout in ProviderSchedule.tsx**:
+```text
+TABS:
+[Hours] [Time Off] [Appointments] [My Services] [Settings]
+
+MY SERVICES TAB:
++------------------------+
+| + Add Service          |
++------------------------+
+| Swedish Massage        | 30 min | $45 | Active | [Edit] [Delete]
+| Deep Tissue            | 60 min | $80 | Active | [Edit] [Delete]
+| ... 
+```
+
+### Step 4: Dynamic Public Booking Page
+
+**New file**: `src/pages/BookWithWorker.tsx`
+
+Create a page at `/book-with/:slug` that:
+
+1. Fetches worker by slug using `useSpaWorkerBySlug(slug)`
+2. Fetches worker's services using `useWorkerServices(workerId)`
+3. Renders the same layout as `BookWithLindsey.tsx`:
+   - Hero with "Book With {DisplayName}"
+   - Subtitle: "Licensed Massage Therapist" (or custom from worker profile)
+   - Same honeycomb background pattern
+   - Dynamic service list pulled from database
+   - Booking calendar (reuse `LindseyAvailabilityCalendar` with worker filtering)
+4. Falls back to 404 if worker not found or inactive
+
+**Route updates in App.tsx**:
+```typescript
+<Route path="/book-with/:slug" element={<BookWithWorker />} />
+```
+
+### Step 5: Update TherapistDropdown Routes
+
+Change the routing from query param to slug-based:
+
+```typescript
+// Before
+route: `/book-spa?therapist=${w.id}#availability-calendar`
+
+// After
+route: `/book-with/${w.slug || w.id}#availability-calendar`
+```
+
+### Step 6: Extend LindseyAvailabilityCalendar for Worker Support
+
+Modify `LindseyAvailabilityCalendar.tsx` to accept an optional `workerId` prop:
+
+```typescript
+interface LindseyAvailabilityCalendarProps {
+  workerId?: string; // If provided, show this worker's availability/services
+  onBookingComplete?: () => void;
 }
 ```
 
-**Specific item visibility:**
-- Schedule: Add `spa_worker` 
-- Approvals: Add `spa_worker`
-- Blackouts: Add `spa_worker`
-- Resources, Packages, Pricing Rules, Documents, Reviews, Leads & Waitlists: Remain owner/manager only
+When `workerId` is passed:
+- Fetch services from `spa_worker_services` instead of hardcoded `SERVICES`
+- Check availability against that worker's schedule (`spa_worker_availability`)
+- Route checkout to the appropriate edge function with `spa_worker_id`
 
-### Step 2: Update Schedule.tsx for Worker Filtering
+### Step 7: Update Booking Flow
 
-Add logic to detect if the user is a `spa_worker` and filter bookings to only show their own:
-
-```typescript
-// Add helper similar to isSpaLeadOnly
-const isSpaWorkerOnly = useMemo(() => {
-  const roles = authUser?.roles || [];
-  return roles.includes("spa_worker") && 
-    !roles.includes("owner") && 
-    !roles.includes("manager") &&
-    !roles.includes("spa_lead");
-}, [authUser?.roles]);
-
-// Fetch current worker ID from spa_workers table
-const { currentWorker } = useSpaWorkerAvailability();
-
-// Filter bookings by spa_worker_id when in worker view
-const filteredBookings = useMemo(() => {
-  let filtered = (bookings || []).filter((b) => 
-    b?.status !== "denied" && b?.status !== "cancelled"
-  );
-  
-  // If spa_worker, only show their assigned bookings
-  if (isSpaWorkerOnly && currentWorker?.id) {
-    filtered = filtered.filter((b) => b.spa_worker_id === currentWorker.id);
-  }
-  
-  return filtered;
-}, [bookings, isSpaWorkerOnly, currentWorker?.id]);
-```
-
-**Additional changes:**
-- Hide business filter dropdown for `spa_worker` (like we do for `spa_lead`)
-- Auto-select Spa business
-- Remove day-click availability management (they use My Schedule for that)
-
-### Step 3: Update Approvals.tsx for Worker Filtering
-
-Similar changes to filter bookings by the worker's `spa_worker_id`:
-
-```typescript
-// Add spa_worker detection
-const isSpaWorkerOnly = useMemo(() => {
-  const roles = authUser?.roles || [];
-  return roles.includes("spa_worker") && 
-    !roles.includes("owner") && 
-    !roles.includes("manager") &&
-    !roles.includes("spa_lead");
-}, [authUser?.roles]);
-
-// Fetch worker ID
-const { currentWorker } = useSpaWorkerAvailability();
-
-// Filter confirmed bookings to only show worker's own
-const filteredConfirmed = useMemo(() => {
-  let items = (confirmedBookings || [])
-    .filter((b) => matchesUnit(b, businessUnit));
-    
-  // Spa workers only see their own bookings
-  if (isSpaWorkerOnly && currentWorker?.id) {
-    items = items.filter((b) => b.spa_worker_id === currentWorker.id);
-  }
-  
-  return items.map((b) => ({ kind: "booking", booking: b }));
-}, [confirmedBookings, businessUnit, isSpaWorkerOnly, currentWorker?.id]);
-```
-
-**Additional changes:**
-- Hide business unit tabs for `spa_worker` (like `spa_lead`)
-- Force `restoration` filter
-- Show only Confirmed + Rescheduled tabs (remove Pending/Denied)
-
-### Step 4: Update Blackouts.tsx for Worker Filtering
-
-Workers should only see and manage their own blackout dates:
-
-```typescript
-// Add spa_worker detection
-const isSpaWorkerOnly = useMemo(() => {
-  const roles = authUser?.roles || [];
-  return roles.includes("spa_worker") && 
-    !roles.includes("owner") && 
-    !roles.includes("manager") &&
-    !roles.includes("spa_lead");
-}, [authUser?.roles]);
-
-// When creating blackouts, associate with worker's spa_worker_id
-// When listing blackouts, filter to only show worker's own
-```
+Ensure bookings created through worker pages include `spa_worker_id`:
+- Update `lindsey-checkout` edge function or create a generic `spa-checkout` that accepts `worker_id`
+- Store `spa_worker_id` on the booking record
 
 ---
 
-## Summary of Files to Modify
+## Files Summary
 
-| File | Changes |
-|------|---------|
-| `src/components/admin/AdminLayout.tsx` | Add `spa_worker` to Booking Operations visibility for Schedule, Approvals, Blackouts |
-| `src/pages/admin/Schedule.tsx` | Add worker detection + booking filter by `spa_worker_id`, hide business dropdown |
-| `src/pages/admin/Approvals.tsx` | Add worker detection + booking filter by `spa_worker_id`, hide business tabs |
-| `src/pages/admin/Blackouts.tsx` | Add worker detection + filter blackouts to worker's own |
+| File | Action |
+|------|--------|
+| New SQL Migration | Create `spa_worker_services` table, add `slug` to `spa_workers` |
+| `src/hooks/useSpaWorkerServices.ts` | New hook for service CRUD |
+| `src/components/admin/SpaWorkerServicesManager.tsx` | New admin UI for managing services |
+| `src/pages/admin/ProviderSchedule.tsx` | Add "My Services" tab |
+| `src/pages/BookWithWorker.tsx` | New dynamic booking page |
+| `src/App.tsx` | Add route `/book-with/:slug` |
+| `src/components/booking/TherapistDropdown.tsx` | Update route to use slug |
+| `src/components/booking/LindseyAvailabilityCalendar.tsx` | Add worker support |
+| `supabase/functions/lindsey-checkout/index.ts` | Add `spa_worker_id` support |
 
 ---
 
-## User Experience After Implementation
+## User Flow After Implementation
 
-A spa worker logs in and sees:
+**Admin (Worker)**:
+1. Log in as worker
+2. Navigate to "My Schedule" → "My Services" tab
+3. Click "Add Service"
+4. Enter: Swedish Massage, 30 min, $45, description
+5. Save → Service now visible in their booking dropdown
 
-**Sidebar Navigation:**
-```text
-BOOKING OPERATIONS
-  📅 Schedule
-  📋 Approvals  
-  🗓️ Blackouts
+**Customer**:
+1. Visit /spa → Click "Book Massage"
+2. Dropdown shows: Lindsey, [New Worker Name]
+3. Click worker name → Redirected to `/book-with/worker-name`
+4. Page shows: "Book With {Name}", their services, their calendar
+5. Complete booking → Booking assigned to that worker
 
-MY SPA
-  📅 My Schedule
-```
+---
 
-**Schedule Page:**
-- Shows only their assigned bookings on the calendar
-- No business filter dropdown
-- Auto-filtered to Restoration Lounge
+## Notes
 
-**Approvals Page:**
-- Shows Confirmed + Rescheduled tabs only
-- Lists only bookings assigned to them
-- Can initiate reschedule for their own confirmed bookings
-
-**Blackouts Page:**
-- Shows only their blackout dates
-- Can add/remove their own time off
-
-**My Schedule Page:**
-- Remains the same (manage hours, time off, appointments, settings)
-
+- Lindsey's existing hardcoded page at `/book-with-lindsey` can remain for backwards compatibility, or be migrated to the dynamic system
+- Each worker's subtitle/title can be stored in `spa_workers` table (optional enhancement: add `title` column)
+- Icons can be stored as lucide icon names and mapped in the component
