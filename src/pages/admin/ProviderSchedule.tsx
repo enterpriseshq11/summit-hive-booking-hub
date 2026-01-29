@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,12 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Clock, Calendar as CalendarIcon, Plus, Trash2, Save, User, AlertCircle, 
-  Settings, RefreshCw, Mail, Phone, X, CheckCircle
+  Settings, RefreshCw, Mail, Phone, X, CheckCircle, Sparkles
 } from 'lucide-react';
 import { useProviderScheduleManagement } from '@/hooks/useProviderScheduleManagement';
 import { useBookings, useUpdateBookingStatus } from '@/hooks/useBookings';
+import { useSpaWorkerAvailability } from '@/hooks/useSpaWorkerAvailability';
+import { useAuth } from '@/contexts/AuthContext';
+import { SpaWorkerOnboardingWizard } from '@/components/admin/SpaWorkerOnboardingWizard';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -53,6 +57,27 @@ const BUFFER_OPTIONS = [
 ];
 
 export default function ProviderSchedule() {
+  const { authUser } = useAuth();
+  const isSpaWorkerOnly = authUser?.roles?.includes("spa_worker") && 
+    !authUser?.roles?.some(r => ["owner", "manager", "spa_lead"].includes(r));
+  
+  // Check if this is a spa worker who needs onboarding
+  const { 
+    currentWorker, 
+    needsOnboarding, 
+    isLoading: isLoadingWorkerData,
+    availability: workerAvailability,
+  } = useSpaWorkerAvailability();
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Show onboarding wizard for new spa workers
+  useEffect(() => {
+    if (isSpaWorkerOnly && needsOnboarding && !isLoadingWorkerData) {
+      setShowOnboarding(true);
+    }
+  }, [isSpaWorkerOnly, needsOnboarding, isLoadingWorkerData]);
+
   const { 
     schedule, 
     blackouts, 
@@ -308,6 +333,32 @@ export default function ProviderSchedule() {
 
   return (
     <AdminLayout>
+      {/* Onboarding Wizard for new spa workers */}
+      {isSpaWorkerOnly && (
+        <SpaWorkerOnboardingWizard
+          open={showOnboarding}
+          onComplete={() => setShowOnboarding(false)}
+          workerName={currentWorker?.first_name}
+        />
+      )}
+
+      {/* Banner for workers who haven't set availability yet */}
+      {isSpaWorkerOnly && needsOnboarding && !showOnboarding && (
+        <Alert className="mb-6 bg-amber-500/10 border-amber-500/30">
+          <AlertCircle className="h-4 w-4 text-amber-400" />
+          <AlertDescription className="text-amber-200 ml-2">
+            <strong>Set your availability to start receiving bookings.</strong>{" "}
+            <Button
+              variant="link"
+              className="text-amber-400 p-0 h-auto"
+              onClick={() => setShowOnboarding(true)}
+            >
+              Complete setup now
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">My Schedule</h1>
         <p className="text-zinc-400">Manage your availability, time off, and view upcoming appointments</p>
