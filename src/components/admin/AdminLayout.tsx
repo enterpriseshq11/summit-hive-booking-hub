@@ -20,7 +20,6 @@ import {
   Wallet,
   Mic,
   CalendarDays,
-  CalendarRange,
   ClipboardList,
   Package,
   CalendarX,
@@ -111,7 +110,6 @@ const navSections: NavSection[] = [
       { title: "My Schedule", href: "/admin/my-schedule", icon: CalendarDays },
       // Workers tab is Lindsey-only (spa_lead) + admin roles - NOT visible to spa_worker
       { title: "Workers", href: "/admin/spa-workers", icon: Users, visibleToRoles: ["owner", "manager", "spa_lead"] },
-      { title: "Worker Calendars", href: "/admin/worker-calendars", icon: CalendarRange, visibleToRoles: ["owner", "manager", "spa_lead"] },
     ],
   },
   {
