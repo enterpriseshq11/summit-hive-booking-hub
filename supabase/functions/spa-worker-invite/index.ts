@@ -124,6 +124,12 @@ const handler = async (req: Request): Promise<Response> => {
                         </tr>
                       </table>
                       
+                      <!-- Fallback Link -->
+                      <p style="margin: 16px 0 0 0; font-size: 14px; color: #666666;">If the button doesn't work, copy and paste this link into your browser:</p>
+                      <p style="margin: 8px 0 0 0; font-size: 14px; word-break: break-all;">
+                        <a href="${signupUrl}" target="_blank" rel="noopener noreferrer" style="color: #d4af37; text-decoration: underline;">${signupUrl}</a>
+                      </p>
+                      
                       <p style="margin: 24px 0 0 0; font-size: 14px; color: #666666;">
                         This link will expire in 48 hours. If it expires, please contact your manager for a new invite.
                       </p>

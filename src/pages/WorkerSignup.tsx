@@ -99,34 +99,62 @@ export default function WorkerSignupPage() {
     setIsSubmitting(true);
 
     try {
-      // Call the edge function to create the user account (auto-confirms email)
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/complete-worker-signup`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      // 1. Create auth user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: worker.email,
+        password,
+        options: {
+          data: {
+            first_name: worker.first_name,
+            last_name: worker.last_name,
           },
-          body: JSON.stringify({
-            token,
-            password,
-          }),
-        }
-      );
+        },
+      });
 
-      const result = await response.json();
+      if (signUpError) throw signUpError;
+      if (!authData.user) throw new Error("Failed to create account");
 
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to create account");
+      // 2. Update spa_worker record with user_id and mark invite as accepted
+      const { error: updateError } = await supabase
+        .from("spa_workers")
+        .update({
+          user_id: authData.user.id,
+          invite_accepted_at: new Date().toISOString(),
+          invite_token: null, // Clear the token
+        })
+        .eq("id", worker.id);
+
+      if (updateError) throw updateError;
+
+      // 3. Assign spa_worker role
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert({
+          user_id: authData.user.id,
+          role: "spa_worker" as any,
+        });
+
+      if (roleError) {
+        console.error("Failed to assign role:", roleError);
+        // Don't throw - account was created, role can be assigned manually
       }
 
-      // If the account already existed, prompt to sign in
-      if (result.existingAccount) {
-        toast.info("Account already exists. Please sign in.");
-        navigate("/login?redirect=%2Fadmin%2Fmy-schedule");
-        return;
+      // 4. Create profile
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({
+          id: authData.user.id,
+          first_name: worker.first_name,
+          last_name: worker.last_name,
+          email: worker.email,
+        });
+
+      if (profileError) {
+        console.error("Failed to create profile:", profileError);
       }
+
+      // Sign out immediately so user must explicitly sign in
+      await supabase.auth.signOut();
 
       toast.success("Account created successfully!");
       
@@ -134,8 +162,8 @@ export default function WorkerSignupPage() {
       setInviteStatus("success");
     } catch (err: any) {
       console.error("Signup error:", err);
-      if (err.message?.includes("already registered") || err.message?.includes("already exists")) {
-        setError("An account with this email already exists. Please sign in instead.");
+      if (err.message?.includes("already registered")) {
+        setError("An account with this email already exists. Please contact your manager.");
       } else {
         setError(err.message || "Failed to create account. Please try again.");
       }
