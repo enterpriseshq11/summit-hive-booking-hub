@@ -152,7 +152,7 @@ serve(async (req) => {
       });
     }
 
-    // Get existing bookings for the date range
+    // Get existing bookings for the date range - only active/confirmed bookings block slots
     const { data: existingBookings } = await supabase
       .from("bookings")
       .select(`
@@ -160,13 +160,14 @@ serve(async (req) => {
         start_datetime,
         end_datetime,
         bookable_type_id,
+        status,
         booking_resources (
           resource_id
         )
       `)
       .gte("start_datetime", `${queryDate}T00:00:00`)
       .lte("start_datetime", `${endQueryDate}T23:59:59`)
-      .not("status", "in", '("cancelled","no_show")');
+      .in("status", ["pending", "confirmed", "deposit_paid", "in_progress"]);
 
     // Get active slot holds
     const { data: activeHolds } = await supabase
