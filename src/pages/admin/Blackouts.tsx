@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/admin";
 import { useBlackouts } from "@/hooks/useBlackouts";
 import { useResources } from "@/hooks/useResources";
 import { useBusinesses } from "@/hooks/useBusinesses";
+import { useSpaWorkerAvailability } from "@/hooks/useSpaWorkerAvailability";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,9 +28,35 @@ export default function AdminBlackouts() {
   const { data: blackouts, isLoading } = useBlackouts();
   const { data: resources } = useResources();
   const { data: businesses } = useBusinesses();
+  const { currentWorker } = useSpaWorkerAvailability();
   const [showDialog, setShowDialog] = useState(false);
   const [editingBlackout, setEditingBlackout] = useState<BlackoutDate | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Determine if user is spa_worker only (not lead/manager/owner)
+  const isSpaWorkerOnly = useMemo(() => {
+    const roles = authUser?.roles || [];
+    return roles.includes("spa_worker") && 
+           !roles.includes("owner") && 
+           !roles.includes("manager") &&
+           !roles.includes("spa_lead");
+  }, [authUser?.roles]);
+
+  // Determine if user is spa-only (lead OR worker)
+  const isSpaLeadOnly = useMemo(() => {
+    const roles = authUser?.roles || [];
+    return roles.includes("spa_lead") && 
+           !roles.includes("owner") && 
+           !roles.includes("manager");
+  }, [authUser?.roles]);
+
+  const isSpaRoleOnly = isSpaLeadOnly || isSpaWorkerOnly;
+
+  // Get Spa business ID for auto-filtering
+  const spaBusinessId = useMemo(() => {
+    const spaBusiness = businesses?.find(b => b.type === "spa");
+    return spaBusiness?.id;
+  }, [businesses]);
 
   const [form, setForm] = useState({
     business_id: "",
@@ -161,8 +188,29 @@ export default function AdminBlackouts() {
   }
 
   const now = new Date();
-  const activeBlackouts = blackouts?.filter((b) => new Date(b.end_datetime) > now) || [];
-  const pastBlackouts = blackouts?.filter((b) => new Date(b.end_datetime) <= now) || [];
+  
+  // Filter blackouts based on role
+  const filteredBlackouts = useMemo(() => {
+    let items = blackouts || [];
+    
+    // Spa workers only see their own blackouts (created_by matches their user ID)
+    // OR blackouts for the spa business that don't have a specific creator
+    if (isSpaWorkerOnly && authUser?.id) {
+      items = items.filter((b) => 
+        b.created_by === authUser.id || 
+        (b.business_id === spaBusinessId && !b.created_by)
+      );
+    }
+    // Spa lead sees all spa blackouts
+    else if (isSpaLeadOnly && spaBusinessId) {
+      items = items.filter((b) => b.business_id === spaBusinessId || !b.business_id);
+    }
+    
+    return items;
+  }, [blackouts, isSpaWorkerOnly, isSpaLeadOnly, authUser?.id, spaBusinessId]);
+  
+  const activeBlackouts = filteredBlackouts.filter((b) => new Date(b.end_datetime) > now) || [];
+  const pastBlackouts = filteredBlackouts.filter((b) => new Date(b.end_datetime) <= now) || [];
 
   return (
     <AdminLayout>
@@ -180,7 +228,7 @@ export default function AdminBlackouts() {
           <Button onClick={() => { 
             setEditingBlackout(null); 
             setForm({ 
-              business_id: "", 
+              business_id: isSpaRoleOnly && spaBusinessId ? spaBusinessId : "", 
               resource_id: "", 
               start_datetime: "", 
               end_datetime: "", 
@@ -190,7 +238,7 @@ export default function AdminBlackouts() {
             setShowDialog(true); 
           }}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Blackout
+            {isSpaWorkerOnly ? "Add Time Off" : "Add Blackout"}
           </Button>
         </div>
 
@@ -323,33 +371,43 @@ export default function AdminBlackouts() {
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingBlackout ? "Edit Blackout" : "Add Blackout"}</DialogTitle>
+              <DialogTitle>
+                {editingBlackout 
+                  ? (isSpaWorkerOnly ? "Edit Time Off" : "Edit Blackout") 
+                  : (isSpaWorkerOnly ? "Add Time Off" : "Add Blackout")}
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label>Business (leave empty for all)</Label>
-                <Select value={form.business_id || "all"} onValueChange={(v) => setForm({ ...form, business_id: v === "all" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="All businesses" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Businesses</SelectItem>
-                    {businesses?.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Resource (leave empty for all)</Label>
-                <Select value={form.resource_id || "all"} onValueChange={(v) => setForm({ ...form, resource_id: v === "all" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="All resources" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Resources</SelectItem>
-                    {resources?.map((r) => (
-                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Business selector - hidden for spa role users */}
+              {!isSpaRoleOnly && (
+                <div>
+                  <Label>Business (leave empty for all)</Label>
+                  <Select value={form.business_id || "all"} onValueChange={(v) => setForm({ ...form, business_id: v === "all" ? "" : v })}>
+                    <SelectTrigger><SelectValue placeholder="All businesses" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Businesses</SelectItem>
+                      {businesses?.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {/* Resource selector - hidden for spa workers */}
+              {!isSpaWorkerOnly && (
+                <div>
+                  <Label>Resource (leave empty for all)</Label>
+                  <Select value={form.resource_id || "all"} onValueChange={(v) => setForm({ ...form, resource_id: v === "all" ? "" : v })}>
+                    <SelectTrigger><SelectValue placeholder="All resources" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Resources</SelectItem>
+                      {resources?.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Start *</Label>
