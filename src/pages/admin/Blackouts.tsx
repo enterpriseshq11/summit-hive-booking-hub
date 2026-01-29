@@ -177,6 +177,29 @@ export default function AdminBlackouts() {
     return { label: "Hard Block", icon: Ban, variant: "destructive" as const };
   };
 
+  // NOTE: Must be called before any conditional returns to avoid hook order mismatches.
+  const filteredBlackouts = useMemo(() => {
+    let items = blackouts || [];
+
+    // Spa workers only see their own blackouts (created_by matches their user ID)
+    // OR blackouts for the spa business that don't have a specific creator
+    if (isSpaWorkerOnly && authUser?.id) {
+      items = items.filter(
+        (b) => b.created_by === authUser.id || (b.business_id === spaBusinessId && !b.created_by)
+      );
+    }
+    // Spa lead sees all spa blackouts
+    else if (isSpaLeadOnly && spaBusinessId) {
+      items = items.filter((b) => b.business_id === spaBusinessId || !b.business_id);
+    }
+
+    return items;
+  }, [blackouts, isSpaWorkerOnly, isSpaLeadOnly, authUser?.id, spaBusinessId]);
+
+  const now = new Date();
+  const activeBlackouts = filteredBlackouts.filter((b) => new Date(b.end_datetime) > now) || [];
+  const pastBlackouts = filteredBlackouts.filter((b) => new Date(b.end_datetime) <= now) || [];
+
   if (isLoading) {
     return (
       <AdminLayout>
@@ -186,31 +209,6 @@ export default function AdminBlackouts() {
       </AdminLayout>
     );
   }
-
-  const now = new Date();
-  
-  // Filter blackouts based on role
-  const filteredBlackouts = useMemo(() => {
-    let items = blackouts || [];
-    
-    // Spa workers only see their own blackouts (created_by matches their user ID)
-    // OR blackouts for the spa business that don't have a specific creator
-    if (isSpaWorkerOnly && authUser?.id) {
-      items = items.filter((b) => 
-        b.created_by === authUser.id || 
-        (b.business_id === spaBusinessId && !b.created_by)
-      );
-    }
-    // Spa lead sees all spa blackouts
-    else if (isSpaLeadOnly && spaBusinessId) {
-      items = items.filter((b) => b.business_id === spaBusinessId || !b.business_id);
-    }
-    
-    return items;
-  }, [blackouts, isSpaWorkerOnly, isSpaLeadOnly, authUser?.id, spaBusinessId]);
-  
-  const activeBlackouts = filteredBlackouts.filter((b) => new Date(b.end_datetime) > now) || [];
-  const pastBlackouts = filteredBlackouts.filter((b) => new Date(b.end_datetime) <= now) || [];
 
   return (
     <AdminLayout>
