@@ -36,6 +36,7 @@ import CareersSpa from "./pages/careers/CareersSpa";
 import CareersFitness from "./pages/careers/CareersFitness";
 import CareersContracting from "./pages/careers/CareersContracting";
 import WorkerSignup from "./pages/WorkerSignup";
+import AuthCallback from "./pages/AuthCallback";
 
 // Debug (public, never redirects)
 import AuthDebug from "./pages/__debug/AuthDebug";
@@ -139,6 +140,7 @@ function AppInner() {
         {/* Auth routes (no layout) */}
         <Route path="/login" element={<Login />} />
         <Route path="/worker-signup" element={<WorkerSignup />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* Unified Admin routes - all under /admin/* with staff protection */}
         <Route element={<ProtectedRoute requireStaff />}>
