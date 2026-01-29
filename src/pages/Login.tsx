@@ -151,11 +151,21 @@ export default function Login() {
 
       if (error) {
         trackEvent("signin_fail", { error: error.message });
-        toast({
-          title: "Sign in failed",
-          description: "Incorrect email, username, or password.",
-          variant: "destructive",
-        });
+        
+        // Check for email not confirmed error
+        if (error.message?.toLowerCase().includes("email not confirmed")) {
+          toast({
+            title: "Email not verified",
+            description: "Please check your email and click the verification link before signing in.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Sign in failed",
+            description: "Incorrect email, username, or password.",
+            variant: "destructive",
+          });
+        }
         setIsLoading(false);
       } else {
         trackEvent("signin_success");

@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
-type InviteStatus = "loading" | "valid" | "expired" | "invalid" | "already_used" | "success";
+type InviteStatus = "loading" | "valid" | "expired" | "invalid" | "already_used" | "verify_email" | "success";
 
 interface WorkerInvite {
   id: string;
@@ -99,7 +99,10 @@ export default function WorkerSignupPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. Create auth user
+      // Get current origin for email redirect
+      const redirectUrl = `${window.location.origin}/#/auth/callback`;
+
+      // 1. Create auth user WITH email confirmation required
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: worker.email,
         password,
@@ -108,6 +111,7 @@ export default function WorkerSignupPage() {
             first_name: worker.first_name,
             last_name: worker.last_name,
           },
+          emailRedirectTo: redirectUrl,
         },
       });
 
@@ -153,13 +157,13 @@ export default function WorkerSignupPage() {
         console.error("Failed to create profile:", profileError);
       }
 
-      // Sign out immediately so user must explicitly sign in
+      // Sign out immediately so user must verify email first
       await supabase.auth.signOut();
 
-      toast.success("Account created successfully!");
+      toast.success("Account created! Please check your email to verify.");
       
-      // Show success state with sign-in prompt
-      setInviteStatus("success");
+      // Show verify email state instead of success
+      setInviteStatus("verify_email");
     } catch (err: any) {
       console.error("Signup error:", err);
       if (err.message?.includes("already registered")) {
@@ -242,7 +246,91 @@ export default function WorkerSignupPage() {
     );
   }
 
-  // Success state - account created, prompt to sign in
+  // Verify email state - account created, must verify before signing in
+  if (inviteStatus === "verify_email") {
+    const handleResendVerification = async () => {
+      if (!worker?.email) return;
+      
+      setIsSubmitting(true);
+      try {
+        const { error } = await supabase.auth.resend({
+          type: "signup",
+          email: worker.email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/#/auth/callback`,
+          },
+        });
+        
+        if (error) {
+          toast.error("Failed to resend verification email");
+        } else {
+          toast.success("Verification email sent!");
+        }
+      } catch {
+        toast.error("Failed to resend verification email");
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-zinc-900 border-zinc-800">
+          <CardHeader className="text-center">
+            <div className="h-16 w-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
+              <svg className="h-8 w-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <CardTitle className="text-2xl text-white">Verify Your Email</CardTitle>
+            <CardDescription className="text-zinc-400 text-base mt-2">
+              We sent a verification email to:
+            </CardDescription>
+            <p className="text-white font-medium mt-1">{worker?.email}</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-zinc-800/50 rounded-lg p-4 text-center">
+              <p className="text-sm text-zinc-300">
+                Please check your inbox and click the verification link to activate your account.
+              </p>
+            </div>
+            
+            <div className="space-y-3 pt-2">
+              <Button 
+                variant="outline"
+                onClick={handleResendVerification}
+                disabled={isSubmitting}
+                className="w-full border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Resend Verification Email"
+                )}
+              </Button>
+              
+              <Button 
+                variant="ghost"
+                onClick={() => navigate("/login?redirect=%2Fadmin%2Fmy-schedule")} 
+                className="w-full text-zinc-400 hover:text-white"
+              >
+                Back to Sign In
+              </Button>
+            </div>
+            
+            <p className="text-xs text-zinc-500 text-center pt-2">
+              Can't find the email? Check your spam folder or contact your manager for help.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Success state - account created AND verified (after callback redirect)
   if (inviteStatus === "success") {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
