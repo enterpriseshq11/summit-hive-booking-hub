@@ -1,70 +1,127 @@
 
-Goal: Cancelled (and denied/no-show) appointments must stop blocking time slots everywhere. The “Booked” label in the public Lindsey calendar (and any other availability views) should immediately flip back to “Open” after cancellation, while still respecting hours, overrides, blackouts, and capacity.
 
-What’s happening now (based on your screenshot + backend data)
-- The Lindsey booking page is not using the shared availability engine; it uses `useLindseyAvailability`.
-- That hook currently fetches bookings with a “NOT IN” filter that is unreliable in our client query style, and it only excludes `cancelled` / `no_show` (it does not exclude `denied`).
-- In your example date (Jan 31, 2026), the backend has bookings at those times with statuses `cancelled` and `denied`, which should NOT block slots, but they are still being included in the “busy” list → UI shows “Booked”.
+# Fix: Worker Invite Creates Customer Instead of spa_worker
 
-Implementation approach
-A) Standardize which booking statuses “block” a timeslot
-- Create one shared list of blocking statuses (an allowlist) and use it everywhere availability is computed.
-- Blocking statuses should include the “active” pipeline states, and exclude anything that should free the slot:
-  - Block: `pending`, `pending_payment`, `pending_documents`, `approved`, `confirmed`, `in_progress`, `reschedule_requested`, `rescheduled`
-  - Do NOT block: `cancelled`, `denied`, `no_show`, `completed` (completed is historical)
+## Problem Summary
 
-B) Fix Lindsey public calendar (the screenshot issue)
-Files:
-- `src/hooks/useLindseyAvailability.ts`
-Changes:
-1) Replace the current `.not("status", "in", ...)` filter with an allowlist:
-   - Use `.in("status", BLOCKING_BOOKING_STATUSES)` so cancelled/denied/no_show never come back in the bookings query.
-2) Keep the rest of the logic intact (hours, blackout checks, slot-fit logic), so cancellation only removes the “busy” block.
+When a worker accepts an invite and creates their account, they are treated as a regular customer instead of a spa worker because:
 
-Expected result:
-- Those 10:30, 11:00, 1:00, 1:30, 2:00 slots that are only blocked by `cancelled`/`denied` records will become “Open” immediately after refetch.
+1. The client-side code cannot insert a row into `user_roles` (blocked by RLS policy - only owners can insert roles)
+2. The client-side code cannot update `spa_workers.user_id` (blocked by RLS policy - only admins can update)
+3. Without a role, the login routing treats them as a customer and sends them to "My Account"
 
-C) Fix provider availability (prevents “phantom busy” for staff assignment)
-Files:
-- `src/hooks/useProviders.ts` (function `useAvailableProviders`)
-Changes:
-1) Replace `.not("status", "in", ...)` with the same allowlist `.in("status", BLOCKING_BOOKING_STATUSES)`
-2) This ensures a cancelled/denied booking does not mark a provider as unavailable.
+## Solution
 
-D) Harden the global availability engine (applies to Spa/360/Voice Vault/etc.)
-Files:
-- `supabase/functions/check-availability/index.ts`
-Changes:
-1) Update the booking status filter to use the same allowlist (currently it only blocks 4 statuses, and it should block additional active states like `pending_payment`, `approved`, `reschedule_requested`, etc.).
-2) Improve the date overlap logic (recommended):
-   - Right now it filters by `start_datetime` within the range only.
-   - Safer: fetch any booking that overlaps the range:
-     - `start_datetime <= range_end` AND `end_datetime >= range_start`
-   - This prevents edge cases where a booking starts before the date boundary but overlaps into it.
+Move the role assignment and worker linking to a secure backend function that uses elevated (service role) privileges.
 
-E) Verification checklist (acceptance criteria)
-1) Create a booking at 2:00 PM.
-2) Cancel it (admin cancellation flow).
-3) Without refreshing the page:
-   - Lindsey public booking calendar shows 2:00 PM as Open again.
-   - Admin Schedule removes the event (already supported by realtime invalidation).
-4) Repeat the test on another business using the shared availability engine (e.g., Photo Booth / Voice Vault) to confirm:
-   - Cancelled booking disappears from “busy” and the time slot reopens.
-5) Confirm the slot still respects:
-   - day-level overrides
-   - blackouts
-   - staff hours
-   - buffer rules
+## Implementation Plan
 
-Notes / edge cases we will handle
-- “Denied” should not block time. We’ll ensure it’s excluded everywhere by using the allowlist.
-- Multiple cancelled duplicates at the same time will no longer matter because they won’t be returned by the availability queries.
-- This change does not relax business-hour rules; it only fixes which booking records are considered “busy”.
+### Step 1: Create Edge Function for Worker Account Activation
 
-Files to change
-- `src/hooks/useLindseyAvailability.ts`
-- `src/hooks/useProviders.ts`
-- `supabase/functions/check-availability/index.ts`
+Create a new edge function `activate-spa-worker` that:
+- Accepts the invite token and new user ID
+- Uses service role to bypass RLS
+- Links the user to their `spa_workers` record
+- Inserts the `spa_worker` role into `user_roles`
+- Marks the invite as accepted
 
-Out of scope (unless you want it next)
-- Converting Lindsey availability to use the unified availability engine with resources/capacity per room (right now Lindsey is “single calendar”; it doesn’t model two rooms as parallel capacity). If you want “one room booked but the other still open,” that’s a follow-up enhancement.
+### Step 2: Update WorkerSignup.tsx
+
+Replace the direct Supabase calls with a call to the new edge function:
+- After `supabase.auth.signUp()` succeeds, call `activate-spa-worker` edge function
+- The edge function handles all the privileged operations securely
+
+### Step 3: Add Fallback Database Trigger (Optional Safety Net)
+
+Create a database trigger on `spa_workers` that automatically:
+- When `user_id` changes from NULL to a value
+- Inserts a corresponding `spa_worker` role if one doesn't exist
+
+---
+
+## Technical Details
+
+### Edge Function: `activate-spa-worker`
+
+```text
+Location: supabase/functions/activate-spa-worker/index.ts
+
+Input:
+- invite_token: string
+- user_id: string (the auth.users.id of the new account)
+
+Actions (using service role):
+1. Fetch spa_worker record by invite_token
+2. Verify invite is valid (not expired, not already accepted)
+3. Update spa_workers: set user_id, invite_accepted_at, clear invite_token
+4. Insert into user_roles: { user_id, role: 'spa_worker' }
+5. Upsert profile if needed
+6. Return success
+
+Security:
+- Validates invite token before any privileged action
+- Uses service role key (never exposed to client)
+- Logs action to audit_log
+```
+
+### Changes to WorkerSignup.tsx
+
+```text
+Current (broken):
+1. Create auth user
+2. Update spa_workers (fails - RLS blocks)
+3. Insert user_roles (fails - RLS blocks)
+4. Create profile (may fail)
+
+Fixed:
+1. Create auth user
+2. Call activate-spa-worker edge function with { invite_token, user_id }
+3. Edge function does all privileged work securely
+4. Show verify email screen
+```
+
+### Database Trigger (Safety Net)
+
+```text
+Trigger: on_spa_worker_user_linked
+Table: spa_workers
+Event: AFTER UPDATE
+Condition: OLD.user_id IS NULL AND NEW.user_id IS NOT NULL
+
+Action:
+- Insert { user_id: NEW.user_id, role: 'spa_worker' } into user_roles
+- ON CONFLICT DO NOTHING (idempotent)
+```
+
+---
+
+## Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `supabase/functions/activate-spa-worker/index.ts` | Create new edge function |
+| `src/pages/WorkerSignup.tsx` | Replace direct DB calls with edge function call |
+| Database migration | Add safety trigger for auto-role assignment |
+
+---
+
+## Post-Implementation Verification
+
+1. Send a new worker invite from admin
+2. Click invite link → should land on Create Account
+3. Set password → account created, verify email screen shown
+4. Verify email → sign in
+5. Sign in → should land on `/admin/my-schedule` (worker dashboard)
+6. Verify worker does NOT see "Workers" tab
+7. Verify worker sees onboarding wizard to set availability
+
+---
+
+## Why This Approach?
+
+- **Security**: Role assignment happens server-side with service role, not client-side
+- **Reliability**: Single atomic operation handles all linking
+- **Audit Trail**: All actions logged to audit_log
+- **Fallback**: Database trigger provides safety net if edge function fails
+- **No RLS Changes**: We don't need to weaken RLS policies (which would be a security risk)
+
