@@ -236,14 +236,14 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
                 {DAYS_OF_WEEK.map(day => (
                   <div
                     key={day.value}
-                    className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 rounded-lg border border-zinc-800 bg-zinc-800/30"
+                    className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 rounded-lg border border-zinc-600 bg-zinc-700/40"
                   >
                     <div className="flex items-center gap-3 min-w-[120px]">
                       <Switch
                         checked={schedule[day.value]?.enabled ?? false}
                         onCheckedChange={(checked) => handleDayChange(day.value, "enabled", checked)}
                       />
-                      <span className={`font-medium ${!schedule[day.value]?.enabled ? "text-zinc-500" : "text-white"}`}>
+                      <span className={`font-medium ${!schedule[day.value]?.enabled ? "text-zinc-400" : "text-white"}`}>
                         {day.label}
                       </span>
                     </div>
@@ -254,10 +254,10 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
                           value={schedule[day.value]?.start || "09:00"}
                           onValueChange={(value) => handleDayChange(day.value, "start", value)}
                         >
-                          <SelectTrigger className="w-[110px] bg-zinc-800 border-zinc-700">
+                          <SelectTrigger className="w-[110px] bg-zinc-700 border-zinc-500 text-white">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-zinc-800 border-zinc-700">
+                          <SelectContent className="bg-zinc-700 border-zinc-500">
                             {TIME_OPTIONS.map(time => (
                               <SelectItem key={time.value} value={time.value}>
                                 {time.label}
@@ -265,15 +265,15 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
                             ))}
                           </SelectContent>
                         </Select>
-                        <span className="text-zinc-500">to</span>
+                        <span className="text-zinc-300 font-medium">to</span>
                         <Select
                           value={schedule[day.value]?.end || "18:00"}
                           onValueChange={(value) => handleDayChange(day.value, "end", value)}
                         >
-                          <SelectTrigger className="w-[110px] bg-zinc-800 border-zinc-700">
+                          <SelectTrigger className="w-[110px] bg-zinc-700 border-zinc-500 text-white">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-zinc-800 border-zinc-700">
+                          <SelectContent className="bg-zinc-700 border-zinc-500">
                             {TIME_OPTIONS.map(time => (
                               <SelectItem key={time.value} value={time.value}>
                                 {time.label}
@@ -283,7 +283,7 @@ export function SpaWorkerOnboardingWizard({ open, onComplete, workerName }: SpaW
                         </Select>
                       </div>
                     ) : (
-                      <Badge variant="secondary" className="ml-8 sm:ml-0 text-zinc-500 bg-zinc-800">
+                      <Badge variant="secondary" className="ml-8 sm:ml-0 text-zinc-300 bg-zinc-600">
                         Day off
                       </Badge>
                     )}
