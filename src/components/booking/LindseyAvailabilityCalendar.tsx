@@ -111,7 +111,7 @@ const ROOMS = [
   },
   { 
     id: "22222222-2222-2222-2222-222222222222", 
-    name: "B1 - Back Room", 
+    name: "B1 - Private Room", 
     description: "Secluded and peaceful. Ideal for couples.",
     capacity: 2,
   },
