@@ -59,7 +59,19 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/account";
+  // Get redirect path from URL query param (preferred) or state (fallback)
+  const getRedirectParam = (): string => {
+    const params = new URLSearchParams(location.search);
+    const redirectParam = params.get("redirect");
+    if (redirectParam) {
+      return decodeURIComponent(redirectParam);
+    }
+    // Fallback to state for backwards compatibility
+    const stateFrom = (location.state as { from?: { pathname: string } })?.from?.pathname;
+    return stateFrom || "/account";
+  };
+  
+  const from = getRedirectParam();
 
   useEffect(() => {
     trackEvent("view_login", { view });
