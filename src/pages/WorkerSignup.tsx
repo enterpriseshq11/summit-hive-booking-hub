@@ -52,7 +52,7 @@ export default function WorkerSignupPage() {
           return;
         }
 
-        // Check if already accepted
+        // Check if already accepted - redirect to sign-in with proper redirect
         if (data.invite_accepted_at || data.user_id) {
           setInviteStatus("already_used");
           return;
