@@ -69,6 +69,7 @@ import AdminPaymentSettings from "./pages/admin/PaymentSettings";
 import AdminCareerApplications from "./pages/admin/CareerApplications";
 import AdminSpaWorkers from "./pages/admin/SpaWorkers";
 import AdminWorkerCalendars from "./pages/admin/WorkerCalendars";
+import AdminGHLWebhookTest from "./pages/admin/GHLWebhookTest";
 // Command Center Pages (now unified under /admin/*)
 import CommandCenterLeads from "./pages/command-center/Leads";
 import CommandCenterLeadDetail from "./pages/command-center/LeadDetail";
@@ -182,6 +183,7 @@ function AppInner() {
           <Route path="/admin/spa-workers" element={<AdminSpaWorkers />} />
           <Route path="/admin/worker-calendars" element={<AdminWorkerCalendars />} />
           <Route path="/admin/payment-settings" element={<AdminPaymentSettings />} />
+          <Route path="/admin/ghl-webhook-test" element={<AdminGHLWebhookTest />} />
           
           {/* Coworking (The Hive) */}
           <Route path="/admin/office-listings" element={<AdminOfficeListings />} />
