@@ -31,17 +31,18 @@ interface BookingNotificationRequest {
 }
 
 interface GHLWebhookPayload {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   phone: string;
   email: string;
-  service_name: string;
-  appointment_date: string;
-  appointment_time: string;
-  room: string;
+  serviceName: string;
+  serviceDuration: number;
   price: string;
-  booking_number: string;
-  booking_type: "paid" | "free_consultation";
+  room: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  timezone: string;
+  bookingId: string;
 }
 
 // Send webhook to GoHighLevel for CRM automation
@@ -51,6 +52,14 @@ async function sendGHLWebhook(payload: GHLWebhookPayload): Promise<{ success: bo
   if (!webhookUrl) {
     logStep("GHL webhook skipped - URL not configured");
     return { success: false, error: "GHL webhook URL not configured" };
+  }
+
+  // Validate URL format
+  try {
+    new URL(webhookUrl);
+  } catch {
+    logStep("GHL webhook skipped - invalid URL format", { url: webhookUrl.substring(0, 30) });
+    return { success: false, error: "Invalid webhook URL format" };
   }
 
   try {
@@ -498,17 +507,18 @@ Ref: ${stripeRef}`;
       const lastName = nameParts.slice(1).join(" ") || "";
       
       const ghlPayload: GHLWebhookPayload = {
-        first_name: firstName,
-        last_name: lastName,
+        firstName: firstName,
+        lastName: lastName,
         phone: booking.guest_phone || "",
         email: booking.guest_email || "",
-        service_name: serviceName,
-        appointment_date: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
-        appointment_time: startTimeStr,
-        room: roomName,
+        serviceName: serviceName,
+        serviceDuration: Number(duration) || 60,
         price: formatMoney(totalAmount),
-        booking_number: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
-        booking_type: "paid",
+        room: roomName,
+        appointmentDate: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
+        appointmentTime: startTimeStr,
+        timezone: "America/New_York",
+        bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
       };
       
       const ghlResult = await sendGHLWebhook(ghlPayload);
@@ -767,17 +777,18 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
       const lastName = nameParts.slice(1).join(" ") || "";
       
       const ghlPayload: GHLWebhookPayload = {
-        first_name: firstName,
-        last_name: lastName,
+        firstName: firstName,
+        lastName: lastName,
         phone: booking.guest_phone || "",
         email: booking.guest_email || "",
-        service_name: serviceName,
-        appointment_date: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
-        appointment_time: startTimeStr,
-        room: roomName,
+        serviceName: serviceName,
+        serviceDuration: Number(duration) || 60,
         price: formatMoney(totalAmount),
-        booking_number: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
-        booking_type: "paid",
+        room: roomName,
+        appointmentDate: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
+        appointmentTime: startTimeStr,
+        timezone: "America/New_York",
+        bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
       };
       
       const ghlResult = await sendGHLWebhook(ghlPayload);
@@ -1008,17 +1019,18 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
       const lastName = nameParts.slice(1).join(" ") || "";
       
       const ghlPayload: GHLWebhookPayload = {
-        first_name: firstName,
-        last_name: lastName,
+        firstName: firstName,
+        lastName: lastName,
         phone: booking.guest_phone || "",
         email: booking.guest_email || "",
-        service_name: serviceName,
-        appointment_date: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
-        appointment_time: startTimeStr,
-        room: roomName,
+        serviceName: serviceName,
+        serviceDuration: Number(duration) || 15,
         price: "$0.00",
-        booking_number: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
-        booking_type: "free_consultation",
+        room: roomName,
+        appointmentDate: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
+        appointmentTime: startTimeStr,
+        timezone: "America/New_York",
+        bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
       };
       
       const ghlResult = await sendGHLWebhook(ghlPayload);

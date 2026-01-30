@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.spa-worker-complete-onboarding]
 verify_jwt = false
+
+[functions.ghl-test-webhook]
+verify_jwt = false
