@@ -30,6 +30,59 @@ interface BookingNotificationRequest {
   stripe_payment_intent?: string;
 }
 
+interface GHLWebhookPayload {
+  first_name: string;
+  last_name: string;
+  phone: string;
+  email: string;
+  service_name: string;
+  appointment_date: string;
+  appointment_time: string;
+  room: string;
+  price: string;
+  booking_number: string;
+  booking_type: "paid" | "free_consultation";
+}
+
+// Send webhook to GoHighLevel for CRM automation
+async function sendGHLWebhook(payload: GHLWebhookPayload): Promise<{ success: boolean; error?: string }> {
+  const webhookUrl = Deno.env.get("GHL_LINDSEY_WEBHOOK_URL");
+  
+  if (!webhookUrl) {
+    logStep("GHL webhook skipped - URL not configured");
+    return { success: false, error: "GHL webhook URL not configured" };
+  }
+
+  try {
+    logStep("Sending GHL webhook", { 
+      url: webhookUrl.substring(0, 50) + "...", 
+      payload: { ...payload, phone: "***", email: "***" } 
+    });
+
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const responseText = await response.text();
+    
+    if (response.ok) {
+      logStep("GHL webhook sent successfully", { status: response.status });
+      return { success: true };
+    } else {
+      logStep("GHL webhook failed", { status: response.status, response: responseText });
+      return { success: false, error: `HTTP ${response.status}: ${responseText}` };
+    }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    logStep("GHL webhook error", { error: msg });
+    return { success: false, error: msg };
+  }
+}
+
 // SMS via Twilio (only if env vars are set)
 async function sendSMS(to: string, message: string): Promise<{ success: boolean; sid?: string; error?: string }> {
   const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
@@ -439,6 +492,27 @@ Ref: ${stripeRef}`;
           .is("email_sent_staff_at", null);
       }
 
+      // Send GHL webhook for CRM automation (paid booking)
+      const nameParts = (booking.guest_name || "").split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+      
+      const ghlPayload: GHLWebhookPayload = {
+        first_name: firstName,
+        last_name: lastName,
+        phone: booking.guest_phone || "",
+        email: booking.guest_email || "",
+        service_name: serviceName,
+        appointment_date: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
+        appointment_time: startTimeStr,
+        room: roomName,
+        price: formatMoney(totalAmount),
+        booking_number: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
+        booking_type: "paid",
+      };
+      
+      const ghlResult = await sendGHLWebhook(ghlPayload);
+
       return new Response(
         JSON.stringify({
           success: true,
@@ -449,6 +523,8 @@ Ref: ${stripeRef}`;
           customer_email_error: customerResult.error,
           sms_sent: smsResult.success,
           sms_sid: smsResult.sid,
+          ghl_webhook_sent: ghlResult.success,
+          ghl_webhook_error: ghlResult.error,
         }),
         {
           status: 200,
@@ -657,6 +733,27 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
         success: emailSuccess,
       });
 
+      // Send GHL webhook for CRM automation (free consultation)
+      const nameParts = (booking.guest_name || "").split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+      
+      const ghlPayload: GHLWebhookPayload = {
+        first_name: firstName,
+        last_name: lastName,
+        phone: booking.guest_phone || "",
+        email: booking.guest_email || "",
+        service_name: serviceName,
+        appointment_date: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
+        appointment_time: startTimeStr,
+        room: roomName,
+        price: "$0.00",
+        booking_number: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
+        booking_type: "free_consultation",
+      };
+      
+      const ghlResult = await sendGHLWebhook(ghlPayload);
+
       return new Response(
         JSON.stringify({
           success: true,
@@ -666,6 +763,8 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
           customer_email_id: customerResult.data?.id,
           customer_email_error: customerResult.error,
           sms_sent: smsResult.success,
+          ghl_webhook_sent: ghlResult.success,
+          ghl_webhook_error: ghlResult.error,
         }),
         {
           status: 200,
