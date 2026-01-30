@@ -129,85 +129,35 @@ serve(async (req) => {
 
           logStep("Booking updated", { bookingId, newStatus });
 
-          // ============= ROUTE NOTIFICATIONS BY BUSINESS TYPE =============
-          // Check if this is a SPA/Lindsey booking - if so, fire GHL webhook only
-          // For all other business types, use the centralized notification service
-          
-          // Fetch booking to check business type
-          const { data: bookingDetails } = await supabase
-            .from("bookings")
-            .select("bookable_type_id, source_brand, businesses(type)")
-            .eq("id", bookingId)
-            .single();
-          
-          const businessType = (bookingDetails?.businesses as { type?: string })?.type || "";
-          const sourceBrand = String(bookingDetails?.source_brand || "").toLowerCase();
-          const isLindseyBooking = bookingDetails?.bookable_type_id === LINDSEY_BOOKABLE_TYPE_ID;
-          const isSpaBooking = businessType === "spa" || 
-            ["spa", "restoration_lounge", "massage"].includes(sourceBrand) ||
-            isLindseyBooking;
+          // ============= CENTRALIZED NOTIFICATION SYSTEM =============
+          // Send notifications for ALL booking types via unified notification service
+          try {
+            const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-notification`;
+            const notificationResponse = await fetch(notificationUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              },
+              body: JSON.stringify({
+                booking_id: bookingId,
+                notification_type: "confirmation",
+                channels: ["email", "sms"],
+                recipients: ["customer", "staff"],
+                stripe_session_id: session.id,
+                stripe_payment_intent: session.payment_intent as string,
+              }),
+            });
 
-          if (isSpaBooking) {
-            // SPA BOOKINGS: Fire GHL webhook only, skip Lovable notifications
-            // GoHighLevel handles all customer-facing automations
-            logStep("SPA booking detected - routing to GHL only", { bookingId, businessType, sourceBrand });
-            
-            try {
-              const lindseyNotificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/lindsey-booking-notification`;
-              const lindseyResponse = await fetch(lindseyNotificationUrl, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-                },
-                body: JSON.stringify({
-                  booking_id: bookingId,
-                  type: "confirmed",
-                  stripe_session_id: session.id,
-                  stripe_payment_intent: session.payment_intent as string,
-                }),
-              });
-
-              if (lindseyResponse.ok) {
-                const result = await lindseyResponse.json();
-                logStep("GHL webhook fired for SPA booking", { bookingId, result });
-              } else {
-                const errText = await lindseyResponse.text();
-                logStep("GHL webhook failed for SPA booking", { status: lindseyResponse.status, error: errText });
-              }
-            } catch (ghlError) {
-              logStep("GHL webhook error for SPA booking", { error: String(ghlError) });
+            if (notificationResponse.ok) {
+              const result = await notificationResponse.json();
+              logStep("Centralized notification sent", { bookingId, result });
+            } else {
+              const errText = await notificationResponse.text();
+              logStep("Centralized notification failed", { status: notificationResponse.status, error: errText });
             }
-          } else {
-            // NON-SPA BOOKINGS: Use centralized notification service
-            try {
-              const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-notification`;
-              const notificationResponse = await fetch(notificationUrl, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-                },
-                body: JSON.stringify({
-                  booking_id: bookingId,
-                  notification_type: "confirmation",
-                  channels: ["email", "sms"],
-                  recipients: ["customer", "staff"],
-                  stripe_session_id: session.id,
-                  stripe_payment_intent: session.payment_intent as string,
-                }),
-              });
-
-              if (notificationResponse.ok) {
-                const result = await notificationResponse.json();
-                logStep("Centralized notification sent", { bookingId, result });
-              } else {
-                const errText = await notificationResponse.text();
-                logStep("Centralized notification failed", { status: notificationResponse.status, error: errText });
-              }
-            } catch (notifError) {
-              logStep("Centralized notification error", { error: String(notifError) });
-            }
+          } catch (notifError) {
+            logStep("Centralized notification error", { error: String(notifError) });
           }
         }
 

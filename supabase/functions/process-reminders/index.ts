@@ -73,25 +73,12 @@ serve(async (req) => {
           continue;
         }
 
-        // ============= SPA BOOKINGS: SKIP ALL REMINDERS =============
-        // GoHighLevel is the single source of truth for SPA automations.
-        // All customer-facing reminders are handled by GHL, not Lovable.
-        const isSpa = businessType === "spa" || 
-          (typeof sourceBrand === "string" && ["spa", "restoration_lounge", "massage"].includes(sourceBrand.toLowerCase()));
-        
-        if (isSpa) {
-          // Mark as skipped (not cancelled, just handled externally)
-          await supabase
-            .from("scheduled_reminders")
-            .update({ status: "sent", processed_at: new Date().toISOString() })
-            .eq("id", reminder.id);
-          results.success++; // Count as success since GHL handles it
-          logStep("Reminder skipped - SPA booking (GHL handles)", { id: reminder.id, booking_id: reminder.booking_id });
-          continue;
-        }
-
         const recipientType = (reminder as { recipient_type?: string }).recipient_type || "customer";
         const reminderType = reminder.reminder_type || "24h";
+
+        // Determine if this is a Spa booking (Lindsey)
+        const isSpa = businessType === "spa" || 
+          (typeof sourceBrand === "string" && ["spa", "restoration_lounge", "massage"].includes(sourceBrand.toLowerCase()));
 
         // For Spa bookings, send to both customer AND staff
         // For other bookings, follow the recipient_type in the reminder record
