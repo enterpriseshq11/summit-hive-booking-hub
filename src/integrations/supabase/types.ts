@@ -5007,6 +5007,7 @@ export type Database = {
         | "no_show"
         | "reschedule_requested"
         | "rescheduled"
+        | "showed"
       business_type:
         | "summit"
         | "coworking"
@@ -5292,6 +5293,7 @@ export const Constants = {
         "no_show",
         "reschedule_requested",
         "rescheduled",
+        "showed",
       ],
       business_type: [
         "summit",

@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Send, CheckCircle2, XCircle, AlertTriangle, Copy } from "lucide-react";
+import { Loader2, Send, CheckCircle2, XCircle, AlertTriangle, Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 interface TestResult {
@@ -28,12 +29,24 @@ interface TestResult {
     appointmentTime: string;
     timezone: string;
     bookingId: string;
+    status?: string;
   };
 }
+
+const STATUS_OPTIONS = [
+  { value: "confirmed", label: "Confirmed" },
+  { value: "showed", label: "Showed" },
+  { value: "no_show", label: "No Show" },
+  { value: "cancelled", label: "Cancelled" },
+  { value: "rescheduled", label: "Rescheduled" },
+];
 
 export default function GHLWebhookTest() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [statusResult, setStatusResult] = useState<TestResult | null>(null);
+  const [testStatus, setTestStatus] = useState("showed");
 
   const sendTestWebhook = async () => {
     setLoading(true);
@@ -56,9 +69,55 @@ export default function GHLWebhookTest() {
     }
   };
 
-  const copyPayload = () => {
-    if (result?.payload_sent) {
-      navigator.clipboard.writeText(JSON.stringify(result.payload_sent, null, 2));
+  const sendStatusTestWebhook = async () => {
+    setStatusLoading(true);
+    setStatusResult(null);
+
+    // Create a mock booking ID for testing
+    const testBookingId = `TEST-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    
+    // Build test payload matching what spa-status-webhook would send
+    const testPayload = {
+      bookingId: testBookingId,
+      status: testStatus,
+      firstName: "Test",
+      lastName: "StatusChange",
+      phone: "5675559999",
+      email: "status-test@example.com",
+      serviceName: "Deep Tissue Massage",
+      serviceDuration: 90,
+      price: "$120.00",
+      room: "P1",
+      appointmentDate: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }),
+      appointmentTime: "3:30 PM",
+      timezone: "America/New_York",
+    };
+
+    try {
+      // We'll directly call the GHL webhook for testing status payloads
+      const { data, error } = await supabase.functions.invoke("ghl-test-webhook", {
+        method: "POST",
+        body: { test_status: testStatus },
+      });
+
+      if (error) {
+        setStatusResult({ success: false, error: error.message });
+      } else {
+        setStatusResult({ 
+          ...data as TestResult, 
+          payload_sent: { ...((data as TestResult).payload_sent || {}), status: testStatus } as TestResult["payload_sent"]
+        });
+      }
+    } catch (err) {
+      setStatusResult({ success: false, error: err instanceof Error ? err.message : "Unknown error" });
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  const copyPayload = (payload: TestResult["payload_sent"]) => {
+    if (payload) {
+      navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
       toast.success("Payload copied to clipboard");
     }
   };
@@ -172,7 +231,7 @@ export default function GHLWebhookTest() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium">Payload Sent:</h4>
-                    <Button variant="ghost" size="sm" onClick={copyPayload}>
+                    <Button variant="ghost" size="sm" onClick={() => copyPayload(result.payload_sent)}>
                       <Copy className="h-4 w-4 mr-1" />
                       Copy
                     </Button>
@@ -186,11 +245,94 @@ export default function GHLWebhookTest() {
           </Card>
         )}
 
+        {/* Status Change Test Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5" />
+              Test Status Change Webhook
+            </CardTitle>
+            <CardDescription>
+              Send a test status change payload. Use this to map status-based workflows in GHL 
+              (showed, no_show, cancelled, rescheduled).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium">Test Status:</label>
+              <Select value={testStatus} onValueChange={setTestStatus}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button 
+              onClick={sendStatusTestWebhook} 
+              disabled={statusLoading}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              {statusLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Status Test
+                </>
+              )}
+            </Button>
+
+            {statusResult && (
+              <div className="mt-4 space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant={statusResult.success ? "default" : "destructive"}>
+                    {statusResult.success ? "Success" : "Failed"}
+                  </Badge>
+                  {statusResult.response_status && (
+                    <Badge variant="secondary">HTTP {statusResult.response_status}</Badge>
+                  )}
+                </div>
+                {statusResult.error && (
+                  <Alert variant="destructive">
+                    <XCircle className="h-4 w-4" />
+                    <AlertDescription>{statusResult.error}</AlertDescription>
+                  </Alert>
+                )}
+                {statusResult.payload_sent && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium">Status Payload:</h4>
+                      <Button variant="ghost" size="sm" onClick={() => copyPayload(statusResult.payload_sent)}>
+                        <Copy className="h-4 w-4 mr-1" />
+                        Copy
+                      </Button>
+                    </div>
+                    <pre className="bg-muted p-3 rounded text-xs overflow-auto">
+                      {JSON.stringify(statusResult.payload_sent, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Expected Payload Fields</CardTitle>
             <CardDescription>
-              These are the fields that will be sent to GHL on every successful Lindsey booking.
+              These are the fields sent to GHL for bookings and status changes.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -201,6 +343,8 @@ export default function GHLWebhookTest() {
                 <span className="font-medium">Example</span>
               </div>
               {[
+                ["bookingId", "string", "AZ260115123456"],
+                ["status", "string", "confirmed | showed | no_show | cancelled | rescheduled"],
                 ["firstName", "string", "Jane"],
                 ["lastName", "string", "Smith"],
                 ["phone", "string", "5675551234"],
@@ -208,19 +352,22 @@ export default function GHLWebhookTest() {
                 ["serviceName", "string", "Swedish Massage"],
                 ["serviceDuration", "number", "60"],
                 ["price", "string", "$80.00"],
-                ["room", "string", "M1"],
+                ["room", "string", "M1 or P1"],
                 ["appointmentDate", "string", "01/15/2026"],
                 ["appointmentTime", "string", "2:00 PM"],
                 ["timezone", "string", "America/New_York"],
-                ["bookingId", "string", "AZ260115123456"],
               ].map(([field, type, example]) => (
                 <div key={field} className="grid grid-cols-3 gap-4 py-2 border-b last:border-0">
                   <code className="text-primary">{field}</code>
                   <span className="text-muted-foreground">{type}</span>
-                  <span className="text-muted-foreground">{example}</span>
+                  <span className="text-muted-foreground text-xs">{example}</span>
                 </div>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              <strong>Note:</strong> The <code>status</code> field is only included for status change webhooks. 
+              New booking webhooks do not include status (they default to confirmed).
+            </p>
           </CardContent>
         </Card>
       </div>

@@ -83,3 +83,9 @@ verify_jwt = false
 
 [functions.ghl-test-webhook]
 verify_jwt = false
+
+[functions.spa-status-webhook]
+verify_jwt = false
+
+[functions.activate-spa-worker]
+verify_jwt = false
