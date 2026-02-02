@@ -5,6 +5,8 @@ import { useBookings } from "@/hooks/useBookings";
 import { useBusinesses } from "@/hooks/useBusinesses";
 import { useAvailabilityOverrides, formatOverrideDisplay } from "@/hooks/useAvailabilityOverrides";
 import { useSpaWorkerAvailability } from "@/hooks/useSpaWorkerAvailability";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CalendarDays, Clock, ChevronLeft, ChevronRight, Calendar, CalendarRange, RefreshCw, Settings2 } from "lucide-react";
+import { CalendarDays, Clock, ChevronLeft, ChevronRight, Calendar, CalendarRange, RefreshCw, Settings2, Loader2 } from "lucide-react";
 import { BookingEditDialog } from "@/components/admin/BookingEditDialog";
 import { 
   format, 
@@ -31,6 +33,17 @@ import {
 } from "date-fns";
 
 type ViewMode = "week" | "month";
+
+// SPA status options for admin dropdown
+const SPA_STATUS_OPTIONS = [
+  { value: "confirmed", label: "Confirmed" },
+  { value: "showed", label: "Showed" },
+  { value: "no_show", label: "No Show" },
+  { value: "cancelled", label: "Cancelled" },
+  { value: "rescheduled", label: "Rescheduled" },
+] as const;
+
+type SpaStatus = typeof SPA_STATUS_OPTIONS[number]["value"];
 
 // Check if a business is Spa/Restoration for reschedule functionality
 const isSpaBooking = (booking: any) => {
@@ -66,6 +79,10 @@ export default function AdminSchedule() {
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [selectedDayForAvailability, setSelectedDayForAvailability] = useState<Date | null>(null);
+  
+  // SPA status change state
+  const [spaStatusValue, setSpaStatusValue] = useState<SpaStatus | "">("");
+  const [savingStatus, setSavingStatus] = useState(false);
 
   // Determine if user is spa-only (has spa_lead but not owner/manager)
   const isSpaLeadOnly = useMemo(() => {
@@ -148,6 +165,15 @@ export default function AdminSchedule() {
     return map;
   }, [availabilityOverrides]);
 
+  // Sync SPA status dropdown when a booking is selected
+  useEffect(() => {
+    if (selectedBooking && isSpaBooking(selectedBooking)) {
+      setSpaStatusValue((selectedBooking.status as SpaStatus) || "confirmed");
+    } else {
+      setSpaStatusValue("");
+    }
+  }, [selectedBooking]);
+
   const filteredBookings = useMemo(() => {
     // Hide denied and cancelled bookings to keep the calendar uncluttered.
     let filtered = (bookings || []).filter((b: any) => b?.status !== "denied" && b?.status !== "cancelled");
@@ -229,6 +255,47 @@ export default function AdminSchedule() {
   const handleAvailabilitySuccess = () => {
     refetch();
     refetchOverrides();
+  };
+
+  // Handle SPA status change with webhook to GHL
+  const handleSpaStatusSave = async () => {
+    if (!selectedBooking || !spaStatusValue) return;
+    
+    // Skip if status hasn't changed
+    if (spaStatusValue === selectedBooking.status) {
+      toast.info("Status unchanged");
+      return;
+    }
+
+    setSavingStatus(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("spa-status-webhook", {
+        body: {
+          booking_id: selectedBooking.id,
+          new_status: spaStatusValue,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.webhook_sent) {
+        toast.success(`Status updated to "${spaStatusValue}" — GHL webhook sent`);
+      } else {
+        toast.success(`Status updated to "${spaStatusValue}"`);
+        if (data?.reason) {
+          console.warn("Webhook not sent:", data.reason);
+        }
+      }
+
+      // Update local state and refetch
+      setSelectedBooking((prev: any) => prev ? { ...prev, status: spaStatusValue } : prev);
+      refetch();
+    } catch (err: any) {
+      console.error("Status update error:", err);
+      toast.error(`Failed to update status: ${err?.message || "Unknown error"}`);
+    } finally {
+      setSavingStatus(false);
+    }
   };
 
   return (
@@ -485,9 +552,42 @@ export default function AdminSchedule() {
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Status</label>
-                      <Badge className={getStatusColor(selectedBooking.status || '')}>
-                        {selectedBooking.status}
-                      </Badge>
+                      {/* For SPA bookings: show editable dropdown */}
+                      {isSpaBooking(selectedBooking) ? (
+                        <div className="flex items-center gap-2 mt-1">
+                          <Select 
+                            value={spaStatusValue} 
+                            onValueChange={(v) => setSpaStatusValue(v as SpaStatus)}
+                          >
+                            <SelectTrigger className="w-[140px] bg-card border-border text-foreground h-8 text-sm">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-card border-border">
+                              {SPA_STATUS_OPTIONS.map((opt) => (
+                                <SelectItem 
+                                  key={opt.value} 
+                                  value={opt.value}
+                                  className="text-foreground focus:bg-muted focus:text-foreground"
+                                >
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            size="sm"
+                            onClick={handleSpaStatusSave}
+                            disabled={savingStatus || spaStatusValue === selectedBooking.status}
+                            className="h-8 px-3"
+                          >
+                            {savingStatus ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Badge className={getStatusColor(selectedBooking.status || '')}>
+                          {selectedBooking.status}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   
@@ -533,6 +633,13 @@ export default function AdminSchedule() {
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Notes</label>
                       <p className="text-sm text-muted-foreground">{selectedBooking.notes}</p>
+                    </div>
+                  )}
+
+                  {/* SPA Status Info Banner */}
+                  {isSpaBooking(selectedBooking) && (
+                    <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
+                      <strong className="text-foreground">💡 GHL Integration:</strong> Changing status will send a webhook to GoHighLevel to trigger the corresponding workflow (SMS/email confirmations, no-show follow-up, etc.).
                     </div>
                   )}
 

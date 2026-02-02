@@ -23,6 +23,7 @@ interface GHLTestPayload {
   appointmentTime: string;
   timezone: string;
   bookingId: string;
+  status?: string;
 }
 
 serve(async (req) => {
@@ -59,28 +60,43 @@ serve(async (req) => {
       );
     }
 
+    // Check if request body contains test_status for status change testing
+    let testStatus: string | undefined;
+    try {
+      const body = await req.json();
+      testStatus = body?.test_status;
+    } catch {
+      // No body or invalid JSON, proceed with default booking test
+    }
+
     // Generate test payload with sample data
     const now = new Date();
     const testDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
     
     const testPayload: GHLTestPayload = {
-      firstName: "Test",
-      lastName: "Customer",
-      phone: "5675551234",
-      email: "test@example.com",
-      serviceName: "Swedish Massage",
-      serviceDuration: 60,
-      price: "$80.00",
-      room: "M1",
+      firstName: testStatus ? "Test" : "Test",
+      lastName: testStatus ? "StatusChange" : "Customer",
+      phone: testStatus ? "5675559999" : "5675551234",
+      email: testStatus ? "status-test@example.com" : "test@example.com",
+      serviceName: testStatus ? "Deep Tissue Massage" : "Swedish Massage",
+      serviceDuration: testStatus ? 90 : 60,
+      price: testStatus ? "$120.00" : "$80.00",
+      room: testStatus ? "P1" : "M1",
       appointmentDate: testDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
-      appointmentTime: "2:00 PM",
+      appointmentTime: testStatus ? "3:30 PM" : "2:00 PM",
       timezone: "America/New_York",
-      bookingId: "TEST-" + now.getTime().toString().slice(-8),
+      bookingId: (testStatus ? "STATUS-" : "TEST-") + now.getTime().toString().slice(-8),
     };
+
+    // Add status field if testing status change
+    if (testStatus) {
+      testPayload.status = testStatus;
+    }
 
     logStep("Sending test webhook", { 
       url: webhookUrl.substring(0, 50) + "...", 
-      payload: testPayload 
+      payload: testPayload,
+      testStatus
     });
 
     const response = await fetch(webhookUrl, {
