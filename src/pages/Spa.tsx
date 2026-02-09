@@ -126,6 +126,7 @@ export default function Spa() {
                   <Clock className="h-5 w-5 mr-2" />
                   Join Waitlist
                 </Button>
+                <SpecialsButton onClick={() => setShowSpecials(true)} label="View Spa Specials" size="lg" />
               </div>
               
               {/* Booking Request Field */}
@@ -165,12 +166,9 @@ export default function Spa() {
       }} aria-hidden="true" />
       </section>
 
-      {/* Anchor Chips + Specials Button */}
+      {/* Anchor Chips */}
       <section className="py-6 container border-b border-border">
-        <div className="flex flex-col items-center gap-4">
-          <SpaAnchorChips />
-          <SpecialsButton onClick={() => setShowSpecials(true)} label="View Spa Specials" />
-        </div>
+        <SpaAnchorChips />
       </section>
 
       {/* Services Section */}
