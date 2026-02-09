@@ -38,6 +38,9 @@ import CareersFitness from "./pages/careers/CareersFitness";
 import CareersContracting from "./pages/careers/CareersContracting";
 import WorkerSignup from "./pages/WorkerSignup";
 import AuthCallback from "./pages/AuthCallback";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import RequestService from "./pages/RequestService";
 
 // Debug (public, never redirects)
 import AuthDebug from "./pages/__debug/AuthDebug";
@@ -125,6 +128,9 @@ function AppInner() {
           <Route path="/voice-vault" element={<VoiceVault />} />
           <Route path="/360-photo-booth" element={<PhotoBooth />} />
           <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/request-service" element={<RequestService />} />
 
           {/* Careers Routes */}
           <Route path="/careers" element={<Careers />} />
