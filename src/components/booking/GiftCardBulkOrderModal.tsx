@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { Building2, CheckCircle, Users } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,7 @@ interface GiftCardBulkOrderModalProps {
 export function GiftCardBulkOrderModal({ isOpen, onClose }: GiftCardBulkOrderModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
   const [formData, setFormData] = useState({
     companyName: "",
     contactName: "",
@@ -204,6 +206,9 @@ export function GiftCardBulkOrderModal({ isOpen, onClose }: GiftCardBulkOrderMod
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
             />
           </div>
+
+          {/* SMS Consent */}
+          <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
           <Button
             type="submit"

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { Bell, Loader2, Check, Calendar, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +34,7 @@ export function WaitlistCTA({
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -216,6 +218,9 @@ export function WaitlistCTA({
                 rows={3}
               />
             </div>
+
+            {/* SMS Consent */}
+            <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
             <div className="flex gap-3 pt-2">
               <Button

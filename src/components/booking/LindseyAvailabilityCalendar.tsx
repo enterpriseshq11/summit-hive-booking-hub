@@ -7,6 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { cn } from "@/lib/utils";
 import { format, addDays, startOfToday, isBefore, startOfDay } from "date-fns";
 import { 

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { Check, Building2, ArrowRight, CheckCircle, Calculator } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -95,6 +96,7 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
     officeCode: "",
     leaseTermMonths: "",
   });
+  const [smsConsent, setSmsConsent] = useState(false);
 
   // If a user clicks an office card, open the modal pre-filled.
   useEffect(() => {
@@ -557,6 +559,9 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
               />
             </div>
           </div>
+
+          {/* SMS Consent */}
+          <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
           <div className="flex flex-col gap-3 pt-4">
             <Button

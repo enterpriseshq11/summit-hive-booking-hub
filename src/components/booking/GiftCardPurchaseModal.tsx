@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { 
   Gift, 
   Mail, 
@@ -58,6 +59,7 @@ export function GiftCardPurchaseModal({
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
 
   const amount = customAmount || selectedAmount || 0;
 
@@ -307,6 +309,9 @@ export function GiftCardPurchaseModal({
                 />
               </div>
             </div>
+
+            {/* SMS Consent */}
+            <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
             {/* Schedule Delivery */}
             <div className="space-y-3">

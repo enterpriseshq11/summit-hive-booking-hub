@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useResources } from "@/hooks/useResources";
 import { supabase } from "@/integrations/supabase/client";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 
 interface LeaseSignupFormProps {
   onSuccess?: (bookingId: string) => void;
@@ -38,6 +39,7 @@ export default function LeaseSignupForm({ onSuccess }: LeaseSignupFormProps) {
     company: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
 
   const offices = resources?.filter(r => r.type === "office" || r.type === "suite") || [];
   const selectedOffice = offices.find(o => o.id === selectedUnit);
@@ -289,7 +291,10 @@ export default function LeaseSignupForm({ onSuccess }: LeaseSignupFormProps) {
         </Card>
       )}
 
-      <Button 
+      {/* SMS Consent */}
+      <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
+
+      <Button
         type="submit" 
         size="lg" 
         className="w-full" 

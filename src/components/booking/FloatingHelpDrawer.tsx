@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +33,7 @@ export function FloatingHelpDrawer({
     email: "",
     phone: "",
   });
+  const [smsConsent, setSmsConsent] = useState(false);
 
   const handleTourSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,6 +174,7 @@ export function FloatingHelpDrawer({
                     />
                   </div>
                 </div>
+                <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
                 <div className="flex gap-2">
                   <Button
                     type="button"

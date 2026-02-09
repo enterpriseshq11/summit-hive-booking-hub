@@ -21,6 +21,7 @@ import { useRequiredDocuments } from "@/hooks/useSignedDocuments";
 import { useCreateBooking } from "@/hooks/useBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 
 interface SpaBookingFormProps {
   onSuccess?: (bookingId: string) => void;
@@ -62,6 +63,7 @@ export default function SpaBookingForm({ onSuccess }: SpaBookingFormProps) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [intakeComplete, setIntakeComplete] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
 
   // Time slots
   const timeSlots = [
@@ -403,7 +405,10 @@ export default function SpaBookingForm({ onSuccess }: SpaBookingFormProps) {
         </Card>
       )}
 
-      <Button 
+      {/* SMS Consent */}
+      <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
+
+      <Button
         type="submit" 
         size="lg" 
         className="w-full" 

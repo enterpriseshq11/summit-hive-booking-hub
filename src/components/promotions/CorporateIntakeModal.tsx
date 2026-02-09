@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { useSubmitPromotionLead } from "@/hooks/usePromotions";
 import { CheckCircle, Loader2, Building2 } from "lucide-react";
 
@@ -29,6 +30,7 @@ interface CorporateIntakeModalProps {
 
 export function CorporateIntakeModal({ open, onOpenChange }: CorporateIntakeModalProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
   const submitLead = useSubmitPromotionLead();
 
   const form = useForm<FormData>({
@@ -209,7 +211,9 @@ export function CorporateIntakeModal({ open, onOpenChange }: CorporateIntakeModa
                   )}
                 />
 
-                <Button 
+                <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
+
+                <Button
                   type="submit" 
                   className="w-full bg-gold hover:bg-gold/90 text-primary-foreground font-semibold"
                   disabled={submitLead.isPending}
