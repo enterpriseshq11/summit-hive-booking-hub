@@ -14,21 +14,16 @@ export function SpecialsPopup({ storageKey, headline, onViewSpecials }: Specials
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const dismissed = sessionStorage.getItem(`specials_popup_${storageKey}`);
-    if (!dismissed) {
-      // Small delay so the page renders first
-      const timer = setTimeout(() => setOpen(true), 800);
-      return () => clearTimeout(timer);
-    }
+    // Show popup every time the page is visited
+    const timer = setTimeout(() => setOpen(true), 800);
+    return () => clearTimeout(timer);
   }, [storageKey]);
 
   const dismiss = () => {
-    sessionStorage.setItem(`specials_popup_${storageKey}`, "1");
     setOpen(false);
   };
 
   const handleView = () => {
-    sessionStorage.setItem(`specials_popup_${storageKey}`, "1");
     setOpen(false);
     onViewSpecials();
   };
