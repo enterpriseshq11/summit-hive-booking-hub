@@ -30,12 +30,14 @@ import { SEOHead, jsonLdSchemas } from "@/components/seo";
 import theHiveLogo from "@/assets/the-hive-logo-transparent.png";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
 import { HiveOfficeCards } from "@/components/coworking/HiveOfficeCards";
+import { SpecialsPopup, SpecialsButton, SpecialsModal, HIVE_SPECIALS } from "@/components/specials";
 
 export default function Coworking() {
   const navigate = useNavigate();
   const { data: business, isLoading: businessLoading } = useBusinessByType("coworking");
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showTourModal, setShowTourModal] = useState(false);
+  const [showSpecials, setShowSpecials] = useState(false);
   const [selectedWorkspaceType, setSelectedWorkspaceType] = useState<string | null>(null);
   const [selectedOfficeCode, setSelectedOfficeCode] = useState<string | null>(null);
 
@@ -198,6 +200,7 @@ export default function Coworking() {
                   <Calendar className="h-5 w-5 mr-2" />
                   Schedule a Tour
                 </Button>
+                <SpecialsButton onClick={() => setShowSpecials(true)} label="View Specials" size="lg" />
               </div>
 
               {/* Trust Chip */}
@@ -570,6 +573,10 @@ export default function Coworking() {
         phoneNumber={SITE_CONFIG.contact.phone}
         email={SITE_CONFIG.contact.email}
       />
+
+      {/* Specials Popup (once per session) + Modal */}
+      <SpecialsPopup storageKey="hive" headline="Want to see our current office & coworking specials?" onViewSpecials={() => setShowSpecials(true)} />
+      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Office & Coworking Specials" specials={HIVE_SPECIALS} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />

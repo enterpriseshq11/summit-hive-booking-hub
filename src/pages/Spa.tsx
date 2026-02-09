@@ -15,6 +15,7 @@ import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, 
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import restorationLoungeLogo from "@/assets/restoration-lounge-logo.jpg";
+import { SpecialsPopup, SpecialsButton, SpecialsModal, SPA_SPECIALS } from "@/components/specials";
 export default function Spa() {
   const navigate = useNavigate();
   const {
@@ -27,6 +28,7 @@ export default function Spa() {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showSpecials, setShowSpecials] = useState(false);
   const [preselectedService, setPreselectedService] = useState<"massage" | "recovery" | "wellness" | null>(null);
   const [bookingContact, setBookingContact] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
@@ -163,9 +165,12 @@ export default function Spa() {
       }} aria-hidden="true" />
       </section>
 
-      {/* Anchor Chips */}
+      {/* Anchor Chips + Specials Button */}
       <section className="py-6 container border-b border-border">
-        <SpaAnchorChips />
+        <div className="flex flex-col items-center gap-4">
+          <SpaAnchorChips />
+          <SpecialsButton onClick={() => setShowSpecials(true)} label="View Spa Specials" />
+        </div>
       </section>
 
       {/* Services Section */}
@@ -766,6 +771,10 @@ export default function Spa() {
 
       {/* Waitlist Modal */}
       <SpaWaitlistModal open={showWaitlistModal} onOpenChange={setShowWaitlistModal} preselectedService={preselectedService} />
+
+      {/* Specials Popup (once per session) + Modal */}
+      <SpecialsPopup storageKey="spa" headline="Want to see our current spa specials?" onViewSpecials={() => setShowSpecials(true)} />
+      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Restoration Lounge Specials" specials={SPA_SPECIALS} />
 
       {/* Floating Help Drawer */}
       <FloatingHelpDrawer businessType="spa" phoneNumber={SITE_CONFIG.contact.phone} email={SITE_CONFIG.contact.email} />

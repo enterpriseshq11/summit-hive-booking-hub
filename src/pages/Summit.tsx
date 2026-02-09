@@ -16,6 +16,7 @@ import summitLogo from "@/assets/summit-logo.png";
 import e3Logo from "@/assets/e3-logo.png";
 import PhotoBooth360Section from "@/components/summit/PhotoBooth360Section";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
+import { SpecialsButton, SpecialsModal, SUMMIT_SPECIALS } from "@/components/specials";
 
 export default function Summit() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function Summit() {
   } = useBusinessByType("summit");
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [showSpecials, setShowSpecials] = useState(false);
   const [selectedEventType, setSelectedEventType] = useState<string | undefined>();
   const [prefillQuestion, setPrefillQuestion] = useState<string | undefined>();
   const [expandedHighlight, setExpandedHighlight] = useState<string | null>(null);
@@ -196,13 +198,15 @@ export default function Summit() {
               </div>
               
               {/* Hero CTA Row - centered on mobile/tablet, left-aligned on desktop */}
-              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                   <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary" data-event="summit_request_open">
                     <CalendarDays className="h-5 w-5 mr-2" />
                     Book with Victoria
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
+
+                  <SpecialsButton onClick={() => setShowSpecials(true)} label="Summit Specials" />
 
                   {/* Trust Chip */}
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/5 border border-primary-foreground/20 rounded-full text-sm font-medium text-primary-foreground/70" aria-label="Response within 24 hours">
@@ -724,6 +728,7 @@ export default function Summit() {
       {/* Modals */}
       <SummitRequestModal open={showRequestModal} onOpenChange={setShowRequestModal} prefillEventType={selectedEventType} prefillQuestion={prefillQuestion} />
       <SummitWaitlistModal open={showWaitlistModal} onOpenChange={setShowWaitlistModal} />
+      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Summit Specials" specials={SUMMIT_SPECIALS} onSpecialAction={() => setShowRequestModal(true)} />
 
       {/* Sticky Mobile CTA */}
       <StickyMobileSummitCTA onRequestClick={() => setShowRequestModal(true)} />
