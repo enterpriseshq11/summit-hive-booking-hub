@@ -49,7 +49,7 @@ export default function RequestService() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold tracking-tight">Request Service</h1>
             <p className="text-muted-foreground mt-2">
-              Tell us what you're interested in and we'll get back to you fast.
+              Submit your inquiry to <strong>A-Z Enterprises</strong>. Tell us what you're interested in and we'll get back to you fast.
             </p>
           </div>
 
