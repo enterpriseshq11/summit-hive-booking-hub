@@ -47,9 +47,10 @@ export default function RequestService() {
       <div className="min-h-screen bg-background">
         <div className="max-w-xl mx-auto px-4 py-16">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">Request Service</h1>
+            <h1 className="text-3xl font-bold tracking-tight">A-Z Enterprises</h1>
+            <p className="text-lg font-medium mt-1">Request Service</p>
             <p className="text-muted-foreground mt-2">
-              Submit your inquiry to <strong>A-Z Enterprises</strong>. Tell us what you're interested in and we'll get back to you fast.
+              This form submits your information to A-Z Enterprises. Tell us what you're interested in and we'll get back to you fast.
             </p>
           </div>
 
