@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { useSubmitPromotionLead, type Promotion } from "@/hooks/usePromotions";
 import { CheckCircle, Send, Loader2 } from "lucide-react";
 
@@ -38,6 +39,7 @@ const BUSINESS_OPTIONS = [
 
 export function PromotionInterestForm({ preselectedOffer, leadType = "standard" }: PromotionInterestFormProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
   const submitLead = useSubmitPromotionLead();
 
   const form = useForm<FormData>({
@@ -234,7 +236,9 @@ export function PromotionInterestForm({ preselectedOffer, leadType = "standard" 
               )}
             />
 
-            <Button 
+            <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
+
+            <Button
               type="submit" 
               className="w-full bg-gold hover:bg-gold/90 text-primary-foreground font-semibold"
               size="lg"

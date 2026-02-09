@@ -18,6 +18,7 @@ import { usePackages } from "@/hooks/usePackages";
 import { useCreateBooking } from "@/hooks/useBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 
 interface EventRequestFormProps {
   onSuccess?: (bookingId: string) => void;
@@ -45,6 +46,7 @@ export default function EventRequestForm({ onSuccess }: EventRequestFormProps) {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
 
   const selectedPackage = packages?.find(p => p.id === formData.packageId);
   const selectedType = bookableTypes?.find(t => t.id === selectedTypeId);
@@ -332,6 +334,9 @@ export default function EventRequestForm({ onSuccess }: EventRequestFormProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* SMS Consent */}
+      <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
       <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || !selectedTypeId || !formData.startDate}>
         {isSubmitting ? "Submitting..." : "Submit Event Request"}

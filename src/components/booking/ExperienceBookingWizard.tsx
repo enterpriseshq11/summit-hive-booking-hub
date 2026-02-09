@@ -16,6 +16,7 @@ import { useBookableTypes } from "@/hooks/useBookableTypes";
 import { usePackages } from "@/hooks/usePackages";
 import { useAvailability, useCreateSlotHold, useReleaseSlotHold } from "@/hooks/useAvailability";
 import { PackageSelector } from "@/components/booking/PackageSelector";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 
 type Step = "service" | "calendar" | "time" | "contact";
 

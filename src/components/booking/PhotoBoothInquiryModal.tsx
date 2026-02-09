@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -39,6 +40,7 @@ export function PhotoBoothInquiryModal({ open, onOpenChange, source = "website" 
   const createInquiry = useCreatePhotoBoothInquiry();
   
   const [isSuccess, setIsSuccess] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
   const [eventDate, setEventDate] = useState<Date | undefined>();
   const [formData, setFormData] = useState({
     full_name: "",
@@ -263,6 +265,9 @@ export function PhotoBoothInquiryModal({ open, onOpenChange, source = "website" 
                 })}
               </div>
             </div>
+
+            {/* SMS Consent */}
+            <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
             {/* Submit */}
             <Button

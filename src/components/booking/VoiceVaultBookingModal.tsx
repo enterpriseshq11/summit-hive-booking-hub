@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import {
   Dialog,
   DialogContent,
@@ -96,6 +97,7 @@ export function VoiceVaultBookingModal({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [depositConsent, setDepositConsent] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
 
   const resetForm = () => {
     setStep("type");
@@ -109,6 +111,7 @@ export function VoiceVaultBookingModal({
     setCustomerEmail("");
     setCustomerPhone("");
     setDepositConsent(false);
+    setSmsConsent(false);
   };
 
   const today = startOfToday();

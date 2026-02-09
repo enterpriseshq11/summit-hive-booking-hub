@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +41,7 @@ export function ScheduleTourModal({ open, onOpenChange, businessType = "coworkin
     email: "",
     phone: "",
   });
+  const [smsConsent, setSmsConsent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,6 +246,9 @@ export function ScheduleTourModal({ open, onOpenChange, businessType = "coworkin
               />
             </div>
           </div>
+
+          {/* SMS Consent */}
+          <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
           <div className="flex flex-col gap-3 pt-4">
             <Button

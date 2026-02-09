@@ -25,6 +25,7 @@ import {
 import { SEOHead } from "@/components/seo";
 import { useCreatePhotoBoothInquiry } from "@/hooks/usePhotoBoothInquiries";
 import { cn } from "@/lib/utils";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
 
@@ -48,6 +49,7 @@ export default function PhotoBoothLanding() {
   const createInquiry = useCreatePhotoBoothInquiry();
   
   const [isSuccess, setIsSuccess] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
   const [eventDate, setEventDate] = useState<Date | undefined>();
   const [formData, setFormData] = useState({
     full_name: "",

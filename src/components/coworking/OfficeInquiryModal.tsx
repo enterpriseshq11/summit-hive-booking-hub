@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCreateOfficeInquiry, type InquiryType } from "@/hooks/useOfficeInquiries";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { type OfficeListing } from "@/hooks/useOfficeListings";
 import { Loader2, Check, Building2, Calendar, MessageSquare, Clock } from "lucide-react";
 
@@ -72,6 +73,7 @@ export function OfficeInquiryModal({
 }: OfficeInquiryModalProps) {
   const createInquiry = useCreateOfficeInquiry();
   const [submitted, setSubmitted] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -341,6 +343,9 @@ export function OfficeInquiryModal({
               rows={3}
             />
           </div>
+
+          {/* SMS Consent */}
+          <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
           {/* Trust Signal */}
           <p className="text-xs text-muted-foreground text-center">

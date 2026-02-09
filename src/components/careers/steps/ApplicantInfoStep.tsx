@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CareerApplicant } from "@/hooks/useCareerApplications";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 
 interface ApplicantInfoStepProps {
   applicant: Partial<CareerApplicant>;
@@ -28,6 +30,7 @@ const REFERRAL_SOURCES = [
 ];
 
 export function ApplicantInfoStep({ applicant, setApplicant }: ApplicantInfoStepProps) {
+  const [smsConsent, setSmsConsent] = useState(false);
   const updateField = <K extends keyof CareerApplicant>(
     field: K,
     value: CareerApplicant[K]
@@ -260,6 +263,9 @@ export function ApplicantInfoStep({ applicant, setApplicant }: ApplicantInfoStep
           </select>
         </div>
       </div>
+
+      {/* SMS Consent */}
+      <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
     </div>
   );
 }

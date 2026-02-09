@@ -12,6 +12,8 @@ import { useEffect } from "react";
 
 // Pages
 import Index from "./pages/Index";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import BookingHub from "./pages/BookingHub";
 import Login from "./pages/Login";
 import Account from "./pages/Account";
@@ -106,6 +108,8 @@ function AppInner() {
         {/* Public routes with main layout */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Index />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route path="/booking" element={<BookingHub />} />
           <Route path="/summit" element={<Summit />} />
           <Route path="/coworking" element={<Coworking />} />

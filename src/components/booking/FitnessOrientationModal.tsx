@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ export function FitnessOrientationModal({ open, onOpenChange }: FitnessOrientati
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [questions, setQuestions] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
 
   const toggleDay = (day: string) => {
     setPreferredDays(prev => 
@@ -193,6 +195,9 @@ export function FitnessOrientationModal({ open, onOpenChange }: FitnessOrientati
               />
             </div>
           </div>
+
+          {/* SMS Consent */}
+          <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
           {/* Submit */}
           <div className="space-y-3">

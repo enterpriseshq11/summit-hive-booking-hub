@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { toast } from "sonner";
 import { format, addDays, addHours } from "date-fns";
 import { z } from "zod";
@@ -104,6 +105,7 @@ export function SummitRequestModal({
   const [guestEmail, setGuestEmail] = useState(authUser?.profile?.email || "");
   const [guestPhone, setGuestPhone] = useState(authUser?.profile?.phone || "");
   const [contactErrors, setContactErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
+  const [smsConsent, setSmsConsent] = useState(false);
 
   // Wedding-specific fields
   const [ceremonyIncluded, setCeremonyIncluded] = useState<boolean | null>(null);
@@ -692,6 +694,9 @@ export function SummitRequestModal({
                 </div>
               </CardContent>
             </Card>
+
+            {/* SMS Consent */}
+            <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
             {/* Submit */}
             <div className="pt-2">

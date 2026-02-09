@@ -99,8 +99,15 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
           <p className="text-sm text-primary-foreground/50">
             {SITE_CONFIG.business.copyright}
           </p>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy" className="text-sm text-primary-foreground/50 hover:text-accent transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="text-sm text-primary-foreground/50 hover:text-accent transition-colors">
+              Terms of Service
+            </Link>
+          </div>
           <p className="text-sm text-primary-foreground/50">Build: {BUILD_TIMESTAMP_UTC}</p>
-          <p className="text-sm text-primary-foreground/50">Crafted with care in Ohio</p>
         </div>
       </div>
     </footer>;
