@@ -34,6 +34,7 @@ import PhotoBoothLanding from "./pages/PhotoBoothLanding";
 import BookWithLindsey from "./pages/BookWithLindsey";
 import BookWithWorker from "./pages/BookWithWorker";
 import NotFound from "./pages/NotFound";
+import RequestService from "./pages/RequestService";
 import Careers from "./pages/Careers";
 import CareersSpa from "./pages/careers/CareersSpa";
 import CareersFitness from "./pages/careers/CareersFitness";
@@ -110,6 +111,7 @@ function AppInner() {
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/request-service" element={<RequestService />} />
           <Route path="/booking" element={<BookingHub />} />
           <Route path="/summit" element={<Summit />} />
           <Route path="/coworking" element={<Coworking />} />
