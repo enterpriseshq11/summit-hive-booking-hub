@@ -33,6 +33,14 @@ export default function TermsOfService() {
         <p>
           By opting in to SMS communications, you consent to receive transactional text messages from A-Z Enterprises related to your inquiry, appointment, or service request. Message frequency may vary. Message and data rates may apply. Reply STOP to opt out or HELP for help at any time.
         </p>
+        <p>
+          Mobile carriers are not liable for delayed or undelivered messages.
+        </p>
+
+        <h2>Age Requirement</h2>
+        <p>
+          You must be at least 18 years old to use this website and to opt in to receive SMS communications.
+        </p>
 
         <h2>User Conduct</h2>
         <p>You agree not to:</p>
