@@ -605,6 +605,9 @@ export function VoiceVaultBookingModal({
                 </div>
               )}
 
+              {/* SMS Consent */}
+              <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
+
               <p className="text-xs text-muted-foreground text-center">
                 By proceeding, you agree to the Voice Vault Studio & Content Terms.
               </p>
