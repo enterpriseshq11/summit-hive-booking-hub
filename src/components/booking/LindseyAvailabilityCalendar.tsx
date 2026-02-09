@@ -161,6 +161,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "" });
   const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
   const [consentChecked, setConsentChecked] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [completionType, setCompletionType] = useState<"paid" | "free" | "pay_on_arrival" | null>(null);
@@ -1062,6 +1063,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                     </p>
                   </div>
                 )}
+
+                {/* SMS Consent */}
+                <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
                 <Button
                   type="submit"

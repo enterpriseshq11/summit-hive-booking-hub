@@ -310,6 +310,9 @@ export default function PhotoBoothLanding() {
                         </div>
                       </div>
 
+                      {/* SMS Consent */}
+                      <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
+
                       <Button
                         type="submit"
                         className="w-full bg-accent text-primary hover:bg-accent/90 font-semibold py-6 text-lg"
