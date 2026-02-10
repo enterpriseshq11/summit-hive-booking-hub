@@ -82,7 +82,7 @@ export function SpecialsModal({ open, onOpenChange, title, specials, onSpecialAc
               <p className="text-sm text-muted-foreground">{special.description}</p>
 
               {claimingId === special.id ? (
-                <SpecialClaimForm specialId={special.id} specialTitle={special.title} />
+                <SpecialClaimForm specialId={special.id} specialTitle={special.title} businessUnit={special.business_unit} />
               ) : (
                 <Button
                   size="sm"
