@@ -67,6 +67,7 @@ interface VoiceVaultBookingModalProps {
 }
 
 type Step = "type" | "details" | "contact" | "payment" | "confirmed";
+import { Textarea } from "@/components/ui/textarea";
 
 export function VoiceVaultBookingModal({
   open,
@@ -98,6 +99,9 @@ export function VoiceVaultBookingModal({
   const [customerPhone, setCustomerPhone] = useState("");
   const [depositConsent, setDepositConsent] = useState(false);
   const [smsConsent, setSmsConsent] = useState(false);
+  const [preferredDateTime, setPreferredDateTime] = useState("");
+
+  const isRequestMode = !voiceVaultPaymentsEnabled;
 
   const resetForm = () => {
     setStep("type");
@@ -112,6 +116,7 @@ export function VoiceVaultBookingModal({
     setCustomerPhone("");
     setDepositConsent(false);
     setSmsConsent(false);
+    setPreferredDateTime("");
   };
 
   const today = startOfToday();
@@ -141,12 +146,37 @@ export function VoiceVaultBookingModal({
         return;
       }
 
+      // REQUEST MODE: submit as a request, no payment
+      if (isRequestMode) {
+        const { error } = await supabase.from("bookings").insert({
+          business_id: (await supabase.from("businesses").select("id").eq("type", "voice_vault").maybeSingle()).data?.id || "",
+          bookable_type_id: "00000000-0000-0000-0000-000000000000",
+          booking_number: `VV-REQ-${Date.now()}`,
+          guest_name: customerName.trim(),
+          guest_email: customerEmail.trim(),
+          guest_phone: customerPhone.trim() || null,
+          start_datetime: new Date().toISOString(),
+          end_datetime: new Date().toISOString(),
+          subtotal: 0,
+          total_amount: 0,
+          status: "pending" as any,
+          source_brand: "voice_vault",
+          notes: `REQUEST MODE\nService: ${bookingType === "hourly" ? `Studio Rental (${durationHours} hrs)` : bookingType === "core_series" ? "Core Series" : "White Glove"}\nPreferred Day/Time: ${preferredDateTime || "Not specified"}`,
+        });
+
+        if (error) throw error;
+
+        setStep("confirmed");
+        toast.success("Request received! Our team will reach out to confirm.");
+        return;
+      }
+
       const payload: Record<string, unknown> = {
         type: bookingType,
         customer_name: customerName.trim(),
         customer_email: customerEmail.trim(),
         customer_phone: customerPhone.trim() || null,
-        skip_payment: bookingType === "hourly" && !voiceVaultPaymentsEnabled,
+        skip_payment: false,
       };
 
       if (bookingType === "hourly") {
@@ -167,7 +197,6 @@ export function VoiceVaultBookingModal({
 
       if (error) throw error;
 
-      // Handle pay-on-arrival response
       if (data?.is_pay_on_arrival) {
         setConfirmedBookingId(data.record_id);
         setStep("confirmed");
@@ -205,9 +234,11 @@ export function VoiceVaultBookingModal({
       case "details":
         return bookingType === "hourly" ? "Choose Your Time" : "Choose Your Payment Plan";
       case "contact":
-        return "Your Information";
+        return isRequestMode ? "Your Information" : "Your Information";
       case "payment":
-        return "Review & Pay Deposit";
+        return isRequestMode ? "Review & Submit Request" : "Review & Pay Deposit";
+      case "confirmed":
+        return isRequestMode ? "Request Received!" : "Booking Confirmed!";
       default:
         return "";
     }
@@ -513,11 +544,27 @@ export function VoiceVaultBookingModal({
                   onChange={(e) => setCustomerPhone(e.target.value)}
                 />
               </div>
+
+              {isRequestMode && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Open 7 days a week &mdash; anytime after 10 AM is best.
+                  </p>
+                  <Label htmlFor="preferred-datetime">What day and time would you like to come in?</Label>
+                  <Textarea
+                    id="preferred-datetime"
+                    placeholder="e.g. Saturday afternoon, or Tuesday after 2 PM"
+                    value={preferredDateTime}
+                    onChange={(e) => setPreferredDateTime(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+              )}
             </div>
           )}
 
-          {/* Step 4: Review */}
-          {step === "payment" && (
+          {/* Step 4: Review - only in live booking mode */}
+          {step === "payment" && !isRequestMode && (
             <div className="space-y-4">
               <div className="bg-secondary/50 rounded-lg p-4 border border-border space-y-3">
                 <div className="flex justify-between">
@@ -562,7 +609,6 @@ export function VoiceVaultBookingModal({
                 <div className="pt-3 border-t border-border space-y-2">
                   {bookingType === "hourly" ? (
                     <>
-                      {/* Hourly deposit breakdown */}
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Total Price</span>
                         <span className="font-medium text-foreground">${getHourlyPricing().total.toFixed(2)}</span>
@@ -587,8 +633,8 @@ export function VoiceVaultBookingModal({
                 </div>
               </div>
 
-              {/* Deposit consent checkbox - only shown when payments enabled for hourly */}
-              {bookingType === "hourly" && voiceVaultPaymentsEnabled && (
+              {/* Deposit consent checkbox */}
+              {bookingType === "hourly" && (
                 <div className="flex items-start gap-3 p-4 rounded-lg border border-border bg-muted/30">
                   <Checkbox
                     id="vv-deposit-consent"
@@ -605,7 +651,6 @@ export function VoiceVaultBookingModal({
                 </div>
               )}
 
-              {/* SMS Consent */}
               <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
               <p className="text-xs text-muted-foreground text-center">
@@ -614,57 +659,100 @@ export function VoiceVaultBookingModal({
             </div>
           )}
 
-          {/* Navigation */}
-          <div className="flex gap-3 pt-4 border-t border-border">
-            {step !== "type" && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (step === "details") setStep("type");
-                  if (step === "contact") setStep("details");
-                  if (step === "payment") setStep("contact");
-                }}
-                disabled={loading}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            )}
-
-            <Button
-              className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-              disabled={
-                loading ||
-                (step === "type" && !canProceedFromType) ||
-                (step === "details" && !canProceedFromDetails) ||
-                (step === "contact" && !canProceedFromContact) ||
-                (step === "payment" && bookingType === "hourly" && voiceVaultPaymentsEnabled && !depositConsent)
-              }
-              onClick={() => {
-                if (step === "type") setStep("details");
-                else if (step === "details") setStep("contact");
-                else if (step === "contact") setStep("payment");
-                else if (step === "payment") handleSubmit();
-              }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : step === "payment" ? (
-                <>
-                  Proceed to Payment
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </>
-              ) : (
-                <>
-                  Continue
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </>
+          {/* Confirmed step */}
+          {step === "confirmed" && (
+            <div className="space-y-4 text-center py-4">
+              <div className="flex justify-center">
+                <div className="h-16 w-16 rounded-full bg-accent/20 flex items-center justify-center">
+                  <CheckCircle2 className="h-8 w-8 text-accent" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-foreground">
+                {isRequestMode ? "Request Received!" : "Booking Confirmed!"}
+              </h3>
+              <p className="text-muted-foreground">
+                {isRequestMode
+                  ? "Our team will reach out to confirm availability and schedule your session."
+                  : "Your Voice Vault session has been scheduled. Payment is due on arrival."}
+              </p>
+              {customerEmail && (
+                <p className="text-sm text-muted-foreground">
+                  A confirmation has been sent to <strong>{customerEmail}</strong>.
+                </p>
               )}
-            </Button>
-          </div>
+              <Button variant="outline" onClick={handleClose}>
+                Close
+              </Button>
+            </div>
+          )}
+
+          {/* Navigation - hidden on confirmed step */}
+          {step !== "confirmed" && (
+            <div className="flex gap-3 pt-4 border-t border-border">
+              {step !== "type" && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (step === "details") setStep("type");
+                    if (step === "contact") {
+                      if (isRequestMode) setStep("type");
+                      else setStep("details");
+                    }
+                    if (step === "payment") setStep("contact");
+                  }}
+                  disabled={loading}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+              )}
+
+              <Button
+                className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                disabled={
+                  loading ||
+                  (step === "type" && !canProceedFromType) ||
+                  (step === "details" && !canProceedFromDetails) ||
+                  (step === "contact" && !canProceedFromContact) ||
+                  (step === "payment" && bookingType === "hourly" && voiceVaultPaymentsEnabled && !depositConsent)
+                }
+                onClick={() => {
+                  if (step === "type") {
+                    if (isRequestMode) setStep("contact");
+                    else setStep("details");
+                  }
+                  else if (step === "details") setStep("contact");
+                  else if (step === "contact") {
+                    if (isRequestMode) handleSubmit();
+                    else setStep("payment");
+                  }
+                  else if (step === "payment") handleSubmit();
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : step === "contact" && isRequestMode ? (
+                  <>
+                    Submit Request
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                ) : step === "payment" ? (
+                  <>
+                    Proceed to Payment
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                ) : (
+                  <>
+                    Continue
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
