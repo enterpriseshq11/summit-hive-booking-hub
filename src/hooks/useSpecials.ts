@@ -15,6 +15,8 @@ export interface Special {
   start_date: string | null;
   end_date: string | null;
   is_active: boolean;
+  action_type: string;
+  promo_code: string | null;
   created_at: string;
   updated_at: string;
 }

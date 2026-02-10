@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { SpecialClaimForm } from "./SpecialClaimForm";
 import type { Special } from "@/hooks/useSpecials";
 
 interface SpecialsModalProps {
@@ -15,8 +18,28 @@ interface SpecialsModalProps {
 
 export function SpecialsModal({ open, onOpenChange, title, specials, onSpecialAction }: SpecialsModalProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [claimingId, setClaimingId] = useState<string | null>(null);
 
   const handleAction = (special: Special) => {
+    const actionType = special.action_type || "route_only";
+
+    // Promo code flow: store code, navigate, show toast
+    if (actionType === "apply_promo" && special.promo_code) {
+      sessionStorage.setItem("az_promo_code", special.promo_code);
+      toast({ title: `Promo code ${special.promo_code} applied!`, description: "It will be auto-filled at checkout." });
+      if (special.cta_link) navigate(special.cta_link);
+      onOpenChange(false);
+      return;
+    }
+
+    // Request form flow: show inline form
+    if (actionType === "request_form") {
+      setClaimingId(special.id);
+      return;
+    }
+
+    // Route flow (default / route_only): navigate or call custom handler
     if (onSpecialAction) {
       onSpecialAction(special);
     } else if (special.cta_link) {
@@ -25,8 +48,14 @@ export function SpecialsModal({ open, onOpenChange, title, specials, onSpecialAc
     onOpenChange(false);
   };
 
+  // Reset claiming state when modal closes
+  const handleOpenChange = (v: boolean) => {
+    if (!v) setClaimingId(null);
+    onOpenChange(v);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
@@ -51,14 +80,19 @@ export function SpecialsModal({ open, onOpenChange, title, specials, onSpecialAc
                 )}
               </div>
               <p className="text-sm text-muted-foreground">{special.description}</p>
-              <Button
-                size="sm"
-                onClick={() => handleAction(special)}
-                className="bg-accent hover:bg-accent/90 text-primary font-semibold"
-              >
-                {special.cta_label}
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
+
+              {claimingId === special.id ? (
+                <SpecialClaimForm specialId={special.id} specialTitle={special.title} />
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => handleAction(special)}
+                  className="bg-accent hover:bg-accent/90 text-primary font-semibold"
+                >
+                  {special.cta_label}
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              )}
             </div>
           ))}
         </div>

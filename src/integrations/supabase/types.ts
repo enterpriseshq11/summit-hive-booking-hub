@@ -4392,6 +4392,44 @@ export type Database = {
         }
         Relationships: []
       }
+      special_claims: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          name: string
+          phone: string
+          special_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          phone: string
+          special_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string
+          special_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "special_claims_special_id_fkey"
+            columns: ["special_id"]
+            isOneToOne: false
+            referencedRelation: "specials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       specials: {
         Row: {
           action_type: string

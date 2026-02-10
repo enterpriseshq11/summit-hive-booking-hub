@@ -40,6 +40,12 @@ const STATUS_COLORS: Record<string, string> = {
   inactive: "bg-red-500/20 text-red-400 border-red-500/30",
 };
 
+const ACTION_TYPES = [
+  { value: "route_only", label: "Route (navigate to page)" },
+  { value: "apply_promo", label: "Promo Code (auto-apply at checkout)" },
+  { value: "request_form", label: "Request Form (lead capture)" },
+] as const;
+
 const EMPTY_FORM: SpecialInsert = {
   business_unit: "summit",
   title: "",
@@ -52,6 +58,8 @@ const EMPTY_FORM: SpecialInsert = {
   start_date: null,
   end_date: null,
   is_active: true,
+  action_type: "route_only",
+  promo_code: null,
 };
 
 export default function AdminSpecials() {
@@ -91,6 +99,8 @@ export default function AdminSpecials() {
       start_date: s.start_date,
       end_date: s.end_date,
       is_active: s.is_active,
+      action_type: s.action_type || "route_only",
+      promo_code: s.promo_code,
     });
     setEditOpen(true);
   };
@@ -231,6 +241,28 @@ export default function AdminSpecials() {
               <Label className="text-zinc-300">Description</Label>
               <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-zinc-800 border-zinc-700 text-white" rows={3} />
             </div>
+
+            {/* Action Type */}
+            <div>
+              <Label className="text-zinc-300">Action Type</Label>
+              <Select value={form.action_type || "route_only"} onValueChange={(v) => setForm({ ...form, action_type: v })}>
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  {ACTION_TYPES.map((a) => (
+                    <SelectItem key={a.value} value={a.value} className="text-white">{a.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Promo Code (only for apply_promo) */}
+            {form.action_type === "apply_promo" && (
+              <div>
+                <Label className="text-zinc-300">Promo Code</Label>
+                <Input value={form.promo_code ?? ""} onChange={(e) => setForm({ ...form, promo_code: e.target.value || null })} placeholder="BOGOMASSAGE" className="bg-zinc-800 border-zinc-700 text-white" />
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-zinc-300">CTA Label</Label>
