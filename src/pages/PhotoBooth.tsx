@@ -27,6 +27,8 @@ import photoBoothLogo from "@/assets/360-photo-booth-logo.png";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
 import { PhotoBoothBookingWizard } from "@/components/booking/PhotoBoothBookingWizard";
 import { usePhotoBooth360PaymentsConfig } from "@/hooks/usePaymentConfigs";
+import { SpecialsPopup, SpecialsButton, SpecialsModal } from "@/components/specials";
+import { usePublicSpecials } from "@/hooks/useSpecials";
 
 const FEATURES = [
   { icon: Camera, text: "360 platform + pro lighting setup" },
@@ -74,6 +76,8 @@ export default function PhotoBooth() {
   // Get payment config for dynamic CTA labels
   const { photoBooth360PaymentsEnabled } = usePhotoBooth360PaymentsConfig();
   const ctaLabel = photoBooth360PaymentsEnabled ? "Book & Pay Deposit" : "Book Appointment";
+  const [showSpecials, setShowSpecials] = useState(false);
+  const { data: boothSpecials = [] } = usePublicSpecials("photo_booth_360");
 
   const scrollToBooking = () => {
     const el = document.getElementById("photo-booth-booking");
@@ -405,6 +409,10 @@ export default function PhotoBooth() {
         onOpenChange={setInquiryOpen}
         source="website"
       />
+
+      {/* Specials Popup + Modal */}
+      <SpecialsPopup storageKey="photo_booth_360" headline="Want to see our current 360 Photo Booth specials?" onViewSpecials={() => setShowSpecials(true)} hasSpecials={boothSpecials.length > 0} />
+      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="360 Photo Booth Specials" specials={boothSpecials} />
     </>
   );
 }
