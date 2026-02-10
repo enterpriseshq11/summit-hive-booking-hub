@@ -290,10 +290,10 @@ export default function Coworking() {
             />
             <div className="mt-6 pt-6 border-t border-border flex gap-3">
               <Button
-                onClick={() => openRequestModal("Day Pass")}
+                onClick={() => openRequestModal("Private Office")}
                 className="flex-1 bg-accent hover:bg-accent/90 text-primary"
               >
-                Book a Day Pass
+                Request an Office
               </Button>
               <Button
                 variant="outline"
