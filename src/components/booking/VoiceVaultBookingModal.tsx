@@ -560,6 +560,8 @@ export function VoiceVaultBookingModal({
                   />
                 </div>
               )}
+
+              <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
             </div>
           )}
 
