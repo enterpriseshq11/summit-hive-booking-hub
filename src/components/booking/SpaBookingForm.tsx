@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,10 +22,6 @@ import { useCreateBooking } from "@/hooks/useBookings";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
-import { PromoCodeInput } from "@/components/checkout/PromoCodeInput";
-import { ServiceDiscountSelector } from "@/components/checkout/ServiceDiscountSelector";
-import { CheckoutDiscountSummary, computeDiscounts } from "@/components/checkout/CheckoutDiscountSummary";
-import { useServiceDiscountConfig, type PromoCode } from "@/hooks/usePromoCodes";
 
 interface SpaBookingFormProps {
   onSuccess?: (bookingId: string) => void;
@@ -68,14 +64,6 @@ export default function SpaBookingForm({ onSuccess }: SpaBookingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [intakeComplete, setIntakeComplete] = useState(false);
   const [smsConsent, setSmsConsent] = useState(false);
-
-  // Discount state
-  const [searchParams] = useSearchParams();
-  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
-  const [serviceDiscountCategory, setServiceDiscountCategory] = useState<string | null>(null);
-  const [eligibilityConfirmed, setEligibilityConfirmed] = useState(false);
-  const { data: discountConfig } = useServiceDiscountConfig("restoration");
-  const urlPromo = searchParams.get("promo") || sessionStorage.getItem("az_promo_code");
 
   // Time slots
   const timeSlots = [
@@ -394,26 +382,6 @@ export default function SpaBookingForm({ onSuccess }: SpaBookingFormProps) {
         </Card>
       )}
 
-      {/* Promo + Service Discounts */}
-      {selectedPackage && (
-        <div className="space-y-3">
-          <PromoCodeInput
-            businessUnit="restoration"
-            appliedPromo={appliedPromo}
-            onApply={setAppliedPromo}
-            initialCode={urlPromo || undefined}
-          />
-          <ServiceDiscountSelector
-            businessUnit="restoration"
-            selectedCategory={serviceDiscountCategory}
-            onSelect={setServiceDiscountCategory}
-            eligibilityConfirmed={eligibilityConfirmed}
-            onEligibilityChange={setEligibilityConfirmed}
-            hasPromoApplied={!!appliedPromo}
-          />
-        </div>
-      )}
-
       {/* Price Summary */}
       {selectedPackage && (
         <Card className="bg-muted/30">
@@ -433,16 +401,6 @@ export default function SpaBookingForm({ onSuccess }: SpaBookingFormProps) {
                 {isMember && <Badge variant="secondary">Member Price</Badge>}
               </div>
             </div>
-            {(appliedPromo || (serviceDiscountCategory && eligibilityConfirmed)) && (
-              <div className="mt-3 pt-3 border-t border-border">
-                <CheckoutDiscountSummary
-                  subtotal={calculatePrice()}
-                  promoCode={appliedPromo}
-                  serviceDiscountCategory={eligibilityConfirmed ? serviceDiscountCategory : null}
-                  serviceDiscountPercent={discountConfig?.discount_percent ?? 10}
-                />
-              </div>
-            )}
           </CardContent>
         </Card>
       )}

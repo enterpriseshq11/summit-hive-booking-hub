@@ -15,13 +15,6 @@ export interface Special {
   start_date: string | null;
   end_date: string | null;
   is_active: boolean;
-  action_type: string;
-  destination_route: string | null;
-  promo_code: string | null;
-  discount_type: string | null;
-  discount_value: number | null;
-  terms: string | null;
-  requires_verification: boolean;
   created_at: string;
   updated_at: string;
 }

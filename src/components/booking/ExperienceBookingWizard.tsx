@@ -1,5 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useMemo, useRef, useState } from "react";
 import { format, addDays, startOfToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -18,12 +17,6 @@ import { usePackages } from "@/hooks/usePackages";
 import { useAvailability, useCreateSlotHold, useReleaseSlotHold } from "@/hooks/useAvailability";
 import { PackageSelector } from "@/components/booking/PackageSelector";
 import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
-import { PromoCodeInput } from "@/components/checkout/PromoCodeInput";
-import { ServiceDiscountSelector } from "@/components/checkout/ServiceDiscountSelector";
-import { CheckoutDiscountSummary, computeDiscounts } from "@/components/checkout/CheckoutDiscountSummary";
-import { useServiceDiscountConfig, type PromoCode } from "@/hooks/usePromoCodes";
-
-
 
 type Step = "service" | "calendar" | "time" | "contact";
 
@@ -62,7 +55,6 @@ export function ExperienceBookingWizard({
   const calendarStepRef = useRef<HTMLDivElement>(null);
   const timeStepRef = useRef<HTMLDivElement>(null);
 
-  const [searchParams] = useSearchParams();
   const [step, setStep] = useState<Step>("service");
   const [selectedBookableTypeId, setSelectedBookableTypeId] = useState<string>("");
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
@@ -70,16 +62,6 @@ export function ExperienceBookingWizard({
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Discount state
-  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
-  const [serviceDiscountCategory, setServiceDiscountCategory] = useState<string | null>(null);
-  const [eligibilityConfirmed, setEligibilityConfirmed] = useState(false);
-  const { data: discountConfig } = useServiceDiscountConfig(businessType);
-
-  // Auto-apply promo from URL or sessionStorage
-  const urlPromo = searchParams.get("promo") || sessionStorage.getItem("az_promo_code");
-
 
   const { data: businesses } = useBusinesses();
   const business = businesses?.find((b) => b.type === businessType);
@@ -144,19 +126,7 @@ export function ExperienceBookingWizard({
   const createHold = useCreateSlotHold();
   const releaseHold = useReleaseSlotHold();
 
-  const subtotal = selectedPackage ? Number(selectedPackage.base_price) : 0;
-  const serviceDiscountPct = discountConfig?.discount_percent ?? 10;
-  const hasPromo = !!appliedPromo;
-  const hasServiceDiscount = !!serviceDiscountCategory && eligibilityConfirmed;
-  const stackable = appliedPromo?.stackable_with_service_discount ?? false;
-  const discountResult = computeDiscounts({
-    subtotal,
-    promoCode: appliedPromo,
-    serviceDiscountCategory: hasServiceDiscount ? serviceDiscountCategory : null,
-    serviceDiscountPercent: serviceDiscountPct,
-    stackable,
-  });
-  const total = discountResult.total;
+  const total = selectedPackage ? Number(selectedPackage.base_price) : 0;
   const { deposit, remaining } = computeDeposit(total, depositPercent, minDeposit);
 
   const handleSelectPackage = (pkg: Package) => {
@@ -357,56 +327,12 @@ export function ExperienceBookingWizard({
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Review & Pay</h3>
 
-          {/* Promo Code Input */}
-          {!requestOnly && (
-            <PromoCodeInput
-              businessUnit={businessType}
-              appliedPromo={appliedPromo}
-              onApply={(p) => {
-                setAppliedPromo(p);
-                if (p && !stackable && serviceDiscountCategory) {
-                  setServiceDiscountCategory(null);
-                  setEligibilityConfirmed(false);
-                }
-              }}
-              initialCode={urlPromo || undefined}
-            />
-          )}
-
-          {/* Service Discount Selector */}
-          {!requestOnly && (
-            <ServiceDiscountSelector
-              businessUnit={businessType}
-              selectedCategory={serviceDiscountCategory}
-              onSelect={(cat) => {
-                setServiceDiscountCategory(cat);
-                if (cat && !stackable && appliedPromo) {
-                  setAppliedPromo(null);
-                }
-              }}
-              eligibilityConfirmed={eligibilityConfirmed}
-              onEligibilityChange={setEligibilityConfirmed}
-              hasPromoApplied={hasPromo}
-            />
-          )}
-
           {!requestOnly ? (
             <Card className="border-border">
               <CardContent className="p-4 space-y-2">
-                {discountResult.totalDiscount > 0 && (
-                  <CheckoutDiscountSummary
-                    subtotal={subtotal}
-                    promoCode={appliedPromo}
-                    serviceDiscountCategory={hasServiceDiscount ? serviceDiscountCategory : null}
-                    serviceDiscountPercent={serviceDiscountPct}
-                    stackable={stackable}
-                  />
-                )}
-                {discountResult.totalDiscount === 0 && (
-                  <p className="text-sm">
-                    <strong>Total:</strong> ${total.toFixed(0)}
-                  </p>
-                )}
+                <p className="text-sm">
+                  <strong>Total:</strong> ${total.toFixed(0)}
+                </p>
                 <p className="text-sm">
                   <strong>Deposit Due Today ({depositPercent}%):</strong> ${deposit.toFixed(0)}
                 </p>
