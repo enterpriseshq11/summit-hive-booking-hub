@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 
 type Step = "duration" | "calendar" | "time" | "contact" | "confirmed";
+import { Textarea } from "@/components/ui/textarea";
+import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 
 const HOURLY_RATE = 45;
 const MIN_HOURS = 1;
@@ -90,9 +92,11 @@ export function PhotoBoothBookingWizard({
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [confirmedBookingId, setConfirmedBookingId] = useState<string | null>(null);
   const [depositConsent, setDepositConsent] = useState(false);
+  const [preferredDateTime, setPreferredDateTime] = useState("");
 
   // Get payment config
   const { photoBooth360PaymentsEnabled, isLoading: isLoadingPaymentConfig } = usePhotoBooth360PaymentsConfig();
+  const isRequestMode = !photoBooth360PaymentsEnabled;
 
   const { data: businesses } = useBusinesses();
   const business = businesses?.find((b) => b.type === "photo_booth");
@@ -154,6 +158,11 @@ export function PhotoBoothBookingWizard({
   const { deposit, remaining } = computeDeposit(total, depositPercent, minDeposit);
 
   const handleSelectDuration = () => {
+    if (isRequestMode) {
+      // Skip calendar/time in request mode
+      setStep("contact");
+      return;
+    }
     setSelectedDate(undefined);
     setSelectedSlot(null);
     setStep("calendar");
@@ -166,6 +175,46 @@ export function PhotoBoothBookingWizard({
     setSelectedSlot(null);
     setStep("time");
     setTimeout(() => timeStepRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+  };
+
+  const submitRequest = async () => {
+    if (!guestInfo.name.trim() || !guestInfo.email.trim() || !guestInfo.phone.trim()) {
+      toast.error("Please enter your name, email, and phone.");
+      return;
+    }
+    if (!isValidEmail(guestInfo.email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const bizId = business?.id || "";
+      const { error } = await supabase.from("bookings").insert({
+        business_id: bizId,
+        bookable_type_id: bookableType?.id || "00000000-0000-0000-0000-000000000000",
+        booking_number: `PB-REQ-${Date.now()}`,
+        guest_name: guestInfo.name.trim(),
+        guest_email: guestInfo.email.trim(),
+        guest_phone: guestInfo.phone.trim(),
+        start_datetime: new Date().toISOString(),
+        end_datetime: new Date().toISOString(),
+        subtotal: 0,
+        total_amount: 0,
+        status: "pending" as any,
+        source_brand: "photo_booth",
+        notes: `REQUEST MODE\nDuration: ${selectedHours} hours\nPreferred Day/Time: ${preferredDateTime || "Not specified"}`,
+      });
+
+      if (error) throw error;
+
+      setStep("confirmed");
+      toast.success("Request received! Our team will reach out to confirm.");
+    } catch (err: any) {
+      toast.error(err?.message || "Unable to submit request.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const proceedToPayment = async () => {
@@ -206,7 +255,7 @@ export function PhotoBoothBookingWizard({
         customer_name: guestInfo.name.trim(),
         customer_email: guestInfo.email.trim(),
         customer_phone: guestInfo.phone.trim(),
-        skip_payment: !photoBooth360PaymentsEnabled,
+        skip_payment: false,
       };
 
       console.info("[PHOTO_BOOTH_CHECKOUT] Invoking experience-checkout", payload);
@@ -230,7 +279,6 @@ export function PhotoBoothBookingWizard({
         throw error;
       }
       
-      // Handle pay-on-arrival response
       if (data?.is_pay_on_arrival) {
         console.info("[PHOTO_BOOTH_CHECKOUT] Pay-on-arrival booking confirmed", data);
         setConfirmedBookingId(data.booking_id);
@@ -354,7 +402,7 @@ export function PhotoBoothBookingWizard({
               className="w-full bg-accent text-primary hover:bg-accent/90 font-semibold py-6"
               onClick={handleSelectDuration}
             >
-              Continue - Select Date & Time
+              Continue{isRequestMode ? " - Request a Time" : " - Select Date & Time"}
             </Button>
           </div>
 
@@ -412,8 +460,8 @@ export function PhotoBoothBookingWizard({
         </div>
       )}
 
-      {/* Step 2: Calendar */}
-      {step !== "duration" && (
+      {/* Step 2: Calendar - hidden in request mode */}
+      {step !== "duration" && !isRequestMode && (
         <div ref={calendarStepRef} className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="text-xs">
@@ -503,63 +551,87 @@ export function PhotoBoothBookingWizard({
         </div>
       )}
 
-      {/* Step 4: Contact + Review & Pay */}
+      {/* Step 4: Contact + Review */}
       {step === "contact" && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">
-            {photoBooth360PaymentsEnabled ? "Review & Pay" : "Review & Confirm"}
+            {isRequestMode ? "Request a Time" : photoBooth360PaymentsEnabled ? "Review & Pay" : "Review & Confirm"}
           </h3>
 
-          <Card className="border-border">
-            <CardContent className="p-4 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Duration</span>
-                <span className="text-sm font-medium">
-                  {selectedHours} {selectedHours === 1 ? "hour" : "hours"} @ ${HOURLY_RATE}/hr
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Date & Time</span>
-                <span className="text-sm font-medium">
-                  {selectedDate && format(selectedDate, "MMM d, yyyy")} at{" "}
-                  {selectedSlot && format(new Date(selectedSlot.start_time), "h:mm a")}
-                </span>
-              </div>
-              <Separator className="my-2" />
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Total</span>
-                <span className="text-lg font-bold">${total}</span>
-              </div>
-              
-              {photoBooth360PaymentsEnabled ? (
-                <>
-                  <div className="flex justify-between items-center text-accent">
-                    <span className="text-sm font-medium">Deposit Due Today ({depositPercent}%)</span>
-                    <span className="text-lg font-bold">${deposit.toFixed(0)}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-muted-foreground">
-                    <span className="text-sm">Remaining Balance (due on arrival)</span>
-                    <span className="text-sm">${remaining.toFixed(0)}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground pt-2">
-                    Your deposit reserves this time slot and is applied toward your total. Remaining balance is due at check-in.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="flex justify-between items-center text-accent">
-                    <span className="text-sm font-medium">Amount Due on Arrival</span>
-                    <span className="text-lg font-bold">${total}</span>
-                  </div>
-                  <div className="bg-accent/10 rounded-lg p-3 border border-accent/30 mt-2">
-                    <p className="text-sm text-foreground text-center">
-                      <strong>No payment required now.</strong> Full payment is due when you arrive.
+          {/* Summary card - only show date/time details in live booking mode */}
+          {!isRequestMode && (
+            <Card className="border-border">
+              <CardContent className="p-4 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Duration</span>
+                  <span className="text-sm font-medium">
+                    {selectedHours} {selectedHours === 1 ? "hour" : "hours"} @ ${HOURLY_RATE}/hr
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Date & Time</span>
+                  <span className="text-sm font-medium">
+                    {selectedDate && format(selectedDate, "MMM d, yyyy")} at{" "}
+                    {selectedSlot && format(new Date(selectedSlot.start_time), "h:mm a")}
+                  </span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Total</span>
+                  <span className="text-lg font-bold">${total}</span>
+                </div>
+                
+                {photoBooth360PaymentsEnabled ? (
+                  <>
+                    <div className="flex justify-between items-center text-accent">
+                      <span className="text-sm font-medium">Deposit Due Today ({depositPercent}%)</span>
+                      <span className="text-lg font-bold">${deposit.toFixed(0)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-muted-foreground">
+                      <span className="text-sm">Remaining Balance (due on arrival)</span>
+                      <span className="text-sm">${remaining.toFixed(0)}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground pt-2">
+                      Your deposit reserves this time slot and is applied toward your total. Remaining balance is due at check-in.
                     </p>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center text-accent">
+                      <span className="text-sm font-medium">Amount Due on Arrival</span>
+                      <span className="text-lg font-bold">${total}</span>
+                    </div>
+                    <div className="bg-accent/10 rounded-lg p-3 border border-accent/30 mt-2">
+                      <p className="text-sm text-foreground text-center">
+                        <strong>No payment required now.</strong> Full payment is due when you arrive.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Request mode duration summary */}
+          {isRequestMode && (
+            <Card className="border-border">
+              <CardContent className="p-4 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Duration</span>
+                  <span className="text-sm font-medium">
+                    {selectedHours} {selectedHours === 1 ? "hour" : "hours"} @ ${HOURLY_RATE}/hr
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Estimated Total</span>
+                  <span className="text-lg font-bold">${total}</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  No payment required now. Our team will confirm availability and pricing.
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid sm:grid-cols-3 gap-3">
             <div className="space-y-1.5">
@@ -591,6 +663,23 @@ export function PhotoBoothBookingWizard({
             </div>
           </div>
 
+          {/* Preferred day/time - request mode only */}
+          {isRequestMode && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Open 7 days a week &mdash; anytime after 10 AM is best.
+              </p>
+              <Label htmlFor="pb-preferred-datetime">What day and time would you like to come in?</Label>
+              <Textarea
+                id="pb-preferred-datetime"
+                placeholder="e.g. Saturday afternoon, or Tuesday after 2 PM"
+                value={preferredDateTime}
+                onChange={(e) => setPreferredDateTime(e.target.value)}
+                rows={2}
+              />
+            </div>
+          )}
+
           {paymentError && (
             <Alert>
               <AlertTitle>Booking couldn't be completed</AlertTitle>
@@ -599,7 +688,7 @@ export function PhotoBoothBookingWizard({
           )}
 
           {/* Deposit consent checkbox - only shown when payments enabled */}
-          {photoBooth360PaymentsEnabled && (
+          {photoBooth360PaymentsEnabled && !isRequestMode && (
             <div className="flex items-start gap-3 p-4 rounded-lg border border-border bg-muted/30">
               <Checkbox
                 id="deposit-consent"
@@ -621,7 +710,11 @@ export function PhotoBoothBookingWizard({
               type="button"
               variant="outline"
               onClick={() => {
-                setStep("time");
+                if (isRequestMode) {
+                  setStep("duration");
+                } else {
+                  setStep("time");
+                }
                 setDepositConsent(false);
               }}
               disabled={isSubmitting}
@@ -631,21 +724,23 @@ export function PhotoBoothBookingWizard({
             <Button
               type="button"
               className="bg-accent text-primary hover:bg-accent/90 flex-1"
-              onClick={proceedToPayment}
-              disabled={isSubmitting || (photoBooth360PaymentsEnabled && !depositConsent)}
+              onClick={isRequestMode ? submitRequest : proceedToPayment}
+              disabled={isSubmitting || (photoBooth360PaymentsEnabled && !isRequestMode && !depositConsent)}
             >
               {isSubmitting 
                 ? "Processing..." 
-                : photoBooth360PaymentsEnabled 
-                  ? "Proceed to Payment" 
-                  : "Confirm Booking"
+                : isRequestMode
+                  ? "Submit Request"
+                  : photoBooth360PaymentsEnabled 
+                    ? "Proceed to Payment" 
+                    : "Confirm Booking"
               }
             </Button>
           </div>
         </div>
       )}
 
-      {/* Step 5: Confirmed (Pay on Arrival) */}
+      {/* Step 5: Confirmed */}
       {step === "confirmed" && (
         <div className="space-y-6 text-center py-6">
           <div className="flex justify-center">
@@ -655,40 +750,48 @@ export function PhotoBoothBookingWizard({
           </div>
           
           <div className="space-y-2">
-            <h3 className="text-2xl font-bold text-foreground">Booking Confirmed!</h3>
+            <h3 className="text-2xl font-bold text-foreground">
+              {isRequestMode ? "Request Received!" : "Booking Confirmed!"}
+            </h3>
             <p className="text-muted-foreground">
-              Your 360 Photo Booth rental has been scheduled.
+              {isRequestMode
+                ? "Our team will reach out to confirm availability and schedule your session."
+                : "Your 360 Photo Booth rental has been scheduled."}
             </p>
           </div>
 
-          <Card className="border-border text-left">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Date & Time</span>
-                <span className="text-sm font-medium">
-                  {selectedDate && format(selectedDate, "EEEE, MMM d, yyyy")} at{" "}
-                  {selectedSlot && format(new Date(selectedSlot.start_time), "h:mm a")}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Duration</span>
-                <span className="text-sm font-medium">
-                  {selectedHours} {selectedHours === 1 ? "hour" : "hours"}
-                </span>
-              </div>
-              <Separator />
-              <div className="flex justify-between items-center text-accent">
-                <span className="font-medium">Amount Due on Arrival</span>
-                <span className="text-xl font-bold">${total}</span>
-              </div>
-            </CardContent>
-          </Card>
+          {!isRequestMode && (
+            <Card className="border-border text-left">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Date & Time</span>
+                  <span className="text-sm font-medium">
+                    {selectedDate && format(selectedDate, "EEEE, MMM d, yyyy")} at{" "}
+                    {selectedSlot && format(new Date(selectedSlot.start_time), "h:mm a")}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Duration</span>
+                  <span className="text-sm font-medium">
+                    {selectedHours} {selectedHours === 1 ? "hour" : "hours"}
+                  </span>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center text-accent">
+                  <span className="font-medium">Amount Due on Arrival</span>
+                  <span className="text-xl font-bold">${total}</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="bg-accent/10 rounded-lg p-4 border border-accent/30">
             <p className="text-sm text-foreground">
-              A confirmation email has been sent to <strong>{guestInfo.email}</strong>.
-              <br />
-              Payment will be collected when you arrive.
+              {isRequestMode ? (
+                <>A confirmation has been sent to <strong>{guestInfo.email}</strong>.<br />Our team will contact you to finalize your booking.</>
+              ) : (
+                <>A confirmation email has been sent to <strong>{guestInfo.email}</strong>.<br />Payment will be collected when you arrive.</>
+              )}
             </p>
           </div>
 
@@ -701,9 +804,10 @@ export function PhotoBoothBookingWizard({
               setSelectedSlot(null);
               setGuestInfo({ name: "", email: "", phone: "" });
               setConfirmedBookingId(null);
+              setPreferredDateTime("");
             }}
           >
-            Book Another Time
+            {isRequestMode ? "Submit Another Request" : "Book Another Time"}
           </Button>
         </div>
       )}
