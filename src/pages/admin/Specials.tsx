@@ -52,6 +52,13 @@ const EMPTY_FORM: SpecialInsert = {
   start_date: null,
   end_date: null,
   is_active: true,
+  action_type: "route_only",
+  destination_route: null,
+  promo_code: null,
+  discount_type: null,
+  discount_value: null,
+  terms: null,
+  requires_verification: false,
 };
 
 export default function AdminSpecials() {
@@ -91,6 +98,13 @@ export default function AdminSpecials() {
       start_date: s.start_date,
       end_date: s.end_date,
       is_active: s.is_active,
+      action_type: s.action_type || "route_only",
+      destination_route: s.destination_route,
+      promo_code: s.promo_code,
+      discount_type: s.discount_type,
+      discount_value: s.discount_value,
+      terms: s.terms,
+      requires_verification: s.requires_verification,
     });
     setEditOpen(true);
   };
@@ -174,9 +188,12 @@ export default function AdminSpecials() {
                       <Badge variant="outline" className="text-xs text-zinc-400 border-zinc-600 capitalize">{BUSINESS_UNITS.find((u) => u.value === s.business_unit)?.label}</Badge>
                     </div>
                     <p className="text-sm text-zinc-400">{s.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-zinc-500">
+                    <div className="flex items-center gap-4 text-xs text-zinc-500 flex-wrap">
                       <span>CTA: {s.cta_label}</span>
                       <span>Priority: {s.priority}</span>
+                      <span className="capitalize">{s.action_type === "apply_promo" ? "🏷️ Promo" : "🔗 Route"}</span>
+                      {s.promo_code && <span className="text-green-400">Code: {s.promo_code}</span>}
+                      {s.destination_route && <span className="text-blue-400">→ {s.destination_route}</span>}
                       {s.always_on ? <span className="text-green-500">Always On</span> : (
                         <>
                           {s.start_date && <span>Starts: {new Date(s.start_date).toLocaleDateString()}</span>}
@@ -250,6 +267,58 @@ export default function AdminSpecials() {
                 <Label className="text-zinc-300">Priority (higher = first)</Label>
                 <Input type="number" value={form.priority} onChange={(e) => setForm({ ...form, priority: parseInt(e.target.value) || 0 })} className="bg-zinc-800 border-zinc-700 text-white" />
               </div>
+            </div>
+
+            {/* Action Type */}
+            <div>
+              <Label className="text-zinc-300">Action Type</Label>
+              <Select value={form.action_type} onValueChange={(v) => setForm({ ...form, action_type: v })}>
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectItem value="route_only" className="text-white">Route Only (navigate to page)</SelectItem>
+                  <SelectItem value="apply_promo" className="text-white">Apply Promo (auto-apply discount)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-zinc-300">Destination Route</Label>
+              <Input value={form.destination_route ?? ""} onChange={(e) => setForm({ ...form, destination_route: e.target.value || null })} placeholder="/#/summit or /#/spa" className="bg-zinc-800 border-zinc-700 text-white" />
+            </div>
+
+            {form.action_type === "apply_promo" && (
+              <>
+                <div>
+                  <Label className="text-zinc-300">Promo Code</Label>
+                  <Input value={form.promo_code ?? ""} onChange={(e) => setForm({ ...form, promo_code: e.target.value.toUpperCase() || null })} placeholder="BOGOMASSAGE" className="bg-zinc-800 border-zinc-700 text-white" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-zinc-300">Discount Type</Label>
+                    <Select value={form.discount_type ?? "percent"} onValueChange={(v) => setForm({ ...form, discount_type: v })}>
+                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
+                      <SelectContent className="bg-zinc-800 border-zinc-700">
+                        <SelectItem value="percent" className="text-white">Percent</SelectItem>
+                        <SelectItem value="fixed" className="text-white">Fixed ($)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300">Discount Value</Label>
+                    <Input type="number" value={form.discount_value ?? ""} onChange={(e) => setForm({ ...form, discount_value: parseFloat(e.target.value) || null })} placeholder="10" className="bg-zinc-800 border-zinc-700 text-white" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div>
+              <Label className="text-zinc-300">Terms (optional small text)</Label>
+              <Input value={form.terms ?? ""} onChange={(e) => setForm({ ...form, terms: e.target.value || null })} placeholder="Valid for first-time customers only" className="bg-zinc-800 border-zinc-700 text-white" />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Switch checked={form.requires_verification} onCheckedChange={(v) => setForm({ ...form, requires_verification: v })} />
+              <Label className="text-zinc-300">Requires Verification</Label>
             </div>
 
             <div className="flex items-center gap-3">
