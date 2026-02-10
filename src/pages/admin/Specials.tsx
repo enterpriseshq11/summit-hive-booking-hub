@@ -29,6 +29,7 @@ const BUSINESS_UNITS = [
   { value: "restoration", label: "Restoration" },
   { value: "photo_booth_360", label: "360 Photo Booth" },
   { value: "voice_vault", label: "Voice Vault" },
+  { value: "fitness", label: "A-Z Total Fitness" },
 ] as const;
 
 const STATUS_FILTERS = ["all", "active", "scheduled", "expired", "inactive"] as const;

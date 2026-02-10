@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { SpecialsPopup, SpecialsButton, SpecialsModal } from "@/components/specials";
+import { usePublicSpecials } from "@/hooks/useSpecials";
 import azTotalFitnessLogo from "@/assets/az-total-fitness-transparent.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +33,8 @@ export default function Fitness() {
   const [showOrientationModal, setShowOrientationModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [preselectedPlan, setPreselectedPlan] = useState<"essential" | "performance" | "elite" | null>(null);
+  const [showSpecials, setShowSpecials] = useState(false);
+  const { data: fitnessSpecials = [] } = usePublicSpecials("fitness");
 
   const membershipTiers = [
     {
@@ -191,6 +195,7 @@ export default function Fitness() {
                     <Calendar className="h-5 w-5 mr-2" />
                     Schedule Orientation
                   </Button>
+                  <SpecialsButton onClick={() => setShowSpecials(true)} label="View Fitness Specials" size="lg" />
                 </div>
                 
                 {/* Microcopy under primary CTA */}
@@ -881,6 +886,10 @@ export default function Fitness() {
         onOpenChange={setShowWaitlistModal}
         preselectedPlan={preselectedPlan}
       />
+
+      {/* Specials Popup (once per session) + Modal */}
+      <SpecialsPopup storageKey="fitness" headline="Want to see our current fitness specials?" onViewSpecials={() => setShowSpecials(true)} hasSpecials={fitnessSpecials.length > 0} />
+      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="A-Z Total Fitness Specials" specials={fitnessSpecials} />
 
       {/* Floating Help Drawer */}
       <FloatingHelpDrawer 
