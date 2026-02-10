@@ -55,7 +55,8 @@ export default function BookWithLindsey() {
   
   // Get payment config for dynamic CTA labels
   const { spaPaymentsEnabled } = useSpaPaymentsConfig();
-  const ctaLabel = spaPaymentsEnabled ? "Book & Pay Deposit" : "Book Now";
+  const isRequestMode = !spaPaymentsEnabled;
+  const ctaLabel = spaPaymentsEnabled ? "Book & Pay Deposit" : "Request Appointment";
 
   return (
     <div className="min-h-screen bg-background">
@@ -113,7 +114,11 @@ export default function BookWithLindsey() {
               {/* Trust Badge */}
               <div className="flex items-center justify-center lg:justify-start gap-2 text-primary-foreground/70">
                 <CheckCircle className="h-5 w-5 text-accent" aria-hidden="true" />
-                <span className="text-sm">Available 7 days a week • 9 AM – 9 PM</span>
+                <span className="text-sm">
+                  {isRequestMode 
+                    ? "Open 7 days a week • Anytime after 10 AM"
+                    : "Available 7 days a week • 9 AM – 9 PM"}
+                </span>
               </div>
             </div>
             
@@ -140,8 +145,14 @@ export default function BookWithLindsey() {
       {/* Main Booking Calendar Section - THE SINGLE BOOKING PATH */}
       <section id="booking-calendar" className="py-12 container">
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">Book Your Session</h2>
-          <p className="text-muted-foreground text-lg">Select your service, date, and time all in one place</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+            {isRequestMode ? "Request Your Session" : "Book Your Session"}
+          </h2>
+          <p className="text-muted-foreground text-lg">
+            {isRequestMode 
+              ? "Select your service and tell us your preferred time. We'll confirm within 1 business day."
+              : "Select your service, date, and time all in one place"}
+          </p>
         </div>
         
         <div className="max-w-4xl mx-auto">
