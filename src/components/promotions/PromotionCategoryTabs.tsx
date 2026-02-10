@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Building2, Sparkles, Dumbbell, Layers, Clock, Gift, Mic, Camera } from "lucide-react";
+import { Building2, Sparkles, Dumbbell, Layers, Clock, Gift } from "lucide-react";
 
-// Updated category types to include all business units + specials scoped mode
-export type PromotionCategoryTab = "all" | "office" | "spa" | "fitness" | "voice_vault" | "photo_booth_360" | "bundles" | "limited";
+// Updated category types to match Phase 11 spec
+export type PromotionCategoryTab = "all" | "office" | "spa" | "fitness" | "bundles" | "limited";
 
 interface Tab {
   id: PromotionCategoryTab;
@@ -16,8 +16,6 @@ const TABS: Tab[] = [
   { id: "office", label: "Office & Coworking", icon: Building2 },
   { id: "spa", label: "Spa & Wellness", icon: Sparkles },
   { id: "fitness", label: "Fitness", icon: Dumbbell },
-  { id: "voice_vault", label: "Voice Vault", icon: Mic },
-  { id: "photo_booth_360", label: "360 Photo Booth", icon: Camera },
   { id: "bundles", label: "Bundles", icon: Layers },
   { id: "limited", label: "Limited-Time", icon: Clock },
 ];
@@ -25,12 +23,11 @@ const TABS: Tab[] = [
 interface PromotionCategoryTabsProps {
   activeTab: PromotionCategoryTab;
   onTabChange: (tab: PromotionCategoryTab) => void;
-  /** When true, only show unit-specific tabs (hide bundles/limited/all) */
-  scopedMode?: boolean;
 }
 
-export function PromotionCategoryTabs({ activeTab, onTabChange, scopedMode }: PromotionCategoryTabsProps) {
+export function PromotionCategoryTabs({ activeTab, onTabChange }: PromotionCategoryTabsProps) {
   const [isSticky, setIsSticky] = useState(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,16 +45,13 @@ export function PromotionCategoryTabs({ activeTab, onTabChange, scopedMode }: Pr
     return () => observer.disconnect();
   }, []);
 
-  const visibleTabs = scopedMode
-    ? TABS.filter(t => !["all", "bundles", "limited"].includes(t.id))
-    : TABS;
-
   return (
     <>
       {/* Sentinel element for intersection observer */}
       <div ref={sentinelRef} className="h-px" />
       
       <div
+        ref={tabsRef}
         className={`
           sticky top-0 z-40 transition-all duration-300
           ${isSticky ? "bg-background/95 backdrop-blur-md border-b border-border/50 shadow-sm" : "bg-muted/30"}
@@ -69,7 +63,7 @@ export function PromotionCategoryTabs({ activeTab, onTabChange, scopedMode }: Pr
             aria-label="Promotion categories"
             className="flex gap-1 overflow-x-auto py-3 scrollbar-hide"
           >
-            {visibleTabs.map((tab) => {
+            {TABS.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button

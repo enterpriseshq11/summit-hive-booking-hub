@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { SpecialsPopup, SpecialsModal } from "@/components/specials";
-import { usePublicSpecials } from "@/hooks/useSpecials";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -133,8 +131,6 @@ export default function VoiceVault() {
   const [termsOpen, setTermsOpen] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [bookingType, setBookingType] = useState<"hourly" | "core_series" | "white_glove">("hourly");
-  const [showSpecials, setShowSpecials] = useState(false);
-  const { data: voiceVaultSpecials = [] } = usePublicSpecials("voice_vault");
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
@@ -1028,10 +1024,6 @@ export default function VoiceVault() {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Specials Popup (once per session) + Modal */}
-      <SpecialsPopup storageKey="voice_vault" headline="Want to see our current Voice Vault specials?" onViewSpecials={() => setShowSpecials(true)} hasSpecials={voiceVaultSpecials.length > 0} />
-      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Voice Vault Specials" specials={voiceVaultSpecials} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />

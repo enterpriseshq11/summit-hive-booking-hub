@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, ExternalLink } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import type { Special } from "@/hooks/useSpecials";
 
 interface SpecialsModalProps {
@@ -23,11 +23,6 @@ export function SpecialsModal({ open, onOpenChange, title, specials, onSpecialAc
       navigate(special.cta_link);
     }
     onOpenChange(false);
-  };
-
-  const handleLearnMore = (special: Special) => {
-    onOpenChange(false);
-    navigate(`/promotions?source=specials&unit=${special.business_unit}`);
   };
 
   return (
@@ -56,25 +51,14 @@ export function SpecialsModal({ open, onOpenChange, title, specials, onSpecialAc
                 )}
               </div>
               <p className="text-sm text-muted-foreground">{special.description}</p>
-              <div className="flex items-center gap-2 flex-wrap">
-                <Button
-                  size="sm"
-                  onClick={() => handleAction(special)}
-                  className="bg-accent hover:bg-accent/90 text-primary font-semibold"
-                >
-                  {special.cta_label}
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleLearnMore(special)}
-                  className="text-accent hover:text-accent/80 hover:bg-accent/10"
-                >
-                  Learn More
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </Button>
-              </div>
+              <Button
+                size="sm"
+                onClick={() => handleAction(special)}
+                className="bg-accent hover:bg-accent/90 text-primary font-semibold"
+              >
+                {special.cta_label}
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
             </div>
           ))}
         </div>
