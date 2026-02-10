@@ -35,10 +35,10 @@ export const SUMMIT_SPECIALS: Special[] = [
 
 export const SPA_SPECIALS: Special[] = [
   {
-    id: "massage-bundle",
-    title: "3 Massages = Free Gym Access",
-    description: "Book 3 massage sessions and receive a complimentary 30-day gym membership.",
-    badge: "Best Value",
+    id: "bogo-massage",
+    title: "Buy One, Get One Free Massage",
+    description: "Book a massage and get your second one free. Use promo code BOGOMASSAGE at checkout.",
+    badge: "BOGO",
     ctaLabel: "Book a Massage",
     ctaRoute: "/book-with-lindsey",
   },
