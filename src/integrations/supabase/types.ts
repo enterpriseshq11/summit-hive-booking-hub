@@ -4362,6 +4362,57 @@ export type Database = {
         }
         Relationships: []
       }
+      specials: {
+        Row: {
+          always_on: boolean
+          badge: string | null
+          business_unit: string
+          created_at: string
+          cta_label: string
+          cta_link: string | null
+          description: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          priority: number
+          start_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          always_on?: boolean
+          badge?: string | null
+          business_unit: string
+          created_at?: string
+          cta_label?: string
+          cta_link?: string | null
+          description: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          start_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          always_on?: boolean
+          badge?: string | null
+          business_unit?: string
+          created_at?: string
+          cta_label?: string
+          cta_link?: string | null
+          description?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          start_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       spins: {
         Row: {
           created_at: string | null

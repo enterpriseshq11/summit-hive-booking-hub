@@ -34,6 +34,7 @@ import {
   Tag,
   MessageSquare,
   Gift,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,6 +103,7 @@ const navSections: NavSection[] = [
       { title: "Documents", href: "/admin/documents", icon: FileText, visibleToRoles: ["owner", "manager"] },
       { title: "Reviews", href: "/admin/reviews", icon: Star, visibleToRoles: ["owner", "manager"] },
       { title: "Leads & Waitlists", href: "/admin/leads-waitlists", icon: Users, visibleToRoles: ["owner", "manager"] },
+      { title: "Specials", href: "/admin/specials", icon: Sparkles, visibleToRoles: ["owner", "manager"] },
     ],
   },
   {

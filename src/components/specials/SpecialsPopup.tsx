@@ -8,16 +8,18 @@ interface SpecialsPopupProps {
   storageKey: string;
   headline: string;
   onViewSpecials: () => void;
+  /** If no active specials, don't show the popup */
+  hasSpecials?: boolean;
 }
 
-export function SpecialsPopup({ storageKey, headline, onViewSpecials }: SpecialsPopupProps) {
+export function SpecialsPopup({ storageKey, headline, onViewSpecials, hasSpecials = true }: SpecialsPopupProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Show popup every time the page is visited
+    if (!hasSpecials) return;
     const timer = setTimeout(() => setOpen(true), 800);
     return () => clearTimeout(timer);
-  }, [storageKey]);
+  }, [storageKey, hasSpecials]);
 
   const dismiss = () => {
     setOpen(false);
