@@ -12,11 +12,16 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[LINDSEY-NOTIFICATION] ${step}${detailsStr}`);
 };
 
-// Provider settings - Lindsey
+// Provider settings - Lindsey (used when toggle ON)
 // IMPORTANT: Staff inbox uses @a-zenterpriseshq.com (with hyphen)
 // FROM/sender uses @azenterpriseshq.com (no hyphen, verified in Resend)
 const LINDSEY_EMAIL = "lindsey@a-zenterpriseshq.com";
 const LINDSEY_PHONE = "+15676441019";
+
+// Victoria settings (used when toggle OFF / request mode)
+const VICTORIA_EMAIL = "victoria@a-zenterpriseshq.com";
+const VICTORIA_PHONE = "+15673796340";
+
 const FROM_EMAIL = "A-Z Enterprises <no-reply@azenterpriseshq.com>";
 const REPLY_TO_EMAIL = "info@azenterpriseshq.com";
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
@@ -25,9 +30,10 @@ const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;
 
 interface BookingNotificationRequest {
   booking_id: string;
-  type: "confirmed" | "cancelled" | "reminder" | "free_consultation" | "pay_on_arrival";
+  type: "confirmed" | "cancelled" | "reminder" | "free_consultation" | "pay_on_arrival" | "request";
   stripe_session_id?: string;
   stripe_payment_intent?: string;
+  preferred_datetime?: string;
 }
 
 interface GHLWebhookPayload {
@@ -157,8 +163,8 @@ serve(async (req) => {
     });
     const resend = new Resend(resendKey);
 
-    const { booking_id, type, stripe_session_id, stripe_payment_intent }: BookingNotificationRequest = await req.json();
-    logStep("Request received", { booking_id, type, stripe_session_id });
+    const { booking_id, type, stripe_session_id, stripe_payment_intent, preferred_datetime }: BookingNotificationRequest = await req.json();
+    logStep("Request received", { booking_id, type, stripe_session_id, preferred_datetime });
 
     if (!booking_id) {
       return new Response(JSON.stringify({ error: "booking_id is required" }), {
@@ -799,6 +805,250 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
           email_sent: emailSuccess,
           lindsey_email_id: lindseyResult.data?.id,
           lindsey_email_error: lindseyResult.error,
+          customer_email_id: customerResult.data?.id,
+          customer_email_error: customerResult.error,
+          sms_sent: smsResult.success,
+          sms_sid: smsResult.sid,
+          ghl_webhook_sent: ghlResult.success,
+          ghl_webhook_error: ghlResult.error,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // ============= REQUEST MODE (Toggle OFF → Victoria) =============
+    if (type === "request") {
+      logStep("Processing request mode notification (routing to Victoria)");
+
+      const preferredStr = preferred_datetime || "Not specified";
+      const customerSubject = `Request Received — ${serviceName} (${duration} min)`;
+      const staffSubject = `New Spa Request — ${booking.guest_name} — ${serviceName} (${duration} min)`;
+
+      // SMS to Victoria (not Lindsey)
+      const smsMessage = `NEW SPA REQUEST 📋
+${serviceName} — ${duration}min
+Client: ${booking.guest_name}
+Phone: ${booking.guest_phone || "no phone"}
+Email: ${booking.guest_email}
+Preferred: ${preferredStr}
+Total: ${formatMoney(totalAmount)}
+Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
+
+      const smsResult = await sendSMS(VICTORIA_PHONE, smsMessage);
+
+      // Staff email to Victoria
+      const staffEmailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2d3748; padding: 20px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 20px; }
+    .badge { display: inline-block; background: #805ad5; color: white; padding: 4px 12px; font-size: 12px; font-weight: bold; border-radius: 4px; }
+    .content { padding: 20px; background: #ffffff; }
+    .info-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    .info-table td { padding: 10px; border-bottom: 1px solid #eee; }
+    .info-table td:first-child { font-weight: bold; width: 140px; color: #666; }
+    .highlight { background: #faf5ff; border-left: 4px solid #805ad5; padding: 15px; margin: 15px 0; }
+    .footer { background: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="badge">📋 NEW REQUEST</span>
+      <h1 style="margin-top: 10px;">Spa Appointment Request</h1>
+    </div>
+    <div class="content">
+       <div class="highlight">
+         <strong>📋 This is a request, not a confirmed booking.</strong><br>
+         <span style="font-size: 12px; color: #666;">Please contact the client to confirm date/time and schedule the appointment.</span>
+       </div>
+      
+      <h2 style="margin-top: 0;">Service Requested</h2>
+      <table class="info-table">
+        <tr><td>🧘 Service</td><td><strong>${serviceName}</strong></td></tr>
+        <tr><td>⏱️ Duration</td><td>${duration} minutes</td></tr>
+        <tr><td>📅 Preferred</td><td><strong>${preferredStr}</strong></td></tr>
+        <tr><td>💵 Price</td><td>${formatMoney(totalAmount)}</td></tr>
+      </table>
+
+      <h2>Client Information</h2>
+      <table class="info-table">
+        <tr><td>👤 Name</td><td><strong>${booking.guest_name}</strong></td></tr>
+        <tr><td>📧 Email</td><td><a href="mailto:${booking.guest_email}">${booking.guest_email}</a></td></tr>
+        <tr><td>📱 Phone</td><td>${booking.guest_phone ? `<a href="tel:${booking.guest_phone}">${booking.guest_phone}</a>` : "Not provided"}</td></tr>
+      </table>
+
+      <div style="background: #fffbeb; padding: 15px; border-radius: 4px; margin-top: 15px; text-align: center;">
+        <strong>⏳ Action Required</strong><br>
+        <span style="font-size: 13px; color: #666;">Contact the client to confirm their appointment and assign a time slot.</span>
+      </div>
+
+      <p style="margin-top: 20px; font-size: 14px; color: #666;">
+        Request #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}<br>
+        <a href="https://summit-hive-booking-hub.lovable.app/#/admin/approvals">View in Admin Dashboard</a>
+      </p>
+    </div>
+    <div class="footer">
+      <p>Restoration Lounge | A-Z Enterprises</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+      // Customer email
+      const customerEmailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #2d3748; padding: 30px; text-align: center; }
+    .header h1 { color: #d4af37; margin: 0; font-size: 24px; }
+    .content { padding: 30px 20px; background: #ffffff; }
+    .success-badge { display: inline-block; background: #805ad5; color: white; padding: 8px 20px; font-size: 14px; font-weight: bold; border-radius: 20px; margin-bottom: 20px; }
+    .appointment-box { background: #f8f6f0; border: 2px solid #d4af37; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .appointment-box h3 { margin: 0 0 15px 0; color: #2d3748; }
+    .location-box { background: #edf2f7; padding: 15px; border-radius: 4px; margin: 20px 0; }
+    .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 14px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Restoration Lounge</h1>
+      <p style="color: #a0aec0; margin: 5px 0 0 0;">by A-Z Enterprises</p>
+    </div>
+    <div class="content">
+      <div style="text-align: center;">
+        <span class="success-badge">✓ Request Received</span>
+        <h2 style="margin: 10px 0;">We Got Your Request!</h2>
+      </div>
+      
+      <p>Hi ${booking.guest_name?.split(" ")[0] || "there"},</p>
+      <p>Thank you for your interest in booking a massage session! We received your request and will contact you within 1 business day to confirm your appointment.</p>
+
+      <div class="appointment-box">
+        <h3>📋 Request Details</h3>
+        <table style="width: 100%;">
+          <tr><td style="padding: 8px 0; color: #666;">Service:</td><td style="padding: 8px 0; font-weight: bold;">${serviceName}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Duration:</td><td style="padding: 8px 0; font-weight: bold;">${duration} minutes</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Preferred Time:</td><td style="padding: 8px 0; font-weight: bold;">${preferredStr}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Price:</td><td style="padding: 8px 0; font-weight: bold;">${formatMoney(totalAmount)}</td></tr>
+          <tr><td style="padding: 8px 0; color: #666;">Payment:</td><td style="padding: 8px 0; font-weight: bold; color: #805ad5;">Due on Arrival (after confirmation)</td></tr>
+        </table>
+      </div>
+
+      <div style="background: #faf5ff; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #805ad5;">
+        <strong>What happens next?</strong>
+        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+          <li>We will reach out to confirm a date and time that works for you.</li>
+          <li>No payment is required until your appointment is confirmed.</li>
+          <li>Payment is due when you arrive for your session.</li>
+        </ul>
+      </div>
+
+      <div class="location-box">
+        <strong>📍 Location</strong>
+        <p style="margin: 10px 0 0 0;">
+          Restoration Lounge at The Hive<br>
+          ${BUSINESS_ADDRESS}
+        </p>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px;">
+        <p>Questions? Contact us:</p>
+        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+      </div>
+
+      <p style="margin-top: 30px;">
+        We look forward to hearing from you!<br><br>
+        <strong>A-Z Enterprises Team</strong><br>
+        Restoration Lounge
+      </p>
+    </div>
+    <div class="footer">
+      <p>Request #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}</p>
+      <p>Restoration Lounge | A-Z Enterprises | Wapakoneta, Ohio</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+      logStep("Sending request mode emails", {
+        provider: "Resend",
+        from: FROM_EMAIL,
+        staffRecipient: VICTORIA_EMAIL,
+        customerRecipient: booking.guest_email,
+      });
+
+      const [staffResult, customerResult] = await Promise.all([
+        resend.emails.send({
+          from: FROM_EMAIL,
+          reply_to: REPLY_TO_EMAIL,
+          to: [VICTORIA_EMAIL],
+          subject: staffSubject,
+          html: staffEmailHtml,
+        }),
+        resend.emails.send({
+          from: FROM_EMAIL,
+          reply_to: REPLY_TO_EMAIL,
+          to: [booking.guest_email],
+          subject: customerSubject,
+          html: customerEmailHtml,
+        }),
+      ]);
+
+      const emailSuccess = !!(staffResult.data?.id || customerResult.data?.id);
+
+      logStep("Request mode emails result", {
+        staffEmailId: staffResult.data?.id,
+        staffError: staffResult.error,
+        customerEmailId: customerResult.data?.id,
+        customerError: customerResult.error,
+        success: emailSuccess,
+      });
+
+      // Update booking timestamps
+      if (staffResult.data?.id && !alreadySentStaff) {
+        await supabase.from("bookings").update({ email_sent_staff_at: new Date().toISOString() }).eq("id", booking_id);
+      }
+      if (customerResult.data?.id && !alreadySentCustomer) {
+        await supabase.from("bookings").update({ email_sent_customer_at: new Date().toISOString() }).eq("id", booking_id);
+      }
+
+      // Send GHL webhook
+      const nameParts = (booking.guest_name || "").split(" ");
+      const ghlPayload: GHLWebhookPayload = {
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        phone: booking.guest_phone || "",
+        email: booking.guest_email || "",
+        serviceName: serviceName,
+        serviceDuration: Number(duration) || 60,
+        price: formatMoney(totalAmount),
+        room: "TBD (Request Mode)",
+        appointmentDate: preferredStr,
+        appointmentTime: "TBD",
+        timezone: "America/New_York",
+        bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
+      };
+      
+      const ghlResult = await sendGHLWebhook(ghlPayload);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          email_sent: emailSuccess,
+          staff_email_id: staffResult.data?.id,
+          staff_email_error: staffResult.error,
           customer_email_id: customerResult.data?.id,
           customer_email_error: customerResult.error,
           sms_sent: smsResult.success,

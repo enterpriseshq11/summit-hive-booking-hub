@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
@@ -121,6 +122,8 @@ const ROOMS = [
 
 type BookingStep = "service" | "calendar" | "time" | "contact" | "confirm";
 
+// In request mode (payments OFF), we skip calendar/time steps entirely
+
 interface LindseyAvailabilityCalendarProps {
   onBookingComplete?: () => void;
   workerId?: string; // If provided, use this worker instead of Lindsey
@@ -159,6 +162,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "" });
+  const [preferredDateTime, setPreferredDateTime] = useState("");
   const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
   const [consentChecked, setConsentChecked] = useState(false);
   const [smsConsent, setSmsConsent] = useState(false);
@@ -272,6 +276,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
     return option.price;
   };
   
+  // Request mode = spa payments OFF (no calendar, just request form)
+  const isRequestMode = !spaPaymentsEnabled;
+
   const handleServiceSelect = (serviceId: string, duration: number) => {
     setSelectedService(serviceId);
     setSelectedDuration(duration);
@@ -279,9 +286,15 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
     if (serviceId === "couples") {
       setSelectedRoom("22222222-2222-2222-2222-222222222222");
     }
-    setStep("calendar");
     
-    // Scroll to calendar step after state update
+    if (isRequestMode) {
+      // Skip calendar/time — go directly to contact/request form
+      setStep("contact");
+    } else {
+      setStep("calendar");
+    }
+    
+    // Scroll to next step after state update
     setTimeout(() => {
       calendarStepRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
@@ -372,8 +385,13 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedService || !selectedDuration || !selectedDate || !selectedTime) {
+    // In request mode, date/time are not required (user provides preferred text)
+    if (!isRequestMode && (!selectedService || !selectedDuration || !selectedDate || !selectedTime)) {
       toast.error("Please complete all required fields");
+      return;
+    }
+    if (isRequestMode && (!selectedService || !selectedDuration)) {
+      toast.error("Please select a service");
       return;
     }
 
@@ -400,24 +418,37 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
     setIsSubmitting(true);
 
     try {
-      // Build datetime strings
-      const startDatetime = `${format(selectedDate, "yyyy-MM-dd")}T${selectedTime}:00`;
-      const endMinutes = selectedDuration || 60;
-      const [hours, mins] = selectedTime.split(":").map(Number);
-      const endHours = hours + Math.floor((mins + endMinutes) / 60);
-      const endMins = (mins + endMinutes) % 60;
-      const endTime = `${String(endHours).padStart(2, "0")}:${String(endMins).padStart(2, "0")}`;
-      const endDatetime = `${format(selectedDate, "yyyy-MM-dd")}T${endTime}:00`;
+      // In request mode, use placeholder datetimes since user only provides preferred text
+      let startDatetime: string;
+      let endDatetime: string;
+      
+      if (isRequestMode) {
+        // Use a placeholder date (today) since this is a request, not a confirmed slot
+        const today = format(new Date(), "yyyy-MM-dd");
+        startDatetime = `${today}T10:00:00`;
+        const endMinutes = selectedDuration || 60;
+        const endHours = 10 + Math.floor(endMinutes / 60);
+        const endMins = endMinutes % 60;
+        const endTime = `${String(endHours).padStart(2, "0")}:${String(endMins).padStart(2, "0")}`;
+        endDatetime = `${today}T${endTime}:00`;
+      } else {
+        startDatetime = `${format(selectedDate!, "yyyy-MM-dd")}T${selectedTime}:00`;
+        const endMinutes = selectedDuration || 60;
+        const [hours, mins] = selectedTime.split(":").map(Number);
+        const endHours = hours + Math.floor((mins + endMinutes) / 60);
+        const endMins = (mins + endMinutes) % 60;
+        const endTime = `${String(endHours).padStart(2, "0")}:${String(endMins).padStart(2, "0")}`;
+        endDatetime = `${format(selectedDate!, "yyyy-MM-dd")}T${endTime}:00`;
+      }
 
       // Call lindsey-checkout edge function
-      // Pass skip_payment flag when spa payments are disabled
       const { data, error } = await supabase.functions.invoke("lindsey-checkout", {
         body: {
           service_id: selectedService,
           service_name: serviceData?.name || "Massage",
           duration: selectedDuration,
           price,
-          room_id: roomId,
+          room_id: isRequestMode ? undefined : roomId,
           start_datetime: startDatetime,
           end_datetime: endDatetime,
           customer_name: guestInfo.name.trim(),
@@ -425,7 +456,9 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
           customer_phone: guestInfo.phone.trim(),
           consent_no_show_fee: isPaidService && spaPaymentsEnabled ? consentChecked : undefined,
           consent_timestamp: isPaidService && spaPaymentsEnabled ? consentTimestamp : undefined,
-          skip_payment: !spaPaymentsEnabled, // Signal to skip payment when disabled
+          skip_payment: !spaPaymentsEnabled,
+          request_mode: isRequestMode,
+          preferred_datetime: isRequestMode ? preferredDateTime : undefined,
         },
       });
 
@@ -452,14 +485,37 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
         return;
       }
 
-      // Handle pay-on-arrival bookings (spa payments disabled)
+      // Handle request mode submissions (spa payments disabled, no calendar)
+      if (data?.is_request) {
+        setCompletionType("pay_on_arrival");
+        setCompletedBookingId(data?.booking_id || null);
+        setBookingComplete(true);
+        setStep("confirm");
+        
+        const summary = {
+          serviceName: serviceData?.name || "Massage",
+          duration: selectedDuration || undefined,
+          dateLabel: preferredDateTime || "To be confirmed",
+          timeLabel: "To be confirmed",
+          roomName: "To be assigned",
+          servicePrice: data?.service_price,
+          balanceDue: data?.balance_due,
+          total: price,
+        };
+        setCompletedSummary(summary);
+        
+        toast.success("Request submitted! We will contact you to confirm your appointment.");
+        onBookingComplete?.();
+        return;
+      }
+
+      // Handle pay-on-arrival bookings (spa payments disabled but with calendar)
       if (data?.is_pay_on_arrival) {
         setCompletionType("pay_on_arrival");
         setCompletedBookingId(data?.booking_id || null);
         setBookingComplete(true);
         setStep("confirm");
         
-        // Store summary for display
         const summary = {
           serviceName: serviceData?.name || "Massage",
           duration: selectedDuration || undefined,
@@ -527,6 +583,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
     setSelectedDate(undefined);
     setSelectedTime("");
     setGuestInfo({ name: "", email: "", phone: "" });
+    setPreferredDateTime("");
     setFormErrors({});
     setConsentChecked(false);
     setBookingComplete(false);
@@ -542,20 +599,26 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
         setStep("calendar");
         break;
       case "contact":
-        setStep("time");
+        // In request mode, go back to service (skip calendar/time)
+        setStep(isRequestMode ? "service" : "time");
         break;
       default:
         break;
     }
   };
 
-  // Step indicator
-  const steps = [
-    { key: "service", label: "Service" },
-    { key: "calendar", label: "Date" },
-    { key: "time", label: "Time" },
-    { key: "contact", label: "Details" },
-  ];
+  // Step indicator - in request mode, skip calendar/time steps
+  const steps = isRequestMode
+    ? [
+        { key: "service", label: "Service" },
+        { key: "contact", label: "Request Details" },
+      ]
+    : [
+        { key: "service", label: "Service" },
+        { key: "calendar", label: "Date" },
+        { key: "time", label: "Time" },
+        { key: "contact", label: "Details" },
+      ];
 
   const currentStepIndex = steps.findIndex(s => s.key === step);
 
@@ -568,7 +631,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Sparkles className="h-5 w-5 text-accent" />
-            Book Your Session
+            {isRequestMode ? "Request a Session" : "Book Your Session"}
           </CardTitle>
           
           {/* Step Indicator */}
@@ -630,12 +693,15 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
             </div>
             <h2 className="text-2xl font-bold mb-2">
               {completionType === "paid" ? "Booking Confirmed!" : 
+               isRequestMode ? "Request Received!" :
                completionType === "pay_on_arrival" ? "Appointment Confirmed!" : 
                "Consultation Booked!"}
             </h2>
             <p className="text-muted-foreground mb-6">
               {completionType === "paid"
                 ? "Your $20 booking fee has been received. Check your email for your receipt and details."
+                : isRequestMode
+                ? "We received your request and will contact you within 1 business day to confirm your appointment."
                 : completionType === "pay_on_arrival"
                 ? "Your appointment is confirmed. Payment is due at arrival."
                 : "This is a free consultation. Check your email for details."}
@@ -914,23 +980,35 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
             {step === "contact" && (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="text-center mb-4">
-                  <h4 className="font-semibold text-lg">Almost Done!</h4>
-                  <p className="text-muted-foreground text-sm">Enter your contact information to complete the booking</p>
+                  <h4 className="font-semibold text-lg">
+                    {isRequestMode ? "Request Your Appointment" : "Almost Done!"}
+                  </h4>
+                  <p className="text-muted-foreground text-sm">
+                    {isRequestMode 
+                      ? "Tell us when you'd like to come in and we'll confirm your appointment"
+                      : "Enter your contact information to complete the booking"}
+                  </p>
                 </div>
 
-                {/* Summary Card with Booking Fee Breakdown */}
+                {/* Summary Card */}
                 <Card className="bg-accent/5 border-accent/30">
                   <CardContent className="py-4">
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-semibold">{getSelectedServiceData()?.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {selectedDate && format(selectedDate, "EEE, MMM d")} at{" "}
-                          {selectedTime && format(new Date(`2000-01-01T${selectedTime}`), "h:mm a")}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {ROOMS.find(r => r.id === selectedRoom)?.name || "H1 - Hallway Room"} • {selectedDuration} min
-                        </p>
+                        {isRequestMode ? (
+                          <p className="text-sm text-muted-foreground">{selectedDuration} min session</p>
+                        ) : (
+                          <>
+                            <p className="text-sm text-muted-foreground">
+                              {selectedDate && format(selectedDate, "EEE, MMM d")} at{" "}
+                              {selectedTime && format(new Date(`2000-01-01T${selectedTime}`), "h:mm a")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {ROOMS.find(r => r.id === selectedRoom)?.name || "H1 - Hallway Room"} • {selectedDuration} min
+                            </p>
+                          </>
+                        )}
                       </div>
                       <div className="text-right">
                         {(() => {
@@ -1032,6 +1110,21 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                   </div>
                 </div>
 
+                {/* Preferred Day/Time - Request Mode Only */}
+                {isRequestMode && (
+                  <div className="space-y-2">
+                    <Label htmlFor="preferred-datetime">What day and time would you like to come in?</Label>
+                    <p className="text-xs text-muted-foreground">Open 7 days a week. Anytime after 10 AM is best.</p>
+                    <Textarea
+                      id="preferred-datetime"
+                      value={preferredDateTime}
+                      onChange={(e) => setPreferredDateTime(e.target.value)}
+                      placeholder="e.g. Saturday afternoon, or any weekday after 2 PM"
+                      rows={2}
+                    />
+                  </div>
+                )}
+
                 {/* Consent Checkbox - Only for paid services when payments enabled */}
                 {calculatePrice() !== null && calculatePrice() !== 0 && spaPaymentsEnabled && (
                   <div className="flex items-start space-x-3 p-4 rounded-lg bg-muted/50 border border-border">
@@ -1052,14 +1145,23 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                   </div>
                 )}
 
-                {/* Pay on arrival notice when payments disabled */}
-                {calculatePrice() !== null && calculatePrice() !== 0 && !spaPaymentsEnabled && (
+                {/* Pay on arrival notice when payments disabled (non-request mode) */}
+                {!isRequestMode && calculatePrice() !== null && calculatePrice() !== 0 && !spaPaymentsEnabled && (
                   <div className="p-4 rounded-lg bg-accent/10 border border-accent/30">
                     <p className="text-sm text-foreground">
                       <strong>Payment due on arrival:</strong> ${calculatePrice()}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       No payment is required to book. Pay when you arrive for your appointment.
+                    </p>
+                  </div>
+                )}
+
+                {/* Request mode notice */}
+                {isRequestMode && calculatePrice() !== null && calculatePrice() !== 0 && (
+                  <div className="p-4 rounded-lg bg-accent/10 border border-accent/30">
+                    <p className="text-sm text-foreground">
+                      <strong>No payment required now.</strong> We will contact you to confirm your appointment and discuss payment options.
                     </p>
                   </div>
                 )}
@@ -1077,9 +1179,11 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                     ? "Processing..." 
                     : calculatePrice() === 0 
                       ? "Confirm Booking" 
-                      : spaPaymentsEnabled 
-                        ? `Pay $20 Booking Fee`
-                        : "Confirm Appointment"}
+                      : isRequestMode
+                        ? "Submit Request"
+                        : spaPaymentsEnabled 
+                          ? `Pay $20 Booking Fee`
+                          : "Confirm Appointment"}
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
 
