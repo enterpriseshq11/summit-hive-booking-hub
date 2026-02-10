@@ -18,6 +18,8 @@ import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
 import { useVoiceVaultPaymentsConfig } from "@/hooks/usePaymentConfigs";
+import { SpecialsPopup, SpecialsButton, SpecialsModal } from "@/components/specials";
+import { usePublicSpecials } from "@/hooks/useSpecials";
 
 // Gallery is currently in "Coming Soon" state - real images to be added
 const galleryComingSoon = true;
@@ -138,6 +140,8 @@ export default function VoiceVault() {
     message: ""
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showSpecials, setShowSpecials] = useState(false);
+  const { data: vaultSpecials = [] } = usePublicSpecials("voice_vault");
   
   // Get payment config for dynamic CTA labels
   const { voiceVaultPaymentsEnabled } = useVoiceVaultPaymentsConfig();
@@ -1027,5 +1031,9 @@ export default function VoiceVault() {
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
+
+      {/* Specials Popup + Modal */}
+      <SpecialsPopup storageKey="voice_vault" headline="Want to see our current Voice Vault specials?" onViewSpecials={() => setShowSpecials(true)} hasSpecials={vaultSpecials.length > 0} />
+      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Voice Vault Specials" specials={vaultSpecials} />
     </div>;
 }
