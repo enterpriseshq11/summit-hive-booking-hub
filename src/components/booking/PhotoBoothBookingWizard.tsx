@@ -93,6 +93,7 @@ export function PhotoBoothBookingWizard({
   const [confirmedBookingId, setConfirmedBookingId] = useState<string | null>(null);
   const [depositConsent, setDepositConsent] = useState(false);
   const [preferredDateTime, setPreferredDateTime] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
 
   // Get payment config
   const { photoBooth360PaymentsEnabled, isLoading: isLoadingPaymentConfig } = usePhotoBooth360PaymentsConfig();
@@ -679,6 +680,8 @@ export function PhotoBoothBookingWizard({
               />
             </div>
           )}
+
+          <SmsConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
 
           {paymentError && (
             <Alert>
