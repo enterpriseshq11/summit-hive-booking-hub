@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Sparkles } from "lucide-react";
-import type { Special } from "./SpecialsData";
+import type { Special } from "@/hooks/useSpecials";
 
 interface SpecialsModalProps {
   open: boolean;
@@ -19,8 +19,8 @@ export function SpecialsModal({ open, onOpenChange, title, specials, onSpecialAc
   const handleAction = (special: Special) => {
     if (onSpecialAction) {
       onSpecialAction(special);
-    } else if (special.ctaRoute) {
-      navigate(special.ctaRoute);
+    } else if (special.cta_link) {
+      navigate(special.cta_link);
     }
     onOpenChange(false);
   };
@@ -35,7 +35,9 @@ export function SpecialsModal({ open, onOpenChange, title, specials, onSpecialAc
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 mt-2">
-          {specials.map((special) => (
+          {specials.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">No specials at this time.</p>
+          ) : specials.map((special) => (
             <div
               key={special.id}
               className="rounded-lg border border-accent/20 bg-accent/5 p-4 space-y-2"
@@ -54,7 +56,7 @@ export function SpecialsModal({ open, onOpenChange, title, specials, onSpecialAc
                 onClick={() => handleAction(special)}
                 className="bg-accent hover:bg-accent/90 text-primary font-semibold"
               >
-                {special.ctaLabel}
+                {special.cta_label}
                 <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
