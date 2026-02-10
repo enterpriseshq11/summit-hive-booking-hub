@@ -59,7 +59,7 @@ const EMPTY_FORM: SpecialInsert = {
   start_date: null,
   end_date: null,
   is_active: true,
-  action_type: "route_only",
+  action_type: "request_form",
   promo_code: null,
 };
 

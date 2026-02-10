@@ -10,9 +10,10 @@ import { CheckCircle, Loader2 } from "lucide-react";
 interface SpecialClaimFormProps {
   specialId: string;
   specialTitle: string;
+  businessUnit?: string;
 }
 
-export function SpecialClaimForm({ specialId, specialTitle }: SpecialClaimFormProps) {
+export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: SpecialClaimFormProps) {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,8 @@ export function SpecialClaimForm({ specialId, specialTitle }: SpecialClaimFormPr
     if (!form.name || !form.email || !form.phone) return;
 
     setLoading(true);
+
+    // 1. Save to special_claims table
     const { error } = await supabase.from("special_claims").insert({
       special_id: specialId,
       name: form.name,
@@ -30,13 +33,38 @@ export function SpecialClaimForm({ specialId, specialTitle }: SpecialClaimFormPr
       phone: form.phone,
       message: form.message || null,
     });
-    setLoading(false);
 
     if (error) {
+      setLoading(false);
       toast({ title: "Something went wrong", description: error.message, variant: "destructive" });
       return;
     }
 
+    // 2. Resolve business_unit if not passed as prop
+    let resolvedUnit = businessUnit || "";
+    if (!resolvedUnit) {
+      const { data: specialData } = await supabase
+        .from("specials")
+        .select("business_unit")
+        .eq("id", specialId)
+        .single();
+      resolvedUnit = specialData?.business_unit || "unknown";
+    }
+
+    // 3. Send notification to correct staff (fire-and-forget)
+    supabase.functions.invoke("special-claim-notification", {
+      body: {
+        special_id: specialId,
+        special_title: specialTitle,
+        business_unit: resolvedUnit,
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        message: form.message || null,
+      },
+    }).catch((err) => console.error("Notification send failed:", err));
+
+    setLoading(false);
     setSubmitted(true);
   };
 
