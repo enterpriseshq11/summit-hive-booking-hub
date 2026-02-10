@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Gift, Sparkles, Check, ArrowRight, Clock, Shield, BadgeCheck, Layers, Star, Building2, Dumbbell, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import {
   CorporateIntakeModal,
 } from "@/components/promotions";
 import { usePromotions, type Promotion } from "@/hooks/usePromotions";
+import { usePublicSpecials, type Special } from "@/hooks/useSpecials";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import type { PromotionCategoryTab } from "@/components/promotions/PromotionCategoryTabs";
@@ -44,28 +46,83 @@ const TESTIMONIALS = [
   }
 ];
 
-// Business icons for cross-business display
-const BUSINESS_ICONS = {
-  summit: Building2,
-  coworking: Building2,
-  spa: Sparkles,
-  fitness: Dumbbell,
-  events: Star,
+// Map business_unit keys to tab IDs
+const UNIT_TO_TAB: Record<string, PromotionCategoryTab> = {
+  summit: "office",
+  hive: "office",
+  restoration: "spa",
+  fitness: "fitness",
+  voice_vault: "voice_vault",
+  photo_booth_360: "photo_booth_360",
+};
+
+// Map tab IDs to business_unit keys for specials queries
+const TAB_TO_UNITS: Record<string, string[]> = {
+  office: ["summit", "hive"],
+  spa: ["restoration"],
+  fitness: ["fitness"],
+  voice_vault: ["voice_vault"],
+  photo_booth_360: ["photo_booth_360"],
 };
 
 export default function Promotions() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<PromotionCategoryTab>("all");
+
+  // Detect scoped mode from URL params
+  const sourceParam = searchParams.get("source");
+  const unitParam = searchParams.get("unit");
+  const isScopedMode = sourceParam === "specials" && !!unitParam;
+
+  // Determine initial tab from URL unit param
+  const initialTab: PromotionCategoryTab = unitParam
+    ? (UNIT_TO_TAB[unitParam] || "all")
+    : "all";
+
+  const [activeTab, setActiveTab] = useState<PromotionCategoryTab>(initialTab);
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isCorporateModalOpen, setIsCorporateModalOpen] = useState(false);
   const [preselectedOffer, setPreselectedOffer] = useState<Promotion | null>(null);
   const [promoEmail, setPromoEmail] = useState("");
 
-  const { data: promotions = [], isLoading } = usePromotions();
+  // Sync tab from URL on mount / when params change
+  useEffect(() => {
+    if (unitParam) {
+      const mappedTab = UNIT_TO_TAB[unitParam];
+      if (mappedTab) setActiveTab(mappedTab);
+    }
+  }, [unitParam]);
 
-  // Filter promotions based on the new category tabs
+  // Fetch general promotions (only used in non-scoped mode)
+  const { data: promotions = [], isLoading: promosLoading } = usePromotions();
+
+  // Fetch specials for scoped mode (all units, client-side filter)
+  const { data: summitSpecials = [] } = usePublicSpecials("summit");
+  const { data: hiveSpecials = [] } = usePublicSpecials("hive");
+  const { data: restorationSpecials = [] } = usePublicSpecials("restoration");
+  const { data: fitnessSpecials = [] } = usePublicSpecials("fitness");
+  const { data: voiceVaultSpecials = [] } = usePublicSpecials("voice_vault");
+  const { data: photoBoothSpecials = [] } = usePublicSpecials("photo_booth_360");
+
+  const allSpecials = useMemo(() => [
+    ...summitSpecials,
+    ...hiveSpecials,
+    ...restorationSpecials,
+    ...fitnessSpecials,
+    ...voiceVaultSpecials,
+    ...photoBoothSpecials,
+  ], [summitSpecials, hiveSpecials, restorationSpecials, fitnessSpecials, voiceVaultSpecials, photoBoothSpecials]);
+
+  // Get specials filtered by current tab
+  const filteredSpecials = useMemo(() => {
+    const units = TAB_TO_UNITS[activeTab];
+    if (!units) return allSpecials; // "all" tab shows everything
+    return allSpecials.filter(s => units.includes(s.business_unit));
+  }, [allSpecials, activeTab]);
+
+  // Filter promotions based on the category tabs (non-scoped mode)
   const filteredPromotions = useMemo(() => {
     if (activeTab === "all") return promotions;
     
@@ -123,18 +180,82 @@ export default function Promotions() {
     }
   };
 
+  const handleTabChange = (tab: PromotionCategoryTab) => {
+    setActiveTab(tab);
+    // If in scoped mode and switching tabs, update URL
+    if (isScopedMode) {
+      const units = TAB_TO_UNITS[tab];
+      if (units) {
+        setSearchParams({ source: "specials", unit: units[0] });
+      }
+    }
+  };
+
+  const exitScopedMode = () => {
+    setSearchParams({});
+    setActiveTab("all");
+  };
+
   // Dynamic hero content based on user state
-  const heroHeadline = user 
-    ? "Your Member-Only Advantages" 
-    : "More Value. More Results. One Ecosystem.";
+  const heroHeadline = isScopedMode
+    ? "Current Specials"
+    : user 
+      ? "Your Member-Only Advantages" 
+      : "More Value. More Results. One Ecosystem.";
   
-  const heroCTA = user 
-    ? "View My Eligible Promotions" 
-    : "Explore Current Offers";
+  const heroCTA = isScopedMode
+    ? "Browse All Offers"
+    : user 
+      ? "View My Eligible Promotions" 
+      : "Explore Current Offers";
+
+  // Tab heading text
+  const getTabHeading = () => {
+    if (isScopedMode) {
+      const headings: Record<string, string> = {
+        office: "Office & Coworking Specials",
+        spa: "Spa & Wellness Specials",
+        fitness: "Fitness Specials",
+        voice_vault: "Voice Vault Specials",
+        photo_booth_360: "360 Photo Booth Specials",
+      };
+      return headings[activeTab] || "Current Specials";
+    }
+    const headings: Record<string, string> = {
+      all: "All Offers",
+      office: "Office & Coworking Promotions",
+      spa: "Spa & Wellness Specials",
+      fitness: "Fitness Deals",
+      voice_vault: "Voice Vault Offers",
+      photo_booth_360: "360 Photo Booth Offers",
+      bundles: "Cross-Business Bundles",
+      limited: "Limited-Time Offers",
+    };
+    return headings[activeTab] || "All Offers";
+  };
+
+  const getTabDescription = () => {
+    if (isScopedMode) return "Active specials for this business unit.";
+    const descriptions: Record<string, string> = {
+      all: "Browse all available promotions and packages.",
+      office: "Maximize your workspace investment with exclusive member perks.",
+      spa: "Recovery, relaxation, and wellness bundles for optimal self-care.",
+      fitness: "Training packages and gym membership enhancements.",
+      voice_vault: "Recording studio packages and creator deals.",
+      photo_booth_360: "Event entertainment packages and add-ons.",
+      bundles: "High-value packages that combine multiple businesses for maximum savings.",
+      limited: "Time-sensitive offers—available for a limited window only.",
+    };
+    return descriptions[activeTab] || "";
+  };
+
+  // In scoped mode, render specials as cards; otherwise use promotions
+  const isLoading = isScopedMode ? false : promosLoading;
+  const displayItems = isScopedMode ? filteredSpecials : filteredPromotions;
 
   return (
     <>
-      {/* Hero Section - Enhanced with animated glow */}
+      {/* Hero Section */}
       <section className="relative min-h-[65vh] flex items-center justify-center overflow-hidden bg-primary">
         {/* Grid texture background */}
         <div className="absolute inset-0">
@@ -190,7 +311,7 @@ export default function Promotions() {
         <div className="relative z-10 max-w-4xl mx-auto px-4 py-20 text-center">
           <Badge variant="outline" className="mb-6 border-gold/50 text-gold bg-gold/10 px-4 py-1.5">
             <Sparkles className="w-3 h-3 mr-2" />
-            Promotions
+            {isScopedMode ? "Specials" : "Promotions"}
           </Badge>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground tracking-tight mb-6">
@@ -198,29 +319,46 @@ export default function Promotions() {
           </h1>
 
           <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-8">
-            Exclusive bundles and limited-time offers designed to help you get more from A-Z Enterprises.
+            {isScopedMode
+              ? "Active specials for this division. Claim before they expire."
+              : "Exclusive bundles and limited-time offers designed to help you get more from A-Z Enterprises."}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <Button
-              size="lg"
-              onClick={scrollToOffers}
-              className="bg-gold hover:bg-gold/90 text-primary font-semibold px-8"
-              data-event="promo_hero_cta_view_offers"
-            >
-              <Gift className="w-4 h-4 mr-2" />
-              {heroCTA}
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => document.getElementById("interest-form")?.scrollIntoView({ behavior: "smooth" })}
-              className="border-gold/50 text-gold hover:bg-gold/10"
-              data-event="promo_hero_cta_custom_bundle"
-            >
-              Request Custom Bundle
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            {isScopedMode ? (
+              <Button
+                size="lg"
+                onClick={exitScopedMode}
+                variant="outline"
+                className="border-gold/50 text-gold hover:bg-gold/10"
+                data-event="promo_hero_exit_scoped"
+              >
+                <Gift className="w-4 h-4 mr-2" />
+                Browse All Offers
+              </Button>
+            ) : (
+              <>
+                <Button
+                  size="lg"
+                  onClick={scrollToOffers}
+                  className="bg-gold hover:bg-gold/90 text-primary font-semibold px-8"
+                  data-event="promo_hero_cta_view_offers"
+                >
+                  <Gift className="w-4 h-4 mr-2" />
+                  {heroCTA}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => document.getElementById("interest-form")?.scrollIntoView({ behavior: "smooth" })}
+                  className="border-gold/50 text-gold hover:bg-gold/10"
+                  data-event="promo_hero_cta_custom_bundle"
+                >
+                  Request Custom Bundle
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </>
+            )}
           </div>
 
           <p className="text-sm text-primary-foreground/60">
@@ -231,30 +369,33 @@ export default function Promotions() {
 
       <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
 
-      {/* How It Works Strip */}
-      <section className="py-12 bg-muted/30">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8">
-            {HOW_IT_WORKS.map((step) => (
-              <div key={step.step} className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center shrink-0 shadow-lg shadow-gold/10">
-                  <span className="text-gold font-bold">{step.step}</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
-                </div>
+      {/* How It Works Strip - hide in scoped mode */}
+      {!isScopedMode && (
+        <>
+          <section className="py-12 bg-muted/30">
+            <div className="max-w-5xl mx-auto px-4">
+              <div className="grid md:grid-cols-3 gap-8">
+                {HOW_IT_WORKS.map((step) => (
+                  <div key={step.step} className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center shrink-0 shadow-lg shadow-gold/10">
+                      <span className="text-gold font-bold">{step.step}</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">{step.title}</h3>
+                      <p className="text-sm text-muted-foreground">{step.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+            </div>
+          </section>
+          <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+        </>
+      )}
 
       {/* Category Tabs */}
       <div id="offers-section">
-        <PromotionCategoryTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <PromotionCategoryTabs activeTab={activeTab} onTabChange={handleTabChange} scopedMode={isScopedMode} />
       </div>
 
       {/* Trust Chips */}
@@ -271,26 +412,12 @@ export default function Promotions() {
         </div>
       </div>
 
-      {/* Promotions Grid */}
+      {/* Content Grid */}
       <section className="py-12 bg-background">
         <div className="max-w-6xl mx-auto px-4">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-foreground">
-              {activeTab === "all" && "All Offers"}
-              {activeTab === "office" && "Office & Coworking Promotions"}
-              {activeTab === "spa" && "Spa & Wellness Specials"}
-              {activeTab === "fitness" && "Fitness Deals"}
-              {activeTab === "bundles" && "Cross-Business Bundles"}
-              {activeTab === "limited" && "Limited-Time Offers"}
-            </h2>
-            <p className="text-muted-foreground mt-1">
-              {activeTab === "all" && "Browse all available promotions and packages."}
-              {activeTab === "office" && "Maximize your workspace investment with exclusive member perks."}
-              {activeTab === "spa" && "Recovery, relaxation, and wellness bundles for optimal self-care."}
-              {activeTab === "fitness" && "Training packages and gym membership enhancements."}
-              {activeTab === "bundles" && "High-value packages that combine multiple businesses for maximum savings."}
-              {activeTab === "limited" && "Time-sensitive offers—available for a limited window only."}
-            </p>
+            <h2 className="text-2xl font-bold text-foreground">{getTabHeading()}</h2>
+            <p className="text-muted-foreground mt-1">{getTabDescription()}</p>
           </div>
 
           {isLoading ? (
@@ -299,89 +426,121 @@ export default function Promotions() {
                 <div key={i} className="h-64 rounded-2xl bg-muted/50 animate-pulse" />
               ))}
             </div>
-          ) : filteredPromotions.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPromotions.map((promotion) => (
-                <PromotionCard
-                  key={promotion.id}
-                  promotion={promotion}
-                  onSelect={handleSelectPromotion}
-                />
-              ))}
-            </div>
-          ) : (
-            // Premium Empty State
-            <div className="text-center py-16 px-4">
-              <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-6">
-                <Layers className="w-8 h-8 text-gold" />
+          ) : isScopedMode ? (
+            // SCOPED MODE: Show specials from admin system as cards
+            filteredSpecials.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredSpecials.map((special) => (
+                  <SpecialCard key={special.id} special={special} />
+                ))}
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                New offers rotate monthly
-              </h3>
-              <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                Our promotions are carefully curated and refresh regularly. Join our promo list to be first to know when new offers drop.
-              </p>
-              <form onSubmit={handlePromoEmailSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={promoEmail}
-                  onChange={(e) => setPromoEmail(e.target.value)}
-                  className="flex-1"
-                  required
-                />
-                <Button type="submit" className="bg-gold hover:bg-gold/90 text-primary font-semibold">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Join Promo List
+            ) : (
+              <div className="text-center py-16 px-4">
+                <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="w-8 h-8 text-gold" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  No active specials right now
+                </h3>
+                <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                  Check back soon or browse all our offers.
+                </p>
+                <Button onClick={exitScopedMode} className="bg-gold hover:bg-gold/90 text-primary font-semibold">
+                  Browse All Offers
                 </Button>
-              </form>
-            </div>
+              </div>
+            )
+          ) : (
+            // NORMAL MODE: Show promotions
+            filteredPromotions.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredPromotions.map((promotion) => (
+                  <PromotionCard
+                    key={promotion.id}
+                    promotion={promotion}
+                    onSelect={handleSelectPromotion}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 px-4">
+                <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-6">
+                  <Layers className="w-8 h-8 text-gold" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  New offers rotate monthly
+                </h3>
+                <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                  Our promotions are carefully curated and refresh regularly. Join our promo list to be first to know when new offers drop.
+                </p>
+                <form onSubmit={handlePromoEmailSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                  <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={promoEmail}
+                    onChange={(e) => setPromoEmail(e.target.value)}
+                    className="flex-1"
+                    required
+                  />
+                  <Button type="submit" className="bg-gold hover:bg-gold/90 text-primary font-semibold">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Join Promo List
+                  </Button>
+                </form>
+              </div>
+            )
           )}
         </div>
       </section>
 
       <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
 
-      {/* Testimonials Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-foreground text-center mb-10">
-            What Members Say
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            {TESTIMONIALS.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="relative p-6 rounded-2xl bg-card border border-border/50"
-              >
-                <div className="absolute left-0 top-4 bottom-4 w-1 bg-gradient-to-b from-gold via-gold/50 to-transparent rounded-full" />
-                <blockquote className="text-foreground mb-4 pl-4">
-                  "{testimonial.quote}"
-                </blockquote>
-                <div className="pl-4">
-                  <p className="text-sm font-medium text-gold">{testimonial.author}</p>
-                  <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Testimonials Section - hide in scoped mode */}
+      {!isScopedMode && (
+        <>
+          <section className="py-16 bg-muted/30">
+            <div className="max-w-5xl mx-auto px-4">
+              <h2 className="text-2xl font-bold text-foreground text-center mb-10">
+                What Members Say
+              </h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                {TESTIMONIALS.map((testimonial, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    className="relative p-6 rounded-2xl bg-card border border-border/50"
+                  >
+                    <div className="absolute left-0 top-4 bottom-4 w-1 bg-gradient-to-b from-gold via-gold/50 to-transparent rounded-full" />
+                    <blockquote className="text-foreground mb-4 pl-4">
+                      "{testimonial.quote}"
+                    </blockquote>
+                    <div className="pl-4">
+                      <p className="text-sm font-medium text-gold">{testimonial.author}</p>
+                      <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+          <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+        </>
+      )}
 
-      <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
-
-      {/* Interest Form */}
-      <section id="interest-form" className="py-16 bg-background">
-        <div className="max-w-2xl mx-auto px-4">
-          <PromotionInterestForm preselectedOffer={preselectedOffer} />
-        </div>
-      </section>
-
-      <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+      {/* Interest Form - hide in scoped mode */}
+      {!isScopedMode && (
+        <>
+          <section id="interest-form" className="py-16 bg-background">
+            <div className="max-w-2xl mx-auto px-4">
+              <PromotionInterestForm preselectedOffer={preselectedOffer} />
+            </div>
+          </section>
+          <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+        </>
+      )}
 
       {/* Final CTA */}
       <section className="py-20 bg-card">
@@ -390,18 +549,20 @@ export default function Promotions() {
             <div className="absolute left-0 top-4 bottom-4 w-1 bg-gradient-to-b from-gold via-gold/50 to-transparent rounded-full" />
             
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-              Find the Right Package for You
+              {isScopedMode ? "Want More Options?" : "Find the Right Package for You"}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Tell us what you want to combine and we'll build the best-value package.
+              {isScopedMode
+                ? "Browse all promotions and bundles across A-Z Enterprises."
+                : "Tell us what you want to combine and we'll build the best-value package."}
             </p>
             <Button
               size="lg"
-              onClick={() => document.getElementById("interest-form")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={isScopedMode ? exitScopedMode : () => document.getElementById("interest-form")?.scrollIntoView({ behavior: "smooth" })}
               className="bg-gold hover:bg-gold/90 text-primary font-semibold px-8"
-              data-event="promo_footer_cta_custom_bundle"
+              data-event="promo_footer_cta"
             >
-              Request a Custom Bundle
+              {isScopedMode ? "Browse All Offers" : "Request a Custom Bundle"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -431,5 +592,38 @@ export default function Promotions() {
 
       <StickyMobilePromotionsCTA onOpenOffers={scrollToOffers} />
     </>
+  );
+}
+
+/** Card component for rendering a Special in the promotions grid */
+function SpecialCard({ special }: { special: Special }) {
+  const navigate = useNavigate();
+
+  const handleAction = () => {
+    if (special.cta_link) {
+      navigate(special.cta_link);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-accent/20 bg-card p-6 space-y-3 hover:border-accent/40 hover:shadow-gold-lg transition-all">
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="font-bold text-lg text-foreground">{special.title}</h3>
+        {special.badge && (
+          <Badge className="bg-accent/20 text-accent border-accent/30 text-xs flex-shrink-0">
+            {special.badge}
+          </Badge>
+        )}
+      </div>
+      <p className="text-sm text-muted-foreground leading-relaxed">{special.description}</p>
+      <Button
+        size="sm"
+        onClick={handleAction}
+        className="bg-accent hover:bg-accent/90 text-primary font-semibold"
+      >
+        {special.cta_label}
+        <ArrowRight className="h-4 w-4 ml-1" />
+      </Button>
+    </div>
   );
 }

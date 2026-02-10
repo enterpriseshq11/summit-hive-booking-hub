@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { SpecialsPopup, SpecialsModal } from "@/components/specials";
+import { usePublicSpecials } from "@/hooks/useSpecials";
 import azTotalFitnessLogo from "@/assets/az-total-fitness-transparent.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +32,8 @@ export default function Fitness() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showOrientationModal, setShowOrientationModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [showSpecials, setShowSpecials] = useState(false);
+  const { data: fitnessSpecials = [] } = usePublicSpecials("fitness");
   const [preselectedPlan, setPreselectedPlan] = useState<"essential" | "performance" | "elite" | null>(null);
 
   const membershipTiers = [
@@ -891,6 +895,10 @@ export default function Fitness() {
 
       {/* Sticky Mobile CTA */}
       <StickyMobileFitnessCTA onJoinNow={() => openJoinModal()} />
+
+      {/* Specials Popup (once per session) + Modal */}
+      <SpecialsPopup storageKey="fitness" headline="Want to see our current fitness specials?" onViewSpecials={() => setShowSpecials(true)} hasSpecials={fitnessSpecials.length > 0} />
+      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Fitness Specials" specials={fitnessSpecials} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
