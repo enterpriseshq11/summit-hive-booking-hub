@@ -21,18 +21,34 @@ interface ClaimPayload {
 }
 
 // Route notifications to correct staff based on business unit
-function getStaffEmail(businessUnit: string): string {
-  // Spa/Restoration → Lindsey
-  if (businessUnit === "restoration") {
-    return Deno.env.get("LINDSEY_NOTIFY_EMAIL") || Deno.env.get("VICTORIA_NOTIFY_EMAIL") || "";
+async function isSpaPaymentsEnabled(): Promise<boolean> {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/app_config?key=eq.spa_payments_enabled&select=value`,
+      { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+    );
+    const rows = await res.json();
+    return rows?.[0]?.value === "true";
+  } catch {
+    return false;
   }
-  // Fitness → info@ or Victoria
-  // Hive, Summit, Photo Booth, Voice Vault → Victoria
+}
+
+function getStaffEmail(businessUnit: string, spaPaymentsOn: boolean): string {
+  // Spa/Restoration: Lindsey when payments ON, Victoria when OFF
+  if (businessUnit === "restoration") {
+    if (spaPaymentsOn) {
+      return Deno.env.get("LINDSEY_NOTIFY_EMAIL") || Deno.env.get("VICTORIA_NOTIFY_EMAIL") || "";
+    }
+    return Deno.env.get("VICTORIA_NOTIFY_EMAIL") || Deno.env.get("DYLAN_NOTIFY_EMAIL") || "";
+  }
   return Deno.env.get("VICTORIA_NOTIFY_EMAIL") || Deno.env.get("DYLAN_NOTIFY_EMAIL") || "";
 }
 
-function getStaffPhone(businessUnit: string): string {
-  if (businessUnit === "restoration") {
+function getStaffPhone(businessUnit: string, spaPaymentsOn: boolean): string {
+  if (businessUnit === "restoration" && spaPaymentsOn) {
     return Deno.env.get("LINDSEY_NOTIFY_PHONE") || "";
   }
   return Deno.env.get("VICTORIA_NOTIFY_PHONE") || "";
@@ -62,7 +78,9 @@ const handler = async (req: Request): Promise<Response> => {
     const payload: ClaimPayload = await req.json();
     const { special_id, special_title, business_unit, name, email, phone, message } = payload;
 
-    const staffEmail = getStaffEmail(business_unit);
+    // Check spa payment toggle for restoration routing
+    const spaPaymentsOn = business_unit === "restoration" ? await isSpaPaymentsEnabled() : false;
+    const staffEmail = getStaffEmail(business_unit, spaPaymentsOn);
     const unitLabel = UNIT_LABELS[business_unit] || business_unit;
     const FROM_EMAIL = getFromEmail();
     const replyTo = Deno.env.get("REPLY_TO_EMAIL") || "info@a-zenterpriseshq.com";
@@ -124,7 +142,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // 2. SMS to staff
-    const staffPhone = getStaffPhone(business_unit);
+    const staffPhone = getStaffPhone(business_unit, spaPaymentsOn);
     const twilioSid = Deno.env.get("TWILIO_ACCOUNT_SID");
     const twilioAuth = Deno.env.get("TWILIO_AUTH_TOKEN");
     const twilioMsgSvc = Deno.env.get("TWILIO_MESSAGING_SERVICE_SID");
