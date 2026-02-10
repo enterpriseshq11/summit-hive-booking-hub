@@ -3985,6 +3985,36 @@ export type Database = {
           },
         ]
       }
+      service_discount_config: {
+        Row: {
+          business_unit: string
+          categories: Json
+          created_at: string
+          discount_percent: number
+          enabled: boolean
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          business_unit: string
+          categories?: Json
+          created_at?: string
+          discount_percent?: number
+          enabled?: boolean
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          business_unit?: string
+          categories?: Json
+          created_at?: string
+          discount_percent?: number
+          enabled?: boolean
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       signed_documents: {
         Row: {
           booking_id: string | null
@@ -4364,6 +4394,7 @@ export type Database = {
       }
       specials: {
         Row: {
+          action_type: string
           always_on: boolean
           badge: string | null
           business_unit: string
@@ -4371,15 +4402,22 @@ export type Database = {
           cta_label: string
           cta_link: string | null
           description: string
+          destination_route: string | null
+          discount_type: string | null
+          discount_value: number | null
           end_date: string | null
           id: string
           is_active: boolean
           priority: number
+          promo_code: string | null
+          requires_verification: boolean
           start_date: string | null
+          terms: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          action_type?: string
           always_on?: boolean
           badge?: string | null
           business_unit: string
@@ -4387,15 +4425,22 @@ export type Database = {
           cta_label?: string
           cta_link?: string | null
           description: string
+          destination_route?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
           end_date?: string | null
           id?: string
           is_active?: boolean
           priority?: number
+          promo_code?: string | null
+          requires_verification?: boolean
           start_date?: string | null
+          terms?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          action_type?: string
           always_on?: boolean
           badge?: string | null
           business_unit?: string
@@ -4403,11 +4448,17 @@ export type Database = {
           cta_label?: string
           cta_link?: string | null
           description?: string
+          destination_route?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
           end_date?: string | null
           id?: string
           is_active?: boolean
           priority?: number
+          promo_code?: string | null
+          requires_verification?: boolean
           start_date?: string | null
+          terms?: string | null
           title?: string
           updated_at?: string
         }

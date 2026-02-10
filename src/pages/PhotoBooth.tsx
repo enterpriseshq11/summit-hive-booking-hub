@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { SpecialsPopup, SpecialsModal } from "@/components/specials";
+import { usePublicSpecials } from "@/hooks/useSpecials";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -70,6 +72,8 @@ const FAQS = [
 export default function PhotoBooth() {
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [showSpecials, setShowSpecials] = useState(false);
+  const { data: photoBoothSpecials = [] } = usePublicSpecials("photo_booth_360");
   
   // Get payment config for dynamic CTA labels
   const { photoBooth360PaymentsEnabled } = usePhotoBooth360PaymentsConfig();
@@ -405,6 +409,10 @@ export default function PhotoBooth() {
         onOpenChange={setInquiryOpen}
         source="website"
       />
+
+      {/* Specials Popup (once per session) + Modal */}
+      <SpecialsPopup storageKey="photo_booth_360" headline="Want to see our current 360 Photo Booth specials?" onViewSpecials={() => setShowSpecials(true)} hasSpecials={photoBoothSpecials.length > 0} />
+      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="360 Photo Booth Specials" specials={photoBoothSpecials} />
     </>
   );
 }
