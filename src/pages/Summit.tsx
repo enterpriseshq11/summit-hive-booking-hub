@@ -168,11 +168,11 @@ export default function Summit() {
               <div className="flex flex-col items-center gap-3 lg:hidden">
                 {/* Fixed-height container for logo - logo scales beyond this without pushing content */}
                 <div className="relative h-32 w-full flex items-center justify-center">
-                  <img 
-                    src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png" 
-                    alt="The Summit Event Center" 
-                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 max-w-[90vw] h-auto drop-shadow-lg"
-                  />
+                  <img
+                  src="/lovable-uploads/790635c3-febc-47a4-83e5-d0723774fd9e.png"
+                  alt="The Summit Event Center"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 max-w-[90vw] h-auto drop-shadow-lg" />
+
                 </div>
                 <div className="inline-flex items-center gap-3 px-4 py-2 bg-accent/10 rounded-full border border-accent/30">
                   <span className="text-accent font-bold text-lg">E³</span>
@@ -223,7 +223,7 @@ export default function Summit() {
                     Request a Booking (Optional)
                   </Label>
                   <div className="flex gap-2">
-                    <Input id="contact-input" type="text" placeholder="Enter your email or phone number" value={contactInput} onChange={e => setContactInput(e.target.value)} className="bg-primary-foreground/5 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-accent" />
+                    <Input id="contact-input" type="text" placeholder="Enter your email or phone number" value={contactInput} onChange={(e) => setContactInput(e.target.value)} className="bg-primary-foreground/5 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-accent" />
                     <Button variant="outline" onClick={() => setShowRequestModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold">
                       Send
                     </Button>
@@ -271,79 +271,79 @@ export default function Summit() {
 
       {/* Under-hero booking module (request-only per spec) */}
       <UnderHeroBookingCard
-        title="Request Your Date"
-        icon={<CalendarDays className="h-5 w-5 text-accent" />}
-        description="Choose an event type and preferred time. Victoria will confirm options within 24 hours."
-      >
+      title="Request Your Date"
+      icon={<CalendarDays className="h-5 w-5 text-accent" />}
+      description="Choose an event type and preferred time. Victoria will confirm options within 24 hours.">
+
         <div className="grid gap-6">
           <div className="grid sm:grid-cols-3 gap-3">
-            {eventTypes.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setSelectedEventType(t.id)}
-                className={cn(
-                  "text-left rounded-lg border p-4 transition-colors",
-                  selectedEventType === t.id
-                    ? "border-accent bg-accent/5"
-                    : "border-border hover:border-accent/50"
-                )}
-              >
+            {eventTypes.map((t) =>
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setSelectedEventType(t.id)}
+            className={cn(
+              "text-left rounded-lg border p-4 transition-colors",
+              selectedEventType === t.id ?
+              "border-accent bg-accent/5" :
+              "border-border hover:border-accent/50"
+            )}>
+
                 <div className="flex items-center gap-2 font-semibold">
                   <t.icon className="h-4 w-4 text-accent" />
                   {t.name}
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{t.tagline}</p>
               </button>
-            ))}
+          )}
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="summit-preferred-date">Preferred Date</Label>
               <Input
-                id="summit-preferred-date"
-                type="date"
-                value={preferredDate}
-                onChange={(e) => setPreferredDate(e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
-              />
+              id="summit-preferred-date"
+              type="date"
+              value={preferredDate}
+              onChange={(e) => setPreferredDate(e.target.value)}
+              min={new Date().toISOString().split("T")[0]} />
+
             </div>
             <div className="space-y-2">
               <Label htmlFor="summit-preferred-time">Preferred Start Time</Label>
               <Input
-                id="summit-preferred-time"
-                type="time"
-                value={preferredStartTime}
-                onChange={(e) => setPreferredStartTime(e.target.value)}
-              />
+              id="summit-preferred-time"
+              type="time"
+              value={preferredStartTime}
+              onChange={(e) => setPreferredStartTime(e.target.value)} />
+
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
-              className="bg-accent hover:bg-accent/90 text-primary font-semibold"
-              onClick={() => {
-                const extras = [
-                  selectedEventType ? `Event type: ${selectedEventType}` : null,
-                  preferredDate ? `Preferred date: ${preferredDate}` : null,
-                  preferredStartTime ? `Preferred start: ${preferredStartTime}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(" | ");
+            className="bg-accent hover:bg-accent/90 text-primary font-semibold"
+            onClick={() => {
+              const extras = [
+              selectedEventType ? `Event type: ${selectedEventType}` : null,
+              preferredDate ? `Preferred date: ${preferredDate}` : null,
+              preferredStartTime ? `Preferred start: ${preferredStartTime}` : null].
 
-                if (extras) setPrefillQuestion(extras);
-                setShowRequestModal(true);
-              }}
-            >
+              filter(Boolean).
+              join(" | ");
+
+              if (extras) setPrefillQuestion(extras);
+              setShowRequestModal(true);
+            }}>
+
               Book with Victoria
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
             <Button
-              variant="outline"
-              onClick={() => setShowWaitlistModal(true)}
-              className="border-accent/30 text-accent hover:bg-accent/10"
-            >
+            variant="outline"
+            onClick={() => setShowWaitlistModal(true)}
+            className="border-accent/30 text-accent hover:bg-accent/10">
+
               Notify Me
             </Button>
           </div>
@@ -414,7 +414,7 @@ export default function Summit() {
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
-          {venueHighlights.map(highlight => {
+          {venueHighlights.map((highlight) => {
           const Icon = highlight.icon;
           const isExpanded = expandedHighlight === highlight.id;
           return <Card key={highlight.id} className="shadow-premium hover:shadow-premium-hover transition-all hover:border-accent/30">
@@ -491,9 +491,9 @@ export default function Summit() {
             <p className="text-muted-foreground text-lg">Choose a starting point — Victoria will tailor everything around your vision.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {eventTypes.map(type => {
+            {eventTypes.map((type) => {
             const Icon = type.icon;
-            return <Card key={type.name} className={cn("hover:shadow-premium-hover hover:border-accent/40 transition-all duration-300 shadow-premium group cursor-pointer", "focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2")} onClick={() => handleEventTypeClick(type.id)} role="button" tabIndex={0} onKeyDown={e => {
+            return <Card key={type.name} className={cn("hover:shadow-premium-hover hover:border-accent/40 transition-all duration-300 shadow-premium group cursor-pointer", "focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2")} onClick={() => handleEventTypeClick(type.id)} role="button" tabIndex={0} onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 handleEventTypeClick(type.id);
@@ -708,7 +708,7 @@ export default function Summit() {
       <section className="py-20 bg-primary">
         <div className="container">
           <div className="max-w-2xl mx-auto text-center">
-            <img src={e3Logo} alt="" className="h-12 w-auto mx-auto mb-6 opacity-60" aria-hidden="true" />
+            
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">
               Get a tailored proposal — Victoria will reply within 24 hours.
             </h2>
