@@ -23,7 +23,7 @@ const VICTORIA_EMAIL = "victoria@a-zenterpriseshq.com";
 const VICTORIA_PHONE = "+15673796340";
 
 const FROM_EMAIL = "A-Z Enterprises <no-reply@azenterpriseshq.com>";
-const REPLY_TO_EMAIL = "info@azenterpriseshq.com";
+const REPLY_TO_EMAIL = Deno.env.get("REPLY_TO_EMAIL") || "victoria@a-zenterpriseshq.com";
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
 
 const formatMoney = (v?: number | null) => `$${Number(v ?? 0).toFixed(2)}`;

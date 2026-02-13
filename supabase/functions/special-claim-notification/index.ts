@@ -83,7 +83,7 @@ const handler = async (req: Request): Promise<Response> => {
     const staffEmail = getStaffEmail(business_unit, spaPaymentsOn);
     const unitLabel = UNIT_LABELS[business_unit] || business_unit;
     const FROM_EMAIL = getFromEmail();
-    const replyTo = Deno.env.get("REPLY_TO_EMAIL") || "info@a-zenterpriseshq.com";
+    const replyTo = Deno.env.get("REPLY_TO_EMAIL") || "victoria@a-zenterpriseshq.com";
 
     const results: string[] = [];
 
