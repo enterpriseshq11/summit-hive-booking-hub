@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
 import { RescheduleModal } from "@/components/admin/RescheduleModal";
@@ -12,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info, RefreshCw } from "lucide-react";
+import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info, RefreshCw, Pencil } from "lucide-react";
 import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -328,6 +330,11 @@ export default function AdminApprovals() {
   const [selectedLease, setSelectedLease] = useState<any>(null);
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
 
+  // Editable confirmed date/time for approval modal
+  const [editingDateTime, setEditingDateTime] = useState(false);
+  const [confirmedStart, setConfirmedStart] = useState("");
+  const [confirmedEnd, setConfirmedEnd] = useState("");
+
   // Helper to check if a booking is Spa/Restoration
   const isSpaBooking = (booking: any) => {
     const t = booking?.businesses?.type;
@@ -423,7 +430,7 @@ export default function AdminApprovals() {
     setAction("approve");
   }, [searchParams, pendingBookings]);
 
-  const handleAction = () => {
+  const handleAction = async () => {
     if (!action) return;
 
     // Hive lease request
@@ -436,11 +443,37 @@ export default function AdminApprovals() {
       setSelectedLease(null);
       setAction(null);
       setNotes("");
+      setEditingDateTime(false);
       return;
     }
 
     // Standard booking
     if (!selectedBooking) return;
+
+    // If approving with edited date/time, update the booking record first
+    if (action === "approve" && confirmedStart) {
+      const startIso = new Date(confirmedStart).toISOString();
+      const endIso = confirmedEnd ? new Date(confirmedEnd).toISOString() : null;
+
+      // Validate date is not blank
+      if (!confirmedStart) {
+        toast.error("Confirmed date/time cannot be blank.");
+        return;
+      }
+
+      const dateUpdates: any = { start_datetime: startIso };
+      if (endIso) dateUpdates.end_datetime = endIso;
+
+      const { error: dtError } = await supabase
+        .from("bookings")
+        .update(dateUpdates)
+        .eq("id", selectedBooking.id);
+
+      if (dtError) {
+        toast.error("Failed to update confirmed date/time: " + dtError.message);
+        return;
+      }
+    }
     
     updateStatus.mutate({
       id: selectedBooking.id,
@@ -465,6 +498,7 @@ export default function AdminApprovals() {
         setSelectedBooking(null);
         setAction(null);
         setNotes("");
+        setEditingDateTime(false);
       },
     });
   };
@@ -894,7 +928,7 @@ export default function AdminApprovals() {
         )}
 
         {/* Approval/Denial Dialog */}
-        <Dialog open={!!action} onOpenChange={() => { setAction(null); setNotes(""); setSelectedLease(null); }}>
+        <Dialog open={!!action} onOpenChange={() => { setAction(null); setNotes(""); setSelectedLease(null); setEditingDateTime(false); }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -910,11 +944,80 @@ export default function AdminApprovals() {
                       ? `${selectedLease.first_name || "Customer"} ${selectedLease.last_name || ""}`.trim()
                       : selectedBooking.guest_name || `${selectedBooking.profiles?.first_name} ${selectedBooking.profiles?.last_name}`}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedLease
-                      ? `Submitted ${format(new Date(selectedLease.created_at), "MMMM d, yyyy 'at' h:mm a")}`
-                      : format(new Date(selectedBooking.start_datetime), "MMMM d, yyyy 'at' h:mm a")}
-                  </p>
+
+                  {/* Date/Time display with Edit toggle (bookings only, approve action only) */}
+                  {selectedBooking && !selectedLease && (
+                    <>
+                      {!editingDateTime ? (
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-muted-foreground">
+                            {format(new Date(confirmedStart || selectedBooking.start_datetime), "MMMM d, yyyy 'at' h:mm a")}
+                          </p>
+                          {action === "approve" && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                              onClick={() => {
+                                const toLocal = (iso: string) => {
+                                  const d = new Date(iso);
+                                  const pad = (n: number) => String(n).padStart(2, "0");
+                                  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                                };
+                                setConfirmedStart(toLocal(selectedBooking.start_datetime));
+                                setConfirmedEnd(toLocal(selectedBooking.end_datetime));
+                                setEditingDateTime(true);
+                              }}
+                            >
+                              <Pencil className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-2 border border-border rounded-lg p-3 bg-background">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">Start</label>
+                              <Input
+                                type="datetime-local"
+                                value={confirmedStart}
+                                onChange={(e) => setConfirmedStart(e.target.value)}
+                                className="mt-1 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">End</label>
+                              <Input
+                                type="datetime-local"
+                                value={confirmedEnd}
+                                onChange={(e) => setConfirmedEnd(e.target.value)}
+                                className="mt-1 text-sm"
+                              />
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            onClick={() => setEditingDateTime(false)}
+                          >
+                            Cancel edit
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Lease submitted date (no editing) */}
+                  {selectedLease && (
+                    <p className="text-sm text-muted-foreground">
+                      Submitted {format(new Date(selectedLease.created_at), "MMMM d, yyyy 'at' h:mm a")}
+                    </p>
+                  )}
+
                   <p className="text-sm">
                     {selectedLease
                       ? `The Hive — Office Lease Request${selectedLease.office_code ? ` (Office ${selectedLease.office_code})` : ""}`
