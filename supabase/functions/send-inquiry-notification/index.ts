@@ -42,7 +42,7 @@ function getFromEmail() {
 }
 
 function getReplyTo() {
-  return Deno.env.get("REPLY_TO_EMAIL") || "info@azenterpriseshq.com";
+  return Deno.env.get("REPLY_TO_EMAIL") || "victoria@a-zenterpriseshq.com";
 }
 
 function getVictoriaEmail() {

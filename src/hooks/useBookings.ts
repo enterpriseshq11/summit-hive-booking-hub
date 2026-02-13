@@ -159,7 +159,29 @@ export function useUpdateBookingStatus() {
 
       return data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: async (_, variables) => {
+      // Send customer notification for status changes that need it
+      const notifyStatuses: Record<string, string> = {
+        confirmed: "confirmation",
+        cancelled: "cancellation",
+        denied: "denied",
+      };
+      const notificationType = notifyStatuses[variables.status];
+      if (notificationType) {
+        try {
+          await supabase.functions.invoke("send-booking-notification", {
+            body: {
+              booking_id: variables.id,
+              notification_type: notificationType,
+              channels: ["email", "sms"],
+              recipients: ["customer", "staff"],
+            },
+          });
+        } catch {
+          // non-blocking — toast already shown below
+        }
+      }
+
       // Aggressively invalidate all booking-related queries
       // This ensures all calendars (admin, public, my-schedule) update immediately
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
