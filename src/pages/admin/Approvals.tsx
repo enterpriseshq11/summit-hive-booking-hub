@@ -977,14 +977,14 @@ export default function AdminApprovals() {
                         </div>
                       ) : (
                         <div className="space-y-2 border border-border rounded-lg p-3 bg-background">
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-3">
                             <div>
                               <label className="text-xs font-medium text-muted-foreground">Start</label>
                               <Input
                                 type="datetime-local"
                                 value={confirmedStart}
                                 onChange={(e) => setConfirmedStart(e.target.value)}
-                                className="mt-1 text-sm"
+                                className="mt-1 text-sm w-full"
                               />
                             </div>
                             <div>
@@ -993,7 +993,7 @@ export default function AdminApprovals() {
                                 type="datetime-local"
                                 value={confirmedEnd}
                                 onChange={(e) => setConfirmedEnd(e.target.value)}
-                                className="mt-1 text-sm"
+                                className="mt-1 text-sm w-full"
                               />
                             </div>
                           </div>
