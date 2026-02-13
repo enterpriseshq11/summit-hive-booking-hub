@@ -10,17 +10,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClipboardList, Check, X, MessageSquare, Calendar as CalendarIcon, Clock, Users, DollarSign, Info, RefreshCw } from "lucide-react";
-import { format, parseISO, setHours, setMinutes } from "date-fns";
+import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info, RefreshCw } from "lucide-react";
+import { format } from "date-fns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
 
 type BusinessUnit = "all" | "summit" | "hive" | "restoration" | "photo_booth" | "voice_vault";
 
@@ -332,11 +327,6 @@ export default function AdminApprovals() {
   const [viewDenied, setViewDenied] = useState<any>(null);
   const [selectedLease, setSelectedLease] = useState<any>(null);
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
-  
-  // Confirmed date/time for approval editing
-  const [confirmedDate, setConfirmedDate] = useState<Date | undefined>(undefined);
-  const [confirmedTime, setConfirmedTime] = useState("09:00");
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   // Helper to check if a booking is Spa/Restoration
   const isSpaBooking = (booking: any) => {
@@ -433,15 +423,6 @@ export default function AdminApprovals() {
     setAction("approve");
   }, [searchParams, pendingBookings]);
 
-  // Pre-fill confirmed date/time when opening approve modal for a booking
-  useEffect(() => {
-    if (action === "approve" && selectedBooking?.start_datetime) {
-      const start = parseISO(selectedBooking.start_datetime);
-      setConfirmedDate(start);
-      setConfirmedTime(format(start, "HH:mm"));
-    }
-  }, [action, selectedBooking]);
-
   const handleAction = () => {
     if (!action) return;
 
@@ -460,74 +441,32 @@ export default function AdminApprovals() {
 
     // Standard booking
     if (!selectedBooking) return;
-
-    // Build the confirmed datetime if approving
-    let confirmedStartIso = selectedBooking.start_datetime;
-    let confirmedEndIso = selectedBooking.end_datetime;
-
-    if (action === "approve" && confirmedDate) {
-      const [hh, mm] = confirmedTime.split(":").map(Number);
-      const newStart = setMinutes(setHours(new Date(confirmedDate), hh), mm);
-      
-      // Preserve original duration
-      const origStart = parseISO(selectedBooking.start_datetime);
-      const origEnd = parseISO(selectedBooking.end_datetime);
-      const durationMs = origEnd.getTime() - origStart.getTime();
-      const newEnd = new Date(newStart.getTime() + durationMs);
-
-      confirmedStartIso = newStart.toISOString();
-      confirmedEndIso = newEnd.toISOString();
-    }
-
-    // If date/time was edited, update the booking record first
-    const dateChanged = confirmedStartIso !== selectedBooking.start_datetime;
-
-    const doApproval = async () => {
-      // Update datetime if changed
-      if (action === "approve" && dateChanged) {
-        const { error: updateError } = await supabase
-          .from("bookings")
-          .update({
-            start_datetime: confirmedStartIso,
-            end_datetime: confirmedEndIso,
-          })
-          .eq("id", selectedBooking.id);
-        if (updateError) {
-          console.error("Failed to update booking datetime:", updateError);
-          return;
+    
+    updateStatus.mutate({
+      id: selectedBooking.id,
+      status: action === "approve" ? "confirmed" : "denied",
+      notes,
+    }, {
+      onSuccess: async () => {
+        // Send decision email to customer
+        try {
+          await supabase.functions.invoke("send-booking-notification", {
+            body: {
+              booking_id: selectedBooking.id,
+              notification_type: action === "approve" ? "confirmation" : "denied",
+              channels: ["email"],
+              recipients: ["customer"],
+            },
+          });
+        } catch {
+          // non-blocking
         }
-      }
 
-      updateStatus.mutate({
-        id: selectedBooking.id,
-        status: action === "approve" ? "confirmed" : "denied",
-        notes,
-      }, {
-        onSuccess: async () => {
-          // Send decision email to customer
-          try {
-            await supabase.functions.invoke("send-booking-notification", {
-              body: {
-                booking_id: selectedBooking.id,
-                notification_type: action === "approve" ? "confirmation" : "denied",
-                channels: ["email"],
-                recipients: ["customer"],
-              },
-            });
-          } catch {
-            // non-blocking
-          }
-
-          setSelectedBooking(null);
-          setAction(null);
-          setNotes("");
-          setConfirmedDate(undefined);
-          setConfirmedTime("09:00");
-        },
-      });
-    };
-
-    doApproval();
+        setSelectedBooking(null);
+        setAction(null);
+        setNotes("");
+      },
+    });
   };
 
   return (
@@ -955,8 +894,8 @@ export default function AdminApprovals() {
         )}
 
         {/* Approval/Denial Dialog */}
-        <Dialog open={!!action} onOpenChange={() => { setAction(null); setNotes(""); setSelectedLease(null); setConfirmedDate(undefined); setConfirmedTime("09:00"); }}>
-          <DialogContent className="max-w-lg">
+        <Dialog open={!!action} onOpenChange={() => { setAction(null); setNotes(""); setSelectedLease(null); }}>
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>
                 {action === "approve" ? "Approve Booking" : "Deny Booking"}
@@ -972,7 +911,7 @@ export default function AdminApprovals() {
                       : selectedBooking.guest_name || `${selectedBooking.profiles?.first_name} ${selectedBooking.profiles?.last_name}`}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Requested: {selectedLease
+                    {selectedLease
                       ? `Submitted ${format(new Date(selectedLease.created_at), "MMMM d, yyyy 'at' h:mm a")}`
                       : format(new Date(selectedBooking.start_datetime), "MMMM d, yyyy 'at' h:mm a")}
                   </p>
@@ -981,52 +920,6 @@ export default function AdminApprovals() {
                       ? `The Hive — Office Lease Request${selectedLease.office_code ? ` (Office ${selectedLease.office_code})` : ""}`
                       : `${selectedBooking.businesses?.name} - ${selectedBooking.bookable_types?.name}`}
                   </p>
-                </div>
-              )}
-
-              {/* Confirmed Date & Time — only for booking approvals (not lease) */}
-              {action === "approve" && selectedBooking && !selectedLease && (
-                <div className="space-y-3 border border-border rounded-lg p-4">
-                  <Label className="text-sm font-semibold">Confirmed Date & Time</Label>
-                  <p className="text-xs text-muted-foreground">Adjust if needed. Defaults to the customer's requested time.</p>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground mb-1 block">Date</Label>
-                      <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !confirmedDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {confirmedDate ? format(confirmedDate, "MMMM d, yyyy") : "Pick a date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={confirmedDate}
-                            onSelect={(d) => { setConfirmedDate(d); setDatePickerOpen(false); }}
-                            disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                            className={cn("p-3 pointer-events-auto")}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div className="w-full sm:w-36">
-                      <Label className="text-xs text-muted-foreground mb-1 block">Time</Label>
-                      <Input
-                        type="time"
-                        value={confirmedTime}
-                        onChange={(e) => setConfirmedTime(e.target.value)}
-                        min="09:00"
-                        max="21:00"
-                      />
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -1046,27 +939,23 @@ export default function AdminApprovals() {
               </div>
 
               {action === "approve" && (
-                <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg">
+                <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-lg">
                   <p>Upon approval:</p>
                   <ul className="list-disc list-inside mt-1 space-y-1">
-                    <li>Booking is confirmed for <strong>{confirmedDate ? format(confirmedDate, "MMM d, yyyy") : "—"} at {confirmedTime || "—"}</strong></li>
-                    <li>Customer gets a "Request Approved / Booking Confirmed" email with the confirmed time</li>
+                    <li>Customer gets a “Request Approved / Booking Confirmed” email</li>
                   </ul>
                 </div>
               )}
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setAction(null); setNotes(""); setConfirmedDate(undefined); setConfirmedTime("09:00"); }}>
+              <Button variant="outline" onClick={() => { setAction(null); setNotes(""); }}>
                 Cancel
               </Button>
               <Button
                 variant={action === "approve" ? "default" : "destructive"}
                 onClick={handleAction}
-                disabled={
-                  updateStatus.isPending || updateLeaseApproval.isPending ||
-                  (action === "approve" && selectedBooking && !selectedLease && !confirmedDate)
-                }
+                disabled={updateStatus.isPending || updateLeaseApproval.isPending}
               >
                 {updateStatus.isPending || updateLeaseApproval.isPending
                   ? "Processing..."
