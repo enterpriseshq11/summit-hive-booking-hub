@@ -270,7 +270,7 @@ serve(async (req) => {
 
     // Generate time slots for EACH day in the range
     const slotLengthMins = Math.max(30, Number(duration_mins || 60));
-    const stepMins = 60;
+    const stepMins = 30;
 
     for (const dateStr of allDatesInRange) {
       const dateObj = new Date(dateStr + "T12:00:00"); // Use noon to avoid timezone issues
