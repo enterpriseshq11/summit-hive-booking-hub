@@ -480,21 +480,9 @@ export default function AdminApprovals() {
       status: action === "approve" ? "confirmed" : "denied",
       notes,
     }, {
-      onSuccess: async () => {
-        // Send decision email to customer
-        try {
-          await supabase.functions.invoke("send-booking-notification", {
-            body: {
-              booking_id: selectedBooking.id,
-              notification_type: action === "approve" ? "confirmation" : "denied",
-              channels: ["email"],
-              recipients: ["customer"],
-            },
-          });
-        } catch {
-          // non-blocking
-        }
-
+      onSuccess: () => {
+        // Notification is sent automatically by useUpdateBookingStatus hook
+        // (covers confirmed, cancelled, and denied statuses)
         setSelectedBooking(null);
         setAction(null);
         setNotes("");
