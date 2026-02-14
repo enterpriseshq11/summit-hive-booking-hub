@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,60 @@ const servicePlaceholders: Record<BusinessType, string> = {
   photo_booth: "e.g. 360 Rental, Event Add-on",
   voice_vault: "e.g. Podcast Recording",
 };
+
+// Expandable overflow slots component
+function ExpandableSlots({ slots, period, onSlotClick }: { slots: any[]; period: string; onSlotClick: (slot: any) => void }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="space-y-3">
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="w-full text-sm text-accent font-medium text-center py-2 hover:underline transition-colors flex items-center justify-center gap-1"
+      >
+        {expanded ? (
+          <>Hide extra {period} slots</>
+        ) : (
+          <>+{slots.length} more {period} slots available ▾</>
+        )}
+      </button>
+      {expanded && (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+          {slots.map((slot) => (
+            <button
+              key={slot.id}
+              onClick={() => onSlotClick(slot)}
+              className="group bg-card border-2 rounded-lg p-4 text-left hover:border-primary hover:shadow-lg transition-all duration-200"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="font-semibold text-lg group-hover:text-primary transition-colors">
+                  {new Date(slot.start_time).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+                <Badge variant="secondary" className="font-semibold">
+                  ${slot.base_price.toFixed(0)}
+                </Badge>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {slot.resource_name}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                Until{" "}
+                {new Date(slot.end_time).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function AvailabilitySearch({
   defaultBusinessType,
@@ -486,9 +540,11 @@ export function AvailabilitySearch({
                     </div>
                     
                     {slots.length > 6 && (
-                      <p className="text-sm text-muted-foreground text-center">
-                        +{slots.length - 6} more {period} slots available
-                      </p>
+                      <ExpandableSlots
+                        slots={slots.slice(6)}
+                        period={period}
+                        onSlotClick={handleSlotClick}
+                      />
                     )}
                   </div>
                 );
