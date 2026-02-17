@@ -1,88 +1,29 @@
 
 
-## Specials Claim System -- Making Specials Actually Work
+## Swap Office Name Labels on Coworking Cards
 
-### The Problem
-Right now, when a visitor clicks a special's CTA button, it either navigates to a page or does nothing (if `cta_link` is null). There is no claim mechanism, no promo code auto-application, and no lead capture.
+### What's Changing
 
-### The Solution
-Add two claim paths depending on the special type, plus fix broken CTAs.
+The four office cards currently display names that are swapped. The photos, prices, and positions stay exactly where they are. Only the displayed names and floor labels need to swap:
 
----
+| Card Position | Currently Shows | Should Show |
+|---|---|---|
+| Top-left | S1 / Second Floor | P1 / First Floor |
+| Top-right | S2 / Second Floor | P2 / First Floor |
+| Bottom-left | P1 / First Floor | S1 / Second Floor |
+| Bottom-right | P2 / First Floor | S2 / Second Floor |
 
-### 1. Add New Fields to the `specials` Table
+### Technical Details
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `action_type` | text | Either `route` (navigate somewhere), `promo_code` (auto-apply a code), or `request_form` (open a lead capture form) |
-| `promo_code` | text (nullable) | The code to auto-apply (e.g., `BOGOMASSAGE`) |
+**File:** `src/components/coworking/HiveOfficeCards.tsx`
 
-This lets admins define what happens when someone "claims" a special.
+1. Update the `getDisplayInfo` function to swap labels:
+   - Code "S1" displays as "Private Office P1" / "First Floor"
+   - Code "S2" displays as "Private Office P2" / "First Floor"
+   - Code "P1" displays as "Private Office S1" / "Second Floor"
+   - Code "P2" displays as "Private Office S2" / "Second Floor"
 
----
+2. Update the displayed code on each card (the bold text next to the building icon) to show the swapped name instead of the database code. For example, the card with DB code "S1" will show "P1" as the bold heading.
 
-### 2. Three Claim Behaviors
-
-**A) `route` -- Navigate to a page**
-Same as today. CTA clicks navigate to the `cta_link`. Used for specials like "Learn More" that point to `/promotions`.
-
-**B) `promo_code` -- Auto-apply a promo code**
-When the user clicks "Claim," the system:
-- Stores the promo code in sessionStorage
-- Navigates to the booking page (`cta_link`)
-- The booking/checkout form reads sessionStorage and pre-fills the promo code field
-- Shows a toast: "Promo code BOGOMASSAGE applied!"
-
-**C) `request_form` -- Open a lead capture form**
-For specials with no direct booking path (like Summit event specials or Voice Vault packages):
-- Clicking the CTA opens an inline "Claim This Special" form right in the modal
-- Fields: Name, Phone, Email, optional Message
-- Submits to a `special_claims` table
-- Shows confirmation: "We received your request. We will contact you within 1 business day."
-
----
-
-### 3. New `special_claims` Table
-
-Tracks every claim for lead follow-up:
-- `id`, `special_id`, `name`, `email`, `phone`, `message`, `created_at`
-- RLS: public insert (anonymous visitors can submit), admin read
-
----
-
-### 4. Admin Specials Editor Updates
-
-Add to the special creation/edit form:
-- **Action Type** dropdown: Route / Promo Code / Request Form
-- **Promo Code** field (shown only when action type is "promo_code")
-- The existing `cta_link` field stays for route-based specials
-
----
-
-### 5. Fix Null CTA Links
-
-Update all specials currently in the database with `cta_link: null` to use the `request_form` action type, so clicking the CTA actually does something useful.
-
----
-
-### 6. Checkout Integration (for promo code specials)
-
-Update the booking/checkout flows to check sessionStorage for a pre-applied promo code on page load and auto-fill it.
-
----
-
-### Technical Summary
-
-**Files to create:**
-- `src/components/specials/SpecialClaimForm.tsx` -- inline lead capture form
-
-**Files to modify:**
-- `src/hooks/useSpecials.ts` -- add `action_type` and `promo_code` to the Special type
-- `src/components/specials/SpecialsModal.tsx` -- handle three action types, show claim form inline
-- `src/pages/admin/Specials.tsx` -- add action_type/promo_code fields to editor
-- Booking pages (Lindsey, experience checkout) -- read promo code from sessionStorage
-
-**Database changes:**
-- Add `action_type` and `promo_code` columns to `specials` table
-- Create `special_claims` table with public insert + admin read RLS
+No database changes, no photo swaps, no price changes. Purely a display-label fix.
 
