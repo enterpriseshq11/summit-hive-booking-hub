@@ -1,11 +1,32 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, CalendarIcon } from "lucide-react";
+
+const SPA_SERVICES = [
+  "Swedish Massage",
+  "Deep Tissue Massage",
+  "Ashiatsu Massage",
+  "Couples Massage",
+  "Consultation (Free)",
+];
+
+const TIME_SLOTS = Array.from({ length: 23 }, (_, i) => {
+  const hour = Math.floor(i / 2) + 10;
+  const min = i % 2 === 0 ? "00" : "30";
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const display = `${hour > 12 ? hour - 12 : hour}:${min} ${ampm}`;
+  return { value: `${hour}:${min}`, label: display };
+});
 
 interface SpecialClaimFormProps {
   specialId: string;
@@ -18,20 +39,41 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [service, setService] = useState("");
+  const [date, setDate] = useState<Date>();
+  const [time, setTime] = useState("");
+
+  const isSpa = useMemo(() => {
+    const unit = (businessUnit || "").toLowerCase();
+    return unit.includes("spa") || unit.includes("restoration");
+  }, [businessUnit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.phone) return;
+    if (isSpa && (!service || !date || !time)) {
+      toast({ title: "Missing fields", description: "Please select a service, date, and time.", variant: "destructive" });
+      return;
+    }
 
     setLoading(true);
 
-    // 1. Save to special_claims table
+    const messageParts = [form.message];
+    if (isSpa) {
+      messageParts.unshift(
+        `Service: ${service}`,
+        `Requested Date: ${date ? format(date, "PPP") : ""}`,
+        `Requested Time: ${TIME_SLOTS.find(t => t.value === time)?.label || time}`
+      );
+    }
+    const fullMessage = messageParts.filter(Boolean).join(" | ");
+
     const { error } = await supabase.from("special_claims").insert({
       special_id: specialId,
       name: form.name,
       email: form.email,
       phone: form.phone,
-      message: form.message || null,
+      message: fullMessage || null,
     });
 
     if (error) {
@@ -40,7 +82,6 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
       return;
     }
 
-    // 2. Resolve business_unit if not passed as prop
     let resolvedUnit = businessUnit || "";
     if (!resolvedUnit) {
       const { data: specialData } = await supabase
@@ -51,7 +92,6 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
       resolvedUnit = specialData?.business_unit || "unknown";
     }
 
-    // 3. Send notification to correct staff (fire-and-forget)
     supabase.functions.invoke("special-claim-notification", {
       body: {
         special_id: specialId,
@@ -60,13 +100,25 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
         name: form.name,
         email: form.email,
         phone: form.phone,
-        message: form.message || null,
+        message: fullMessage || null,
       },
     }).catch((err) => console.error("Notification send failed:", err));
 
     setLoading(false);
     setSubmitted(true);
   };
+
+  // Compute price shown to customer based on service
+  const servicePrice = useMemo(() => {
+    const prices: Record<string, string> = {
+      "Swedish Massage": "$85",
+      "Deep Tissue Massage": "$95",
+      "Ashiatsu Massage": "$105",
+      "Couples Massage": "$170",
+      "Consultation (Free)": "Free",
+    };
+    return service ? prices[service] || null : null;
+  }, [service]);
 
   if (submitted) {
     return (
@@ -83,6 +135,68 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
   return (
     <form onSubmit={handleSubmit} className="space-y-3 pt-2 border-t border-border">
       <p className="text-sm font-medium text-foreground">Claim This Special</p>
+
+      {isSpa && (
+        <>
+          <div>
+            <Label className="text-xs">Service *</Label>
+            <Select value={service} onValueChange={setService} required>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="Select a service" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                {SPA_SERVICES.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {servicePrice && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Price due on arrival: <span className="font-semibold text-foreground">{servicePrice}</span>
+              </p>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs">Preferred Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn("w-full h-9 justify-start text-left font-normal text-sm", !date && "text-muted-foreground")}
+                  >
+                    <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
+                    {date ? format(date, "MM/dd/yyyy") : "Pick date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <Label className="text-xs">Preferred Time *</Label>
+              <Select value={time} onValueChange={setTime} required>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Pick time" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50 max-h-48">
+                  {TIME_SLOTS.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </>
+      )}
+
       <div>
         <Label className="text-xs">Name *</Label>
         <Input
