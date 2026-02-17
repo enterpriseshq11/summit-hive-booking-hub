@@ -189,7 +189,10 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {data.map((office) => {
+        {[...data].sort((a, b) => {
+          const order = ["S1", "S2", "P1", "P2"];
+          return (order.indexOf(a.code) === -1 ? 99 : order.indexOf(a.code)) - (order.indexOf(b.code) === -1 ? 99 : order.indexOf(b.code));
+        }).map((office) => {
           const isP1 = office.code === "P1";
           const isS1 = office.code === "S1";
           const isS2 = office.code === "S2";
