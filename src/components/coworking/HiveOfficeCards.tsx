@@ -76,13 +76,13 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
   }
 
   // Helper to get display info for each office (main label + optional subtext)
-  const getDisplayInfo = (code: string): { label: string; subtext?: string } => {
+  const getDisplayInfo = (code: string): { label: string; subtext?: string; displayCode: string } => {
     switch (code) {
-      case "P1": return { label: "Private Office P1", subtext: "First Floor" };
-      case "P2": return { label: "Private Office P2", subtext: "First Floor" };
-      case "S1": return { label: "Private Office S1", subtext: "Second Floor" };
-      case "S2": return { label: "Private Office S2", subtext: "Second Floor" };
-      default: return { label: code };
+      case "S1": return { label: "Private Office P1", subtext: "First Floor", displayCode: "P1" };
+      case "S2": return { label: "Private Office P2", subtext: "First Floor", displayCode: "P2" };
+      case "P1": return { label: "Private Office S1", subtext: "Second Floor", displayCode: "S1" };
+      case "P2": return { label: "Private Office S2", subtext: "Second Floor", displayCode: "S2" };
+      default: return { label: code, displayCode: code };
     }
   };
 
@@ -119,7 +119,7 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
               <div className="min-w-0">
                 <CardTitle className="text-base flex items-center gap-2 text-white font-bold drop-shadow-md">
                   <Building2 className="h-4 w-4 text-white/90" />
-                  <span className="truncate">{office.code}</span>
+                  <span className="truncate">{displayInfo.displayCode}</span>
                 </CardTitle>
                 <p className="text-sm mt-1 text-white/90 font-semibold drop-shadow-md">{displayInfo.label}</p>
                 {displayInfo.subtext && (
