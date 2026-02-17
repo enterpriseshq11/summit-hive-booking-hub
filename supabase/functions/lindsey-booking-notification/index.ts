@@ -49,6 +49,8 @@ interface GHLWebhookPayload {
   appointmentTime: string;
   timezone: string;
   bookingId: string;
+  appointmentStartISO: string;
+  appointmentStartUnix: number;
 }
 
 // Send webhook to GoHighLevel for CRM automation
@@ -525,6 +527,8 @@ Ref: ${stripeRef}`;
         appointmentTime: startTimeStr,
         timezone: "America/New_York",
         bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
+        appointmentStartISO: booking.start_datetime,
+        appointmentStartUnix: Math.floor(startDate.getTime() / 1000),
       };
       
       const ghlResult = await sendGHLWebhook(ghlPayload);
@@ -795,6 +799,8 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
         appointmentTime: startTimeStr,
         timezone: "America/New_York",
         bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
+        appointmentStartISO: booking.start_datetime,
+        appointmentStartUnix: Math.floor(startDate.getTime() / 1000),
       };
       
       const ghlResult = await sendGHLWebhook(ghlPayload);
@@ -1039,6 +1045,8 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
         appointmentTime: "TBD",
         timezone: "America/New_York",
         bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
+        appointmentStartISO: booking.start_datetime,
+        appointmentStartUnix: Math.floor(startDate.getTime() / 1000),
       };
       
       const ghlResult = await sendGHLWebhook(ghlPayload);
@@ -1281,6 +1289,8 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
         appointmentTime: startTimeStr,
         timezone: "America/New_York",
         bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
+        appointmentStartISO: booking.start_datetime,
+        appointmentStartUnix: Math.floor(startDate.getTime() / 1000),
       };
       
       const ghlResult = await sendGHLWebhook(ghlPayload);
