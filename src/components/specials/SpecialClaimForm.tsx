@@ -15,10 +15,25 @@ import { CheckCircle, Loader2, CalendarIcon } from "lucide-react";
 const SPA_SERVICES = [
   "Swedish Massage",
   "Deep Tissue Massage",
-  "Ashiatsu Massage",
+  "Ashiatsu (Barefoot Massage)",
   "Couples Massage",
   "Consultation (Free)",
 ];
+
+const SERVICE_DURATIONS: Record<string, { duration: string; price: string }[]> = {
+  "Swedish Massage": [
+    { duration: "30 min", price: "$45" },
+    { duration: "60 min", price: "$80" },
+  ],
+  "Ashiatsu (Barefoot Massage)": [
+    { duration: "60 min", price: "$60" },
+    { duration: "90 min", price: "$90" },
+  ],
+  "Couples Massage": [
+    { duration: "60 min", price: "$170" },
+    { duration: "90 min", price: "$190" },
+  ],
+};
 
 const TIME_SLOTS = Array.from({ length: 23 }, (_, i) => {
   const hour = Math.floor(i / 2) + 10;
@@ -40,6 +55,7 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [service, setService] = useState("");
+  const [duration, setDuration] = useState("");
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState("");
 
@@ -55,13 +71,18 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
       toast({ title: "Missing fields", description: "Please select a service, date, and time.", variant: "destructive" });
       return;
     }
+    if (isSpa && hasDurations && !duration) {
+      toast({ title: "Missing fields", description: "Please select a session duration.", variant: "destructive" });
+      return;
+    }
 
     setLoading(true);
 
     const messageParts = [form.message];
     if (isSpa) {
       messageParts.unshift(
-        `Service: ${service}`,
+        `Service: ${service}${duration ? ` (${duration})` : ""}`,
+        `Price: ${servicePrice || "N/A"}`,
         `Requested Date: ${date ? format(date, "PPP") : ""}`,
         `Requested Time: ${TIME_SLOTS.find(t => t.value === time)?.label || time}`
       );
@@ -108,17 +129,20 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
     setSubmitted(true);
   };
 
-  // Compute price shown to customer based on service
+  const hasDurations = !!SERVICE_DURATIONS[service];
+  const durations = SERVICE_DURATIONS[service] || [];
+
+  // Compute price shown to customer based on service + duration
   const servicePrice = useMemo(() => {
-    const prices: Record<string, string> = {
-      "Swedish Massage": "$85",
-      "Deep Tissue Massage": "$95",
-      "Ashiatsu Massage": "$105",
-      "Couples Massage": "$170",
-      "Consultation (Free)": "Free",
-    };
-    return service ? prices[service] || null : null;
-  }, [service]);
+    if (!service) return null;
+    if (service === "Deep Tissue Massage") return "$55";
+    if (service === "Consultation (Free)") return "Free";
+    if (hasDurations && duration) {
+      const match = durations.find(d => d.duration === duration);
+      return match?.price || null;
+    }
+    return null;
+  }, [service, duration, hasDurations, durations]);
 
   if (submitted) {
     return (
@@ -140,7 +164,7 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
         <>
           <div>
             <Label className="text-xs">Service *</Label>
-            <Select value={service} onValueChange={setService} required>
+            <Select value={service} onValueChange={(v) => { setService(v); setDuration(""); }} required>
               <SelectTrigger className="h-9">
                 <SelectValue placeholder="Select a service" />
               </SelectTrigger>
@@ -150,6 +174,23 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
                 ))}
               </SelectContent>
             </Select>
+            {hasDurations && (
+              <div className="mt-2">
+                <Label className="text-xs">Duration *</Label>
+                <Select value={duration} onValueChange={setDuration} required>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    {durations.map((d) => (
+                      <SelectItem key={d.duration} value={d.duration}>
+                        {d.duration} — {d.price}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {servicePrice && (
               <p className="text-xs text-muted-foreground mt-1">
                 Price due on arrival: <span className="font-semibold text-foreground">{servicePrice}</span>
