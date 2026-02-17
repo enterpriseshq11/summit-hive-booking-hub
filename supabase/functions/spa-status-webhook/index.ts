@@ -30,6 +30,8 @@ interface GHLStatusPayload {
   appointmentDate: string;
   appointmentTime: string;
   timezone: string;
+  appointmentStartISO: string;
+  appointmentStartUnix: number;
 }
 
 serve(async (req) => {
@@ -179,6 +181,8 @@ serve(async (req) => {
       appointmentDate,
       appointmentTime,
       timezone: "America/New_York",
+      appointmentStartISO: booking.start_datetime,
+      appointmentStartUnix: Math.floor(startDate.getTime() / 1000),
     };
 
     // Send to GHL

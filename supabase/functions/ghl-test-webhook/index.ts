@@ -24,6 +24,8 @@ interface GHLTestPayload {
   timezone: string;
   bookingId: string;
   status?: string;
+  appointmentStartISO: string;
+  appointmentStartUnix: number;
 }
 
 serve(async (req) => {
@@ -86,6 +88,8 @@ serve(async (req) => {
       appointmentTime: testStatus ? "3:30 PM" : "2:00 PM",
       timezone: "America/New_York",
       bookingId: (testStatus ? "STATUS-" : "TEST-") + now.getTime().toString().slice(-8),
+      appointmentStartISO: testDate.toISOString(),
+      appointmentStartUnix: Math.floor(testDate.getTime() / 1000),
     };
 
     // Add status field if testing status change
