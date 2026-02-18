@@ -6,13 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SmsConsentCheckbox } from "@/components/booking/SmsConsentCheckbox";
 import { cn } from "@/lib/utils";
 import { format, addDays, startOfToday, isBefore, startOfDay } from "date-fns";
 import { 
-  CalendarIcon, Clock, CheckCircle, XCircle, ChevronRight, ArrowLeft,
+  CalendarIcon, CalendarDays, Clock, CheckCircle, XCircle, ChevronRight, ArrowLeft,
   Heart, Flame, Star, Users, MapPin, Sparkles, ArrowRight, HelpCircle
 } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +22,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLindseyAvailability, isPromoDate, calculateServicePrice } from "@/hooks/useLindseyAvailability";
 import { useSpaPaymentsConfig } from "@/hooks/useSpaPaymentsConfig";
 import { SpaWorkerService } from "@/hooks/useSpaWorkerServices";
+
+// Time slots for request mode: 10:00 AM to 8:30 PM in 30-min increments
+const REQUEST_TIME_SLOTS = Array.from({ length: 21 }, (_, i) => {
+  const hour = Math.floor(i / 2) + 10;
+  const min = i % 2 === 0 ? "00" : "30";
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour > 12 ? hour - 12 : hour;
+  return { value: `${hour}:${min}`, label: `${displayHour}:${min} ${ampm}` };
+});
 
 // Service option type
 interface ServiceOption {
@@ -163,6 +174,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "" });
   const [preferredDateTime, setPreferredDateTime] = useState("");
+  const [requestDate, setRequestDate] = useState<Date>();
+  const [requestTime, setRequestTime] = useState("");
   const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
   const [consentChecked, setConsentChecked] = useState(false);
   const [smsConsent, setSmsConsent] = useState(false);
@@ -584,6 +597,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
     setSelectedTime("");
     setGuestInfo({ name: "", email: "", phone: "" });
     setPreferredDateTime("");
+    setRequestDate(undefined);
+    setRequestTime("");
     setFormErrors({});
     setConsentChecked(false);
     setBookingComplete(false);
@@ -1113,15 +1128,61 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                 {/* Preferred Day/Time - Request Mode Only */}
                 {isRequestMode && (
                   <div className="space-y-2">
-                    <Label htmlFor="preferred-datetime">What day and time would you like to come in?</Label>
-                    <p className="text-xs text-muted-foreground">Open 7 days a week. Anytime after 10 AM is best.</p>
-                    <Textarea
-                      id="preferred-datetime"
-                      value={preferredDateTime}
-                      onChange={(e) => setPreferredDateTime(e.target.value)}
-                      placeholder="e.g. Saturday afternoon, or any weekday after 2 PM"
-                      rows={2}
-                    />
+                    <Label>When would you like to come in?</Label>
+                    <p className="text-xs text-muted-foreground">Open 7 days a week, 10:00 AM – 8:30 PM.</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Preferred Date *</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              type="button"
+                              className={cn("w-full h-9 justify-start text-left font-normal text-sm", !requestDate && "text-muted-foreground")}
+                            >
+                              <CalendarDays className="h-3.5 w-3.5 mr-1.5" />
+                              {requestDate ? format(requestDate, "MM/dd/yyyy") : "Pick date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 z-50" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={requestDate}
+                              onSelect={(d) => {
+                                setRequestDate(d);
+                                if (d && requestTime) {
+                                  const timeLabel = REQUEST_TIME_SLOTS.find(t => t.value === requestTime)?.label || requestTime;
+                                  setPreferredDateTime(`${format(d, "PPP")} at ${timeLabel}`);
+                                }
+                              }}
+                              disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Preferred Time *</Label>
+                        <Select value={requestTime} onValueChange={(v) => {
+                          setRequestTime(v);
+                          const timeLabel = REQUEST_TIME_SLOTS.find(t => t.value === v)?.label || v;
+                          if (requestDate) {
+                            setPreferredDateTime(`${format(requestDate, "PPP")} at ${timeLabel}`);
+                          } else {
+                            setPreferredDateTime(`Time: ${timeLabel}`);
+                          }
+                        }}>
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Pick time" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background z-50 max-h-48">
+                            {REQUEST_TIME_SLOTS.map((t) => (
+                              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
                 )}
 
