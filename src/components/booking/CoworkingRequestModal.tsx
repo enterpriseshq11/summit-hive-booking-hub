@@ -21,7 +21,6 @@ interface CoworkingRequestModalProps {
 const workspaceTypes = [
   { value: "private-office", label: "Private Office" },
   { value: "dedicated-desk", label: "Dedicated Desk" },
-  { value: "day-pass", label: "Day Pass" },
 ];
 
 const officeOptions = [
