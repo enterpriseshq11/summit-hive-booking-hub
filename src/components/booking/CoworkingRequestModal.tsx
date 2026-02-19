@@ -24,10 +24,10 @@ const workspaceTypes = [
 ];
 
 const officeOptions = [
-  { value: "S1", label: "S1 — Standard (2nd floor)" },
-  { value: "S2", label: "S2 — Standard (2nd floor)" },
-  { value: "P1", label: "P1 — Premium (1st floor)" },
-  { value: "P2", label: "P2 — Premium (1st floor)" },
+  { value: "S1", label: "S1 — Standard (1st floor)" },
+  { value: "S2", label: "S2 — Standard (1st floor)" },
+  { value: "P1", label: "P1 — Premium (2nd floor)" },
+  { value: "P2", label: "P2 — Premium (2nd floor)" },
 ];
 
 const leaseTermOptions = [
