@@ -20,6 +20,12 @@ interface ClaimPayload {
   message: string | null;
 }
 
+function getSupabaseAdmin() {
+  const url = Deno.env.get("SUPABASE_URL")!;
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  return createClient(url, key);
+}
+
 // Route notifications to correct staff based on business unit
 async function isSpaPaymentsEnabled(): Promise<boolean> {
   try {
@@ -63,10 +69,133 @@ const UNIT_LABELS: Record<string, string> = {
   fitness: "A-Z Total Fitness",
 };
 
+// Map business_unit to the businesses.type enum
+const UNIT_TO_BIZ_TYPE: Record<string, string> = {
+  summit: "summit",
+  hive: "coworking",
+  restoration: "spa",
+  photo_booth_360: "photo_booth",
+  voice_vault: "voice_vault",
+  fitness: "fitness",
+};
+
 function getFromEmail() {
   const fromName = Deno.env.get("FROM_NAME") || "A-Z Enterprises";
   const fromEmail = Deno.env.get("FROM_EMAIL") || "no-reply@azenterpriseshq.com";
   return `${fromName} <${fromEmail}>`;
+}
+
+/**
+ * Create a pending booking record so the special request shows up
+ * in Admin → Approvals → Pending.
+ */
+async function createPendingBooking(payload: ClaimPayload): Promise<string | null> {
+  try {
+    const sb = getSupabaseAdmin();
+    const bizType = UNIT_TO_BIZ_TYPE[payload.business_unit];
+    if (!bizType) {
+      console.warn("Unknown business_unit for booking creation:", payload.business_unit);
+      return null;
+    }
+
+    // Look up business
+    const { data: biz } = await sb
+      .from("businesses")
+      .select("id")
+      .eq("type", bizType)
+      .eq("is_active", true)
+      .limit(1)
+      .single();
+
+    if (!biz) {
+      console.warn("No active business found for type:", bizType);
+      return null;
+    }
+
+    // Get first active bookable type for this business (fallback)
+    const { data: bt } = await sb
+      .from("bookable_types")
+      .select("id")
+      .eq("business_id", biz.id)
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .limit(1)
+      .single();
+
+    if (!bt) {
+      console.warn("No active bookable_type for business:", biz.id);
+      return null;
+    }
+
+    // Parse requested date/time from message if available
+    let startDt = new Date();
+    startDt.setHours(startDt.getHours() + 24); // default: 24h from now
+    let endDt = new Date(startDt);
+    endDt.setHours(endDt.getHours() + 1);
+
+    // Try parsing date/time from structured message
+    if (payload.message) {
+      const dateMatch = payload.message.match(/Requested Date:\s*(.+?)(?:\s*\||$)/);
+      const timeMatch = payload.message.match(/Requested Time:\s*(.+?)(?:\s*\||$)/);
+      if (dateMatch) {
+        try {
+          const parsed = new Date(dateMatch[1].trim());
+          if (!isNaN(parsed.getTime())) {
+            startDt = parsed;
+            // Try adding time
+            if (timeMatch) {
+              const timeStr = timeMatch[1].trim();
+              const tMatch = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+              if (tMatch) {
+                let h = parseInt(tMatch[1]);
+                const m = parseInt(tMatch[2]);
+                const ap = tMatch[3].toUpperCase();
+                if (ap === "PM" && h < 12) h += 12;
+                if (ap === "AM" && h === 12) h = 0;
+                startDt.setHours(h, m, 0, 0);
+              }
+            }
+            endDt = new Date(startDt);
+            endDt.setHours(endDt.getHours() + 1);
+          }
+        } catch { /* use defaults */ }
+      }
+    }
+
+    const specialNote = `SPECIAL REQUEST: ${payload.special_title} | ${payload.message || ""}`.trim();
+
+    const { data: booking, error } = await sb
+      .from("bookings")
+      .insert({
+        business_id: biz.id,
+        bookable_type_id: bt.id,
+        status: "pending",
+        guest_name: payload.name,
+        guest_email: payload.email,
+        guest_phone: payload.phone,
+        start_datetime: startDt.toISOString(),
+        end_datetime: endDt.toISOString(),
+        subtotal: 0,
+        total_amount: 0,
+        notes: specialNote,
+        internal_notes: "REQUEST MODE — Special claim submission",
+        source_brand: payload.business_unit === "restoration" ? "restoration" : payload.business_unit,
+        booking_number: "", // trigger will generate
+      })
+      .select("id, booking_number")
+      .single();
+
+    if (error) {
+      console.error("Failed to create pending booking for special claim:", error);
+      return null;
+    }
+
+    console.log(`Created pending booking ${booking.booking_number} for special claim by ${payload.name}`);
+    return booking.id;
+  } catch (err) {
+    console.error("Error in createPendingBooking:", err);
+    return null;
+  }
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -86,6 +215,12 @@ const handler = async (req: Request): Promise<Response> => {
     const replyTo = Deno.env.get("REPLY_TO_EMAIL") || "victoria@a-zenterpriseshq.com";
 
     const results: string[] = [];
+
+    // Create a pending booking so it appears in Approvals
+    const bookingId = await createPendingBooking(payload);
+    if (bookingId) {
+      results.push(`booking: ${bookingId}`);
+    }
 
     // 1. Staff notification
     if (staffEmail) {
@@ -129,6 +264,8 @@ const handler = async (req: Request): Promise<Response> => {
                 </table>
                 
                 ${message ? `<div class="message-box"><strong>Message:</strong><p style="margin: 10px 0 0 0;">${message}</p></div>` : ""}
+                
+                ${bookingId ? `<p style="margin-top: 15px; font-size: 13px; color: #888;">This request is now in <strong>Approvals → Pending</strong>. <a href="https://summit-hive-booking-hub.lovable.app/admin/approvals?id=${bookingId}">Review now</a></p>` : ""}
               </div>
             </div>
           </body>
@@ -149,7 +286,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (staffPhone && twilioSid && twilioAuth && twilioMsgSvc) {
       try {
-        const smsBody = `[${unitLabel}] Special Request: "${special_title}" from ${name} — ${phone}. Check email for details.`;
+        const smsBody = `[${unitLabel}] Special Request: "${special_title}" from ${name} — ${phone}. Check Approvals → Pending to review.`;
         const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
         const smsRes = await fetch(twilioUrl, {
           method: "POST",

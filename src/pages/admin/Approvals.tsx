@@ -325,7 +325,7 @@ export default function AdminApprovals() {
   const [action, setAction] = useState<"approve" | "deny" | null>(null);
   const [notes, setNotes] = useState("");
   const [businessUnit, setBusinessUnit] = useState<BusinessUnit>(isSpaRoleOnly ? "restoration" : "all");
-  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied" | "rescheduled">(isSpaRoleOnly ? "confirmed" : "pending");
+  const [statusTab, setStatusTab] = useState<"pending" | "confirmed" | "denied" | "rescheduled">("pending");
   const [viewDenied, setViewDenied] = useState<any>(null);
   const [selectedLease, setSelectedLease] = useState<any>(null);
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
@@ -349,10 +349,11 @@ export default function AdminApprovals() {
     queryClient.invalidateQueries({ queryKey: ["reschedule_requests"] });
   };
 
-  // Auto-switch to confirmed tab when switching to Restoration (since they don't use pending)
+  // Auto-switch to pending tab when switching to Restoration (they now use pending too)
+  // Only auto-switch away from "denied" since Spa doesn't use denied tab
   useEffect(() => {
-    if (isSpaUnit(businessUnit) && (statusTab === "pending" || statusTab === "denied")) {
-      setStatusTab("confirmed");
+    if (isSpaUnit(businessUnit) && statusTab === "denied") {
+      setStatusTab("pending");
     }
   }, [businessUnit, statusTab]);
 
@@ -514,9 +515,17 @@ export default function AdminApprovals() {
 
         {/* Status Tabs - Different for Spa vs other businesses */}
         {isSpaUnit(businessUnit) ? (
-          // Spa/Restoration: Only Confirmed and Rescheduled tabs
-          <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "confirmed" | "rescheduled")}>
+          // Spa/Restoration: Pending, Confirmed, and Rescheduled tabs
+          <Tabs value={statusTab} onValueChange={(v) => setStatusTab(v as "pending" | "confirmed" | "rescheduled")}>
             <TabsList className="w-full justify-start flex-wrap h-auto">
+              <TabsTrigger value="pending" className="flex items-center gap-1">
+                Pending
+                {filteredPending.length > 0 && (
+                  <Badge variant="destructive" className="ml-1 h-5 px-1.5">
+                    {filteredPending.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
               <TabsTrigger value="rescheduled" className="flex items-center gap-1">
                 <RefreshCw className="h-3 w-3" />
