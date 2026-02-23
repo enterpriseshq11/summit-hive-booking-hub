@@ -15,6 +15,7 @@ const logStep = (step: string, details?: unknown) => {
 // ============= CONFIGURATION (ENV-DRIVEN) =============
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
 const BUSINESS_PHONE = "(567) 379-6340";
+const TZ = "America/New_York";
 
 // ============= SECRETS-DRIVEN (NO HARDCODED STAFF EMAILS) =============
 // CRITICAL DOMAIN RULE:
@@ -561,9 +562,9 @@ function buildCustomerConfirmationEmail(
   
   const startDate = new Date(booking.start_datetime as string);
   const endDate = new Date(booking.end_datetime as string);
-  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-  const endTimeStr = endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const dateStr = startDate.toLocaleDateString("en-US", { timeZone: TZ, weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
+  const endTimeStr = endDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   const totalAmount = Number(booking.total_amount || 0);
   const depositAmount = Number(booking.deposit_amount || 0);
@@ -690,9 +691,9 @@ function buildStaffConfirmationEmail(booking: Record<string, unknown>, businessT
   
   const startDate = new Date(booking.start_datetime as string);
   const endDate = new Date(booking.end_datetime as string);
-  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-  const endTimeStr = endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const dateStr = startDate.toLocaleDateString("en-US", { timeZone: TZ, weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
+  const endTimeStr = endDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   const totalAmount = Number(booking.total_amount || 0);
   const depositAmount = Number(booking.deposit_amount || 0);
@@ -790,8 +791,8 @@ function buildReminderEmail(
   const businessLabel = getBusinessLabel(businessType);
   
   const startDate = new Date(booking.start_datetime as string);
-  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const dateStr = startDate.toLocaleDateString("en-US", { timeZone: TZ, weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   // Updated reminder text for new timing
   let reminderText: string;
@@ -903,8 +904,8 @@ function buildRescheduleRequestEmail(
   const businessLabel = getBusinessLabel(businessType);
   
   const originalStart = new Date(booking.start_datetime as string);
-  const originalDateStr = originalStart.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const originalTimeStr = originalStart.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const originalDateStr = originalStart.toLocaleDateString("en-US", { timeZone: TZ, weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const originalTimeStr = originalStart.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Your Appointment";
 
@@ -1005,13 +1006,13 @@ function buildRescheduleRequestSMS(
 ): string {
   const businessLabel = getBusinessLabel(businessType);
   const originalStart = new Date(booking.start_datetime as string);
-  const originalShortDate = originalStart.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const originalTimeStr = originalStart.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const originalShortDate = originalStart.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
+  const originalTimeStr = originalStart.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   const firstOption = proposedTimes[0];
   const optionDate = new Date(firstOption.start);
-  const optionShortDate = optionDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const optionTimeStr = optionDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const optionShortDate = optionDate.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
+  const optionTimeStr = optionDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   return `📅 RESCHEDULE REQUEST
 ${businessLabel} needs to reschedule your ${originalShortDate} ${originalTimeStr} appt.
@@ -1027,8 +1028,8 @@ function buildCancellationEmail(
 ): string {
   const businessLabel = getBusinessLabel(businessType);
   const startDate = new Date(booking.start_datetime as string);
-  const dateStr = startDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const dateStr = startDate.toLocaleDateString("en-US", { timeZone: TZ, weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   const serviceName = (booking.bookable_types as Record<string, unknown>)?.name || "Your Appointment";
 
   const cancellationReason =
@@ -1105,8 +1106,8 @@ function buildCancellationEmail(
 function buildCancellationSMS(booking: Record<string, unknown>, businessType: string): string {
   const businessLabel = getBusinessLabel(businessType);
   const startDate = new Date(booking.start_datetime as string);
-  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const shortDate = startDate.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
+  const timeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   return `❌ CANCELLED
 Your ${businessLabel} appt on ${shortDate} at ${timeStr} has been cancelled.
@@ -1117,8 +1118,8 @@ To reschedule, book again or call ${BUSINESS_PHONE}`;
 function buildCustomerConfirmationSMS(booking: Record<string, unknown>, businessType: string): string {
   const businessLabel = getBusinessLabel(businessType);
   const startDate = new Date(booking.start_datetime as string);
-  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const shortDate = startDate.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
+  const timeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   return `✅ BOOKING CONFIRMED
 ${businessLabel}
@@ -1131,9 +1132,9 @@ function buildStaffConfirmationSMS(booking: Record<string, unknown>, businessTyp
   const businessLabel = getBusinessLabel(businessType);
   const startDate = new Date(booking.start_datetime as string);
   const endDate = new Date(booking.end_datetime as string);
-  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-  const endTimeStr = endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const shortDate = startDate.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
+  const startTimeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
+  const endTimeStr = endDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   const totalAmount = Number(booking.total_amount || 0);
   const depositAmount = Number(booking.deposit_amount || 0);
@@ -1149,8 +1150,8 @@ Paid: ${formatMoney(depositAmount)} / Total: ${formatMoney(totalAmount)}`;
 function buildReminderSMS(booking: Record<string, unknown>, businessType: string, reminderType: string): string {
   const businessLabel = getBusinessLabel(businessType);
   const startDate = new Date(booking.start_datetime as string);
-  const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const shortDate = startDate.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
+  const timeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
   
   // Updated reminder text for new timing
   let reminderText: string;
@@ -1368,8 +1369,8 @@ serve(async (req) => {
           const durationMins = computeDurationMins(booking);
           const paymentLabel = describePayment(booking);
           const startDate = new Date(booking.start_datetime);
-          const shortDate = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-          const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+          const shortDate = startDate.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
+          const timeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
 
           let subject: string;
           let html: string;

@@ -127,9 +127,10 @@ serve(async (req) => {
 
     const startDate = new Date(booking.start_datetime);
     const endDate = new Date(booking.end_datetime);
-    const dateStr = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    const startTimeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-    const endTimeStr = endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    const TZ = "America/New_York";
+    const dateStr = startDate.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
+    const startTimeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
+    const endTimeStr = endDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
 
     const resourceName = booking.booking_resources?.[0]?.resources?.name || "(unassigned)";
 
