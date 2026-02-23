@@ -13,11 +13,12 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info, RefreshCw, Pencil } from "lucide-react";
+import { ClipboardList, Check, X, MessageSquare, Calendar, Clock, Users, DollarSign, Info, RefreshCw, Pencil, Phone, Mail, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Label } from "@/components/ui/label";
 
 type BusinessUnit = "all" | "summit" | "hive" | "restoration" | "photo_booth" | "voice_vault";
 
@@ -329,6 +330,7 @@ export default function AdminApprovals() {
   const [viewDenied, setViewDenied] = useState<any>(null);
   const [selectedLease, setSelectedLease] = useState<any>(null);
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
+  const [detailItem, setDetailItem] = useState<ApprovalItem | null>(null);
 
   // Editable confirmed date/time for approval modal
   const [editingDateTime, setEditingDateTime] = useState(false);
@@ -637,7 +639,7 @@ export default function AdminApprovals() {
               const proposedTimes = Array.isArray(rescheduleReq?.proposed_times) ? rescheduleReq.proposed_times : [];
               
               return (
-                <Card key={item.booking.id} className="hover:shadow-md transition-shadow border-amber-200 dark:border-amber-800">
+                <Card key={item.booking.id} className="hover:shadow-md transition-shadow border-amber-200 dark:border-amber-800 cursor-pointer" onClick={() => setDetailItem(item)}>
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row justify-between gap-4">
                       <div className="space-y-3 flex-1">
@@ -717,7 +719,8 @@ export default function AdminApprovals() {
             ).map((item) => (
               <Card
                 key={item.kind === "booking" ? item.booking.id : item.inquiry.id}
-                className="hover:shadow-md transition-shadow"
+                className="hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setDetailItem(item)}
               >
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row justify-between gap-4">
@@ -852,7 +855,7 @@ export default function AdminApprovals() {
                     </div>
 
                     {statusTab === "pending" ? (
-                      <div className="flex lg:flex-col gap-2 lg:justify-center">
+                      <div className="flex lg:flex-col gap-2 lg:justify-center" onClick={(e) => e.stopPropagation()}>
                         <Button
                           className="flex-1 lg:flex-none"
                           onClick={() => {
@@ -888,7 +891,7 @@ export default function AdminApprovals() {
                         </Button>
                       </div>
                     ) : statusTab === "denied" ? (
-                      <div className="flex lg:flex-col gap-2 lg:justify-center">
+                      <div className="flex lg:flex-col gap-2 lg:justify-center" onClick={(e) => e.stopPropagation()}>
                         <Button
                           variant="outline"
                           className="flex-1 lg:flex-none"
@@ -901,7 +904,7 @@ export default function AdminApprovals() {
                     ) : statusTab === "confirmed" ? (
                       // Show Reschedule button only for Spa/Restoration bookings
                       item.kind === "booking" && isSpaBooking(item.booking) ? (
-                        <div className="flex lg:flex-col gap-2 lg:justify-center">
+                        <div className="flex lg:flex-col gap-2 lg:justify-center" onClick={(e) => e.stopPropagation()}>
                           <Button
                             variant="outline"
                             className="flex-1 lg:flex-none"
@@ -1097,6 +1100,182 @@ export default function AdminApprovals() {
                   </div>
                 )}
               </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Booking Detail Modal - opens on card click */}
+        <Dialog open={!!detailItem} onOpenChange={(o) => !o && setDetailItem(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Request Details</DialogTitle>
+            </DialogHeader>
+
+            {detailItem && (
+              <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                {/* Contact Info */}
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-base">
+                    {detailItem.kind === "booking"
+                      ? detailItem.booking.guest_name || "Customer"
+                      : `${detailItem.inquiry.first_name || ""} ${detailItem.inquiry.last_name || ""}`.trim() || "Customer"}
+                  </h4>
+
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span>{detailItem.kind === "booking" ? detailItem.booking.guest_email : detailItem.inquiry.email || "No email"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span>{detailItem.kind === "booking" ? detailItem.booking.guest_phone : detailItem.inquiry.phone || "No phone"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Booking Details */}
+                {detailItem.kind === "booking" && (
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Business</Label>
+                        <p className="font-medium">{detailItem.booking.businesses?.name || "—"}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Service</Label>
+                        <p className="font-medium">{detailItem.booking.bookable_types?.name || "—"}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Date</Label>
+                        <p className="font-medium">{format(new Date(detailItem.booking.start_datetime), "EEEE, MMM d, yyyy")}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Time</Label>
+                        <p className="font-medium">
+                          {format(new Date(detailItem.booking.start_datetime), "h:mm a")}
+                          {detailItem.booking.end_datetime && ` – ${format(new Date(detailItem.booking.end_datetime), "h:mm a")}`}
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Guests</Label>
+                        <p className="font-medium">{detailItem.booking.guest_count || 1}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Total</Label>
+                        <p className="font-medium">{formatEstimate(detailItem.booking)}</p>
+                      </div>
+                      {detailItem.booking.packages?.name && (
+                        <div className="col-span-2">
+                          <Label className="text-xs text-muted-foreground">Package</Label>
+                          <p className="font-medium">{detailItem.booking.packages.name}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Lease Details */}
+                {detailItem.kind === "hive_lease" && (
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Business</Label>
+                        <p className="font-medium">The Hive</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Type</Label>
+                        <p className="font-medium">Office Lease Request</p>
+                      </div>
+                      {detailItem.inquiry.office_code && (
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Office</Label>
+                          <p className="font-medium">{detailItem.inquiry.office_code}</p>
+                        </div>
+                      )}
+                      {detailItem.inquiry.lease_term_months && (
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Term</Label>
+                          <p className="font-medium">{detailItem.inquiry.lease_term_months} months</p>
+                        </div>
+                      )}
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Monthly Rate</Label>
+                        <p className="font-medium">{formatUSD0(detailItem.inquiry.monthly_rate)}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Term Total</Label>
+                        <p className="font-medium">{formatUSD0(detailItem.inquiry.term_total)}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Deposit</Label>
+                        <p className="font-medium">{formatUSD0(detailItem.inquiry.deposit_amount)}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Submitted</Label>
+                        <p className="font-medium">{format(new Date(detailItem.inquiry.created_at), "MMM d, yyyy")}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {detailItem.kind === "booking" && detailItem.booking.notes && (
+                  <div className="bg-muted/50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <Label className="text-xs text-muted-foreground">Customer Notes</Label>
+                    </div>
+                    <p className="text-sm whitespace-pre-wrap">{detailItem.booking.notes}</p>
+                  </div>
+                )}
+
+                {/* Status badge */}
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs text-muted-foreground">Status:</Label>
+                  <Badge variant="outline" className="capitalize">{detailItem.kind === "booking" ? detailItem.booking.status : detailItem.inquiry.approval_status}</Badge>
+                </div>
+              </div>
+            )}
+
+            {/* Action buttons for pending items */}
+            {detailItem && (
+              (detailItem.kind === "booking" ? detailItem.booking.status === "pending" : detailItem.inquiry?.approval_status === "pending") && (
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (detailItem.kind === "booking") {
+                        setSelectedBooking(detailItem.booking);
+                        setSelectedLease(null);
+                      } else {
+                        setSelectedLease(detailItem.inquiry);
+                        setSelectedBooking(null);
+                      }
+                      setDetailItem(null);
+                      setAction("deny");
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Deny
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (detailItem.kind === "booking") {
+                        setSelectedBooking(detailItem.booking);
+                        setSelectedLease(null);
+                      } else {
+                        setSelectedLease(detailItem.inquiry);
+                        setSelectedBooking(null);
+                      }
+                      setDetailItem(null);
+                      setAction("approve");
+                    }}
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Approve
+                  </Button>
+                </DialogFooter>
+              )
             )}
           </DialogContent>
         </Dialog>
