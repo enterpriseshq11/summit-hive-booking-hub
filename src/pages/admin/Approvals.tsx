@@ -1151,10 +1151,37 @@ export default function AdminApprovals() {
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Time</Label>
-                        <p className="font-medium">
-                          {format(new Date(detailItem.booking.start_datetime), "h:mm a")}
-                          {detailItem.booking.end_datetime && ` – ${format(new Date(detailItem.booking.end_datetime), "h:mm a")}`}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-medium">
+                            {format(new Date(detailItem.booking.start_datetime), "h:mm a")}
+                            {detailItem.booking.end_datetime && ` – ${format(new Date(detailItem.booking.end_datetime), "h:mm a")}`}
+                          </p>
+                          {detailItem.booking.status === "pending" && (
+                            <button
+                              className="text-muted-foreground hover:text-foreground transition-colors"
+                              title="Edit time"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (detailItem.kind === "booking") {
+                                  setSelectedBooking(detailItem.booking);
+                                  setSelectedLease(null);
+                                  const pad = (n: number) => String(n).padStart(2, "0");
+                                  const toLocal = (iso: string) => {
+                                    const d = new Date(iso);
+                                    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                                  };
+                                  setConfirmedStart(toLocal(detailItem.booking.start_datetime));
+                                  setConfirmedEnd(toLocal(detailItem.booking.end_datetime));
+                                  setEditingDateTime(true);
+                                  setAction("approve");
+                                }
+                                setDetailItem(null);
+                              }}
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Guests</Label>
