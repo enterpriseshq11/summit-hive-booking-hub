@@ -129,8 +129,9 @@ serve(async (req) => {
       : Math.max(0, Math.round((new Date(booking.end_datetime).getTime() - new Date(booking.start_datetime).getTime()) / 60000));
 
     const startDate = new Date(booking.start_datetime);
-    const dateStr = startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    const timeStr = startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    const TZ = "America/New_York";
+    const dateStr = startDate.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
+    const timeStr = startDate.toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", hour12: true });
 
     const deposit = booking.deposit_amount ?? 0;
     const dueOnArrival = booking.balance_due ?? Math.max(0, Number(booking.total_amount ?? 0) - Number(deposit));

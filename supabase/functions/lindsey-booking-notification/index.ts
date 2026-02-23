@@ -214,22 +214,27 @@ serve(async (req) => {
     // Format date/time
     const startDate = new Date(booking.start_datetime);
     const endDate = new Date(booking.end_datetime);
+    const TZ = "America/New_York";
     const dateStr = startDate.toLocaleDateString("en-US", {
+      timeZone: TZ,
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
     const shortDateStr = startDate.toLocaleDateString("en-US", {
+      timeZone: TZ,
       month: "short",
       day: "numeric",
     });
     const startTimeStr = startDate.toLocaleTimeString("en-US", {
+      timeZone: TZ,
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     });
     const endTimeStr = endDate.toLocaleTimeString("en-US", {
+      timeZone: TZ,
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
@@ -523,7 +528,7 @@ Ref: ${stripeRef}`;
         serviceDuration: Number(duration) || 60,
         price: formatMoney(totalAmount),
         room: roomName,
-        appointmentDate: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
+        appointmentDate: startDate.toLocaleDateString("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }),
         appointmentTime: startTimeStr,
         timezone: "America/New_York",
         bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
@@ -795,7 +800,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
         serviceDuration: Number(duration) || 60,
         price: formatMoney(totalAmount),
         room: roomName,
-        appointmentDate: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
+        appointmentDate: startDate.toLocaleDateString("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }),
         appointmentTime: startTimeStr,
         timezone: "America/New_York",
         bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
@@ -1285,7 +1290,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
         serviceDuration: Number(duration) || 15,
         price: "$0.00",
         room: roomName,
-        appointmentDate: startDate.toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }),
+        appointmentDate: startDate.toLocaleDateString("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }),
         appointmentTime: startTimeStr,
         timezone: "America/New_York",
         bookingId: booking.booking_number || booking.id.slice(0, 8).toUpperCase(),
