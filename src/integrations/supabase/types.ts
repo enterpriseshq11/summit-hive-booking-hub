@@ -1791,11 +1791,13 @@ export type Database = {
           contract_version_id: string | null
           coordinator_id: string
           created_at: string
+          deposit_due_at: string | null
           event_date: string
           event_type: string | null
           expires_at: string | null
           gross_revenue: number
           guest_count: number | null
+          hours_booked: number | null
           id: string
           is_full_facility: boolean
           net_contribution: number
@@ -1820,11 +1822,13 @@ export type Database = {
           contract_version_id?: string | null
           coordinator_id: string
           created_at?: string
+          deposit_due_at?: string | null
           event_date: string
           event_type?: string | null
           expires_at?: string | null
           gross_revenue?: number
           guest_count?: number | null
+          hours_booked?: number | null
           id?: string
           is_full_facility?: boolean
           net_contribution?: number
@@ -1849,11 +1853,13 @@ export type Database = {
           contract_version_id?: string | null
           coordinator_id?: string
           created_at?: string
+          deposit_due_at?: string | null
           event_date?: string
           event_type?: string | null
           expires_at?: string | null
           gross_revenue?: number
           guest_count?: number | null
+          hours_booked?: number | null
           id?: string
           is_full_facility?: boolean
           net_contribution?: number
@@ -5713,6 +5719,61 @@ export type Database = {
           p_start_time: string
         }
         Returns: boolean
+      }
+      e3_advance_to_yellow: { Args: { p_booking_id: string }; Returns: Json }
+      e3_approve_deposit: { Args: { p_booking_id: string }; Returns: Json }
+      e3_cancel_booking: {
+        Args: { p_booking_id: string; p_reason?: string }
+        Returns: Json
+      }
+      e3_check_conflict: {
+        Args: {
+          p_event_date: string
+          p_exclude_booking_id?: string
+          p_hall_ids: string[]
+          p_time_block_id: string
+          p_venue_id: string
+        }
+        Returns: Json
+      }
+      e3_config_value: { Args: { p_key: string }; Returns: string }
+      e3_create_booking: {
+        Args: {
+          p_client_email: string
+          p_client_name: string
+          p_client_phone?: string
+          p_event_date: string
+          p_event_type?: string
+          p_gross_revenue?: number
+          p_guest_count?: number
+          p_hall_ids: string[]
+          p_notes?: string
+          p_time_block_id: string
+          p_venue_id: string
+        }
+        Returns: Json
+      }
+      e3_expire_stale_bookings: { Args: never; Returns: number }
+      e3_get_commission_tier: {
+        Args: { p_coordinator_id: string }
+        Returns: number
+      }
+      e3_get_coordinator_id: { Args: { _user_id: string }; Returns: string }
+      e3_revert_missed_deposits: { Args: never; Returns: number }
+      e3_update_booking: {
+        Args: {
+          p_booking_id: string
+          p_client_email?: string
+          p_client_name?: string
+          p_client_phone?: string
+          p_event_type?: string
+          p_gross_revenue?: number
+          p_guest_count?: number
+          p_hall_ids?: string[]
+          p_notes?: string
+          p_time_block_id?: string
+        }
+        Returns: Json
       }
       generate_booking_number: { Args: never; Returns: string }
       get_spa_worker_id: { Args: { _user_id: string }; Returns: string }

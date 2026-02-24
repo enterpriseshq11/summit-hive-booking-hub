@@ -91,6 +91,14 @@ import CommandCenterPayroll from "./pages/command-center/Payroll";
 import OfficeListingsHub from "./pages/coworking/OfficeListingsHub";
 import OfficeDetailPage from "./pages/coworking/OfficeDetailPage";
 
+// E3 Event System Pages
+import E3Dashboard from "./pages/e3/Dashboard";
+import E3SubmitEvent from "./pages/e3/SubmitEvent";
+import E3MyEvents from "./pages/e3/MyEvents";
+import E3BookingDetails from "./pages/e3/BookingDetails";
+import E3Calendar from "./pages/e3/Calendar";
+import E3AdminDeposits from "./pages/e3/AdminDeposits";
+
 const queryClient = new QueryClient();
 
 function AppInner() {
@@ -152,6 +160,16 @@ function AppInner() {
         <Route path="/login" element={<Login />} />
         <Route path="/worker-signup" element={<WorkerSignup />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+
+        {/* E3 Event System (protected) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/e3" element={<E3Dashboard />} />
+          <Route path="/e3/submit" element={<E3SubmitEvent />} />
+          <Route path="/e3/events" element={<E3MyEvents />} />
+          <Route path="/e3/bookings/:id" element={<E3BookingDetails />} />
+          <Route path="/e3/calendar" element={<E3Calendar />} />
+          <Route path="/e3/admin/deposits" element={<E3AdminDeposits />} />
+        </Route>
 
         {/* Unified Admin routes - all under /admin/* with staff protection */}
         <Route element={<ProtectedRoute requireStaff />}>
