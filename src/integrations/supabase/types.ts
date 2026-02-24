@@ -2049,6 +2049,7 @@ export type Database = {
       e3_document_templates: {
         Row: {
           created_at: string
+          doc_type_key: string | null
           file_url: string | null
           id: string
           is_active: boolean
@@ -2057,6 +2058,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          doc_type_key?: string | null
           file_url?: string | null
           id?: string
           is_active?: boolean
@@ -2065,6 +2067,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          doc_type_key?: string | null
           file_url?: string | null
           id?: string
           is_active?: boolean
