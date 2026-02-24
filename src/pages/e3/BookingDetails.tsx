@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useE3Booking, useE3AdvanceToYellow, useE3CancelBooking } from "@/hooks/useE3";
+import { useE3Booking, useE3AdvanceToYellow, useE3CancelBooking, useE3DocumentTemplates } from "@/hooks/useE3";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Upload, Clock, DollarSign, Users, Calendar, Building2, FileText, Loader2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Upload, Clock, DollarSign, Calendar, Building2, FileText, Loader2, ExternalLink, Download, CheckCircle2, AlertCircle } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,14 +20,13 @@ const STATE_COLORS: Record<string, string> = {
   expired: "bg-muted text-muted-foreground",
 };
 
-const DOC_TYPES = [
-  { value: "contract", label: "Master Event Contract" },
-  { value: "cleaning", label: "Cleaning Agreement" },
-  { value: "building_rules", label: "Building Rules & Policies" },
-  { value: "alcohol_policy", label: "Alcohol Policy" },
-  { value: "damage_policy", label: "Damage Policy" },
-  { value: "cancellation_policy", label: "Cancellation Policy" },
-  { value: "other", label: "Other" },
+const REQUIRED_DOC_TYPES = [
+  { key: "contract", label: "Master Event Contract", required: true },
+  { key: "cleaning", label: "Cleaning Agreement", required: true },
+  { key: "building_rules", label: "Building Rules & Policies", required: true },
+  { key: "alcohol_policy", label: "Alcohol Policy", required: false },
+  { key: "damage_policy", label: "Damage Policy", required: true },
+  { key: "cancellation_policy", label: "Cancellation Policy", required: true },
 ];
 
 export default function E3BookingDetails() {
@@ -38,44 +36,63 @@ export default function E3BookingDetails() {
   const { data: booking, isLoading } = useE3Booking(id);
   const advanceToYellow = useE3AdvanceToYellow();
   const cancelBooking = useE3CancelBooking();
+  const { data: templates = [] } = useE3DocumentTemplates();
 
-  const [docType, setDocType] = useState("contract");
-  const [uploading, setUploading] = useState(false);
+  const [uploadingType, setUploadingType] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const activeUploadType = useRef<string>("");
+
+  const handleUploadClick = (docTypeKey: string) => {
+    activeUploadType.current = docTypeKey;
+    fileInputRef.current?.click();
+  };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !id) return;
+    const docTypeKey = activeUploadType.current;
+    if (!file || !id || !docTypeKey) return;
 
-    setUploading(true);
+    setUploadingType(docTypeKey);
     try {
+      // Find matching template
+      const template = (templates as any[]).find(
+        (t: any) => t.doc_type_key === docTypeKey && t.is_active
+      );
+
       const ext = file.name.split(".").pop();
-      const path = `${id}/${docType}-${Date.now()}.${ext}`;
+      const templatePath = template ? `templates/${template.id}/` : "";
+      const path = `${id}/${templatePath}signed/${docTypeKey}-${Date.now()}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("e3-documents")
+        .from("e3-booking-documents")
         .upload(path, file);
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("e3-documents")
-        .getPublicUrl(path);
+      // Get a signed URL since bucket is private
+      const { data: signedData, error: signedErr } = await supabase.storage
+        .from("e3-booking-documents")
+        .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
+
+      const fileUrl = signedData?.signedUrl || path;
 
       const { error: dbError } = await supabase
         .from("e3_booking_documents")
         .insert({
           booking_id: id,
-          document_type: docType,
-          file_url: urlData.publicUrl,
+          document_type: docTypeKey,
+          template_id: template?.id || null,
+          file_url: fileUrl,
+          uploaded_by: (await supabase.auth.getUser()).data.user?.id,
         });
       if (dbError) throw dbError;
 
-      toast.success(`${DOC_TYPES.find(d => d.value === docType)?.label || docType} uploaded.`);
+      const label = REQUIRED_DOC_TYPES.find(d => d.key === docTypeKey)?.label || docTypeKey;
+      toast.success(`${label} uploaded.`);
       qc.invalidateQueries({ queryKey: ["e3_booking", id] });
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
     } finally {
-      setUploading(false);
+      setUploadingType(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -85,9 +102,14 @@ export default function E3BookingDetails() {
 
   const b = booking as any;
   const hallNames = b.e3_booking_halls?.map((bh: any) => bh.e3_halls?.name).filter(Boolean) || [];
-  const docs = b.e3_booking_documents || [];
-  const hasContract = docs.some((d: any) => d.document_type === "contract");
+  const docs = (b.e3_booking_documents || []) as any[];
   const canUpload = ["red_hold", "yellow_contract"].includes(b.booking_state);
+
+  // Check required doc completeness
+  const uploadedTypes = new Set(docs.map((d: any) => d.document_type));
+  const requiredDocs = REQUIRED_DOC_TYPES.filter(d => d.required);
+  const allRequiredUploaded = requiredDocs.every(d => uploadedTypes.has(d.key));
+  const missingCount = requiredDocs.filter(d => !uploadedTypes.has(d.key)).length;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -103,7 +125,7 @@ export default function E3BookingDetails() {
           </Badge>
         </div>
 
-        {/* Deadline Banner */}
+        {/* Deadline Banners */}
         {b.booking_state === "red_hold" && b.expires_at && (
           <Card className="mb-4 border-red-300 bg-red-50">
             <CardContent className="py-3 flex items-center gap-2 text-red-700">
@@ -174,69 +196,105 @@ export default function E3BookingDetails() {
           </CardContent>
         </Card>
 
-        {/* Documents */}
+        {/* Required Documents Section */}
         <Card className="mb-4">
-          <CardHeader><CardTitle className="text-lg flex items-center gap-2"><FileText className="h-4 w-4" /> Documents</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            {docs.length > 0 && (
-              <ul className="space-y-2">
-                {docs.map((d: any) => (
-                  <li key={d.id} className="text-sm flex items-center gap-2 justify-between">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium capitalize">{d.document_type.replace("_", " ")}</span>
-                      <span className="text-muted-foreground text-xs">
-                        {format(new Date(d.uploaded_at), "MMM d, yyyy HH:mm")}
-                      </span>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <FileText className="h-4 w-4" /> Required Documents
+              {allRequiredUploaded ? (
+                <Badge variant="outline" className="bg-green-500/15 text-green-700 border-green-300 ml-2">All Complete</Badge>
+              ) : (
+                <Badge variant="outline" className="bg-red-500/15 text-red-700 border-red-300 ml-2">{missingCount} Missing</Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+              className="hidden"
+              onChange={handleUpload}
+            />
+
+            {REQUIRED_DOC_TYPES.map((docDef) => {
+              const uploaded = docs.find((d: any) => d.document_type === docDef.key);
+              const template = (templates as any[]).find(
+                (t: any) => t.doc_type_key === docDef.key && t.is_active
+              );
+              const isUploading = uploadingType === docDef.key;
+
+              return (
+                <div
+                  key={docDef.key}
+                  className="flex items-center justify-between py-2 px-3 rounded-md border bg-card"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {uploaded ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className={`h-4 w-4 shrink-0 ${docDef.required ? "text-red-500" : "text-muted-foreground"}`} />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {docDef.label}
+                        {!docDef.required && <span className="text-muted-foreground text-xs ml-1">(optional)</span>}
+                      </p>
+                      {template && (
+                        <p className="text-xs text-muted-foreground">v{template.version_number}</p>
+                      )}
+                      {uploaded && (
+                        <p className="text-xs text-muted-foreground">
+                          Uploaded {format(new Date(uploaded.uploaded_at), "MMM d, yyyy")}
+                        </p>
+                      )}
                     </div>
-                    {d.file_url && (
-                      <a href={d.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
-                        View <ExternalLink className="h-3 w-3" />
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {template?.file_url && (
+                      <a
+                        href={template.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline flex items-center gap-1"
+                      >
+                        <Download className="h-3 w-3" /> Template
                       </a>
                     )}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {docs.length === 0 && (
-              <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
-            )}
-
-            {canUpload && (
-              <div className="flex items-end gap-3 pt-2 border-t">
-                <div className="flex-1">
-                  <label className="text-xs text-muted-foreground mb-1 block">Document Type</label>
-                  <Select value={docType} onValueChange={setDocType}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DOC_TYPES.map(dt => (
-                        <SelectItem key={dt.value} value={dt.value}>{dt.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    {uploaded?.file_url && (
+                      <a
+                        href={uploaded.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline flex items-center gap-1"
+                      >
+                        <ExternalLink className="h-3 w-3" /> View
+                      </a>
+                    )}
+                    {canUpload && (
+                      <Button
+                        size="sm"
+                        variant={uploaded ? "ghost" : "outline"}
+                        className="h-7 text-xs"
+                        onClick={() => handleUploadClick(docDef.key)}
+                        disabled={isUploading}
+                      >
+                        {isUploading ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <>
+                            <Upload className="h-3 w-3 mr-1" />
+                            {uploaded ? "Replace" : "Upload"}
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                    className="hidden"
-                    onChange={handleUpload}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
-                  >
-                    {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
-                    Upload
-                  </Button>
-                </div>
-              </div>
-            )}
+              );
+            })}
           </CardContent>
         </Card>
 
@@ -246,10 +304,12 @@ export default function E3BookingDetails() {
             <>
               <Button
                 onClick={() => advanceToYellow.mutate(b.id)}
-                disabled={advanceToYellow.isPending || !hasContract}
+                disabled={advanceToYellow.isPending || !allRequiredUploaded}
                 className="bg-yellow-600 hover:bg-yellow-700 text-white"
               >
-                {hasContract ? "Advance to Yellow Contract" : "Upload Contract First"}
+                {allRequiredUploaded
+                  ? "Submit Contract Package"
+                  : `Upload ${missingCount} Required Doc${missingCount > 1 ? "s" : ""} First`}
               </Button>
               <Button
                 variant="destructive"

@@ -228,7 +228,7 @@ export function useE3DocumentTemplates() {
       const { data, error } = await supabase
         .from("e3_document_templates" as any)
         .select("*")
-        .eq("active_flag", true)
+        .eq("is_active", true)
         .order("template_name");
       if (error) throw error;
       return data;
