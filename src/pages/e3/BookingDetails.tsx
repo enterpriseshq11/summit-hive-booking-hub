@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useE3Booking, useE3AdvanceToYellow, useE3CancelBooking, useE3DocumentTemplates } from "@/hooks/useE3";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Upload, Clock, DollarSign, Calendar, Building2, FileText, Loader2, ExternalLink, Download, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Upload, Clock, DollarSign, Calendar, Building2, FileText, Loader2, ExternalLink, Download, CheckCircle2, AlertCircle, Lock } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,13 +20,13 @@ const STATE_COLORS: Record<string, string> = {
   expired: "bg-muted text-muted-foreground",
 };
 
-const REQUIRED_DOC_TYPES = [
-  { key: "contract", label: "Master Event Contract", required: true },
-  { key: "cleaning", label: "Cleaning Agreement", required: true },
-  { key: "building_rules", label: "Building Rules & Policies", required: true },
-  { key: "alcohol_policy", label: "Alcohol Policy", required: false },
-  { key: "damage_policy", label: "Damage Policy", required: true },
-  { key: "cancellation_policy", label: "Cancellation Policy", required: true },
+const BASE_REQUIRED_DOC_TYPES = [
+  { key: "contract", label: "Master Event Contract", alwaysRequired: true },
+  { key: "cleaning", label: "Cleaning Agreement", alwaysRequired: true },
+  { key: "building_rules", label: "Building Rules & Policies", alwaysRequired: true },
+  { key: "alcohol_policy", label: "Alcohol Policy", alwaysRequired: false },
+  { key: "damage_policy", label: "Damage Policy", alwaysRequired: true },
+  { key: "cancellation_policy", label: "Cancellation Policy", alwaysRequired: true },
 ];
 
 export default function E3BookingDetails() {
@@ -54,7 +54,6 @@ export default function E3BookingDetails() {
 
     setUploadingType(docTypeKey);
     try {
-      // Find matching template
       const template = (templates as any[]).find(
         (t: any) => t.doc_type_key === docTypeKey && t.is_active
       );
@@ -68,25 +67,26 @@ export default function E3BookingDetails() {
         .upload(path, file);
       if (uploadError) throw uploadError;
 
-      // Get a signed URL since bucket is private
-      const { data: signedData, error: signedErr } = await supabase.storage
+      const { data: signedData } = await supabase.storage
         .from("e3-booking-documents")
-        .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
+        .createSignedUrl(path, 60 * 60 * 24 * 365);
 
       const fileUrl = signedData?.signedUrl || path;
 
+      // Store template version snapshot
       const { error: dbError } = await supabase
         .from("e3_booking_documents")
         .insert({
           booking_id: id,
           document_type: docTypeKey,
           template_id: template?.id || null,
+          template_version: template?.version_number || null,
           file_url: fileUrl,
           uploaded_by: (await supabase.auth.getUser()).data.user?.id,
         });
       if (dbError) throw dbError;
 
-      const label = REQUIRED_DOC_TYPES.find(d => d.key === docTypeKey)?.label || docTypeKey;
+      const label = BASE_REQUIRED_DOC_TYPES.find(d => d.key === docTypeKey)?.label || docTypeKey;
       toast.success(`${label} uploaded.`);
       qc.invalidateQueries({ queryKey: ["e3_booking", id] });
     } catch (err: any) {
@@ -103,11 +103,19 @@ export default function E3BookingDetails() {
   const b = booking as any;
   const hallNames = b.e3_booking_halls?.map((bh: any) => bh.e3_halls?.name).filter(Boolean) || [];
   const docs = (b.e3_booking_documents || []) as any[];
-  const canUpload = ["red_hold", "yellow_contract"].includes(b.booking_state);
+  
+  // Lock uploads after yellow_contract (coordinator cannot edit after yellow)
+  const canUpload = b.booking_state === "red_hold";
+  const isLocked = ["green_booked", "completed", "cancelled", "expired"].includes(b.booking_state);
 
-  // Check required doc completeness
+  // Build required docs list based on has_alcohol
+  const requiredDocTypes = BASE_REQUIRED_DOC_TYPES.map(d => ({
+    ...d,
+    required: d.alwaysRequired || (d.key === "alcohol_policy" && b.has_alcohol),
+  }));
+
   const uploadedTypes = new Set(docs.map((d: any) => d.document_type));
-  const requiredDocs = REQUIRED_DOC_TYPES.filter(d => d.required);
+  const requiredDocs = requiredDocTypes.filter(d => d.required);
   const allRequiredUploaded = requiredDocs.every(d => uploadedTypes.has(d.key));
   const missingCount = requiredDocs.filter(d => !uploadedTypes.has(d.key)).length;
 
@@ -123,6 +131,11 @@ export default function E3BookingDetails() {
           <Badge variant="outline" className={STATE_COLORS[b.booking_state] || ""}>
             {b.booking_state?.replace("_", " ")}
           </Badge>
+          {isLocked && (
+            <Badge variant="outline" className="bg-muted text-muted-foreground">
+              <Lock className="h-3 w-3 mr-1" /> Locked
+            </Badge>
+          )}
         </div>
 
         {/* Deadline Banners */}
@@ -143,6 +156,7 @@ export default function E3BookingDetails() {
               <span className="text-sm font-medium">
                 Deposit due {formatDistanceToNow(new Date(b.deposit_due_at), { addSuffix: true })}
               </span>
+              <span className="text-xs ml-2">(Editing locked. Contact admin for changes.)</span>
             </CardContent>
           </Card>
         )}
@@ -177,6 +191,7 @@ export default function E3BookingDetails() {
               </div>
             </div>
             <div><span className="text-muted-foreground">Type</span><p className="font-medium">{b.event_type || "—"}</p></div>
+            <div><span className="text-muted-foreground">Alcohol</span><p className="font-medium">{b.has_alcohol ? "Yes" : "No"}</p></div>
           </CardContent>
         </Card>
 
@@ -209,7 +224,6 @@ export default function E3BookingDetails() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* Hidden file input */}
             <input
               ref={fileInputRef}
               type="file"
@@ -218,7 +232,7 @@ export default function E3BookingDetails() {
               onChange={handleUpload}
             />
 
-            {REQUIRED_DOC_TYPES.map((docDef) => {
+            {requiredDocTypes.map((docDef) => {
               const uploaded = docs.find((d: any) => d.document_type === docDef.key);
               const template = (templates as any[]).find(
                 (t: any) => t.doc_type_key === docDef.key && t.is_active
@@ -242,11 +256,12 @@ export default function E3BookingDetails() {
                         {!docDef.required && <span className="text-muted-foreground text-xs ml-1">(optional)</span>}
                       </p>
                       {template && (
-                        <p className="text-xs text-muted-foreground">v{template.version_number}</p>
+                        <p className="text-xs text-muted-foreground">Template v{template.version_number}</p>
                       )}
                       {uploaded && (
                         <p className="text-xs text-muted-foreground">
                           Uploaded {format(new Date(uploaded.uploaded_at), "MMM d, yyyy")}
+                          {uploaded.template_version && ` (v${uploaded.template_version})`}
                         </p>
                       )}
                     </div>
@@ -319,6 +334,11 @@ export default function E3BookingDetails() {
                 Cancel Hold
               </Button>
             </>
+          )}
+          {b.booking_state === "yellow_contract" && (
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
+              <Lock className="h-3.5 w-3.5" /> Awaiting admin deposit approval. Editing is locked.
+            </p>
           )}
         </div>
       </div>

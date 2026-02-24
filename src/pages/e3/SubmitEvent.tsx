@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useE3Venues, useE3Halls, useE3TimeBlocks, useE3CreateBooking } from "@/hooks/useE3";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -36,10 +37,10 @@ export default function E3SubmitEvent() {
     timeBlockId: "",
     grossRevenue: "",
     notes: "",
+    hasAlcohol: false,
   });
   const [selectedHalls, setSelectedHalls] = useState<string[]>([]);
 
-  // Auto-select first venue
   if (venues.length > 0 && !venueId) {
     setVenueId(venues[0].id);
   }
@@ -66,6 +67,7 @@ export default function E3SubmitEvent() {
       p_guest_count: form.guestCount ? parseInt(form.guestCount) : undefined,
       p_gross_revenue: form.grossRevenue ? parseFloat(form.grossRevenue) : 0,
       p_notes: form.notes || undefined,
+      p_has_alcohol: form.hasAlcohol,
     });
 
     if (result?.booking_id) {
@@ -188,6 +190,18 @@ export default function E3SubmitEvent() {
                 {selectedHalls.length === halls.length && halls.length > 0 && (
                   <p className="text-xs text-accent font-medium">Full facility selected</p>
                 )}
+              </div>
+
+              {/* Alcohol Toggle */}
+              <div className="flex items-center justify-between py-2 px-3 rounded-lg border">
+                <div>
+                  <Label className="text-sm font-medium">Alcohol at Event?</Label>
+                  <p className="text-xs text-muted-foreground">Requires additional alcohol policy document</p>
+                </div>
+                <Switch
+                  checked={form.hasAlcohol}
+                  onCheckedChange={(checked) => setForm((p) => ({ ...p, hasAlcohol: checked }))}
+                />
               </div>
 
               {/* Gross Revenue */}

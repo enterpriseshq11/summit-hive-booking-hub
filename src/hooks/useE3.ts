@@ -119,6 +119,7 @@ export function useE3CreateBooking() {
       p_guest_count?: number;
       p_gross_revenue?: number;
       p_notes?: string;
+      p_has_alcohol?: boolean;
     }) => {
       const { data, error } = await supabase.rpc("e3_create_booking", params);
       if (error) throw error;
