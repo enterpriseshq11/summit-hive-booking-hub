@@ -5751,7 +5751,20 @@ export type Database = {
         Returns: boolean
       }
       e3_advance_to_yellow: { Args: { p_booking_id: string }; Returns: Json }
+      e3_approve_commission: {
+        Args: { p_commission_id: string }
+        Returns: Json
+      }
       e3_approve_deposit: { Args: { p_booking_id: string }; Returns: Json }
+      e3_approve_override: { Args: { p_override_id: string }; Returns: Json }
+      e3_bulk_approve_commissions: {
+        Args: { p_commission_ids: string[] }
+        Returns: Json
+      }
+      e3_bulk_pay_commissions: {
+        Args: { p_commission_ids: string[] }
+        Returns: Json
+      }
       e3_cancel_booking: {
         Args: { p_booking_id: string; p_reason?: string }
         Returns: Json
@@ -5807,6 +5820,7 @@ export type Database = {
         Returns: number
       }
       e3_get_coordinator_id: { Args: { _user_id: string }; Returns: string }
+      e3_pay_commission: { Args: { p_commission_id: string }; Returns: Json }
       e3_recalculate_tiers: { Args: never; Returns: number }
       e3_revert_missed_deposits: { Args: never; Returns: number }
       e3_update_booking:
