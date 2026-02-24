@@ -98,6 +98,7 @@ import E3MyEvents from "./pages/e3/MyEvents";
 import E3BookingDetails from "./pages/e3/BookingDetails";
 import E3Calendar from "./pages/e3/Calendar";
 import E3AdminDeposits from "./pages/e3/AdminDeposits";
+import E3AdminBlackouts from "./pages/e3/AdminBlackouts";
 
 const queryClient = new QueryClient();
 
@@ -169,6 +170,7 @@ function AppInner() {
           <Route path="/e3/bookings/:id" element={<E3BookingDetails />} />
           <Route path="/e3/calendar" element={<E3Calendar />} />
           <Route path="/e3/admin/deposits" element={<E3AdminDeposits />} />
+          <Route path="/e3/admin/blackouts" element={<E3AdminBlackouts />} />
         </Route>
 
         {/* Unified Admin routes - all under /admin/* with staff protection */}

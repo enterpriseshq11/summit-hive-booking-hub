@@ -1702,6 +1702,7 @@ export type Database = {
           file_url: string
           id: string
           template_id: string | null
+          template_version: number | null
           uploaded_at: string
           uploaded_by: string | null
         }
@@ -1712,6 +1713,7 @@ export type Database = {
           file_url: string
           id?: string
           template_id?: string | null
+          template_version?: number | null
           uploaded_at?: string
           uploaded_by?: string | null
         }
@@ -1722,6 +1724,7 @@ export type Database = {
           file_url?: string
           id?: string
           template_id?: string | null
+          template_version?: number | null
           uploaded_at?: string
           uploaded_by?: string | null
         }
@@ -1797,6 +1800,7 @@ export type Database = {
           expires_at: string | null
           gross_revenue: number
           guest_count: number | null
+          has_alcohol: boolean
           hours_booked: number | null
           id: string
           is_full_facility: boolean
@@ -1828,6 +1832,7 @@ export type Database = {
           expires_at?: string | null
           gross_revenue?: number
           guest_count?: number | null
+          has_alcohol?: boolean
           hours_booked?: number | null
           id?: string
           is_full_facility?: boolean
@@ -1859,6 +1864,7 @@ export type Database = {
           expires_at?: string | null
           gross_revenue?: number
           guest_count?: number | null
+          has_alcohol?: boolean
           hours_booked?: number | null
           id?: string
           is_full_facility?: boolean
@@ -5740,22 +5746,40 @@ export type Database = {
         Returns: Json
       }
       e3_config_value: { Args: { p_key: string }; Returns: string }
-      e3_create_booking: {
-        Args: {
-          p_client_email: string
-          p_client_name: string
-          p_client_phone?: string
-          p_event_date: string
-          p_event_type?: string
-          p_gross_revenue?: number
-          p_guest_count?: number
-          p_hall_ids: string[]
-          p_notes?: string
-          p_time_block_id: string
-          p_venue_id: string
-        }
-        Returns: Json
-      }
+      e3_create_booking:
+        | {
+            Args: {
+              p_client_email: string
+              p_client_name: string
+              p_client_phone?: string
+              p_event_date: string
+              p_event_type?: string
+              p_gross_revenue?: number
+              p_guest_count?: number
+              p_hall_ids: string[]
+              p_notes?: string
+              p_time_block_id: string
+              p_venue_id: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_client_email: string
+              p_client_name: string
+              p_client_phone?: string
+              p_event_date: string
+              p_event_type?: string
+              p_gross_revenue?: number
+              p_guest_count?: number
+              p_hall_ids: string[]
+              p_has_alcohol?: boolean
+              p_notes?: string
+              p_time_block_id: string
+              p_venue_id: string
+            }
+            Returns: Json
+          }
       e3_expire_stale_bookings: { Args: never; Returns: number }
       e3_get_commission_tier: {
         Args: { p_coordinator_id: string }
