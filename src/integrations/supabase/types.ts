@@ -1791,6 +1791,7 @@ export type Database = {
           client_phone: string | null
           commission_amount: number
           commission_percentage: number
+          commission_snapshot_percent: number | null
           contract_version_id: string | null
           coordinator_id: string
           created_at: string
@@ -1798,6 +1799,7 @@ export type Database = {
           event_date: string
           event_type: string | null
           expires_at: string | null
+          financial_snapshot_json: Json | null
           gross_revenue: number
           guest_count: number | null
           has_alcohol: boolean
@@ -1809,6 +1811,8 @@ export type Database = {
           payment_status: Database["public"]["Enums"]["e3_payment_status"]
           recurring_parent_id: string | null
           reset_total: number
+          snapshot_created_at: string | null
+          tier_snapshot_level: string | null
           time_block_id: string
           total_cost: number
           updated_at: string
@@ -1823,6 +1827,7 @@ export type Database = {
           client_phone?: string | null
           commission_amount?: number
           commission_percentage?: number
+          commission_snapshot_percent?: number | null
           contract_version_id?: string | null
           coordinator_id: string
           created_at?: string
@@ -1830,6 +1835,7 @@ export type Database = {
           event_date: string
           event_type?: string | null
           expires_at?: string | null
+          financial_snapshot_json?: Json | null
           gross_revenue?: number
           guest_count?: number | null
           has_alcohol?: boolean
@@ -1841,6 +1847,8 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["e3_payment_status"]
           recurring_parent_id?: string | null
           reset_total?: number
+          snapshot_created_at?: string | null
+          tier_snapshot_level?: string | null
           time_block_id: string
           total_cost?: number
           updated_at?: string
@@ -1855,6 +1863,7 @@ export type Database = {
           client_phone?: string | null
           commission_amount?: number
           commission_percentage?: number
+          commission_snapshot_percent?: number | null
           contract_version_id?: string | null
           coordinator_id?: string
           created_at?: string
@@ -1862,6 +1871,7 @@ export type Database = {
           event_date?: string
           event_type?: string | null
           expires_at?: string | null
+          financial_snapshot_json?: Json | null
           gross_revenue?: number
           guest_count?: number | null
           has_alcohol?: boolean
@@ -1873,6 +1883,8 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["e3_payment_status"]
           recurring_parent_id?: string | null
           reset_total?: number
+          snapshot_created_at?: string | null
+          tier_snapshot_level?: string | null
           time_block_id?: string
           total_cost?: number
           updated_at?: string
@@ -1956,7 +1968,7 @@ export type Database = {
           {
             foreignKeyName: "e3_commissions_booking_id_fkey"
             columns: ["booking_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "e3_bookings"
             referencedColumns: ["id"]
           },
@@ -2004,9 +2016,12 @@ export type Database = {
           id: string
           is_active: boolean
           last_name: string
+          last_tier_calculated_at: string | null
           locked_until: string | null
           phone: string | null
           referred_by: string | null
+          tier_level: string | null
+          tier_percent: number | null
           updated_at: string
           user_id: string | null
         }
@@ -2020,9 +2035,12 @@ export type Database = {
           id?: string
           is_active?: boolean
           last_name: string
+          last_tier_calculated_at?: string | null
           locked_until?: string | null
           phone?: string | null
           referred_by?: string | null
+          tier_level?: string | null
+          tier_percent?: number | null
           updated_at?: string
           user_id?: string | null
         }
@@ -2036,9 +2054,12 @@ export type Database = {
           id?: string
           is_active?: boolean
           last_name?: string
+          last_tier_calculated_at?: string | null
           locked_until?: string | null
           phone?: string | null
           referred_by?: string | null
+          tier_level?: string | null
+          tier_percent?: number | null
           updated_at?: string
           user_id?: string | null
         }
@@ -5786,22 +5807,40 @@ export type Database = {
         Returns: number
       }
       e3_get_coordinator_id: { Args: { _user_id: string }; Returns: string }
+      e3_recalculate_tiers: { Args: never; Returns: number }
       e3_revert_missed_deposits: { Args: never; Returns: number }
-      e3_update_booking: {
-        Args: {
-          p_booking_id: string
-          p_client_email?: string
-          p_client_name?: string
-          p_client_phone?: string
-          p_event_type?: string
-          p_gross_revenue?: number
-          p_guest_count?: number
-          p_hall_ids?: string[]
-          p_notes?: string
-          p_time_block_id?: string
-        }
-        Returns: Json
-      }
+      e3_update_booking:
+        | {
+            Args: {
+              p_booking_id: string
+              p_client_email?: string
+              p_client_name?: string
+              p_client_phone?: string
+              p_event_type?: string
+              p_gross_revenue?: number
+              p_guest_count?: number
+              p_hall_ids?: string[]
+              p_notes?: string
+              p_time_block_id?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_booking_id: string
+              p_client_email?: string
+              p_client_name?: string
+              p_client_phone?: string
+              p_event_type?: string
+              p_gross_revenue?: number
+              p_guest_count?: number
+              p_hall_ids?: string[]
+              p_notes?: string
+              p_override_reason?: string
+              p_time_block_id?: string
+            }
+            Returns: Json
+          }
       generate_booking_number: { Args: never; Returns: string }
       get_spa_worker_id: { Args: { _user_id: string }; Returns: string }
       has_department_access: {
