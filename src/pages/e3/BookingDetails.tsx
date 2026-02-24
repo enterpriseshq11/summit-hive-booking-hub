@@ -1,11 +1,16 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useE3Booking, useE3AdvanceToYellow, useE3CancelBooking } from "@/hooks/useE3";
-import { ArrowLeft, Upload, Clock, DollarSign, Users, Calendar, Building2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Upload, Clock, DollarSign, Users, Calendar, Building2, FileText, Loader2, ExternalLink } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const STATE_COLORS: Record<string, string> = {
   red_hold: "bg-red-500/15 text-red-700 border-red-300",
@@ -16,12 +21,64 @@ const STATE_COLORS: Record<string, string> = {
   expired: "bg-muted text-muted-foreground",
 };
 
+const DOC_TYPES = [
+  { value: "contract", label: "Master Event Contract" },
+  { value: "cleaning", label: "Cleaning Agreement" },
+  { value: "building_rules", label: "Building Rules & Policies" },
+  { value: "alcohol_policy", label: "Alcohol Policy" },
+  { value: "damage_policy", label: "Damage Policy" },
+  { value: "cancellation_policy", label: "Cancellation Policy" },
+  { value: "other", label: "Other" },
+];
+
 export default function E3BookingDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const { data: booking, isLoading } = useE3Booking(id);
   const advanceToYellow = useE3AdvanceToYellow();
   const cancelBooking = useE3CancelBooking();
+
+  const [docType, setDocType] = useState("contract");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !id) return;
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${id}/${docType}-${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("e3-documents")
+        .upload(path, file);
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("e3-documents")
+        .getPublicUrl(path);
+
+      const { error: dbError } = await supabase
+        .from("e3_booking_documents")
+        .insert({
+          booking_id: id,
+          document_type: docType,
+          file_url: urlData.publicUrl,
+        });
+      if (dbError) throw dbError;
+
+      toast.success(`${DOC_TYPES.find(d => d.value === docType)?.label || docType} uploaded.`);
+      qc.invalidateQueries({ queryKey: ["e3_booking", id] });
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   if (isLoading) return <div className="p-8 text-muted-foreground">Loading...</div>;
   if (!booking) return <div className="p-8 text-destructive">Booking not found.</div>;
@@ -30,6 +87,7 @@ export default function E3BookingDetails() {
   const hallNames = b.e3_booking_halls?.map((bh: any) => bh.e3_halls?.name).filter(Boolean) || [];
   const docs = b.e3_booking_documents || [];
   const hasContract = docs.some((d: any) => d.document_type === "contract");
+  const canUpload = ["red_hold", "yellow_contract"].includes(b.booking_state);
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -118,24 +176,67 @@ export default function E3BookingDetails() {
 
         {/* Documents */}
         <Card className="mb-4">
-          <CardHeader><CardTitle className="text-lg">Documents</CardTitle></CardHeader>
-          <CardContent>
-            {docs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
-            ) : (
+          <CardHeader><CardTitle className="text-lg flex items-center gap-2"><FileText className="h-4 w-4" /> Documents</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            {docs.length > 0 && (
               <ul className="space-y-2">
                 {docs.map((d: any) => (
-                  <li key={d.id} className="text-sm flex items-center gap-2">
-                    <Upload className="h-3 w-3" />
-                    <span>{d.document_type}</span>
-                    <span className="text-muted-foreground text-xs">
-                      {format(new Date(d.uploaded_at), "MMM d, yyyy HH:mm")}
-                    </span>
+                  <li key={d.id} className="text-sm flex items-center gap-2 justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-3 w-3 text-muted-foreground" />
+                      <span className="font-medium capitalize">{d.document_type.replace("_", " ")}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {format(new Date(d.uploaded_at), "MMM d, yyyy HH:mm")}
+                      </span>
+                    </div>
+                    {d.file_url && (
+                      <a href={d.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
+                        View <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
             )}
-            {/* TODO: Document upload UI will be added when storage bucket is created */}
+            {docs.length === 0 && (
+              <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
+            )}
+
+            {canUpload && (
+              <div className="flex items-end gap-3 pt-2 border-t">
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground mb-1 block">Document Type</label>
+                  <Select value={docType} onValueChange={setDocType}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DOC_TYPES.map(dt => (
+                        <SelectItem key={dt.value} value={dt.value}>{dt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    className="hidden"
+                    onChange={handleUpload}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+                    Upload
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
