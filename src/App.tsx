@@ -99,6 +99,10 @@ import E3BookingDetails from "./pages/e3/BookingDetails";
 import E3Calendar from "./pages/e3/Calendar";
 import E3AdminDeposits from "./pages/e3/AdminDeposits";
 import E3AdminBlackouts from "./pages/e3/AdminBlackouts";
+import E3AdminPayouts from "./pages/e3/AdminPayouts";
+import E3AdminReports from "./pages/e3/AdminReports";
+import E3AdminAudit from "./pages/e3/AdminAudit";
+import E3Commissions from "./pages/e3/Commissions";
 
 const queryClient = new QueryClient();
 
@@ -171,6 +175,10 @@ function AppInner() {
           <Route path="/e3/calendar" element={<E3Calendar />} />
           <Route path="/e3/admin/deposits" element={<E3AdminDeposits />} />
           <Route path="/e3/admin/blackouts" element={<E3AdminBlackouts />} />
+          <Route path="/e3/admin/payouts" element={<E3AdminPayouts />} />
+          <Route path="/e3/admin/reports" element={<E3AdminReports />} />
+          <Route path="/e3/admin/audit" element={<E3AdminAudit />} />
+          <Route path="/e3/commissions" element={<E3Commissions />} />
         </Route>
 
         {/* Unified Admin routes - all under /admin/* with staff protection */}
