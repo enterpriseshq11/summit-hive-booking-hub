@@ -1623,6 +1623,619 @@ export type Database = {
           },
         ]
       }
+      e3_audit_log: {
+        Row: {
+          action: string
+          after_state: Json | null
+          before_state: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: unknown
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: unknown
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: unknown
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      e3_blackout_dates: {
+        Row: {
+          blackout_date: string
+          created_at: string
+          created_by: string | null
+          id: string
+          reason: string | null
+          venue_id: string
+        }
+        Insert: {
+          blackout_date: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason?: string | null
+          venue_id: string
+        }
+        Update: {
+          blackout_date?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason?: string | null
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_blackout_dates_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "e3_venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_booking_documents: {
+        Row: {
+          booking_id: string
+          document_type: string
+          file_hash: string | null
+          file_url: string
+          id: string
+          template_id: string | null
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          booking_id: string
+          document_type: string
+          file_hash?: string | null
+          file_url: string
+          id?: string
+          template_id?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          booking_id?: string
+          document_type?: string
+          file_hash?: string | null
+          file_url?: string
+          id?: string
+          template_id?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_booking_documents_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "e3_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e3_booking_documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "e3_document_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_booking_halls: {
+        Row: {
+          booking_id: string
+          created_at: string
+          hall_id: string
+          id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          hall_id: string
+          id?: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          hall_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_booking_halls_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "e3_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e3_booking_halls_hall_id_fkey"
+            columns: ["hall_id"]
+            isOneToOne: false
+            referencedRelation: "e3_halls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_bookings: {
+        Row: {
+          admin_approved: boolean
+          booking_state: Database["public"]["Enums"]["e3_booking_state"]
+          building_overhead: number
+          client_email: string
+          client_name: string
+          client_phone: string | null
+          commission_amount: number
+          commission_percentage: number
+          contract_version_id: string | null
+          coordinator_id: string
+          created_at: string
+          event_date: string
+          event_type: string | null
+          expires_at: string | null
+          gross_revenue: number
+          guest_count: number | null
+          id: string
+          is_full_facility: boolean
+          net_contribution: number
+          notes: string | null
+          payment_status: Database["public"]["Enums"]["e3_payment_status"]
+          recurring_parent_id: string | null
+          reset_total: number
+          time_block_id: string
+          total_cost: number
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          admin_approved?: boolean
+          booking_state?: Database["public"]["Enums"]["e3_booking_state"]
+          building_overhead?: number
+          client_email: string
+          client_name: string
+          client_phone?: string | null
+          commission_amount?: number
+          commission_percentage?: number
+          contract_version_id?: string | null
+          coordinator_id: string
+          created_at?: string
+          event_date: string
+          event_type?: string | null
+          expires_at?: string | null
+          gross_revenue?: number
+          guest_count?: number | null
+          id?: string
+          is_full_facility?: boolean
+          net_contribution?: number
+          notes?: string | null
+          payment_status?: Database["public"]["Enums"]["e3_payment_status"]
+          recurring_parent_id?: string | null
+          reset_total?: number
+          time_block_id: string
+          total_cost?: number
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          admin_approved?: boolean
+          booking_state?: Database["public"]["Enums"]["e3_booking_state"]
+          building_overhead?: number
+          client_email?: string
+          client_name?: string
+          client_phone?: string | null
+          commission_amount?: number
+          commission_percentage?: number
+          contract_version_id?: string | null
+          coordinator_id?: string
+          created_at?: string
+          event_date?: string
+          event_type?: string | null
+          expires_at?: string | null
+          gross_revenue?: number
+          guest_count?: number | null
+          id?: string
+          is_full_facility?: boolean
+          net_contribution?: number
+          notes?: string | null
+          payment_status?: Database["public"]["Enums"]["e3_payment_status"]
+          recurring_parent_id?: string | null
+          reset_total?: number
+          time_block_id?: string
+          total_cost?: number
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_bookings_coordinator_id_fkey"
+            columns: ["coordinator_id"]
+            isOneToOne: false
+            referencedRelation: "e3_coordinators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e3_bookings_recurring_parent_id_fkey"
+            columns: ["recurring_parent_id"]
+            isOneToOne: false
+            referencedRelation: "e3_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e3_bookings_time_block_id_fkey"
+            columns: ["time_block_id"]
+            isOneToOne: false
+            referencedRelation: "e3_time_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e3_bookings_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "e3_venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_commissions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          booking_id: string
+          commission_amount: number
+          commission_percent: number
+          coordinator_id: string
+          created_at: string
+          id: string
+          net_contribution: number
+          paid_at: string | null
+          status: Database["public"]["Enums"]["e3_commission_status"]
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          booking_id: string
+          commission_amount: number
+          commission_percent: number
+          coordinator_id: string
+          created_at?: string
+          id?: string
+          net_contribution: number
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["e3_commission_status"]
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          booking_id?: string
+          commission_amount?: number
+          commission_percent?: number
+          coordinator_id?: string
+          created_at?: string
+          id?: string
+          net_contribution?: number
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["e3_commission_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_commissions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "e3_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e3_commissions_coordinator_id_fkey"
+            columns: ["coordinator_id"]
+            isOneToOne: false
+            referencedRelation: "e3_coordinators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_config: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      e3_coordinators: {
+        Row: {
+          access_code_hash: string
+          created_at: string
+          current_tier_percent: number
+          email: string
+          failed_login_attempts: number
+          first_name: string
+          id: string
+          is_active: boolean
+          last_name: string
+          locked_until: string | null
+          phone: string | null
+          referred_by: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          access_code_hash: string
+          created_at?: string
+          current_tier_percent?: number
+          email: string
+          failed_login_attempts?: number
+          first_name: string
+          id?: string
+          is_active?: boolean
+          last_name: string
+          locked_until?: string | null
+          phone?: string | null
+          referred_by?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          access_code_hash?: string
+          created_at?: string
+          current_tier_percent?: number
+          email?: string
+          failed_login_attempts?: number
+          first_name?: string
+          id?: string
+          is_active?: boolean
+          last_name?: string
+          locked_until?: string | null
+          phone?: string | null
+          referred_by?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_coordinators_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "e3_coordinators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_document_templates: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          id: string
+          is_active: boolean
+          template_name: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          template_name: string
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          template_name?: string
+          version_number?: number
+        }
+        Relationships: []
+      }
+      e3_halls: {
+        Row: {
+          allocation_percentage: number
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          reset_buffer: number
+          sort_order: number | null
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          allocation_percentage?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          reset_buffer?: number
+          sort_order?: number | null
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          allocation_percentage?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          reset_buffer?: number
+          sort_order?: number | null
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_halls_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "e3_venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_referral_overrides: {
+        Row: {
+          beneficiary_id: string
+          commission_id: string
+          created_at: string
+          id: string
+          override_amount: number
+          override_depth: number
+          override_percent: number
+          status: Database["public"]["Enums"]["e3_commission_status"]
+        }
+        Insert: {
+          beneficiary_id: string
+          commission_id: string
+          created_at?: string
+          id?: string
+          override_amount: number
+          override_depth: number
+          override_percent: number
+          status?: Database["public"]["Enums"]["e3_commission_status"]
+        }
+        Update: {
+          beneficiary_id?: string
+          commission_id?: string
+          created_at?: string
+          id?: string
+          override_amount?: number
+          override_depth?: number
+          override_percent?: number
+          status?: Database["public"]["Enums"]["e3_commission_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_referral_overrides_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "e3_coordinators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e3_referral_overrides_commission_id_fkey"
+            columns: ["commission_id"]
+            isOneToOne: false
+            referencedRelation: "e3_commissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_time_blocks: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          is_active: boolean
+          is_editable: boolean
+          name: string
+          start_time: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          is_active?: boolean
+          is_editable?: boolean
+          name: string
+          start_time: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          is_editable?: boolean
+          name?: string
+          start_time?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_time_blocks_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "e3_venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_venues: {
+        Row: {
+          address: string | null
+          base_cost_per_hour: number
+          created_at: string
+          id: string
+          name: string
+          settings: Json | null
+          status: string
+          total_sqft: number | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          base_cost_per_hour?: number
+          created_at?: string
+          id?: string
+          name: string
+          settings?: Json | null
+          status?: string
+          total_sqft?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          base_cost_per_hour?: number
+          created_at?: string
+          id?: string
+          name?: string
+          settings?: Json | null
+          status?: string
+          total_sqft?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employee_notes: {
         Row: {
           content: string
@@ -5208,6 +5821,20 @@ export type Database = {
         | "won"
         | "lost"
       document_type: "contract" | "waiver" | "policy" | "intake_form"
+      e3_booking_state:
+        | "red_hold"
+        | "yellow_contract"
+        | "green_booked"
+        | "completed"
+        | "cancelled"
+        | "expired"
+      e3_commission_status: "pending" | "approved" | "paid"
+      e3_payment_status:
+        | "unpaid"
+        | "deposit_received"
+        | "paid_in_full"
+        | "refunded"
+        | "defaulted"
       giveaway_pool: "standard" | "vip"
       lead_status:
         | "new"
@@ -5501,6 +6128,22 @@ export const Constants = {
         "lost",
       ],
       document_type: ["contract", "waiver", "policy", "intake_form"],
+      e3_booking_state: [
+        "red_hold",
+        "yellow_contract",
+        "green_booked",
+        "completed",
+        "cancelled",
+        "expired",
+      ],
+      e3_commission_status: ["pending", "approved", "paid"],
+      e3_payment_status: [
+        "unpaid",
+        "deposit_received",
+        "paid_in_full",
+        "refunded",
+        "defaulted",
+      ],
       giveaway_pool: ["standard", "vip"],
       lead_status: [
         "new",
