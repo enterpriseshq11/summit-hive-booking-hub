@@ -5,6 +5,7 @@ import { useCrmEmployees } from "@/hooks/useCrmEmployees";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -85,6 +86,7 @@ export default function CommandCenterLeads() {
     email: "",
     phone: "",
     company_name: "",
+    follow_up_due: "",
     business_unit: "spa" as BusinessType,
     source: "website" as CrmLeadSource,
   });
@@ -103,13 +105,18 @@ export default function CommandCenterLeads() {
   const bulkUpdate = useBulkUpdateLeads();
 
   const handleCreateLead = async () => {
-    await createLead.mutateAsync(newLead);
+    const { follow_up_due, ...rest } = newLead;
+    await createLead.mutateAsync({
+      ...rest,
+      follow_up_due: follow_up_due ? new Date(follow_up_due).toISOString() : null,
+    });
     setIsCreateDialogOpen(false);
     setNewLead({
       lead_name: "",
       email: "",
       phone: "",
       company_name: "",
+      follow_up_due: "",
       business_unit: "spa",
       source: "website",
     });
@@ -193,12 +200,21 @@ export default function CommandCenterLeads() {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-zinc-300">Company</Label>
-                  <Input
+                  <Label className="text-zinc-300">Details</Label>
+                  <Textarea
                     value={newLead.company_name}
                     onChange={(e) => setNewLead({ ...newLead, company_name: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100 min-h-[80px]"
+                    placeholder="Add notes or details about this lead..."
+                  />
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Follow-up Date & Time</Label>
+                  <Input
+                    type="datetime-local"
+                    value={newLead.follow_up_due}
+                    onChange={(e) => setNewLead({ ...newLead, follow_up_due: e.target.value })}
                     className="bg-zinc-800 border-zinc-700 text-zinc-100"
-                    placeholder="Acme Corp"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
