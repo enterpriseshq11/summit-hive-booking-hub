@@ -102,6 +102,8 @@ import E3AdminBlackouts from "./pages/e3/AdminBlackouts";
 import E3AdminPayouts from "./pages/e3/AdminPayouts";
 import E3AdminReports from "./pages/e3/AdminReports";
 import E3AdminAudit from "./pages/e3/AdminAudit";
+import E3AdminHealth from "./pages/e3/AdminHealth";
+import E3AdminCoordinators from "./pages/e3/AdminCoordinators";
 import E3Commissions from "./pages/e3/Commissions";
 
 const queryClient = new QueryClient();
@@ -178,6 +180,8 @@ function AppInner() {
           <Route path="/e3/admin/payouts" element={<E3AdminPayouts />} />
           <Route path="/e3/admin/reports" element={<E3AdminReports />} />
           <Route path="/e3/admin/audit" element={<E3AdminAudit />} />
+          <Route path="/e3/admin/health" element={<E3AdminHealth />} />
+          <Route path="/e3/admin/coordinators" element={<E3AdminCoordinators />} />
           <Route path="/e3/commissions" element={<E3Commissions />} />
         </Route>
 
