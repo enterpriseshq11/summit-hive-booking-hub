@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useE3Booking, useE3AdvanceToYellow, useE3CancelBooking, useE3DocumentTemplates } from "@/hooks/useE3";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Upload, Clock, DollarSign, Calendar, Building2, FileText, Loader2, ExternalLink, Download, CheckCircle2, AlertCircle, Lock } from "lucide-react";
+import { ArrowLeft, Upload, Clock, DollarSign, Calendar, Building2, FileText, Loader2, ExternalLink, Download, CheckCircle2, AlertCircle, Lock, Package } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -312,6 +312,49 @@ export default function E3BookingDetails() {
             })}
           </CardContent>
         </Card>
+
+        {/* Booking Pack Download */}
+        {["green_booked", "completed"].includes(b.booking_state) && (
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Package className="h-4 w-4" /> Booking Pack
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-3">
+                Download a complete record for dispute protection.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const pack = {
+                    booking_id: b.id, state: b.booking_state, event_date: b.event_date,
+                    client: { name: b.client_name, email: b.client_email, phone: b.client_phone },
+                    venue: b.e3_venues?.name, halls: hallNames, time_block: b.e3_time_blocks?.name,
+                    financials: {
+                      gross_revenue: b.gross_revenue, building_overhead: b.building_overhead,
+                      reset_total: b.reset_total, total_cost: b.total_cost,
+                      net_contribution: b.net_contribution, commission_percentage: b.commission_percentage,
+                      commission_amount: b.commission_amount,
+                    },
+                    financial_snapshot: b.financial_snapshot_json,
+                    documents: docs.map((d: any) => ({ type: d.document_type, url: d.file_url, uploaded_at: d.uploaded_at, template_version: d.template_version })),
+                    has_alcohol: b.has_alcohol, created_at: b.created_at, updated_at: b.updated_at,
+                  };
+                  const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url; a.download = `booking-pack-${b.id.slice(0, 8)}.json`; a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("Booking pack downloaded.");
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" /> Download Booking Pack (JSON)
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Actions */}
         <div className="flex flex-wrap gap-3">

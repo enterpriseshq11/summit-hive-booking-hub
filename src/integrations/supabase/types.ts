@@ -2008,6 +2008,8 @@ export type Database = {
       e3_coordinators: {
         Row: {
           access_code_hash: string
+          admin_notes: string | null
+          coordinator_status: string
           created_at: string
           current_tier_percent: number
           email: string
@@ -2018,6 +2020,7 @@ export type Database = {
           last_name: string
           last_tier_calculated_at: string | null
           locked_until: string | null
+          max_holds_override: number | null
           phone: string | null
           referred_by: string | null
           tier_level: string | null
@@ -2027,6 +2030,8 @@ export type Database = {
         }
         Insert: {
           access_code_hash: string
+          admin_notes?: string | null
+          coordinator_status?: string
           created_at?: string
           current_tier_percent?: number
           email: string
@@ -2037,6 +2042,7 @@ export type Database = {
           last_name: string
           last_tier_calculated_at?: string | null
           locked_until?: string | null
+          max_holds_override?: number | null
           phone?: string | null
           referred_by?: string | null
           tier_level?: string | null
@@ -2046,6 +2052,8 @@ export type Database = {
         }
         Update: {
           access_code_hash?: string
+          admin_notes?: string | null
+          coordinator_status?: string
           created_at?: string
           current_tier_percent?: number
           email?: string
@@ -2056,6 +2064,7 @@ export type Database = {
           last_name?: string
           last_tier_calculated_at?: string | null
           locked_until?: string | null
+          max_holds_override?: number | null
           phone?: string | null
           referred_by?: string | null
           tier_level?: string | null
@@ -2143,6 +2152,60 @@ export type Database = {
             columns: ["venue_id"]
             isOneToOne: false
             referencedRelation: "e3_venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e3_notifications_outbox: {
+        Row: {
+          booking_id: string | null
+          channel: Database["public"]["Enums"]["e3_notification_channel"]
+          coordinator_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          notification_type: Database["public"]["Enums"]["e3_notification_type"]
+          payload_json: Json | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["e3_notification_status"]
+        }
+        Insert: {
+          booking_id?: string | null
+          channel?: Database["public"]["Enums"]["e3_notification_channel"]
+          coordinator_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          notification_type: Database["public"]["Enums"]["e3_notification_type"]
+          payload_json?: Json | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["e3_notification_status"]
+        }
+        Update: {
+          booking_id?: string | null
+          channel?: Database["public"]["Enums"]["e3_notification_channel"]
+          coordinator_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          notification_type?: Database["public"]["Enums"]["e3_notification_type"]
+          payload_json?: Json | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["e3_notification_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e3_notifications_outbox_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "e3_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e3_notifications_outbox_coordinator_id_fkey"
+            columns: ["coordinator_id"]
+            isOneToOne: false
+            referencedRelation: "e3_coordinators"
             referencedColumns: ["id"]
           },
         ]
@@ -5821,8 +5884,21 @@ export type Database = {
       }
       e3_get_coordinator_id: { Args: { _user_id: string }; Returns: string }
       e3_pay_commission: { Args: { p_commission_id: string }; Returns: Json }
+      e3_reactivate_coordinator: {
+        Args: { p_coordinator_id: string }
+        Returns: Json
+      }
       e3_recalculate_tiers: { Args: never; Returns: number }
       e3_revert_missed_deposits: { Args: never; Returns: number }
+      e3_set_referred_by: {
+        Args: { p_coordinator_id: string; p_referred_by_id: string }
+        Returns: Json
+      }
+      e3_suspend_coordinator: {
+        Args: { p_coordinator_id: string; p_reason?: string }
+        Returns: Json
+      }
+      e3_system_health: { Args: never; Returns: Json }
       e3_update_booking:
         | {
             Args: {
@@ -5970,6 +6046,20 @@ export type Database = {
         | "cancelled"
         | "expired"
       e3_commission_status: "pending" | "approved" | "paid"
+      e3_notification_channel: "email" | "sms"
+      e3_notification_status: "queued" | "sent" | "failed"
+      e3_notification_type:
+        | "red_hold_reminder"
+        | "deposit_reminder"
+        | "green_confirmed"
+        | "commission_created"
+        | "commission_approved"
+        | "commission_paid"
+        | "override_created"
+        | "override_paid"
+        | "booking_expired"
+        | "booking_cancelled"
+        | "deposit_reverted"
       e3_payment_status:
         | "unpaid"
         | "deposit_received"
@@ -6278,6 +6368,21 @@ export const Constants = {
         "expired",
       ],
       e3_commission_status: ["pending", "approved", "paid"],
+      e3_notification_channel: ["email", "sms"],
+      e3_notification_status: ["queued", "sent", "failed"],
+      e3_notification_type: [
+        "red_hold_reminder",
+        "deposit_reminder",
+        "green_confirmed",
+        "commission_created",
+        "commission_approved",
+        "commission_paid",
+        "override_created",
+        "override_paid",
+        "booking_expired",
+        "booking_cancelled",
+        "deposit_reverted",
+      ],
       e3_payment_status: [
         "unpaid",
         "deposit_received",
