@@ -16,8 +16,8 @@ export const SITE_CONFIG = {
     state: "Ohio",
     stateAbbr: "OH",
     // TODO: Replace with actual address once confirmed by client
-    street: "Wapakoneta, OH",
-    full: "Wapakoneta, Ohio",
+    street: "10 W Auglaize St",
+    full: "10 W Auglaize St, Wapakoneta, Ohio 45895",
     zip: "45895",
   },
   
