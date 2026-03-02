@@ -76,17 +76,17 @@ interface NavSection {
 const navSections: NavSection[] = [
   {
     label: "Command Center",
-    visibleToRoles: ["owner", "manager"],
+    visibleToRoles: ["owner", "manager", "spa_lead"],
     items: [
-      { title: "Dashboard", href: "/admin", icon: LayoutDashboard, end: true },
+      { title: "Dashboard", href: "/admin", icon: LayoutDashboard, end: true, visibleToRoles: ["owner", "manager"] },
       { title: "Leads", href: "/admin/leads", icon: Target },
-      { title: "Pipeline", href: "/admin/pipeline", icon: Kanban },
-      { title: "Employees", href: "/admin/employees", icon: Users },
-      { title: "Activity Log", href: "/admin/activity", icon: Activity },
-      { title: "Revenue", href: "/admin/revenue", icon: DollarSign },
-      { title: "Commissions", href: "/admin/commissions", icon: Percent },
+      { title: "Pipeline", href: "/admin/pipeline", icon: Kanban, visibleToRoles: ["owner", "manager"] },
+      { title: "Employees", href: "/admin/employees", icon: Users, visibleToRoles: ["owner", "manager"] },
+      { title: "Activity Log", href: "/admin/activity", icon: Activity, visibleToRoles: ["owner", "manager"] },
+      { title: "Revenue", href: "/admin/revenue", icon: DollarSign, visibleToRoles: ["owner", "manager"] },
+      { title: "Commissions", href: "/admin/commissions", icon: Percent, visibleToRoles: ["owner", "manager"] },
       { title: "Payroll", href: "/admin/payroll", icon: Wallet, adminOnly: true },
-      { title: "Alerts", href: "/admin/alerts", icon: Bell },
+      { title: "Alerts", href: "/admin/alerts", icon: Bell, visibleToRoles: ["owner", "manager"] },
     ],
   },
   {
