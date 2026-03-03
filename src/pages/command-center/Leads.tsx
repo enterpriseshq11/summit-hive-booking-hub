@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/admin";
 import { useCrmLeads, useCreateCrmLead, useUpdateCrmLead, useBulkUpdateLeads, type CrmLeadWithRelations } from "@/hooks/useCrmLeads";
+import { toast } from "sonner";
 import { useCrmEmployees } from "@/hooks/useCrmEmployees";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ import {
   Mail,
   Calendar,
   User,
+  Download,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -49,7 +51,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, isToday, isThisWeek, subDays } from "date-fns";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -81,6 +83,7 @@ export default function CommandCenterLeads() {
   const [search, setSearch] = useState("");
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [leadDateFilter, setLeadDateFilter] = useState<"all" | "today" | "week" | "recent">("all");
   const [newLead, setNewLead] = useState({
     lead_name: "",
     email: "",
@@ -103,6 +106,49 @@ export default function CommandCenterLeads() {
   const createLead = useCreateCrmLead();
   const updateLead = useUpdateCrmLead();
   const bulkUpdate = useBulkUpdateLeads();
+
+  const filteredLeads = useMemo(() => {
+    if (!leads) return [];
+    switch (leadDateFilter) {
+      case "today":
+        return leads.filter((l) => isToday(new Date(l.created_at!)));
+      case "week":
+        return leads.filter((l) => isThisWeek(new Date(l.created_at!), { weekStartsOn: 1 }));
+      case "recent":
+        const sevenDaysAgo = subDays(new Date(), 7);
+        return leads.filter((l) => new Date(l.created_at!) >= sevenDaysAgo);
+      default:
+        return leads;
+    }
+  }, [leads, leadDateFilter]);
+
+  const exportLeadsCSV = () => {
+    if (!filteredLeads || filteredLeads.length === 0) {
+      toast.error("No leads to export");
+      return;
+    }
+    const headers = ["Name", "Email", "Phone", "Business Unit", "Source", "Status", "Assigned To", "Follow-up", "Created"];
+    const rows = filteredLeads.map((lead) => [
+      lead.lead_name || "",
+      lead.email || "",
+      lead.phone || "",
+      lead.business_unit || "",
+      lead.source || "",
+      lead.status || "new",
+      lead.assigned_employee ? `${lead.assigned_employee.first_name || ""} ${lead.assigned_employee.last_name || ""}`.trim() : "Unassigned",
+      lead.follow_up_due ? format(new Date(lead.follow_up_due), "yyyy-MM-dd HH:mm") : "",
+      lead.created_at ? format(new Date(lead.created_at), "yyyy-MM-dd HH:mm") : "",
+    ]);
+    const csvContent = [headers, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leads-export-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${filteredLeads.length} leads`);
+  };
 
   const handleCreateLead = async () => {
     const { follow_up_due, ...rest } = newLead;
@@ -141,10 +187,10 @@ export default function CommandCenterLeads() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedLeads.length === (leads?.length || 0)) {
+    if (selectedLeads.length === (filteredLeads?.length || 0)) {
       setSelectedLeads([]);
     } else {
-      setSelectedLeads(leads?.map((l) => l.id) || []);
+      setSelectedLeads(filteredLeads?.map((l) => l.id) || []);
     }
   };
 
@@ -384,6 +430,27 @@ export default function CommandCenterLeads() {
           </CardContent>
         </Card>
 
+        {/* Date Filters & Export */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex gap-2 flex-wrap">
+            {(["all", "today", "week", "recent"] as const).map((filter) => (
+              <Button
+                key={filter}
+                variant={leadDateFilter === filter ? "default" : "outline"}
+                size="sm"
+                onClick={() => setLeadDateFilter(filter)}
+                className={leadDateFilter === filter ? "bg-amber-500 hover:bg-amber-600 text-black" : "border-zinc-700 text-zinc-300"}
+              >
+                {filter === "all" ? "All" : filter === "today" ? "Today" : filter === "week" ? "This Week" : "Last 7 Days"}
+              </Button>
+            ))}
+          </div>
+          <Button variant="outline" size="sm" onClick={exportLeadsCSV} className="border-zinc-700 text-zinc-300">
+            <Download className="h-4 w-4 mr-1" />
+            Export CSV ({filteredLeads.length})
+          </Button>
+        </div>
+
         {/* Leads Table */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardContent className="p-0">
@@ -414,14 +481,14 @@ export default function CommandCenterLeads() {
                       Loading leads...
                     </TableCell>
                   </TableRow>
-                ) : leads?.length === 0 ? (
+                ) : filteredLeads.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center py-8 text-zinc-500">
-                      No leads found
+                      {leads && leads.length > 0 ? "No leads match this filter" : "No leads found"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  leads?.map((lead) => (
+                  filteredLeads.map((lead) => (
                     <TableRow
                       key={lead.id}
                       className="border-zinc-800 hover:bg-zinc-800/50 cursor-pointer"
