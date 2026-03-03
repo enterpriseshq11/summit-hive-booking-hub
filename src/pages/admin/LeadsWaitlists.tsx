@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/admin";
 import { useLeadsWaitlists } from "@/hooks/useLeadsWaitlists";
 import { useBusinesses } from "@/hooks/useBusinesses";
@@ -6,8 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { format, addDays } from "date-fns";
-import { Users, Loader2, UserPlus, Clock, Send, ArrowRight, Mail, Phone, Calendar, Crown } from "lucide-react";
+import { format, addDays, isToday, isThisWeek, subDays } from "date-fns";
+import { Users, Loader2, UserPlus, Clock, Send, ArrowRight, Mail, Phone, Calendar, Crown, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,50 @@ export default function AdminLeadsWaitlists() {
   const [selectedWaitlist, setSelectedWaitlist] = useState<WaitlistEntry | null>(null);
   const [offerExpiry, setOfferExpiry] = useState(24);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [leadDateFilter, setLeadDateFilter] = useState<"all" | "today" | "week" | "recent">("all");
+
+  const filteredLeads = useMemo(() => {
+    if (!leads) return [];
+    switch (leadDateFilter) {
+      case "today":
+        return leads.filter((l) => isToday(new Date(l.created_at)));
+      case "week":
+        return leads.filter((l) => isThisWeek(new Date(l.created_at), { weekStartsOn: 1 }));
+      case "recent":
+        const sevenDaysAgo = subDays(new Date(), 7);
+        return leads.filter((l) => new Date(l.created_at) >= sevenDaysAgo);
+      default:
+        return leads;
+    }
+  }, [leads, leadDateFilter]);
+
+  const exportLeadsCSV = () => {
+    if (!filteredLeads || filteredLeads.length === 0) {
+      toast.error("No leads to export");
+      return;
+    }
+    const headers = ["Name", "Email", "Phone", "Event Type", "Business", "Guest Count", "Budget", "Status", "Created"];
+    const rows = filteredLeads.map((lead) => [
+      `${lead.first_name || ""} ${lead.last_name || ""}`.trim(),
+      lead.email || "",
+      lead.phone || "",
+      lead.event_type || "",
+      getBusinessName(lead.business_id),
+      lead.guest_count?.toString() || "",
+      lead.budget_range || "",
+      lead.status || "new",
+      lead.created_at ? format(new Date(lead.created_at), "yyyy-MM-dd HH:mm") : "",
+    ]);
+    const csvContent = [headers, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leads-export-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${filteredLeads.length} leads`);
+  };
 
   const logAudit = async (actionType: string, entityType: string, entityId: string, before: any, after: any) => {
     await supabase.from("audit_log").insert({
@@ -214,6 +258,24 @@ export default function AdminLeadsWaitlists() {
           </TabsList>
 
           <TabsContent value="leads" className="mt-4">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+              <div className="flex gap-2 flex-wrap">
+                {(["all", "today", "week", "recent"] as const).map((filter) => (
+                  <Button
+                    key={filter}
+                    variant={leadDateFilter === filter ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setLeadDateFilter(filter)}
+                  >
+                    {filter === "all" ? "All" : filter === "today" ? "Today" : filter === "week" ? "This Week" : "Last 7 Days"}
+                  </Button>
+                ))}
+              </div>
+              <Button variant="outline" size="sm" onClick={exportLeadsCSV}>
+                <Download className="h-4 w-4 mr-1" />
+                Export CSV ({filteredLeads.length})
+              </Button>
+            </div>
             <Card>
               <CardContent className="p-0">
                 <Table>
@@ -227,7 +289,7 @@ export default function AdminLeadsWaitlists() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {leads?.map((lead) => (
+                    {filteredLeads?.map((lead) => (
                       <TableRow key={lead.id}>
                         <TableCell>
                           <div>
@@ -278,10 +340,10 @@ export default function AdminLeadsWaitlists() {
                         </TableCell>
                       </TableRow>
                     ))}
-                    {(!leads || leads.length === 0) && (
+                    {(!filteredLeads || filteredLeads.length === 0) && (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                          No leads
+                          {leads && leads.length > 0 ? "No leads match this filter" : "No leads"}
                         </TableCell>
                       </TableRow>
                     )}
