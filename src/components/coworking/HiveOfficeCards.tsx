@@ -81,7 +81,7 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
       case "P1": return { label: "Premium Office P1", subtext: "First Floor", displayCode: "P1" };
       case "P2": return { label: "Premium Office P2", subtext: "First Floor", displayCode: "P2" };
       case "S1": return { label: "Private Office S1", subtext: "Second Floor", displayCode: "P1" };
-      case "S2": return { label: "Private Office S2", subtext: "Second Floor", displayCode: "S2" };
+      case "S2": return { label: "Private Office S2", subtext: "Second Floor", displayCode: "P2" };
       default: return { label: code, displayCode: code };
     }
   };
