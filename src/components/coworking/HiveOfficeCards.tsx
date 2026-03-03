@@ -78,8 +78,8 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
   // Helper to get display info for each office (main label + optional subtext)
   const getDisplayInfo = (code: string): { label: string; subtext?: string; displayCode: string } => {
     switch (code) {
-      case "P1": return { label: "Premium Office P1", subtext: "First Floor", displayCode: "P1" };
-      case "P2": return { label: "Premium Office P2", subtext: "First Floor", displayCode: "P2" };
+      case "P1": return { label: "Premium Office P1", subtext: "First Floor", displayCode: "S1" };
+      case "P2": return { label: "Premium Office P2", subtext: "First Floor", displayCode: "S2" };
       case "S1": return { label: "Private Office S1", subtext: "Second Floor", displayCode: "P1" };
       case "S2": return { label: "Private Office S2", subtext: "Second Floor", displayCode: "P2" };
       default: return { label: code, displayCode: code };
