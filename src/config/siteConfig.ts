@@ -1,13 +1,41 @@
 // Centralized site configuration - Single source of truth for contact info and business details
 
 export const SITE_CONFIG = {
-  // Contact Information (REQUIRES CLIENT CONFIRMATION FOR FINAL VALUES)
+  // Contact Information — Front desk / building-level
   contact: {
-    phone: "567-379-6340",
-    phoneFormatted: "(567) 379-6340",
-    phoneLink: "tel:+15673796340",
+    phone: "(419) 909-8442",
+    phoneFormatted: "(419) 909-8442",
+    phoneLink: "tel:+14199098442",
     email: "info@az-enterprises.com",
     emailLink: "mailto:info@az-enterprises.com",
+  },
+
+  // Division-specific suite addresses and direct phone numbers
+  divisions: {
+    spa: {
+      name: "Restoration Lounge Spa",
+      suite: "Suite A",
+      phone: "(419) 820-9566",
+      phoneLink: "tel:+14198209566",
+    },
+    fitness: {
+      name: "A-Z Total Fitness",
+      suite: "Suite B",
+      phone: "(419) 839-3668",
+      phoneLink: "tel:+14198393668",
+    },
+    summit: {
+      name: "The Summit Event Center",
+      suite: "Suite C",
+      phone: "(419) 848-0434",
+      phoneLink: "tel:+14198480434",
+    },
+    coworking: {
+      name: "The Hive Co-Working Space",
+      suite: "Suite D",
+      phone: "(419) 909-3765",
+      phoneLink: "tel:+14199093765",
+    },
   },
   
   // Location (REQUIRES CLIENT CONFIRMATION FOR ADDRESS)

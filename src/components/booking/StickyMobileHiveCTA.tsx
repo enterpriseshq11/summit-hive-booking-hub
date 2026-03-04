@@ -7,7 +7,7 @@ interface StickyMobileHiveCTAProps {
   phoneNumber?: string;
 }
 
-export function StickyMobileHiveCTA({ onRequestClick, phoneNumber = "4195551234" }: StickyMobileHiveCTAProps) {
+export function StickyMobileHiveCTA({ onRequestClick, phoneNumber = "14199093765" }: StickyMobileHiveCTAProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
