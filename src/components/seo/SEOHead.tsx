@@ -79,7 +79,7 @@ export const jsonLdSchemas = {
       addressRegion: 'OH',
       addressCountry: 'US',
     },
-    telephone: '+1-567-379-6340',
+    telephone: '+1-419-909-8442',
     email: 'info@az-enterprises.com',
     openingHours: 'Mo-Su 06:00-22:00',
     url: BASE_URL,
@@ -97,7 +97,7 @@ export const jsonLdSchemas = {
       addressRegion: 'OH',
       addressCountry: 'US',
     },
-    telephone: '+1-567-379-6340',
+    telephone: '+1-419-909-8442',
     openingHours: 'Mo-Su 06:00-22:00',
     amenityFeature: [
       { '@type': 'LocationFeatureSpecification', name: 'High-Speed WiFi' },
