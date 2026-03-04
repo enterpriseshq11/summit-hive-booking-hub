@@ -21,7 +21,7 @@ import {
 import { 
   Building2, Wifi, Coffee, Users, MapPin, ArrowRight, Check, 
   RefreshCw, Quote, Clock, Zap, Shield, Heart, Briefcase,
-  MessageSquare, CalendarCheck, Rocket, AlertCircle, Calendar
+  MessageSquare, CalendarCheck, Rocket, AlertCircle, Calendar, Phone
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
@@ -209,6 +209,18 @@ export default function Coworking() {
               <div className="flex items-center justify-center lg:justify-start gap-2 text-sm text-primary-foreground/80">
                 <Check className="h-4 w-4 text-accent" />
                 No obligation. Local team response within 24 hours. No payment until confirmed.
+              </div>
+
+              {/* Address & Direct Phone */}
+              <div className="flex flex-wrap gap-6 text-sm text-primary-foreground/70 justify-center lg:justify-start">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-accent" aria-hidden="true" />
+                  <span>{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.coworking.suite}, {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr}</span>
+                </div>
+                <a href={SITE_CONFIG.divisions.coworking.phoneLink} className="flex items-center gap-2 hover:text-accent transition-colors">
+                  <Phone className="h-4 w-4 text-accent" aria-hidden="true" />
+                  <span>{SITE_CONFIG.divisions.coworking.phone}</span>
+                </a>
               </div>
 
               {/* All Pills - Single Unified Group */}

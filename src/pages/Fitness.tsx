@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Dumbbell, Check, Users, ArrowRight, Clock, Zap, Heart, Trophy, 
   ChevronRight, Quote, Shield, CheckCircle, Calendar, Target,
-  Award, ShieldCheck, Flame, User, Waves, Coffee
+  Award, ShieldCheck, Flame, User, Waves, Coffee, MapPin, Phone
 } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
@@ -199,9 +199,21 @@ export default function Fitness() {
                 </div>
                 
                 {/* Microcopy under primary CTA */}
-                <p className="text-sm text-primary-foreground/60 mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                <p className="text-sm text-primary-foreground/60 mb-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
                   No contracts • Cancel anytime • Local team support
                 </p>
+
+                {/* Address & Direct Phone */}
+                <div className="flex flex-wrap gap-6 text-sm text-primary-foreground/70 justify-center md:justify-start mb-4 animate-fade-in" style={{ animationDelay: '0.35s' }}>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-accent" aria-hidden="true" />
+                    <span>{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.fitness.suite}, {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr}</span>
+                  </div>
+                  <a href={SITE_CONFIG.divisions.fitness.phoneLink} className="flex items-center gap-2 hover:text-accent transition-colors">
+                    <Phone className="h-4 w-4 text-accent" aria-hidden="true" />
+                    <span>{SITE_CONFIG.divisions.fitness.phone}</span>
+                  </a>
+                </div>
                 
                 {/* Tertiary text link */}
                 <a 
