@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { SITE_CONFIG } from "@/config/siteConfig";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -88,11 +89,11 @@ export function Header() {
             <span>Open 7 Days</span>
           </div>
           <a
-            href="tel:+15673796340"
+            href={SITE_CONFIG.contact.phoneLink}
             className="flex items-center gap-1.5 hover:text-primary-foreground transition-colors"
           >
             <Phone className="h-3 w-3" />
-            <span>567-379-6340</span>
+            <span>{SITE_CONFIG.contact.phone}</span>
           </a>
         </div>
       </div>
