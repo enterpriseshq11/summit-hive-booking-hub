@@ -853,6 +853,14 @@ export default function Fitness() {
             <p className="text-sm text-primary-foreground/60">
               No contracts • Cancel anytime • Local team support
             </p>
+            <div className="mt-8 pt-6 border-t border-primary-foreground/10 space-y-1">
+              <p className="text-sm text-primary-foreground/80 font-medium">{SITE_CONFIG.divisions.fitness.name}</p>
+              <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.fitness.suite}</p>
+              <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</p>
+              <a href={SITE_CONFIG.divisions.fitness.phoneLink} className="inline-block text-sm text-accent hover:text-accent/80 transition-colors font-medium mt-1">
+                Direct: {SITE_CONFIG.divisions.fitness.phone}
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -894,7 +902,7 @@ export default function Fitness() {
       {/* Floating Help Drawer */}
       <FloatingHelpDrawer 
         businessType="fitness"
-        phoneNumber={SITE_CONFIG.contact.phone}
+        phoneNumber={SITE_CONFIG.divisions.fitness.phone}
         email={SITE_CONFIG.contact.email}
       />
 

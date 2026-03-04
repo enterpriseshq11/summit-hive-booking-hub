@@ -551,6 +551,14 @@ export default function Coworking() {
           <p className="text-primary-foreground/70 mt-4 text-sm">
             No obligation • Local team response within 24 hours • No payment until confirmed
           </p>
+          <div className="mt-8 pt-6 border-t border-primary-foreground/10 space-y-1">
+            <p className="text-sm text-primary-foreground/80 font-medium">{SITE_CONFIG.divisions.coworking.name}</p>
+            <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.coworking.suite}</p>
+            <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</p>
+            <a href={SITE_CONFIG.divisions.coworking.phoneLink} className="inline-block text-sm text-accent hover:text-accent/80 transition-colors font-medium mt-1">
+              Direct: {SITE_CONFIG.divisions.coworking.phone}
+            </a>
+          </div>
         </div>
       </section>
 
@@ -572,7 +580,7 @@ export default function Coworking() {
       {/* Floating Help */}
       <FloatingHelpDrawer 
         businessType="coworking"
-        phoneNumber={SITE_CONFIG.contact.phone}
+        phoneNumber={SITE_CONFIG.divisions.coworking.phone}
         email={SITE_CONFIG.contact.email}
       />
 

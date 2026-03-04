@@ -243,8 +243,12 @@ export default function Summit() {
               <div className="flex flex-wrap gap-6 text-sm text-primary-foreground/70 justify-center lg:justify-start">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-accent" aria-hidden="true" />
-                  <span>Wapakoneta, Ohio</span>
+                  <span>{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.summit.suite}, {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr}</span>
                 </div>
+                <a href={SITE_CONFIG.divisions.summit.phoneLink} className="flex items-center gap-2 hover:text-accent transition-colors">
+                  <Phone className="h-4 w-4 text-accent" aria-hidden="true" />
+                  <span>{SITE_CONFIG.divisions.summit.phone}</span>
+                </a>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-accent" aria-hidden="true" />
                   <span>Up to 300 guests</span>
@@ -723,6 +727,14 @@ export default function Summit() {
             </Button>
             
             <p className="text-primary-foreground/60 text-sm">No obligation — review everything before you commit.</p>
+            <div className="mt-8 pt-6 border-t border-primary-foreground/10 space-y-1">
+              <p className="text-sm text-primary-foreground/80 font-medium">{SITE_CONFIG.divisions.summit.name}</p>
+              <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.summit.suite}</p>
+              <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</p>
+              <a href={SITE_CONFIG.divisions.summit.phoneLink} className="inline-block text-sm text-accent hover:text-accent/80 transition-colors font-medium mt-1">
+                Direct: {SITE_CONFIG.divisions.summit.phone}
+              </a>
+            </div>
           </div>
         </div>
       </section>

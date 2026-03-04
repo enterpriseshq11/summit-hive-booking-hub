@@ -703,6 +703,14 @@ export default function Spa() {
           <p className="text-sm text-primary-foreground/60 mt-4 max-w-md mx-auto">
             No obligation • Response within 24 hours • You'll review everything before payment
           </p>
+          <div className="mt-8 pt-6 border-t border-primary-foreground/10 space-y-1">
+            <p className="text-sm text-primary-foreground/80 font-medium">{SITE_CONFIG.divisions.spa.name}</p>
+            <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.spa.suite}</p>
+            <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</p>
+            <a href={SITE_CONFIG.divisions.spa.phoneLink} className="inline-block text-sm text-accent hover:text-accent/80 transition-colors font-medium mt-1">
+              Direct: {SITE_CONFIG.divisions.spa.phone}
+            </a>
+          </div>
         </div>
       </section>
 
@@ -777,7 +785,7 @@ export default function Spa() {
       <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Restoration Lounge Specials" specials={spaSpecials} />
 
       {/* Floating Help Drawer */}
-      <FloatingHelpDrawer businessType="spa" phoneNumber={SITE_CONFIG.contact.phone} email={SITE_CONFIG.contact.email} />
+      <FloatingHelpDrawer businessType="spa" phoneNumber={SITE_CONFIG.divisions.spa.phone} email={SITE_CONFIG.contact.email} />
 
       {/* Sticky Mobile CTA */}
       <StickyMobileSpaCTA onRequestService={goToBookWithLindsey} />
