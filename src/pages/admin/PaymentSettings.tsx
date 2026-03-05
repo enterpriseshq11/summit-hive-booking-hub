@@ -28,7 +28,7 @@ const paymentConfigs: PaymentToggleConfig[] = [
     description: "Massage, bodywork, and wellness services",
     icon: Sparkles,
     iconColor: "text-pink-400",
-    depositInfo: "$20 non-refundable booking fee, applied to final bill",
+    depositInfo: "Full service price collected at checkout",
   },
   {
     key: "voice_vault_payments_enabled",

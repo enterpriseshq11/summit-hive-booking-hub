@@ -361,11 +361,10 @@ serve(async (req) => {
       return jsonResponse(400, { error: "Consent to booking fee policy is required" });
     }
 
-    // BOOKING FEE: Always charge $20 flat deposit
-    const BOOKING_FEE = 20;
+    // FULL PRICE: Charge full service price at checkout
     const servicePrice = Number(price);
-    const depositAmount = BOOKING_FEE;
-    const balanceDue = Math.max(0, servicePrice - depositAmount);
+    const depositAmount = servicePrice;
+    const balanceDue = 0;
 
     // Generate booking number
     const { data: bookingNumber, error: bnError } = await supabase.rpc("generate_booking_number");
@@ -389,7 +388,7 @@ serve(async (req) => {
         deposit_amount: depositAmount,
         balance_due: balanceDue,
         balance_due_date: start_datetime.split("T")[0], // Due on appointment date
-        notes: `Service: ${service_name}, Duration: ${duration} min | Service Price: $${servicePrice} | Booking Fee Paid: $${depositAmount} | Balance Due: $${balanceDue} | No-Show Fee Consent: ${consent_timestamp}`,
+        notes: `Service: ${service_name}, Duration: ${duration} min | Service Price: $${servicePrice} | Paid in Full: $${depositAmount} | Balance Due: $0 | No-Show Fee Consent: ${consent_timestamp}`,
       })
       .select("id")
       .single();
@@ -407,7 +406,7 @@ serve(async (req) => {
       if (brError) logStep("Room attachment warning", { error: brError });
     }
 
-    // Create Stripe checkout for $20 booking fee only
+    // Create Stripe checkout for full service price
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const origin = req.headers.get("origin") || "http://localhost:3000";
 
@@ -417,8 +416,8 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `Booking Fee - ${service_name} (${duration} min)`,
-              description: `$20 booking fee to hold your appointment. Applied toward your $${servicePrice} service. Remaining $${balanceDue} due at appointment.`,
+              name: `${service_name} (${duration} min)`,
+              description: `Full payment for your ${service_name} appointment.`,
               metadata: {
                 booking_id: booking.id,
                 service_id: service_id || "",
@@ -449,11 +448,11 @@ serve(async (req) => {
       },
     });
 
-    // Create pending payment record for booking fee
+    // Create pending payment record for full price
     const { error: payError } = await supabase.from("payments").insert({
       booking_id: booking.id,
       amount: depositAmount,
-      payment_type: "deposit",
+      payment_type: "full",
       status: "pending",
       stripe_payment_intent_id: session.payment_intent as string,
       metadata: {
