@@ -382,16 +382,13 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
     );
   };
 
-  // Booking fee constant
-  const BOOKING_FEE = 20;
-  
-  const getBookingFeeBreakdown = () => {
+  // Full price checkout helper
+  const getPriceBreakdown = () => {
     const price = calculatePrice() || 0;
     if (price <= 0) return null; // Free consultation
     return {
       servicePrice: price,
-      bookingFee: BOOKING_FEE,
-      balanceDue: Math.max(0, price - BOOKING_FEE),
+      totalDue: price,
     };
   };
 
@@ -420,7 +417,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
     
     // Consent required for paid services only when payments are enabled
     if (!isFreeConsult && isPaidService && spaPaymentsEnabled && !consentChecked) {
-      toast.error("Please accept the booking fee policy to continue");
+      toast.error("Please accept the payment policy to continue");
       return;
     }
 
@@ -555,7 +552,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
       if (data?.url) {
         toast.success("Redirecting to secure payment...");
         const bookingId = data?.booking_id as string | undefined;
-        const breakdown = getBookingFeeBreakdown();
+        const breakdown = getPriceBreakdown();
         if (bookingId) {
           try {
             const summary = {
@@ -565,8 +562,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
               timeLabel: selectedTime ? format(new Date(`2000-01-01T${selectedTime}`), "h:mm a") : undefined,
               roomName: ROOMS.find((r) => r.id === roomId)?.name || "H1 - Hallway Room",
               servicePrice: breakdown?.servicePrice,
-              depositPaid: breakdown?.bookingFee,
-              balanceDue: breakdown?.balanceDue,
+              totalPaid: breakdown?.totalDue,
               total: price,
             };
             sessionStorage.setItem(`lindsey_booking_${bookingId}`, JSON.stringify(summary));
@@ -731,14 +727,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                 <li><strong>Room:</strong> {completedSummary?.roomName || ROOMS.find(r => r.id === selectedRoom)?.name || "H1 - Hallway Room"}</li>
                 {completionType === "paid" && (
                   <>
-                    <li className="pt-2 border-t border-border mt-2">
-                      <strong>Service Price:</strong> ${(completedSummary as any)?.servicePrice ?? completedSummary?.total ?? calculatePrice()}
-                    </li>
-                    <li className="text-accent font-medium">
-                      <strong>Booking Fee Paid:</strong> ${(completedSummary as any)?.depositPaid ?? BOOKING_FEE}
-                    </li>
-                    <li>
-                      <strong>Remaining Due at Appointment:</strong> ${(completedSummary as any)?.balanceDue ?? Math.max(0, (calculatePrice() || 0) - BOOKING_FEE)}
+                    <li className="pt-2 border-t border-border mt-2 text-accent font-medium">
+                      <strong>Paid in Full:</strong> ${(completedSummary as any)?.totalPaid ?? (completedSummary as any)?.servicePrice ?? calculatePrice()}
                     </li>
                   </>
                 )}
@@ -1027,7 +1017,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                       </div>
                       <div className="text-right">
                         {(() => {
-                          const breakdown = getBookingFeeBreakdown();
+                          const breakdown = getPriceBreakdown();
                           if (!breakdown) {
                             return <p className="text-xl font-bold text-green-600">Free</p>;
                           }
@@ -1046,17 +1036,14 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                             );
                           }
                           
-                          // Normal payment mode
+                          // Full price payment mode
                           return (
                             <div className="space-y-1 text-sm">
-                              <p className="text-muted-foreground">
-                                Service Price: <span className="font-medium text-foreground">${breakdown.servicePrice}</span>
+                              <p className="text-xl font-bold text-foreground">
+                                ${breakdown.servicePrice}
                               </p>
-                              <p className="text-accent font-semibold">
-                                Booking Fee Today: ${breakdown.bookingFee}
-                              </p>
-                              <p className="text-muted-foreground">
-                                Due At Appointment: <span className="font-medium text-foreground">${breakdown.balanceDue}</span>
+                              <p className="text-accent font-semibold text-xs">
+                                Paid at checkout
                               </p>
                             </div>
                           );
