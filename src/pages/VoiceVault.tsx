@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Mic, Video, Wifi, Lightbulb, Shield, Users, Clock, Star, CheckCircle2, ArrowRight, Calendar, Headphones, Sliders, X, Sparkles, Zap, TrendingUp, Building2, Dumbbell, Gift, Phone, Mail, HelpCircle, Play, Podcast, MessageSquare, Volume2, Award, Quote } from "lucide-react";
+import { Mic, Video, Wifi, Lightbulb, Shield, Users, Clock, Star, CheckCircle2, ArrowRight, Calendar, Headphones, Sliders, X, Sparkles, Zap, TrendingUp, Building2, Dumbbell, Gift, Phone, Mail, HelpCircle, Play, Podcast, MessageSquare, Volume2, Award, Quote, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import voiceVaultLogo from "@/assets/voice-vault-logo.png";
@@ -309,6 +309,22 @@ export default function VoiceVault() {
               </button>
               .
             </p>
+
+            {/* Quick Info - matches Summit/Hive/Spa/Fitness pattern */}
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-primary-foreground/70 mt-6">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-accent" aria-hidden="true" />
+                <span>{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.voiceVault.suite}, {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr}</span>
+              </div>
+              <a href={SITE_CONFIG.divisions.voiceVault.phoneLink} className="flex items-center gap-2 hover:text-accent transition-colors">
+                <Phone className="h-4 w-4 text-accent" aria-hidden="true" />
+                <span>{SITE_CONFIG.divisions.voiceVault.phone}</span>
+              </a>
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-accent" aria-hidden="true" />
+                <span>Up to 4 guests</span>
+              </div>
+            </div>
           </div>
         </div>
 

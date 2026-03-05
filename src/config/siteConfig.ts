@@ -36,6 +36,12 @@ export const SITE_CONFIG = {
       phone: "(419) 909-3765",
       phoneLink: "tel:+14199093765",
     },
+    voiceVault: {
+      name: "Voice Vault Podcast Studio",
+      suite: "Suite Z",
+      phone: "(419) 848-0772",
+      phoneLink: "tel:+14198480772",
+    },
   },
   
   // Location (REQUIRES CLIENT CONFIRMATION FOR ADDRESS)
