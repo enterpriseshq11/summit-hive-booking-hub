@@ -713,8 +713,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                "Consultation Booked!"}
             </h2>
             <p className="text-muted-foreground mb-6">
-              {completionType === "paid"
-                ? "Your $20 booking fee has been received. Check your email for your receipt and details."
+               {completionType === "paid"
+                ? "Your payment has been received. Check your email for your receipt and details."
                 : isRequestMode
                 ? "We received your request and will contact you within 1 business day to confirm your appointment."
                 : completionType === "pay_on_arrival"
@@ -1199,9 +1199,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                       htmlFor="consent" 
                       className="text-sm leading-relaxed cursor-pointer"
                     >
-                      I understand there is a <span className="font-semibold text-accent">$20 booking fee</span> charged today to hold my appointment. 
-                      This fee is applied toward my service total if I attend. 
-                      If I do not show up (or cancel outside the policy window), the $20 is non-refundable.
+                      I understand that <span className="font-semibold text-accent">full payment</span> is required today to confirm my appointment. 
+                      If I do not show up (or cancel outside the policy window), the payment is non-refundable.
                     </Label>
                   </div>
                 )}
@@ -1243,14 +1242,14 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
                       : isRequestMode
                         ? "Submit Request"
                         : spaPaymentsEnabled 
-                          ? `Pay $20 Booking Fee`
+                          ? `Pay $${calculatePrice()} Now`
                           : "Confirm Appointment"}
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
 
                 {calculatePrice() !== 0 && spaPaymentsEnabled && (
                   <p className="text-center text-xs text-muted-foreground">
-                    You will be redirected to secure payment for your $20 booking fee.
+                    You will be redirected to secure payment for the full service price.
                   </p>
                 )}
               </form>
