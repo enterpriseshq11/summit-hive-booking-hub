@@ -226,7 +226,7 @@ export default function Spa() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-              <Button onClick={goToBookWithLindsey} className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold" data-event="spa_massage_card_click">
+                    <Button onClick={openBookingForm} className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold" data-event="spa_massage_card_click">
                 Book this <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </CardContent>
