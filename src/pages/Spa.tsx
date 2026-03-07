@@ -261,7 +261,7 @@ export default function Spa() {
           </Card>
 
           {/* Wellness Experiences Card */}
-          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={goToBookWithLindsey} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToBookWithLindsey()} data-event="spa_wellness_card_click">
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={openBookingForm} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openBookingForm()} data-event="spa_wellness_card_click">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
