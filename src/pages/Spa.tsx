@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useProviders } from "@/hooks/useProviders";
 import { NextAvailableWidget, WaitlistCTA, SpaBookingForm, FloatingHelpDrawer, SpaRequestModal, SpaWaitlistModal, SpaAnchorChips, StickyMobileSpaCTA } from "@/components/booking";
-
+import { TherapistDropdown } from "@/components/booking/TherapistDropdown";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, FileText, Quote, User, Award, ShieldCheck, Wifi, Coffee, Zap, Droplets, Sun, Wind, ThermometerSun, Users, Activity, Target, DollarSign, MapPin, Video, Phone } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
@@ -38,9 +38,9 @@ export default function Spa() {
     setShowBookingForm(false);
   };
   
-  // Open booking form dialog
-  const openBookingForm = () => {
-    setShowBookingForm(true);
+  // Navigate to Lindsey's booking page
+  const goToBookWithLindsey = () => {
+    navigate('/book-with-lindsey');
   };
   
   const openRequestModal = (service?: "massage" | "recovery" | "wellness") => {
@@ -123,10 +123,7 @@ export default function Spa() {
               
               {/* Hero CTAs */}
               <div className="flex flex-col sm:flex-row items-center md:ml-[7.25rem] lg:ml-0 lg:items-start gap-4 mb-6">
-                <Button size="lg" onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_hero_book_massage_click">
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Book Massage
-                </Button>
+                <TherapistDropdown />
                 <Button size="lg" variant="outline" onClick={() => setShowWaitlistModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold" data-event="spa_hero_secondary_cta_click">
                   <Clock className="h-5 w-5 mr-2" />
                   Join Waitlist
@@ -154,7 +151,7 @@ export default function Spa() {
                   </Label>
                   <div className="flex gap-2">
                     <Input id="booking-contact" type="text" placeholder="Enter your email or phone number" value={bookingContact} onChange={e => setBookingContact(e.target.value)} className="bg-background/90 border-accent/30 text-foreground placeholder:text-muted-foreground" />
-                    <Button onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0">
+                    <Button onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0">
                       Request
                     </Button>
                   </div>
@@ -226,14 +223,14 @@ export default function Spa() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-                    <Button onClick={openBookingForm} className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold" data-event="spa_massage_card_click">
+              <Button onClick={goToBookWithLindsey} className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold" data-event="spa_massage_card_click">
                 Book this <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </CardContent>
           </Card>
 
           {/* Recovery Services Card */}
-          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={openBookingForm} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openBookingForm()} data-event="spa_recovery_card_click">
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={goToBookWithLindsey} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToBookWithLindsey()} data-event="spa_recovery_card_click">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -261,7 +258,7 @@ export default function Spa() {
           </Card>
 
           {/* Wellness Experiences Card */}
-          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={openBookingForm} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && openBookingForm()} data-event="spa_wellness_card_click">
+          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={goToBookWithLindsey} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToBookWithLindsey()} data-event="spa_wellness_card_click">
             {/* Badge */}
             <div className="absolute top-3 right-3">
               <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
@@ -291,10 +288,7 @@ export default function Spa() {
         
         {/* Single section CTA */}
         <div className="text-center mt-10">
-          <Button size="lg" onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_services_cta_click">
-            <Sparkles className="h-5 w-5 mr-2" />
-            Book Massage
-          </Button>
+          <TherapistDropdown />
           <p className="text-sm text-muted-foreground mt-3">
             You'll review everything before payment. No surprise fees.
           </p>
@@ -325,7 +319,7 @@ export default function Spa() {
                 </ul>
 
                 <div className="text-center">
-                  <Button size="lg" onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
+                  <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
                     Book Assisted Stretching
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
@@ -414,8 +408,8 @@ export default function Spa() {
 
                   {/* CTAs */}
                   <div className="flex flex-wrap gap-3">
-                    <Button size="lg" onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_lindsey_cta_click">
-                      Book Service
+                    <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_lindsey_cta_click">
+                      Book With Lindsey
                       <ArrowRight className="h-5 w-5 ml-2" />
                     </Button>
                     <Button size="lg" variant="outline" onClick={() => setShowPricingModal(true)} className="border-accent text-accent hover:bg-accent/10" data-event="spa_lindsey_pricing_click">
@@ -716,10 +710,7 @@ export default function Spa() {
             Expert care and premium treatments — book your appointment today.
           </p>
           <div className="flex justify-center">
-            <Button size="lg" onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_final_cta_click">
-              <Sparkles className="h-5 w-5 mr-2" />
-              Book Massage
-            </Button>
+            <TherapistDropdown />
           </div>
           <p className="text-sm text-primary-foreground/60 mt-4 max-w-md mx-auto">
             No obligation • Response within 24 hours • You'll review everything before payment
@@ -787,7 +778,7 @@ export default function Spa() {
             className="w-full mt-4 bg-accent hover:bg-accent/90 text-primary"
             onClick={() => {
               setShowPricingModal(false);
-              openBookingForm();
+              goToBookWithLindsey();
             }}
           >
             View Full Menu & Book
@@ -809,7 +800,7 @@ export default function Spa() {
       <FloatingHelpDrawer businessType="spa" phoneNumber={SITE_CONFIG.divisions.spa.phone} email={SITE_CONFIG.contact.email} />
 
       {/* Sticky Mobile CTA */}
-      <StickyMobileSpaCTA onRequestService={openBookingForm} />
+      <StickyMobileSpaCTA onRequestService={goToBookWithLindsey} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
