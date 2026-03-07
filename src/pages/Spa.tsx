@@ -409,7 +409,7 @@ export default function Spa() {
                   {/* CTAs */}
                   <div className="flex flex-wrap gap-3">
                     <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_lindsey_cta_click">
-                      Book With Lindsey
+                      Book Now
                       <ArrowRight className="h-5 w-5 ml-2" />
                     </Button>
                     <Button size="lg" variant="outline" onClick={() => setShowPricingModal(true)} className="border-accent text-accent hover:bg-accent/10" data-event="spa_lindsey_pricing_click">
