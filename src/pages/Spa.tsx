@@ -291,7 +291,10 @@ export default function Spa() {
         
         {/* Single section CTA */}
         <div className="text-center mt-10">
-          <TherapistDropdown />
+          <Button size="lg" onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_services_cta_click">
+            <Sparkles className="h-5 w-5 mr-2" />
+            Book Massage
+          </Button>
           <p className="text-sm text-muted-foreground mt-3">
             You'll review everything before payment. No surprise fees.
           </p>
