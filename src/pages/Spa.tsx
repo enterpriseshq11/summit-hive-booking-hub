@@ -38,9 +38,9 @@ export default function Spa() {
     setShowBookingForm(false);
   };
   
-  // Navigate to Lindsey's booking page
-  const goToBookWithLindsey = () => {
-    navigate('/book-with-lindsey');
+  // Open booking form dialog
+  const openBookingForm = () => {
+    setShowBookingForm(true);
   };
   
   const openRequestModal = (service?: "massage" | "recovery" | "wellness") => {
