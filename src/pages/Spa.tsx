@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useBusinessByType } from "@/hooks/useBusinesses";
 import { useProviders } from "@/hooks/useProviders";
 import { NextAvailableWidget, WaitlistCTA, SpaBookingForm, FloatingHelpDrawer, SpaRequestModal, SpaWaitlistModal, SpaAnchorChips, StickyMobileSpaCTA } from "@/components/booking";
-import { TherapistDropdown } from "@/components/booking/TherapistDropdown";
+
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Clock, Heart, ArrowRight, Leaf, Star, CheckCircle, Calendar, FileText, Quote, User, Award, ShieldCheck, Wifi, Coffee, Zap, Droplets, Sun, Wind, ThermometerSun, Users, Activity, Target, DollarSign, MapPin, Video, Phone } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
