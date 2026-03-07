@@ -784,7 +784,7 @@ export default function Spa() {
             className="w-full mt-4 bg-accent hover:bg-accent/90 text-primary"
             onClick={() => {
               setShowPricingModal(false);
-              goToBookWithLindsey();
+              openBookingForm();
             }}
           >
             View Full Menu & Book
