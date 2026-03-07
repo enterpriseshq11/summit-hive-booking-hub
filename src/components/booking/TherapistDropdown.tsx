@@ -16,7 +16,7 @@ export interface Therapist {
 // Static fallback for Lindsey (always available as spa_lead)
 const LINDSEY_FALLBACK: Therapist = {
   id: "lindsey",
-  name: "Lindsey",
+  name: "Book Now",
   subtitle: "Licensed Massage Therapist",
   route: "/book-with-lindsey#availability-calendar",
   available: true,
