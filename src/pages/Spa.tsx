@@ -809,7 +809,7 @@ export default function Spa() {
       <FloatingHelpDrawer businessType="spa" phoneNumber={SITE_CONFIG.divisions.spa.phone} email={SITE_CONFIG.contact.email} />
 
       {/* Sticky Mobile CTA */}
-      <StickyMobileSpaCTA onRequestService={goToBookWithLindsey} />
+      <StickyMobileSpaCTA onRequestService={openBookingForm} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
