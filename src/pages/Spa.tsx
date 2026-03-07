@@ -325,7 +325,7 @@ export default function Spa() {
                 </ul>
 
                 <div className="text-center">
-                  <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
+                  <Button size="lg" onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
                     Book Assisted Stretching
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
