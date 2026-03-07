@@ -123,7 +123,10 @@ export default function Spa() {
               
               {/* Hero CTAs */}
               <div className="flex flex-col sm:flex-row items-center md:ml-[7.25rem] lg:ml-0 lg:items-start gap-4 mb-6">
-                <TherapistDropdown />
+                <Button size="lg" onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_hero_book_massage_click">
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  Book Massage
+                </Button>
                 <Button size="lg" variant="outline" onClick={() => setShowWaitlistModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 hover:border-accent font-semibold" data-event="spa_hero_secondary_cta_click">
                   <Clock className="h-5 w-5 mr-2" />
                   Join Waitlist
