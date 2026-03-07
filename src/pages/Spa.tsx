@@ -716,7 +716,10 @@ export default function Spa() {
             Expert care and premium treatments — book your appointment today.
           </p>
           <div className="flex justify-center">
-            <TherapistDropdown />
+            <Button size="lg" onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_final_cta_click">
+              <Sparkles className="h-5 w-5 mr-2" />
+              Book Massage
+            </Button>
           </div>
           <p className="text-sm text-primary-foreground/60 mt-4 max-w-md mx-auto">
             No obligation • Response within 24 hours • You'll review everything before payment
