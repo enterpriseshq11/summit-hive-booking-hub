@@ -154,7 +154,7 @@ export default function Spa() {
                   </Label>
                   <div className="flex gap-2">
                     <Input id="booking-contact" type="text" placeholder="Enter your email or phone number" value={bookingContact} onChange={e => setBookingContact(e.target.value)} className="bg-background/90 border-accent/30 text-foreground placeholder:text-muted-foreground" />
-                    <Button onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0">
+                    <Button onClick={openBookingForm} className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0">
                       Request
                     </Button>
                   </div>
