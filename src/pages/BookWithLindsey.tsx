@@ -81,10 +81,10 @@ export default function BookWithLindsey() {
             {/* Hero Copy */}
             <div className="flex-1 text-center lg:text-left">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary-foreground">
-                Book With Lindsey
+                Book Now
               </h1>
               <p className="text-xl md:text-2xl text-accent font-medium mb-4">
-                Licensed Massage Therapist & Recovery Specialist
+                Licensed Massage Therapy & Recovery Services
               </p>
               <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl">
                 Results-driven recovery treatments. Every session is intentional, customized, and focused on real outcomes.
