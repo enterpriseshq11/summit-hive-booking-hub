@@ -73,14 +73,19 @@ export default function AdminLeadsWaitlists() {
       lead.status || "new",
       lead.created_at ? format(new Date(lead.created_at), "yyyy-MM-dd HH:mm") : "",
     ]);
-    const csvContent = [headers, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csvContent = "\uFEFF" + [headers, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\r\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
-    a.download = `leads-export-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.setAttribute("href", url);
+    a.setAttribute("download", `leads-export-${format(new Date(), "yyyy-MM-dd")}.csv`);
+    a.style.display = "none";
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
     toast.success(`Exported ${filteredLeads.length} leads`);
   };
 
