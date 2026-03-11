@@ -52,7 +52,7 @@ import type { Database } from "@/integrations/supabase/types";
 type CrmLeadStatus = Database["public"]["Enums"]["crm_lead_status"];
 type BusinessType = Database["public"]["Enums"]["business_type"];
 
-import { statusColors, statusLabels } from "@/constants/pipelineConfig";
+import { statusColors, statusLabels, statusSelectOptions } from "@/constants/pipelineConfig";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-US", {
