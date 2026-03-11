@@ -1401,6 +1401,7 @@ export type Database = {
           revenue_attached: number | null
           source: Database["public"]["Enums"]["crm_lead_source"] | null
           status: Database["public"]["Enums"]["crm_lead_status"] | null
+          temperature: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1418,6 +1419,7 @@ export type Database = {
           revenue_attached?: number | null
           source?: Database["public"]["Enums"]["crm_lead_source"] | null
           status?: Database["public"]["Enums"]["crm_lead_status"] | null
+          temperature?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1435,6 +1437,7 @@ export type Database = {
           revenue_attached?: number | null
           source?: Database["public"]["Enums"]["crm_lead_source"] | null
           status?: Database["public"]["Enums"]["crm_lead_status"] | null
+          temperature?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -6037,6 +6040,15 @@ export type Database = {
         | "proposal_sent"
         | "won"
         | "lost"
+        | "contact_attempted"
+        | "responded"
+        | "warm_lead"
+        | "hot_lead"
+        | "contract_sent"
+        | "deposit_pending"
+        | "booked"
+        | "follow_up_needed"
+        | "no_response"
       document_type: "contract" | "waiver" | "policy" | "intake_form"
       e3_booking_state:
         | "red_hold"
@@ -6357,6 +6369,15 @@ export const Constants = {
         "proposal_sent",
         "won",
         "lost",
+        "contact_attempted",
+        "responded",
+        "warm_lead",
+        "hot_lead",
+        "contract_sent",
+        "deposit_pending",
+        "booked",
+        "follow_up_needed",
+        "no_response",
       ],
       document_type: ["contract", "waiver", "policy", "intake_form"],
       e3_booking_state: [

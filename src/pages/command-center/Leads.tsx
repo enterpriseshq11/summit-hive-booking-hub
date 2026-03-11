@@ -59,14 +59,7 @@ type CrmLeadStatus = Database["public"]["Enums"]["crm_lead_status"];
 type CrmLeadSource = Database["public"]["Enums"]["crm_lead_source"];
 type BusinessType = Database["public"]["Enums"]["business_type"];
 
-const statusColors: Record<CrmLeadStatus, string> = {
-  new: "bg-blue-500/20 text-blue-400 border-blue-500/50",
-  contacted: "bg-yellow-500/20 text-yellow-400 border-yellow-500/50",
-  qualified: "bg-purple-500/20 text-purple-400 border-purple-500/50",
-  proposal_sent: "bg-orange-500/20 text-orange-400 border-orange-500/50",
-  won: "bg-green-500/20 text-green-400 border-green-500/50",
-  lost: "bg-red-500/20 text-red-400 border-red-500/50",
-};
+import { statusColors, statusLabels, statusSelectOptions } from "@/constants/pipelineConfig";
 
 const businessUnitLabels: Record<BusinessType, string> = {
   spa: "Spa",
@@ -354,12 +347,11 @@ export default function CommandCenterLeads() {
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700">
                   <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="contacted">Contacted</SelectItem>
-                  <SelectItem value="qualified">Qualified</SelectItem>
-                  <SelectItem value="proposal_sent">Proposal Sent</SelectItem>
-                  <SelectItem value="won">Won</SelectItem>
-                  <SelectItem value="lost">Lost</SelectItem>
+                  {statusSelectOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select
@@ -397,12 +389,11 @@ export default function CommandCenterLeads() {
                     <SelectValue placeholder="Change Status" />
                   </SelectTrigger>
                   <SelectContent className="bg-zinc-800 border-zinc-700">
-                    <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="contacted">Contacted</SelectItem>
-                    <SelectItem value="qualified">Qualified</SelectItem>
-                    <SelectItem value="proposal_sent">Proposal Sent</SelectItem>
-                    <SelectItem value="won">Won</SelectItem>
-                    <SelectItem value="lost">Lost</SelectItem>
+                    {statusSelectOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select onValueChange={handleBulkAssign}>
@@ -582,22 +573,28 @@ export default function CommandCenterLeads() {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-zinc-700" />
                             <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "contacted" })}
+                              onClick={() => updateLead.mutate({ id: lead.id, status: "contact_attempted" })}
                               className="text-zinc-100"
                             >
-                              Mark Contacted
+                              Mark Contact Attempted
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "qualified" })}
+                              onClick={() => updateLead.mutate({ id: lead.id, status: "responded" })}
                               className="text-zinc-100"
                             >
-                              Mark Qualified
+                              Mark Responded
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "won" })}
+                              onClick={() => updateLead.mutate({ id: lead.id, status: "hot_lead" })}
+                              className="text-red-400"
+                            >
+                              Mark Hot Lead
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => updateLead.mutate({ id: lead.id, status: "booked" })}
                               className="text-green-400"
                             >
-                              Mark Won
+                              Mark Booked
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => updateLead.mutate({ id: lead.id, status: "lost" })}
