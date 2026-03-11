@@ -573,22 +573,28 @@ export default function CommandCenterLeads() {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-zinc-700" />
                             <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "contacted" })}
+                              onClick={() => updateLead.mutate({ id: lead.id, status: "contact_attempted" })}
                               className="text-zinc-100"
                             >
-                              Mark Contacted
+                              Mark Contact Attempted
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "qualified" })}
+                              onClick={() => updateLead.mutate({ id: lead.id, status: "responded" })}
                               className="text-zinc-100"
                             >
-                              Mark Qualified
+                              Mark Responded
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "won" })}
+                              onClick={() => updateLead.mutate({ id: lead.id, status: "hot_lead" })}
+                              className="text-red-400"
+                            >
+                              Mark Hot Lead
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => updateLead.mutate({ id: lead.id, status: "booked" })}
                               className="text-green-400"
                             >
-                              Mark Won
+                              Mark Booked
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => updateLead.mutate({ id: lead.id, status: "lost" })}

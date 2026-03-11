@@ -49,12 +49,18 @@ import type { Database } from "@/integrations/supabase/types";
 type BusinessType = Database["public"]["Enums"]["business_type"];
 
 const pipelineStages = [
-  { key: "new", label: "New", color: "bg-blue-500" },
-  { key: "contacted", label: "Contacted", color: "bg-yellow-500" },
-  { key: "qualified", label: "Qualified", color: "bg-purple-500" },
-  { key: "proposal_sent", label: "Proposal Sent", color: "bg-orange-500" },
-  { key: "won", label: "Won", color: "bg-green-500" },
-  { key: "lost", label: "Lost", color: "bg-red-500" },
+  { key: "new", label: "New Lead", color: "bg-zinc-500" },
+  { key: "contact_attempted", label: "Contact Attempted", color: "bg-yellow-500" },
+  { key: "responded", label: "Responded", color: "bg-sky-500" },
+  { key: "warm_lead", label: "Warm Lead", color: "bg-orange-400" },
+  { key: "hot_lead", label: "Hot Lead", color: "bg-red-500" },
+  { key: "proposal_sent", label: "Proposal Sent", color: "bg-blue-500" },
+  { key: "contract_sent", label: "Contract Sent", color: "bg-purple-500" },
+  { key: "deposit_pending", label: "Deposit Pending", color: "bg-amber-600" },
+  { key: "booked", label: "Booked", color: "bg-green-500" },
+  { key: "follow_up_needed", label: "Follow Up Needed", color: "bg-yellow-600" },
+  { key: "no_response", label: "No Response", color: "bg-zinc-600" },
+  { key: "lost", label: "Lost", color: "bg-zinc-700" },
 ];
 
 const businessUnits: { key: BusinessType; label: string; color: string }[] = [

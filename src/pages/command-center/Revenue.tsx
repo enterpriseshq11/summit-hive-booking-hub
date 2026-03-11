@@ -93,7 +93,7 @@ export default function CommandCenterRevenue() {
     employeeId: employeeFilter || undefined,
   });
   const { data: employees } = useCrmEmployees();
-  const { data: leads } = useCrmLeads({ status: "won" });
+  const { data: leads } = useCrmLeads({ status: "booked" });
   const createRevenue = useCreateCrmRevenue();
 
   const handleCreate = async () => {
