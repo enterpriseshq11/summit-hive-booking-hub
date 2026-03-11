@@ -52,23 +52,7 @@ import type { Database } from "@/integrations/supabase/types";
 type CrmLeadStatus = Database["public"]["Enums"]["crm_lead_status"];
 type BusinessType = Database["public"]["Enums"]["business_type"];
 
-const statusColors: Record<CrmLeadStatus, string> = {
-  new: "bg-blue-500/20 text-blue-400 border-blue-500/50",
-  contacted: "bg-yellow-500/20 text-yellow-400 border-yellow-500/50",
-  qualified: "bg-purple-500/20 text-purple-400 border-purple-500/50",
-  proposal_sent: "bg-orange-500/20 text-orange-400 border-orange-500/50",
-  won: "bg-green-500/20 text-green-400 border-green-500/50",
-  lost: "bg-red-500/20 text-red-400 border-red-500/50",
-};
-
-const statusLabels: Record<CrmLeadStatus, string> = {
-  new: "New",
-  contacted: "Contacted",
-  qualified: "Qualified",
-  proposal_sent: "Proposal Sent",
-  won: "Won",
-  lost: "Lost",
-};
+import { statusColors, statusLabels } from "@/constants/pipelineConfig";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-US", {
