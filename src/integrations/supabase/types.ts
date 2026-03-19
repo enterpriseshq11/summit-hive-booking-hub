@@ -1385,16 +1385,82 @@ export type Database = {
           },
         ]
       }
+      crm_lead_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          is_completed: boolean
+          lead_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
+          lead_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
+          lead_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_lead_tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_lead_tasks_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_leads: {
         Row: {
           assigned_employee_id: string | null
           business_unit: Database["public"]["Enums"]["business_type"]
           company_name: string | null
+          contact_attempts: number
           created_at: string | null
           created_by: string | null
           email: string | null
           follow_up_due: string | null
           id: string
+          last_contacted_at: string | null
           lead_name: string
           lost_reason: string | null
           phone: string | null
@@ -1408,11 +1474,13 @@ export type Database = {
           assigned_employee_id?: string | null
           business_unit: Database["public"]["Enums"]["business_type"]
           company_name?: string | null
+          contact_attempts?: number
           created_at?: string | null
           created_by?: string | null
           email?: string | null
           follow_up_due?: string | null
           id?: string
+          last_contacted_at?: string | null
           lead_name: string
           lost_reason?: string | null
           phone?: string | null
@@ -1426,11 +1494,13 @@ export type Database = {
           assigned_employee_id?: string | null
           business_unit?: Database["public"]["Enums"]["business_type"]
           company_name?: string | null
+          contact_attempts?: number
           created_at?: string | null
           created_by?: string | null
           email?: string | null
           follow_up_due?: string | null
           id?: string
+          last_contacted_at?: string | null
           lead_name?: string
           lost_reason?: string | null
           phone?: string | null

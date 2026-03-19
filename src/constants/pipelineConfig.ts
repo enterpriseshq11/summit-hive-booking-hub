@@ -67,3 +67,59 @@ export const statusSelectOptions = pipelineStages.map((s) => ({
   value: s.status,
   label: s.label,
 }));
+
+/** Priority score calculation */
+export function calculatePriorityScore(lead: {
+  status?: string | null;
+  temperature?: string | null;
+  follow_up_due?: string | null;
+  contact_attempts?: number;
+}): number {
+  let score = 0;
+
+  // Status-based scoring
+  switch (lead.status) {
+    case "deposit_pending": score += 15; break;
+    case "hot_lead": score += 10; break;
+    case "contract_sent": score += 10; break;
+    case "proposal_sent": score += 8; break;
+    case "warm_lead": score += 6; break;
+    case "new": score += 5; break;
+    case "responded": score += 5; break;
+    case "follow_up_needed": score += 7; break;
+    case "no_response": score -= 5; break;
+    case "lost": score -= 10; break;
+    case "booked": score -= 3; break;
+  }
+
+  // Temperature scoring
+  if (lead.temperature === "hot") score += 10;
+  else if (lead.temperature === "warm") score += 5;
+
+  // Follow-up due today or overdue
+  if (lead.follow_up_due) {
+    const due = new Date(lead.follow_up_due);
+    const now = new Date();
+    const diffHours = (due.getTime() - now.getTime()) / (1000 * 60 * 60);
+    if (diffHours < 0) score += 12; // overdue
+    else if (diffHours < 24) score += 10; // due today
+    else if (diffHours < 72) score += 5; // due soon
+  }
+
+  return score;
+}
+
+/** Source display labels */
+export const sourceLabels: Record<string, string> = {
+  website: "Website",
+  referral: "Referral",
+  walk_in: "Walk-In",
+  phone: "Phone Call",
+  social_media: "Social Media",
+  email: "Email",
+  event: "Event",
+  other: "Other",
+  facebook: "Facebook",
+  instagram: "Instagram",
+  google: "Google",
+};
