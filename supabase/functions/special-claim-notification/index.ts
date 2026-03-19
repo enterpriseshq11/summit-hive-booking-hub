@@ -164,6 +164,9 @@ async function createPendingBooking(payload: ClaimPayload): Promise<string | nul
 
     const specialNote = `SPECIAL REQUEST: ${payload.special_title} | ${payload.message || ""}`.trim();
 
+    // Generate a unique booking number (trigger only fires on NULL, not empty string)
+    const bookingNumber = `AZ${new Date().toISOString().slice(2, 10).replace(/-/g, "")}${Math.floor(Math.random() * 1000000).toString().padStart(6, "0")}`;
+
     const { data: booking, error } = await sb
       .from("bookings")
       .insert({
@@ -180,7 +183,7 @@ async function createPendingBooking(payload: ClaimPayload): Promise<string | nul
         notes: specialNote,
         internal_notes: "REQUEST MODE — Special claim submission",
         source_brand: payload.business_unit === "restoration" ? "restoration" : payload.business_unit,
-        booking_number: "", // trigger will generate
+        booking_number: bookingNumber,
       })
       .select("id, booking_number")
       .single();
