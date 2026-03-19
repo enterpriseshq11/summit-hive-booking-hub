@@ -120,7 +120,7 @@ export default function CommandCenterLeads() {
       toast.error("No leads to export");
       return;
     }
-    const headers = ["Name", "Email", "Phone", "Business Unit", "Source", "Status", "Assigned To", "Follow-up", "Created"];
+    const headers = ["Name", "Email", "Phone", "Business Unit", "Source", "Status", "Temperature", "Contact Attempts", "Last Contacted", "Assigned To", "Follow-up", "Created"];
     const rows = filteredLeads.map((lead) => [
       lead.lead_name || "",
       lead.email || "",
@@ -128,11 +128,14 @@ export default function CommandCenterLeads() {
       lead.business_unit || "",
       lead.source || "",
       lead.status || "new",
+      (lead as any).temperature || "cold",
+      String((lead as any).contact_attempts ?? 0),
+      (lead as any).last_contacted_at ? format(new Date((lead as any).last_contacted_at), "yyyy-MM-dd HH:mm") : "",
       lead.assigned_employee ? `${lead.assigned_employee.first_name || ""} ${lead.assigned_employee.last_name || ""}`.trim() : "Unassigned",
       lead.follow_up_due ? format(new Date(lead.follow_up_due), "yyyy-MM-dd HH:mm") : "",
       lead.created_at ? format(new Date(lead.created_at), "yyyy-MM-dd HH:mm") : "",
     ]);
-    const csvContent = [headers, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csvContent = "\uFEFF" + [headers, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\r\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
