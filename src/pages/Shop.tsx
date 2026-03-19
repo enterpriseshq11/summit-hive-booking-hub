@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExternalLink, Sparkles, Clock } from "lucide-react";
+import { ExternalLink, Sparkles, Clock, Gift } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const beamUrl = "https://beeamhq.com/?utm_source=main_site&utm_medium=referral&utm_campaign=shop_hub";
 
