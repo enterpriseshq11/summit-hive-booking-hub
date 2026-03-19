@@ -116,7 +116,7 @@ export default function Shop() {
           <div className="max-w-5xl mx-auto">
             <Card className="overflow-hidden border-0 shadow-2xl bg-card">
               <div className="grid md:grid-cols-2">
-                <div className="relative h-64 md:h-auto min-h-[400px] bg-gradient-to-br from-rose-950 to-rose-900 flex items-center justify-center">
+                <div className="relative h-64 md:h-auto min-h-[400px] bg-gradient-to-br from-primary to-primary/90 flex items-center justify-center">
                   <div className="relative z-10 text-center">
                     <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-accent/20 flex items-center justify-center">
                       <Gift className="w-16 h-16 text-accent" />
