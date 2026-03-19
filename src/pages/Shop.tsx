@@ -110,6 +110,40 @@ export default function Shop() {
         </div>
       </section>
 
+      {/* Elevated by Elyse */}
+      <section className="py-20 md:py-28 bg-muted/30">
+        <div className="container px-4">
+          <div className="max-w-5xl mx-auto">
+            <Card className="overflow-hidden border-0 shadow-2xl bg-card">
+              <div className="grid md:grid-cols-2">
+                <div className="relative h-64 md:h-auto min-h-[400px] bg-gradient-to-br from-rose-950 to-rose-900 flex items-center justify-center">
+                  <div className="relative z-10 text-center">
+                    <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-accent/20 flex items-center justify-center">
+                      <Gift className="w-16 h-16 text-accent" />
+                    </div>
+                    <span className="text-accent font-semibold tracking-widest text-sm uppercase">Custom Gifts</span>
+                  </div>
+                </div>
+                <CardContent className="p-8 md:p-12 flex flex-col justify-center">
+                  <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                    Elevated by Elyse
+                  </h2>
+                  <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                    Premium personalized gifts, tumblers, apparel, and custom home goods. Locally crafted with care.
+                  </p>
+                  <Button asChild size="lg" className="w-full md:w-auto bg-accent hover:bg-accent/90 text-primary font-semibold group">
+                    <Link to="/shop/elevated-by-elyse" className="flex items-center justify-center gap-2">
+                      Browse Collection
+                      <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Coming Soon Section */}
       <section className="py-20 bg-muted/30">
         <div className="container px-4">
@@ -123,7 +157,6 @@ export default function Shop() {
           </div>
           
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Coming Soon Card 1 */}
             <Card className="border border-border/50 bg-card/50 opacity-60">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
@@ -138,7 +171,6 @@ export default function Shop() {
               </CardContent>
             </Card>
             
-            {/* Coming Soon Card 2 */}
             <Card className="border border-border/50 bg-card/50 opacity-60">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
