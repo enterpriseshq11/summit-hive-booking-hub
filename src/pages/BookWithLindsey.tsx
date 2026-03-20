@@ -12,42 +12,32 @@ import {
 import { LindseyAvailabilityCalendar } from "@/components/booking/LindseyAvailabilityCalendar";
 import { useSpaPaymentsConfig } from "@/hooks/usePaymentConfigs";
 
-// Lindsey's pricing menu data for reference/modal only
-const SERVICES = {
-  swedish: {
-    name: "Swedish Massage",
-    options: [
-      { duration: 30, price: 45 },
-      { duration: 60, price: 80 },
-    ],
-  },
-  deepTissue: {
-    name: "Deep Tissue Massage",
-    options: [
-      { duration: 30, price: 55 },
-      { duration: 60, price: null, note: "TBD" },
-    ],
-  },
-  ashiatsu: {
-    name: "Ashiatsu (Barefoot Massage)",
-    options: [
-      { duration: 60, price: 60 },
-      { duration: 90, price: 90 },
-    ],
-  },
-  couples: {
-    name: "Couples Massage",
-    options: [
-      { duration: 60, price: 85, promoPrice: 70 },
-      { duration: 90, price: 125, promoPrice: 95 },
-    ],
-  },
-};
+// Updated service menu for pricing modal
+const SERVICES_LIST = [
+  { name: "Scalp Stimulation", price60: 45 },
+  { name: "Infrared Sauna", price60: 45 },
+  { name: "Yoni Steam", price60: 60 },
+  { name: "Neck, Back & Shoulders", price60: 75 },
+  { name: "Trigger Point Release", price60: 85 },
+  { name: "Radiant Renewal", price60: 90 },
+  { name: "Total Body Stretch", price60: 90 },
+  { name: "Hot Stone", price60: 100 },
+  { name: "Cupping", price60: 100 },
+  { name: "Deep Tissue", price60: 110 },
+  { name: "Lymphatic Drainage", price60: 120 },
+  { name: "Table Thai", price60: 120 },
+  { name: "Hydrating Sugar Scrub", price60: 125 },
+  { name: "Mud Detox", price60: 150 },
+  { name: "Seaweed Body Wrap", price60: 150 },
+  { name: "Chamomile Body Wrap", price60: 150 },
+  { name: "Natural Herbal Bath", price60: 155 },
+  { name: "Cold Plunge Bath", price60: 155 },
+];
 
 const ADDONS = [
-  { id: "hot-stones", name: "Hot Stones" },
+  { id: "energy-boost", name: "Energy Boost" },
+  { id: "hot-towel", name: "Hot Towel Treatment" },
   { id: "aromatherapy", name: "Aromatherapy" },
-  { id: "cupping", name: "Cupping" },
 ];
 
 export default function BookWithLindsey() {
@@ -167,7 +157,7 @@ export default function BookWithLindsey() {
               <div>
                 <h4 className="font-semibold mb-1">Available Add-ons</h4>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Enhance your session with these optional additions. Discuss with Lindsey during your appointment.
+                  Enhance your session with these optional additions. Discuss with your therapist during your appointment.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {ADDONS.map((addon) => (
@@ -230,36 +220,23 @@ export default function BookWithLindsey() {
 
       {/* Quick Pricing Modal */}
       <Dialog open={showPricingModal} onOpenChange={setShowPricingModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Quick Price Reference</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2">Swedish Massage</h4>
-              <p className="text-sm text-muted-foreground">30 min — $45 | 60 min — $80</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Deep Tissue Massage</h4>
-              <p className="text-sm text-muted-foreground">30 min — $55 | 60 min — TBD</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Ashiatsu (Barefoot)</h4>
-              <p className="text-sm text-muted-foreground">60 min — $60 | 90 min — $90</p>
-            </div>
-            <div className="bg-green-500/10 p-3 rounded-lg">
-              <h4 className="font-semibold mb-2 text-green-600">
-                <Gift className="h-4 w-4 inline mr-1" />
-                Couples Massage (Promo)
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                60 min — <span className="line-through">$85</span> $70 | 90 min — <span className="line-through">$125</span> $95
-              </p>
-              <p className="text-xs text-green-600 mt-1">Promo valid through end of February</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Consultations</h4>
-              <p className="text-sm text-muted-foreground">Prenatal & Migraine — Free</p>
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground mb-3">All services default to 60 min. Upgrade to 90 min for +$35.</p>
+            {SERVICES_LIST.map((svc) => (
+              <div key={svc.name} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                <span className="font-medium text-sm">{svc.name}</span>
+                <span className="text-sm text-muted-foreground">
+                  ${svc.price60} <span className="text-xs">/ ${svc.price60 + 35}</span>
+                </span>
+              </div>
+            ))}
+            <div className="pt-3 border-t border-border">
+              <h4 className="font-semibold text-sm mb-1">Add-Ons</h4>
+              <p className="text-xs text-muted-foreground">Energy Boost • Hot Towel Treatment • Aromatherapy</p>
             </div>
           </div>
           <Button 
