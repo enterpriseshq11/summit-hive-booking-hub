@@ -12,28 +12,38 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, Loader2, CalendarIcon } from "lucide-react";
 
-const SPA_SERVICES = [
-  "Swedish Massage",
-  "Deep Tissue Massage",
-  "Ashiatsu (Barefoot Massage)",
-  "Couples Massage",
-  "Consultation (Free)",
+const SPA_SERVICES_WITH_PRICES: { name: string; price60: number }[] = [
+  { name: "Scalp Stimulation", price60: 45 },
+  { name: "Infrared Sauna", price60: 45 },
+  { name: "Yoni Steam", price60: 60 },
+  { name: "Neck, Back & Shoulders", price60: 75 },
+  { name: "Trigger Point Release", price60: 85 },
+  { name: "Radiant Renewal", price60: 90 },
+  { name: "Total Body Stretch", price60: 90 },
+  { name: "Hot Stone", price60: 100 },
+  { name: "Cupping", price60: 100 },
+  { name: "Deep Tissue", price60: 110 },
+  { name: "Lymphatic Drainage", price60: 120 },
+  { name: "Table Thai", price60: 120 },
+  { name: "Hydrating Sugar Scrub", price60: 125 },
+  { name: "Mud Detox", price60: 150 },
+  { name: "Seaweed Body Wrap", price60: 150 },
+  { name: "Chamomile Body Wrap", price60: 150 },
+  { name: "Natural Herbal Bath", price60: 155 },
+  { name: "Cold Plunge Bath", price60: 155 },
 ];
 
-const SERVICE_DURATIONS: Record<string, { duration: string; price: string }[]> = {
-  "Swedish Massage": [
-    { duration: "30 min", price: "$45" },
-    { duration: "60 min", price: "$80" },
-  ],
-  "Ashiatsu (Barefoot Massage)": [
-    { duration: "60 min", price: "$60" },
-    { duration: "90 min", price: "$90" },
-  ],
-  "Couples Massage": [
-    { duration: "60 min", price: "$170" },
-    { duration: "90 min", price: "$190" },
-  ],
-};
+const SPA_SERVICES = SPA_SERVICES_WITH_PRICES.map(s => s.name);
+
+const SERVICE_DURATIONS: Record<string, { duration: string; price: string }[]> = Object.fromEntries(
+  SPA_SERVICES_WITH_PRICES.map(s => [
+    s.name,
+    [
+      { duration: "60 min", price: `$${s.price60}` },
+      { duration: "90 min", price: `$${s.price60 + 35}` },
+    ],
+  ])
+);
 
 const TIME_SLOTS = Array.from({ length: 23 }, (_, i) => {
   const hour = Math.floor(i / 2) + 10;
@@ -135,8 +145,6 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
   // Compute price shown to customer based on service + duration
   const servicePrice = useMemo(() => {
     if (!service) return null;
-    if (service === "Deep Tissue Massage") return "$55";
-    if (service === "Consultation (Free)") return "Free";
     if (hasDurations && duration) {
       const match = durations.find(d => d.duration === duration);
       return match?.price || null;
@@ -193,7 +201,7 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
             )}
             {servicePrice && (
               <p className="text-xs text-muted-foreground mt-1">
-                Price due on arrival: <span className="font-semibold text-foreground">{servicePrice}</span>
+                Price at checkout: <span className="font-semibold text-foreground">{servicePrice}</span>
               </p>
             )}
           </div>
