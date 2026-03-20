@@ -189,108 +189,97 @@ export default function Spa() {
       <section id="spa-services" className="py-14 container">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">Our Services</h2>
-          <p className="text-muted-foreground text-lg">Restore your body and mind — choose your path to recovery</p>
+          <p className="text-muted-foreground text-lg">All services default to 60 minutes. Upgrade any service to 90 minutes for +$35.</p>
+          <p className="text-sm text-accent mt-2 font-medium">Please arrive 10 minutes early to your appointment.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {/* Massage Therapy Card */}
-          <Card className="hover:shadow-gold-lg hover:border-accent/50 transition-all duration-300 shadow-premium group border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden">
-            {/* Badge */}
-            <div className="absolute top-3 right-3">
-              <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
-                Most Popular
-              </Badge>
-            </div>
-            <CardHeader className="pt-8">
-              <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:shadow-gold transition-all">
-                <Heart className="h-7 w-7 text-accent group-hover:text-primary transition-colors" />
-              </div>
-              <CardTitle className="text-xl group-hover:text-accent transition-colors">Massage Therapy</CardTitle>
-              <p className="text-sm text-accent font-medium">Release tension. Restore balance.</p>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="mb-4">
-                <AccordionItem value="massage-types" className="border-0">
-                  <AccordionTrigger className="text-sm text-muted-foreground hover:no-underline py-2 px-0">
-                    View Massage Types
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-2">
-                    <ul className="space-y-2">
-                      {["Ayurveda Massage", "Prenatal Massage", "Relaxation Massage", "Swedish Massage", "Deep Tissue Massage", "Couples Massage", "Aromatherapy"].map((type, idx) => <li key={idx} className="flex items-center gap-2 text-muted-foreground text-sm">
-                          <CheckCircle className="h-4 w-4 text-accent flex-shrink-0" />
-                          {type}
-                        </li>)}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-              <Button onClick={goToBookWithLindsey} className="w-full bg-accent hover:bg-accent/90 text-primary font-semibold" data-event="spa_massage_card_click">
-                Book this <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+          {[
+            { name: "Scalp Stimulation", price: 45 },
+            { name: "Infrared Sauna", price: 45 },
+            { name: "Yoni Steam", price: 60 },
+            { name: "Neck, Back & Shoulders", price: 75 },
+            { name: "Trigger Point Release", price: 85 },
+            { name: "Radiant Renewal", price: 90 },
+            { name: "Total Body Stretch", price: 90 },
+            { name: "Hot Stone", price: 100 },
+            { name: "Cupping", price: 100 },
+            { name: "Deep Tissue", price: 110 },
+            { name: "Lymphatic Drainage", price: 120 },
+            { name: "Table Thai", price: 120 },
+            { name: "Hydrating Sugar Scrub", price: 125 },
+            { name: "Mud Detox", price: 150 },
+            { name: "Seaweed Body Wrap", price: 150 },
+            { name: "Chamomile Body Wrap", price: 150 },
+            { name: "Natural Herbal Bath", price: 155 },
+            { name: "Cold Plunge Bath", price: 155 },
+          ].map((svc) => (
+            <Card key={svc.name} className="hover:shadow-gold-lg hover:border-accent/50 transition-all duration-300 shadow-premium group border-2 border-transparent cursor-pointer" onClick={goToBookWithLindsey} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToBookWithLindsey()}>
+              <CardContent className="p-5">
+                <h3 className="font-semibold text-base group-hover:text-accent transition-colors mb-3">{svc.name}</h3>
+                <div className="flex items-baseline justify-between">
+                  <div>
+                    <span className="text-lg font-bold">${svc.price}</span>
+                    <span className="text-sm text-muted-foreground ml-1">/ 60 min</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                    90 min — ${svc.price + 35}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-          {/* Recovery Services Card */}
-          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={goToBookWithLindsey} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToBookWithLindsey()} data-event="spa_recovery_card_click">
-            {/* Badge */}
-            <div className="absolute top-3 right-3">
-              <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
-                Best for Athletes
-              </Badge>
-            </div>
-            <CardHeader className="pt-8">
-              <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:shadow-gold transition-all">
-                <Leaf className="h-7 w-7 text-accent group-hover:text-primary transition-colors" />
-              </div>
-              <CardTitle className="text-xl group-hover:text-accent transition-colors">Recovery Services</CardTitle>
-              <p className="text-sm text-accent font-medium">Accelerate your body's natural healing.</p>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 mb-4">
-                {["Massage Therapy", "Medical Massage", "Red Light Therapy", "Wellness Services"].map((benefit, idx) => <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
-                    <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
-                    {benefit}
-                  </li>)}
-              </ul>
-              <p className="text-sm text-accent font-medium flex items-center gap-1 group-hover:underline">
-                Book this <ArrowRight className="h-4 w-4" />
-              </p>
-            </CardContent>
-          </Card>
+        {/* Memberships / Packages */}
+        <div className="mt-14 max-w-4xl mx-auto">
+          <h3 className="text-2xl font-bold text-center mb-2">Memberships & Packages</h3>
+          <p className="text-center text-muted-foreground mb-2 text-sm">Valid for one year after purchase. Can be shared with family and friends.</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+            {[
+              { count: 4, price: 345, perks: ["Includes 1 add-on"] },
+              { count: 6, price: 520, perks: ["Includes 3 free add-ons"] },
+              { count: 8, price: 690, perks: ["3 free add-ons", "1 cupping session", "1 hot stone session"] },
+              { count: 10, price: 850, perks: ["3 free add-ons", "2 cupping sessions", "2 hot stone sessions"] },
+            ].map((pkg) => (
+              <Card key={pkg.count} className="shadow-premium border-border hover:border-accent/50 transition-all">
+                <CardContent className="p-5 text-center">
+                  <p className="text-3xl font-bold text-accent">{pkg.count}</p>
+                  <p className="text-sm text-muted-foreground mb-2">Massages</p>
+                  <p className="text-xl font-bold mb-3">${pkg.price}</p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    {pkg.perks.map((p, i) => (
+                      <li key={i} className="flex items-center gap-1.5 justify-center">
+                        <CheckCircle className="h-3 w-3 text-accent flex-shrink-0" />
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button size="sm" onClick={goToBookWithLindsey} className="w-full mt-4 bg-accent hover:bg-accent/90 text-primary font-semibold text-xs">
+                    Get Started
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
 
-          {/* Wellness Experiences Card */}
-          <Card className="hover:shadow-gold-lg hover:border-accent/50 hover:-translate-y-1 transition-all duration-300 shadow-premium group cursor-pointer border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 relative overflow-hidden" onClick={goToBookWithLindsey} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToBookWithLindsey()} data-event="spa_wellness_card_click">
-            {/* Badge */}
-            <div className="absolute top-3 right-3">
-              <Badge className="bg-accent/20 text-accent border-accent/30 text-xs">
-                Perfect for Everyone
-              </Badge>
-            </div>
-            <CardHeader className="pt-8">
-              <div className="h-14 w-14 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:shadow-gold transition-all">
-                <Star className="h-7 w-7 text-accent group-hover:text-primary transition-colors" />
-              </div>
-              <CardTitle className="text-xl group-hover:text-accent transition-colors">Wellness Experiences</CardTitle>
-              <p className="text-sm text-accent font-medium">Shared moments of restoration.</p>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 mb-4">
-                {["Relaxation Services", "Energy Work", "Workshops & Retreats", "Guided Meditations", "Yoga", "Aerial Yoga", "Hot Yoga", "Pilates with Reformers", "Stress Reduction Sessions"].map((benefit, idx) => <li key={idx} className="flex items-start gap-2 text-muted-foreground text-sm">
-                    <CheckCircle className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
-                    {benefit}
-                  </li>)}
-              </ul>
-              <p className="text-sm text-accent font-medium flex items-center gap-1 group-hover:underline">
-                Book this <ArrowRight className="h-4 w-4" />
-              </p>
-            </CardContent>
-          </Card>
+        {/* Add-Ons */}
+        <div className="mt-10 max-w-2xl mx-auto text-center">
+          <h3 className="text-xl font-bold mb-3">Add-Ons</h3>
+          <div className="flex flex-wrap justify-center gap-3">
+            {["Energy Boost", "Hot Towel Treatment", "Aromatherapy"].map((addon) => (
+              <span key={addon} className="px-4 py-2 bg-accent/10 text-sm font-medium rounded-full border border-accent/20">
+                {addon}
+              </span>
+            ))}
+          </div>
         </div>
         
         {/* Single section CTA */}
         <div className="text-center mt-10">
           <TherapistDropdown />
           <p className="text-sm text-muted-foreground mt-3">
-            You'll review everything before payment. No surprise fees.
+            Full payment at checkout. No surprise fees.
           </p>
         </div>
       </section>
