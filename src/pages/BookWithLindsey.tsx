@@ -220,36 +220,23 @@ export default function BookWithLindsey() {
 
       {/* Quick Pricing Modal */}
       <Dialog open={showPricingModal} onOpenChange={setShowPricingModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Quick Price Reference</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2">Swedish Massage</h4>
-              <p className="text-sm text-muted-foreground">30 min — $45 | 60 min — $80</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Deep Tissue Massage</h4>
-              <p className="text-sm text-muted-foreground">30 min — $55 | 60 min — TBD</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Ashiatsu (Barefoot)</h4>
-              <p className="text-sm text-muted-foreground">60 min — $60 | 90 min — $90</p>
-            </div>
-            <div className="bg-green-500/10 p-3 rounded-lg">
-              <h4 className="font-semibold mb-2 text-green-600">
-                <Gift className="h-4 w-4 inline mr-1" />
-                Couples Massage (Promo)
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                60 min — <span className="line-through">$85</span> $70 | 90 min — <span className="line-through">$125</span> $95
-              </p>
-              <p className="text-xs text-green-600 mt-1">Promo valid through end of February</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Consultations</h4>
-              <p className="text-sm text-muted-foreground">Prenatal & Migraine — Free</p>
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground mb-3">All services default to 60 min. Upgrade to 90 min for +$35.</p>
+            {SERVICES_LIST.map((svc) => (
+              <div key={svc.name} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                <span className="font-medium text-sm">{svc.name}</span>
+                <span className="text-sm text-muted-foreground">
+                  ${svc.price60} <span className="text-xs">/ ${svc.price60 + 35}</span>
+                </span>
+              </div>
+            ))}
+            <div className="pt-3 border-t border-border">
+              <h4 className="font-semibold text-sm mb-1">Add-Ons</h4>
+              <p className="text-xs text-muted-foreground">Energy Boost • Hot Towel Treatment • Aromatherapy</p>
             </div>
           </div>
           <Button 
