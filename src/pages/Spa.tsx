@@ -729,39 +729,53 @@ export default function Spa() {
 
       {/* Pricing Modal */}
       <Dialog open={showPricingModal} onOpenChange={setShowPricingModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Lindsey's Pricing Menu</DialogTitle>
+            <DialogTitle>Service Pricing Menu</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2">Swedish Massage</h4>
-              <p className="text-sm text-muted-foreground">30 min — $45 | 60 min — $80</p>
+          <p className="text-sm text-muted-foreground mb-4">All services default to 60 min. Upgrade any to 90 min for +$35.</p>
+          <div className="space-y-2">
+            {[
+              { name: "Scalp Stimulation", price: 45 },
+              { name: "Infrared Sauna", price: 45 },
+              { name: "Yoni Steam", price: 60 },
+              { name: "Neck, Back & Shoulders", price: 75 },
+              { name: "Trigger Point Release", price: 85 },
+              { name: "Radiant Renewal", price: 90 },
+              { name: "Total Body Stretch", price: 90 },
+              { name: "Hot Stone", price: 100 },
+              { name: "Cupping", price: 100 },
+              { name: "Deep Tissue", price: 110 },
+              { name: "Lymphatic Drainage", price: 120 },
+              { name: "Table Thai", price: 120 },
+              { name: "Hydrating Sugar Scrub", price: 125 },
+              { name: "Mud Detox", price: 150 },
+              { name: "Seaweed Body Wrap", price: 150 },
+              { name: "Chamomile Body Wrap", price: 150 },
+              { name: "Natural Herbal Bath", price: 155 },
+              { name: "Cold Plunge Bath", price: 155 },
+            ].map((svc) => (
+              <div key={svc.name} className="flex justify-between items-center py-2 border-b border-border last:border-0">
+                <span className="font-medium text-sm">{svc.name}</span>
+                <div className="text-right text-sm">
+                  <span className="font-bold">${svc.price}</span>
+                  <span className="text-muted-foreground ml-2">90 min ${svc.price + 35}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="pt-3 border-t mt-2">
+            <h4 className="font-semibold text-sm mb-2">Packages</h4>
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <p>4 Massages — $345 (1 add-on)</p>
+              <p>6 Massages — $520 (3 add-ons)</p>
+              <p>8 Massages — $690 (3 add-ons, 1 cupping, 1 hot stone)</p>
+              <p>10 Massages — $850 (3 add-ons, 2 cupping, 2 hot stone)</p>
             </div>
-            <div>
-              <h4 className="font-semibold mb-2">Deep Tissue Massage</h4>
-              <p className="text-sm text-muted-foreground">30 min — $55 | 60 min — TBD</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Ashiatsu (Barefoot)</h4>
-              <p className="text-sm text-muted-foreground">60 min — $60 | 90 min — $90</p>
-            </div>
-            <div className="bg-green-500/10 p-3 rounded-lg">
-              <h4 className="font-semibold mb-2 text-green-600">Couples Massage (Promo)</h4>
-              <p className="text-sm text-muted-foreground">
-                60 min — <span className="line-through">$85</span> $70 | 90 min — <span className="line-through">$125</span> $95
-              </p>
-              <p className="text-xs text-green-600 mt-1">Promo valid through end of February</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Consultations</h4>
-              <p className="text-sm text-muted-foreground">Prenatal & Migraine — Free</p>
-            </div>
-            <div className="pt-2 border-t">
-              <h4 className="font-semibold mb-2">Available Add-ons</h4>
-              <p className="text-sm text-muted-foreground">Hot Stones • Aromatherapy • Cupping</p>
-              <p className="text-xs text-muted-foreground mt-1">Pricing available upon request</p>
-            </div>
+          </div>
+          <div className="pt-3 border-t">
+            <h4 className="font-semibold text-sm mb-1">Add-Ons</h4>
+            <p className="text-sm text-muted-foreground">Energy Boost • Hot Towel Treatment • Aromatherapy</p>
           </div>
           <Button 
             className="w-full mt-4 bg-accent hover:bg-accent/90 text-primary"
@@ -770,7 +784,7 @@ export default function Spa() {
               goToBookWithLindsey();
             }}
           >
-            View Full Menu & Book
+            Book Now
           </Button>
         </DialogContent>
       </Dialog>
