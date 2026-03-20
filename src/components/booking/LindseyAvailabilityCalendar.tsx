@@ -52,68 +52,26 @@ interface Service {
   isFree?: boolean;
 }
 
-// Default services for Lindsey (when no workerId provided)
+// Default services — updated menu with 60 min base + 90 min (+$35) upgrade
 const DEFAULT_SERVICES: Service[] = [
-  {
-    id: "swedish",
-    name: "Swedish Massage",
-    description: "Relaxation focused, light to medium pressure.",
-    icon: Heart,
-    options: [
-      { duration: 30, price: 45, label: "30 min" },
-      { duration: 60, price: 80, label: "60 min" },
-    ],
-  },
-  {
-    id: "deep-tissue",
-    name: "Deep Tissue Massage",
-    description: "Focused therapeutic work, deeper pressure.",
-    icon: Flame,
-    options: [
-      // Only 30-min available per spec - no 60-min until pricing confirmed
-      { duration: 30, price: 55, label: "30 min" },
-    ],
-  },
-  {
-    id: "ashiatsu",
-    name: "Ashiatsu (Barefoot Massage)",
-    description: "Uses overhead bars for balance; deep pressure using feet for full body relief.",
-    icon: Star,
-    featured: true,
-    options: [
-      { duration: 60, price: 60, label: "60 min" },
-      { duration: 90, price: 90, label: "90 min" },
-    ],
-  },
-  {
-    id: "couples",
-    name: "Couples Massage",
-    description: "Side-by-side couples session with add-ons available (hot stones, aromatherapy, cupping).",
-    icon: Users,
-    featured: true,
-    isPromo: true,
-    options: [
-      // Promo pricing for Jan + Feb; normal pricing otherwise
-      { duration: 60, price: 85, promoPrice: 70, label: "60 min" },
-      { duration: 90, price: 125, promoPrice: 95, label: "90 min" },
-    ],
-  },
-  {
-    id: "prenatal-consult",
-    name: "Prenatal Consultation",
-    description: "Free consult to determine safest approach.",
-    icon: HelpCircle,
-    isFree: true,
-    options: [{ duration: 15, price: 0, label: "Free" }],
-  },
-  {
-    id: "migraine-consult",
-    name: "Migraine Consultation",
-    description: "Free consult to identify triggers and plan session.",
-    icon: HelpCircle,
-    isFree: true,
-    options: [{ duration: 15, price: 0, label: "Free" }],
-  },
+  { id: "scalp-stimulation", name: "Scalp Stimulation", description: "Targeted scalp therapy to promote relaxation and circulation.", icon: Sparkles, options: [{ duration: 60, price: 45, label: "60 min" }, { duration: 90, price: 80, label: "90 min" }] },
+  { id: "infrared-sauna", name: "Infrared Sauna", description: "Deep-penetrating heat therapy for detox and recovery.", icon: Flame, options: [{ duration: 60, price: 45, label: "60 min" }, { duration: 90, price: 80, label: "90 min" }] },
+  { id: "yoni-steam", name: "Yoni Steam", description: "Herbal steam session for feminine wellness and relaxation.", icon: Heart, options: [{ duration: 60, price: 60, label: "60 min" }, { duration: 90, price: 95, label: "90 min" }] },
+  { id: "neck-back-shoulders", name: "Neck, Back & Shoulders", description: "Focused relief for upper body tension and stress.", icon: Heart, options: [{ duration: 60, price: 75, label: "60 min" }, { duration: 90, price: 110, label: "90 min" }] },
+  { id: "trigger-point", name: "Trigger Point Release", description: "Precision pressure to release chronic muscle knots.", icon: Flame, options: [{ duration: 60, price: 85, label: "60 min" }, { duration: 90, price: 120, label: "90 min" }] },
+  { id: "radiant-renewal", name: "Radiant Renewal", description: "Rejuvenating full-body treatment for glowing skin and deep relaxation.", icon: Star, options: [{ duration: 60, price: 90, label: "60 min" }, { duration: 90, price: 125, label: "90 min" }] },
+  { id: "total-body-stretch", name: "Total Body Stretch", description: "Assisted stretching to improve flexibility and reduce tension.", icon: Heart, options: [{ duration: 60, price: 90, label: "60 min" }, { duration: 90, price: 125, label: "90 min" }] },
+  { id: "hot-stone", name: "Hot Stone", description: "Heated stone therapy for deep muscle relaxation.", icon: Flame, featured: true, options: [{ duration: 60, price: 100, label: "60 min" }, { duration: 90, price: 135, label: "90 min" }] },
+  { id: "cupping", name: "Cupping", description: "Suction therapy to increase blood flow and release tension.", icon: Flame, featured: true, options: [{ duration: 60, price: 100, label: "60 min" }, { duration: 90, price: 135, label: "90 min" }] },
+  { id: "deep-tissue", name: "Deep Tissue", description: "Focused therapeutic work with deeper pressure.", icon: Flame, options: [{ duration: 60, price: 110, label: "60 min" }, { duration: 90, price: 145, label: "90 min" }] },
+  { id: "lymphatic-drainage", name: "Lymphatic Drainage", description: "Gentle technique to support your body's natural detox process.", icon: Heart, options: [{ duration: 60, price: 120, label: "60 min" }, { duration: 90, price: 155, label: "90 min" }] },
+  { id: "table-thai", name: "Table Thai", description: "Thai-style stretching and compression on the massage table.", icon: Star, options: [{ duration: 60, price: 120, label: "60 min" }, { duration: 90, price: 155, label: "90 min" }] },
+  { id: "sugar-scrub", name: "Hydrating Sugar Scrub", description: "Exfoliating body scrub that leaves skin soft and hydrated.", icon: Sparkles, options: [{ duration: 60, price: 125, label: "60 min" }, { duration: 90, price: 160, label: "90 min" }] },
+  { id: "mud-detox", name: "Mud Detox", description: "Mineral-rich mud wrap for deep detoxification.", icon: Star, featured: true, options: [{ duration: 60, price: 150, label: "60 min" }, { duration: 90, price: 185, label: "90 min" }] },
+  { id: "seaweed-wrap", name: "Seaweed Body Wrap", description: "Nourishing seaweed wrap to hydrate and firm the skin.", icon: Star, options: [{ duration: 60, price: 150, label: "60 min" }, { duration: 90, price: 185, label: "90 min" }] },
+  { id: "chamomile-wrap", name: "Chamomile Body Wrap", description: "Soothing chamomile wrap for sensitive skin and deep calm.", icon: Heart, options: [{ duration: 60, price: 150, label: "60 min" }, { duration: 90, price: 185, label: "90 min" }] },
+  { id: "herbal-bath", name: "Natural Herbal Bath", description: "Therapeutic herbal soak for total mind and body restoration.", icon: Sparkles, options: [{ duration: 60, price: 155, label: "60 min" }, { duration: 90, price: 190, label: "90 min" }] },
+  { id: "cold-plunge", name: "Cold Plunge Bath", description: "Cold immersion therapy for recovery and invigoration.", icon: Flame, options: [{ duration: 60, price: 155, label: "60 min" }, { duration: 90, price: 190, label: "90 min" }] },
 ];
 
 const ROOMS = [

@@ -12,42 +12,32 @@ import {
 import { LindseyAvailabilityCalendar } from "@/components/booking/LindseyAvailabilityCalendar";
 import { useSpaPaymentsConfig } from "@/hooks/usePaymentConfigs";
 
-// Lindsey's pricing menu data for reference/modal only
-const SERVICES = {
-  swedish: {
-    name: "Swedish Massage",
-    options: [
-      { duration: 30, price: 45 },
-      { duration: 60, price: 80 },
-    ],
-  },
-  deepTissue: {
-    name: "Deep Tissue Massage",
-    options: [
-      { duration: 30, price: 55 },
-      { duration: 60, price: null, note: "TBD" },
-    ],
-  },
-  ashiatsu: {
-    name: "Ashiatsu (Barefoot Massage)",
-    options: [
-      { duration: 60, price: 60 },
-      { duration: 90, price: 90 },
-    ],
-  },
-  couples: {
-    name: "Couples Massage",
-    options: [
-      { duration: 60, price: 85, promoPrice: 70 },
-      { duration: 90, price: 125, promoPrice: 95 },
-    ],
-  },
-};
+// Updated service menu for pricing modal
+const SERVICES_LIST = [
+  { name: "Scalp Stimulation", price60: 45 },
+  { name: "Infrared Sauna", price60: 45 },
+  { name: "Yoni Steam", price60: 60 },
+  { name: "Neck, Back & Shoulders", price60: 75 },
+  { name: "Trigger Point Release", price60: 85 },
+  { name: "Radiant Renewal", price60: 90 },
+  { name: "Total Body Stretch", price60: 90 },
+  { name: "Hot Stone", price60: 100 },
+  { name: "Cupping", price60: 100 },
+  { name: "Deep Tissue", price60: 110 },
+  { name: "Lymphatic Drainage", price60: 120 },
+  { name: "Table Thai", price60: 120 },
+  { name: "Hydrating Sugar Scrub", price60: 125 },
+  { name: "Mud Detox", price60: 150 },
+  { name: "Seaweed Body Wrap", price60: 150 },
+  { name: "Chamomile Body Wrap", price60: 150 },
+  { name: "Natural Herbal Bath", price60: 155 },
+  { name: "Cold Plunge Bath", price60: 155 },
+];
 
 const ADDONS = [
-  { id: "hot-stones", name: "Hot Stones" },
+  { id: "energy-boost", name: "Energy Boost" },
+  { id: "hot-towel", name: "Hot Towel Treatment" },
   { id: "aromatherapy", name: "Aromatherapy" },
-  { id: "cupping", name: "Cupping" },
 ];
 
 export default function BookWithLindsey() {
