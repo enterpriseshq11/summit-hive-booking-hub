@@ -201,7 +201,7 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
             )}
             {servicePrice && (
               <p className="text-xs text-muted-foreground mt-1">
-                Price due on arrival: <span className="font-semibold text-foreground">{servicePrice}</span>
+                Price at checkout: <span className="font-semibold text-foreground">{servicePrice}</span>
               </p>
             )}
           </div>
