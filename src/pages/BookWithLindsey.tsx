@@ -157,7 +157,7 @@ export default function BookWithLindsey() {
               <div>
                 <h4 className="font-semibold mb-1">Available Add-ons</h4>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Enhance your session with these optional additions. Discuss with Lindsey during your appointment.
+                  Enhance your session with these optional additions. Discuss with your therapist during your appointment.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {ADDONS.map((addon) => (
