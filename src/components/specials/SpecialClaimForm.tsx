@@ -145,8 +145,6 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
   // Compute price shown to customer based on service + duration
   const servicePrice = useMemo(() => {
     if (!service) return null;
-    if (service === "Deep Tissue Massage") return "$55";
-    if (service === "Consultation (Free)") return "Free";
     if (hasDurations && duration) {
       const match = durations.find(d => d.duration === duration);
       return match?.price || null;
