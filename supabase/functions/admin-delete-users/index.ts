@@ -14,7 +14,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify caller is owner
     const authHeader = req.headers.get("Authorization")!;
     const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
@@ -50,17 +49,31 @@ Deno.serve(async (req) => {
     const results: { id: string; success: boolean; error?: string }[] = [];
 
     for (const uid of userIds) {
-      // Don't allow deleting yourself
       if (uid === user.id) {
         results.push({ id: uid, success: false, error: "Cannot delete yourself" });
         continue;
       }
 
-      const { error } = await adminClient.auth.admin.deleteUser(uid);
-      if (error) {
-        results.push({ id: uid, success: false, error: error.message });
-      } else {
-        results.push({ id: uid, success: true });
+      try {
+        // First find all tables referencing this user
+        const { data: refs } = await adminClient.rpc('exec_sql', {
+          sql: `
+            SELECT table_name, column_name 
+            FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+            AND data_type = 'uuid' 
+            AND column_name IN ('user_id', 'created_by', 'actor_user_id', 'assigned_to', 'assigned_employee_id', 'employee_id', 'recorded_by', 'employee_attributed_id', 'approved_by', 'target_user_id', 'actor_id')
+          `
+        });
+
+        const { error } = await adminClient.auth.admin.deleteUser(uid);
+        if (error) {
+          results.push({ id: uid, success: false, error: `${error.message} (${error.status})` });
+        } else {
+          results.push({ id: uid, success: true });
+        }
+      } catch (e) {
+        results.push({ id: uid, success: false, error: String(e) });
       }
     }
 
