@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const results: { id: string; success: boolean; error?: string }[] = [];
+    const results: { id: string; success: boolean; error?: string; method?: string }[] = [];
 
     for (const uid of userIds) {
       if (uid === user.id) {
@@ -54,23 +54,41 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      // Try hard delete first via REST API directly for more control
       try {
-        // First find all tables referencing this user
-        const { data: refs } = await adminClient.rpc('exec_sql', {
-          sql: `
-            SELECT table_name, column_name 
-            FROM information_schema.columns 
-            WHERE table_schema = 'public' 
-            AND data_type = 'uuid' 
-            AND column_name IN ('user_id', 'created_by', 'actor_user_id', 'assigned_to', 'assigned_employee_id', 'employee_id', 'recorded_by', 'employee_attributed_id', 'approved_by', 'target_user_id', 'actor_id')
-          `
+        const resp = await fetch(`${supabaseUrl}/auth/v1/admin/users/${uid}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${serviceRoleKey}`,
+            'apikey': serviceRoleKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ should_soft_delete: false }),
         });
 
-        const { error } = await adminClient.auth.admin.deleteUser(uid);
-        if (error) {
-          results.push({ id: uid, success: false, error: `${error.message} (${error.status})` });
+        if (resp.ok) {
+          results.push({ id: uid, success: true, method: 'hard_delete' });
+          continue;
+        }
+
+        const errBody = await resp.text();
+        
+        // If hard delete fails, try soft delete
+        const resp2 = await fetch(`${supabaseUrl}/auth/v1/admin/users/${uid}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${serviceRoleKey}`,
+            'apikey': serviceRoleKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ should_soft_delete: true }),
+        });
+
+        if (resp2.ok) {
+          results.push({ id: uid, success: true, method: 'soft_delete' });
         } else {
-          results.push({ id: uid, success: true });
+          const errBody2 = await resp2.text();
+          results.push({ id: uid, success: false, error: `hard: ${errBody}, soft: ${errBody2}` });
         }
       } catch (e) {
         results.push({ id: uid, success: false, error: String(e) });
