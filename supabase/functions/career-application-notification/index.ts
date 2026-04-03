@@ -77,7 +77,7 @@ const handler = async (req: Request): Promise<Response> => {
               <li>Please save your confirmation number for your records</li>
             </ul>
             
-            <p style="color: #666;">If you have any questions, feel free to reply to this email or call us at <strong>(419) 909-8442</strong>.</p>
+            <p style="color: #666;">If you have any questions, feel free to reply to this email or call us at <strong>(567) 429-9924</strong>.</p>
             
             <p style="color: #666; margin-top: 30px;">Best regards,<br>The ${teamName} Team<br>A-Z Enterprises</p>
           </div>

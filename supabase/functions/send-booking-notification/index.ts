@@ -557,8 +557,8 @@ function buildCustomerConfirmationEmail(
   // IMPORTANT: Ticket requires updating ONLY Summit customer confirmation email contact phone.
   // Keep all other emails/brands unchanged.
   const sourceBrand = typeof (booking as any).source_brand === "string" ? String((booking as any).source_brand).toLowerCase() : "";
-  const customerContactPhoneText = sourceBrand === "summit" ? "(567) 379-6340" : BUSINESS_PHONE;
-  const customerContactPhoneHref = sourceBrand === "summit" ? "tel:+15673796340" : `tel:${BUSINESS_PHONE}`;
+  const customerContactPhoneText = sourceBrand === "summit" ? "(567) 429-9924" : BUSINESS_PHONE;
+  const customerContactPhoneHref = sourceBrand === "summit" ? "tel:+15674299924" : `tel:${BUSINESS_PHONE}`;
   
   const startDate = new Date(booking.start_datetime as string);
   const endDate = new Date(booking.end_datetime as string);

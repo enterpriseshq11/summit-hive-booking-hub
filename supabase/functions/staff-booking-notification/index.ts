@@ -12,7 +12,7 @@ const logStep = (step: string, details?: unknown) => {
 };
 
 // 360 Photo Booth staff contact (Victoria)
-const VICTORIA_PHONE = "+15673796340";
+const VICTORIA_PHONE = "+15674299924";
 
 interface StaffBookingNotificationRequest {
   booking_id: string;
