@@ -274,6 +274,7 @@ export default function LeadDetail() {
       event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "stage_changed",
       metadata: { previous_stage: lead?.status, new_stage: "lost", reason: lostReason, notes: lostNotes },
     });
     setShowLostDialog(false);
