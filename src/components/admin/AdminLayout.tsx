@@ -203,11 +203,11 @@ const navSections: NavSection[] = [
   {
     label: "Marketing",
     icon: Megaphone,
-    visibleToRoles: ["owner", "manager", "marketing_lead", "ads_lead"],
+    visibleToRoles: MARKETING_ROLES,
     items: [
       { title: "Promotions", href: "/admin/promotions", icon: Tag },
       { title: "Dopamine Drop", href: "/admin/dopamine-drop", icon: Gift },
-      { title: "Specials", href: "/admin/specials", icon: Sparkles },
+      { title: "Ad Tracking", href: "/admin/ad-tracking", icon: TrendingUp },
     ],
   },
   {
