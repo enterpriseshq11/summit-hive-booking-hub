@@ -3111,6 +3111,63 @@ export type Database = {
           },
         ]
       }
+      mobile_home_inventory: {
+        Row: {
+          assigned_agent: string | null
+          created_at: string | null
+          date_listed: string | null
+          date_purchased: string | null
+          date_sold: string | null
+          gross_profit: number | null
+          id: string
+          list_price: number | null
+          notes: string | null
+          property_address: string
+          purchase_price: number | null
+          renovation_cost: number | null
+          renovation_line_items: Json | null
+          sale_price: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_agent?: string | null
+          created_at?: string | null
+          date_listed?: string | null
+          date_purchased?: string | null
+          date_sold?: string | null
+          gross_profit?: number | null
+          id?: string
+          list_price?: number | null
+          notes?: string | null
+          property_address: string
+          purchase_price?: number | null
+          renovation_cost?: number | null
+          renovation_line_items?: Json | null
+          sale_price?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_agent?: string | null
+          created_at?: string | null
+          date_listed?: string | null
+          date_purchased?: string | null
+          date_sold?: string | null
+          gross_profit?: number | null
+          id?: string
+          list_price?: number | null
+          notes?: string | null
+          property_address?: string
+          purchase_price?: number | null
+          renovation_cost?: number | null
+          renovation_line_items?: Json | null
+          sale_price?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       notification_logs: {
         Row: {
           booking_id: string | null
@@ -5414,6 +5471,30 @@ export type Database = {
           },
         ]
       }
+      team_email_role_map: {
+        Row: {
+          created_at: string | null
+          department: string | null
+          email: string
+          id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string | null
+          department?: string | null
+          email: string
+          id?: string
+          role: string
+        }
+        Update: {
+          created_at?: string | null
+          department?: string | null
+          email?: string
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -6122,6 +6203,7 @@ export type Database = {
         | "marketing_lead"
         | "ops_lead"
         | "ads_lead"
+        | "sales_acquisitions"
       booking_mode: "instant" | "request"
       booking_status:
         | "pending"
@@ -6448,6 +6530,7 @@ export const Constants = {
         "marketing_lead",
         "ops_lead",
         "ads_lead",
+        "sales_acquisitions",
       ],
       booking_mode: ["instant", "request"],
       booking_status: [

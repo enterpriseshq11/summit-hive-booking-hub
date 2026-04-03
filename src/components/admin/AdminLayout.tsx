@@ -50,14 +50,15 @@ interface NavSubSection {
 }
 
 // ─── Role visibility constants ───
-const ALL_STAFF = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead", "event_coordinator", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "front_desk"];
+const ALL_STAFF = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead", "event_coordinator", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "front_desk", "sales_acquisitions"];
 const ADMIN_ROLES = ["owner", "manager"];
 const OWNER_ONLY = ["owner"];
-const COMMAND_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead", "spa_lead", "event_coordinator"];
-const SALES_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "event_coordinator"];
+const COMMAND_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead", "spa_lead", "event_coordinator", "sales_acquisitions"];
+const SALES_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "event_coordinator", "sales_acquisitions"];
 const OPS_ROLES = ["owner", "manager", "ops_lead", "spa_lead", "event_coordinator", "coworking_manager", "fitness_lead", "front_desk"];
 const TEAM_ROLES = ["owner", "manager", "ops_lead"];
 const REVENUE_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead"];
+const MARKETING_ROLES = ["owner", "manager", "marketing_lead", "ads_lead"];
 
 // ─── Navigation configuration matching Dylan's exact spec ───
 const navSections: NavSection[] = [
@@ -124,7 +125,7 @@ const navSections: NavSection[] = [
       {
         label: "The Summit",
         icon: Building2,
-        visibleToRoles: ["owner", "manager", "ops_lead", "marketing_lead", "event_coordinator"],
+        visibleToRoles: ["owner", "manager", "ops_lead", "marketing_lead", "event_coordinator", "sales_acquisitions"],
         items: [
           { title: "Leads", href: "/admin/business/summit/leads", icon: Target },
           { title: "Bookings", href: "/admin/business/summit/bookings", icon: CalendarDays },
@@ -179,7 +180,7 @@ const navSections: NavSection[] = [
       {
         label: "Mobile Homes",
         icon: Home,
-        visibleToRoles: ["owner", "manager", "ops_lead"],
+        visibleToRoles: ["owner", "manager", "ops_lead", "sales_acquisitions"],
         items: [
           { title: "Inventory", href: "/admin/business/mobile-homes/inventory", icon: Store },
           { title: "Revenue", href: "/admin/business/mobile-homes/revenue", icon: DollarSign },
@@ -202,11 +203,11 @@ const navSections: NavSection[] = [
   {
     label: "Marketing",
     icon: Megaphone,
-    visibleToRoles: ["owner", "manager", "marketing_lead", "ads_lead"],
+    visibleToRoles: MARKETING_ROLES,
     items: [
       { title: "Promotions", href: "/admin/promotions", icon: Tag },
       { title: "Dopamine Drop", href: "/admin/dopamine-drop", icon: Gift },
-      { title: "Specials", href: "/admin/specials", icon: Sparkles },
+      { title: "Ad Tracking", href: "/admin/ad-tracking", icon: TrendingUp },
     ],
   },
   {

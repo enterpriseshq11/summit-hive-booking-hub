@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const userRoles = roles?.map((r) => r.role as AppRole) || [];
       const isStaff = userRoles.some((r) =>
-        ["owner", "manager", "event_coordinator", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "front_desk", "marketing_lead", "ops_lead", "ads_lead"].includes(r)
+        ["owner", "manager", "event_coordinator", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "front_desk", "marketing_lead", "ops_lead", "ads_lead", "sales_acquisitions"].includes(r)
       );
       const isAdmin = userRoles.some((r) => ["owner", "manager"].includes(r));
 
