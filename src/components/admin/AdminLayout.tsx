@@ -161,8 +161,8 @@ const navSections: NavSection[] = [
         icon: Building2,
         visibleToRoles: ["owner", "manager", "ops_lead", "marketing_lead", "coworking_manager"],
         items: [
-          { title: "Office Listings", href: "/admin/office-listings", icon: Building2 },
-          { title: "Inquiries", href: "/admin/office-inquiries", icon: MessageSquare },
+          { title: "Office Listings", href: "/admin/business/hive/office-listings", icon: Building2 },
+          { title: "Inquiries", href: "/admin/business/hive/inquiries", icon: MessageSquare },
           { title: "Revenue", href: "/admin/business/hive/revenue", icon: DollarSign },
           { title: "Settings", href: "/admin/business/hive/settings", icon: Settings },
         ],
