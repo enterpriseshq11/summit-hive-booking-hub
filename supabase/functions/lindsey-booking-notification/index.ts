@@ -16,7 +16,7 @@ const logStep = (step: string, details?: unknown) => {
 // IMPORTANT: Staff inbox uses @a-zenterpriseshq.com (with hyphen)
 // FROM/sender uses @azenterpriseshq.com (no hyphen, verified in Resend)
 const LINDSEY_EMAIL = "lindsey@a-zenterpriseshq.com";
-const LINDSEY_PHONE = "+15676441019";
+const LINDSEY_PHONE = "+15674299924";
 
 // Victoria settings (used when toggle OFF / request mode)
 const VICTORIA_EMAIL = "victoria@a-zenterpriseshq.com";
