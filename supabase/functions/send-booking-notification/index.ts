@@ -14,7 +14,7 @@ const logStep = (step: string, details?: unknown) => {
 
 // ============= CONFIGURATION (ENV-DRIVEN) =============
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
-const BUSINESS_PHONE = "(567) 379-6340";
+const BUSINESS_PHONE = "(567) 429-9924";
 const TZ = "America/New_York";
 
 // ============= SECRETS-DRIVEN (NO HARDCODED STAFF EMAILS) =============
