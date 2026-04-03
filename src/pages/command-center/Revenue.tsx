@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCrmRevenue, useCreateCrmRevenue } from "@/hooks/useCrmRevenue";
 import { useCrmEmployees } from "@/hooks/useCrmEmployees";
 import { useCrmLeads } from "@/hooks/useCrmLeads";
