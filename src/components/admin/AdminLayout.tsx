@@ -113,7 +113,7 @@ const navSections: NavSection[] = [
     items: [
       { title: "Revenue Tracker", href: "/admin/revenue", icon: BarChart3 },
       { title: "Pricing Rules", href: "/admin/pricing-rules", icon: DollarSign },
-      { title: "Stripe Integration", href: "/admin/payment-settings", icon: CreditCard },
+      { title: "Stripe Integration", href: "/admin/stripe", icon: CreditCard },
     ],
   },
   {
