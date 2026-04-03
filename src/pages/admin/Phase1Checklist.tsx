@@ -2,17 +2,30 @@ import { AdminLayout } from "@/components/admin";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ClipboardCheck, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export default function Phase1Checklist() {
   const { authUser } = useAuth();
   const queryClient = useQueryClient();
   const isOwner = authUser?.roles?.includes("owner");
+  const [uncheckItem, setUncheckItem] = useState<{ id: string; itemNumber: number; description: string } | null>(null);
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["phase1_checklist"],
@@ -37,7 +50,6 @@ export default function Phase1Checklist() {
         .eq("id", id);
       if (error) throw error;
 
-      // Log to activity log
       await supabase.from("crm_activity_events").insert({
         event_type: "status_change" as any,
         entity_type: "phase1_checklist",
@@ -46,15 +58,41 @@ export default function Phase1Checklist() {
         entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
         metadata: {
           action: newValue ? "confirmed" : "unconfirmed",
-          message: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name} ${newValue ? "confirmed" : "unconfirmed"} Phase 1 item ${itemNumber}: ${description}`,
+          message: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name} ${newValue ? "confirmed" : "removed confirmation for"} Phase 1 item ${itemNumber}: ${description}`,
         },
       });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["phase1_checklist"] });
-      toast.success(variables.newValue ? `Item ${variables.itemNumber} confirmed` : `Item ${variables.itemNumber} unconfirmed`);
+      toast.success(variables.newValue ? `Item ${variables.itemNumber} confirmed` : `Item ${variables.itemNumber} confirmation removed`);
     },
   });
+
+  const handleCheckChange = (item: any, checked: boolean) => {
+    if (checked) {
+      // Checking is immediate
+      toggleMutation.mutate({
+        id: item.id,
+        itemNumber: item.item_number,
+        description: item.description,
+        newValue: true,
+      });
+    } else {
+      // Unchecking requires confirmation dialog
+      setUncheckItem({ id: item.id, itemNumber: item.item_number, description: item.description });
+    }
+  };
+
+  const confirmUncheck = () => {
+    if (!uncheckItem) return;
+    toggleMutation.mutate({
+      id: uncheckItem.id,
+      itemNumber: uncheckItem.itemNumber,
+      description: uncheckItem.description,
+      newValue: false,
+    });
+    setUncheckItem(null);
+  };
 
   const confirmedCount = items.filter((i: any) => i.confirmed_by_owner).length;
   const systemConfirmedCount = items.filter((i: any) => i.confirmed_by_system).length;
@@ -90,14 +128,7 @@ export default function Phase1Checklist() {
                       {isOwner ? (
                         <Checkbox
                           checked={item.confirmed_by_owner}
-                          onCheckedChange={(checked) =>
-                            toggleMutation.mutate({
-                              id: item.id,
-                              itemNumber: item.item_number,
-                              description: item.description,
-                              newValue: !!checked,
-                            })
-                          }
+                          onCheckedChange={(checked) => handleCheckChange(item, !!checked)}
                         />
                       ) : item.confirmed_by_owner ? (
                         <CheckCircle2 className="h-5 w-5 text-green-400" />
@@ -116,7 +147,7 @@ export default function Phase1Checklist() {
                         {statusBadge}
                         {item.confirmed_at && (
                           <span className="text-zinc-600 text-xs">
-                            Confirmed {format(new Date(item.confirmed_at), "MMM d 'at' h:mm a")}
+                            Confirmed {format(new Date(item.confirmed_at), "MMM d, yyyy 'at' h:mm a")}
                           </span>
                         )}
                       </div>
@@ -138,6 +169,24 @@ export default function Phase1Checklist() {
           </Card>
         )}
       </div>
+
+      {/* Uncheck Confirmation Dialog */}
+      <AlertDialog open={!!uncheckItem} onOpenChange={(open) => !open && setUncheckItem(null)}>
+        <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-zinc-100">Remove Confirmation?</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Are you sure you want to remove your confirmation for item #{uncheckItem?.itemNumber}: "{uncheckItem?.description}"? This action will be logged.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-zinc-700 text-zinc-300">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmUncheck} className="bg-red-600 hover:bg-red-700">
+              Remove Confirmation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
