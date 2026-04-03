@@ -2866,6 +2866,7 @@ export type Database = {
           file_url: string
           id: string
           lead_id: string
+          storage_bucket_path: string | null
           uploaded_by: string | null
         }
         Insert: {
@@ -2876,6 +2877,7 @@ export type Database = {
           file_url: string
           id?: string
           lead_id: string
+          storage_bucket_path?: string | null
           uploaded_by?: string | null
         }
         Update: {
@@ -2886,6 +2888,7 @@ export type Database = {
           file_url?: string
           id?: string
           lead_id?: string
+          storage_bucket_path?: string | null
           uploaded_by?: string | null
         }
         Relationships: [
@@ -2901,6 +2904,8 @@ export type Database = {
       lead_intake_submissions: {
         Row: {
           business_unit: Database["public"]["Enums"]["business_type"]
+          confirmation_email_sent_at: string | null
+          confirmation_email_status: string | null
           created_at: string
           form_data: Json
           ghl_webhook_fired_at: string | null
@@ -2913,6 +2918,8 @@ export type Database = {
         }
         Insert: {
           business_unit: Database["public"]["Enums"]["business_type"]
+          confirmation_email_sent_at?: string | null
+          confirmation_email_status?: string | null
           created_at?: string
           form_data?: Json
           ghl_webhook_fired_at?: string | null
@@ -2925,6 +2932,8 @@ export type Database = {
         }
         Update: {
           business_unit?: Database["public"]["Enums"]["business_type"]
+          confirmation_email_sent_at?: string | null
+          confirmation_email_status?: string | null
           created_at?: string
           form_data?: Json
           ghl_webhook_fired_at?: string | null
