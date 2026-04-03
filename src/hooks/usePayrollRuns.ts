@@ -256,6 +256,7 @@ export function useMarkPayrollPaid() {
         actor_id: user?.id,
         entity_type: "payroll_run",
         entity_id: id,
+        event_category: "payroll_paid",
         before_data: before,
         after_data: result,
       });
