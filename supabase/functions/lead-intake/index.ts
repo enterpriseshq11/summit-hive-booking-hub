@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
         email,
         phone,
         business_unit,
-        source: source || "website",
+        source: mappedSource as any,
         status: "new",
         temperature: "warm",
         follow_up_due: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
