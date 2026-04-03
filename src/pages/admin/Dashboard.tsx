@@ -315,6 +315,43 @@ export default function AdminDashboard() {
     return tiles.map((tile) => {
       const { value, subtitle, pending } = getTileValue(tile.id);
 
+      // Special handling for payroll_next tile - inline date editor for owner
+      if (tile.id === "payroll_next" && isOwner) {
+        return (
+          <div key={tile.id}>
+            <Popover open={payrollDateOpen} onOpenChange={setPayrollDateOpen}>
+              <PopoverTrigger asChild>
+                <div className="cursor-pointer">
+                  {isOwner ? (
+                    <SortableTile
+                      tile={tile}
+                      value={value}
+                      subtitle={subtitle ? `${subtitle} — Click to edit` : "Click to set date"}
+                      pendingIntegration={pending}
+                      isOwner={isOwner}
+                      onRefresh={refetchAll}
+                      onRemove={() => removeTile(tile.id)}
+                      onResize={(size) => resizeTile(tile.id, size)}
+                    />
+                  ) : (
+                    <KpiTile config={tile} value={value} subtitle={subtitle} pendingIntegration={pending} onRefresh={refetchAll} isOwner={false} />
+                  )}
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={payrollDate || (team?.nextPayrollDate ? parseISO(team.nextPayrollDate) : undefined)}
+                  onSelect={(date) => { if (date) savePayrollDate(date); }}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        );
+      }
+
       if (isOwner) {
         return (
           <SortableTile
