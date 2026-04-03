@@ -278,13 +278,16 @@ function AppInner() {
           <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
           <Route path="/admin/ad-tracking" element={<AdminAdTracking />} />
 
-          {/* SETTINGS (owner-only enforced in component + route guard) */}
+          {/* SETTINGS (owner-only — requireOwner guard blocks all non-owners before component mounts) */}
+        </Route>
+        <Route element={<ProtectedRoute requireOwner />}>
           <Route path="/admin/settings" element={<CommandCenterSettings />} />
           <Route path="/admin/settings/users" element={<AdminUsersRoles />} />
           <Route path="/admin/settings/payment" element={<AdminPaymentSettings />} />
           <Route path="/admin/settings/integrations" element={<AdminIntegrations />} />
           <Route path="/admin/settings/audit-log" element={<AdminAuditLog />} />
           <Route path="/admin/settings/assumptions" element={<AdminAssumptions />} />
+          <Route path="/admin/settings/orphaned-files" element={<AdminOrphanedFiles />} />
 
           {/* Legacy admin routes */}
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
