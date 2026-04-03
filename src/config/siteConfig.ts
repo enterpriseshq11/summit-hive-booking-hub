@@ -3,44 +3,43 @@
 export const SITE_CONFIG = {
   // Contact Information — Front desk / building-level
   contact: {
-    phone: "(419) 909-8442",
-    phoneFormatted: "(419) 909-8442",
-    phoneLink: "tel:+14199098442",
+    phone: "(567) 429-9924",
+    phoneFormatted: "(567) 429-9924",
+    phoneLink: "tel:+15674299924",
     email: "dylan@a-zenterpriseshq.com",
     emailLink: "mailto:dylan@a-zenterpriseshq.com",
   },
-
-  // Division-specific suite addresses and direct phone numbers
+  // Division-specific contact (suite addresses + direct lines)
   divisions: {
     spa: {
       name: "Restoration Lounge Spa",
       suite: "Suite A",
-      phone: "(419) 820-9566",
-      phoneLink: "tel:+14198209566",
+      phone: "(567) 429-9924",
+      phoneLink: "tel:+15674299924",
     },
     fitness: {
       name: "A-Z Total Fitness",
       suite: "Suite B",
-      phone: "(419) 839-3668",
-      phoneLink: "tel:+14198393668",
+      phone: "(567) 429-9924",
+      phoneLink: "tel:+15674299924",
     },
     summit: {
       name: "The Summit Event Center",
       suite: "Suite C",
-      phone: "(419) 848-0434",
-      phoneLink: "tel:+14198480434",
+      phone: "(567) 429-9924",
+      phoneLink: "tel:+15674299924",
     },
     coworking: {
       name: "The Hive Co-Working Space",
       suite: "Suite D",
-      phone: "(419) 909-3765",
-      phoneLink: "tel:+14199093765",
+      phone: "(567) 429-9924",
+      phoneLink: "tel:+15674299924",
     },
     voiceVault: {
       name: "Voice Vault Podcast Studio",
       suite: "Suite Z",
-      phone: "(419) 848-0772",
-      phoneLink: "tel:+14198480772",
+      phone: "(567) 429-9924",
+      phoneLink: "tel:+15674299924",
     },
   },
   

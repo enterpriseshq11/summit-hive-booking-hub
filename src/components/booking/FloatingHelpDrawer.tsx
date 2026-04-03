@@ -22,8 +22,8 @@ interface FloatingHelpDrawerProps {
 
 export function FloatingHelpDrawer({ 
   businessType = "coworking",
-  phoneNumber = "(419) 555-1234",
-  email = "hello@thehive.com"
+  phoneNumber = "(567) 429-9924",
+  email = "dylan@a-zenterpriseshq.com"
 }: FloatingHelpDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showTourForm, setShowTourForm] = useState(false);
