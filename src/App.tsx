@@ -296,6 +296,7 @@ function AppInner() {
           <Route path="/admin/settings/phase1-checklist" element={<AdminPhase1Checklist />} />
           <Route path="/admin/settings/stripe-mapping" element={<AdminStripeMappingPage />} />
           <Route path="/admin/commissions/rules" element={<AdminCommissionRulesPage />} />
+          <Route path="/admin/settings/stripe-connection" element={<AdminStripeConnectionPage />} />
 
           {/* Legacy admin routes */}
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
