@@ -83,6 +83,33 @@ export default function AdminDashboard() {
 
   const [tiles, setTiles] = useState<KpiTileConfig[]>(getDefaultTiles());
   const [layoutDirty, setLayoutDirty] = useState(false);
+  const [payrollDateOpen, setPayrollDateOpen] = useState(false);
+  const [payrollDate, setPayrollDate] = useState<Date | undefined>();
+
+  // Save payroll date
+  const savePayrollDate = async (date: Date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    const { error } = await (supabase as any)
+      .from("admin_settings")
+      .update({ value: dateStr, updated_by: authUser?.id, updated_at: new Date().toISOString() })
+      .eq("key", "next_payroll_run_date");
+    if (!error) {
+      setPayrollDate(date);
+      setPayrollDateOpen(false);
+      refetchTeam();
+      // Log activity
+      await supabase.from("crm_activity_events").insert({
+        event_type: "setting_changed" as any,
+        entity_type: "admin_settings",
+        entity_id: "next_payroll_run_date",
+        actor_id: authUser?.id,
+        metadata: { action: "payroll_date_updated", new_value: dateStr },
+      });
+      toast.success(`Next Payroll Run Date set to ${format(date, "MMM d, yyyy")}`);
+    } else {
+      toast.error("Failed to save payroll date");
+    }
+  };
 
   // Load saved layout for owner
   useEffect(() => {
