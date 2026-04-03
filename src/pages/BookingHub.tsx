@@ -58,7 +58,8 @@ const businessBestFor: Record<BusinessType, string> = {
   spa: "Best for: Massage, facials, recovery treatments",
   fitness: "Best for: Strength training, classes, personal coaching",
   photo_booth: "Best for: Weddings, parties, corporate events",
-  voice_vault: "Best for: Podcast recording, voiceovers, content creation"
+  voice_vault: "Best for: Podcast recording, voiceovers, content creation",
+  elevated_by_elyse: "Best for: Bridal styling, event styling, wardrobe edits",
 };
 const businessTags: Record<BusinessType, string[]> = {
   summit: ["Weddings", "Corporate", "Celebrations"],
