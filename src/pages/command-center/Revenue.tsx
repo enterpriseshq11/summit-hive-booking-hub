@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCrmRevenue, useCreateCrmRevenue } from "@/hooks/useCrmRevenue";
 import { useCrmEmployees } from "@/hooks/useCrmEmployees";
 import { useCrmLeads } from "@/hooks/useCrmLeads";
@@ -77,6 +78,7 @@ function formatCurrency(value: number) {
 
 export default function CommandCenterRevenue() {
   const navigate = useNavigate();
+  const { authUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newRevenue, setNewRevenue] = useState({
@@ -86,6 +88,8 @@ export default function CommandCenterRevenue() {
     employee_attributed_id: "",
     lead_id: "",
   });
+
+  const canWrite = authUser?.roles?.some((r) => ["owner", "manager"].includes(r)) || false;
 
   const unitFilter = searchParams.get("unit") as BusinessType | null;
   const employeeFilter = searchParams.get("employee");
@@ -133,6 +137,7 @@ export default function CommandCenterRevenue() {
             <h1 className="text-2xl font-bold text-zinc-100">Revenue</h1>
             <p className="text-zinc-400">Track all revenue events and attribution</p>
           </div>
+          {canWrite && (
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button className="bg-amber-500 hover:bg-amber-600 text-black">
@@ -251,6 +256,7 @@ export default function CommandCenterRevenue() {
               </div>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         {/* Summary Cards */}

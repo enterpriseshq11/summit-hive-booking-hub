@@ -6358,6 +6358,7 @@ export type Database = {
           }
       generate_booking_number: { Args: never; Returns: string }
       get_spa_worker_id: { Args: { _user_id: string }; Returns: string }
+      get_user_department: { Args: { _user_id: string }; Returns: string }
       has_department_access: {
         Args: {
           _business_type: Database["public"]["Enums"]["business_type"]
@@ -6372,6 +6373,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_spa_lead_role: { Args: { _user_id: string }; Returns: boolean }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_spa_worker: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }

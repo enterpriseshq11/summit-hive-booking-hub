@@ -4,8 +4,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { RotateCcw, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
+import { format, differenceInDays, parseISO } from "date-fns";
 import { KpiTile } from "@/components/admin/KpiTile";
 import {
   useRevenueKpis, useLeadKpis, useOpsKpis, useTeamKpis,
@@ -80,6 +83,33 @@ export default function AdminDashboard() {
 
   const [tiles, setTiles] = useState<KpiTileConfig[]>(getDefaultTiles());
   const [layoutDirty, setLayoutDirty] = useState(false);
+  const [payrollDateOpen, setPayrollDateOpen] = useState(false);
+  const [payrollDate, setPayrollDate] = useState<Date | undefined>();
+
+  // Save payroll date
+  const savePayrollDate = async (date: Date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    const { error } = await (supabase as any)
+      .from("admin_settings")
+      .update({ value: dateStr, updated_by: authUser?.id, updated_at: new Date().toISOString() })
+      .eq("key", "next_payroll_run_date");
+    if (!error) {
+      setPayrollDate(date);
+      setPayrollDateOpen(false);
+      refetchTeam();
+      // Log activity
+      await supabase.from("crm_activity_events").insert({
+        event_type: "setting_changed" as any,
+        entity_type: "admin_settings",
+        entity_id: "next_payroll_run_date",
+        actor_id: authUser?.id,
+        metadata: { action: "payroll_date_updated", new_value: dateStr },
+      });
+      toast.success(`Next Payroll Run Date set to ${format(date, "MMM d, yyyy")}`);
+    } else {
+      toast.error("Failed to save payroll date");
+    }
+  };
 
   // Load saved layout for owner
   useEffect(() => {
@@ -187,8 +217,21 @@ export default function AdminDashboard() {
         return { value: formatCurrency(team?.commissionApproved || 0) };
       case "comm_paid":
         return { value: formatCurrency(0), pending: true };
-      case "payroll_next":
-        return { value: team?.nextPayrollDate || "Not Set", subtitle: "Set in Settings" };
+      case "payroll_next": {
+        if (team?.nextPayrollDate) {
+          try {
+            const d = parseISO(team.nextPayrollDate);
+            const daysLeft = differenceInDays(d, new Date());
+            return {
+              value: format(d, "MMM d, yyyy"),
+              subtitle: daysLeft > 0 ? `${daysLeft} days remaining` : daysLeft === 0 ? "Today" : `${Math.abs(daysLeft)} days overdue`,
+            };
+          } catch {
+            return { value: team.nextPayrollDate, subtitle: "Set in Settings" };
+          }
+        }
+        return { value: "Not Set", subtitle: "Click to set date" };
+      }
       case "promotions_active":
         return { value: 0, pending: true };
       case "schedule_today":
@@ -271,6 +314,43 @@ export default function AdminDashboard() {
   const renderTiles = () => {
     return tiles.map((tile) => {
       const { value, subtitle, pending } = getTileValue(tile.id);
+
+      // Special handling for payroll_next tile - inline date editor for owner
+      if (tile.id === "payroll_next" && isOwner) {
+        return (
+          <div key={tile.id}>
+            <Popover open={payrollDateOpen} onOpenChange={setPayrollDateOpen}>
+              <PopoverTrigger asChild>
+                <div className="cursor-pointer">
+                  {isOwner ? (
+                    <SortableTile
+                      tile={tile}
+                      value={value}
+                      subtitle={subtitle ? `${subtitle} — Click to edit` : "Click to set date"}
+                      pendingIntegration={pending}
+                      isOwner={isOwner}
+                      onRefresh={refetchAll}
+                      onRemove={() => removeTile(tile.id)}
+                      onResize={(size) => resizeTile(tile.id, size)}
+                    />
+                  ) : (
+                    <KpiTile config={tile} value={value} subtitle={subtitle} pendingIntegration={pending} onRefresh={refetchAll} isOwner={false} />
+                  )}
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={payrollDate || (team?.nextPayrollDate ? parseISO(team.nextPayrollDate) : undefined)}
+                  onSelect={(date) => { if (date) savePayrollDate(date); }}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        );
+      }
 
       if (isOwner) {
         return (

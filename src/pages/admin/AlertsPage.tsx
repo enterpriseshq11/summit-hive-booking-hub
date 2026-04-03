@@ -40,6 +40,9 @@ export default function AlertsPage() {
 
   const isOwner = authUser?.roles?.includes("owner");
 
+  const isAdsLead = authUser?.roles?.includes("ads_lead");
+  const marketingSources = ["facebook", "google", "instagram", "tiktok"];
+
   const { data: alerts = [], isLoading } = useQuery({
     queryKey: ["alerts", tab, filterType, filterUnit],
     queryFn: async () => {
@@ -57,7 +60,19 @@ export default function AlertsPage() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data || [];
+      let results = data || [];
+
+      // Kae (ads_lead) only sees ghl_webhook_failed for marketing-sourced leads
+      if (isAdsLead && !isOwner) {
+        results = results.filter((alert: any) => {
+          if (alert.alert_type !== "ghl_webhook_failed") return true;
+          // Check if the alert's entity metadata indicates a marketing source
+          const metadata = alert.description || "";
+          return marketingSources.some((src) => metadata.toLowerCase().includes(src));
+        });
+      }
+
+      return results;
     },
   });
 
