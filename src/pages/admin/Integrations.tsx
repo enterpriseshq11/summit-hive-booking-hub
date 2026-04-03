@@ -87,8 +87,8 @@ export default function AdminIntegrations() {
         }),
       });
 
-      await supabase
-        .from("ghl_webhook_config")
+      await (supabase
+        .from("ghl_webhook_config" as any) as any)
         .update({ last_tested_at: new Date().toISOString() })
         .eq("id", config.id);
 
