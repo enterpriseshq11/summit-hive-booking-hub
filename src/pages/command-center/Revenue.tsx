@@ -163,7 +163,7 @@ export default function CommandCenterRevenue() {
             <DialogTrigger asChild>
               <Button className="bg-amber-500 hover:bg-amber-600 text-black">
                 <Plus className="h-4 w-4 mr-2" />
-                Record Revenue
+                Record Manual Revenue
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-zinc-900 border-zinc-800">
