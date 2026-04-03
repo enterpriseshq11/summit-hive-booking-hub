@@ -83,6 +83,7 @@ import AdminBusinessSubPage from "./pages/admin/BusinessSubPage";
 import AdminLeadDetail from "./pages/admin/LeadDetail";
 import AdminAlertsPage from "./pages/admin/AlertsPage";
 import AdminOrphanedFiles from "./pages/admin/OrphanedFiles";
+import AdminPhase1Checklist from "./pages/admin/Phase1Checklist";
 import IntakePage from "./pages/intake/IntakePage";
 
 // Command Center / CRM Pages
@@ -289,6 +290,7 @@ function AppInner() {
           <Route path="/admin/settings/audit-log" element={<AdminAuditLog />} />
           <Route path="/admin/settings/assumptions" element={<AdminAssumptions />} />
           <Route path="/admin/settings/orphaned-files" element={<AdminOrphanedFiles />} />
+          <Route path="/admin/settings/phase1-checklist" element={<AdminPhase1Checklist />} />
 
           {/* Legacy admin routes */}
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />

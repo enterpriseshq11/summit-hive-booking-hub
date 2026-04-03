@@ -208,6 +208,19 @@ export default function LeadDetail() {
           stage: newStage,
         },
       });
+      // Create alert on webhook failure with source_filter for role-based visibility
+      if (!res.ok) {
+        await supabase.from("crm_alerts").insert({
+          alert_type: "ghl_webhook_failed",
+          title: `GHL webhook failed for ${lead.lead_name}`,
+          description: `Stage ${STAGE_LABELS[newStage] || newStage} webhook returned HTTP ${res.status}`,
+          entity_type: "lead",
+          entity_id: lead.id,
+          source_filter: lead.source || null,
+          severity: "high",
+          target_roles: ["owner", "manager", "operations", "ads_lead"],
+        } as any);
+      }
     } catch (err) {
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
@@ -217,6 +230,17 @@ export default function LeadDetail() {
           stage: newStage,
         },
       });
+      // Create alert on webhook failure with source_filter
+      await supabase.from("crm_alerts").insert({
+        alert_type: "ghl_webhook_failed",
+        title: `GHL webhook failed for ${lead.lead_name}`,
+        description: `Stage ${STAGE_LABELS[newStage] || newStage} webhook error: ${String(err)}`,
+        entity_type: "lead",
+        entity_id: lead.id,
+        source_filter: lead.source || null,
+        severity: "high",
+        target_roles: ["owner", "manager", "operations", "ads_lead"],
+      } as any);
     }
   };
 
