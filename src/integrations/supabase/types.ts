@@ -1192,6 +1192,7 @@ export type Database = {
           entity_id: string | null
           entity_name: string | null
           entity_type: string | null
+          event_category: string | null
           event_type: Database["public"]["Enums"]["crm_activity_type"]
           id: string
           ip_address: unknown
@@ -1206,6 +1207,7 @@ export type Database = {
           entity_id?: string | null
           entity_name?: string | null
           entity_type?: string | null
+          event_category?: string | null
           event_type: Database["public"]["Enums"]["crm_activity_type"]
           id?: string
           ip_address?: unknown
@@ -1220,6 +1222,7 @@ export type Database = {
           entity_id?: string | null
           entity_name?: string | null
           entity_type?: string | null
+          event_category?: string | null
           event_type?: Database["public"]["Enums"]["crm_activity_type"]
           id?: string
           ip_address?: unknown
@@ -1577,7 +1580,9 @@ export type Database = {
           description: string | null
           employee_attributed_id: string | null
           id: string
+          is_manual: boolean | null
           lead_id: string | null
+          payment_method: string | null
           recorded_by: string
           revenue_date: string | null
           updated_at: string | null
@@ -1589,7 +1594,9 @@ export type Database = {
           description?: string | null
           employee_attributed_id?: string | null
           id?: string
+          is_manual?: boolean | null
           lead_id?: string | null
+          payment_method?: string | null
           recorded_by: string
           revenue_date?: string | null
           updated_at?: string | null
@@ -1601,7 +1608,9 @@ export type Database = {
           description?: string | null
           employee_attributed_id?: string | null
           id?: string
+          is_manual?: boolean | null
           lead_id?: string | null
+          payment_method?: string | null
           recorded_by?: string
           revenue_date?: string | null
           updated_at?: string | null
@@ -5749,6 +5758,44 @@ export type Database = {
             columns: ["prize_id"]
             isOneToOne: false
             referencedRelation: "prizes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stripe_business_unit_mappings: {
+        Row: {
+          active: boolean | null
+          business_unit: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          metadata_key: string
+          metadata_value: string
+        }
+        Insert: {
+          active?: boolean | null
+          business_unit: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata_key: string
+          metadata_value: string
+        }
+        Update: {
+          active?: boolean | null
+          business_unit?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata_key?: string
+          metadata_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_business_unit_mappings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
