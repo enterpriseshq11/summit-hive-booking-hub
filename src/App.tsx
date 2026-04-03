@@ -84,6 +84,8 @@ import AdminLeadDetail from "./pages/admin/LeadDetail";
 import AdminAlertsPage from "./pages/admin/AlertsPage";
 import AdminOrphanedFiles from "./pages/admin/OrphanedFiles";
 import AdminPhase1Checklist from "./pages/admin/Phase1Checklist";
+import AdminStripeMappingPage from "./pages/admin/StripeMappingPage";
+import AdminCommissionRulesPage from "./pages/admin/CommissionRulesPage";
 import IntakePage from "./pages/intake/IntakePage";
 
 // Command Center / CRM Pages
