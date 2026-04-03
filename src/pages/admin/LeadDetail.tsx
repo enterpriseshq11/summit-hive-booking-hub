@@ -335,6 +335,7 @@ export default function LeadDetail() {
       event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "lead_updated",
       metadata: { action: "assigned_to_changed", assigned_to: `${member?.first_name} ${member?.last_name}` },
     });
     toast.success(`Assigned to ${member?.first_name}`);
