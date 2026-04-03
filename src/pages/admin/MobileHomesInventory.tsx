@@ -69,7 +69,7 @@ export default function MobileHomesInventory() {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as MobileHome[];
+      return (data || []) as unknown as MobileHome[];
     },
   });
 
