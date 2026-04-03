@@ -514,17 +514,18 @@ export default function LeadDetail() {
                     Next <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 </div>
-                <Select value={lead.status || "new"} onValueChange={v => {
+                <Select value={lead.status || "new"} onValueChange={async (v) => {
                   if (v === "lost") { setShowLostDialog(true); } else {
-                    updateLeadMutation.mutateAsync({ status: v }).then(() => {
-                      supabase.from("crm_activity_events").insert({
-                        event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
-                        actor_id: authUser?.id,
-                        entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
-                        metadata: { previous_stage: lead.status, new_stage: v },
-                      });
-                      toast.success(`Moved to ${v.replace(/_/g, " ")}`);
+                    const previousStage = lead.status || "new";
+                    await updateLeadMutation.mutateAsync({ status: v });
+                    await supabase.from("crm_activity_events").insert({
+                      event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
+                      actor_id: authUser?.id,
+                      entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+                      metadata: { previous_stage: previousStage, new_stage: v },
                     });
+                    await fireGhlStageWebhook(previousStage, v);
+                    toast.success(`Moved to ${v.replace(/_/g, " ")}`);
                   }
                 }}>
                   <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
