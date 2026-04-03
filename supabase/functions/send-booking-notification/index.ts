@@ -503,7 +503,7 @@ async function resolveStaffContact(params: {
   if (owner === "lindsey") {
     // Staff inbox uses @a-zenterpriseshq.com (with hyphen)
     const email = lindseyEnv?.email || "lindsey@a-zenterpriseshq.com";
-    const phone = lindseyEnv?.phone || "+15676441019";
+    const phone = lindseyEnv?.phone || "+15674299924";
     debug.branch = "C_source_brand_mapping";
     debug.staff_email = email;
     debug.staff_phone = phone;
