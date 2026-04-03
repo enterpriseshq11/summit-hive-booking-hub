@@ -20,7 +20,8 @@ const businessIcons: Record<BusinessType, React.ComponentType<{
   spa: Sparkles,
   fitness: Dumbbell,
   photo_booth: Building2,
-  voice_vault: Building2
+  voice_vault: Building2,
+  elevated_by_elyse: Sparkles,
 };
 const businessRoutes: Record<BusinessType, string> = {
   summit: "/summit",
