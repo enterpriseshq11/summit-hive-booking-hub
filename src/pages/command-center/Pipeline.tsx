@@ -599,6 +599,18 @@ export default function CommandCenterPipeline() {
           message: `GHL webhook ${res.ok ? "fired" : "FAILED"} — stage moved to ${STAGE_LABELS[newStage] || newStage} — ${statusText}`,
         },
       });
+      if (!res.ok) {
+        await supabase.from("crm_alerts").insert({
+          alert_type: "ghl_webhook_failed",
+          title: `GHL webhook failed for ${lead.lead_name}`,
+          description: `Stage ${STAGE_LABELS[newStage] || newStage} webhook returned ${statusText}`,
+          entity_type: "lead",
+          entity_id: lead.id,
+          source_filter: lead.source || null,
+          severity: "high",
+          target_roles: ["owner", "manager", "operations", "ads_lead"],
+        } as any);
+      }
     } catch (err: any) {
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
@@ -607,6 +619,16 @@ export default function CommandCenterPipeline() {
           message: `GHL webhook FAILED — stage moved to ${STAGE_LABELS[newStage] || newStage} — Error: ${err.message}`,
         },
       });
+      await supabase.from("crm_alerts").insert({
+        alert_type: "ghl_webhook_failed",
+        title: `GHL webhook failed for ${lead.lead_name}`,
+        description: `Stage ${STAGE_LABELS[newStage] || newStage} webhook error: ${err.message}`,
+        entity_type: "lead",
+        entity_id: lead.id,
+        source_filter: lead.source || null,
+        severity: "high",
+        target_roles: ["owner", "manager", "operations", "ads_lead"],
+      } as any);
     }
   }, []);
 

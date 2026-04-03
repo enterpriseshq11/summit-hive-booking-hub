@@ -63,12 +63,11 @@ export default function AlertsPage() {
       let results = data || [];
 
       // Kae (ads_lead) only sees ghl_webhook_failed for marketing-sourced leads
+      // Uses structured source_filter field, not description text matching
       if (isAdsLead && !isOwner) {
         results = results.filter((alert: any) => {
           if (alert.alert_type !== "ghl_webhook_failed") return true;
-          // Check if the alert's entity metadata indicates a marketing source
-          const metadata = alert.description || "";
-          return marketingSources.some((src) => metadata.toLowerCase().includes(src));
+          return marketingSources.includes(alert.source_filter);
         });
       }
 
