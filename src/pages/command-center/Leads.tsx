@@ -68,6 +68,7 @@ const businessUnitLabels: Record<BusinessType, string> = {
   summit: "Summit",
   photo_booth: "360 Photo Booth",
   voice_vault: "Voice Vault",
+  elevated_by_elyse: "Elevated by Elyse",
 };
 
 export default function CommandCenterLeads() {

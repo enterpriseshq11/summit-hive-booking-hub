@@ -99,6 +99,10 @@ const businessBadges: Record<BusinessType, {
   voice_vault: {
     text: "Hourly booking",
     type: "info"
+  },
+  elevated_by_elyse: {
+    text: "Consultation required",
+    type: "info"
   }
 };
 export default function BookingHub() {
