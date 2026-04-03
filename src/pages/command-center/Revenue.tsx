@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCrmRevenue, useCreateCrmRevenue } from "@/hooks/useCrmRevenue";
