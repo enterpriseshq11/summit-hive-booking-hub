@@ -445,7 +445,7 @@ Ref: ${stripeRef}`;
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+        <p style="font-size: 18px;"><a href="tel:+15674299924">(567) 429-9924</a></p>
       </div>
 
       <p style="margin-top: 30px;">
@@ -726,7 +726,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+        <p style="font-size: 18px;"><a href="tel:+15674299924">(567) 429-9924</a></p>
       </div>
 
       <p style="margin-top: 30px;">
@@ -976,7 +976,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+        <p style="font-size: 18px;"><a href="tel:+15674299924">(567) 429-9924</a></p>
       </div>
 
       <p style="margin-top: 30px;">
@@ -1223,7 +1223,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+        <p style="font-size: 18px;"><a href="tel:+15674299924">(567) 429-9924</a></p>
       </div>
 
       <p style="margin-top: 30px;">
