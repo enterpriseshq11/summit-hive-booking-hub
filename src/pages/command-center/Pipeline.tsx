@@ -543,6 +543,73 @@ export default function CommandCenterPipeline() {
 
   const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string);
 
+  const STAGE_LABELS: Record<string, string> = {
+    new: "New Lead", contact_attempted: "Contact Attempted", responded: "Responded",
+    warm_lead: "Warm Lead", hot_lead: "Hot Lead", proposal_sent: "Proposal Sent",
+    contract_out: "Contract Out", deposit_received: "Deposit Received",
+    booked: "Booked", completed: "Completed", lost: "Lost",
+  };
+
+  const fireGhlStageWebhookFromPipeline = useCallback(async (lead: any, previousStage: string, newStage: string) => {
+    try {
+      const { data: webhookConfig } = await (supabase as any)
+        .from("ghl_pipeline_stage_webhooks")
+        .select("webhook_url")
+        .eq("stage_key", newStage)
+        .maybeSingle();
+
+      if (!webhookConfig?.webhook_url) {
+        await supabase.from("crm_activity_events").insert({
+          event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
+          metadata: {
+            action: "ghl_webhook_skipped",
+            message: `GHL webhook skipped — no URL configured for ${STAGE_LABELS[newStage] || newStage} stage`,
+          },
+        });
+        return;
+      }
+
+      const payload = {
+        event: "pipeline_stage_changed",
+        lead_id: lead.id,
+        lead_name: lead.lead_name,
+        email: lead.email,
+        phone: lead.phone,
+        business_unit: lead.business_unit,
+        previous_stage_key: previousStage,
+        previous_stage_name: STAGE_LABELS[previousStage] || previousStage,
+        new_stage_key: newStage,
+        new_stage_name: STAGE_LABELS[newStage] || newStage,
+        assigned_to: null,
+        timestamp: new Date().toISOString(),
+        source: lead.source,
+      };
+
+      const res = await fetch(webhookConfig.webhook_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const statusText = res.ok ? `HTTP ${res.status}` : `HTTP ${res.status}`;
+      await supabase.from("crm_activity_events").insert({
+        event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
+        metadata: {
+          action: res.ok ? "ghl_webhook_fired" : "ghl_webhook_failed",
+          message: `GHL webhook ${res.ok ? "fired" : "FAILED"} — stage moved to ${STAGE_LABELS[newStage] || newStage} — ${statusText}`,
+        },
+      });
+    } catch (err: any) {
+      await supabase.from("crm_activity_events").insert({
+        event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
+        metadata: {
+          action: "ghl_webhook_failed",
+          message: `GHL webhook FAILED — stage moved to ${STAGE_LABELS[newStage] || newStage} — Error: ${err.message}`,
+        },
+      });
+    }
+  }, []);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
@@ -554,6 +621,7 @@ export default function CommandCenterPipeline() {
     if (pipelineStages.some((s) => s.status === newStatus)) {
       const lead = leads?.find((l) => l.id === leadId);
       if (lead && lead.status !== newStatus) {
+        const previousStage = lead.status;
         const autoTemp =
           newStatus === "hot_lead" || newStatus === "deposit_pending" || newStatus === "booked"
             ? "hot"
@@ -565,7 +633,11 @@ export default function CommandCenterPipeline() {
           id: leadId,
           status: newStatus,
           ...(autoTemp ? { temperature: autoTemp } : {}),
-        } as any);
+        } as any, {
+          onSuccess: () => {
+            fireGhlStageWebhookFromPipeline(lead, previousStage, newStatus);
+          },
+        });
       }
     }
   };
