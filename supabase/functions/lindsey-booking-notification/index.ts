@@ -20,7 +20,7 @@ const LINDSEY_PHONE = "+15674299924";
 
 // Victoria settings (used when toggle OFF / request mode)
 const VICTORIA_EMAIL = "victoria@a-zenterpriseshq.com";
-const VICTORIA_PHONE = "+15673796340";
+const VICTORIA_PHONE = "+15674299924";
 
 const FROM_EMAIL = "A-Z Enterprises <no-reply@azenterpriseshq.com>";
 const REPLY_TO_EMAIL = Deno.env.get("REPLY_TO_EMAIL") || "victoria@a-zenterpriseshq.com";
