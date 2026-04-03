@@ -29,7 +29,8 @@ const businessRoutes: Record<BusinessType, string> = {
   spa: "/spa",
   fitness: "/fitness",
   photo_booth: "/photo-booth",
-  voice_vault: "/voice-vault"
+  voice_vault: "/voice-vault",
+  elevated_by_elyse: "/elevated-by-elyse",
 };
 const businessLabels: Record<BusinessType, string> = {
   summit: "The Summit",
