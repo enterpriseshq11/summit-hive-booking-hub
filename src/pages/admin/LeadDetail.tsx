@@ -237,8 +237,9 @@ export default function LeadDetail() {
     const { data: urlData } = supabase.storage.from("lead-documents").getPublicUrl(filePath);
     await supabase.from("lead_documents").insert({
       lead_id: id!, file_name: file.name, file_type: file.type,
-      file_url: urlData.publicUrl, file_size_bytes: file.size, uploaded_by: authUser?.id,
-    });
+      file_url: urlData.publicUrl, storage_bucket_path: filePath,
+      file_size_bytes: file.size, uploaded_by: authUser?.id,
+    } as any);
     await supabase.from("crm_activity_events").insert({
       event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
@@ -524,10 +525,15 @@ export default function LeadDetail() {
             <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue placeholder="Select reason..." /></SelectTrigger>
             <SelectContent>{LOST_REASONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
           </Select>
-          <Textarea value={lostNotes} onChange={e => setLostNotes(e.target.value)} placeholder="Additional notes (optional)" className="bg-zinc-800 border-zinc-700 text-white" rows={2} />
+          {lostReason === "Other" && (
+            <Textarea value={lostNotes} onChange={e => setLostNotes(e.target.value)} placeholder="Please explain why this lead is being marked as lost... (required)" className="bg-zinc-800 border-zinc-700 text-white" rows={2} />
+          )}
+          {lostReason !== "Other" && (
+            <Textarea value={lostNotes} onChange={e => setLostNotes(e.target.value)} placeholder="Additional notes (optional)" className="bg-zinc-800 border-zinc-700 text-white" rows={2} />
+          )}
           <div className="flex gap-2 justify-end">
             <Button variant="outline" className="border-zinc-700 text-zinc-300" onClick={() => setShowLostDialog(false)}>Cancel</Button>
-            <Button className="bg-red-500 hover:bg-red-400 text-white" onClick={markAsLost} disabled={!lostReason}>Mark as Lost</Button>
+            <Button className="bg-red-500 hover:bg-red-400 text-white" onClick={markAsLost} disabled={!lostReason || (lostReason === "Other" && !lostNotes.trim())}>Mark as Lost</Button>
           </div>
         </DialogContent>
       </Dialog>

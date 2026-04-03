@@ -283,9 +283,7 @@ export default function MobileHomesInventory() {
                     {li.is_voided ? (
                       <div className="flex items-center gap-1">
                         <Badge variant="outline" className="border-red-500/30 text-red-400 text-xs">Voided</Badge>
-                        {isOwner && (
-                          <Button variant="ghost" size="sm" className="h-6 text-xs text-green-400" onClick={() => unvoidLineItem(idx)}>Restore</Button>
-                        )}
+                        {isOwner && <Button variant="ghost" size="sm" className="h-6 text-xs text-green-400" onClick={() => unvoidLineItem(idx)}>Restore</Button>}
                       </div>
                     ) : (
                       <Button variant="ghost" size="icon" className="h-6 w-6 text-red-400" onClick={() => setVoidIdx(idx)} title="Void this item">

@@ -56,14 +56,34 @@ const STAGE_LABELS: Record<string, string> = {
   lost: "Lost",
 };
 
-const FUTURE_INTEGRATIONS = [
-  { name: "DocuSign", desc: "e-signature" },
-  { name: "PandaDoc", desc: "alternative e-signature" },
-  { name: "Facebook Ads", desc: "ad platform" },
-  { name: "Google Ads", desc: "ad platform" },
-  { name: "TikTok Ads", desc: "ad platform" },
-  { name: "Mailchimp", desc: "email marketing" },
-  { name: "Google Business Profile", desc: "local SEO" },
+const FUTURE_INTEGRATION_GROUPS = [
+  {
+    label: "E-Signature",
+    items: [
+      { name: "DocuSign", desc: "Industry-standard e-signature" },
+      { name: "PandaDoc", desc: "Document automation and e-signature" },
+    ],
+  },
+  {
+    label: "Ad Platforms",
+    items: [
+      { name: "Facebook Ads", desc: "Meta ad campaign tracking" },
+      { name: "Google Ads", desc: "Google search and display ads" },
+      { name: "TikTok Ads", desc: "TikTok ad campaign tracking" },
+    ],
+  },
+  {
+    label: "Email & CRM",
+    items: [
+      { name: "Mailchimp", desc: "Email marketing and automation" },
+    ],
+  },
+  {
+    label: "Business Listings",
+    items: [
+      { name: "Google Business Profile", desc: "Local SEO and reviews" },
+    ],
+  },
 ];
 
 function StatusBadge({ status }: { status: string | null }) {
@@ -144,11 +164,15 @@ export default function AdminIntegrations() {
     if (!sw.webhook_url) { toast.error("No URL configured"); return; }
     setTesting(sw.id);
     try {
+    const stageLabel = STAGE_LABELS[sw.stage_name] || sw.stage_name;
       const payload = {
+        event: "pipeline_stage_changed",
         lead_id: "TEST-001", lead_name: "Test Lead", email: "test@a-zenterpriseshq.com",
         phone: "419-000-0000", business_unit: "summit",
-        previous_stage: "new", new_stage: sw.stage_name,
+        previous_stage_key: "new", previous_stage_name: "New Lead",
+        new_stage_key: sw.stage_name, new_stage_name: stageLabel,
         assigned_to: "Dylan Legge", timestamp: new Date().toISOString(),
+        source: "website",
       };
       const res = await fetch(sw.webhook_url, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
@@ -301,21 +325,26 @@ export default function AdminIntegrations() {
                   <Construction className="h-5 w-5 text-zinc-400" /> Section 4 — Future Integrations
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {FUTURE_INTEGRATIONS.map(int => (
-                    <div key={int.name} className="flex items-center justify-between p-3 border border-zinc-800 rounded-lg">
-                      <div>
-                        <p className="text-white text-sm font-medium">{int.name}</p>
-                        <p className="text-zinc-500 text-xs">{int.desc}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="border-red-500/30 text-red-400 text-xs">Not Connected</Badge>
-                        <Button variant="outline" size="sm" className="border-zinc-700 text-zinc-500" disabled>Connect</Button>
-                      </div>
+              <CardContent className="space-y-6">
+                {FUTURE_INTEGRATION_GROUPS.map(group => (
+                  <div key={group.label}>
+                    <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">{group.label}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {group.items.map(int => (
+                        <div key={int.name} className="flex items-center justify-between p-3 border border-zinc-800 rounded-lg">
+                          <div>
+                            <p className="text-white text-sm font-medium">{int.name}</p>
+                            <p className="text-zinc-500 text-xs">{int.desc}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="border-red-500/30 text-red-400 text-xs">Not Connected</Badge>
+                            <Button variant="outline" size="sm" className="border-zinc-700 text-zinc-500" disabled>Connect</Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </>
