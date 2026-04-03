@@ -82,6 +82,7 @@ import AdminBusinessLeads from "./pages/admin/BusinessLeads";
 import AdminBusinessSubPage from "./pages/admin/BusinessSubPage";
 import AdminLeadDetail from "./pages/admin/LeadDetail";
 import AdminAlertsPage from "./pages/admin/AlertsPage";
+import AdminOrphanedFiles from "./pages/admin/OrphanedFiles";
 import IntakePage from "./pages/intake/IntakePage";
 
 // Command Center / CRM Pages
