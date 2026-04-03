@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { AdminLayout } from "@/components/admin";
 import { useCrmLeads, useUpdateCrmLead } from "@/hooks/useCrmLeads";
+import { supabase } from "@/integrations/supabase/client";
 import { useTodaysTasks, useUpdateLeadTask } from "@/hooks/useCrmLeadTasks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
