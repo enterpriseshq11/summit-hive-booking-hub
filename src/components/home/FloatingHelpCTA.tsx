@@ -34,7 +34,7 @@ export const FloatingHelpCTA = forwardRef<HTMLDivElement>(function FloatingHelpC
               <span>(419) 555-0100</span>
             </a>
             <a 
-              href="mailto:info@azbookinghub.com"
+              href="mailto:dylan@a-zenterpriseshq.com"
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm"
             >
               <Mail className="h-4 w-4 text-accent" />

@@ -6,8 +6,8 @@ export const SITE_CONFIG = {
     phone: "(419) 909-8442",
     phoneFormatted: "(419) 909-8442",
     phoneLink: "tel:+14199098442",
-    email: "info@az-enterprises.com",
-    emailLink: "mailto:info@az-enterprises.com",
+    email: "dylan@a-zenterpriseshq.com",
+    emailLink: "mailto:dylan@a-zenterpriseshq.com",
   },
 
   // Division-specific suite addresses and direct phone numbers

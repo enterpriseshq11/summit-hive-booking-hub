@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Centralized careers notification inbox
-const CAREERS_NOTIFY_EMAIL = "info@a-zenterpriseshq.com";
+const CAREERS_NOTIFY_EMAIL = "dylan@a-zenterpriseshq.com";
 
 interface NotificationRequest {
   applicationId: string;
