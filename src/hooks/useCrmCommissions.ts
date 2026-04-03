@@ -130,6 +130,7 @@ export function useMarkCommissionPaid() {
         actor_id: user?.id,
         entity_type: "commission",
         entity_id: commissionId,
+        event_category: "commission_approved",
         after_data: data,
       });
 
