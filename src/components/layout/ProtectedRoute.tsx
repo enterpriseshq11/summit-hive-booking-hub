@@ -35,10 +35,13 @@ export function ProtectedRoute({
     });
   }
 
+  const isOwner = authUser?.roles?.includes("owner") || false;
+
   const denialReason = (() => {
     if (isLoading) return "loading_auth" as const;
     if (requireAuth && !user) return "unauthenticated" as const;
-    if ((requireStaff || requireAdmin) && user && !isRolesLoaded) return "waiting_for_roles" as const;
+    if ((requireStaff || requireAdmin || requireOwner) && user && !isRolesLoaded) return "waiting_for_roles" as const;
+    if (requireOwner && !isOwner) return "not_owner" as const;
     if (requireAdmin && !authUser?.isAdmin) return "not_admin" as const;
     if (requireStaff && !authUser?.isStaff) return "not_staff" as const;
     return "allowed" as const;
