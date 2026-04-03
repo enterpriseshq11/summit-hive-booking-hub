@@ -5414,6 +5414,30 @@ export type Database = {
           },
         ]
       }
+      team_email_role_map: {
+        Row: {
+          created_at: string | null
+          department: string | null
+          email: string
+          id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string | null
+          department?: string | null
+          email: string
+          id?: string
+          role: string
+        }
+        Update: {
+          created_at?: string | null
+          department?: string | null
+          email?: string
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -6122,6 +6146,7 @@ export type Database = {
         | "marketing_lead"
         | "ops_lead"
         | "ads_lead"
+        | "sales_acquisitions"
       booking_mode: "instant" | "request"
       booking_status:
         | "pending"
@@ -6448,6 +6473,7 @@ export const Constants = {
         "marketing_lead",
         "ops_lead",
         "ads_lead",
+        "sales_acquisitions",
       ],
       booking_mode: ["instant", "request"],
       booking_status: [
