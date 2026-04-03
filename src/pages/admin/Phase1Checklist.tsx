@@ -56,6 +56,7 @@ export default function Phase1Checklist() {
         entity_id: id,
         actor_id: authUser?.id,
         entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+        event_category: "settings_change",
         metadata: {
           action: newValue ? "confirmed" : "unconfirmed",
           message: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name} ${newValue ? "confirmed" : "removed confirmation for"} Phase 1 item ${itemNumber}: ${description}`,
