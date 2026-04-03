@@ -2489,6 +2489,78 @@ export type Database = {
           },
         ]
       }
+      ghl_pipeline_stage_webhooks: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_fired_at: string | null
+          last_status: string | null
+          last_tested_at: string | null
+          stage_name: string
+          webhook_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_fired_at?: string | null
+          last_status?: string | null
+          last_tested_at?: string | null
+          stage_name: string
+          webhook_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_fired_at?: string | null
+          last_status?: string | null
+          last_tested_at?: string | null
+          stage_name?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
+      ghl_webhook_config: {
+        Row: {
+          business_unit: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_fired_at: string | null
+          last_status: string | null
+          last_tested_at: string | null
+          pipeline_stage_webhook_url: string | null
+          updated_at: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          business_unit: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_fired_at?: string | null
+          last_status?: string | null
+          last_tested_at?: string | null
+          pipeline_stage_webhook_url?: string | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          business_unit?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_fired_at?: string | null
+          last_status?: string | null
+          last_tested_at?: string | null
+          pipeline_stage_webhook_url?: string | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       gift_cards: {
         Row: {
           code: string
@@ -2785,11 +2857,53 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_documents: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_size_bytes: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          lead_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          lead_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          lead_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_documents_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_intake_submissions: {
         Row: {
           business_unit: Database["public"]["Enums"]["business_type"]
           created_at: string
           form_data: Json
+          ghl_webhook_fired_at: string | null
           ghl_webhook_response: Json | null
           ghl_webhook_status: string | null
           id: string
@@ -2801,6 +2915,7 @@ export type Database = {
           business_unit: Database["public"]["Enums"]["business_type"]
           created_at?: string
           form_data?: Json
+          ghl_webhook_fired_at?: string | null
           ghl_webhook_response?: Json | null
           ghl_webhook_status?: string | null
           id?: string
@@ -2812,6 +2927,7 @@ export type Database = {
           business_unit?: Database["public"]["Enums"]["business_type"]
           created_at?: string
           form_data?: Json
+          ghl_webhook_fired_at?: string | null
           ghl_webhook_response?: Json | null
           ghl_webhook_status?: string | null
           id?: string
