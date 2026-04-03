@@ -215,11 +215,11 @@ const navSections: NavSection[] = [
     icon: Settings,
     visibleToRoles: OWNER_ONLY,
     items: [
-      { title: "Users & Roles", href: "/admin/users-roles", icon: UserCog },
-      { title: "Payment Settings", href: "/admin/payment-settings", icon: CreditCard },
-      { title: "Integrations", href: "/admin/integrations", icon: Link2 },
-      { title: "Audit Log", href: "/admin/audit-log", icon: Shield },
-      { title: "Assumptions", href: "/admin/assumptions", icon: Lightbulb },
+      { title: "Users & Roles", href: "/admin/settings/users", icon: UserCog },
+      { title: "Payment Settings", href: "/admin/settings/payment", icon: CreditCard },
+      { title: "Integrations", href: "/admin/settings/integrations", icon: Link2 },
+      { title: "Audit Log", href: "/admin/settings/audit-log", icon: Shield },
+      { title: "Assumptions", href: "/admin/settings/assumptions", icon: Lightbulb },
     ],
   },
 ];
