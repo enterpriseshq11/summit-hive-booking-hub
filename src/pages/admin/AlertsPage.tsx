@@ -7,37 +7,52 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, Check, Archive, ExternalLink, AlertTriangle, Info, Zap } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Bell, Check, Archive, ExternalLink, AlertTriangle, Info, Zap,
+  UserPlus, Clock, Wifi, CreditCard, Building2, Dumbbell, Briefcase, FileText,
+} from "lucide-react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
-const SEVERITY_STYLES: Record<string, { icon: any; color: string }> = {
-  critical: { icon: AlertTriangle, color: "text-red-400 bg-red-500/10 border-red-500/20" },
-  warning: { icon: AlertTriangle, color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
-  info: { icon: Info, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
-  success: { icon: Zap, color: "text-green-400 bg-green-500/10 border-green-500/20" },
+const ALERT_TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
+  new_lead: { icon: UserPlus, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: "New Lead Submitted" },
+  follow_up_overdue: { icon: Clock, color: "text-amber-400 bg-amber-500/10 border-amber-500/20", label: "Follow-Up Overdue" },
+  hot_lead_no_contact: { icon: AlertTriangle, color: "text-red-400 bg-red-500/10 border-red-500/20", label: "Hot Lead No Contact 24h" },
+  ghl_webhook_failed: { icon: Wifi, color: "text-red-400 bg-red-500/10 border-red-500/20", label: "GHL Webhook Failed" },
+  stripe_payment: { icon: CreditCard, color: "text-green-400 bg-green-500/10 border-green-500/20", label: "Stripe Payment Received" },
+  commission_pending: { icon: Zap, color: "text-amber-400 bg-amber-500/10 border-amber-500/20", label: "Commission Pending" },
+  office_inquiry: { icon: Building2, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: "Office Inquiry Received" },
+  membership_payment_failed: { icon: Dumbbell, color: "text-amber-400 bg-amber-500/10 border-amber-500/20", label: "Membership Payment Failed" },
+  new_hire_application: { icon: Briefcase, color: "text-blue-400 bg-blue-500/10 border-blue-500/20", label: "New Hire Application" },
+  document_signature_required: { icon: FileText, color: "text-purple-400 bg-purple-500/10 border-purple-500/20", label: "Document Signature Required" },
 };
+
+const ALL_ALERT_TYPES = Object.keys(ALERT_TYPE_CONFIG);
 
 export default function AlertsPage() {
   const { authUser } = useAuth();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState("active");
+  const [filterType, setFilterType] = useState("all");
+  const [filterUnit, setFilterUnit] = useState("all");
+
+  const isOwner = authUser?.roles?.includes("owner");
 
   const { data: alerts = [], isLoading } = useQuery({
-    queryKey: ["alerts", tab],
+    queryKey: ["alerts", tab, filterType, filterUnit],
     queryFn: async () => {
-      let query = supabase.from("crm_alerts").select("*").order("created_at", { ascending: false }).limit(100);
+      let query = supabase.from("crm_alerts").select("*").order("created_at", { ascending: false }).limit(200);
 
-      if (tab === "active") {
-        query = query.eq("is_dismissed", false);
-      } else {
-        query = query.eq("is_dismissed", true);
-      }
+      if (tab === "active") query = query.eq("is_dismissed", false);
+      else query = query.eq("is_dismissed", true);
 
-      // Filter by user if not owner
-      if (!authUser?.roles?.includes("owner")) {
-        query = query.eq("target_user_id", authUser?.id);
+      if (filterType !== "all") query = query.eq("alert_type", filterType);
+
+      // Role-based visibility: owner sees all, others see only targeted
+      if (!isOwner) {
+        query = query.or(`target_user_id.eq.${authUser?.id},target_roles.cs.{${(authUser?.roles || []).join(",")}}`);
       }
 
       const { data, error } = await query;
@@ -46,6 +61,8 @@ export default function AlertsPage() {
     },
   });
 
+  const unreadCount = alerts.filter((a: any) => !a.is_read).length;
+
   const dismissMutation = useMutation({
     mutationFn: async (alertId: string) => {
       await supabase.from("crm_alerts").update({ is_dismissed: true, is_read: true }).eq("id", alertId);
@@ -53,6 +70,16 @@ export default function AlertsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["alerts"] });
       toast.success("Alert dismissed");
+    },
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: async (alertId: string) => {
+      await supabase.from("crm_alerts").update({ is_dismissed: false }).eq("id", alertId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["alerts"] });
+      toast.success("Alert restored");
     },
   });
 
@@ -79,31 +106,51 @@ export default function AlertsPage() {
 
   const getEntityLink = (alert: any): string | null => {
     if (alert.entity_type === "lead" && alert.entity_id) return `/admin/leads/${alert.entity_id}`;
-    if (alert.entity_type === "booking" && alert.entity_id) return `/admin/schedule`;
+    if (alert.entity_type === "booking") return `/admin/schedule`;
     if (alert.entity_type === "commission") return `/admin/commissions`;
+    if (alert.entity_type === "integration") return `/admin/settings/integrations`;
+    if (alert.entity_type === "career_application" && alert.entity_id) return `/admin/careers`;
+    if (alert.entity_type === "office_inquiry") return `/admin/business/hive/inquiries`;
     return null;
   };
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
               <Bell className="h-6 w-6 text-amber-400" /> Alerts
+              {unreadCount > 0 && (
+                <Badge className="bg-red-500 text-white text-xs ml-2">{unreadCount} unread</Badge>
+              )}
             </h1>
-            <p className="text-zinc-400">{alerts.filter((a: any) => !a.is_read).length} unread</p>
+            <p className="text-zinc-400">{alerts.length} total in {tab === "active" ? "active" : "archive"}</p>
           </div>
-          {tab === "active" && alerts.length > 0 && (
-            <Button variant="outline" size="sm" className="border-zinc-700 text-zinc-300" onClick={() => dismissAllMutation.mutate()}>
-              <Archive className="h-4 w-4 mr-1" /> Dismiss All
-            </Button>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Filters */}
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-48">
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {ALL_ALERT_TYPES.map(t => (
+                  <SelectItem key={t} value={t}>{ALERT_TYPE_CONFIG[t]?.label || t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {tab === "active" && alerts.length > 0 && (
+              <Button variant="outline" size="sm" className="border-zinc-700 text-zinc-300" onClick={() => dismissAllMutation.mutate()}>
+                <Archive className="h-4 w-4 mr-1" /> Dismiss All
+              </Button>
+            )}
+          </div>
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="bg-zinc-800 border border-zinc-700">
-            <TabsTrigger value="active" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Active</TabsTrigger>
+            <TabsTrigger value="active" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Active Alerts</TabsTrigger>
             <TabsTrigger value="archived" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Archived</TabsTrigger>
           </TabsList>
 
@@ -119,37 +166,47 @@ export default function AlertsPage() {
               </Card>
             ) : (
               alerts.map((alert: any) => {
-                const style = SEVERITY_STYLES[alert.severity] || SEVERITY_STYLES.info;
-                const Icon = style.icon;
+                const config = ALERT_TYPE_CONFIG[alert.alert_type] || { icon: Info, color: "text-zinc-400 bg-zinc-500/10 border-zinc-500/20", label: alert.alert_type };
+                const Icon = config.icon;
                 const link = getEntityLink(alert);
 
                 return (
-                  <Card key={alert.id} className={`border ${style.color} ${!alert.is_read ? "ring-1 ring-amber-500/20" : ""}`}>
+                  <Card key={alert.id} className={`border ${config.color} ${!alert.is_read ? "ring-1 ring-amber-500/30" : ""}`}>
                     <CardContent className="p-4 flex items-start gap-3">
                       <Icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <p className="text-white font-medium text-sm">{alert.title}</p>
+                            <p className={`text-white text-sm ${!alert.is_read ? "font-semibold" : "font-medium"}`}>{alert.title}</p>
                             {alert.description && <p className="text-zinc-400 text-sm mt-0.5">{alert.description}</p>}
                           </div>
                           <div className="flex items-center gap-1 flex-shrink-0">
+                            {!alert.is_read && (
+                              <Button variant="ghost" size="sm" className="h-7 text-xs text-zinc-400" onClick={() => markReadMutation.mutate(alert.id)}>
+                                Mark read
+                              </Button>
+                            )}
                             {link && (
                               <Link to={link}>
-                                <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-400 hover:text-white">
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-amber-400 hover:text-amber-300">
                                   <ExternalLink className="h-3.5 w-3.5" />
                                 </Button>
                               </Link>
                             )}
-                            {!alert.is_dismissed && (
+                            {!alert.is_dismissed ? (
                               <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-400 hover:text-white" onClick={() => dismissMutation.mutate(alert.id)}>
                                 <Check className="h-3.5 w-3.5" />
+                              </Button>
+                            ) : (
+                              <Button variant="ghost" size="sm" className="h-7 text-xs text-green-400" onClick={() => restoreMutation.mutate(alert.id)}>
+                                Restore
                               </Button>
                             )}
                           </div>
                         </div>
-                        <div className="flex gap-2 mt-2">
-                          <Badge variant="outline" className="border-zinc-700 text-zinc-500 text-xs">{alert.alert_type?.replace(/_/g, " ")}</Badge>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          <Badge variant="outline" className="border-zinc-700 text-zinc-500 text-xs">{config.label}</Badge>
+                          {alert.entity_type && <Badge variant="outline" className="border-zinc-700 text-zinc-600 text-xs">{alert.entity_type}</Badge>}
                           <span className="text-zinc-600 text-xs">{format(new Date(alert.created_at), "MMM d 'at' h:mm a")}</span>
                         </div>
                       </div>

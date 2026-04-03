@@ -1,19 +1,9 @@
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
-import { Construction } from "lucide-react";
-
-// Pages that are stubs
-const STUB_PAGES = new Set([
-  "summit/bookings", "summit/revenue", "summit/settings",
-  "spa/bookings", "spa/revenue", "spa/workers", "spa/settings",
-  "fitness/memberships", "fitness/revenue", "fitness/settings",
-  "hive/office-listings", "hive/inquiries", "hive/revenue", "hive/settings",
-  "voice-vault/bookings", "voice-vault/revenue", "voice-vault/settings",
-  "mobile-homes/revenue", "mobile-homes/settings",
-  "elevated-by-elyse/bookings", "elevated-by-elyse/revenue", "elevated-by-elyse/settings",
-]);
+import { Button } from "@/components/ui/button";
+import { Construction, ArrowLeft } from "lucide-react";
 
 const UNIT_LABELS: Record<string, string> = {
   summit: "The Summit Event Center",
@@ -23,6 +13,16 @@ const UNIT_LABELS: Record<string, string> = {
   "voice-vault": "Voice Vault",
   "mobile-homes": "Mobile Homes",
   "elevated-by-elyse": "Elevated by Elyse",
+};
+
+const UNIT_COLORS: Record<string, string> = {
+  summit: "border-amber-500/30 text-amber-400",
+  spa: "border-purple-500/30 text-purple-400",
+  fitness: "border-green-500/30 text-green-400",
+  hive: "border-blue-500/30 text-blue-400",
+  "voice-vault": "border-orange-500/30 text-orange-400",
+  "mobile-homes": "border-zinc-500/30 text-zinc-400",
+  "elevated-by-elyse": "border-pink-500/30 text-pink-400",
 };
 
 const UNIT_ROLE_ACCESS: Record<string, string[]> = {
@@ -47,27 +47,30 @@ export default function BusinessSubPage() {
     return <Navigate to="/admin" replace />;
   }
 
-  const key = `${unit}/${page}`;
   const unitLabel = unit ? UNIT_LABELS[unit] || unit : "";
+  const unitColor = unit ? UNIT_COLORS[unit] || "border-zinc-500/30 text-zinc-400" : "";
   const pageLabel = page ? page.charAt(0).toUpperCase() + page.slice(1).replace(/-/g, " ") : "";
 
-  if (STUB_PAGES.has(key)) {
-    return (
-      <AdminLayout>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-          <Construction className="h-16 w-16 text-amber-500/50 mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">{unitLabel} — {pageLabel}</h1>
-          <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-sm px-4 py-1">
-            Coming in Phase 2
-          </Badge>
-          <p className="text-zinc-500 mt-4 max-w-md">
-            This page is scheduled for the next development phase. Core functionality will be added once Phase 1 is confirmed complete.
-          </p>
+  return (
+    <AdminLayout>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <Construction className="h-16 w-16 text-amber-500/50 mb-4" />
+        <div className="flex items-center gap-3 mb-2">
+          <Badge variant="outline" className={unitColor}>{unitLabel}</Badge>
         </div>
-      </AdminLayout>
-    );
-  }
-
-  // Non-stub pages are handled by dedicated route components
-  return null;
+        <h1 className="text-2xl font-bold text-white mb-2">{unitLabel} — {pageLabel}</h1>
+        <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-sm px-4 py-1">
+          Coming in Phase 2
+        </Badge>
+        <p className="text-zinc-500 mt-4 max-w-md">
+          This section is coming in Phase 2. Full {pageLabel.toLowerCase()} management, revenue tracking, and settings for {unitLabel} will be available here.
+        </p>
+        <Link to={`/admin`} className="mt-6">
+          <Button variant="outline" className="border-zinc-700 text-zinc-300">
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
+          </Button>
+        </Link>
+      </div>
+    </AdminLayout>
+  );
 }

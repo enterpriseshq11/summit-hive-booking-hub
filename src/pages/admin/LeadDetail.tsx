@@ -25,8 +25,8 @@ const PIPELINE_STAGES = [
 ];
 
 const LOST_REASONS = [
-  "No Response After Multiple Attempts", "Budget Constraints", "Chose a Competitor",
-  "Date Not Available", "Lead Unqualified", "Other",
+  "No Response", "Budget", "Chose Competitor",
+  "Date Not Available", "Duplicate Lead", "Other",
 ];
 
 const UNIT_COLORS: Record<string, string> = {
