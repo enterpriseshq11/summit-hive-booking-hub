@@ -325,21 +325,26 @@ export default function AdminIntegrations() {
                   <Construction className="h-5 w-5 text-zinc-400" /> Section 4 — Future Integrations
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {FUTURE_INTEGRATIONS.map(int => (
-                    <div key={int.name} className="flex items-center justify-between p-3 border border-zinc-800 rounded-lg">
-                      <div>
-                        <p className="text-white text-sm font-medium">{int.name}</p>
-                        <p className="text-zinc-500 text-xs">{int.desc}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="border-red-500/30 text-red-400 text-xs">Not Connected</Badge>
-                        <Button variant="outline" size="sm" className="border-zinc-700 text-zinc-500" disabled>Connect</Button>
-                      </div>
+              <CardContent className="space-y-6">
+                {FUTURE_INTEGRATION_GROUPS.map(group => (
+                  <div key={group.label}>
+                    <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">{group.label}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {group.items.map(int => (
+                        <div key={int.name} className="flex items-center justify-between p-3 border border-zinc-800 rounded-lg">
+                          <div>
+                            <p className="text-white text-sm font-medium">{int.name}</p>
+                            <p className="text-zinc-500 text-xs">{int.desc}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="border-red-500/30 text-red-400 text-xs">Not Connected</Badge>
+                            <Button variant="outline" size="sm" className="border-zinc-700 text-zinc-500" disabled>Connect</Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </>

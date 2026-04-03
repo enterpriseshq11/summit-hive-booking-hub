@@ -4,6 +4,72 @@ const corsHeaders = {
 };
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
 
+const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend';
+
+const UNIT_DISPLAY: Record<string, string> = {
+  summit: "The Summit Event Center",
+  spa: "Restoration Lounge Spa",
+  fitness: "A-Z Total Fitness",
+  coworking: "The Hive Coworking",
+  voice_vault: "Voice Vault Studio",
+  elevated_by_elyse: "Elevated by Elyse",
+  mobile_homes: "A-Z Mobile Homes",
+};
+
+const UNIT_SENDER: Record<string, { email: string; name: string }> = {
+  summit: { email: "events@a-zenterpriseshq.com", name: "The Summit Event Center" },
+  spa: { email: "spa@a-zenterpriseshq.com", name: "Restoration Lounge Spa" },
+  fitness: { email: "fitness@a-zenterpriseshq.com", name: "A-Z Total Fitness" },
+  coworking: { email: "hive@a-zenterpriseshq.com", name: "The Hive Coworking" },
+  voice_vault: { email: "studio@a-zenterpriseshq.com", name: "Voice Vault Studio" },
+  elevated_by_elyse: { email: "elyse@a-zenterpriseshq.com", name: "Elevated by Elyse" },
+};
+
+const UNIT_TOKENS: Record<string, { phone: string; email: string }> = {
+  summit: { phone: "[SUMMIT_PHONE]", email: "[SUMMIT_EMAIL]" },
+  spa: { phone: "[SPA_PHONE]", email: "[SPA_EMAIL]" },
+  fitness: { phone: "[FITNESS_PHONE]", email: "[FITNESS_EMAIL]" },
+  coworking: { phone: "[HIVE_PHONE]", email: "[HIVE_EMAIL]" },
+  voice_vault: { phone: "[VOICEVAULT_PHONE]", email: "[VOICEVAULT_EMAIL]" },
+  elevated_by_elyse: { phone: "[ELYSE_PHONE]", email: "[ELYSE_EMAIL]" },
+};
+
+function buildConfirmationHtml(firstName: string, businessUnit: string, formFields: Record<string, any>): string {
+  const unitName = UNIT_DISPLAY[businessUnit] || businessUnit;
+  const tokens = UNIT_TOKENS[businessUnit] || { phone: "(567) 429-9924", email: "dylan@a-zenterpriseshq.com" };
+  const serviceType = formFields?.event_type || formFields?.service_interest || formFields?.membership_type || "General Inquiry";
+  const preferredDate = formFields?.preferred_date || "Not specified";
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#ffffff;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:20px">
+<tr><td style="background:#18181b;padding:24px;text-align:center;border-radius:8px 8px 0 0">
+<h1 style="color:#f59e0b;margin:0;font-size:22px">${unitName}</h1>
+<p style="color:#a1a1aa;margin:8px 0 0;font-size:14px">Powered by A-Z Enterprises</p>
+</td></tr>
+<tr><td style="background:#ffffff;padding:24px;border:1px solid #e4e4e7;border-top:none">
+<h2 style="color:#18181b;margin:0 0 16px;font-size:18px">Thank you, ${firstName}!</h2>
+<p style="color:#52525b;font-size:14px;line-height:1.6;margin:0 0 16px">We received your submission and our team will follow up within <strong>24 hours</strong>.</p>
+<table width="100%" style="background:#f4f4f5;border-radius:8px;padding:16px;margin:0 0 16px">
+<tr><td style="padding:8px 16px">
+<p style="color:#71717a;font-size:12px;margin:0">Service / Event Type</p>
+<p style="color:#18181b;font-size:14px;font-weight:600;margin:4px 0 0">${serviceType}</p>
+</td></tr>
+<tr><td style="padding:8px 16px">
+<p style="color:#71717a;font-size:12px;margin:0">Preferred Date</p>
+<p style="color:#18181b;font-size:14px;font-weight:600;margin:4px 0 0">${preferredDate}</p>
+</td></tr>
+</table>
+<p style="color:#52525b;font-size:14px;line-height:1.6;margin:0 0 8px"><strong>Questions?</strong> Reach us at:</p>
+<p style="color:#52525b;font-size:14px;margin:0 0 4px">Phone: ${tokens.phone}</p>
+<p style="color:#52525b;font-size:14px;margin:0 0 16px">Email: ${tokens.email}</p>
+</td></tr>
+<tr><td style="background:#f4f4f5;padding:16px;text-align:center;border-radius:0 0 8px 8px;border:1px solid #e4e4e7;border-top:none">
+<p style="color:#a1a1aa;font-size:12px;margin:0">10 W Auglaize St, Wapakoneta, Ohio 45895</p>
+<p style="color:#a1a1aa;font-size:12px;margin:4px 0 0">&copy; ${new Date().getFullYear()} A-Z Enterprises</p>
+</td></tr></table></body></html>`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -103,7 +169,59 @@ Deno.serve(async (req) => {
       ghlResponse = "No webhook URL configured";
     }
 
-    // 3. Log intake submission
+    // 3. Send confirmation email via Resend
+    let confirmationEmailStatus = "pending";
+    let confirmationEmailSentAt: string | null = null;
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY_1");
+
+    if (LOVABLE_API_KEY && RESEND_API_KEY) {
+      try {
+        const sender = UNIT_SENDER[business_unit] || { email: "dylan@a-zenterpriseshq.com", name: "A-Z Enterprises" };
+        const unitName = UNIT_DISPLAY[business_unit] || business_unit;
+        const htmlBody = buildConfirmationHtml(first_name, business_unit, form_fields || {});
+
+        const emailRes = await fetch(`${GATEWAY_URL}/emails`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+            "X-Connection-Api-Key": RESEND_API_KEY,
+          },
+          body: JSON.stringify({
+            from: `${sender.name} <${sender.email}>`,
+            to: [email],
+            subject: `${unitName} — Inquiry Confirmation`,
+            html: htmlBody,
+            reply_to: "victoria@a-zenterpriseshq.com",
+          }),
+        });
+
+        if (emailRes.ok) {
+          confirmationEmailStatus = "sent";
+          confirmationEmailSentAt = new Date().toISOString();
+          console.log("Confirmation email sent to", email);
+        } else {
+          const errBody = await emailRes.text();
+          console.error("Email send failed:", emailRes.status, errBody);
+          // Check for domain verification issue
+          if (errBody.includes("verify") || errBody.includes("domain")) {
+            confirmationEmailStatus = "pending_domain_verification";
+          } else {
+            confirmationEmailStatus = "failed";
+          }
+        }
+      } catch (emailErr) {
+        console.error("Email send error:", emailErr);
+        confirmationEmailStatus = "failed";
+      }
+    } else {
+      console.warn("Resend not configured — LOVABLE_API_KEY or RESEND_API_KEY_1 missing");
+      confirmationEmailStatus = "pending_domain_verification";
+    }
+
+    // 4. Log intake submission
     await supabase.from("lead_intake_submissions").insert({
       business_unit,
       form_data: { first_name, last_name, email, phone, source, ...form_fields },
@@ -112,14 +230,16 @@ Deno.serve(async (req) => {
       ghl_webhook_status: ghlStatus,
       ghl_webhook_response: ghlResponse,
       ghl_webhook_fired_at: ghlStatus === "fired" ? new Date().toISOString() : null,
+      confirmation_email_status: confirmationEmailStatus,
+      confirmation_email_sent_at: confirmationEmailSentAt,
     });
 
-    // 4. Fire alert to assigned team members
+    // 5. Fire alert to assigned team members
     const alertTargets: Record<string, string[]> = {
       summit: ["victoria@a-zenterpriseshq.com", "mark@a-zenterpriseshq.com"],
       spa: ["nasiya@a-zenterpriseshq.com"],
-      fitness: ["victoria@a-zenterpriseshq.com", "operations@a-zenterpriseshq.com"],
-      coworking: ["victoria@a-zenterpriseshq.com", "operations@a-zenterpriseshq.com"],
+      fitness: ["victoria@a-zenterpriseshq.com", "rose@a-zenterpriseshq.com"],
+      coworking: ["victoria@a-zenterpriseshq.com", "rose@a-zenterpriseshq.com"],
       voice_vault: ["victoria@a-zenterpriseshq.com"],
       elevated_by_elyse: ["elyse@a-zenterpriseshq.com"],
     };
@@ -146,7 +266,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 5. Log to audit
+    // 6. Log to audit
     await supabase.from("audit_log").insert({
       action_type: "lead_intake_submitted",
       entity_type: "crm_leads",
@@ -154,6 +274,7 @@ Deno.serve(async (req) => {
       after_json: {
         business_unit, name: `${first_name} ${last_name}`,
         ghl_status: ghlStatus,
+        email_status: confirmationEmailStatus,
       },
     });
 
@@ -162,6 +283,7 @@ Deno.serve(async (req) => {
         success: true,
         lead_id: lead.id,
         ghl_status: ghlStatus,
+        confirmation_email_status: confirmationEmailStatus,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
