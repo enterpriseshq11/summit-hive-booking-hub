@@ -166,6 +166,7 @@ export default function LeadDetail() {
         // Log skipped webhook in timeline
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+          event_category: "ghl_webhook_fired",
           metadata: {
             action: "ghl_webhook_skipped",
             message: `GHL webhook skipped — no URL configured for ${STAGE_LABELS[newStage] || newStage} stage`,
