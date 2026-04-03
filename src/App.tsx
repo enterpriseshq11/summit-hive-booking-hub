@@ -61,6 +61,7 @@ import AdminLeadsWaitlists from "./pages/admin/LeadsWaitlists";
 import AdminUsersRoles from "./pages/admin/UsersRoles";
 import AdminAuditLog from "./pages/admin/AuditLog";
 import AdminAssumptions from "./pages/admin/Assumptions";
+import AdminIntegrations from "./pages/admin/Integrations";
 import AdminPromotions from "./pages/admin/Promotions";
 import AdminDopamineDrop from "./pages/admin/DopamineDrop";
 import AdminVoiceVault from "./pages/admin/VoiceVault";
