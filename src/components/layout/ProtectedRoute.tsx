@@ -92,13 +92,19 @@ export function ProtectedRoute({
     return <Navigate to={loginUrl} replace />;
   }
 
-  // If staff/admin is required, wait for role hydration before deciding access
-  if ((requireStaff || requireAdmin) && user && !isRolesLoaded) {
+  // If staff/admin/owner is required, wait for role hydration before deciding access
+  if ((requireStaff || requireAdmin || requireOwner) && user && !isRolesLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
+  }
+
+  if (requireOwner && !isOwner) {
+    // Import toast dynamically to show access denied
+    import("sonner").then(({ toast }) => toast.error("Access Denied — You do not have permission to view this page."));
+    return <Navigate to="/admin" replace />;
   }
 
   if (requireStaff && !authUser?.isStaff) {
