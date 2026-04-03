@@ -164,11 +164,15 @@ export default function AdminIntegrations() {
     if (!sw.webhook_url) { toast.error("No URL configured"); return; }
     setTesting(sw.id);
     try {
+    const stageLabel = STAGE_LABELS[sw.stage_name] || sw.stage_name;
       const payload = {
+        event: "pipeline_stage_changed",
         lead_id: "TEST-001", lead_name: "Test Lead", email: "test@a-zenterpriseshq.com",
         phone: "419-000-0000", business_unit: "summit",
-        previous_stage: "new", new_stage: sw.stage_name,
+        previous_stage_key: "new", previous_stage_name: "New Lead",
+        new_stage_key: sw.stage_name, new_stage_name: stageLabel,
         assigned_to: "Dylan Legge", timestamp: new Date().toISOString(),
+        source: "website",
       };
       const res = await fetch(sw.webhook_url, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
