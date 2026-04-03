@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCrmRevenue, useCreateCrmRevenue } from "@/hooks/useCrmRevenue";
@@ -87,6 +88,9 @@ export default function CommandCenterRevenue() {
     business_unit: "spa" as BusinessType,
     employee_attributed_id: "",
     lead_id: "",
+    payment_method: "cash",
+    revenue_date: new Date().toISOString().split("T")[0],
+    internal_notes: "",
   });
 
   const canWrite = authUser?.roles?.some((r) => ["owner", "manager"].includes(r)) || false;
@@ -103,7 +107,7 @@ export default function CommandCenterRevenue() {
   const createRevenue = useCreateCrmRevenue();
 
   const handleCreate = async () => {
-    if (!newRevenue.amount) return;
+    if (!newRevenue.amount || !newRevenue.description) return;
     await createRevenue.mutateAsync({
       amount: parseFloat(newRevenue.amount),
       description: newRevenue.description,
@@ -111,7 +115,22 @@ export default function CommandCenterRevenue() {
       employee_attributed_id: newRevenue.employee_attributed_id || null,
       lead_id: newRevenue.lead_id || null,
       recorded_by: "", // Will be set by hook
+      revenue_date: newRevenue.revenue_date || new Date().toISOString().split("T")[0],
+    } as any);
+
+    // Log manual revenue entry to activity log
+    await supabase.from("crm_activity_events").insert({
+      event_type: "status_change" as any,
+      entity_type: "revenue",
+      actor_id: authUser?.id,
+      entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      metadata: {
+        action: "manual_revenue_recorded",
+        message: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name} manually recorded $${newRevenue.amount} for ${newRevenue.business_unit} — method: ${newRevenue.payment_method}`,
+        payment_method: newRevenue.payment_method,
+      },
     });
+
     setIsCreateOpen(false);
     setNewRevenue({
       amount: "",
@@ -119,6 +138,9 @@ export default function CommandCenterRevenue() {
       business_unit: "spa",
       employee_attributed_id: "",
       lead_id: "",
+      payment_method: "cash",
+      revenue_date: new Date().toISOString().split("T")[0],
+      internal_notes: "",
     });
   };
 
@@ -142,7 +164,7 @@ export default function CommandCenterRevenue() {
             <DialogTrigger asChild>
               <Button className="bg-amber-500 hover:bg-amber-600 text-black">
                 <Plus className="h-4 w-4 mr-2" />
-                Record Revenue
+                Record Manual Revenue
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-zinc-900 border-zinc-800">
@@ -227,14 +249,39 @@ export default function CommandCenterRevenue() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-zinc-300">Description</Label>
+                  <Label className="text-zinc-300">Payment Method *</Label>
+                  <Select
+                    value={newRevenue.payment_method}
+                    onValueChange={(v) => setNewRevenue({ ...newRevenue, payment_method: v })}
+                  >
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700">
+                      <SelectItem value="cash">Cash</SelectItem>
+                      <SelectItem value="check">Check</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Revenue Date *</Label>
+                  <Input
+                    type="date"
+                    value={newRevenue.revenue_date}
+                    onChange={(e) => setNewRevenue({ ...newRevenue, revenue_date: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  />
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Description *</Label>
                   <Textarea
                     value={newRevenue.description}
                     onChange={(e) =>
                       setNewRevenue({ ...newRevenue, description: e.target.value })
                     }
                     className="bg-zinc-800 border-zinc-700 text-zinc-100"
-                    placeholder="Booking, package sale, etc."
+                    placeholder="Describe the revenue source"
                   />
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
