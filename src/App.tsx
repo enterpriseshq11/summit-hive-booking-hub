@@ -8,7 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout, ProtectedRoute } from "@/components/layout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { ScrollToTop } from "@/components/ScrollToTop";
-import { useEffect } from "react";
+import { lazy, Suspense } from "react";
 
 // Pages
 import Index from "./pages/Index";
@@ -43,11 +43,11 @@ import CareersContracting from "./pages/careers/CareersContracting";
 import WorkerSignup from "./pages/WorkerSignup";
 import AuthCallback from "./pages/AuthCallback";
 
-// Debug (public, never redirects)
+// Debug
 import AuthDebug from "./pages/__debug/AuthDebug";
 import DebugPing from "./pages/__debug/Ping";
 
-// Admin Pages (unified under /admin/*)
+// Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminSchedule from "./pages/admin/Schedule";
 import AdminApprovals from "./pages/admin/Approvals";
@@ -83,7 +83,8 @@ import AdminBusinessSubPage from "./pages/admin/BusinessSubPage";
 import AdminLeadDetail from "./pages/admin/LeadDetail";
 import AdminAlertsPage from "./pages/admin/AlertsPage";
 import IntakePage from "./pages/intake/IntakePage";
-// Command Center Pages (now unified under /admin/*)
+
+// Command Center / CRM Pages
 import CommandCenterLeads from "./pages/command-center/Leads";
 import CommandCenterLeadDetail from "./pages/command-center/LeadDetail";
 import CommandCenterPipeline from "./pages/command-center/Pipeline";
@@ -96,11 +97,11 @@ import CommandCenterCommissions from "./pages/command-center/Commissions";
 import CommandCenterSettings from "./pages/command-center/Settings";
 import CommandCenterPayroll from "./pages/command-center/Payroll";
 
-// Public Coworking Pages
+// Public Coworking
 import OfficeListingsHub from "./pages/coworking/OfficeListingsHub";
 import OfficeDetailPage from "./pages/coworking/OfficeDetailPage";
 
-// E3 Event System Pages
+// E3
 import E3Dashboard from "./pages/e3/Dashboard";
 import E3SubmitEvent from "./pages/e3/SubmitEvent";
 import E3MyEvents from "./pages/e3/MyEvents";
@@ -118,20 +119,15 @@ import E3Commissions from "./pages/e3/Commissions";
 const queryClient = new QueryClient();
 
 function AppInner() {
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log("ROUTER_HASH", window.location.hash);
-  }, []);
-
   return (
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
-        {/* Public debug routes (never protected) */}
+        {/* Debug */}
         <Route path="/__debug/auth" element={<AuthDebug />} />
         <Route path="/__debug/ping" element={<DebugPing />} />
 
-        {/* Public routes with main layout */}
+        {/* Public routes */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -158,10 +154,10 @@ function AppInner() {
           <Route path="/360-photo-booth" element={<PhotoBooth />} />
           <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
 
-          {/* Public Intake Forms — no login required */}
+          {/* Public Intake Forms */}
           <Route path="/intake/:unit" element={<IntakePage />} />
 
-          {/* Careers Routes */}
+          {/* Careers */}
           <Route path="/careers" element={<Careers />} />
           <Route path="/careers/spa" element={<CareersSpa />} />
           <Route path="/careers/spa/:role" element={<CareersSpa />} />
@@ -170,18 +166,18 @@ function AppInner() {
           <Route path="/careers/contracting" element={<CareersContracting />} />
           <Route path="/careers/contracting/:role" element={<CareersContracting />} />
 
-          {/* Protected customer routes */}
+          {/* Protected customer */}
           <Route element={<ProtectedRoute />}>
             <Route path="/account" element={<Account />} />
           </Route>
         </Route>
 
-        {/* Auth routes (no layout) */}
+        {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/worker-signup" element={<WorkerSignup />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* E3 Event System (protected) */}
+        {/* E3 */}
         <Route element={<ProtectedRoute />}>
           <Route path="/e3" element={<E3Dashboard />} />
           <Route path="/e3/submit" element={<E3SubmitEvent />} />
@@ -198,71 +194,125 @@ function AppInner() {
           <Route path="/e3/commissions" element={<E3Commissions />} />
         </Route>
 
-        {/* Unified Admin routes - all under /admin/* with staff protection */}
+        {/* ══════════ ADMIN ROUTES ══════════ */}
         <Route element={<ProtectedRoute requireStaff />}>
-          {/* Dashboard */}
+          {/* COMMAND CENTER */}
           <Route path="/admin" element={<AdminDashboard />} />
-          
-          {/* Command Center (CRM) */}
-          <Route path="/admin/leads" element={<CommandCenterLeads />} />
-          <Route path="/admin/leads/:id" element={<CommandCenterLeadDetail />} />
-          <Route path="/admin/pipeline" element={<CommandCenterPipeline />} />
-          <Route path="/admin/employees" element={<CommandCenterEmployees />} />
-          <Route path="/admin/employees/:id" element={<CommandCenterEmployeeDetail />} />
+          <Route path="/admin/alerts" element={<AdminAlertsPage />} />
           <Route path="/admin/activity" element={<CommandCenterActivity />} />
-          <Route path="/admin/alerts" element={<CommandCenterAlerts />} />
-          <Route path="/admin/revenue" element={<CommandCenterRevenue />} />
-          <Route path="/admin/commissions" element={<CommandCenterCommissions />} />
-          <Route path="/admin/payroll" element={<CommandCenterPayroll />} />
-          <Route path="/admin/settings" element={<CommandCenterSettings />} />
-          
-          {/* Booking Operations */}
-          <Route path="/admin/schedule" element={<AdminSchedule />} />
+          <Route path="/admin/activity-log" element={<CommandCenterActivity />} />
+
+          {/* SALES */}
+          <Route path="/admin/leads" element={<CommandCenterLeads />} />
+          <Route path="/admin/leads/:id" element={<AdminLeadDetail />} />
+          <Route path="/admin/pipeline" element={<CommandCenterPipeline />} />
           <Route path="/admin/approvals" element={<AdminApprovals />} />
+
+          {/* OPERATIONS */}
+          <Route path="/admin/schedule" element={<AdminSchedule />} />
           <Route path="/admin/resources" element={<AdminResources />} />
           <Route path="/admin/packages" element={<AdminPackages />} />
-          <Route path="/admin/pricing-rules" element={<AdminPricingRules />} />
           <Route path="/admin/blackouts" element={<AdminBlackouts />} />
           <Route path="/admin/documents" element={<AdminDocuments />} />
-          <Route path="/admin/reviews" element={<AdminReviews />} />
-          <Route path="/admin/leads-waitlists" element={<AdminLeadsWaitlists />} />
-          
-          {/* Voice Vault */}
-          <Route path="/admin/voice-vault" element={<AdminVoiceVault />} />
-          
-          {/* Spa / Provider Schedule */}
-          <Route path="/admin/my-schedule" element={<AdminProviderSchedule />} />
-          <Route path="/admin/spa-workers" element={<AdminSpaWorkers />} />
-          <Route path="/admin/worker-calendars" element={<AdminWorkerCalendars />} />
-          <Route path="/admin/payment-settings" element={<AdminPaymentSettings />} />
-          <Route path="/admin/ghl-webhook-test" element={<AdminGHLWebhookTest />} />
-          <Route path="/admin/specials" element={<AdminSpecials />} />
-          
-          {/* Coworking (The Hive) */}
-          <Route path="/admin/office-listings" element={<AdminOfficeListings />} />
-          <Route path="/admin/office-listings/:id/photos" element={<AdminOfficePhotos />} />
-          <Route path="/admin/office-promotions" element={<AdminOfficePromotions />} />
-          <Route path="/admin/office-inquiries" element={<AdminOfficeInquiries />} />
-          
-          {/* Hiring */}
+
+          {/* TEAM */}
+          <Route path="/admin/employees" element={<CommandCenterEmployees />} />
+          <Route path="/admin/employees/:id" element={<CommandCenterEmployeeDetail />} />
+          <Route path="/admin/payroll" element={<CommandCenterPayroll />} />
+          <Route path="/admin/commissions" element={<CommandCenterCommissions />} />
           <Route path="/admin/careers" element={<AdminCareerApplications />} />
-          
-          {/* Marketing */}
+
+          {/* REVENUE */}
+          <Route path="/admin/revenue" element={<CommandCenterRevenue />} />
+          <Route path="/admin/pricing-rules" element={<AdminPricingRules />} />
+          <Route path="/admin/stripe" element={<AdminPaymentSettings />} />
+
+          {/* ── BUSINESSES: Summit ── */}
+          <Route path="/admin/business/summit/leads" element={<AdminBusinessLeads />} />
+          <Route path="/admin/business/summit/bookings" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/summit/revenue" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/summit/settings" element={<AdminBusinessSubPage />} />
+
+          {/* ── BUSINESSES: Spa ── */}
+          <Route path="/admin/business/spa/leads" element={<AdminBusinessLeads />} />
+          <Route path="/admin/business/spa/bookings" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/spa/revenue" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/spa/workers" element={<AdminSpaWorkers />} />
+          <Route path="/admin/business/spa/worker-calendars" element={<AdminWorkerCalendars />} />
+          <Route path="/admin/business/spa/settings" element={<AdminBusinessSubPage />} />
+
+          {/* ── BUSINESSES: Fitness ── */}
+          <Route path="/admin/business/fitness/memberships" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/fitness/revenue" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/fitness/settings" element={<AdminBusinessSubPage />} />
+
+          {/* ── BUSINESSES: Hive ── */}
+          <Route path="/admin/business/hive/office-listings" element={<AdminOfficeListings />} />
+          <Route path="/admin/business/hive/inquiries" element={<AdminOfficeInquiries />} />
+          <Route path="/admin/business/hive/revenue" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/hive/settings" element={<AdminBusinessSubPage />} />
+
+          {/* ── BUSINESSES: Voice Vault ── */}
+          <Route path="/admin/business/voice-vault/bookings" element={<AdminVoiceVault />} />
+          <Route path="/admin/business/voice-vault/revenue" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/voice-vault/settings" element={<AdminBusinessSubPage />} />
+
+          {/* ── BUSINESSES: Mobile Homes ── */}
+          <Route path="/admin/business/mobile-homes/inventory" element={<AdminMobileHomesInventory />} />
+          <Route path="/admin/business/mobile-homes/revenue" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/mobile-homes/settings" element={<AdminBusinessSubPage />} />
+
+          {/* ── BUSINESSES: Elevated by Elyse ── */}
+          <Route path="/admin/business/elevated-by-elyse/leads" element={<AdminBusinessLeads />} />
+          <Route path="/admin/business/elevated-by-elyse/bookings" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/elevated-by-elyse/revenue" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/elevated-by-elyse/settings" element={<AdminBusinessSubPage />} />
+
+          {/* MARKETING */}
+          <Route path="/admin/marketing/promotions" element={<AdminPromotions />} />
+          <Route path="/admin/marketing/dopamine-drop" element={<AdminDopamineDrop />} />
+          <Route path="/admin/marketing/ad-tracking" element={<AdminAdTracking />} />
+
+          {/* Legacy marketing paths */}
           <Route path="/admin/promotions" element={<AdminPromotions />} />
           <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
-          
-          {/* System */}
+          <Route path="/admin/ad-tracking" element={<AdminAdTracking />} />
+
+          {/* SETTINGS (owner-only enforced in component + route guard) */}
+          <Route path="/admin/settings" element={<CommandCenterSettings />} />
+          <Route path="/admin/settings/users" element={<AdminUsersRoles />} />
+          <Route path="/admin/settings/payment" element={<AdminPaymentSettings />} />
+          <Route path="/admin/settings/integrations" element={<AdminIntegrations />} />
+          <Route path="/admin/settings/audit-log" element={<AdminAuditLog />} />
+          <Route path="/admin/settings/assumptions" element={<AdminAssumptions />} />
+
+          {/* Legacy admin routes */}
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
           <Route path="/admin/audit-log" element={<AdminAuditLog />} />
           <Route path="/admin/assumptions" element={<AdminAssumptions />} />
           <Route path="/admin/integrations" element={<AdminIntegrations />} />
+          <Route path="/admin/payment-settings" element={<AdminPaymentSettings />} />
+          <Route path="/admin/spa-workers" element={<AdminSpaWorkers />} />
+          <Route path="/admin/worker-calendars" element={<AdminWorkerCalendars />} />
+          <Route path="/admin/office-listings" element={<AdminOfficeListings />} />
+          <Route path="/admin/office-listings/:id/photos" element={<AdminOfficePhotos />} />
+          <Route path="/admin/office-promotions" element={<AdminOfficePromotions />} />
+          <Route path="/admin/office-inquiries" element={<AdminOfficeInquiries />} />
+          <Route path="/admin/voice-vault" element={<AdminVoiceVault />} />
+          <Route path="/admin/my-schedule" element={<AdminProviderSchedule />} />
+          <Route path="/admin/ghl-webhook-test" element={<AdminGHLWebhookTest />} />
+          <Route path="/admin/specials" element={<AdminSpecials />} />
+          <Route path="/admin/reviews" element={<AdminReviews />} />
+          <Route path="/admin/leads-waitlists" element={<AdminLeadsWaitlists />} />
+
+          {/* Catch-all for /admin/business/:unit/:page stubs */}
+          <Route path="/admin/business/:unit/:page" element={<AdminBusinessSubPage />} />
         </Route>
 
-        {/* Legacy command-center redirects (for backwards compatibility) */}
+        {/* Legacy redirects */}
         <Route path="/command-center" element={<AdminDashboard />} />
         <Route path="/command-center/*" element={<NotFound />} />
 
-        {/* Catch-all */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
