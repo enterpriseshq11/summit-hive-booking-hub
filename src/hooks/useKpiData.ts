@@ -169,14 +169,19 @@ export function useOpsKpis() {
       const { count: pendingApprovals } = await supabase
         .from("bookings")
         .select("id", { count: "exact", head: true })
-        .eq("status", "pending_approval");
+        .eq("status", "pending");
 
-      // Active memberships
-      const { count: activeMemberships } = await supabase
-        .from("memberships" as any)
-        .select("id", { count: "exact", head: true })
-        .eq("status", "active")
-        .catch(() => ({ count: 0 })) as any;
+      // Active memberships - query may fail if table doesn't exist
+      let activeMemberships = 0;
+      try {
+        const { count } = await supabase
+          .from("memberships" as any)
+          .select("id", { count: "exact", head: true })
+          .eq("status", "active");
+        activeMemberships = count || 0;
+      } catch {
+        activeMemberships = 0;
+      }
 
       // Open office listings
       const { data: offices } = await supabase
