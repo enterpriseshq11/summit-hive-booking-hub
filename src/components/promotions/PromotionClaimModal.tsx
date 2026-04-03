@@ -256,7 +256,7 @@ export function PromotionClaimModal({ promotion, open, onOpenChange }: Promotion
                 Done
               </Button>
               <p className="text-xs text-muted-foreground">
-                Questions? Contact us at <span className="text-gold">info@azenterprises.com</span>
+                Questions? Contact us at <span className="text-gold">dylan@a-zenterpriseshq.com</span>
               </p>
             </div>
           </div>

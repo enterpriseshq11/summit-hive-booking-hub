@@ -80,7 +80,7 @@ export const jsonLdSchemas = {
       addressCountry: 'US',
     },
     telephone: '+1-419-909-8442',
-    email: 'info@az-enterprises.com',
+    email: 'dylan@a-zenterpriseshq.com',
     openingHours: 'Mo-Su 06:00-22:00',
     url: BASE_URL,
     ...overrides,
