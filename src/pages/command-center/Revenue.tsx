@@ -249,14 +249,39 @@ export default function CommandCenterRevenue() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-zinc-300">Description</Label>
+                  <Label className="text-zinc-300">Payment Method *</Label>
+                  <Select
+                    value={newRevenue.payment_method}
+                    onValueChange={(v) => setNewRevenue({ ...newRevenue, payment_method: v })}
+                  >
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700">
+                      <SelectItem value="cash">Cash</SelectItem>
+                      <SelectItem value="check">Check</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Revenue Date *</Label>
+                  <Input
+                    type="date"
+                    value={newRevenue.revenue_date}
+                    onChange={(e) => setNewRevenue({ ...newRevenue, revenue_date: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  />
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Description *</Label>
                   <Textarea
                     value={newRevenue.description}
                     onChange={(e) =>
                       setNewRevenue({ ...newRevenue, description: e.target.value })
                     }
                     className="bg-zinc-800 border-zinc-700 text-zinc-100"
-                    placeholder="Booking, package sale, etc."
+                    placeholder="Describe the revenue source"
                   />
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
