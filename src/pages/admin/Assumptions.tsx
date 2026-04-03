@@ -90,14 +90,27 @@ export default function AdminAssumptions() {
 
   const canEdit = authUser?.isAdmin;
 
+  // Fetch admin_settings for display
+  const { data: adminSettings } = useQuery({
+    queryKey: ["admin_settings_display"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_settings")
+        .select("*")
+        .order("key", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Assumptions Register</h1>
+            <h1 className="text-2xl font-bold">Assumptions & System Settings</h1>
             <p className="text-muted-foreground">
-              Production-safe defaults made during development
+              Production-safe defaults and system configuration values
             </p>
           </div>
 
