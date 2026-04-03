@@ -155,8 +155,8 @@ export default function LeadDetail() {
   const fireGhlStageWebhook = async (previousStage: string, newStage: string) => {
     if (!lead) return;
     try {
-      const { data: webhookConfig } = await supabase
-        .from("ghl_pipeline_stage_webhooks" as any)
+      const { data: webhookConfig } = await (supabase as any)
+        .from("ghl_pipeline_stage_webhooks")
         .select("webhook_url")
         .eq("stage_key", newStage)
         .maybeSingle();
