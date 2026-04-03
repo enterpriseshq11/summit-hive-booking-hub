@@ -243,6 +243,41 @@ export default function AdminAssumptions() {
             </CardContent>
           </Card>
         )}
+
+        {/* System Configuration Values */}
+        {adminSettings && adminSettings.length > 0 && (
+          <div className="space-y-4 mt-8">
+            <h2 className="text-xl font-bold">System Configuration</h2>
+            <p className="text-muted-foreground text-sm">Phase 2 configuration values. Editing will be available in Phase 2.</p>
+            <div className="grid gap-3">
+              {adminSettings.map((setting: any) => {
+                const label = setting.key
+                  .replace(/_/g, " ")
+                  .replace(/\b\w/g, (c: string) => c.toUpperCase());
+                return (
+                  <Card key={setting.id}>
+                    <CardContent className="py-3 px-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium">{label}</p>
+                        <p className="text-xs text-muted-foreground">Key: {setting.key}</p>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="outline" className="font-mono">
+                          {setting.value ?? "null"}
+                        </Badge>
+                        {setting.updated_at && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Updated: {new Date(setting.updated_at).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );
