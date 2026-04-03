@@ -136,6 +136,7 @@ export default function CommandCenterRevenue() {
             <h1 className="text-2xl font-bold text-zinc-100">Revenue</h1>
             <p className="text-zinc-400">Track all revenue events and attribution</p>
           </div>
+          {canWrite && (
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button className="bg-amber-500 hover:bg-amber-600 text-black">
