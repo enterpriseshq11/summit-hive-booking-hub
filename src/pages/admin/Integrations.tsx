@@ -40,7 +40,7 @@ export default function AdminIntegrations() {
 
   const loadConfigs = async () => {
     const { data } = await supabase
-      .from("ghl_webhook_config")
+      .from("ghl_webhook_config" as any)
       .select("*")
       .order("business_unit");
     setConfigs((data as any) || []);
