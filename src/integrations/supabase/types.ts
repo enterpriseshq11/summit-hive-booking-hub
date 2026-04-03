@@ -1247,6 +1247,7 @@ export type Database = {
           is_dismissed: boolean | null
           is_read: boolean | null
           severity: string | null
+          source_filter: string | null
           target_roles: string[] | null
           target_user_id: string | null
           title: string
@@ -1261,6 +1262,7 @@ export type Database = {
           is_dismissed?: boolean | null
           is_read?: boolean | null
           severity?: string | null
+          source_filter?: string | null
           target_roles?: string[] | null
           target_user_id?: string | null
           title: string
@@ -1275,6 +1277,7 @@ export type Database = {
           is_dismissed?: boolean | null
           is_read?: boolean | null
           severity?: string | null
+          source_filter?: string | null
           target_roles?: string[] | null
           target_user_id?: string | null
           title?: string
@@ -3993,6 +3996,61 @@ export type Database = {
           },
         ]
       }
+      payroll_run_items: {
+        Row: {
+          amount: number
+          commission_id: string | null
+          created_at: string | null
+          description: string | null
+          employee_id: string
+          id: string
+          item_type: string
+          payroll_run_id: string
+        }
+        Insert: {
+          amount: number
+          commission_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          employee_id: string
+          id?: string
+          item_type: string
+          payroll_run_id: string
+        }
+        Update: {
+          amount?: number
+          commission_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          employee_id?: string
+          id?: string
+          item_type?: string
+          payroll_run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_run_items_commission_id_fkey"
+            columns: ["commission_id"]
+            isOneToOne: false
+            referencedRelation: "crm_commissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_items_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_items_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_runs: {
         Row: {
           approved_at: string | null
@@ -4068,6 +4126,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      phase1_checklist_items: {
+        Row: {
+          confirmed_at: string | null
+          confirmed_by_owner: boolean | null
+          confirmed_by_system: boolean | null
+          created_at: string | null
+          description: string
+          id: string
+          item_number: number
+          notes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          confirmed_at?: string | null
+          confirmed_by_owner?: boolean | null
+          confirmed_by_system?: boolean | null
+          created_at?: string | null
+          description: string
+          id?: string
+          item_number: number
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          confirmed_at?: string | null
+          confirmed_by_owner?: boolean | null
+          confirmed_by_system?: boolean | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          item_number?: number
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       photo_booth_inquiries: {
         Row: {
@@ -5658,6 +5752,139 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stripe_refunds: {
+        Row: {
+          amount: number
+          business_unit: string | null
+          created_at: string | null
+          id: string
+          reason: string | null
+          revenue_event_id: string | null
+          status: string
+          stripe_payment_intent_id: string
+          stripe_refund_id: string
+        }
+        Insert: {
+          amount: number
+          business_unit?: string | null
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          revenue_event_id?: string | null
+          status: string
+          stripe_payment_intent_id: string
+          stripe_refund_id: string
+        }
+        Update: {
+          amount?: number
+          business_unit?: string | null
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          revenue_event_id?: string | null
+          status?: string
+          stripe_payment_intent_id?: string
+          stripe_refund_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_refunds_revenue_event_id_fkey"
+            columns: ["revenue_event_id"]
+            isOneToOne: false
+            referencedRelation: "crm_revenue_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stripe_transactions: {
+        Row: {
+          amount: number
+          business_unit: string | null
+          created_at: string | null
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          id: string
+          is_duplicate: boolean | null
+          payment_method_type: string | null
+          revenue_event_id: string | null
+          status: string
+          stripe_charge_id: string | null
+          stripe_created_at: string | null
+          stripe_payment_intent_id: string
+          synced_at: string | null
+        }
+        Insert: {
+          amount: number
+          business_unit?: string | null
+          created_at?: string | null
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          is_duplicate?: boolean | null
+          payment_method_type?: string | null
+          revenue_event_id?: string | null
+          status: string
+          stripe_charge_id?: string | null
+          stripe_created_at?: string | null
+          stripe_payment_intent_id: string
+          synced_at?: string | null
+        }
+        Update: {
+          amount?: number
+          business_unit?: string | null
+          created_at?: string | null
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          is_duplicate?: boolean | null
+          payment_method_type?: string | null
+          revenue_event_id?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_created_at?: string | null
+          stripe_payment_intent_id?: string
+          synced_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_transactions_revenue_event_id_fkey"
+            columns: ["revenue_event_id"]
+            isOneToOne: false
+            referencedRelation: "crm_revenue_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stripe_webhook_events: {
+        Row: {
+          event_type: string
+          id: string
+          payload: Json
+          processed: boolean | null
+          received_at: string | null
+          stripe_event_id: string
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          payload: Json
+          processed?: boolean | null
+          received_at?: string | null
+          stripe_event_id: string
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed?: boolean | null
+          received_at?: string | null
+          stripe_event_id?: string
+        }
+        Relationships: []
       }
       team_email_role_map: {
         Row: {
