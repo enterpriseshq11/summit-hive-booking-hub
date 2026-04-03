@@ -303,6 +303,7 @@ export default function LeadDetail() {
       event_type: "lead_contacted" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "lead_updated",
       metadata: { method: showLogDialog, notes: logNotes, duration: logDuration, outcome: logOutcome },
     });
     queryClient.invalidateQueries({ queryKey: ["lead-detail", id] });
