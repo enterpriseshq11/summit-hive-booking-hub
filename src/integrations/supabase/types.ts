@@ -1459,6 +1459,10 @@ export type Database = {
           created_by: string | null
           email: string | null
           follow_up_due: string | null
+          ghl_contact_id: string | null
+          ghl_last_contact_date: string | null
+          ghl_last_contact_method: string | null
+          ghl_last_synced_at: string | null
           id: string
           last_contacted_at: string | null
           lead_name: string
@@ -1479,6 +1483,10 @@ export type Database = {
           created_by?: string | null
           email?: string | null
           follow_up_due?: string | null
+          ghl_contact_id?: string | null
+          ghl_last_contact_date?: string | null
+          ghl_last_contact_method?: string | null
+          ghl_last_synced_at?: string | null
           id?: string
           last_contacted_at?: string | null
           lead_name: string
@@ -1499,6 +1507,10 @@ export type Database = {
           created_by?: string | null
           email?: string | null
           follow_up_due?: string | null
+          ghl_contact_id?: string | null
+          ghl_last_contact_date?: string | null
+          ghl_last_contact_method?: string | null
+          ghl_last_synced_at?: string | null
           id?: string
           last_contacted_at?: string | null
           lead_name?: string
@@ -1632,6 +1644,33 @@ export type Database = {
           id?: string
           spin_count?: number | null
           spin_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      dashboard_layouts: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean | null
+          layout_json: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          layout_json?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          layout_json?: Json
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -2745,6 +2784,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      lead_intake_submissions: {
+        Row: {
+          business_unit: Database["public"]["Enums"]["business_type"]
+          created_at: string
+          form_data: Json
+          ghl_webhook_response: Json | null
+          ghl_webhook_status: string | null
+          id: string
+          lead_id: string | null
+          source: string | null
+          submitted_by: string | null
+        }
+        Insert: {
+          business_unit: Database["public"]["Enums"]["business_type"]
+          created_at?: string
+          form_data?: Json
+          ghl_webhook_response?: Json | null
+          ghl_webhook_status?: string | null
+          id?: string
+          lead_id?: string | null
+          source?: string | null
+          submitted_by?: string | null
+        }
+        Update: {
+          business_unit?: Database["public"]["Enums"]["business_type"]
+          created_at?: string
+          form_data?: Json
+          ghl_webhook_response?: Json | null
+          ghl_webhook_status?: string | null
+          id?: string
+          lead_id?: string | null
+          source?: string | null
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_intake_submissions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leads: {
         Row: {
@@ -6036,6 +6119,9 @@ export type Database = {
         | "front_desk"
         | "read_only"
         | "spa_worker"
+        | "marketing_lead"
+        | "ops_lead"
+        | "ads_lead"
       booking_mode: "instant" | "request"
       booking_status:
         | "pending"
@@ -6058,6 +6144,7 @@ export type Database = {
         | "fitness"
         | "voice_vault"
         | "photo_booth"
+        | "elevated_by_elyse"
       career_application_status:
         | "new"
         | "reviewing"
@@ -6358,6 +6445,9 @@ export const Constants = {
         "front_desk",
         "read_only",
         "spa_worker",
+        "marketing_lead",
+        "ops_lead",
+        "ads_lead",
       ],
       booking_mode: ["instant", "request"],
       booking_status: [
@@ -6382,6 +6472,7 @@ export const Constants = {
         "fitness",
         "voice_vault",
         "photo_booth",
+        "elevated_by_elyse",
       ],
       career_application_status: [
         "new",
