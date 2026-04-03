@@ -371,6 +371,7 @@ export default function LeadDetail() {
       event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "document_uploaded",
       metadata: { action: "document_attached", file_name: file.name },
     });
     queryClient.invalidateQueries({ queryKey: ["lead-documents", id] });
