@@ -20,7 +20,8 @@ const businessIcons: Record<BusinessType, React.ComponentType<{
   spa: Sparkles,
   fitness: Dumbbell,
   photo_booth: Building2,
-  voice_vault: Building2
+  voice_vault: Building2,
+  elevated_by_elyse: Sparkles,
 };
 const businessRoutes: Record<BusinessType, string> = {
   summit: "/summit",
@@ -28,7 +29,8 @@ const businessRoutes: Record<BusinessType, string> = {
   spa: "/spa",
   fitness: "/fitness",
   photo_booth: "/photo-booth",
-  voice_vault: "/voice-vault"
+  voice_vault: "/voice-vault",
+  elevated_by_elyse: "/elevated-by-elyse",
 };
 const businessLabels: Record<BusinessType, string> = {
   summit: "The Summit",
@@ -36,7 +38,8 @@ const businessLabels: Record<BusinessType, string> = {
   spa: "Restoration Lounge",
   fitness: "Total Fitness",
   photo_booth: "360 Photo Booth",
-  voice_vault: "Voice Vault"
+  voice_vault: "Voice Vault",
+  elevated_by_elyse: "Elevated by Elyse",
 };
 const businessDescriptions: Record<BusinessType, string> = {
   summit: "Premium Event Venue",
@@ -44,7 +47,8 @@ const businessDescriptions: Record<BusinessType, string> = {
   spa: "Recovery + Spa Treatments",
   fitness: "24/7 Gym + Coaching",
   photo_booth: "360 Photo Booth Rental",
-  voice_vault: "Podcast Studio"
+  voice_vault: "Podcast Studio",
+  elevated_by_elyse: "Styling + Personal Shopping",
 };
 
 // BOOKNOW-06: Best For one-liners
@@ -54,7 +58,8 @@ const businessBestFor: Record<BusinessType, string> = {
   spa: "Best for: Massage, facials, recovery treatments",
   fitness: "Best for: Strength training, classes, personal coaching",
   photo_booth: "Best for: Weddings, parties, corporate events",
-  voice_vault: "Best for: Podcast recording, voiceovers, content creation"
+  voice_vault: "Best for: Podcast recording, voiceovers, content creation",
+  elevated_by_elyse: "Best for: Bridal styling, event styling, wardrobe edits",
 };
 const businessTags: Record<BusinessType, string[]> = {
   summit: ["Weddings", "Corporate", "Celebrations"],
@@ -62,7 +67,8 @@ const businessTags: Record<BusinessType, string[]> = {
   spa: ["Recovery", "Reset"],
   fitness: ["Training", "Performance"],
   photo_booth: ["360", "Events", "Add-on"],
-  voice_vault: ["Recording", "Podcasts"]
+  voice_vault: ["Recording", "Podcasts"],
+  elevated_by_elyse: ["Styling", "Bridal", "Fashion"],
 };
 
 // BOOKNOW-07: Deposit/pricing badges
@@ -92,6 +98,10 @@ const businessBadges: Record<BusinessType, {
   },
   voice_vault: {
     text: "Hourly booking",
+    type: "info"
+  },
+  elevated_by_elyse: {
+    text: "Consultation required",
     type: "info"
   }
 };
