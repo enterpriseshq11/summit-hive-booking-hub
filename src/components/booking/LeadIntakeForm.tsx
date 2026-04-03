@@ -19,7 +19,7 @@ interface IntakeFormProps {
   alertRecipients?: string[];
 }
 
-interface FormFieldConfig {
+export interface FormFieldConfig {
   name: string;
   label: string;
   type: "text" | "email" | "tel" | "select" | "date" | "time" | "textarea" | "toggle" | "number";
