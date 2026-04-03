@@ -4,8 +4,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { RotateCcw, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
+import { format, differenceInDays, parseISO } from "date-fns";
 import { KpiTile } from "@/components/admin/KpiTile";
 import {
   useRevenueKpis, useLeadKpis, useOpsKpis, useTeamKpis,
