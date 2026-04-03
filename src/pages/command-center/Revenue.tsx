@@ -77,6 +77,7 @@ function formatCurrency(value: number) {
 
 export default function CommandCenterRevenue() {
   const navigate = useNavigate();
+  const { authUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newRevenue, setNewRevenue] = useState({
@@ -86,6 +87,8 @@ export default function CommandCenterRevenue() {
     employee_attributed_id: "",
     lead_id: "",
   });
+
+  const canWrite = authUser?.roles?.some((r) => ["owner", "manager"].includes(r)) || false;
 
   const unitFilter = searchParams.get("unit") as BusinessType | null;
   const employeeFilter = searchParams.get("employee");
