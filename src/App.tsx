@@ -290,6 +290,7 @@ function AppInner() {
           <Route path="/admin/settings/audit-log" element={<AdminAuditLog />} />
           <Route path="/admin/settings/assumptions" element={<AdminAssumptions />} />
           <Route path="/admin/settings/orphaned-files" element={<AdminOrphanedFiles />} />
+          <Route path="/admin/settings/phase1-checklist" element={<AdminPhase1Checklist />} />
 
           {/* Legacy admin routes */}
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
