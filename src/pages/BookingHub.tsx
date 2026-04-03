@@ -38,7 +38,8 @@ const businessLabels: Record<BusinessType, string> = {
   spa: "Restoration Lounge",
   fitness: "Total Fitness",
   photo_booth: "360 Photo Booth",
-  voice_vault: "Voice Vault"
+  voice_vault: "Voice Vault",
+  elevated_by_elyse: "Elevated by Elyse",
 };
 const businessDescriptions: Record<BusinessType, string> = {
   summit: "Premium Event Venue",
