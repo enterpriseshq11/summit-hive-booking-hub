@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
           entity_type: "lead",
           entity_id: lead.id,
           entity_name: lead.lead_name,
+          event_category: "stage_changed",
           metadata: { automation_rule: "no_response_after_3_attempts" },
           before_data: { status: "contact_attempted" },
           after_data: { status: "no_response" },

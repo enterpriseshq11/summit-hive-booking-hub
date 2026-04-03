@@ -123,6 +123,7 @@ export default function LeadDetail() {
       await supabase.from("crm_activity_events").insert({
         event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
         actor_id: authUser.id, entity_name: `${authUser.profile?.first_name} ${authUser.profile?.last_name}`,
+        event_category: "note_added",
         metadata: { note_preview: newNote.substring(0, 100) },
       });
     },
@@ -165,6 +166,7 @@ export default function LeadDetail() {
         // Log skipped webhook in timeline
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+          event_category: "ghl_webhook_fired",
           metadata: {
             action: "ghl_webhook_skipped",
             message: `GHL webhook skipped — no URL configured for ${STAGE_LABELS[newStage] || newStage} stage`,
@@ -201,6 +203,7 @@ export default function LeadDetail() {
       const statusText = res.ok ? "success" : "failed";
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+        event_category: statusText === "success" ? "ghl_webhook_fired" : "ghl_webhook_failed",
         metadata: {
           action: statusText === "success" ? "ghl_webhook_fired" : "ghl_webhook_failed",
           message: `GHL webhook ${statusText === "success" ? "fired" : "FAILED"} — stage moved to ${STAGE_LABELS[newStage] || newStage} — HTTP ${res.status}`,
@@ -224,6 +227,7 @@ export default function LeadDetail() {
     } catch (err) {
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+        event_category: "ghl_webhook_failed",
         metadata: {
           action: "ghl_webhook_failed",
           message: `GHL webhook FAILED — stage moved to ${STAGE_LABELS[newStage] || newStage} — Error: ${String(err)}`,
@@ -257,6 +261,7 @@ export default function LeadDetail() {
       event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "stage_changed",
       metadata: { previous_stage: previousStage, new_stage: newStage },
     });
     await fireGhlStageWebhook(previousStage, newStage);
@@ -269,6 +274,7 @@ export default function LeadDetail() {
       event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "stage_changed",
       metadata: { previous_stage: lead?.status, new_stage: "lost", reason: lostReason, notes: lostNotes },
     });
     setShowLostDialog(false);
@@ -281,6 +287,7 @@ export default function LeadDetail() {
       event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "stage_changed",
       metadata: { previous_stage: "lost", new_stage: "warm_lead", action: "reopened" },
     });
     toast.success("Lead reopened");
@@ -296,6 +303,7 @@ export default function LeadDetail() {
       event_type: "lead_contacted" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "lead_updated",
       metadata: { method: showLogDialog, notes: logNotes, duration: logDuration, outcome: logOutcome },
     });
     queryClient.invalidateQueries({ queryKey: ["lead-detail", id] });
@@ -313,6 +321,7 @@ export default function LeadDetail() {
       event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "note_added",
       metadata: { action: "follow_up_scheduled", date: followUpDate },
     });
     setFollowUpDate("");
@@ -326,6 +335,7 @@ export default function LeadDetail() {
       event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "lead_updated",
       metadata: { action: "assigned_to_changed", assigned_to: `${member?.first_name} ${member?.last_name}` },
     });
     toast.success(`Assigned to ${member?.first_name}`);
@@ -361,6 +371,7 @@ export default function LeadDetail() {
       event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "document_uploaded",
       metadata: { action: "document_attached", file_name: file.name },
     });
     queryClient.invalidateQueries({ queryKey: ["lead-documents", id] });

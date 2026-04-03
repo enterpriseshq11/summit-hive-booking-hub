@@ -84,6 +84,7 @@ export function useCreatePayrollRun() {
         entity_type: "payroll_run",
         entity_id: result.id,
         entity_name: `${data.period_start} to ${data.period_end}`,
+        event_category: "payroll_initiated",
         after_data: result,
       });
 
@@ -152,6 +153,7 @@ export function useLockPayrollRun() {
         actor_id: user?.id,
         entity_type: "payroll_run",
         entity_id: id,
+        event_category: "payroll_initiated",
         before_data: run,
         after_data: result,
       });
@@ -200,6 +202,7 @@ export function useApprovePayrollRun() {
         actor_id: user?.id,
         entity_type: "payroll_run",
         entity_id: id,
+        event_category: "payroll_approved",
         before_data: before,
         after_data: result,
       });
@@ -253,6 +256,7 @@ export function useMarkPayrollPaid() {
         actor_id: user?.id,
         entity_type: "payroll_run",
         entity_id: id,
+        event_category: "payroll_paid",
         before_data: before,
         after_data: result,
       });

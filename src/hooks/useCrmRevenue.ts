@@ -81,6 +81,7 @@ export function useCreateCrmRevenue() {
         actor_id: user?.id,
         entity_type: "revenue",
         entity_id: data.id,
+        event_category: "revenue_recorded",
         after_data: data,
       });
 

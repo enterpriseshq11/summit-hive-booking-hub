@@ -124,6 +124,7 @@ export default function LeadDetailPage() {
         entity_type: "lead",
         entity_id: lead.id,
         entity_name: lead.lead_name,
+        event_category: "lead_updated",
         metadata: { contact_method: method },
       });
 

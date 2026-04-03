@@ -124,6 +124,7 @@ export default function CommandCenterRevenue() {
       entity_type: "revenue",
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      event_category: "revenue_manual_entry",
       metadata: {
         action: "manual_revenue_recorded",
         message: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name} manually recorded $${newRevenue.amount} for ${newRevenue.business_unit} — method: ${newRevenue.payment_method}`,
