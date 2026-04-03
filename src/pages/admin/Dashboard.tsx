@@ -190,8 +190,21 @@ export default function AdminDashboard() {
         return { value: formatCurrency(team?.commissionApproved || 0) };
       case "comm_paid":
         return { value: formatCurrency(0), pending: true };
-      case "payroll_next":
-        return { value: team?.nextPayrollDate || "Not Set", subtitle: "Set in Settings" };
+      case "payroll_next": {
+        if (team?.nextPayrollDate) {
+          try {
+            const d = parseISO(team.nextPayrollDate);
+            const daysLeft = differenceInDays(d, new Date());
+            return {
+              value: format(d, "MMM d, yyyy"),
+              subtitle: daysLeft > 0 ? `${daysLeft} days remaining` : daysLeft === 0 ? "Today" : `${Math.abs(daysLeft)} days overdue`,
+            };
+          } catch {
+            return { value: team.nextPayrollDate, subtitle: "Set in Settings" };
+          }
+        }
+        return { value: "Not Set", subtitle: "Click to set date" };
+      }
       case "promotions_active":
         return { value: 0, pending: true };
       case "schedule_today":
