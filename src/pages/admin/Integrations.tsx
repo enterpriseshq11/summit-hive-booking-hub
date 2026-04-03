@@ -49,8 +49,8 @@ export default function AdminIntegrations() {
 
   const saveConfig = async (config: GhlConfig) => {
     setSaving(config.id);
-    const { error } = await supabase
-      .from("ghl_webhook_config")
+    const { error } = await (supabase
+      .from("ghl_webhook_config" as any) as any)
       .update({
         webhook_url: config.webhook_url,
         pipeline_stage_webhook_url: config.pipeline_stage_webhook_url,
