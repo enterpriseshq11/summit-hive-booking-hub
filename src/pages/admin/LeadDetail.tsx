@@ -227,6 +227,7 @@ export default function LeadDetail() {
     } catch (err) {
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+        event_category: "ghl_webhook_failed",
         metadata: {
           action: "ghl_webhook_failed",
           message: `GHL webhook FAILED — stage moved to ${STAGE_LABELS[newStage] || newStage} — Error: ${String(err)}`,
