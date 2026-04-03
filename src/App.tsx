@@ -293,6 +293,8 @@ function AppInner() {
           <Route path="/admin/settings/assumptions" element={<AdminAssumptions />} />
           <Route path="/admin/settings/orphaned-files" element={<AdminOrphanedFiles />} />
           <Route path="/admin/settings/phase1-checklist" element={<AdminPhase1Checklist />} />
+          <Route path="/admin/settings/stripe-mapping" element={<AdminStripeMappingPage />} />
+          <Route path="/admin/commissions/rules" element={<AdminCommissionRulesPage />} />
 
           {/* Legacy admin routes */}
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
