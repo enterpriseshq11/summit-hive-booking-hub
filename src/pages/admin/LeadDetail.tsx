@@ -312,11 +312,27 @@ export default function LeadDetail() {
     const { error: uploadError } = await supabase.storage.from("lead-documents").upload(filePath, file);
     if (uploadError) { toast.error("Upload failed: " + uploadError.message); return; }
     const { data: urlData } = supabase.storage.from("lead-documents").getPublicUrl(filePath);
-    await supabase.from("lead_documents").insert({
+    const { error: dbError } = await supabase.from("lead_documents").insert({
       lead_id: id!, file_name: file.name, file_type: file.type,
       file_url: urlData.publicUrl, storage_bucket_path: filePath,
       file_size_bytes: file.size, uploaded_by: authUser?.id,
     } as any);
+    if (dbError) {
+      // DB insert failed — attempt cleanup of orphaned file
+      console.error("DB insert failed for document, cleaning up storage:", dbError);
+      const { error: cleanupError } = await supabase.storage.from("lead-documents").remove([filePath]);
+      // Log to orphaned_files if cleanup also fails
+      if (cleanupError) {
+        await supabase.from("orphaned_files").insert({
+          file_path: filePath, lead_id: id, intended_for: file.name,
+          upload_timestamp: new Date().toISOString(),
+          cleanup_attempted: true, cleanup_status: `cleanup_failed: ${cleanupError.message}`,
+          cleanup_attempted_at: new Date().toISOString(),
+        } as any);
+      }
+      toast.error("Failed to save document record: " + dbError.message);
+      return;
+    }
     await supabase.from("crm_activity_events").insert({
       event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,

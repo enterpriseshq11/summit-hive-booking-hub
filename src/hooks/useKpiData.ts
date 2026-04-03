@@ -218,10 +218,23 @@ export function useTeamKpis() {
         .select("amount")
         .eq("status", "approved");
 
+      // Next payroll run date from admin_settings
+      let nextPayrollDate: string | null = null;
+      try {
+        const { data: setting } = await (supabase as any)
+          .from("admin_settings")
+          .select("value")
+          .eq("key", "next_payroll_run_date")
+          .maybeSingle();
+        if (setting?.value) {
+          nextPayrollDate = setting.value;
+        }
+      } catch { /* table may not exist yet */ }
+
       return {
         commissionPending: (pendingComm || []).reduce((s, r) => s + (Number(r.amount) || 0), 0),
         commissionApproved: (approvedComm || []).reduce((s, r) => s + (Number(r.amount) || 0), 0),
-        nextPayrollDate: null as string | null, // Manually set
+        nextPayrollDate,
       };
     },
     refetchInterval: 60000,
