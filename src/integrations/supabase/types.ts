@@ -96,6 +96,33 @@ export type Database = {
           },
         ]
       }
+      admin_settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string | null
+        }
+        Relationships: []
+      }
       app_config: {
         Row: {
           created_at: string
@@ -3748,6 +3775,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      orphaned_files: {
+        Row: {
+          cleanup_attempted: boolean | null
+          cleanup_attempted_at: string | null
+          cleanup_status: string | null
+          created_at: string
+          file_path: string
+          id: string
+          intended_for: string | null
+          lead_id: string | null
+          upload_timestamp: string
+        }
+        Insert: {
+          cleanup_attempted?: boolean | null
+          cleanup_attempted_at?: string | null
+          cleanup_status?: string | null
+          created_at?: string
+          file_path: string
+          id?: string
+          intended_for?: string | null
+          lead_id?: string | null
+          upload_timestamp?: string
+        }
+        Update: {
+          cleanup_attempted?: boolean | null
+          cleanup_attempted_at?: string | null
+          cleanup_status?: string | null
+          created_at?: string
+          file_path?: string
+          id?: string
+          intended_for?: string | null
+          lead_id?: string | null
+          upload_timestamp?: string
+        }
+        Relationships: []
       }
       packages: {
         Row: {

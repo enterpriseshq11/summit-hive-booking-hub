@@ -7,6 +7,7 @@ interface ProtectedRouteProps {
   requireAuth?: boolean;
   requireStaff?: boolean;
   requireAdmin?: boolean;
+  requireOwner?: boolean;
   redirectTo?: string;
 }
 
@@ -14,6 +15,7 @@ export function ProtectedRoute({
   requireAuth = true,
   requireStaff = false,
   requireAdmin = false,
+  requireOwner = false,
   redirectTo = "/login",
 }: ProtectedRouteProps) {
   const { user, session, authUser, isLoading, isRolesLoaded } = useAuth();
@@ -33,10 +35,13 @@ export function ProtectedRoute({
     });
   }
 
+  const isOwner = authUser?.roles?.includes("owner") || false;
+
   const denialReason = (() => {
     if (isLoading) return "loading_auth" as const;
     if (requireAuth && !user) return "unauthenticated" as const;
-    if ((requireStaff || requireAdmin) && user && !isRolesLoaded) return "waiting_for_roles" as const;
+    if ((requireStaff || requireAdmin || requireOwner) && user && !isRolesLoaded) return "waiting_for_roles" as const;
+    if (requireOwner && !isOwner) return "not_owner" as const;
     if (requireAdmin && !authUser?.isAdmin) return "not_admin" as const;
     if (requireStaff && !authUser?.isStaff) return "not_staff" as const;
     return "allowed" as const;
@@ -87,13 +92,19 @@ export function ProtectedRoute({
     return <Navigate to={loginUrl} replace />;
   }
 
-  // If staff/admin is required, wait for role hydration before deciding access
-  if ((requireStaff || requireAdmin) && user && !isRolesLoaded) {
+  // If staff/admin/owner is required, wait for role hydration before deciding access
+  if ((requireStaff || requireAdmin || requireOwner) && user && !isRolesLoaded) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
+  }
+
+  if (requireOwner && !isOwner) {
+    // Import toast dynamically to show access denied
+    import("sonner").then(({ toast }) => toast.error("Access Denied — You do not have permission to view this page."));
+    return <Navigate to="/admin" replace />;
   }
 
   if (requireStaff && !authUser?.isStaff) {

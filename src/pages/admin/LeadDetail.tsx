@@ -145,6 +145,81 @@ export default function LeadDetail() {
     },
   });
 
+  const STAGE_LABELS: Record<string, string> = {
+    new: "New Lead", contact_attempted: "Contact Attempted", responded: "Responded",
+    warm_lead: "Warm Lead", hot_lead: "Hot Lead", proposal_sent: "Proposal Sent",
+    contract_out: "Contract Out", deposit_received: "Deposit Received",
+    booked: "Booked", completed: "Completed", lost: "Lost",
+  };
+
+  const fireGhlStageWebhook = async (previousStage: string, newStage: string) => {
+    if (!lead) return;
+    try {
+      const { data: webhookConfig } = await (supabase as any)
+        .from("ghl_pipeline_stage_webhooks")
+        .select("webhook_url")
+        .eq("stage_key", newStage)
+        .maybeSingle();
+
+      if (!webhookConfig?.webhook_url) {
+        // Log skipped webhook in timeline
+        await supabase.from("crm_activity_events").insert({
+          event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+          metadata: {
+            action: "ghl_webhook_skipped",
+            message: `GHL webhook skipped — no URL configured for ${STAGE_LABELS[newStage] || newStage} stage`,
+          },
+        });
+        return;
+      }
+
+      const assignedMemberForWebhook = teamMembers.find((m: any) => m.id === lead.assigned_employee_id);
+      const payload = {
+        event: "pipeline_stage_changed",
+        lead_id: lead.id,
+        lead_name: lead.lead_name,
+        email: lead.email,
+        phone: lead.phone,
+        business_unit: lead.business_unit,
+        previous_stage_key: previousStage,
+        previous_stage_name: STAGE_LABELS[previousStage] || previousStage,
+        new_stage_key: newStage,
+        new_stage_name: STAGE_LABELS[newStage] || newStage,
+        assigned_to: assignedMemberForWebhook
+          ? `${assignedMemberForWebhook.first_name} ${assignedMemberForWebhook.last_name}`
+          : null,
+        timestamp: new Date().toISOString(),
+        source: lead.source,
+      };
+
+      const res = await fetch(webhookConfig.webhook_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const statusText = res.ok ? "success" : "failed";
+      await supabase.from("crm_activity_events").insert({
+        event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+        metadata: {
+          action: statusText === "success" ? "ghl_webhook_fired" : "ghl_webhook_failed",
+          message: `GHL webhook ${statusText === "success" ? "fired" : "FAILED"} — stage moved to ${STAGE_LABELS[newStage] || newStage} — HTTP ${res.status}`,
+          http_status: res.status,
+          stage: newStage,
+        },
+      });
+    } catch (err) {
+      await supabase.from("crm_activity_events").insert({
+        event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+        metadata: {
+          action: "ghl_webhook_failed",
+          message: `GHL webhook FAILED — stage moved to ${STAGE_LABELS[newStage] || newStage} — Error: ${String(err)}`,
+          stage: newStage,
+        },
+      });
+    }
+  };
+
   const moveStage = async (direction: "next" | "prev") => {
     if (!lead) return;
     const currentIdx = PIPELINE_STAGES.indexOf(lead.status || "new");
@@ -152,13 +227,15 @@ export default function LeadDetail() {
     if (newIdx < 0 || newIdx >= PIPELINE_STAGES.length) return;
     const newStage = PIPELINE_STAGES[newIdx];
     if (newStage === "lost") { setShowLostDialog(true); return; }
+    const previousStage = lead.status || "new";
     await updateLeadMutation.mutateAsync({ status: newStage });
     await supabase.from("crm_activity_events").insert({
       event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
-      metadata: { previous_stage: lead.status, new_stage: newStage },
+      metadata: { previous_stage: previousStage, new_stage: newStage },
     });
+    await fireGhlStageWebhook(previousStage, newStage);
     toast.success(`Moved to ${newStage.replace(/_/g, " ")}`);
   };
 
@@ -235,11 +312,27 @@ export default function LeadDetail() {
     const { error: uploadError } = await supabase.storage.from("lead-documents").upload(filePath, file);
     if (uploadError) { toast.error("Upload failed: " + uploadError.message); return; }
     const { data: urlData } = supabase.storage.from("lead-documents").getPublicUrl(filePath);
-    await supabase.from("lead_documents").insert({
+    const { error: dbError } = await supabase.from("lead_documents").insert({
       lead_id: id!, file_name: file.name, file_type: file.type,
       file_url: urlData.publicUrl, storage_bucket_path: filePath,
       file_size_bytes: file.size, uploaded_by: authUser?.id,
     } as any);
+    if (dbError) {
+      // DB insert failed — attempt cleanup of orphaned file
+      console.error("DB insert failed for document, cleaning up storage:", dbError);
+      const { error: cleanupError } = await supabase.storage.from("lead-documents").remove([filePath]);
+      // Log to orphaned_files if cleanup also fails
+      if (cleanupError) {
+        await supabase.from("orphaned_files").insert({
+          file_path: filePath, lead_id: id, intended_for: file.name,
+          upload_timestamp: new Date().toISOString(),
+          cleanup_attempted: true, cleanup_status: `cleanup_failed: ${cleanupError.message}`,
+          cleanup_attempted_at: new Date().toISOString(),
+        } as any);
+      }
+      toast.error("Failed to save document record: " + dbError.message);
+      return;
+    }
     await supabase.from("crm_activity_events").insert({
       event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
@@ -437,17 +530,18 @@ export default function LeadDetail() {
                     Next <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 </div>
-                <Select value={lead.status || "new"} onValueChange={v => {
+                <Select value={lead.status || "new"} onValueChange={async (v) => {
                   if (v === "lost") { setShowLostDialog(true); } else {
-                    updateLeadMutation.mutateAsync({ status: v }).then(() => {
-                      supabase.from("crm_activity_events").insert({
-                        event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
-                        actor_id: authUser?.id,
-                        entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
-                        metadata: { previous_stage: lead.status, new_stage: v },
-                      });
-                      toast.success(`Moved to ${v.replace(/_/g, " ")}`);
+                    const previousStage = lead.status || "new";
+                    await updateLeadMutation.mutateAsync({ status: v });
+                    await supabase.from("crm_activity_events").insert({
+                      event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
+                      actor_id: authUser?.id,
+                      entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+                      metadata: { previous_stage: previousStage, new_stage: v },
                     });
+                    await fireGhlStageWebhook(previousStage, v);
+                    toast.success(`Moved to ${v.replace(/_/g, " ")}`);
                   }
                 }}>
                   <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue /></SelectTrigger>

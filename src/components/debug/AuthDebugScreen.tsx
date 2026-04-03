@@ -5,6 +5,7 @@ export type AuthDebugDenialReason =
   | "unauthenticated"
   | "waiting_for_roles"
   | "not_admin"
+  | "not_owner"
   | "not_staff"
   | "allowed";
 
