@@ -125,7 +125,7 @@ const navSections: NavSection[] = [
       {
         label: "The Summit",
         icon: Building2,
-        visibleToRoles: ["owner", "manager", "ops_lead", "marketing_lead", "event_coordinator"],
+        visibleToRoles: ["owner", "manager", "ops_lead", "marketing_lead", "event_coordinator", "sales_acquisitions"],
         items: [
           { title: "Leads", href: "/admin/business/summit/leads", icon: Target },
           { title: "Bookings", href: "/admin/business/summit/bookings", icon: CalendarDays },
