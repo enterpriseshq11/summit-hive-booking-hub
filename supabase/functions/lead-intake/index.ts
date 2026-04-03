@@ -28,6 +28,16 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    // Map form source values to valid enum values
+    const SOURCE_MAP: Record<string, string> = {
+      google_search: "website", facebook: "social_media", instagram: "social_media",
+      tiktok: "social_media", referral: "referral", drive_by: "walk_in",
+      wedding_wire: "website", the_knot: "website", other: "other", website: "website",
+      phone: "phone", email: "email", event: "event", walk_in: "walk_in",
+      social_media: "social_media",
+    };
+    const mappedSource = SOURCE_MAP[source || "website"] || "other";
+
     // 1. Create lead in crm_leads
     const { data: lead, error: leadError } = await supabase
       .from("crm_leads")
