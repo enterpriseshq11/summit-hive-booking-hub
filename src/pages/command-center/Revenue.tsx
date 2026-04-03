@@ -255,6 +255,7 @@ export default function CommandCenterRevenue() {
               </div>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         {/* Summary Cards */}
