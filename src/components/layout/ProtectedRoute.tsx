@@ -15,6 +15,7 @@ export function ProtectedRoute({
   requireAuth = true,
   requireStaff = false,
   requireAdmin = false,
+  requireOwner = false,
   redirectTo = "/login",
 }: ProtectedRouteProps) {
   const { user, session, authUser, isLoading, isRolesLoaded } = useAuth();
