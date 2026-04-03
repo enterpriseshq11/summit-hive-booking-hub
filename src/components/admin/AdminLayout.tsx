@@ -172,9 +172,9 @@ const navSections: NavSection[] = [
         icon: Mic,
         visibleToRoles: ["owner", "manager", "ops_lead", "marketing_lead"],
         items: [
-          { title: "Bookings", href: "/admin/voice-vault", icon: CalendarDays },
-          { title: "Revenue", href: "/admin/business/vault/revenue", icon: DollarSign },
-          { title: "Settings", href: "/admin/business/vault/settings", icon: Settings },
+          { title: "Bookings", href: "/admin/business/voice-vault/bookings", icon: CalendarDays },
+          { title: "Revenue", href: "/admin/business/voice-vault/revenue", icon: DollarSign },
+          { title: "Settings", href: "/admin/business/voice-vault/settings", icon: Settings },
         ],
       },
       {
