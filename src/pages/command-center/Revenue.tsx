@@ -106,7 +106,7 @@ export default function CommandCenterRevenue() {
   const createRevenue = useCreateCrmRevenue();
 
   const handleCreate = async () => {
-    if (!newRevenue.amount) return;
+    if (!newRevenue.amount || !newRevenue.description) return;
     await createRevenue.mutateAsync({
       amount: parseFloat(newRevenue.amount),
       description: newRevenue.description,
@@ -114,7 +114,22 @@ export default function CommandCenterRevenue() {
       employee_attributed_id: newRevenue.employee_attributed_id || null,
       lead_id: newRevenue.lead_id || null,
       recorded_by: "", // Will be set by hook
+      revenue_date: newRevenue.revenue_date || new Date().toISOString().split("T")[0],
+    } as any);
+
+    // Log manual revenue entry to activity log
+    await supabase.from("crm_activity_events").insert({
+      event_type: "status_change" as any,
+      entity_type: "revenue",
+      actor_id: authUser?.id,
+      entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+      metadata: {
+        action: "manual_revenue_recorded",
+        message: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name} manually recorded $${newRevenue.amount} for ${newRevenue.business_unit} — method: ${newRevenue.payment_method}`,
+        payment_method: newRevenue.payment_method,
+      },
     });
+
     setIsCreateOpen(false);
     setNewRevenue({
       amount: "",
@@ -122,6 +137,9 @@ export default function CommandCenterRevenue() {
       business_unit: "spa",
       employee_attributed_id: "",
       lead_id: "",
+      payment_method: "cash",
+      revenue_date: new Date().toISOString().split("T")[0],
+      internal_notes: "",
     });
   };
 
