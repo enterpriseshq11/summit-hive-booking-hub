@@ -7,6 +7,7 @@ interface ProtectedRouteProps {
   requireAuth?: boolean;
   requireStaff?: boolean;
   requireAdmin?: boolean;
+  requireOwner?: boolean;
   redirectTo?: string;
 }
 
