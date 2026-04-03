@@ -27,11 +27,11 @@ export const FloatingHelpCTA = forwardRef<HTMLDivElement>(function FloatingHelpC
           </div>
           <div className="space-y-2">
             <a 
-              href="tel:+14195550100"
+              href="tel:+15674299924"
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm"
             >
               <Phone className="h-4 w-4 text-accent" />
-              <span>(419) 555-0100</span>
+              <span>(567) 429-9924</span>
             </a>
             <a 
               href="mailto:dylan@a-zenterpriseshq.com"

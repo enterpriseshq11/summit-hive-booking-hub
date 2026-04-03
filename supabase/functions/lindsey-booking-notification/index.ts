@@ -16,11 +16,11 @@ const logStep = (step: string, details?: unknown) => {
 // IMPORTANT: Staff inbox uses @a-zenterpriseshq.com (with hyphen)
 // FROM/sender uses @azenterpriseshq.com (no hyphen, verified in Resend)
 const LINDSEY_EMAIL = "lindsey@a-zenterpriseshq.com";
-const LINDSEY_PHONE = "+15676441019";
+const LINDSEY_PHONE = "+15674299924";
 
 // Victoria settings (used when toggle OFF / request mode)
 const VICTORIA_EMAIL = "victoria@a-zenterpriseshq.com";
-const VICTORIA_PHONE = "+15673796340";
+const VICTORIA_PHONE = "+15674299924";
 
 const FROM_EMAIL = "A-Z Enterprises <no-reply@azenterpriseshq.com>";
 const REPLY_TO_EMAIL = Deno.env.get("REPLY_TO_EMAIL") || "victoria@a-zenterpriseshq.com";
@@ -445,7 +445,7 @@ Ref: ${stripeRef}`;
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+        <p style="font-size: 18px;"><a href="tel:+15674299924">(567) 429-9924</a></p>
       </div>
 
       <p style="margin-top: 30px;">
@@ -726,7 +726,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+        <p style="font-size: 18px;"><a href="tel:+15674299924">(567) 429-9924</a></p>
       </div>
 
       <p style="margin-top: 30px;">
@@ -976,7 +976,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+        <p style="font-size: 18px;"><a href="tel:+15674299924">(567) 429-9924</a></p>
       </div>
 
       <p style="margin-top: 30px;">
@@ -1223,7 +1223,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <div style="text-align: center; margin-top: 30px;">
         <p>Questions? Contact us:</p>
-        <p style="font-size: 18px;"><a href="tel:+15673796340">(567) 379-6340</a></p>
+        <p style="font-size: 18px;"><a href="tel:+15674299924">(567) 429-9924</a></p>
       </div>
 
       <p style="margin-top: 30px;">

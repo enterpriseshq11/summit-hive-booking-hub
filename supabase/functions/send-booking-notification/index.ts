@@ -14,7 +14,7 @@ const logStep = (step: string, details?: unknown) => {
 
 // ============= CONFIGURATION (ENV-DRIVEN) =============
 const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
-const BUSINESS_PHONE = "(567) 379-6340";
+const BUSINESS_PHONE = "(567) 429-9924";
 const TZ = "America/New_York";
 
 // ============= SECRETS-DRIVEN (NO HARDCODED STAFF EMAILS) =============
@@ -503,7 +503,7 @@ async function resolveStaffContact(params: {
   if (owner === "lindsey") {
     // Staff inbox uses @a-zenterpriseshq.com (with hyphen)
     const email = lindseyEnv?.email || "lindsey@a-zenterpriseshq.com";
-    const phone = lindseyEnv?.phone || "+15676441019";
+    const phone = lindseyEnv?.phone || "+15674299924";
     debug.branch = "C_source_brand_mapping";
     debug.staff_email = email;
     debug.staff_phone = phone;
@@ -557,8 +557,8 @@ function buildCustomerConfirmationEmail(
   // IMPORTANT: Ticket requires updating ONLY Summit customer confirmation email contact phone.
   // Keep all other emails/brands unchanged.
   const sourceBrand = typeof (booking as any).source_brand === "string" ? String((booking as any).source_brand).toLowerCase() : "";
-  const customerContactPhoneText = sourceBrand === "summit" ? "(567) 379-6340" : BUSINESS_PHONE;
-  const customerContactPhoneHref = sourceBrand === "summit" ? "tel:+15673796340" : `tel:${BUSINESS_PHONE}`;
+  const customerContactPhoneText = sourceBrand === "summit" ? "(567) 429-9924" : BUSINESS_PHONE;
+  const customerContactPhoneHref = sourceBrand === "summit" ? "tel:+15674299924" : `tel:${BUSINESS_PHONE}`;
   
   const startDate = new Date(booking.start_datetime as string);
   const endDate = new Date(booking.end_datetime as string);

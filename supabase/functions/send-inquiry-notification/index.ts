@@ -163,7 +163,7 @@ const handler = async (req: Request): Promise<Response> => {
                   </ul>
                 </div>
                 
-                <p>Questions in the meantime? Reply to this email or call us at <strong>(567) 379-6340</strong>.</p>
+                <p>Questions in the meantime? Reply to this email or call us at <strong>(567) 429-9924</strong>.</p>
                 
                 <p>We look forward to helping you find your perfect workspace!</p>
                 
@@ -262,7 +262,7 @@ const handler = async (req: Request): Promise<Response> => {
 
                 ${reasonBlock}
 
-                <p>Questions? Reply to this email or call us at <strong>(567) 379-6340</strong>.</p>
+                <p>Questions? Reply to this email or call us at <strong>(567) 429-9924</strong>.</p>
                 <p style="margin-top: 30px;">
                   Best regards,<br>
                   <strong>The Hive Team</strong><br>

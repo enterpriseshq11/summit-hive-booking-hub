@@ -112,8 +112,8 @@ export function PromotionTerms() {
 
       <div className="text-center py-4">
         <p className="text-xs text-muted-foreground">
-          Questions? Contact us at <span className="text-gold">(419) 555-0100</span> or email{" "}
-          <span className="text-gold">hello@az-wellness.com</span>
+          Questions? Contact us at <span className="text-gold">(567) 429-9924</span> or email{" "}
+          <span className="text-gold">dylan@a-zenterpriseshq.com</span>
         </p>
       </div>
     </div>
