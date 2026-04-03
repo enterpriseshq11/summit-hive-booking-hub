@@ -237,8 +237,9 @@ export default function LeadDetail() {
     const { data: urlData } = supabase.storage.from("lead-documents").getPublicUrl(filePath);
     await supabase.from("lead_documents").insert({
       lead_id: id!, file_name: file.name, file_type: file.type,
-      file_url: urlData.publicUrl, file_size_bytes: file.size, uploaded_by: authUser?.id,
-    });
+      file_url: urlData.publicUrl, storage_bucket_path: filePath,
+      file_size_bytes: file.size, uploaded_by: authUser?.id,
+    } as any);
     await supabase.from("crm_activity_events").insert({
       event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
