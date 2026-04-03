@@ -56,14 +56,34 @@ const STAGE_LABELS: Record<string, string> = {
   lost: "Lost",
 };
 
-const FUTURE_INTEGRATIONS = [
-  { name: "DocuSign", desc: "e-signature" },
-  { name: "PandaDoc", desc: "alternative e-signature" },
-  { name: "Facebook Ads", desc: "ad platform" },
-  { name: "Google Ads", desc: "ad platform" },
-  { name: "TikTok Ads", desc: "ad platform" },
-  { name: "Mailchimp", desc: "email marketing" },
-  { name: "Google Business Profile", desc: "local SEO" },
+const FUTURE_INTEGRATION_GROUPS = [
+  {
+    label: "E-Signature",
+    items: [
+      { name: "DocuSign", desc: "Industry-standard e-signature" },
+      { name: "PandaDoc", desc: "Document automation and e-signature" },
+    ],
+  },
+  {
+    label: "Ad Platforms",
+    items: [
+      { name: "Facebook Ads", desc: "Meta ad campaign tracking" },
+      { name: "Google Ads", desc: "Google search and display ads" },
+      { name: "TikTok Ads", desc: "TikTok ad campaign tracking" },
+    ],
+  },
+  {
+    label: "Email & CRM",
+    items: [
+      { name: "Mailchimp", desc: "Email marketing and automation" },
+    ],
+  },
+  {
+    label: "Business Listings",
+    items: [
+      { name: "Google Business Profile", desc: "Local SEO and reviews" },
+    ],
+  },
 ];
 
 function StatusBadge({ status }: { status: string | null }) {
