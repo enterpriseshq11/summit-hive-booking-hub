@@ -41,7 +41,7 @@ export default function BusinessSubPage() {
   const userRoles = authUser?.roles || [];
 
   const allowedRoles = unit ? UNIT_ROLE_ACCESS[unit] || [] : [];
-  const hasAccess = allowedRoles.some((r: string) => userRoles.includes(r));
+  const hasAccess = allowedRoles.some((r) => (userRoles as string[]).includes(r));
 
   if (!hasAccess) {
     return <Navigate to="/admin" replace />;

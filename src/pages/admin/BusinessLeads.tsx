@@ -42,7 +42,7 @@ export default function BusinessLeads() {
   const config = unit ? UNIT_MAP[unit] : null;
   if (!config) return <Navigate to="/admin" replace />;
 
-  const hasAccess = config.roles.some((r: string) => userRoles.includes(r));
+  const hasAccess = config.roles.some((r) => (userRoles as string[]).includes(r));
   if (!hasAccess) return <Navigate to="/admin" replace />;
 
   const { data: leads = [], isLoading } = useQuery({
