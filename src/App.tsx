@@ -245,6 +245,7 @@ function AppInner() {
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
           <Route path="/admin/audit-log" element={<AdminAuditLog />} />
           <Route path="/admin/assumptions" element={<AdminAssumptions />} />
+          <Route path="/admin/integrations" element={<AdminIntegrations />} />
         </Route>
 
         {/* Legacy command-center redirects (for backwards compatibility) */}
