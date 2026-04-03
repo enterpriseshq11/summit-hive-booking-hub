@@ -145,6 +145,81 @@ export default function LeadDetail() {
     },
   });
 
+  const STAGE_LABELS: Record<string, string> = {
+    new: "New Lead", contact_attempted: "Contact Attempted", responded: "Responded",
+    warm_lead: "Warm Lead", hot_lead: "Hot Lead", proposal_sent: "Proposal Sent",
+    contract_out: "Contract Out", deposit_received: "Deposit Received",
+    booked: "Booked", completed: "Completed", lost: "Lost",
+  };
+
+  const fireGhlStageWebhook = async (previousStage: string, newStage: string) => {
+    if (!lead) return;
+    try {
+      const { data: webhookConfig } = await supabase
+        .from("ghl_pipeline_stage_webhooks" as any)
+        .select("webhook_url")
+        .eq("stage_key", newStage)
+        .maybeSingle();
+
+      if (!webhookConfig?.webhook_url) {
+        // Log skipped webhook in timeline
+        await supabase.from("crm_activity_events").insert({
+          event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+          metadata: {
+            action: "ghl_webhook_skipped",
+            message: `GHL webhook skipped — no URL configured for ${STAGE_LABELS[newStage] || newStage} stage`,
+          },
+        });
+        return;
+      }
+
+      const assignedMemberForWebhook = teamMembers.find((m: any) => m.id === lead.assigned_employee_id);
+      const payload = {
+        event: "pipeline_stage_changed",
+        lead_id: lead.id,
+        lead_name: lead.lead_name,
+        email: lead.email,
+        phone: lead.phone,
+        business_unit: lead.business_unit,
+        previous_stage_key: previousStage,
+        previous_stage_name: STAGE_LABELS[previousStage] || previousStage,
+        new_stage_key: newStage,
+        new_stage_name: STAGE_LABELS[newStage] || newStage,
+        assigned_to: assignedMemberForWebhook
+          ? `${assignedMemberForWebhook.first_name} ${assignedMemberForWebhook.last_name}`
+          : null,
+        timestamp: new Date().toISOString(),
+        source: lead.source,
+      };
+
+      const res = await fetch(webhookConfig.webhook_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const statusText = res.ok ? "success" : "failed";
+      await supabase.from("crm_activity_events").insert({
+        event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+        metadata: {
+          action: statusText === "success" ? "ghl_webhook_fired" : "ghl_webhook_failed",
+          message: `GHL webhook ${statusText === "success" ? "fired" : "FAILED"} — stage moved to ${STAGE_LABELS[newStage] || newStage} — HTTP ${res.status}`,
+          http_status: res.status,
+          stage: newStage,
+        },
+      });
+    } catch (err) {
+      await supabase.from("crm_activity_events").insert({
+        event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+        metadata: {
+          action: "ghl_webhook_failed",
+          message: `GHL webhook FAILED — stage moved to ${STAGE_LABELS[newStage] || newStage} — Error: ${String(err)}`,
+          stage: newStage,
+        },
+      });
+    }
+  };
+
   const moveStage = async (direction: "next" | "prev") => {
     if (!lead) return;
     const currentIdx = PIPELINE_STAGES.indexOf(lead.status || "new");
@@ -152,13 +227,15 @@ export default function LeadDetail() {
     if (newIdx < 0 || newIdx >= PIPELINE_STAGES.length) return;
     const newStage = PIPELINE_STAGES[newIdx];
     if (newStage === "lost") { setShowLostDialog(true); return; }
+    const previousStage = lead.status || "new";
     await updateLeadMutation.mutateAsync({ status: newStage });
     await supabase.from("crm_activity_events").insert({
       event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
       actor_id: authUser?.id,
       entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
-      metadata: { previous_stage: lead.status, new_stage: newStage },
+      metadata: { previous_stage: previousStage, new_stage: newStage },
     });
+    await fireGhlStageWebhook(previousStage, newStage);
     toast.success(`Moved to ${newStage.replace(/_/g, " ")}`);
   };
 
