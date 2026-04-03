@@ -87,6 +87,9 @@ export default function CommandCenterRevenue() {
     business_unit: "spa" as BusinessType,
     employee_attributed_id: "",
     lead_id: "",
+    payment_method: "cash",
+    revenue_date: new Date().toISOString().split("T")[0],
+    internal_notes: "",
   });
 
   const canWrite = authUser?.roles?.some((r) => ["owner", "manager"].includes(r)) || false;
