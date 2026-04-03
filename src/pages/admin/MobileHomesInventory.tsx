@@ -75,11 +75,13 @@ export default function MobileHomesInventory() {
 
   const saveMutation = useMutation({
     mutationFn: async (item: Partial<MobileHome> & { id?: string }) => {
+      const payload = { ...item } as any;
       if (item.id) {
-        const { error } = await supabase.from("mobile_home_inventory").update(item).eq("id", item.id);
+        const { error } = await supabase.from("mobile_home_inventory").update(payload).eq("id", item.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("mobile_home_inventory").insert(item);
+        delete payload.id;
+        const { error } = await supabase.from("mobile_home_inventory").insert(payload);
         if (error) throw error;
       }
     },

@@ -42,7 +42,7 @@ export default function BusinessLeads() {
   const config = unit ? UNIT_MAP[unit] : null;
   if (!config) return <Navigate to="/admin" replace />;
 
-  const hasAccess = config.roles.some(r => userRoles.includes(r));
+  const hasAccess = config.roles.some((r: string) => userRoles.includes(r));
   if (!hasAccess) return <Navigate to="/admin" replace />;
 
   const { data: leads = [], isLoading } = useQuery({
@@ -51,12 +51,12 @@ export default function BusinessLeads() {
       let query = supabase
         .from("crm_leads")
         .select("*")
-        .eq("business_unit", config.businessType)
+        .eq("business_unit", config.businessType as any)
         .order("created_at", { ascending: false })
         .limit(200);
 
       if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter);
+        query = query.eq("status", statusFilter as any);
       }
 
       const { data, error } = await query;
