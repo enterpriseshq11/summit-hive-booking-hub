@@ -76,6 +76,13 @@ import AdminSpaWorkers from "./pages/admin/SpaWorkers";
 import AdminWorkerCalendars from "./pages/admin/WorkerCalendars";
 import AdminGHLWebhookTest from "./pages/admin/GHLWebhookTest";
 import AdminSpecials from "./pages/admin/Specials";
+import AdminAdTracking from "./pages/admin/AdTracking";
+import AdminMobileHomesInventory from "./pages/admin/MobileHomesInventory";
+import AdminBusinessLeads from "./pages/admin/BusinessLeads";
+import AdminBusinessSubPage from "./pages/admin/BusinessSubPage";
+import AdminLeadDetail from "./pages/admin/LeadDetail";
+import AdminAlertsPage from "./pages/admin/AlertsPage";
+import IntakePage from "./pages/intake/IntakePage";
 // Command Center Pages (now unified under /admin/*)
 import CommandCenterLeads from "./pages/command-center/Leads";
 import CommandCenterLeadDetail from "./pages/command-center/LeadDetail";
