@@ -50,14 +50,15 @@ interface NavSubSection {
 }
 
 // ─── Role visibility constants ───
-const ALL_STAFF = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead", "event_coordinator", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "front_desk"];
+const ALL_STAFF = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead", "event_coordinator", "spa_lead", "spa_worker", "coworking_manager", "fitness_lead", "front_desk", "sales_acquisitions"];
 const ADMIN_ROLES = ["owner", "manager"];
 const OWNER_ONLY = ["owner"];
-const COMMAND_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead", "spa_lead", "event_coordinator"];
-const SALES_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "event_coordinator"];
+const COMMAND_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead", "spa_lead", "event_coordinator", "sales_acquisitions"];
+const SALES_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "event_coordinator", "sales_acquisitions"];
 const OPS_ROLES = ["owner", "manager", "ops_lead", "spa_lead", "event_coordinator", "coworking_manager", "fitness_lead", "front_desk"];
 const TEAM_ROLES = ["owner", "manager", "ops_lead"];
 const REVENUE_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead"];
+const MARKETING_ROLES = ["owner", "manager", "marketing_lead", "ads_lead"];
 
 // ─── Navigation configuration matching Dylan's exact spec ───
 const navSections: NavSection[] = [
