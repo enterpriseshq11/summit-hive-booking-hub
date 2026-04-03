@@ -47,7 +47,8 @@ const businessDescriptions: Record<BusinessType, string> = {
   spa: "Recovery + Spa Treatments",
   fitness: "24/7 Gym + Coaching",
   photo_booth: "360 Photo Booth Rental",
-  voice_vault: "Podcast Studio"
+  voice_vault: "Podcast Studio",
+  elevated_by_elyse: "Styling + Personal Shopping",
 };
 
 // BOOKNOW-06: Best For one-liners
