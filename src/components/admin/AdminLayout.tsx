@@ -205,9 +205,9 @@ const navSections: NavSection[] = [
     icon: Megaphone,
     visibleToRoles: MARKETING_ROLES,
     items: [
-      { title: "Promotions", href: "/admin/promotions", icon: Tag },
-      { title: "Dopamine Drop", href: "/admin/dopamine-drop", icon: Gift },
-      { title: "Ad Tracking", href: "/admin/ad-tracking", icon: TrendingUp },
+      { title: "Promotions", href: "/admin/marketing/promotions", icon: Tag },
+      { title: "Dopamine Drop", href: "/admin/marketing/dopamine-drop", icon: Gift },
+      { title: "Ad Tracking", href: "/admin/marketing/ad-tracking", icon: TrendingUp },
     ],
   },
   {
