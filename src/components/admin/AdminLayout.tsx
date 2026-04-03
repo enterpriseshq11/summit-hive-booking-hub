@@ -113,7 +113,7 @@ const navSections: NavSection[] = [
     items: [
       { title: "Revenue Tracker", href: "/admin/revenue", icon: BarChart3 },
       { title: "Pricing Rules", href: "/admin/pricing-rules", icon: DollarSign },
-      { title: "Stripe Integration", href: "/admin/payment-settings", icon: CreditCard },
+      { title: "Stripe Integration", href: "/admin/stripe", icon: CreditCard },
     ],
   },
   {
@@ -141,8 +141,8 @@ const navSections: NavSection[] = [
           { title: "Leads", href: "/admin/business/spa/leads", icon: Target },
           { title: "Bookings", href: "/admin/business/spa/bookings", icon: CalendarDays },
           { title: "Revenue", href: "/admin/business/spa/revenue", icon: DollarSign },
-          { title: "Workers", href: "/admin/spa-workers", icon: Users },
-          { title: "Worker Calendars", href: "/admin/worker-calendars", icon: CalendarRange },
+          { title: "Workers", href: "/admin/business/spa/workers", icon: Users },
+          { title: "Worker Calendars", href: "/admin/business/spa/worker-calendars", icon: CalendarRange },
           { title: "Settings", href: "/admin/business/spa/settings", icon: Settings },
         ],
       },
@@ -161,8 +161,8 @@ const navSections: NavSection[] = [
         icon: Building2,
         visibleToRoles: ["owner", "manager", "ops_lead", "marketing_lead", "coworking_manager"],
         items: [
-          { title: "Office Listings", href: "/admin/office-listings", icon: Building2 },
-          { title: "Inquiries", href: "/admin/office-inquiries", icon: MessageSquare },
+          { title: "Office Listings", href: "/admin/business/hive/office-listings", icon: Building2 },
+          { title: "Inquiries", href: "/admin/business/hive/inquiries", icon: MessageSquare },
           { title: "Revenue", href: "/admin/business/hive/revenue", icon: DollarSign },
           { title: "Settings", href: "/admin/business/hive/settings", icon: Settings },
         ],
@@ -172,9 +172,9 @@ const navSections: NavSection[] = [
         icon: Mic,
         visibleToRoles: ["owner", "manager", "ops_lead", "marketing_lead"],
         items: [
-          { title: "Bookings", href: "/admin/voice-vault", icon: CalendarDays },
-          { title: "Revenue", href: "/admin/business/vault/revenue", icon: DollarSign },
-          { title: "Settings", href: "/admin/business/vault/settings", icon: Settings },
+          { title: "Bookings", href: "/admin/business/voice-vault/bookings", icon: CalendarDays },
+          { title: "Revenue", href: "/admin/business/voice-vault/revenue", icon: DollarSign },
+          { title: "Settings", href: "/admin/business/voice-vault/settings", icon: Settings },
         ],
       },
       {
@@ -192,10 +192,10 @@ const navSections: NavSection[] = [
         icon: Sparkles,
         visibleToRoles: ["owner", "marketing_lead"],
         items: [
-          { title: "Leads", href: "/admin/business/elevated/leads", icon: Target },
-          { title: "Bookings", href: "/admin/business/elevated/bookings", icon: CalendarDays },
-          { title: "Revenue", href: "/admin/business/elevated/revenue", icon: DollarSign },
-          { title: "Settings", href: "/admin/business/elevated/settings", icon: Settings },
+          { title: "Leads", href: "/admin/business/elevated-by-elyse/leads", icon: Target },
+          { title: "Bookings", href: "/admin/business/elevated-by-elyse/bookings", icon: CalendarDays },
+          { title: "Revenue", href: "/admin/business/elevated-by-elyse/revenue", icon: DollarSign },
+          { title: "Settings", href: "/admin/business/elevated-by-elyse/settings", icon: Settings },
         ],
       },
     ],
@@ -205,9 +205,9 @@ const navSections: NavSection[] = [
     icon: Megaphone,
     visibleToRoles: MARKETING_ROLES,
     items: [
-      { title: "Promotions", href: "/admin/promotions", icon: Tag },
-      { title: "Dopamine Drop", href: "/admin/dopamine-drop", icon: Gift },
-      { title: "Ad Tracking", href: "/admin/ad-tracking", icon: TrendingUp },
+      { title: "Promotions", href: "/admin/marketing/promotions", icon: Tag },
+      { title: "Dopamine Drop", href: "/admin/marketing/dopamine-drop", icon: Gift },
+      { title: "Ad Tracking", href: "/admin/marketing/ad-tracking", icon: TrendingUp },
     ],
   },
   {
@@ -215,11 +215,11 @@ const navSections: NavSection[] = [
     icon: Settings,
     visibleToRoles: OWNER_ONLY,
     items: [
-      { title: "Users & Roles", href: "/admin/users-roles", icon: UserCog },
-      { title: "Payment Settings", href: "/admin/payment-settings", icon: CreditCard },
-      { title: "Integrations", href: "/admin/integrations", icon: Link2 },
-      { title: "Audit Log", href: "/admin/audit-log", icon: Shield },
-      { title: "Assumptions", href: "/admin/assumptions", icon: Lightbulb },
+      { title: "Users & Roles", href: "/admin/settings/users", icon: UserCog },
+      { title: "Payment Settings", href: "/admin/settings/payment", icon: CreditCard },
+      { title: "Integrations", href: "/admin/settings/integrations", icon: Link2 },
+      { title: "Audit Log", href: "/admin/settings/audit-log", icon: Shield },
+      { title: "Assumptions", href: "/admin/settings/assumptions", icon: Lightbulb },
     ],
   },
 ];
