@@ -180,7 +180,7 @@ const navSections: NavSection[] = [
       {
         label: "Mobile Homes",
         icon: Home,
-        visibleToRoles: ["owner", "manager", "ops_lead"],
+        visibleToRoles: ["owner", "manager", "ops_lead", "sales_acquisitions"],
         items: [
           { title: "Inventory", href: "/admin/business/mobile-homes/inventory", icon: Store },
           { title: "Revenue", href: "/admin/business/mobile-homes/revenue", icon: DollarSign },
