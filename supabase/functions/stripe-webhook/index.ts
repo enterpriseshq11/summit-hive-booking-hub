@@ -55,6 +55,17 @@ serve(async (req) => {
 
     logStep("Event received", { type: event.type, id: event.id });
 
+    // Log to stripe_webhook_events table for Phase 2 processing
+    await supabase.from("stripe_webhook_events").insert({
+      event_type: event.type,
+      stripe_event_id: event.id,
+      payload: event as any,
+      received_at: new Date().toISOString(),
+      processed: false,
+    }).then(({ error: logError }) => {
+      if (logError) logStep("Failed to log webhook event", { error: logError.message });
+    });
+
     // Idempotency check
     const { data: existingEvent } = await supabase
       .from("audit_log")
