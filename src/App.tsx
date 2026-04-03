@@ -158,6 +158,9 @@ function AppInner() {
           <Route path="/360-photo-booth" element={<PhotoBooth />} />
           <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
 
+          {/* Public Intake Forms — no login required */}
+          <Route path="/intake/:unit" element={<IntakePage />} />
+
           {/* Careers Routes */}
           <Route path="/careers" element={<Careers />} />
           <Route path="/careers/spa" element={<CareersSpa />} />
