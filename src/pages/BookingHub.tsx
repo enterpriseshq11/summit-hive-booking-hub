@@ -67,7 +67,8 @@ const businessTags: Record<BusinessType, string[]> = {
   spa: ["Recovery", "Reset"],
   fitness: ["Training", "Performance"],
   photo_booth: ["360", "Events", "Add-on"],
-  voice_vault: ["Recording", "Podcasts"]
+  voice_vault: ["Recording", "Podcasts"],
+  elevated_by_elyse: ["Styling", "Bridal", "Fashion"],
 };
 
 // BOOKNOW-07: Deposit/pricing badges
