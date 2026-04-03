@@ -123,6 +123,7 @@ export default function LeadDetail() {
       await supabase.from("crm_activity_events").insert({
         event_type: "note_added" as any, entity_type: "lead", entity_id: id!,
         actor_id: authUser.id, entity_name: `${authUser.profile?.first_name} ${authUser.profile?.last_name}`,
+        event_category: "note_added",
         metadata: { note_preview: newNote.substring(0, 100) },
       });
     },
