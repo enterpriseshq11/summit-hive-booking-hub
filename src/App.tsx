@@ -230,6 +230,7 @@ function AppInner() {
 
           {/* REVENUE */}
           <Route path="/admin/revenue" element={<CommandCenterRevenue />} />
+          <Route path="/admin/revenue/stripe-transactions" element={<AdminStripeTransactions />} />
           <Route path="/admin/pricing-rules" element={<AdminPricingRules />} />
           <Route path="/admin/stripe" element={<AdminPaymentSettings />} />
 
