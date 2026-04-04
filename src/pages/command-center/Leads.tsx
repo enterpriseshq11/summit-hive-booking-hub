@@ -448,7 +448,7 @@ export default function CommandCenterLeads() {
 
         {/* Leads Table */}
         <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="p-0">
+          <CardContent className="p-0 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-zinc-800 hover:bg-transparent">
