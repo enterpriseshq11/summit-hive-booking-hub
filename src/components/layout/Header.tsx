@@ -44,18 +44,16 @@ import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
 
 // Experiences dropdown items
 const experienceItems = [
-  { label: "Summit", href: "/summit", icon: Building2, description: "Event center & venue" },
-  { label: "Book Event", href: "/book-summit", icon: CalendarDays, description: "Request a Summit event" },
-  { label: "Hive Coworking", href: "/coworking", icon: Building2, description: "Private offices & coworking" },
-  { label: "Spa", href: "/spa", icon: Sparkles, description: "Massage & wellness" },
-  { label: "Fitness", href: "/fitness", icon: Dumbbell, description: "Gym & training" },
+  { label: "Book an Event", href: "/book-summit", icon: CalendarDays, description: "Request a Summit event" },
+  { label: "Book a Spa Service", href: "/book-spa", icon: Sparkles, description: "Massage & wellness" },
+  { label: "Book Studio Time", href: "/book-voice-vault", icon: Mic, description: "Private recording studio" },
+  { label: "Join the Gym", href: "/join-fitness", icon: Dumbbell, description: "Gym memberships" },
+  { label: "Coworking Space", href: "/the-hive", icon: Building2, description: "Private offices & coworking" },
+  { label: "Summit Venue", href: "/summit", icon: Building2, description: "Event center & venue" },
+  { label: "Spa Info", href: "/spa", icon: Sparkles, description: "Service details" },
+  { label: "Fitness Info", href: "/fitness", icon: Dumbbell, description: "Gym & training" },
   { label: "360 Photo Booth", href: "/360-photo-booth", icon: Camera, description: "Event photo experiences" },
-  { label: "Voice Vault", href: "/voice-vault", icon: Mic, description: "Private recording studio" },
-  { label: "Book Studio", href: "/book-voice-vault", icon: Mic, description: "Book a recording session" },
-  { label: "Book Spa", href: "/book-spa", icon: Sparkles, description: "Book a spa service" },
-  { label: "Join Fitness", href: "/join-fitness", icon: Dumbbell, description: "Gym memberships" },
-  { label: "Coworking", href: "/the-hive", icon: Building2, description: "Private offices" },
-  { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, description: "Daily rewards & prizes" },
+  { label: "Voice Vault", href: "/voice-vault", icon: Mic, description: "Studio info" },
 ];
 
 // Shop dropdown items
