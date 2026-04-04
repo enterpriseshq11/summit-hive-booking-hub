@@ -1516,6 +1516,8 @@ export type Database = {
           last_contacted_at: string | null
           lead_name: string
           lost_reason: string | null
+          pandadoc_document_id: string | null
+          pandadoc_status: string | null
           phone: string | null
           revenue_attached: number | null
           source: Database["public"]["Enums"]["crm_lead_source"] | null
@@ -1540,6 +1542,8 @@ export type Database = {
           last_contacted_at?: string | null
           lead_name: string
           lost_reason?: string | null
+          pandadoc_document_id?: string | null
+          pandadoc_status?: string | null
           phone?: string | null
           revenue_attached?: number | null
           source?: Database["public"]["Enums"]["crm_lead_source"] | null
@@ -1564,6 +1568,8 @@ export type Database = {
           last_contacted_at?: string | null
           lead_name?: string
           lost_reason?: string | null
+          pandadoc_document_id?: string | null
+          pandadoc_status?: string | null
           phone?: string | null
           revenue_attached?: number | null
           source?: Database["public"]["Enums"]["crm_lead_source"] | null
@@ -3952,6 +3958,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pandadoc_template_tags: {
+        Row: {
+          business_unit: string
+          created_at: string
+          created_by: string | null
+          id: string
+          template_id: string
+          template_name: string | null
+        }
+        Insert: {
+          business_unit: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          template_id: string
+          template_name?: string | null
+        }
+        Update: {
+          business_unit?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          template_id?: string
+          template_name?: string | null
+        }
+        Relationships: []
+      }
+      pandadoc_webhook_events: {
+        Row: {
+          document_id: string | null
+          event_type: string
+          id: string
+          payload: Json | null
+          processed: boolean
+          received_at: string
+        }
+        Insert: {
+          document_id?: string | null
+          event_type: string
+          id?: string
+          payload?: Json | null
+          processed?: boolean
+          received_at?: string
+        }
+        Update: {
+          document_id?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          processed?: boolean
+          received_at?: string
+        }
+        Relationships: []
       }
       payment_schedules: {
         Row: {
