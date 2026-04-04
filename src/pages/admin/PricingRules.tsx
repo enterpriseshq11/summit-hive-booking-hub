@@ -90,6 +90,7 @@ export default function AdminPricingRules() {
       valid_from: rule.valid_from || "",
       valid_until: rule.valid_until || "",
       is_active: rule.is_active ?? true,
+      stripe_price_id: (rule as any).stripe_price_id || "",
     });
     setShowDialog(true);
   };
