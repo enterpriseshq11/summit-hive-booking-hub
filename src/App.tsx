@@ -88,6 +88,7 @@ import AdminStripeMappingPage from "./pages/admin/StripeMappingPage";
 import AdminCommissionRulesPage from "./pages/admin/CommissionRulesPage";
 import AdminStripeConnectionPage from "./pages/admin/StripeConnectionPage";
 import AdminStripeTransactions from "./pages/admin/StripeTransactions";
+import AdminFitnessMemberships from "./pages/admin/FitnessMemberships";
 import IntakePage from "./pages/intake/IntakePage";
 
 // Command Center / CRM Pages

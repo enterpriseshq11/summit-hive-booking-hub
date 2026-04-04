@@ -523,6 +523,10 @@ serve(async (req) => {
         if (subscriptionId) {
           await supabase.from("memberships").update({ status: "past_due" })
             .eq("stripe_subscription_id", subscriptionId);
+
+          // Update fitness_memberships
+          await supabase.from("fitness_memberships").update({ status: "payment_failed" })
+            .eq("stripe_subscription_id", subscriptionId);
         }
         break;
       }
