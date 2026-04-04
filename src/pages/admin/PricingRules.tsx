@@ -236,7 +236,7 @@ export default function AdminPricingRules() {
               <Eye className="h-4 w-4 mr-2" />
               Preview Price
             </Button>
-            <Button onClick={() => { setEditingRule(null); setForm({ name: "", description: "", business_id: "", bookable_type_id: "", package_id: "", rule_type: "peak_hours", modifier_type: "percentage", modifier_value: 0, priority: 100, conditions: {}, valid_from: "", valid_until: "", is_active: true }); setShowDialog(true); }}>
+            <Button onClick={() => { setEditingRule(null); setForm({ name: "", description: "", business_id: "", bookable_type_id: "", package_id: "", rule_type: "peak_hours", modifier_type: "percentage", modifier_value: 0, priority: 100, conditions: {}, valid_from: "", valid_until: "", is_active: true, stripe_price_id: "" }); setShowDialog(true); }}>
               <Plus className="h-4 w-4 mr-2" />
               Add Rule
             </Button>
