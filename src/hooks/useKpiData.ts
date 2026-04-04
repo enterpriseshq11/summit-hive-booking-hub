@@ -200,7 +200,7 @@ export function useOpsKpis() {
         .from("hive_private_offices")
         .select("id, status");
       const totalOffices = offices?.length || 0;
-      const occupiedOffices = offices?.filter((o: any) => o.status === "booked").length || 0;
+      const occupiedOffices = offices?.filter((o: any) => o.status === "leased").length || 0;
       const availableOffices = totalOffices - occupiedOffices;
 
       return {

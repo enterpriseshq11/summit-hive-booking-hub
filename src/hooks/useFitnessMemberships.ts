@@ -83,27 +83,25 @@ export function useCreateFitnessMembership() {
       let stripeSubscriptionId: string | null = null;
       let nextBillingDate: string | null = null;
 
-      try {
-        const { data: stripeResult, error: stripeError } = await supabase.functions.invoke(
-          "fitness-membership-stripe",
-          {
-            body: {
-              action: "create",
-              name: `${input.first_name} ${input.last_name}`,
-              email: input.email,
-              monthly_amount: input.monthly_amount,
-              membership_type: input.membership_type,
-            },
-          }
-        );
-        if (!stripeError && stripeResult) {
-          stripeCustomerId = stripeResult.customer_id;
-          stripeSubscriptionId = stripeResult.subscription_id;
-          nextBillingDate = stripeResult.next_billing_date;
+      const { data: stripeResult, error: stripeError } = await supabase.functions.invoke(
+        "fitness-membership-stripe",
+        {
+          body: {
+            action: "create",
+            name: `${input.first_name} ${input.last_name}`,
+            email: input.email,
+            monthly_amount: input.monthly_amount,
+            membership_type: input.membership_type,
+          },
         }
-      } catch (e) {
-        console.warn("Stripe subscription creation failed:", e);
+      );
+      if (stripeError || !stripeResult?.customer_id) {
+        const errMsg = stripeError?.message || stripeResult?.error || "Stripe subscription creation failed";
+        throw new Error(`Stripe billing setup failed: ${errMsg}. Member was not created.`);
       }
+      stripeCustomerId = stripeResult.customer_id;
+      stripeSubscriptionId = stripeResult.subscription_id;
+      nextBillingDate = stripeResult.next_billing_date;
 
       let leadId: string | null = null;
       try {
