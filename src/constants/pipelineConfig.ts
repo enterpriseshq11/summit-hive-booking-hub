@@ -14,8 +14,7 @@ export const statusLabels: Record<CrmLeadStatus, string> = {
   contract_sent: "Contract Out",
   deposit_pending: "Deposit Received",
   booked: "Booked",
-  won: "Completed", // legacy fallback
-  completed: "Completed",
+  won: "Completed",
   follow_up_needed: "Follow Up Needed",
   no_response: "No Response",
   lost: "Lost",
@@ -33,14 +32,17 @@ export const statusColors: Record<CrmLeadStatus, string> = {
   contract_sent: "bg-purple-500/20 text-purple-400 border-purple-500/50",
   deposit_pending: "bg-amber-600/20 text-amber-400 border-amber-600/50",
   booked: "bg-green-500/20 text-green-400 border-green-500/50",
-  won: "bg-green-500/20 text-green-400 border-green-500/50",
-  completed: "bg-emerald-600/20 text-emerald-400 border-emerald-600/50",
+  won: "bg-emerald-600/20 text-emerald-400 border-emerald-600/50",
   follow_up_needed: "bg-yellow-600/20 text-yellow-300 border-yellow-600/50",
   no_response: "bg-zinc-600/20 text-zinc-400 border-zinc-600/50",
   lost: "bg-zinc-800/40 text-zinc-500 border-zinc-700/50",
 };
 
-/** Pipeline stages in display order — canonical 11 stages */
+/** Pipeline stages in display order — canonical 11 stages
+ * NOTE: The DB enum uses "won" for Completed and "completed" is stored in
+ * ghl_pipeline_stage_webhooks. The pipeline board maps "won" → "Completed"
+ * display label. The GHL webhook table uses "completed" as stage_name.
+ */
 export const pipelineStages: { status: CrmLeadStatus; label: string; borderColor: string }[] = [
   { status: "new", label: "New Lead", borderColor: "border-zinc-500" },
   { status: "contact_attempted", label: "Contact Attempted", borderColor: "border-yellow-500" },
@@ -51,7 +53,7 @@ export const pipelineStages: { status: CrmLeadStatus; label: string; borderColor
   { status: "contract_sent", label: "Contract Out", borderColor: "border-purple-500" },
   { status: "deposit_pending", label: "Deposit Received", borderColor: "border-amber-600" },
   { status: "booked", label: "Booked", borderColor: "border-green-500" },
-  { status: "completed", label: "Completed", borderColor: "border-emerald-600" },
+  { status: "won", label: "Completed", borderColor: "border-emerald-600" },
   { status: "lost", label: "Lost", borderColor: "border-zinc-700" },
 ];
 
@@ -90,7 +92,7 @@ export function calculatePriorityScore(lead: {
     case "no_response": score -= 5; break;
     case "lost": score -= 10; break;
     case "booked": score -= 3; break;
-    case "completed": score -= 5; break;
+    case "won": score -= 5; break;
   }
 
   if (lead.temperature === "hot") score += 10;
