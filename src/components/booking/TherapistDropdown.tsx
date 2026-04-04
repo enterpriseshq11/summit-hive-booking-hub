@@ -34,11 +34,10 @@ export function TherapistDropdown({ className }: TherapistDropdownProps) {
 
   const { data: spaWorkers = [], isLoading } = useActiveSpaWorkers();
 
-  // Build therapist list from database + always include Lindsey
+  // Build therapist list from database + default entry
   const therapists: Therapist[] = [
-    LINDSEY_FALLBACK,
+    DEFAULT_BOOKING_ENTRY,
     ...spaWorkers
-      .filter(w => w.display_name.toLowerCase() !== "lindsey") // Avoid duplicate Lindsey
       .map(w => ({
         id: w.id,
         name: w.display_name,
