@@ -348,5 +348,6 @@ export const KAE_TILES: KpiTileConfig[] = [
   { id: "leads_unit", title: "Lead Volume by Unit", category: "leads", size: "large" },
   { id: "promotions_active", title: "Active Promotions", category: "operations", size: "small" },
   { id: "pipeline_rate_top", title: "Lead to Responded Rate", category: "leads", size: "small" },
-  { id: "cost_per_lead", title: "Cost Per Lead", category: "leads", size: "medium" },
+  { id: "cost_per_lead", title: "Cost Per Lead", category: "leads", size: "medium", href: "/admin/marketing/ad-tracking" },
+  { id: "ad_spend_month", title: "Total Ad Spend This Month", category: "revenue", size: "medium", href: "/admin/marketing/ad-tracking" },
 ];
