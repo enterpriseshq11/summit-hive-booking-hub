@@ -2526,6 +2526,42 @@ export type Database = {
         }
         Relationships: []
       }
+      edge_function_errors: {
+        Row: {
+          error_message: string
+          function_name: string
+          id: string
+          occurred_at: string
+          payload: Json | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          stack_trace: string | null
+        }
+        Insert: {
+          error_message: string
+          function_name: string
+          id?: string
+          occurred_at?: string
+          payload?: Json | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          stack_trace?: string | null
+        }
+        Update: {
+          error_message?: string
+          function_name?: string
+          id?: string
+          occurred_at?: string
+          payload?: Json | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          stack_trace?: string | null
+        }
+        Relationships: []
+      }
       employee_notes: {
         Row: {
           content: string
@@ -6198,6 +6234,27 @@ export type Database = {
           email?: string
           id?: string
           role?: string
+        }
+        Relationships: []
+      }
+      user_onboarding: {
+        Row: {
+          completed_at: string
+          id: string
+          role_at_completion: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          role_at_completion?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          role_at_completion?: string | null
+          user_id?: string
         }
         Relationships: []
       }

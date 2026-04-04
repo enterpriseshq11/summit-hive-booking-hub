@@ -38,9 +38,9 @@ export default function Spa() {
     setShowBookingForm(false);
   };
   
-  // Navigate to Lindsey's booking page
-  const goToBookWithLindsey = () => {
-    navigate('/book-with-lindsey');
+  // Navigate to spa booking page
+  const goToSpaBooking = () => {
+    navigate('/spa');
   };
   
   const openRequestModal = (service?: "massage" | "recovery" | "wellness") => {
@@ -51,8 +51,8 @@ export default function Spa() {
     setShowBookingForm(true);
   };
 
-  // Lindsey's specialties
-  const lindseySpecialties = [{
+  // Spa specialties
+  const spaSpecialties = [{
     icon: Heart,
     label: "Deep Tissue & Therapeutic Massage"
   }, {
@@ -118,7 +118,7 @@ export default function Spa() {
                 Expert Care. Premium Experience.
               </p>
               <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl">
-                Professional recovery, massage therapy, and wellness treatments—personally delivered by Lindsey.
+                Professional recovery, massage therapy, and wellness treatments—professionally delivered by our licensed therapists.
               </p>
               
               {/* Hero CTAs */}
@@ -151,7 +151,7 @@ export default function Spa() {
                   </Label>
                   <div className="flex gap-2">
                     <Input id="booking-contact" type="text" placeholder="Enter your email or phone number" value={bookingContact} onChange={e => setBookingContact(e.target.value)} className="bg-background/90 border-accent/30 text-foreground placeholder:text-muted-foreground" />
-                    <Button onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0">
+                    <Button onClick={goToSpaBooking} className="bg-accent hover:bg-accent/90 text-primary font-semibold flex-shrink-0">
                       Request
                     </Button>
                   </div>
@@ -213,7 +213,7 @@ export default function Spa() {
             { name: "Natural Herbal Bath", price: 155 },
             { name: "Cold Plunge Bath", price: 155 },
           ].map((svc) => (
-            <Card key={svc.name} className="hover:shadow-gold-lg hover:border-accent/50 transition-all duration-300 shadow-premium group border-2 border-transparent cursor-pointer" onClick={goToBookWithLindsey} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToBookWithLindsey()}>
+            <Card key={svc.name} className="hover:shadow-gold-lg hover:border-accent/50 transition-all duration-300 shadow-premium group border-2 border-transparent cursor-pointer" onClick={goToSpaBooking} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && goToSpaBooking()}>
               <CardContent className="p-5">
                 <h3 className="font-semibold text-base group-hover:text-accent transition-colors mb-3">{svc.name}</h3>
                 <div className="flex items-baseline justify-between">
@@ -254,7 +254,7 @@ export default function Spa() {
                       </li>
                     ))}
                   </ul>
-                  <Button size="sm" onClick={goToBookWithLindsey} className="w-full mt-4 bg-accent hover:bg-accent/90 text-primary font-semibold text-xs">
+                  <Button size="sm" onClick={goToSpaBooking} className="w-full mt-4 bg-accent hover:bg-accent/90 text-primary font-semibold text-xs">
                     Get Started
                   </Button>
                 </CardContent>
@@ -308,7 +308,7 @@ export default function Spa() {
                 </ul>
 
                 <div className="text-center">
-                  <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
+                  <Button size="lg" onClick={goToSpaBooking} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_stretching_cta_click">
                     Book Assisted Stretching
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
@@ -321,10 +321,10 @@ export default function Spa() {
 
 
 
-      {/* What's Included section moved below Meet Lindsey per spec */}
+      {/* What's Included section moved below Meet Our Therapist per spec */}
 
 
-      {/* Meet Lindsey Section - Single Provider Feature */}
+      {/* Meet Our Therapist Section - Single Provider Feature */}
       <section id="spa-providers" className="py-16 bg-muted/30">
         <div className="container">
           {/* Trust strip */}
@@ -344,7 +344,7 @@ export default function Spa() {
           </div>
           
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Meet Lindsey</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">Meet Our Therapist</h2>
             <p className="text-accent text-lg font-medium">Your Personal Recovery & Restoration Specialist</p>
           </div>
 
@@ -353,7 +353,7 @@ export default function Spa() {
               <div className="grid md:grid-cols-3 gap-0">
                 {/* Photo Column */}
                 <div className="md:col-span-1 bg-accent/5 flex items-center justify-center p-8">
-                  {/* TODO: Replace with Lindsey headshot when available */}
+                  {/* TODO: Replace with therapist headshot when available */}
                   <div className="h-48 w-48 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center border-4 border-accent/30 shadow-gold">
                     <User className="h-24 w-24 text-accent/60" />
                   </div>
@@ -362,7 +362,7 @@ export default function Spa() {
                 {/* Info Column */}
                 <div className="md:col-span-2 p-8">
                   <div className="mb-4">
-                    <h3 className="text-2xl font-bold mb-1">Lindsey</h3>
+                    <h3 className="text-2xl font-bold mb-1">Nasiya</h3>
                     <p className="text-accent font-medium">Licensed Massage Therapist & Recovery Specialist</p>
                     <p className="text-muted-foreground text-sm">Restoration Lounge Lead Therapist</p>
                   </div>
@@ -370,7 +370,7 @@ export default function Spa() {
                   {/* Bio */}
                   <div className="space-y-4 mb-6 text-muted-foreground leading-relaxed">
                     <p>
-                      Lindsey is the heart of The Restoration Lounge. She specializes in results-driven recovery treatments designed to help clients move better, feel better, and perform at their highest level—whether you're an athlete, professional, or simply someone who takes recovery seriously.
+                      Nasiya is the heart of The Restoration Lounge. She specializes in results-driven recovery treatments designed to help clients move better, feel better, and perform at their highest level—whether you're an athlete, professional, or simply someone who takes recovery seriously.
                     </p>
                     <p>
                       Her approach blends clinical expertise with a premium, personalized experience. Every session is intentional, customized, and focused on real outcomes—not cookie-cutter spa treatments.
@@ -381,7 +381,7 @@ export default function Spa() {
                   <div className="mb-6">
                     <h4 className="font-semibold mb-3 text-sm uppercase tracking-wide text-accent">Specialties</h4>
                     <div className="flex flex-wrap gap-2">
-                      {lindseySpecialties.map((specialty, idx) => <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-accent/10 rounded-full text-sm border border-accent/20">
+                      {spaSpecialties.map((specialty, idx) => <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-accent/10 rounded-full text-sm border border-accent/20">
                           <specialty.icon className="h-4 w-4 text-accent flex-shrink-0" />
                           <span>{specialty.label}</span>
                         </div>)}
@@ -391,17 +391,17 @@ export default function Spa() {
                   {/* Trust paragraph */}
                   <div className="p-4 bg-primary/5 rounded-lg border border-border mb-6">
                     <p className="text-sm text-muted-foreground italic">
-                      Clients choose Lindsey because she listens, adapts, and delivers results. This isn't a high-volume spa model—it's focused, hands-on recovery care built around what your body actually needs.
+                      Clients choose Nasiya because she listens, adapts, and delivers results. This isn't a high-volume spa model—it's focused, hands-on recovery care built around what your body actually needs.
                     </p>
                   </div>
 
                   {/* CTAs */}
                   <div className="flex flex-wrap gap-3">
-                    <Button size="lg" onClick={goToBookWithLindsey} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_lindsey_cta_click">
+                    <Button size="lg" onClick={goToSpaBooking} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="spa_therapist_cta_click">
                       Book Now
                       <ArrowRight className="h-5 w-5 ml-2" />
                     </Button>
-                    <Button size="lg" variant="outline" onClick={() => setShowPricingModal(true)} className="border-accent text-accent hover:bg-accent/10" data-event="spa_lindsey_pricing_click">
+                    <Button size="lg" variant="outline" onClick={() => setShowPricingModal(true)} className="border-accent text-accent hover:bg-accent/10" data-event="spa_therapist_pricing_click">
                       <DollarSign className="h-5 w-5 mr-2" />
                       View Pricing
                     </Button>
@@ -781,7 +781,7 @@ export default function Spa() {
             className="w-full mt-4 bg-accent hover:bg-accent/90 text-primary"
             onClick={() => {
               setShowPricingModal(false);
-              goToBookWithLindsey();
+              goToSpaBooking();
             }}
           >
             Book Now
@@ -803,7 +803,7 @@ export default function Spa() {
       <FloatingHelpDrawer businessType="spa" phoneNumber={SITE_CONFIG.divisions.spa.phone} email={SITE_CONFIG.contact.email} />
 
       {/* Sticky Mobile CTA */}
-      <StickyMobileSpaCTA onRequestService={goToBookWithLindsey} />
+      <StickyMobileSpaCTA onRequestService={goToSpaBooking} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />

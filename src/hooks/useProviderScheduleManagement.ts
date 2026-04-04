@@ -152,8 +152,8 @@ export function useProviderScheduleManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider-schedule'] });
-      queryClient.invalidateQueries({ queryKey: ['lindsey-availability'] });
-      queryClient.invalidateQueries({ queryKey: ['lindsey-availability-windows'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-availability'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-availability-windows'] });
     },
   });
 
@@ -187,7 +187,7 @@ export function useProviderScheduleManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider-settings'] });
-      queryClient.invalidateQueries({ queryKey: ['lindsey-availability'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-availability'] });
       toast.success('Settings saved');
     },
   });
@@ -209,8 +209,8 @@ export function useProviderScheduleManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider-blackouts'] });
-      queryClient.invalidateQueries({ queryKey: ['lindsey-availability'] });
-      queryClient.invalidateQueries({ queryKey: ['lindsey-blackouts'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-availability'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-blackouts'] });
     },
   });
 
@@ -226,8 +226,8 @@ export function useProviderScheduleManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider-blackouts'] });
-      queryClient.invalidateQueries({ queryKey: ['lindsey-availability'] });
-      queryClient.invalidateQueries({ queryKey: ['lindsey-blackouts'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-availability'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-blackouts'] });
     },
   });
 
@@ -250,7 +250,7 @@ export function useProviderScheduleManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider-recurring-blocks'] });
-      queryClient.invalidateQueries({ queryKey: ['lindsey-availability'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-availability'] });
     },
   });
 
@@ -266,7 +266,7 @@ export function useProviderScheduleManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider-recurring-blocks'] });
-      queryClient.invalidateQueries({ queryKey: ['lindsey-availability'] });
+      queryClient.invalidateQueries({ queryKey: ['spa-availability'] });
     },
   });
 

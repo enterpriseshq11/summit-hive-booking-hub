@@ -88,6 +88,8 @@ import AdminCommissionRulesPage from "./pages/admin/CommissionRulesPage";
 import AdminStripeConnectionPage from "./pages/admin/StripeConnectionPage";
 import AdminStripeTransactions from "./pages/admin/StripeTransactions";
 import AdminFitnessMemberships from "./pages/admin/FitnessMemberships";
+import AdminErrorLog from "./pages/admin/ErrorLog";
+import AdminOnboarding from "./pages/admin/Onboarding";
 import IntakePage from "./pages/intake/IntakePage";
 
 // Command Center / CRM Pages
@@ -298,6 +300,8 @@ function AppInner() {
           <Route path="/admin/settings/stripe-mapping" element={<AdminStripeMappingPage />} />
           <Route path="/admin/commissions/rules" element={<AdminCommissionRulesPage />} />
           <Route path="/admin/settings/stripe-connection" element={<AdminStripeConnectionPage />} />
+          <Route path="/admin/settings/error-log" element={<AdminErrorLog />} />
+          <Route path="/admin/onboarding" element={<AdminOnboarding />} />
 
           {/* Legacy admin routes */}
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />

@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, addMinutes, parseISO, isBefore, isAfter, startOfDay, addDays, getDay } from "date-fns";
 import { BLOCKING_BOOKING_STATUSES } from "@/constants/bookingStatuses";
 
-// Lindsey's default working hours (9 AM - 9 PM, 7 days/week)
+// Default spa working hours (9 AM - 9 PM, 7 days/week)
 const DEFAULT_WORKING_HOURS = {
   start: "09:00",
   end: "21:00",
@@ -46,21 +46,21 @@ export interface DayAvailability {
   isWorkingDay: boolean;
 }
 
-interface UseLindseyAvailabilityParams {
+interface UseSpaAvailabilityParams {
   selectedDate?: Date;
   selectedDuration?: number; // in minutes
 }
 
 /**
- * Hook to fetch Lindsey's real-time availability from the database.
+ * Hook to fetch spa worker real-time availability from the database.
  * Checks availability_windows, bookings, and blackout_dates tables.
  */
-export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: UseLindseyAvailabilityParams) {
+export function useSpaAvailability({ selectedDate, selectedDuration = 60 }: UseSpaAvailabilityParams) {
   const spaBusinessId = "4df48af2-39e4-4bd1-a9b3-963de8ef39d7";
 
   // Fetch provider settings for buffer times
   const { data: providerSettings } = useQuery({
-    queryKey: ["lindsey-provider-settings"],
+    queryKey: ["spa-provider-settings"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("provider_settings")
@@ -74,9 +74,9 @@ export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: 
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch availability windows (Lindsey's schedule)
+  // Fetch availability windows (spa schedule)
   const { data: availabilityWindows } = useQuery({
-    queryKey: ["lindsey-availability-windows"],
+    queryKey: ["spa-availability-windows"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("availability_windows")
@@ -91,7 +91,7 @@ export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: 
 
   // Fetch bookings for the next 60 days - ONLY active/blocking statuses
   const { data: bookings } = useQuery({
-    queryKey: ["lindsey-bookings"],
+    queryKey: ["spa-bookings"],
     queryFn: async () => {
       const startDate = format(new Date(), "yyyy-MM-dd");
       const endDate = format(addDays(new Date(), 60), "yyyy-MM-dd");
@@ -112,7 +112,7 @@ export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: 
 
   // Fetch blackout dates
   const { data: blackouts } = useQuery({
-    queryKey: ["lindsey-blackouts"],
+    queryKey: ["spa-blackouts"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("blackout_dates")

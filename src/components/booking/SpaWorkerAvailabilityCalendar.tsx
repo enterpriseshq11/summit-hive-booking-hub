@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useLindseyAvailability, isPromoDate, calculateServicePrice } from "@/hooks/useLindseyAvailability";
+import { useSpaAvailability, isPromoDate, calculateServicePrice } from "@/hooks/useSpaAvailability";
 import { useSpaPaymentsConfig } from "@/hooks/useSpaPaymentsConfig";
 import { SpaWorkerService } from "@/hooks/useSpaWorkerServices";
 
@@ -93,10 +93,10 @@ type BookingStep = "service" | "calendar" | "time" | "contact" | "confirm";
 
 // In request mode (payments OFF), we skip calendar/time steps entirely
 
-interface LindseyAvailabilityCalendarProps {
+interface SpaWorkerAvailabilityCalendarProps {
   onBookingComplete?: () => void;
-  workerId?: string; // If provided, use this worker instead of Lindsey
-  workerServices?: SpaWorkerService[]; // Services from database for non-Lindsey workers
+  workerId?: string;
+  workerServices?: SpaWorkerService[];
 }
 
 // Convert database services to component format
@@ -120,7 +120,7 @@ function convertWorkerServices(services: SpaWorkerService[]): Service[] {
   });
 }
 
-export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, workerServices }: LindseyAvailabilityCalendarProps) {
+export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, workerServices }: SpaWorkerAvailabilityCalendarProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -163,7 +163,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
     getAvailabilityMap,
     getDayAvailability,
     isLoading: isLoadingAvailability,
-  } = useLindseyAvailability({
+  } = useSpaAvailability({
     selectedDate,
     selectedDuration: selectedDuration || 60,
   });
@@ -186,19 +186,19 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
       toast.success("Payment successful. Your booking is confirmed.");
 
       try {
-        const raw = sessionStorage.getItem(`lindsey_booking_${id}`);
+        const raw = sessionStorage.getItem(`spa_booking_${id}`);
         if (raw) setCompletedSummary(JSON.parse(raw));
       } catch {
         // ignore
       }
 
       // Clean the URL so refreshing doesn't re-trigger toasts.
-      navigate("/book-with-lindsey", { replace: true });
+      navigate("/spa", { replace: true });
     }
 
     if (booking === "cancelled") {
       toast.error("Payment cancelled. Your time is not reserved until payment is completed.");
-      navigate("/book-with-lindsey", { replace: true });
+      navigate("/spa", { replace: true });
     }
   }, [navigate, searchParams]);
 
@@ -409,8 +409,8 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
         endDatetime = `${format(selectedDate!, "yyyy-MM-dd")}T${endTime}:00`;
       }
 
-      // Call lindsey-checkout edge function
-      const { data, error } = await supabase.functions.invoke("lindsey-checkout", {
+      // Call create-checkout edge function for spa bookings
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           service_id: selectedService,
           service_name: serviceData?.name || "Massage",
@@ -523,7 +523,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
               totalPaid: breakdown?.totalDue,
               total: price,
             };
-            sessionStorage.setItem(`lindsey_booking_${bookingId}`, JSON.stringify(summary));
+            sessionStorage.setItem(`spa_booking_${bookingId}`, JSON.stringify(summary));
           } catch {
             // ignore
           }
@@ -592,7 +592,7 @@ export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, worke
   const currentStepIndex = steps.findIndex(s => s.key === step);
 
   return (
-    <Card ref={calendarStepRef} id="lindsey-booking-step-2" className="shadow-premium border-border overflow-hidden scroll-mt-24">
+    <Card ref={calendarStepRef} id="spa-booking-step-2" className="shadow-premium border-border overflow-hidden scroll-mt-24">
       {/* Gold accent line */}
       <div className="h-1 bg-accent" />
       

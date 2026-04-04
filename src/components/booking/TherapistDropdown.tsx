@@ -13,12 +13,12 @@ export interface Therapist {
   available: boolean;
 }
 
-// Static fallback for Lindsey (always available as spa_lead)
-const LINDSEY_FALLBACK: Therapist = {
-  id: "lindsey",
+// Static fallback entry (always available as default booking)
+const DEFAULT_BOOKING_ENTRY: Therapist = {
+  id: "default-booking",
   name: "Book Now",
   subtitle: "Licensed Massage Therapist",
-  route: "/book-with-lindsey#availability-calendar",
+  route: "/spa#availability-calendar",
   available: true,
 };
 
@@ -34,11 +34,10 @@ export function TherapistDropdown({ className }: TherapistDropdownProps) {
 
   const { data: spaWorkers = [], isLoading } = useActiveSpaWorkers();
 
-  // Build therapist list from database + always include Lindsey
+  // Build therapist list from database + default entry
   const therapists: Therapist[] = [
-    LINDSEY_FALLBACK,
+    DEFAULT_BOOKING_ENTRY,
     ...spaWorkers
-      .filter(w => w.display_name.toLowerCase() !== "lindsey") // Avoid duplicate Lindsey
       .map(w => ({
         id: w.id,
         name: w.display_name,
@@ -153,4 +152,4 @@ export function TherapistDropdown({ className }: TherapistDropdownProps) {
 }
 
 // Export static list for backwards compatibility
-export const THERAPISTS: Therapist[] = [LINDSEY_FALLBACK];
+export const THERAPISTS: Therapist[] = [DEFAULT_BOOKING_ENTRY];

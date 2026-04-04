@@ -40,7 +40,7 @@ export const SPA_SPECIALS: Special[] = [
     description: "Book a massage and get your second one free. Use promo code BOGOMASSAGE at checkout.",
     badge: "BOGO",
     ctaLabel: "Book a Massage",
-    ctaRoute: "/book-with-lindsey",
+    ctaRoute: "/spa",
   },
   {
     id: "couples-reset",
