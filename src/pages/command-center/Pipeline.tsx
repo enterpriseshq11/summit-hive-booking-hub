@@ -551,19 +551,37 @@ export default function CommandCenterPipeline() {
   };
 
   const fireGhlStageWebhookFromPipeline = useCallback(async (lead: any, previousStage: string, newStage: string) => {
+    // Check ghl_sync_in_progress to prevent infinite loop
     try {
-      const { data: webhookConfig } = await (supabase as any)
-        .from("ghl_pipeline_stage_webhooks")
-        .select("webhook_url")
-        .eq("stage_key", newStage)
+      const { data: freshLead } = await supabase
+        .from("crm_leads")
+        .select("ghl_sync_in_progress")
+        .eq("id", lead.id)
         .maybeSingle();
 
-      if (!webhookConfig?.webhook_url) {
+      if ((freshLead as any)?.ghl_sync_in_progress) {
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
           metadata: {
             action: "ghl_webhook_skipped",
-            message: `GHL webhook skipped — no URL configured for ${STAGE_LABELS[newStage] || newStage} stage`,
+            message: `GHL webhook skipped — inbound sync in progress, preventing loop`,
+          },
+        });
+        return;
+      }
+
+      const { data: webhookConfig } = await (supabase as any)
+        .from("ghl_pipeline_stage_webhooks")
+        .select("webhook_url, is_active")
+        .eq("stage_name", newStage)
+        .maybeSingle();
+
+      if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {
+        await supabase.from("crm_activity_events").insert({
+          event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
+          metadata: {
+            action: "ghl_webhook_skipped",
+            message: `GHL webhook skipped — no URL configured or inactive for ${STAGE_LABELS[newStage] || newStage} stage`,
           },
         });
         return;
@@ -591,7 +609,7 @@ export default function CommandCenterPipeline() {
         body: JSON.stringify(payload),
       });
 
-      const statusText = res.ok ? `HTTP ${res.status}` : `HTTP ${res.status}`;
+      const statusText = `HTTP ${res.status}`;
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
         metadata: {

@@ -26,8 +26,6 @@ serve(async (req) => {
     const body = await req.json();
     logStep("Webhook received", { event: body?.event });
 
-    // PandaDoc doesn't support webhook signatures in the traditional sense.
-    // They send a shared key header if configured. Check if available.
     const webhookKey = Deno.env.get("PANDADOC_WEBHOOK_KEY");
     const headerKey = req.headers.get("x-pandadoc-signature");
     if (webhookKey && headerKey && headerKey !== webhookKey) {
@@ -53,10 +51,9 @@ serve(async (req) => {
       logStep("Document completed", { documentId });
 
       if (documentId) {
-        // Find lead with this PandaDoc document ID
         const { data: lead } = await supabase
           .from("crm_leads")
-          .select("id, lead_name, business_unit, status, assigned_employee_id, pandadoc_status")
+          .select("id, lead_name, business_unit, status, assigned_employee_id, pandadoc_status, ghl_sync_in_progress")
           .eq("pandadoc_document_id", documentId)
           .maybeSingle();
 
@@ -66,37 +63,74 @@ serve(async (req) => {
             .update({ pandadoc_status: "completed" })
             .eq("id", lead.id);
 
-          // Move to deposit_received if currently at contract_out
-          if (lead.status === "contract_out") {
+          // Move to deposit_pending if currently at contract_sent
+          if (lead.status === "contract_sent") {
             await supabase.from("crm_leads")
-              .update({ status: "deposit_received" })
+              .update({ status: "deposit_pending" })
               .eq("id", lead.id);
 
-            // Fire GHL webhook for stage change
-            try {
-              const ghlUrl = await supabase
-                .from("admin_settings")
-                .select("value")
-                .eq("key", "ghl_webhook_url")
-                .maybeSingle();
+            // Fire GHL webhook for deposit_pending stage — query ghl_pipeline_stage_webhooks
+            if (!lead.ghl_sync_in_progress) {
+              try {
+                const { data: webhookConfig } = await supabase
+                  .from("ghl_pipeline_stage_webhooks")
+                  .select("webhook_url, is_active")
+                  .eq("stage_name", "deposit_pending")
+                  .maybeSingle();
 
-              if (ghlUrl?.data?.value) {
-                await fetch(ghlUrl.data.value, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    lead_id: lead.id,
-                    lead_name: lead.lead_name,
-                    business_unit: lead.business_unit,
-                    new_stage_key: "deposit_received",
-                    new_stage_name: "Deposit Received",
-                    trigger: "pandadoc_signed",
-                    timestamp: new Date().toISOString(),
-                  }),
+                if (webhookConfig?.webhook_url && webhookConfig.is_active) {
+                  const ghlRes = await fetch(webhookConfig.webhook_url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      event: "pipeline_stage_changed",
+                      lead_id: lead.id,
+                      lead_name: lead.lead_name,
+                      business_unit: lead.business_unit,
+                      previous_stage_key: "contract_sent",
+                      previous_stage_name: "Contract Sent",
+                      new_stage_key: "deposit_pending",
+                      new_stage_name: "Deposit Pending",
+                      trigger: "pandadoc_signed",
+                      timestamp: new Date().toISOString(),
+                    }),
+                  });
+
+                  const statusText = `HTTP ${ghlRes.status}`;
+                  await supabase.from("crm_activity_events").insert({
+                    event_type: "lead_updated" as any,
+                    entity_type: "lead",
+                    entity_id: lead.id,
+                    metadata: {
+                      action: ghlRes.ok ? "ghl_webhook_fired" : "ghl_webhook_failed",
+                      message: `GHL webhook ${ghlRes.ok ? "fired" : "FAILED"} — stage moved to Deposit Pending — ${statusText}`,
+                    },
+                  });
+                } else {
+                  await supabase.from("crm_activity_events").insert({
+                    event_type: "lead_updated" as any,
+                    entity_type: "lead",
+                    entity_id: lead.id,
+                    metadata: {
+                      action: "ghl_webhook_skipped",
+                      message: "GHL webhook skipped — no URL configured or inactive for deposit_pending stage",
+                    },
+                  });
+                }
+              } catch (e) {
+                logStep("GHL webhook failed", { error: String(e) });
+                await supabase.from("crm_activity_events").insert({
+                  event_type: "lead_updated" as any,
+                  entity_type: "lead",
+                  entity_id: lead.id,
+                  metadata: {
+                    action: "ghl_webhook_failed",
+                    message: `GHL webhook FAILED — Error: ${String(e)}`,
+                  },
                 });
               }
-            } catch (e) {
-              logStep("GHL webhook failed", { error: String(e) });
+            } else {
+              logStep("GHL webhook skipped — ghl_sync_in_progress is true", { leadId: lead.id });
             }
           }
 
@@ -129,7 +163,6 @@ serve(async (req) => {
           try {
             const resendKey = Deno.env.get("RESEND_API_KEY");
             if (resendKey) {
-              // Get base_url from admin_settings
               let baseUrl = "https://summit-hive-booking-hub.lovable.app";
               const { data: baseUrlSetting } = await supabase
                 .from("admin_settings")
@@ -169,7 +202,6 @@ serve(async (req) => {
           logStep("Document completed processed for lead", { leadId: lead.id });
         } else {
           logStep("WARNING: No matching lead found for document", { documentId });
-          // Update webhook event with note about missing lead
           await supabase.from("pandadoc_webhook_events")
             .update({ payload: { ...body, _warning: "No matching lead found for this document ID" } })
             .eq("document_id", documentId)
@@ -218,6 +250,8 @@ serve(async (req) => {
           });
 
           logStep("Document declined processed for lead", { leadId: lead.id });
+        } else {
+          logStep("WARNING: No matching lead found for declined document", { documentId });
         }
       }
     }
@@ -237,9 +271,10 @@ serve(async (req) => {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: msg });
-    return new Response(JSON.stringify({ error: msg }), {
+    // Always return 200 to prevent PandaDoc retries on errors
+    return new Response(JSON.stringify({ received: true, error: msg }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: 200,
     });
   }
 });
