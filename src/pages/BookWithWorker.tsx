@@ -9,7 +9,7 @@ import {
   Sparkles, ArrowLeft, CheckCircle, 
   Info, Eye, Gift, Clock, Heart, Star, Loader2
 } from "lucide-react";
-import { LindseyAvailabilityCalendar } from "@/components/booking/LindseyAvailabilityCalendar";
+import { SpaWorkerAvailabilityCalendar } from "@/components/booking/SpaWorkerAvailabilityCalendar";
 import { useSpaPaymentsConfig } from "@/hooks/usePaymentConfigs";
 import { useSpaWorkerBySlug, useWorkerServices, SpaWorkerService } from "@/hooks/useSpaWorkerServices";
 

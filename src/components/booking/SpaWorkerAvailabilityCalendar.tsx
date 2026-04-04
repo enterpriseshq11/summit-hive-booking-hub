@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useLindseyAvailability, isPromoDate, calculateServicePrice } from "@/hooks/useLindseyAvailability";
+import { useSpaAvailability, isPromoDate, calculateServicePrice } from "@/hooks/useSpaAvailability";
 import { useSpaPaymentsConfig } from "@/hooks/useSpaPaymentsConfig";
 import { SpaWorkerService } from "@/hooks/useSpaWorkerServices";
 
