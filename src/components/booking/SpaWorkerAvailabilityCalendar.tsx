@@ -198,7 +198,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
 
     if (booking === "cancelled") {
       toast.error("Payment cancelled. Your time is not reserved until payment is completed.");
-      navigate("/book-with-lindsey", { replace: true });
+      navigate("/spa", { replace: true });
     }
   }, [navigate, searchParams]);
 
