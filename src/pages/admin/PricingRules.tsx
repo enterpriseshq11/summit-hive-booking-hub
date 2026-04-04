@@ -58,6 +58,7 @@ export default function AdminPricingRules() {
     valid_from: "",
     valid_until: "",
     is_active: true,
+    stripe_price_id: "",
   });
 
   const [previewBase, setPreviewBase] = useState(100);
@@ -89,6 +90,7 @@ export default function AdminPricingRules() {
       valid_from: rule.valid_from || "",
       valid_until: rule.valid_until || "",
       is_active: rule.is_active ?? true,
+      stripe_price_id: (rule as any).stripe_price_id || "",
     });
     setShowDialog(true);
   };
@@ -107,6 +109,7 @@ export default function AdminPricingRules() {
         package_id: form.package_id || null,
         valid_from: form.valid_from || null,
         valid_until: form.valid_until || null,
+        stripe_price_id: form.stripe_price_id || null,
       };
 
       if (editingRule) {
@@ -233,7 +236,7 @@ export default function AdminPricingRules() {
               <Eye className="h-4 w-4 mr-2" />
               Preview Price
             </Button>
-            <Button onClick={() => { setEditingRule(null); setForm({ name: "", description: "", business_id: "", bookable_type_id: "", package_id: "", rule_type: "peak_hours", modifier_type: "percentage", modifier_value: 0, priority: 100, conditions: {}, valid_from: "", valid_until: "", is_active: true }); setShowDialog(true); }}>
+            <Button onClick={() => { setEditingRule(null); setForm({ name: "", description: "", business_id: "", bookable_type_id: "", package_id: "", rule_type: "peak_hours", modifier_type: "percentage", modifier_value: 0, priority: 100, conditions: {}, valid_from: "", valid_until: "", is_active: true, stripe_price_id: "" }); setShowDialog(true); }}>
               <Plus className="h-4 w-4 mr-2" />
               Add Rule
             </Button>
@@ -391,6 +394,11 @@ export default function AdminPricingRules() {
               <div>
                 <Label>Priority (higher = applied later, wins conflicts)</Label>
                 <Input type="number" value={form.priority} onChange={(e) => setForm({ ...form, priority: parseInt(e.target.value) || 0 })} />
+              </div>
+              <div>
+                <Label>Stripe Price ID</Label>
+                <Input value={form.stripe_price_id} onChange={(e) => setForm({ ...form, stripe_price_id: e.target.value })} placeholder="price_1ABC..." />
+                <p className="text-xs text-muted-foreground mt-1">Required for online checkout. Find this in your Stripe dashboard.</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

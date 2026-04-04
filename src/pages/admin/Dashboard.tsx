@@ -11,11 +11,11 @@ import { toast } from "sonner";
 import { format, differenceInDays, parseISO } from "date-fns";
 import { KpiTile } from "@/components/admin/KpiTile";
 import {
-  useRevenueKpis, useLeadKpis, useOpsKpis, useTeamKpis,
   DYLAN_DEFAULT_TILES, VICTORIA_TILES, MARK_TILES, NASIYA_TILES,
   ELYSE_TILES, ROSE_TILES, KAE_TILES,
   type KpiTileConfig,
 } from "@/hooks/useKpiData";
+import { useRoleKpis, resolveKpiValue } from "@/hooks/useRoleKpis";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
   type DragEndEvent,
@@ -59,13 +59,25 @@ function SortableTile({
   );
 }
 
-function formatCurrency(amount: number): string {
-  return `$${amount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+function getUserRole(roles: string[] | undefined): string | undefined {
+  if (!roles || roles.length === 0) return undefined;
+  if (roles.includes("owner")) return "owner";
+  if (roles.includes("manager")) return "manager";
+  if (roles.includes("sales_acquisitions")) return "sales_acquisitions";
+  if (roles.includes("spa_lead")) return "spa_lead";
+  if (roles.includes("marketing_lead")) return "marketing_lead";
+  if (roles.includes("ops_lead")) return "ops_lead";
+  if (roles.includes("ads_lead")) return "ads_lead";
+  return "manager";
 }
 
 export default function AdminDashboard() {
   const { authUser } = useAuth();
   const isOwner = authUser?.roles?.includes("owner") || false;
+  const currentRole = getUserRole(authUser?.roles);
+
+  // Consolidated KPI data via role-based DB function
+  const { data: kpiData, refetch: refetchKpis } = useRoleKpis(currentRole);
 
   // Determine which tiles to show based on role
   const getDefaultTiles = useCallback((): KpiTileConfig[] => {
@@ -96,8 +108,7 @@ export default function AdminDashboard() {
     if (!error) {
       setPayrollDate(date);
       setPayrollDateOpen(false);
-      refetchTeam();
-      // Log activity
+      refetchKpis();
       await supabase.from("crm_activity_events").insert({
         event_type: "setting_changed" as any,
         entity_type: "admin_settings",
@@ -132,119 +143,19 @@ export default function AdminDashboard() {
       });
   }, [isOwner, authUser?.id]);
 
-  // KPI data hooks
-  const { data: revenue, refetch: refetchRevenue } = useRevenueKpis();
-  const { data: leads, refetch: refetchLeads } = useLeadKpis(authUser?.id);
-  const { data: ops, refetch: refetchOps } = useOpsKpis();
-  const { data: team, refetch: refetchTeam } = useTeamKpis();
-
   const refetchAll = () => {
-    refetchRevenue();
-    refetchLeads();
-    refetchOps();
-    refetchTeam();
+    refetchKpis();
     toast.success("Dashboard refreshed");
   };
 
-  // Get value for a tile
+  // Get value for a tile from consolidated data
   const getTileValue = (id: string): { value: string | number; subtitle?: string; pending?: boolean } => {
-    switch (id) {
-      case "rev_today":
-        return { value: formatCurrency(revenue?.totalRevenueToday || 0) };
-      case "rev_month":
-        return { value: formatCurrency(revenue?.totalRevenueMonth || 0) };
-      case "stripe_today":
-        return { value: formatCurrency(revenue?.stripePaymentsToday || 0), pending: !revenue?.stripeIntegrated };
-      case "outstanding":
-        return { value: formatCurrency(revenue?.outstandingBalances || 0) };
-      case "rev_summit":
-        return { value: formatCurrency(revenue?.unitRevenue?.summit || 0), subtitle: "This Month" };
-      case "rev_spa":
-        return { value: formatCurrency(revenue?.unitRevenue?.spa || 0), subtitle: "This Month" };
-      case "rev_fitness":
-        return { value: formatCurrency(revenue?.unitRevenue?.fitness || 0), subtitle: "This Month" };
-      case "rev_hive":
-        return { value: formatCurrency(revenue?.unitRevenue?.coworking || 0), subtitle: "This Month" };
-      case "rev_vault":
-        return { value: formatCurrency(revenue?.unitRevenue?.voice_vault || 0), subtitle: "This Month" };
-      case "rev_mobile":
-        return { value: formatCurrency(revenue?.unitRevenue?.mobile_homes || 0), subtitle: "This Month" };
-      case "rev_elevated":
-        return { value: formatCurrency(revenue?.unitRevenue?.elevated_by_elyse || 0), subtitle: "This Month" };
-      case "rev_spa_today":
-        return { value: formatCurrency(0), pending: true, subtitle: "Today" };
-      case "leads_active":
-        return { value: leads?.totalActive || 0 };
-      case "leads_new":
-        return { value: leads?.newLeadsWeek || 0 };
-      case "leads_contacted":
-        return { value: leads?.contactedToday || 0, subtitle: "Today" };
-      case "leads_overdue":
-        return { value: leads?.overdue || 0 };
-      case "leads_hot":
-        return { value: leads?.hotNoContact || 0 };
-      case "pipeline_rate":
-      case "pipeline_rate_top":
-        return { value: `${leads?.conversionRate || 0}%` };
-      case "leads_source":
-        return {
-          value: Object.entries(leads?.sourceBreakdown || {})
-            .map(([k, v]) => `${k}: ${v}`)
-            .join(", ") || "No data",
-        };
-      case "leads_unit":
-        return {
-          value: Object.entries(leads?.unitBreakdown || {})
-            .map(([k, v]) => `${k}: ${v}`)
-            .join(", ") || "No data",
-        };
-      case "leads_new_spa":
-        return { value: leads?.unitBreakdown?.spa || 0 };
-      case "bookings_today":
-      case "bookings_today_spa":
-        return { value: ops?.bookingsToday || 0 };
-      case "bookings_week":
-        return { value: ops?.bookingsWeek || 0 };
-      case "approvals":
-        return { value: ops?.pendingApprovals || 0 };
-      case "offices":
-        return { value: ops?.openOffices || "0/0" };
-      case "memberships":
-        return { value: ops?.activeMemberships || 0 };
-      case "comm_pending":
-        return { value: formatCurrency(team?.commissionPending || 0) };
-      case "comm_approved":
-        return { value: formatCurrency(team?.commissionApproved || 0) };
-      case "comm_paid":
-        return { value: formatCurrency(0), pending: true };
-      case "payroll_next": {
-        if (team?.nextPayrollDate) {
-          try {
-            const d = parseISO(team.nextPayrollDate);
-            const daysLeft = differenceInDays(d, new Date());
-            return {
-              value: format(d, "MMM d, yyyy"),
-              subtitle: daysLeft > 0 ? `${daysLeft} days remaining` : daysLeft === 0 ? "Today" : `${Math.abs(daysLeft)} days overdue`,
-            };
-          } catch {
-            return { value: team.nextPayrollDate, subtitle: "Set in Settings" };
-          }
-        }
-        return { value: "Not Set", subtitle: "Click to set date" };
-      }
-      case "promotions_active":
-        return { value: 0, pending: true };
-      case "schedule_today":
-        return { value: ops?.bookingsToday || 0, subtitle: "Appointments" };
-      case "schedule_gaps":
-        return { value: 0, pending: true, subtitle: "Days with no bookings" };
-      case "pipeline_breakdown":
-        return { value: "—", pending: true };
-      case "cost_per_lead":
-        return { value: "Manual Entry", pending: true };
-      default:
-        return { value: "—" };
+    // Special case for payroll_next — needs separate admin_settings query  
+    if (id === "payroll_next") {
+      const resolved = resolveKpiValue(id, kpiData);
+      return resolved;
     }
+    return resolveKpiValue(id, kpiData);
   };
 
   // DnD
@@ -341,7 +252,7 @@ export default function AdminDashboard() {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={payrollDate || (team?.nextPayrollDate ? parseISO(team.nextPayrollDate) : undefined)}
+                  selected={payrollDate}
                   onSelect={(date) => { if (date) savePayrollDate(date); }}
                   initialFocus
                   className="p-3 pointer-events-auto"
