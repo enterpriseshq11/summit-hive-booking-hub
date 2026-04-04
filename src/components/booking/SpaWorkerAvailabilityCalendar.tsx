@@ -93,10 +93,10 @@ type BookingStep = "service" | "calendar" | "time" | "contact" | "confirm";
 
 // In request mode (payments OFF), we skip calendar/time steps entirely
 
-interface LindseyAvailabilityCalendarProps {
+interface SpaWorkerAvailabilityCalendarProps {
   onBookingComplete?: () => void;
-  workerId?: string; // If provided, use this worker instead of Lindsey
-  workerServices?: SpaWorkerService[]; // Services from database for non-Lindsey workers
+  workerId?: string;
+  workerServices?: SpaWorkerService[];
 }
 
 // Convert database services to component format
