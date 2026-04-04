@@ -12,7 +12,7 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
-const LINDSEY_BOOKABLE_TYPE_ID = "f7c9e18f-3b4c-4c2a-9d85-4a2c067fd8fb";
+const SPA_BOOKABLE_TYPE_ID = "f7c9e18f-3b4c-4c2a-9d85-4a2c067fd8fb";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
