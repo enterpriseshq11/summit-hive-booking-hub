@@ -129,11 +129,11 @@ serve(async (req) => {
           },
         });
 
-        // Move to contract_out if not already past that stage
+        // Move to contract_sent if not already past that stage
         const preContractStages = ["new", "contact_attempted", "responded", "warm_lead", "hot_lead", "proposal_sent"];
         if (lead && preContractStages.includes(lead.status)) {
           await supabase.from("crm_leads")
-            .update({ status: "contract_out" })
+            .update({ status: "contract_sent" })
             .eq("id", lead_id);
         }
 
