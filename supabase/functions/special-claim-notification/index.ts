@@ -207,6 +207,15 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Dynamic base URL from admin_settings
+    const sb = getSupabaseAdmin();
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const { data: baseUrlSetting } = await sb
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
+
     const payload: ClaimPayload = await req.json();
     const { special_id, special_title, business_unit, name, email, phone, message } = payload;
 
