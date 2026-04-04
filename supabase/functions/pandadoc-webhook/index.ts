@@ -270,9 +270,21 @@ serve(async (req) => {
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
     logStep("ERROR", { message: msg });
+
+    // Log to edge_function_errors
+    try {
+      await supabase.from("edge_function_errors").insert({
+        function_name: "pandadoc-webhook",
+        error_message: msg,
+        stack_trace: stack || null,
+        payload: { note: "Error during PandaDoc webhook processing" },
+      });
+    } catch (_) { /* best effort */ }
+
     // Always return 200 to prevent PandaDoc retries on errors
-    return new Response(JSON.stringify({ received: true, error: msg }), {
+    return new Response(JSON.stringify({ received: true, error: "Internal processing error" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

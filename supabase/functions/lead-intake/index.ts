@@ -311,7 +311,23 @@ Deno.serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    const errorStack = err instanceof Error ? err.stack : undefined;
     console.error("Intake form error:", err);
+
+    // Log to edge_function_errors
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const sb = createClient(supabaseUrl, serviceKey);
+      await sb.from("edge_function_errors").insert({
+        function_name: "lead-intake",
+        error_message: errorMessage,
+        stack_trace: errorStack || null,
+        payload: { note: "Error during intake form processing" },
+      });
+    } catch (_) { /* best effort */ }
+
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

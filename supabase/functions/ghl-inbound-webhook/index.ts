@@ -254,8 +254,20 @@ serve(async (req) => {
     );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
     logStep("ERROR", { message: msg });
-    return new Response(JSON.stringify({ error: msg }), {
+
+    // Log to edge_function_errors
+    try {
+      await supabase.from("edge_function_errors").insert({
+        function_name: "ghl-inbound-webhook",
+        error_message: msg,
+        stack_trace: stack || null,
+        payload: { note: "Error during GHL inbound webhook processing" },
+      });
+    } catch (_) { /* best effort */ }
+
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

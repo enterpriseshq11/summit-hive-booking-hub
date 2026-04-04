@@ -148,7 +148,7 @@ export default function GHLWebhookTest() {
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Before Testing</AlertTitle>
               <AlertDescription>
-                Make sure you have set the <code className="bg-muted px-1 rounded">GHL_LINDSEY_WEBHOOK_URL</code> secret 
+                Make sure you have set the <code className="bg-muted px-1 rounded">GHL_SPA_WEBHOOK_URL</code> secret 
                 in your project settings with your actual GoHighLevel webhook URL.
               </AlertDescription>
             </Alert>

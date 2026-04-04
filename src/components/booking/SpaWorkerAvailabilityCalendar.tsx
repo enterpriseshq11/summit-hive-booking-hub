@@ -212,7 +212,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
     return availability[dateKey];
   };
 
-  // Use worker services if provided, otherwise use defaults (Lindsey's)
+  // Use worker services if provided, otherwise use defaults
   const SERVICES = useMemo(() => {
     if (workerServices && workerServices.length > 0) {
       return convertWorkerServices(workerServices);
@@ -894,7 +894,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
 
             {/* Step 3: Time Selection */}
             {step === "time" && selectedDate && (
-              <div ref={timeStepRef} id="lindsey-booking-step-3" className="space-y-4 scroll-mt-24">
+              <div ref={timeStepRef} id="spa-booking-step-3" className="space-y-4 scroll-mt-24">
                 <div className="text-center mb-4">
                   <h4 className="font-semibold text-lg">
                     {format(selectedDate, "EEEE, MMMM d, yyyy")}

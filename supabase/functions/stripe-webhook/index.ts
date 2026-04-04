@@ -12,7 +12,7 @@ const logStep = (step: string, details?: any) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
-const LINDSEY_BOOKABLE_TYPE_ID = "f7c9e18f-3b4c-4c2a-9d85-4a2c067fd8fb";
+const SPA_BOOKABLE_TYPE_ID = "f7c9e18f-3b4c-4c2a-9d85-4a2c067fd8fb";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -624,8 +624,20 @@ serve(async (req) => {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+
+    // Log to edge_function_errors
+    try {
+      await supabase.from("edge_function_errors").insert({
+        function_name: "stripe-webhook",
+        error_message: errorMessage,
+        stack_trace: errorStack || null,
+        payload: { note: "Request body not available after Stripe verification" },
+      });
+    } catch (_) { /* best effort */ }
+
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500,
     });
   }

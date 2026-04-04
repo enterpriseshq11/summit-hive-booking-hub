@@ -6932,6 +6932,22 @@ export type Database = {
             Returns: Json
           }
       generate_booking_number: { Args: never; Returns: string }
+      get_ads_dashboard_kpis: { Args: { p_user_id: string }; Returns: Json }
+      get_manager_dashboard_kpis: { Args: { p_user_id: string }; Returns: Json }
+      get_marketing_dashboard_kpis: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      get_ops_dashboard_kpis: { Args: { p_user_id: string }; Returns: Json }
+      get_owner_dashboard_kpis: { Args: { p_user_id: string }; Returns: Json }
+      get_sales_dashboard_kpis: {
+        Args: { p_employee_id?: string; p_user_id: string }
+        Returns: Json
+      }
+      get_spa_dashboard_kpis: {
+        Args: { p_employee_id?: string; p_user_id: string }
+        Returns: Json
+      }
       get_spa_worker_id: { Args: { _user_id: string }; Returns: string }
       get_user_department: { Args: { _user_id: string }; Returns: string }
       has_department_access: {
