@@ -55,6 +55,60 @@ export default function LeadDetailPage() {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [newRevenue, setNewRevenue] = useState({ amount: "", description: "" });
   const [newTask, setNewTask] = useState({ title: "", description: "", assigned_to: "", due_date: "" });
+  const [isContractOpen, setIsContractOpen] = useState(false);
+  const [contractForm, setContractForm] = useState({ template_id: "", recipient_name: "", recipient_email: "", message: "" });
+
+  // PandaDoc templates
+  const { data: pandadocTemplates } = useQuery({
+    queryKey: ["pandadoc_templates"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("pandadoc-send", {
+        body: { action: "list_templates" },
+      });
+      if (error) return [];
+      return data?.results || data || [];
+    },
+    staleTime: 300000,
+  });
+
+  const sendContract = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("pandadoc-send", {
+        body: {
+          action: "send_document",
+          template_id: contractForm.template_id,
+          recipient_name: contractForm.recipient_name,
+          recipient_email: contractForm.recipient_email,
+          message: contractForm.message || undefined,
+          lead_id: id,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["crm_lead", id] });
+      queryClient.invalidateQueries({ queryKey: ["crm_activity"] });
+      setIsContractOpen(false);
+      toast.success(`Contract sent successfully to ${contractForm.recipient_email}`);
+    },
+    onError: (error: any) => {
+      toast.error("Failed to send contract: " + error.message);
+    },
+  });
+
+  const resendReminder = useMutation({
+    mutationFn: async (documentId: string) => {
+      const { data, error } = await supabase.functions.invoke("pandadoc-send", {
+        body: { action: "resend_reminder", document_id: documentId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+    },
+    onSuccess: () => toast.success("Reminder sent"),
+    onError: (error: any) => toast.error("Failed to send reminder: " + error.message),
+  });
 
   const { data: lead, isLoading: leadLoading } = useCrmLead(id);
   const { data: employees } = useCrmEmployees();
