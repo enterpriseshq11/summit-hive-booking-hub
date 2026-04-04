@@ -74,9 +74,9 @@ export function useSpaAvailability({ selectedDate, selectedDuration = 60 }: UseS
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch availability windows (Lindsey's schedule)
+  // Fetch availability windows (spa schedule)
   const { data: availabilityWindows } = useQuery({
-    queryKey: ["lindsey-availability-windows"],
+    queryKey: ["spa-availability-windows"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("availability_windows")
