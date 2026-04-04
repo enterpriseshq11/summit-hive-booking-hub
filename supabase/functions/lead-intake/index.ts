@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
     if (resendApiKey) {
       try {
         const resend = new Resend(resendApiKey);
-        const sender = UNIT_SENDER[business_unit] || { email: "dylan@a-zenterpriseshq.com", name: "A-Z Enterprises" };
+        const sender = UNIT_SENDER[business_unit] || { email: "noreply@azenterpriseshq.com", name: "A-Z Enterprises" };
         const unitName = UNIT_DISPLAY[business_unit] || business_unit;
         const htmlBody = buildConfirmationHtml(first_name, business_unit, form_fields || {});
 
