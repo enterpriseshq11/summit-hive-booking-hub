@@ -4527,6 +4527,7 @@ export type Database = {
           package_id: string | null
           priority: number | null
           rule_type: string
+          stripe_price_id: string | null
           updated_at: string
           valid_from: string | null
           valid_until: string | null
@@ -4545,6 +4546,7 @@ export type Database = {
           package_id?: string | null
           priority?: number | null
           rule_type: string
+          stripe_price_id?: string | null
           updated_at?: string
           valid_from?: string | null
           valid_until?: string | null
@@ -4563,6 +4565,7 @@ export type Database = {
           package_id?: string | null
           priority?: number | null
           rule_type?: string
+          stripe_price_id?: string | null
           updated_at?: string
           valid_from?: string | null
           valid_until?: string | null
