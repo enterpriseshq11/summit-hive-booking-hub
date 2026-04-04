@@ -112,7 +112,7 @@ export function useSpaAvailability({ selectedDate, selectedDuration = 60 }: UseS
 
   // Fetch blackout dates
   const { data: blackouts } = useQuery({
-    queryKey: ["lindsey-blackouts"],
+    queryKey: ["spa-blackouts"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("blackout_dates")
