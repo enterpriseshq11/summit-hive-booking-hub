@@ -78,6 +78,17 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Dynamic base URL from admin_settings
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const sbClient = createClient(supabaseUrl, serviceKey);
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const { data: baseUrlSetting } = await sbClient
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
+
     const { type, inquiry }: InquiryNotificationRequest = await req.json();
 
     const requestId = crypto.randomUUID();
