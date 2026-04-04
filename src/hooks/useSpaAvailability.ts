@@ -60,7 +60,7 @@ export function useSpaAvailability({ selectedDate, selectedDuration = 60 }: UseS
 
   // Fetch provider settings for buffer times
   const { data: providerSettings } = useQuery({
-    queryKey: ["lindsey-provider-settings"],
+    queryKey: ["spa-provider-settings"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("provider_settings")
