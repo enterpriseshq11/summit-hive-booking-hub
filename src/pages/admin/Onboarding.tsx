@@ -10,31 +10,31 @@ import { toast } from "sonner";
 const ROLE_DESCRIPTIONS: Record<string, { title: string; description: string }> = {
   owner: {
     title: "Owner",
-    description: "You have full access to all features including settings, team management, revenue, and every business unit. You can configure integrations, manage employees, and view all reports.",
+    description: "You have full access to every feature in A-Z Command: all 7 business units, revenue tracking, team management, payroll, commissions, integrations, and platform settings. Your dashboard is fully customizable with drag-and-drop KPI tiles.",
   },
   manager: {
     title: "Operations Manager",
-    description: "You can access the Command Center, manage leads across business units, view revenue reports, and oversee daily operations. Settings and integrations are managed by the owner.",
+    description: "You oversee daily operations across all business units. Your dashboard shows global revenue, active leads, overdue follow-ups, and bookings. You can manage leads, approve bookings, view revenue reports, and monitor the pipeline board. Settings and integrations are managed by the owner.",
   },
-  head_of_operations: {
-    title: "Head of Operations",
-    description: "You can access the Command Center, manage leads, oversee operations, and view revenue data. Use the pipeline board to track lead progress across all units.",
-  },
-  marketing: {
-    title: "Marketing",
-    description: "You can access Sales and Marketing tools including lead management, promotions, and the Elevated by Elyse business unit. Revenue data is view-only.",
-  },
-  ads: {
-    title: "Ads Specialist",
-    description: "You have access to the Dashboard with your KPI tiles and the Marketing section including Ad Tracking. You can view lead source data and cost per lead metrics.",
-  },
-  sales: {
-    title: "Sales & Acquisitions",
-    description: "You have access to Sales tools across all business units, plus full management of Summit and Mobile Homes divisions. Use the pipeline to track your leads.",
+  sales_acquisitions: {
+    title: "Sales & Acquisitions Manager",
+    description: "You manage leads across all business units with full access to Summit and Mobile Homes. Your dashboard shows your assigned leads, pipeline stage breakdown, overdue follow-ups, and your commissions. Use the pipeline board to move leads through stages.",
   },
   spa_lead: {
-    title: "Spa Lead Therapist",
-    description: "You can manage your schedule, view your bookings, and access spa-specific data. Your calendar and availability are visible to clients for online booking.",
+    title: "Lead Massage Therapist — Restoration Lounge",
+    description: "You manage your daily schedule, view spa bookings, and track your commissions. Your calendar and availability are visible to clients for online booking. You have access to spa-specific data and can manage your service catalog.",
+  },
+  marketing_lead: {
+    title: "Head of Marketing — Elevated by Elyse",
+    description: "You manage promotions, lead sources, and the Elevated by Elyse business unit. Your dashboard shows total leads this week, leads by source, pipeline conversion rate, and Elevated by Elyse revenue. Revenue data across other units is view-only.",
+  },
+  ops_lead: {
+    title: "Head of Operations",
+    description: "You oversee daily operations including overdue follow-ups, bookings, pending approvals, and schedule gaps. Your dashboard shows Hive occupancy, active leads, and hot leads needing attention. Use the pipeline board to monitor lead flow across all units.",
+  },
+  ads_lead: {
+    title: "Head of Ads",
+    description: "You manage advertising performance across all channels. Your dashboard shows new leads by source and business unit, cost per lead, total ad spend, and top-of-funnel conversion rates. Use Ad Tracking to monitor Facebook and Google campaign performance.",
   },
   spa_worker: {
     title: "Spa Therapist",
