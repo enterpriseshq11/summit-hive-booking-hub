@@ -27,7 +27,7 @@ export function useFitnessMemberships() {
   return useQuery({
     queryKey: QUERY_KEY,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("fitness_memberships")
         .select("*")
         .order("created_at", { ascending: false });
@@ -41,23 +41,23 @@ export function useFitnessMembershipStats() {
   return useQuery({
     queryKey: ["fitness_membership_stats"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("fitness_memberships")
         .select("status, monthly_amount, updated_at");
       if (error) throw error;
 
-      const all = data || [];
+      const all = (data || []) as any[];
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
       return {
-        totalActive: all.filter((m: any) => m.status === "active").length,
+        totalActive: all.filter(m => m.status === "active").length,
         mrr: all
-          .filter((m: any) => m.status === "active")
-          .reduce((s: number, m: any) => s + (Number(m.monthly_amount) || 0), 0),
-        paymentFailed: all.filter((m: any) => m.status === "payment_failed").length,
+          .filter(m => m.status === "active")
+          .reduce((s, m) => s + (Number(m.monthly_amount) || 0), 0),
+        paymentFailed: all.filter(m => m.status === "payment_failed").length,
         cancelledThisMonth: all.filter(
-          (m: any) => m.status === "cancelled" && m.updated_at >= monthStart
+          m => m.status === "cancelled" && m.updated_at >= monthStart
         ).length,
       };
     },
@@ -79,7 +79,6 @@ export function useCreateFitnessMembership() {
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Create Stripe customer + subscription via edge function
       let stripeCustomerId: string | null = null;
       let stripeSubscriptionId: string | null = null;
       let nextBillingDate: string | null = null;
@@ -103,10 +102,9 @@ export function useCreateFitnessMembership() {
           nextBillingDate = stripeResult.next_billing_date;
         }
       } catch (e) {
-        console.warn("Stripe subscription creation failed, continuing without:", e);
+        console.warn("Stripe subscription creation failed:", e);
       }
 
-      // Create lead
       let leadId: string | null = null;
       try {
         const { data: lead } = await supabase
@@ -115,18 +113,17 @@ export function useCreateFitnessMembership() {
             lead_name: `${input.first_name} ${input.last_name}`,
             email: input.email,
             phone: input.phone || null,
-            business_unit: "fitness",
-            status: "won",
-            source: "admin_panel",
+            business_unit: "fitness" as any,
+            status: "won" as any,
+            source: "admin_panel" as any,
             created_by: user?.id,
-          })
+          } as any)
           .select("id")
           .single();
         leadId = lead?.id || null;
       } catch { /* ok */ }
 
-      // Insert membership
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("fitness_memberships")
         .insert({
           ...input,
@@ -165,27 +162,25 @@ export function useUpdateMembershipStatus() {
       stripeAction?: "pause" | "cancel" | "resume";
       subscriptionId?: string | null;
     }) => {
-      // Call Stripe action if needed
       if (stripeAction && subscriptionId) {
         await supabase.functions.invoke("fitness-membership-stripe", {
           body: { action: stripeAction, subscription_id: subscriptionId },
         });
       }
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("fitness_memberships")
         .update({ status })
         .eq("id", id);
       if (error) throw error;
 
-      // Log activity
       await supabase.from("crm_activity_events").insert({
         event_type: "status_change" as any,
         entity_type: "fitness_membership",
         entity_id: id,
         event_category: "membership_updated",
         entity_name: "Fitness Membership",
-        metadata: { new_status: status, stripe_action: stripeAction },
+        metadata: { new_status: status, stripe_action: stripeAction } as any,
       });
     },
     onSuccess: () => {

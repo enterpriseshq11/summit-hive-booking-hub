@@ -26,7 +26,7 @@ export function useHiveLeases(officeCode?: string) {
   return useQuery({
     queryKey: [...QUERY_KEY, officeCode],
     queryFn: async () => {
-      let q = supabase.from("hive_leases").select("*").order("created_at", { ascending: false });
+      let q = (supabase as any).from("hive_leases").select("*").order("created_at", { ascending: false });
       if (officeCode) q = q.eq("office_code", officeCode);
       const { data, error } = await q;
       if (error) throw error;
@@ -77,13 +77,12 @@ export function useCreateHiveLease() {
         }
       }
 
-      // Update office status to booked
-      await supabase
+      await (supabase as any)
         .from("hive_private_offices")
         .update({ status: "booked" })
         .eq("code", input.office_code);
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("hive_leases")
         .insert({
           ...input,
@@ -119,7 +118,6 @@ export function useEndHiveLease() {
       officeCode: string;
       subscriptionId?: string | null;
     }) => {
-      // Cancel Stripe subscription if applicable
       if (subscriptionId) {
         try {
           await supabase.functions.invoke("fitness-membership-stripe", {
@@ -128,12 +126,12 @@ export function useEndHiveLease() {
         } catch { /* ok */ }
       }
 
-      await supabase
+      await (supabase as any)
         .from("hive_leases")
         .update({ status: "terminated" })
         .eq("id", leaseId);
 
-      await supabase
+      await (supabase as any)
         .from("hive_private_offices")
         .update({ status: "available", booked_until: null })
         .eq("code", officeCode);
@@ -144,7 +142,7 @@ export function useEndHiveLease() {
         entity_id: leaseId,
         event_category: "lease_terminated",
         entity_name: "Hive Lease",
-        metadata: { office_code: officeCode },
+        metadata: { office_code: officeCode } as any,
       });
     },
     onSuccess: () => {
