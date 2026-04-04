@@ -1578,7 +1578,7 @@ serve(async (req) => {
             const kind = notification_type === "request" ? "Request" : notification_type === "confirmation" ? "Booking" : notification_type === "denied" ? "Request" : "Notification";
             subject = `${kind}: ${brandLabel} — ${booking.guest_name || "Guest"} — ${shortDate} ${timeStr}`;
 
-            const adminLink = `https://summit-hive-booking-hub.lovable.app/#/admin/approvals?id=${booking_id}`;
+            const adminLink = `${baseUrl}/#/admin/approvals?id=${booking_id}`;
             html = buildStaffConfirmationEmail(
               {
                 ...booking,

@@ -172,40 +172,31 @@ Deno.serve(async (req) => {
     let confirmationEmailStatus = "pending";
     let confirmationEmailSentAt: string | null = null;
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY_1");
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
-    if (LOVABLE_API_KEY && RESEND_API_KEY) {
+    if (resendApiKey) {
       try {
+        const resend = new Resend(resendApiKey);
         const sender = UNIT_SENDER[business_unit] || { email: "dylan@a-zenterpriseshq.com", name: "A-Z Enterprises" };
         const unitName = UNIT_DISPLAY[business_unit] || business_unit;
         const htmlBody = buildConfirmationHtml(first_name, business_unit, form_fields || {});
 
-        const emailRes = await fetch(`${GATEWAY_URL}/emails`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-            "X-Connection-Api-Key": RESEND_API_KEY,
-          },
-          body: JSON.stringify({
-            from: `${sender.name} <${sender.email}>`,
-            to: [email],
-            subject: `${unitName} — Inquiry Confirmation`,
-            html: htmlBody,
-            reply_to: "victoria@a-zenterpriseshq.com",
-          }),
+        const emailRes = await resend.emails.send({
+          from: `${sender.name} <${sender.email}>`,
+          to: [email],
+          subject: `${unitName} — Inquiry Confirmation`,
+          html: htmlBody,
+          reply_to: "victoria@a-zenterpriseshq.com",
         });
 
-        if (emailRes.ok) {
+        if (emailRes.data?.id) {
           confirmationEmailStatus = "sent";
           confirmationEmailSentAt = new Date().toISOString();
-          console.log("Confirmation email sent to", email);
+          console.log("Confirmation email sent to", email, "id:", emailRes.data.id);
         } else {
-          const errBody = await emailRes.text();
-          console.error("Email send failed:", emailRes.status, errBody);
-          // Check for domain verification issue
-          if (errBody.includes("verify") || errBody.includes("domain")) {
+          console.error("Email send failed:", emailRes.error);
+          const errMsg = JSON.stringify(emailRes.error || {});
+          if (errMsg.includes("verify") || errMsg.includes("domain")) {
             confirmationEmailStatus = "pending_domain_verification";
           } else {
             confirmationEmailStatus = "failed";
@@ -216,8 +207,8 @@ Deno.serve(async (req) => {
         confirmationEmailStatus = "failed";
       }
     } else {
-      console.warn("Resend not configured — LOVABLE_API_KEY or RESEND_API_KEY_1 missing");
-      confirmationEmailStatus = "pending_domain_verification";
+      console.warn("Resend not configured — RESEND_API_KEY missing");
+      confirmationEmailStatus = "not_configured";
     }
 
     // 4. Log intake submission
