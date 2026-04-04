@@ -51,8 +51,8 @@ export default function Spa() {
     setShowBookingForm(true);
   };
 
-  // Lindsey's specialties
-  const lindseySpecialties = [{
+  // Spa specialties
+  const spaSpecialties = [{
     icon: Heart,
     label: "Deep Tissue & Therapeutic Massage"
   }, {
