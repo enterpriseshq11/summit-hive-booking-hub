@@ -219,6 +219,7 @@ export default function AdminDocuments() {
                 {type.label} ({groupedTemplates[type.value]?.length || 0})
               </TabsTrigger>
             ))}
+            <TabsTrigger value="pandadoc">PandaDoc Templates</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="mt-4">
@@ -248,6 +249,10 @@ export default function AdminDocuments() {
               />
             </TabsContent>
           ))}
+
+          <TabsContent value="pandadoc" className="mt-4">
+            <PandaDocTemplatesTab />
+          </TabsContent>
         </Tabs>
 
         {/* Edit Dialog */}
