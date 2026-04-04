@@ -12,7 +12,8 @@ import { usePayrollRuns, useCreatePayrollRun, useLockPayrollRun, useApprovePayro
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, addDays, startOfWeek } from "date-fns";
-import { Plus, Lock, CheckCircle, DollarSign, Download, FileJson, Eye } from "lucide-react";
+import { Plus, Lock, CheckCircle, DollarSign, Download, FileJson, Eye, FileText } from "lucide-react";
+import { toast as sonnerToast } from "sonner";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -26,6 +27,7 @@ export default function Payroll() {
   const [createOpen, setCreateOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+  const [pdfGenerating, setPdfGenerating] = useState<string | null>(null);
   const [periodStart, setPeriodStart] = useState(() => {
     const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
     return format(monday, "yyyy-MM-dd");
@@ -48,28 +50,48 @@ export default function Payroll() {
     setCreateOpen(false);
   };
 
-  const handleExport = async (runId: string, format: "csv" | "json") => {
+  const handleMarkPaid = async (runId: string) => {
+    setPdfGenerating(runId);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke("export-payroll", {
-        body: { payroll_run_id: runId, format },
+      // Generate PDF first
+      const { data: pdfResult, error: pdfError } = await supabase.functions.invoke("generate-payroll-pdf", {
+        body: { payroll_run_id: runId },
       });
 
-      if (response.error) throw response.error;
+      if (pdfError) {
+        console.error("PDF generation failed:", pdfError);
+        sonnerToast.warning("PDF generation failed, proceeding with payment marking");
+      } else {
+        sonnerToast.success("Payroll PDF generated");
+      }
 
-      // Create download
+      // Mark as paid
+      markPaidMutation.mutate(runId);
+    } catch (err) {
+      console.error("Error:", err);
+      markPaidMutation.mutate(runId);
+    } finally {
+      setPdfGenerating(null);
+    }
+  };
+
+  const handleExport = async (runId: string, fmt: "csv" | "json") => {
+    try {
+      const response = await supabase.functions.invoke("export-payroll", {
+        body: { payroll_run_id: runId, format: fmt },
+      });
+      if (response.error) throw response.error;
       const blob = new Blob(
-        [format === "json" ? JSON.stringify(response.data, null, 2) : response.data],
-        { type: format === "json" ? "application/json" : "text/csv" }
+        [fmt === "json" ? JSON.stringify(response.data, null, 2) : response.data],
+        { type: fmt === "json" ? "application/json" : "text/csv" }
       );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `payroll-export.${format}`;
+      a.download = `payroll-export.${fmt}`;
       a.click();
       URL.revokeObjectURL(url);
-
-      toast({ title: `Exported as ${format.toUpperCase()}` });
+      toast({ title: `Exported as ${fmt.toUpperCase()}` });
     } catch (error: any) {
       toast({ title: "Export failed", description: error.message, variant: "destructive" });
     }
@@ -90,10 +112,7 @@ export default function Payroll() {
           </div>
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New Payroll Run
-              </Button>
+              <Button><Plus className="h-4 w-4 mr-2" />New Payroll Run</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -103,21 +122,11 @@ export default function Payroll() {
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
                   <Label htmlFor="period_start">Period Start</Label>
-                  <Input
-                    id="period_start"
-                    type="date"
-                    value={periodStart}
-                    onChange={(e) => setPeriodStart(e.target.value)}
-                  />
+                  <Input id="period_start" type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="period_end">Period End</Label>
-                  <Input
-                    id="period_end"
-                    type="date"
-                    value={periodEnd}
-                    onChange={(e) => setPeriodEnd(e.target.value)}
-                  />
+                  <Input id="period_end" type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
                 </div>
               </div>
               <DialogFooter>
@@ -136,7 +145,6 @@ export default function Payroll() {
             <TabsTrigger value="approved">Approved</TabsTrigger>
             <TabsTrigger value="paid">Paid</TabsTrigger>
           </TabsList>
-
           <TabsContent value={activeTab} className="mt-4">
             <Card>
               <CardHeader>
@@ -180,35 +188,24 @@ export default function Payroll() {
                                 <Eye className="h-4 w-4" />
                               </Button>
                               {run.status === "draft" && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => lockMutation.mutate(run.id)}
-                                  disabled={lockMutation.isPending}
-                                >
-                                  <Lock className="h-4 w-4 mr-1" />
-                                  Lock
+                                <Button size="sm" variant="outline" onClick={() => lockMutation.mutate(run.id)} disabled={lockMutation.isPending}>
+                                  <Lock className="h-4 w-4 mr-1" />Lock
                                 </Button>
                               )}
                               {run.status === "locked" && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => approveMutation.mutate(run.id)}
-                                  disabled={approveMutation.isPending}
-                                >
-                                  <CheckCircle className="h-4 w-4 mr-1" />
-                                  Approve
+                                <Button size="sm" variant="outline" onClick={() => approveMutation.mutate(run.id)} disabled={approveMutation.isPending}>
+                                  <CheckCircle className="h-4 w-4 mr-1" />Approve
                                 </Button>
                               )}
                               {run.status === "approved" && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => markPaidMutation.mutate(run.id)}
-                                  disabled={markPaidMutation.isPending}
-                                >
+                                <Button size="sm" onClick={() => handleMarkPaid(run.id)} disabled={markPaidMutation.isPending || pdfGenerating === run.id}>
                                   <DollarSign className="h-4 w-4 mr-1" />
-                                  Mark Paid
+                                  {pdfGenerating === run.id ? "Generating PDF..." : "Mark Paid"}
+                                </Button>
+                              )}
+                              {run.status === "paid" && (run as any).pdf_url && (
+                                <Button size="sm" variant="outline" onClick={() => window.open((run as any).pdf_url, "_blank")}>
+                                  <FileText className="h-4 w-4 mr-1" />Download PDF
                                 </Button>
                               )}
                               {(run.status === "approved" || run.status === "paid") && (
@@ -256,9 +253,7 @@ export default function Payroll() {
                 <TableBody>
                   {runCommissions.map((comm: any) => (
                     <TableRow key={comm.id}>
-                      <TableCell>
-                        {comm.employee?.first_name} {comm.employee?.last_name}
-                      </TableCell>
+                      <TableCell>{comm.employee?.first_name} {comm.employee?.last_name}</TableCell>
                       <TableCell>${Number(comm.revenue_event?.amount || 0).toLocaleString()}</TableCell>
                       <TableCell>{comm.revenue_event?.business_unit}</TableCell>
                       <TableCell className="text-right font-medium">

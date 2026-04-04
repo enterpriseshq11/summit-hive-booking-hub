@@ -1305,6 +1305,9 @@ export type Database = {
           id: string
           paid_at: string | null
           payroll_run_id: string | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           revenue_event_id: string
           rule_id: string | null
           status: Database["public"]["Enums"]["commission_status"] | null
@@ -1319,6 +1322,9 @@ export type Database = {
           id?: string
           paid_at?: string | null
           payroll_run_id?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           revenue_event_id: string
           rule_id?: string | null
           status?: Database["public"]["Enums"]["commission_status"] | null
@@ -1333,6 +1339,9 @@ export type Database = {
           id?: string
           paid_at?: string | null
           payroll_run_id?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           revenue_event_id?: string
           rule_id?: string | null
           status?: Database["public"]["Enums"]["commission_status"] | null
@@ -1358,6 +1367,13 @@ export type Database = {
             columns: ["payroll_run_id"]
             isOneToOne: false
             referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_commissions_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -4072,6 +4088,7 @@ export type Database = {
           notes: string | null
           paid_at: string | null
           paid_by: string | null
+          pdf_url: string | null
           period_end: string
           period_start: string
           status: string
@@ -4089,6 +4106,7 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
+          pdf_url?: string | null
           period_end: string
           period_start: string
           status?: string
@@ -4106,6 +4124,7 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           paid_by?: string | null
+          pdf_url?: string | null
           period_end?: string
           period_start?: string
           status?: string
@@ -6708,7 +6727,7 @@ export type Database = {
         | "redeemed"
         | "expired"
         | "disqualified"
-      commission_status: "pending" | "approved" | "queued" | "paid"
+      commission_status: "pending" | "approved" | "queued" | "paid" | "rejected"
       crm_activity_type:
         | "login"
         | "logout"
@@ -7040,7 +7059,7 @@ export const Constants = {
         "expired",
         "disqualified",
       ],
-      commission_status: ["pending", "approved", "queued", "paid"],
+      commission_status: ["pending", "approved", "queued", "paid", "rejected"],
       crm_activity_type: [
         "login",
         "logout",

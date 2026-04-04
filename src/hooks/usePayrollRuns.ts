@@ -17,6 +17,7 @@ export interface PayrollRun {
   paid_at: string | null;
   paid_by: string | null;
   notes: string | null;
+  pdf_url: string | null;
   created_at: string;
   updated_at: string;
 }
