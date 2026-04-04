@@ -43,11 +43,11 @@ const ROLE_DESCRIPTIONS: Record<string, { title: string; description: string }> 
 };
 
 export default function Onboarding() {
-  const { user, roles } = useAuth();
+  const { user, authUser } = useAuth();
   const navigate = useNavigate();
   const [isCompleting, setIsCompleting] = useState(false);
 
-  const primaryRole = roles?.[0] || "staff";
+  const primaryRole = authUser?.roles?.[0] || "staff";
   const roleInfo = ROLE_DESCRIPTIONS[primaryRole] || {
     title: "Team Member",
     description: "You have access to the A-Z Command platform. Your dashboard shows the tools and data relevant to your role.",
