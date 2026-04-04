@@ -313,6 +313,61 @@ export default function AdminIntegrations() {
               </CardContent>
             </Card>
 
+            {/* SECTION 2.5: Email Domain Verification */}
+            <Card className="border-zinc-800">
+              <CardHeader>
+                <CardTitle className="text-lg text-white flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-emerald-400" /> Email Configuration
+                </CardTitle>
+                <CardDescription className="text-zinc-400">
+                  Verify email domain status for transactional confirmation emails.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border border-zinc-800 rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white font-medium">a-zenterpriseshq.com</p>
+                      <p className="text-zinc-500 text-sm">Sender domain for all 6 business unit confirmation emails</p>
+                    </div>
+                    {dnsResult && (
+                      <Badge className={
+                        dnsResult.status === "Verified" ? "bg-green-500/20 text-green-400" :
+                        dnsResult.status === "Pending" ? "bg-amber-500/20 text-amber-400" :
+                        "bg-red-500/20 text-red-400"
+                      }>
+                        {dnsResult.status === "Verified" && <CheckCircle className="h-3 w-3 mr-1" />}
+                        {dnsResult.status === "Pending" && <Clock className="h-3 w-3 mr-1" />}
+                        {dnsResult.status === "Failed" && <XCircle className="h-3 w-3 mr-1" />}
+                        {dnsResult.status}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      size="sm"
+                      className="bg-emerald-500 text-white hover:bg-emerald-400"
+                      onClick={checkDnsVerification}
+                      disabled={dnsChecking}
+                    >
+                      <Shield className="h-3 w-3 mr-1" />
+                      {dnsChecking ? "Checking..." : "Check Email Domain Verification"}
+                    </Button>
+                    {dnsResult?.checkedAt && (
+                      <span className="text-xs text-zinc-500">
+                        Last checked: {format(new Date(dnsResult.checkedAt), "MMM d 'at' h:mm a")}
+                      </span>
+                    )}
+                  </div>
+                  {dnsResult?.details && dnsResult.status !== "Verified" && (
+                    <div className="p-3 bg-zinc-900 border border-zinc-700 rounded text-xs text-zinc-400 font-mono whitespace-pre-wrap">
+                      {dnsResult.details}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* SECTION 3: Stripe Connection */}
             <Card className="border-zinc-800">
               <CardHeader>
