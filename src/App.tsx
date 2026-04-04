@@ -32,7 +32,6 @@ import BeamLights from "./pages/BeamLights";
 import VoiceVault from "./pages/VoiceVault";
 import PhotoBooth from "./pages/PhotoBooth";
 import PhotoBoothLanding from "./pages/PhotoBoothLanding";
-import BookWithLindsey from "./pages/BookWithLindsey";
 import BookWithWorker from "./pages/BookWithWorker";
 import NotFound from "./pages/NotFound";
 import RequestService from "./pages/RequestService";
