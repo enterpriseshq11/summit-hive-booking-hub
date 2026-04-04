@@ -482,6 +482,13 @@ serve(async (req) => {
             current_period_end: new Date((invoice.period_end || 0) * 1000).toISOString(),
             status: "active",
           }).eq("stripe_subscription_id", subscriptionId);
+
+          // Update fitness_memberships if matched
+          const nextBilling = new Date((invoice.period_end || 0) * 1000).toISOString().split("T")[0];
+          await supabase.from("fitness_memberships").update({
+            next_billing_date: nextBilling,
+            status: "active",
+          }).eq("stripe_subscription_id", subscriptionId);
         }
         break;
       }
