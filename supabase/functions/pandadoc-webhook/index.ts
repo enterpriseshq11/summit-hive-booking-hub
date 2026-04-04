@@ -125,10 +125,21 @@ serve(async (req) => {
             target_roles: ["owner", "manager"],
           });
 
-          // Send notification email to Dylan
+          // Send notification email to Dylan with lead detail link
           try {
             const resendKey = Deno.env.get("RESEND_API_KEY");
             if (resendKey) {
+              // Get base_url from admin_settings
+              let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+              const { data: baseUrlSetting } = await supabase
+                .from("admin_settings")
+                .select("value")
+                .eq("key", "base_url")
+                .maybeSingle();
+              if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+
+              const leadDetailUrl = `${baseUrl}/admin/leads/${lead.id}`;
+
               await fetch("https://api.resend.com/emails", {
                 method: "POST",
                 headers: {
@@ -146,6 +157,7 @@ serve(async (req) => {
                     <p>Business Unit: ${lead.business_unit}</p>
                     <p>PandaDoc Document ID: ${documentId}</p>
                     <p>Lead is now ready for deposit collection.</p>
+                    <p><a href="${leadDetailUrl}" style="display:inline-block;padding:10px 20px;background:#f59e0b;color:#000;text-decoration:none;border-radius:6px;font-weight:bold;">View Lead Detail</a></p>
                   `,
                 }),
               });
