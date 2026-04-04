@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,20 +10,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Sparkles, MapPin, Phone, Clock, CheckCircle, ArrowRight, CreditCard, Send } from "lucide-react";
+import { Sparkles, MapPin, Phone, Clock, CheckCircle, CreditCard, Send, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SEOHead } from "@/components/seo";
 
-const SPA_SERVICES = [
-  { id: "swedish", name: "Swedish Massage", duration: "60 min", price: 85, priceId: "price_1TIbZbPFNT8K72RI8hr4gThq" },
-  { id: "deep_tissue", name: "Deep Tissue Massage", duration: "60 min", price: 95, priceId: "price_1TIbZcPFNT8K72RIf0uzEctz" },
-  { id: "hot_stone", name: "Hot Stone Massage", duration: "75 min", price: 110, priceId: "price_1TIbZdPFNT8K72RI6xf0s8DW" },
-  { id: "facial", name: "Facial Treatment", duration: "60 min", price: 90, priceId: "price_1TIbZePFNT8K72RIySq47KIb" },
-  { id: "couples", name: "Couples Massage", duration: "60 min", price: 160, priceId: "price_1TIbZfPFNT8K72RIhAE0JGDe" },
-  { id: "package", name: "Spa Package", duration: "90 min", price: 145, priceId: "price_1TIbZfPFNT8K72RIVaPxJAyu" },
+// Fallback services if no pricing rules configured
+const FALLBACK_SERVICES = [
+  { id: "swedish", name: "Swedish Massage", duration: "60 min", price: 85 },
+  { id: "deep_tissue", name: "Deep Tissue Massage", duration: "60 min", price: 95 },
+  { id: "hot_stone", name: "Hot Stone Massage", duration: "75 min", price: 110 },
+  { id: "facial", name: "Facial Treatment", duration: "60 min", price: 90 },
+  { id: "couples", name: "Couples Massage", duration: "60 min", price: 160 },
+  { id: "package", name: "Spa Package", duration: "90 min", price: 145 },
 ];
 
 const SOURCE_OPTIONS = [
@@ -35,11 +37,18 @@ const SOURCE_OPTIONS = [
   { value: "other", label: "Other" },
 ];
 
+interface SpaService {
+  id: string;
+  name: string;
+  duration: string;
+  price: number;
+  priceId: string | null;
+}
+
 export default function BookSpa() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [paymentMode, setPaymentMode] = useState<"pay" | "request">("pay");
   const [selectedService, setSelectedService] = useState<string>("");
   const [form, setForm] = useState({
     first_name: "", last_name: "", email: "", phone: "",
@@ -47,10 +56,41 @@ export default function BookSpa() {
     preferred_date: "", preferred_time: "",
   });
 
-  const service = SPA_SERVICES.find((s) => s.id === selectedService);
+  // Load spa services from pricing_rules with stripe_price_id
+  const { data: services = [] } = useQuery<SpaService[]>({
+    queryKey: ["spa_services_pricing"],
+    queryFn: async () => {
+      const { data: rules } = await supabase
+        .from("pricing_rules")
+        .select("id, name, description, modifier_value, stripe_price_id, businesses!inner(type)")
+        .eq("is_active", true)
+        .eq("businesses.type", "spa" as any)
+        .order("priority", { ascending: true });
+
+      if (rules && rules.length > 0) {
+        return rules.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          duration: r.description || "60 min",
+          price: Math.abs(r.modifier_value),
+          priceId: r.stripe_price_id || null,
+        }));
+      }
+
+      // Fallback to hardcoded if no pricing rules configured
+      return FALLBACK_SERVICES.map((s) => ({ ...s, priceId: null }));
+    },
+  });
+
+  const service = services.find((s) => s.id === selectedService);
+  const canPayOnline = service?.priceId != null;
 
   const handlePayAndBook = async () => {
     if (!validateForm()) return;
+    if (!canPayOnline) {
+      toast.error("Online payment is not available for this service. Please use Request Booking.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke("experience-checkout", {
@@ -61,11 +101,16 @@ export default function BookSpa() {
           customer_name: `${form.first_name} ${form.last_name}`,
           customer_phone: form.phone,
           business_unit: "spa",
+          mode: "payment",
           metadata: {
-            service_id: selectedService,
+            booking_type: "spa_booking",
+            service_type: service!.name,
             preferred_date: form.preferred_date,
             preferred_time: form.preferred_time,
-            is_returning: form.is_returning,
+            client_name: `${form.first_name} ${form.last_name}`,
+            client_email: form.email,
+            client_phone: form.phone,
+            is_returning: String(form.is_returning),
             source: form.source,
             notes: form.notes,
           },
@@ -74,10 +119,14 @@ export default function BookSpa() {
       if (error) throw error;
       if (data?.url) {
         window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Unable to start checkout. Please try again or call us.");
+      toast.error(err?.message?.includes("price") 
+        ? "Stripe subscription creation failed. The configured price may be invalid. Please call us to book."
+        : "Unable to start checkout. Please try again or call us.");
     } finally {
       setIsSubmitting(false);
     }
@@ -146,7 +195,6 @@ export default function BookSpa() {
     <div className="min-h-screen bg-background">
       <SEOHead title="Book a Spa Service — Restoration Lounge Spa" description="Book a massage or spa treatment at the Restoration Lounge Spa in Wapakoneta, Ohio." />
 
-      {/* Hero */}
       <section className="bg-primary text-primary-foreground py-16 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <Badge className="bg-accent text-accent-foreground">Now Accepting Bookings</Badge>
@@ -160,11 +208,10 @@ export default function BookSpa() {
       </section>
 
       <div className="max-w-6xl mx-auto px-4 py-12 grid lg:grid-cols-5 gap-8">
-        {/* Service Menu */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-2xl font-bold text-foreground">Service Menu</h2>
           <div className="space-y-3">
-            {SPA_SERVICES.map((s) => (
+            {services.map((s) => (
               <Card
                 key={s.id}
                 className={`cursor-pointer transition-all ${selectedService === s.id ? "border-accent ring-2 ring-accent/30" : "hover:border-accent/50"}`}
@@ -175,6 +222,11 @@ export default function BookSpa() {
                     <div>
                       <p className="font-semibold text-foreground">{s.name}</p>
                       <p className="text-sm text-muted-foreground">{s.duration}</p>
+                      {!s.priceId && (
+                        <p className="text-xs text-amber-500 flex items-center gap-1 mt-1">
+                          <AlertCircle className="w-3 h-3" /> Request booking only
+                        </p>
+                      )}
                     </div>
                     <Badge variant="secondary" className="text-sm font-bold">${s.price}</Badge>
                   </div>
@@ -194,7 +246,6 @@ export default function BookSpa() {
           </div>
         </div>
 
-        {/* Booking Form */}
         <div className="lg:col-span-3">
           <Card className="shadow-lg">
             <CardHeader>
@@ -241,10 +292,16 @@ export default function BookSpa() {
               <Separator />
 
               <div className="space-y-3">
-                <Button onClick={handlePayAndBook} className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={isSubmitting || !selectedService} size="lg">
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  {isSubmitting ? "Processing..." : `Book & Pay Now${service ? ` — $${service.price}` : ""}`}
-                </Button>
+                {canPayOnline ? (
+                  <Button onClick={handlePayAndBook} className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={isSubmitting || !selectedService} size="lg">
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    {isSubmitting ? "Processing..." : `Book & Pay Now${service ? ` — $${service.price}` : ""}`}
+                  </Button>
+                ) : service ? (
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-center text-sm text-amber-600">
+                    Online payment is not yet available for this service. Use Request Booking below or call us.
+                  </div>
+                ) : null}
                 <Button onClick={handleRequestBooking} variant="outline" className="w-full" disabled={isSubmitting || !selectedService} size="lg">
                   <Send className="w-4 h-4 mr-2" />
                   Request Booking (No Payment)
