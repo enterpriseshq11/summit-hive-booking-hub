@@ -77,7 +77,7 @@ export default function BookVoiceVault() {
           <CheckCircle className="w-16 h-16 text-accent mx-auto" />
           <h1 className="text-3xl font-bold text-foreground">Inquiry Submitted</h1>
           <p className="text-muted-foreground text-lg">We received your studio booking request and will follow up within 24 hours.</p>
-          <p className="text-muted-foreground">Questions? Call us at <a href={`tel:${SITE_CONFIG.phone}`} className="text-accent font-semibold">{SITE_CONFIG.phone}</a></p>
+          <p className="text-muted-foreground">Questions? Call us at <a href={SITE_CONFIG.contact.phoneLink} className="text-accent font-semibold">{SITE_CONFIG.contact.phone}</a></p>
           <Button onClick={() => navigate("/voice-vault")} variant="outline">Back to Voice Vault</Button>
         </div>
       </div>
