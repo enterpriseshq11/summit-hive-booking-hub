@@ -110,7 +110,7 @@ export default function BookSummit() {
           </p>
           <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> 10 W Auglaize St, Wapakoneta, OH 45895</span>
-            <span className="flex items-center gap-1"><Phone className="w-4 h-4" /> {SITE_CONFIG.phone}</span>
+            <span className="flex items-center gap-1"><Phone className="w-4 h-4" /> {SITE_CONFIG.contact.phone}</span>
           </div>
         </div>
       </section>
