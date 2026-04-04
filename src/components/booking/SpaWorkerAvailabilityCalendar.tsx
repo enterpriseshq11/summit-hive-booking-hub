@@ -592,7 +592,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
   const currentStepIndex = steps.findIndex(s => s.key === step);
 
   return (
-    <Card ref={calendarStepRef} id="lindsey-booking-step-2" className="shadow-premium border-border overflow-hidden scroll-mt-24">
+    <Card ref={calendarStepRef} id="spa-booking-step-2" className="shadow-premium border-border overflow-hidden scroll-mt-24">
       {/* Gold accent line */}
       <div className="h-1 bg-accent" />
       
