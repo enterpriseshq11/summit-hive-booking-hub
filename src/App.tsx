@@ -33,6 +33,8 @@ import VoiceVault from "./pages/VoiceVault";
 import PhotoBooth from "./pages/PhotoBooth";
 import PhotoBoothLanding from "./pages/PhotoBoothLanding";
 import BookWithWorker from "./pages/BookWithWorker";
+import BookVoiceVault from "./pages/BookVoiceVault";
+import BookSummit from "./pages/BookSummit";
 import NotFound from "./pages/NotFound";
 import RequestService from "./pages/RequestService";
 import Careers from "./pages/Careers";
