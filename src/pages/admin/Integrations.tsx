@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Link2, Save, TestTube, RefreshCw, CreditCard, Construction, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Link2, Save, TestTube, RefreshCw, CreditCard, Construction, CheckCircle, XCircle, Clock, Mail, Shield } from "lucide-react";
 import { format } from "date-fns";
 
 interface GhlConfig {
