@@ -188,8 +188,8 @@ export function useUpdateBookingStatus() {
       queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["booking"] });
       
-      // Lindsey/Spa-specific booking queries
-      queryClient.invalidateQueries({ queryKey: ["lindsey-bookings"] });
+      // Spa-specific booking queries
+      queryClient.invalidateQueries({ queryKey: ["spa-bookings"] });
       
       // Invalidate admin dashboard stats
       queryClient.invalidateQueries({ queryKey: ["admin_stats"] });

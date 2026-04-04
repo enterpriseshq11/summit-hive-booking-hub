@@ -31,8 +31,8 @@ export function useBookingsRealtime() {
           queryClient.invalidateQueries({ queryKey: ["bookings"] });
           queryClient.invalidateQueries({ queryKey: ["booking"] });
           
-          // Lindsey/Spa-specific booking queries
-          queryClient.invalidateQueries({ queryKey: ["lindsey-bookings"] });
+          // Spa-specific booking queries
+          queryClient.invalidateQueries({ queryKey: ["spa-bookings"] });
           
           // Also invalidate admin stats/alerts that may show pending counts
           queryClient.invalidateQueries({ queryKey: ["admin_stats"] });

@@ -145,7 +145,6 @@ function AppInner() {
           <Route path="/coworking/offices" element={<OfficeListingsHub />} />
           <Route path="/coworking/offices/:slug" element={<OfficeDetailPage />} />
           <Route path="/spa" element={<Spa />} />
-          <Route path="/book-with-lindsey" element={<BookWithLindsey />} />
           <Route path="/book-with/:slug" element={<BookWithWorker />} />
           <Route path="/fitness" element={<Fitness />} />
           <Route path="/gift-cards" element={<GiftCards />} />
