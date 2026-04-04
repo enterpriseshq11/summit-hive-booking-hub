@@ -116,6 +116,11 @@ Deno.serve(async (req) => {
         status: "new",
         temperature: "warm",
         follow_up_due: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        utm_source: utm_source || null,
+        utm_medium: utm_medium || null,
+        utm_campaign: utm_campaign || null,
+        utm_content: utm_content || null,
+        utm_term: utm_term || null,
       })
       .select("id")
       .single();
