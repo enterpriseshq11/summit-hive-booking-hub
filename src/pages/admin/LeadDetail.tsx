@@ -156,20 +156,37 @@ export default function LeadDetail() {
   const fireGhlStageWebhook = async (previousStage: string, newStage: string) => {
     if (!lead) return;
     try {
-      const { data: webhookConfig } = await (supabase as any)
-        .from("ghl_pipeline_stage_webhooks")
-        .select("webhook_url")
-        .eq("stage_key", newStage)
+      // Check ghl_sync_in_progress to prevent infinite loop
+      const { data: freshLead } = await supabase
+        .from("crm_leads")
+        .select("ghl_sync_in_progress")
+        .eq("id", lead.id)
         .maybeSingle();
 
-      if (!webhookConfig?.webhook_url) {
-        // Log skipped webhook in timeline
+      if ((freshLead as any)?.ghl_sync_in_progress) {
+        await supabase.from("crm_activity_events").insert({
+          event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+          metadata: {
+            action: "ghl_webhook_skipped",
+            message: `GHL outbound webhook skipped — sync in progress`,
+          },
+        });
+        return;
+      }
+
+      const { data: webhookConfig } = await (supabase as any)
+        .from("ghl_pipeline_stage_webhooks")
+        .select("webhook_url, is_active")
+        .eq("stage_name", newStage)
+        .maybeSingle();
+
+      if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
           event_category: "ghl_webhook_fired",
           metadata: {
             action: "ghl_webhook_skipped",
-            message: `GHL webhook skipped — no URL configured for ${STAGE_LABELS[newStage] || newStage} stage`,
+            message: `GHL webhook skipped — no URL configured or inactive for ${STAGE_LABELS[newStage] || newStage} stage`,
           },
         });
         return;
