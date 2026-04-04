@@ -1512,6 +1512,7 @@ export type Database = {
           ghl_last_contact_date: string | null
           ghl_last_contact_method: string | null
           ghl_last_synced_at: string | null
+          ghl_sync_in_progress: boolean
           id: string
           last_contacted_at: string | null
           lead_name: string
@@ -1543,6 +1544,7 @@ export type Database = {
           ghl_last_contact_date?: string | null
           ghl_last_contact_method?: string | null
           ghl_last_synced_at?: string | null
+          ghl_sync_in_progress?: boolean
           id?: string
           last_contacted_at?: string | null
           lead_name: string
@@ -1574,6 +1576,7 @@ export type Database = {
           ghl_last_contact_date?: string | null
           ghl_last_contact_method?: string | null
           ghl_last_synced_at?: string | null
+          ghl_sync_in_progress?: boolean
           id?: string
           last_contacted_at?: string | null
           lead_name?: string
