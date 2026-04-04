@@ -86,7 +86,7 @@ export default function BookSummit() {
           <CheckCircle className="w-16 h-16 text-accent mx-auto" />
           <h1 className="text-3xl font-bold text-foreground">Inquiry Submitted</h1>
           <p className="text-muted-foreground text-lg">We received your event inquiry and will follow up within 24 hours.</p>
-          <p className="text-muted-foreground">Questions? Call us at <a href={`tel:${SITE_CONFIG.phone}`} className="text-accent font-semibold">{SITE_CONFIG.phone}</a></p>
+          <p className="text-muted-foreground">Questions? Call us at <a href={SITE_CONFIG.contact.phoneLink} className="text-accent font-semibold">{SITE_CONFIG.contact.phone}</a></p>
           <Button onClick={() => navigate("/summit")} variant="outline">Back to The Summit</Button>
         </div>
       </div>
@@ -110,7 +110,7 @@ export default function BookSummit() {
           </p>
           <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> 10 W Auglaize St, Wapakoneta, OH 45895</span>
-            <span className="flex items-center gap-1"><Phone className="w-4 h-4" /> {SITE_CONFIG.phone}</span>
+            <span className="flex items-center gap-1"><Phone className="w-4 h-4" /> {SITE_CONFIG.contact.phone}</span>
           </div>
         </div>
       </section>
