@@ -703,7 +703,7 @@ function buildStaffConfirmationEmail(booking: Record<string, unknown>, businessT
   const roomName = ((booking.booking_resources as Array<{ resources?: { name?: string } }>)?.[0]?.resources?.name) || "TBD";
 
   const emailKind = typeof (booking as any).email_kind === "string" ? String((booking as any).email_kind) : "BOOKING";
-  const adminLink = typeof (booking as any).admin_link === "string" ? String((booking as any).admin_link) : "https://summit-hive-booking-hub.lovable.app/#/admin/approvals";
+  const adminLink = typeof (booking as any).admin_link === "string" ? String((booking as any).admin_link) : `${baseUrl}/#/admin/approvals`;
   const isRequest = emailKind.toUpperCase() === "REQUEST";
   const badgeText = isRequest ? "📝 NEW REQUEST" : "💳 NEW BOOKING";
   const highlightTitle = isRequest ? "📝 Request Submitted" : "💰 Payment Confirmed";
