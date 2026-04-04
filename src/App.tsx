@@ -239,6 +239,7 @@ function AppInner() {
           <Route path="/admin/payroll" element={<CommandCenterPayroll />} />
           <Route path="/admin/commissions" element={<CommandCenterCommissions />} />
           <Route path="/admin/careers" element={<AdminCareerApplications />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
 
           {/* REVENUE */}
           <Route path="/admin/revenue" element={<CommandCenterRevenue />} />
