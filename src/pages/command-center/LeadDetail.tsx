@@ -300,6 +300,24 @@ export default function LeadDetailPage() {
                 <> · Last: {format(new Date((lead as any).last_contacted_at), "MMM d, h:mm a")}</>
               )}
             </span>
+            {/* Send Contract - only visible at proposal_sent or later */}
+            {["proposal_sent", "contract_out", "deposit_received", "booked", "completed"].includes(lead.status || "") && (
+              <Button
+                size="sm"
+                className="bg-amber-500 hover:bg-amber-600 text-black text-xs h-7 ml-2"
+                onClick={() => {
+                  setContractForm({
+                    template_id: "",
+                    recipient_name: lead.lead_name || "",
+                    recipient_email: lead.email || "",
+                    message: "",
+                  });
+                  setIsContractOpen(true);
+                }}
+              >
+                <FileSignature className="h-3.5 w-3.5 mr-1" />Send Contract
+              </Button>
+            )}
           </CardContent>
         </Card>
 
