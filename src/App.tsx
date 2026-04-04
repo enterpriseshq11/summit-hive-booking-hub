@@ -300,6 +300,8 @@ function AppInner() {
           <Route path="/admin/settings/stripe-mapping" element={<AdminStripeMappingPage />} />
           <Route path="/admin/commissions/rules" element={<AdminCommissionRulesPage />} />
           <Route path="/admin/settings/stripe-connection" element={<AdminStripeConnectionPage />} />
+          <Route path="/admin/settings/error-log" element={<AdminErrorLog />} />
+          <Route path="/admin/onboarding" element={<AdminOnboarding />} />
 
           {/* Legacy admin routes */}
           <Route path="/admin/users-roles" element={<AdminUsersRoles />} />
