@@ -212,7 +212,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
     return availability[dateKey];
   };
 
-  // Use worker services if provided, otherwise use defaults (Lindsey's)
+  // Use worker services if provided, otherwise use defaults
   const SERVICES = useMemo(() => {
     if (workerServices && workerServices.length > 0) {
       return convertWorkerServices(workerServices);
