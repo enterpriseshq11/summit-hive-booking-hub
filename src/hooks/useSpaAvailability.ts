@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, addMinutes, parseISO, isBefore, isAfter, startOfDay, addDays, getDay } from "date-fns";
 import { BLOCKING_BOOKING_STATUSES } from "@/constants/bookingStatuses";
 
-// Lindsey's default working hours (9 AM - 9 PM, 7 days/week)
+// Default spa working hours (9 AM - 9 PM, 7 days/week)
 const DEFAULT_WORKING_HOURS = {
   start: "09:00",
   end: "21:00",
