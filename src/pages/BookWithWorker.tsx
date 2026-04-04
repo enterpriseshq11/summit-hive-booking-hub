@@ -154,7 +154,7 @@ export default function BookWithWorker() {
         </div>
         
         <div className="max-w-4xl mx-auto">
-          <LindseyAvailabilityCalendar workerId={worker.id} workerServices={services} />
+          <SpaWorkerAvailabilityCalendar workerId={worker.id} workerServices={services} />
         </div>
 
         {/* Services Note */}

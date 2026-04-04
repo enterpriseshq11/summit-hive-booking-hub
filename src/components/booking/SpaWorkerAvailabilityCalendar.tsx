@@ -163,7 +163,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
     getAvailabilityMap,
     getDayAvailability,
     isLoading: isLoadingAvailability,
-  } = useLindseyAvailability({
+  } = useSpaAvailability({
     selectedDate,
     selectedDuration: selectedDuration || 60,
   });
