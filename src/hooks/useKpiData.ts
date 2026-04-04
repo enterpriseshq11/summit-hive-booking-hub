@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { startOfDay, startOfWeek, startOfMonth, subDays, format } from "date-fns";
 
 export interface KpiTileConfig {
   id: string;
@@ -10,63 +9,29 @@ export interface KpiTileConfig {
   href?: string;
 }
 
-const today = () => startOfDay(new Date()).toISOString();
-const weekStart = () => startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
-const monthStart = () => startOfMonth(new Date()).toISOString();
+// ── Consolidated KPI hooks using server-side functions ──
 
 export function useRevenueKpis() {
   return useQuery({
     queryKey: ["kpi", "revenue"],
     queryFn: async () => {
-      const todayStr = today();
-      const monthStr = monthStart();
-
-      // Revenue events today
-      const { data: todayRevenue } = await supabase
-        .from("crm_revenue_events")
-        .select("amount, business_unit")
-        .gte("revenue_date", todayStr);
-
-      // Revenue events this month
-      const { data: monthRevenue } = await supabase
-        .from("crm_revenue_events")
-        .select("amount, business_unit")
-        .gte("revenue_date", monthStr);
-
-      // Outstanding balances (deposits paid, balance_due > 0)
-      const { data: outstanding } = await supabase
-        .from("bookings")
-        .select("balance_due")
-        .gt("balance_due", 0)
-        .not("status", "in", '("cancelled","completed")');
-
-      const sumBy = (data: any[], unit?: string) =>
-        (data || [])
-          .filter((r: any) => !unit || r.business_unit === unit)
-          .reduce((s: number, r: any) => s + (Number(r.amount) || 0), 0);
-
-      const units = ["summit", "spa", "fitness", "coworking", "voice_vault", "mobile_homes", "elevated_by_elyse"];
-      const unitRevenue: Record<string, number> = {};
-      units.forEach(u => { unitRevenue[u] = sumBy(monthRevenue || [], u); });
-
-      // Stripe payments today
-      let stripeToday = 0;
-      try {
-        const { data: stripeTxns } = await (supabase as any)
-          .from("stripe_transactions")
-          .select("amount")
-          .eq("status", "succeeded")
-          .gte("stripe_created_at", todayStr)
-          .or("is_duplicate.is.null,is_duplicate.eq.false");
-        stripeToday = (stripeTxns || []).reduce((s: number, r: any) => s + (Number(r.amount) || 0), 0) / 100;
-      } catch { /* table may not exist */ }
-
+      // Use owner dashboard function for revenue data (most comprehensive)
+      const { data, error } = await supabase.rpc("get_owner_dashboard_kpis" as any, {
+        p_user_id: (await supabase.auth.getUser()).data.user?.id,
+      });
+      if (error || !data) {
+        return {
+          totalRevenueToday: 0, totalRevenueMonth: 0, stripePaymentsToday: 0,
+          outstandingBalances: 0, unitRevenue: {} as Record<string, number>, stripeIntegrated: true,
+        };
+      }
+      const d = data as any;
       return {
-        totalRevenueToday: sumBy(todayRevenue || []),
-        totalRevenueMonth: sumBy(monthRevenue || []),
-        stripePaymentsToday: stripeToday,
-        outstandingBalances: (outstanding || []).reduce((s, r) => s + (Number(r.balance_due) || 0), 0),
-        unitRevenue,
+        totalRevenueToday: d.total_revenue_today || 0,
+        totalRevenueMonth: d.total_revenue_month || 0,
+        stripePaymentsToday: d.stripe_payments_today || 0,
+        outstandingBalances: d.outstanding_balances || 0,
+        unitRevenue: d.revenue_by_unit || {},
         stripeIntegrated: true,
       };
     },
@@ -78,78 +43,27 @@ export function useLeadKpis(userId?: string) {
   return useQuery({
     queryKey: ["kpi", "leads", userId],
     queryFn: async () => {
-      const weekStr = weekStart();
-      const todayStr = format(new Date(), "yyyy-MM-dd");
-      const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd'T'HH:mm:ss");
-
-      // Total active leads
-      const { count: totalActive } = await supabase
-        .from("crm_leads")
-        .select("id", { count: "exact", head: true })
-        .not("status", "in", '("won","lost")');
-
-      // New leads this week
-      const { data: newLeadsWeek } = await supabase
-        .from("crm_leads")
-        .select("id, source, business_unit")
-        .gte("created_at", weekStr);
-
-      // Leads contacted today
-      const { count: contactedToday } = await supabase
-        .from("crm_leads")
-        .select("id", { count: "exact", head: true })
-        .gte("last_contacted_at", todayStr);
-
-      // Overdue follow-ups
-      const { count: overdue } = await supabase
-        .from("crm_leads")
-        .select("id", { count: "exact", head: true })
-        .lt("follow_up_due", todayStr + "T23:59:59")
-        .not("status", "in", '("won","lost")');
-
-      // Hot leads no contact 24h
-      const { count: hotNoContact } = await supabase
-        .from("crm_leads")
-        .select("id", { count: "exact", head: true })
-        .eq("temperature", "hot")
-        .or(`last_contacted_at.is.null,last_contacted_at.lt.${yesterday}`);
-
-      // Pipeline conversion rate
-      const { count: totalLeads } = await supabase
-        .from("crm_leads")
-        .select("id", { count: "exact", head: true });
-      const { count: bookedLeads } = await supabase
-        .from("crm_leads")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "won");
-
-      const conversionRate = (totalLeads || 0) > 0
-        ? Math.round(((bookedLeads || 0) / (totalLeads || 1)) * 100)
-        : 0;
-
-      // Source breakdown
-      const sourceBreakdown: Record<string, number> = {};
-      (newLeadsWeek || []).forEach((l: any) => {
-        const src = l.source || "unknown";
-        sourceBreakdown[src] = (sourceBreakdown[src] || 0) + 1;
+      const uid = userId || (await supabase.auth.getUser()).data.user?.id;
+      const { data, error } = await supabase.rpc("get_owner_dashboard_kpis" as any, {
+        p_user_id: uid,
       });
-
-      // Unit breakdown for Kae
-      const unitBreakdown: Record<string, number> = {};
-      (newLeadsWeek || []).forEach((l: any) => {
-        const unit = l.business_unit || "unknown";
-        unitBreakdown[unit] = (unitBreakdown[unit] || 0) + 1;
-      });
-
+      if (error || !data) {
+        return {
+          totalActive: 0, newLeadsWeek: 0, contactedToday: 0,
+          overdue: 0, hotNoContact: 0, conversionRate: 0,
+          sourceBreakdown: {}, unitBreakdown: {},
+        };
+      }
+      const d = data as any;
       return {
-        totalActive: totalActive || 0,
-        newLeadsWeek: newLeadsWeek?.length || 0,
-        contactedToday: contactedToday || 0,
-        overdue: overdue || 0,
-        hotNoContact: hotNoContact || 0,
-        conversionRate,
-        sourceBreakdown,
-        unitBreakdown,
+        totalActive: d.total_active_leads || 0,
+        newLeadsWeek: d.new_leads_week || 0,
+        contactedToday: d.leads_contacted_today || 0,
+        overdue: d.overdue_follow_ups || 0,
+        hotNoContact: d.hot_leads_no_contact || 0,
+        conversionRate: d.pipeline_conversion_rate || 0,
+        sourceBreakdown: d.leads_by_source || {},
+        unitBreakdown: d.leads_by_unit || {},
       };
     },
     refetchInterval: 60000,
@@ -160,58 +74,27 @@ export function useOpsKpis() {
   return useQuery({
     queryKey: ["kpi", "operations"],
     queryFn: async () => {
-      const todayStr = format(new Date(), "yyyy-MM-dd");
-      const weekEnd = format(subDays(startOfWeek(new Date(), { weekStartsOn: 1 }), -6), "yyyy-MM-dd");
-
-      // Bookings today
-      const { count: bookingsToday } = await supabase
-        .from("bookings")
-        .select("id", { count: "exact", head: true })
-        .gte("start_datetime", todayStr)
-        .lt("start_datetime", todayStr + "T23:59:59");
-
-      // Bookings this week
-      const { count: bookingsWeek } = await supabase
-        .from("bookings")
-        .select("id", { count: "exact", head: true })
-        .gte("start_datetime", weekStart())
-        .lt("start_datetime", weekEnd + "T23:59:59");
-
-      // Pending approvals
-      const { count: pendingApprovals } = await supabase
-        .from("bookings")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "pending");
-
-      // Active memberships - query may fail if table doesn't exist
-      let activeMemberships = 0;
-      try {
-        const { count } = await supabase
-          .from("memberships" as any)
-          .select("id", { count: "exact", head: true })
-          .eq("status", "active");
-        activeMemberships = count || 0;
-      } catch {
-        activeMemberships = 0;
+      const uid = (await supabase.auth.getUser()).data.user?.id;
+      const { data, error } = await supabase.rpc("get_owner_dashboard_kpis" as any, {
+        p_user_id: uid,
+      });
+      if (error || !data) {
+        return {
+          bookingsToday: 0, bookingsWeek: 0, pendingApprovals: 0,
+          activeMemberships: 0, openOffices: "0/0", occupiedOffices: 0,
+          totalOffices: 0, occupancyRate: 0,
+        };
       }
-
-      // Office occupancy
-      const { data: offices } = await supabase
-        .from("hive_private_offices")
-        .select("id, status");
-      const totalOffices = offices?.length || 0;
-      const occupiedOffices = offices?.filter((o: any) => o.status === "leased").length || 0;
-      const availableOffices = totalOffices - occupiedOffices;
-
+      const d = data as any;
       return {
-        bookingsToday: bookingsToday || 0,
-        bookingsWeek: bookingsWeek || 0,
-        pendingApprovals: pendingApprovals || 0,
-        activeMemberships: activeMemberships || 0,
-        openOffices: `${availableOffices}/${totalOffices}`,
-        occupiedOffices,
-        totalOffices,
-        occupancyRate: totalOffices > 0 ? Math.round((occupiedOffices / totalOffices) * 100) : 0,
+        bookingsToday: d.bookings_today || 0,
+        bookingsWeek: d.bookings_week || 0,
+        pendingApprovals: d.pending_approvals || 0,
+        activeMemberships: d.active_memberships || 0,
+        openOffices: d.open_office_listings || "0/0",
+        occupiedOffices: 0,
+        totalOffices: 0,
+        occupancyRate: d.hive_occupancy_rate || 0,
       };
     },
     refetchInterval: 60000,
@@ -222,18 +105,14 @@ export function useTeamKpis() {
   return useQuery({
     queryKey: ["kpi", "team"],
     queryFn: async () => {
-      // Commission pending approval
-      const { data: pendingComm } = await supabase
-        .from("crm_commissions")
-        .select("amount")
-        .eq("status", "pending");
-
-      // Commission approved unpaid
-      const { data: approvedComm } = await supabase
-        .from("crm_commissions")
-        .select("amount")
-        .eq("status", "approved");
-
+      const uid = (await supabase.auth.getUser()).data.user?.id;
+      const { data, error } = await supabase.rpc("get_owner_dashboard_kpis" as any, {
+        p_user_id: uid,
+      });
+      if (error || !data) {
+        return { commissionPending: 0, commissionApproved: 0, nextPayrollDate: null as string | null };
+      }
+      const d = data as any;
       // Next payroll run date from admin_settings
       let nextPayrollDate: string | null = null;
       try {
@@ -242,14 +121,12 @@ export function useTeamKpis() {
           .select("value")
           .eq("key", "next_payroll_run_date")
           .maybeSingle();
-        if (setting?.value) {
-          nextPayrollDate = setting.value;
-        }
-      } catch { /* table may not exist yet */ }
+        if (setting?.value) nextPayrollDate = setting.value;
+      } catch { /* table may not exist */ }
 
       return {
-        commissionPending: (pendingComm || []).reduce((s, r) => s + (Number(r.amount) || 0), 0),
-        commissionApproved: (approvedComm || []).reduce((s, r) => s + (Number(r.amount) || 0), 0),
+        commissionPending: d.commission_pending || 0,
+        commissionApproved: d.commission_approved_unpaid || 0,
         nextPayrollDate,
       };
     },
@@ -259,12 +136,10 @@ export function useTeamKpis() {
 
 // Default tile layout for Dylan
 export const DYLAN_DEFAULT_TILES: KpiTileConfig[] = [
-  // Row 1 - Revenue Overview
   { id: "rev_today", title: "Total Revenue Today", category: "revenue", size: "medium" },
   { id: "rev_month", title: "Total Revenue This Month", category: "revenue", size: "medium" },
   { id: "stripe_today", title: "Stripe Payments Today", category: "revenue", size: "medium" },
   { id: "outstanding", title: "Outstanding Balances", category: "revenue", size: "medium" },
-  // Row 2 - Revenue by Unit
   { id: "rev_summit", title: "Summit Revenue", category: "revenue", size: "small" },
   { id: "rev_spa", title: "Spa Revenue", category: "revenue", size: "small" },
   { id: "rev_fitness", title: "Fitness Revenue", category: "revenue", size: "small" },
@@ -272,21 +147,18 @@ export const DYLAN_DEFAULT_TILES: KpiTileConfig[] = [
   { id: "rev_vault", title: "Voice Vault Revenue", category: "revenue", size: "small" },
   { id: "rev_mobile", title: "Mobile Homes Revenue", category: "revenue", size: "small" },
   { id: "rev_elevated", title: "Elevated by Elyse Revenue", category: "revenue", size: "small" },
-  // Row 3 - Leads
   { id: "leads_active", title: "Total Active Leads", category: "leads", size: "medium", href: "/admin/leads" },
   { id: "leads_new", title: "New Leads This Week", category: "leads", size: "medium", href: "/admin/leads" },
   { id: "leads_contacted", title: "Leads Contacted Today", category: "leads", size: "small" },
   { id: "leads_overdue", title: "Overdue Follow-Ups", category: "leads", size: "medium", href: "/admin/leads?filter=overdue" },
   { id: "leads_hot", title: "Hot Leads No Contact 24h", category: "leads", size: "medium", href: "/admin/pipeline?filter=hot" },
   { id: "pipeline_rate", title: "Pipeline Conversion Rate", category: "leads", size: "small" },
-  // Row 4 - Operations
   { id: "bookings_today", title: "Bookings Today", category: "operations", size: "medium", href: "/admin/schedule" },
   { id: "bookings_week", title: "Bookings This Week", category: "operations", size: "small" },
   { id: "approvals", title: "Pending Approvals", category: "operations", size: "medium", href: "/admin/approvals" },
   { id: "offices", title: "Open Office Listings", category: "operations", size: "small", href: "/admin/business/hive/office-listings" },
   { id: "occupancy", title: "Hive Occupancy Rate", category: "operations", size: "small", href: "/admin/business/hive/office-listings" },
   { id: "memberships", title: "Active Memberships", category: "operations", size: "small" },
-  // Row 5 - Team
   { id: "comm_pending", title: "Commission Pending", category: "team", size: "medium", href: "/admin/commissions" },
   { id: "comm_approved", title: "Commission Approved Unpaid", category: "team", size: "medium" },
   { id: "payroll_next", title: "Next Payroll Run", category: "team", size: "small" },
