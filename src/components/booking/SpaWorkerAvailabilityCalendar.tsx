@@ -186,7 +186,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
       toast.success("Payment successful. Your booking is confirmed.");
 
       try {
-        const raw = sessionStorage.getItem(`lindsey_booking_${id}`);
+        const raw = sessionStorage.getItem(`spa_booking_${id}`);
         if (raw) setCompletedSummary(JSON.parse(raw));
       } catch {
         // ignore
