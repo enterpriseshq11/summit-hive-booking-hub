@@ -5854,6 +5854,7 @@ export type Database = {
           customer_name: string | null
           id: string
           is_duplicate: boolean | null
+          metadata: Json | null
           payment_method_type: string | null
           revenue_event_id: string | null
           status: string
@@ -5871,6 +5872,7 @@ export type Database = {
           customer_name?: string | null
           id?: string
           is_duplicate?: boolean | null
+          metadata?: Json | null
           payment_method_type?: string | null
           revenue_event_id?: string | null
           status: string
@@ -5888,6 +5890,7 @@ export type Database = {
           customer_name?: string | null
           id?: string
           is_duplicate?: boolean | null
+          metadata?: Json | null
           payment_method_type?: string | null
           revenue_event_id?: string | null
           status?: string

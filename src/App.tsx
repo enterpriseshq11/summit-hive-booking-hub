@@ -87,6 +87,7 @@ import AdminPhase1Checklist from "./pages/admin/Phase1Checklist";
 import AdminStripeMappingPage from "./pages/admin/StripeMappingPage";
 import AdminCommissionRulesPage from "./pages/admin/CommissionRulesPage";
 import AdminStripeConnectionPage from "./pages/admin/StripeConnectionPage";
+import AdminStripeTransactions from "./pages/admin/StripeTransactions";
 import IntakePage from "./pages/intake/IntakePage";
 
 // Command Center / CRM Pages
@@ -229,6 +230,7 @@ function AppInner() {
 
           {/* REVENUE */}
           <Route path="/admin/revenue" element={<CommandCenterRevenue />} />
+          <Route path="/admin/revenue/stripe-transactions" element={<AdminStripeTransactions />} />
           <Route path="/admin/pricing-rules" element={<AdminPricingRules />} />
           <Route path="/admin/stripe" element={<AdminPaymentSettings />} />
 

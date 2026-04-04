@@ -1,0 +1,1 @@
+ALTER TABLE public.stripe_transactions ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { RevenueTrendChart } from "@/components/admin/RevenueTrendChart";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin";
@@ -343,7 +344,10 @@ export default function CommandCenterRevenue() {
           ))}
         </div>
 
-        {/* Filters */}
+        {/* Revenue Trend Chart */}
+        <RevenueTrendChart />
+
+
         <Card className="bg-zinc-900 border-zinc-800">
           <CardContent className="p-4">
             <div className="flex flex-wrap items-center gap-4">

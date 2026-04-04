@@ -49,13 +49,25 @@ export function useRevenueKpis() {
       const unitRevenue: Record<string, number> = {};
       units.forEach(u => { unitRevenue[u] = sumBy(monthRevenue || [], u); });
 
+      // Stripe payments today
+      let stripeToday = 0;
+      try {
+        const { data: stripeTxns } = await (supabase as any)
+          .from("stripe_transactions")
+          .select("amount")
+          .eq("status", "succeeded")
+          .gte("stripe_created_at", todayStr)
+          .or("is_duplicate.is.null,is_duplicate.eq.false");
+        stripeToday = (stripeTxns || []).reduce((s: number, r: any) => s + (Number(r.amount) || 0), 0) / 100;
+      } catch { /* table may not exist */ }
+
       return {
         totalRevenueToday: sumBy(todayRevenue || []),
         totalRevenueMonth: sumBy(monthRevenue || []),
-        stripePaymentsToday: 0, // Pending Stripe integration
+        stripePaymentsToday: stripeToday,
         outstandingBalances: (outstanding || []).reduce((s, r) => s + (Number(r.balance_due) || 0), 0),
         unitRevenue,
-        stripeIntegrated: false,
+        stripeIntegrated: true,
       };
     },
     refetchInterval: 60000,
