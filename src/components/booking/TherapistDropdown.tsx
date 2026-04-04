@@ -152,4 +152,4 @@ export function TherapistDropdown({ className }: TherapistDropdownProps) {
 }
 
 // Export static list for backwards compatibility
-export const THERAPISTS: Therapist[] = [LINDSEY_FALLBACK];
+export const THERAPISTS: Therapist[] = [DEFAULT_BOOKING_ENTRY];
