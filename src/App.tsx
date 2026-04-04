@@ -33,6 +33,8 @@ import VoiceVault from "./pages/VoiceVault";
 import PhotoBooth from "./pages/PhotoBooth";
 import PhotoBoothLanding from "./pages/PhotoBoothLanding";
 import BookWithWorker from "./pages/BookWithWorker";
+import BookVoiceVault from "./pages/BookVoiceVault";
+import BookSummit from "./pages/BookSummit";
 import NotFound from "./pages/NotFound";
 import RequestService from "./pages/RequestService";
 import Careers from "./pages/Careers";
@@ -160,6 +162,8 @@ function AppInner() {
           <Route path="/voice-vault" element={<VoiceVault />} />
           <Route path="/360-photo-booth" element={<PhotoBooth />} />
           <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
+          <Route path="/book-voice-vault" element={<BookVoiceVault />} />
+          <Route path="/book-summit" element={<BookSummit />} />
 
           {/* Public Intake Forms */}
           <Route path="/intake/:unit" element={<IntakePage />} />

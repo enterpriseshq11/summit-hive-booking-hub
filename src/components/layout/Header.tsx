@@ -45,11 +45,13 @@ import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
 // Experiences dropdown items
 const experienceItems = [
   { label: "Summit", href: "/summit", icon: Building2, description: "Event center & venue" },
+  { label: "Book Event", href: "/book-summit", icon: CalendarDays, description: "Request a Summit event" },
   { label: "Hive Coworking", href: "/coworking", icon: Building2, description: "Private offices & coworking" },
   { label: "Spa", href: "/spa", icon: Sparkles, description: "Massage & wellness" },
   { label: "Fitness", href: "/fitness", icon: Dumbbell, description: "Gym & training" },
   { label: "360 Photo Booth", href: "/360-photo-booth", icon: Camera, description: "Event photo experiences" },
   { label: "Voice Vault", href: "/voice-vault", icon: Mic, description: "Private recording studio" },
+  { label: "Book Studio", href: "/book-voice-vault", icon: Mic, description: "Book a recording session" },
   { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, description: "Daily rewards & prizes" },
 ];
 

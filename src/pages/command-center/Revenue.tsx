@@ -406,7 +406,7 @@ export default function CommandCenterRevenue() {
           <CardHeader>
             <CardTitle className="text-zinc-100">Revenue Events</CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-0 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-zinc-800 hover:bg-transparent">
