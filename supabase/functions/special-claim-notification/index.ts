@@ -268,7 +268,7 @@ const handler = async (req: Request): Promise<Response> => {
                 
                 ${message ? `<div class="message-box"><strong>Message:</strong><p style="margin: 10px 0 0 0;">${message}</p></div>` : ""}
                 
-                ${bookingId ? `<p style="margin-top: 15px; font-size: 13px; color: #888;">This request is now in <strong>Approvals → Pending</strong>. <a href="https://summit-hive-booking-hub.lovable.app/admin/approvals?id=${bookingId}">Review now</a></p>` : ""}
+                ${bookingId ? `<p style="margin-top: 15px; font-size: 13px; color: #888;">This request is now in <strong>Approvals → Pending</strong>. <a href="${baseUrl}/admin/approvals?id=${bookingId}">Review now</a></p>` : ""}
               </div>
             </div>
           </body>

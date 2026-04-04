@@ -324,7 +324,7 @@ const handler = async (req: Request): Promise<Response> => {
         lease_request: '🏢 Office Lease Request',
       };
 
-      const approvalsLink = "https://summit-hive-booking-hub.lovable.app/#/admin/approvals";
+      const approvalsLink = `${baseUrl}/#/admin/approvals`;
 
       const staffEmailResponse = await resend.emails.send({
         from: FROM_EMAIL,

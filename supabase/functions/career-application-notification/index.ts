@@ -153,7 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="margin-top: 24px; padding: 16px; background: #e8f4fd; border-radius: 8px;">
               <p style="margin: 0; color: #333;">
                 <strong>View Full Application:</strong><br>
-                <a href="https://summit-hive-booking-hub.lovable.app/admin/careers?search=${shortId}" style="color: #1a73e8;">
+                <a href="${baseUrl}/admin/careers?search=${shortId}" style="color: #1a73e8;">
                   Open in Admin Dashboard →
                 </a>
               </p>
