@@ -70,10 +70,15 @@ const handler = async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
-    // Build signup URL - points to worker-signup page with hash router
-    const baseUrl = Deno.env.get("SITE_URL") || "https://summit-hive-booking-hub.lovable.app";
+    // Build signup URL - dynamic base URL from admin_settings
+    let siteBaseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const { data: baseUrlSetting } = await supabase
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) siteBaseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
     // Use hash routing: /#/worker-signup?token=...
-    const signupUrl = `${baseUrl}/#/worker-signup?token=${inviteToken}`;
+    const signupUrl = `${siteBaseUrl}/#/worker-signup?token=${inviteToken}`;
 
     // Send invite email - using inline styles for maximum email client compatibility
     const emailResult = await resend.emails.send({
