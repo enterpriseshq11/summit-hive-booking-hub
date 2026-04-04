@@ -141,7 +141,7 @@ export default function FitnessMemberships() {
         {/* Members Table */}
         <Card>
           <CardHeader><CardTitle>Members</CardTitle></CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             {isLoading ? (
               <p className="text-muted-foreground">Loading...</p>
             ) : members.length === 0 ? (
