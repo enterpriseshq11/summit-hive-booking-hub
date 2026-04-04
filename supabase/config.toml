@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.activate-spa-worker]
 verify_jwt = false
+
+[functions.check-domain-verification]
+verify_jwt = false
