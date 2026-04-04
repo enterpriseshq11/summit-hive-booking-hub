@@ -165,6 +165,14 @@ serve(async (req) => {
     });
     const resend = new Resend(resendKey);
 
+    // Dynamic base URL from admin_settings
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const { data: baseUrlSetting } = await supabase
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
+
     const { booking_id, type, stripe_session_id, stripe_payment_intent, preferred_datetime }: BookingNotificationRequest = await req.json();
     logStep("Request received", { booking_id, type, stripe_session_id, preferred_datetime });
 
