@@ -120,7 +120,7 @@ function convertWorkerServices(services: SpaWorkerService[]): Service[] {
   });
 }
 
-export function LindseyAvailabilityCalendar({ onBookingComplete, workerId, workerServices }: LindseyAvailabilityCalendarProps) {
+export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, workerServices }: SpaWorkerAvailabilityCalendarProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
