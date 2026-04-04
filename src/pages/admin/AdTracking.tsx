@@ -205,14 +205,8 @@ export default function AdTracking() {
                 <span className="text-2xl">📘</span>
                 <div>
                   <p className="text-white font-medium">Facebook Ads</p>
-                  {fbCampaigns && fbCampaigns.length > 0 ? (
-                    <Badge variant="outline" className="border-green-500/30 text-green-400 text-xs">
-                      Connected · {fbCampaigns.length} campaigns
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-xs">Awaiting Data</Badge>
-                  )}
-                  {fbLastSync && (
+                  <ConnectionBadge state={fbState} lastSync={fbLastSync} />
+                  {fbState === "connected" && fbLastSync && (
                     <p className="text-xs text-zinc-500 mt-1">Last sync: {format(new Date(fbLastSync), "MMM d, h:mm a")}</p>
                   )}
                 </div>
@@ -234,14 +228,8 @@ export default function AdTracking() {
                 <span className="text-2xl">🔍</span>
                 <div>
                   <p className="text-white font-medium">Google Ads</p>
-                  {googleCampaigns && googleCampaigns.length > 0 ? (
-                    <Badge variant="outline" className="border-green-500/30 text-green-400 text-xs">
-                      Connected · {googleCampaigns.length} campaigns
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-xs">Awaiting Data</Badge>
-                  )}
-                  {googleLastSync && (
+                  <ConnectionBadge state={googleState} lastSync={googleLastSync} />
+                  {googleState === "connected" && googleLastSync && (
                     <p className="text-xs text-zinc-500 mt-1">Last sync: {format(new Date(googleLastSync), "MMM d, h:mm a")}</p>
                   )}
                 </div>
