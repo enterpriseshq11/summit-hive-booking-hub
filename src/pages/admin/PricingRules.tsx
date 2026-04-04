@@ -395,6 +395,11 @@ export default function AdminPricingRules() {
                 <Label>Priority (higher = applied later, wins conflicts)</Label>
                 <Input type="number" value={form.priority} onChange={(e) => setForm({ ...form, priority: parseInt(e.target.value) || 0 })} />
               </div>
+              <div>
+                <Label>Stripe Price ID</Label>
+                <Input value={form.stripe_price_id} onChange={(e) => setForm({ ...form, stripe_price_id: e.target.value })} placeholder="price_1ABC..." />
+                <p className="text-xs text-muted-foreground mt-1">Required for online checkout. Find this in your Stripe dashboard.</p>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Valid From</Label>
