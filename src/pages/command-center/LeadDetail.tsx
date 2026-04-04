@@ -389,6 +389,8 @@ export default function LeadDetailPage() {
                 )}
 
                 <Separator className="bg-zinc-800" />
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-zinc-500 text-xs">Status</Label>
                     <Select value={lead.status || "new"} onValueChange={(v) => updateLead.mutate({ id: lead.id, status: v as CrmLeadStatus })}>
