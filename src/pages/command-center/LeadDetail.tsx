@@ -21,12 +21,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
 import {
   ArrowLeft, Phone, Mail, Building2, Calendar, User, Clock,
   DollarSign, FileText, Send, Plus, RefreshCw, TrendingUp,
   Flame, Snowflake, Thermometer, CheckCircle2, Trash2, AlertTriangle,
+  FileSignature, ExternalLink, RotateCw,
 } from "lucide-react";
 import { format, formatDistanceToNow, isToday, isPast } from "date-fns";
 import { cn } from "@/lib/utils";
