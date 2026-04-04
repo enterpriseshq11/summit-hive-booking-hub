@@ -16,12 +16,12 @@ const UNIT_DISPLAY: Record<string, string> = {
 };
 
 const UNIT_SENDER: Record<string, { email: string; name: string }> = {
-  summit: { email: "events@a-zenterpriseshq.com", name: "The Summit Event Center" },
-  spa: { email: "spa@a-zenterpriseshq.com", name: "Restoration Lounge Spa" },
-  fitness: { email: "fitness@a-zenterpriseshq.com", name: "A-Z Total Fitness" },
-  coworking: { email: "hive@a-zenterpriseshq.com", name: "The Hive Coworking" },
-  voice_vault: { email: "studio@a-zenterpriseshq.com", name: "Voice Vault Studio" },
-  elevated_by_elyse: { email: "elyse@a-zenterpriseshq.com", name: "Elevated by Elyse" },
+  summit: { email: "events@azenterpriseshq.com", name: "The Summit Event Center" },
+  spa: { email: "spa@azenterpriseshq.com", name: "Restoration Lounge Spa" },
+  fitness: { email: "fitness@azenterpriseshq.com", name: "A-Z Total Fitness" },
+  coworking: { email: "hive@azenterpriseshq.com", name: "The Hive Coworking" },
+  voice_vault: { email: "studio@azenterpriseshq.com", name: "Voice Vault Studio" },
+  elevated_by_elyse: { email: "elyse@azenterpriseshq.com", name: "Elevated by Elyse" },
 };
 
 const UNIT_TOKENS: Record<string, { phone: string; email: string }> = {
@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
     if (resendApiKey) {
       try {
         const resend = new Resend(resendApiKey);
-        const sender = UNIT_SENDER[business_unit] || { email: "dylan@a-zenterpriseshq.com", name: "A-Z Enterprises" };
+        const sender = UNIT_SENDER[business_unit] || { email: "noreply@azenterpriseshq.com", name: "A-Z Enterprises" };
         const unitName = UNIT_DISPLAY[business_unit] || business_unit;
         const htmlBody = buildConfirmationHtml(first_name, business_unit, form_fields || {});
 

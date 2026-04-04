@@ -37,9 +37,13 @@ Deno.serve(async (req) => {
     const domainsData = await domainsRes.json();
     const domains = domainsData.data || domainsData || [];
 
-    // Find our domain
+    // Log all domains for debugging
+    const allDomainNames = Array.isArray(domains) ? domains.map((d: any) => ({ name: d.name, status: d.status, id: d.id })) : [];
+    console.log("All domains in account:", JSON.stringify(allDomainNames));
+
+    // Find our domain - try both with and without hyphen
     const found = Array.isArray(domains)
-      ? domains.find((d: any) => d.name === targetDomain)
+      ? domains.find((d: any) => d.name === targetDomain || d.name === targetDomain.replace("a-z", "az"))
       : null;
 
     if (!found) {
@@ -47,7 +51,8 @@ Deno.serve(async (req) => {
         JSON.stringify({
           verified: false,
           pending: false,
-          message: `Domain "${targetDomain}" not found in this Resend account. Make sure the API key belongs to the account where the domain was verified.`,
+          message: `Domain "${targetDomain}" not found in this Resend account. Domains in this account: ${allDomainNames.map((d: any) => d.name).join(", ") || "none"}`,
+          available_domains: allDomainNames,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
