@@ -531,62 +531,272 @@ serve(async (req) => {
         break;
       }
 
-      // ═══════════════ CHECKOUT SESSION COMPLETED (Legacy) ═══════════════
+      // ═══════════════ CHECKOUT SESSION COMPLETED ═══════════════
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const metadata = session.metadata || {};
-        const bookingId = metadata.booking_id;
-        const membershipTierId = metadata.membership_tier_id;
-        const userId = metadata.user_id;
-        const isDeposit = metadata.is_deposit === "true";
+        const bookingType = metadata.booking_type;
 
-        logStep("Checkout completed", { bookingId, membershipTierId, isDeposit });
+        logStep("Checkout completed", { bookingType, sessionId: session.id });
 
-        if (bookingId) {
-          await supabase.from("payments").update({
-            status: "completed",
-            paid_at: new Date().toISOString(),
-            stripe_payment_intent_id: session.payment_intent as string,
-          }).eq("booking_id", bookingId).eq("status", "pending");
+        // ─── Handler A: Spa Booking ───
+        if (bookingType === "spa_booking") {
+          const serviceType = metadata.service_type || "Spa Service";
+          const preferredDate = metadata.preferred_date || new Date().toISOString().split("T")[0];
+          const clientName = metadata.client_name || "";
+          const clientEmail = metadata.client_email || "";
+          const clientPhone = metadata.client_phone || "";
+          const notes = metadata.notes || "";
+          const amountDollars = (session.amount_total || 0) / 100;
 
-          const newStatus = isDeposit ? "deposit_paid" : "confirmed";
-          await supabase.from("bookings").update({
-            status: newStatus,
-            deposit_amount: isDeposit ? (session.amount_total || 0) / 100 : undefined,
-          }).eq("id", bookingId);
+          logStep("Spa booking handler", { serviceType, clientEmail, amountDollars });
 
+          // Create revenue event
+          await supabase.from("crm_revenue_events").insert({
+            amount: amountDollars,
+            business_unit: "spa",
+            description: `Spa Booking — ${serviceType}`,
+            is_manual: false,
+            payment_method: "stripe",
+            recorded_by: "00000000-0000-0000-0000-000000000000",
+            revenue_date: preferredDate,
+          });
+
+          // Create lead at booked stage
+          const nameParts = clientName.split(" ");
+          const firstName = nameParts[0] || "";
+          const lastName = nameParts.slice(1).join(" ") || "";
+          await supabase.from("crm_leads").insert({
+            lead_name: clientName || "Spa Client",
+            email: clientEmail,
+            phone: clientPhone,
+            business_unit: "spa",
+            status: "booked",
+            source: "website",
+          });
+
+          // Log activity
+          await supabase.from("crm_activity_events").insert({
+            event_type: "status_change" as any,
+            entity_type: "spa_booking",
+            event_category: "stripe_payment_received",
+            entity_name: `Spa Booking — ${serviceType}`,
+            metadata: { action: "spa_checkout_completed", service_type: serviceType, amount: amountDollars, client_email: clientEmail },
+          });
+
+          // Fire GHL webhook
           try {
-            const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-notification`;
-            await fetch(notificationUrl, {
+            const { data: ghlConfig } = await supabase
+              .from("ghl_pipeline_stage_webhooks")
+              .select("webhook_url")
+              .eq("stage_name", "booked")
+              .eq("business_unit", "spa")
+              .eq("is_active", true)
+              .maybeSingle();
+            if (ghlConfig?.webhook_url) {
+              await fetch(ghlConfig.webhook_url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  lead_name: clientName, email: clientEmail, phone: clientPhone,
+                  business_unit: "spa", new_stage_key: "booked", new_stage_name: "Booked",
+                  service_type: serviceType, amount: amountDollars, timestamp: new Date().toISOString(),
+                }),
+              });
+            }
+          } catch (ghlErr) { logStep("GHL webhook error (spa)", { error: String(ghlErr) }); }
+
+          // Send notification emails via edge function
+          try {
+            const notifUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-notification`;
+            await fetch(notifUrl, {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-              },
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
               body: JSON.stringify({
-                booking_id: bookingId,
-                notification_type: "confirmation",
-                channels: ["email", "sms"],
-                recipients: ["customer", "staff"],
-                stripe_session_id: session.id,
-                stripe_payment_intent: session.payment_intent as string,
+                notification_type: "spa_booking_confirmation",
+                client_email: clientEmail, client_name: clientName,
+                service_type: serviceType, preferred_date: preferredDate,
+                staff_emails: ["nasiya@a-zenterpriseshq.com", "dylan@a-zenterpriseshq.com"],
               }),
             });
-          } catch (notifError) {
-            logStep("Notification error", { error: String(notifError) });
-          }
+          } catch (notifErr) { logStep("Notification error (spa)", { error: String(notifErr) }); }
         }
 
-        if (membershipTierId && userId) {
-          await supabase.from("memberships").upsert({
-            user_id: userId,
-            tier_id: membershipTierId,
+        // ─── Handler B: Fitness Membership ───
+        else if (bookingType === "fitness_membership") {
+          const membershipType = metadata.tier_name || metadata.membership_type || "Standard Monthly";
+          const clientName = metadata.client_name || "";
+          const clientEmail = metadata.client_email || "";
+          const clientPhone = metadata.client_phone || "";
+          const emergencyName = metadata.emergency_contact_name || "";
+          const emergencyPhone = metadata.emergency_contact_phone || "";
+          const amountDollars = (session.amount_total || 0) / 100;
+          const stripeCustomerId = (session as any).customer as string || null;
+          const stripeSubscriptionId = session.subscription as string || null;
+
+          logStep("Fitness membership handler", { membershipType, clientEmail, amountDollars });
+
+          // Create fitness membership
+          const nameParts = clientName.split(" ");
+          await supabase.from("fitness_memberships").insert({
+            first_name: nameParts[0] || "",
+            last_name: nameParts.slice(1).join(" ") || "",
+            email: clientEmail,
+            phone: clientPhone,
+            membership_type: membershipType,
+            monthly_amount: amountDollars,
             status: "active",
-            stripe_subscription_id: session.subscription as string,
-            current_period_start: new Date().toISOString(),
-            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            billing_cycle: "monthly",
-          }, { onConflict: "user_id,tier_id" });
+            stripe_customer_id: stripeCustomerId,
+            stripe_subscription_id: stripeSubscriptionId,
+            emergency_contact_name: emergencyName,
+            emergency_contact_phone: emergencyPhone,
+            start_date: new Date().toISOString().split("T")[0],
+          });
+
+          // Create lead at booked
+          await supabase.from("crm_leads").insert({
+            lead_name: clientName || "Fitness Member",
+            email: clientEmail,
+            phone: clientPhone,
+            business_unit: "fitness",
+            status: "booked",
+            source: "website",
+          });
+
+          // Fire GHL webhook
+          try {
+            const { data: ghlConfig } = await supabase
+              .from("ghl_pipeline_stage_webhooks")
+              .select("webhook_url")
+              .eq("stage_name", "booked")
+              .eq("business_unit", "fitness")
+              .eq("is_active", true)
+              .maybeSingle();
+            if (ghlConfig?.webhook_url) {
+              await fetch(ghlConfig.webhook_url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  lead_name: clientName, email: clientEmail, phone: clientPhone,
+                  business_unit: "fitness", new_stage_key: "booked", new_stage_name: "Booked",
+                  membership_type: membershipType, amount: amountDollars, timestamp: new Date().toISOString(),
+                }),
+              });
+            }
+          } catch (ghlErr) { logStep("GHL webhook error (fitness)", { error: String(ghlErr) }); }
+
+          // Send notifications
+          try {
+            const notifUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-notification`;
+            await fetch(notifUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
+              body: JSON.stringify({
+                notification_type: "fitness_membership_welcome",
+                client_email: clientEmail, client_name: clientName,
+                membership_type: membershipType,
+                staff_emails: ["victoria@a-zenterpriseshq.com", "dylan@a-zenterpriseshq.com"],
+              }),
+            });
+          } catch (notifErr) { logStep("Notification error (fitness)", { error: String(notifErr) }); }
+        }
+
+        // ─── Handler C: Day Pass ───
+        else if (bookingType === "day_pass") {
+          const clientName = metadata.client_name || "";
+          const clientEmail = metadata.client_email || "";
+          const visitDate = metadata.visit_date || new Date().toISOString().split("T")[0];
+
+          logStep("Day pass handler", { clientName, clientEmail });
+
+          // Create revenue event
+          await supabase.from("crm_revenue_events").insert({
+            amount: 15.00,
+            business_unit: "fitness",
+            description: `Day Pass — ${clientName} — ${visitDate}`,
+            is_manual: false,
+            payment_method: "stripe",
+            recorded_by: "00000000-0000-0000-0000-000000000000",
+            revenue_date: visitDate,
+          });
+
+          // Log activity
+          await supabase.from("crm_activity_events").insert({
+            event_type: "status_change" as any,
+            entity_type: "day_pass",
+            event_category: "stripe_payment_received",
+            entity_name: `Day Pass — ${clientName}`,
+            metadata: { action: "day_pass_purchased", client_email: clientEmail, visit_date: visitDate },
+          });
+
+          // Send confirmation
+          try {
+            const notifUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-notification`;
+            await fetch(notifUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
+              body: JSON.stringify({
+                notification_type: "day_pass_confirmation",
+                client_email: clientEmail, client_name: clientName,
+                visit_date: visitDate,
+              }),
+            });
+          } catch (notifErr) { logStep("Notification error (day_pass)", { error: String(notifErr) }); }
+        }
+
+        // ─── Legacy handlers ───
+        else {
+          const bookingId = metadata.booking_id;
+          const membershipTierId = metadata.membership_tier_id;
+          const userId = metadata.user_id;
+          const isDeposit = metadata.is_deposit === "true";
+
+          if (bookingId) {
+            await supabase.from("payments").update({
+              status: "completed",
+              paid_at: new Date().toISOString(),
+              stripe_payment_intent_id: session.payment_intent as string,
+            }).eq("booking_id", bookingId).eq("status", "pending");
+
+            const newStatus = isDeposit ? "deposit_paid" : "confirmed";
+            await supabase.from("bookings").update({
+              status: newStatus,
+              deposit_amount: isDeposit ? (session.amount_total || 0) / 100 : undefined,
+            }).eq("id", bookingId);
+
+            try {
+              const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-notification`;
+              await fetch(notificationUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                },
+                body: JSON.stringify({
+                  booking_id: bookingId,
+                  notification_type: "confirmation",
+                  channels: ["email", "sms"],
+                  recipients: ["customer", "staff"],
+                  stripe_session_id: session.id,
+                  stripe_payment_intent: session.payment_intent as string,
+                }),
+              });
+            } catch (notifError) {
+              logStep("Notification error", { error: String(notifError) });
+            }
+          }
+
+          if (membershipTierId && userId) {
+            await supabase.from("memberships").upsert({
+              user_id: userId,
+              tier_id: membershipTierId,
+              status: "active",
+              stripe_subscription_id: session.subscription as string,
+              current_period_start: new Date().toISOString(),
+              current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+              billing_cycle: "monthly",
+            }, { onConflict: "user_id,tier_id" });
+          }
         }
         break;
       }

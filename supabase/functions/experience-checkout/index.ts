@@ -72,7 +72,49 @@ serve(async (req) => {
       total_amount: passedTotalAmount,
       // Pay on arrival flag (skip payment when toggle is OFF)
       skip_payment,
+      // Simple price_id mode (for BookSpa / JoinFitness)
+      price_id,
+      service_name,
+      mode: checkoutMode,
+      metadata: passedMetadata,
     } = body || {};
+
+    // ═══════════ SIMPLE PRICE_ID MODE ═══════════
+    // Used by /book-spa and /join-fitness for direct Stripe price checkout
+    if (price_id) {
+      logStep("Simple price_id mode", { price_id, checkoutMode, service_name });
+
+      if (!customer_email) {
+        return jsonResponse(400, { error: "Missing customer email" });
+      }
+
+      const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+      const origin = req.headers.get("origin") || "http://localhost:3000";
+
+      // Look up or create Stripe customer
+      let customerId: string | undefined;
+      const customers = await stripe.customers.list({ email: customer_email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+      }
+
+      const sessionMode = (checkoutMode === "subscription") ? "subscription" : "payment";
+
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        customer_email: customerId ? undefined : customer_email,
+        line_items: [{ price: price_id, quantity: 1 }],
+        mode: sessionMode as any,
+        success_url: `${origin}/?booking=success`,
+        cancel_url: `${origin}/?booking=cancelled`,
+        metadata: passedMetadata || {},
+      });
+
+      logStep("Simple checkout created", { sessionId: session.id, url: session.url });
+      return jsonResponse(200, { url: session.url, session_id: session.id });
+    }
+
+    // ═══════════ LEGACY PACKAGE/RESOURCE MODE ═══════════
 
     // Check if payments are enabled for 360 Photo Booth
     let paymentsEnabled = true;

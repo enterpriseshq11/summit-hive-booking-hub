@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { RotateCcw, Plus, Save } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RotateCcw, Plus, Save, Send } from "lucide-react";
 import { toast } from "sonner";
-import { format, differenceInDays, parseISO } from "date-fns";
+import { format, startOfWeek, startOfMonth } from "date-fns";
 import { KpiTile } from "@/components/admin/KpiTile";
 import {
   DYLAN_DEFAULT_TILES, VICTORIA_TILES, MARK_TILES, NASIYA_TILES,
@@ -16,6 +18,7 @@ import {
   type KpiTileConfig,
 } from "@/hooks/useKpiData";
 import { useRoleKpis, resolveKpiValue } from "@/hooks/useRoleKpis";
+import { useQuery } from "@tanstack/react-query";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
   type DragEndEvent,
@@ -71,9 +74,176 @@ function getUserRole(roles: string[] | undefined): string | undefined {
   return "manager";
 }
 
+// ════════ SCORECARD COMPONENT ════════
+const MANAGED_MEMBERS = [
+  { name: "Mark Leugers", email: "mark@a-zenterpriseshq.com" },
+  { name: "Nasiya", email: "nasiya@a-zenterpriseshq.com" },
+  { name: "Elyse Legge", email: "elyse@a-zenterpriseshq.com" },
+];
+
+interface ScorecardRow {
+  name: string;
+  leadsAssigned: number;
+  leadsContactedThisWeek: number;
+  followUpsOverdue: number;
+  stageMovementsThisWeek: number;
+  commissionsThisMonth: number;
+}
+
+function TeamScorecard() {
+  const [sending, setSending] = useState(false);
+  const { authUser } = useAuth();
+
+  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
+  const monthStart = startOfMonth(new Date()).toISOString();
+
+  const { data: scorecard = [], isLoading } = useQuery({
+    queryKey: ["team_scorecard", weekStart, monthStart],
+    queryFn: async () => {
+      const rows: ScorecardRow[] = [];
+
+      for (const member of MANAGED_MEMBERS) {
+        // Find profile by email
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("email", member.email)
+          .maybeSingle();
+
+        const memberId = profile?.id;
+        if (!memberId) {
+          rows.push({ name: member.name, leadsAssigned: 0, leadsContactedThisWeek: 0, followUpsOverdue: 0, stageMovementsThisWeek: 0, commissionsThisMonth: 0 });
+          continue;
+        }
+
+        // Leads assigned
+        const { count: leadsAssigned } = await supabase
+          .from("crm_leads")
+          .select("id", { count: "exact", head: true })
+          .eq("assigned_employee_id", memberId)
+          .not("status", "in", '("won","lost")');
+
+        // Leads contacted this week
+        const { count: leadsContacted } = await supabase
+          .from("crm_leads")
+          .select("id", { count: "exact", head: true })
+          .eq("assigned_employee_id", memberId)
+          .gte("last_contacted_at", weekStart);
+
+        // Follow-ups overdue
+        const { count: overdueCount } = await supabase
+          .from("crm_leads")
+          .select("id", { count: "exact", head: true })
+          .eq("assigned_employee_id", memberId)
+          .lt("follow_up_due", new Date().toISOString())
+          .not("status", "in", '("won","lost")');
+
+        // Stage movements this week
+        const { count: stageMovements } = await supabase
+          .from("crm_activity_events")
+          .select("id", { count: "exact", head: true })
+          .eq("actor_id", memberId)
+          .eq("event_category", "stage_changed")
+          .gte("created_at", weekStart);
+
+        // Commissions this month
+        const { data: commissions } = await supabase
+          .from("crm_commissions")
+          .select("amount")
+          .eq("employee_id", memberId)
+          .in("status", ["approved", "paid"] as any)
+          .gte("created_at", monthStart);
+
+        const totalCommissions = (commissions || []).reduce((sum, c) => sum + Number(c.amount || 0), 0);
+
+        rows.push({
+          name: member.name,
+          leadsAssigned: leadsAssigned || 0,
+          leadsContactedThisWeek: leadsContacted || 0,
+          followUpsOverdue: overdueCount || 0,
+          stageMovementsThisWeek: stageMovements || 0,
+          commissionsThisMonth: totalCommissions,
+        });
+      }
+
+      return rows;
+    },
+  });
+
+  const handleSendReport = async () => {
+    setSending(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-accountability-report", {
+        body: {
+          scorecard,
+          sender_name: authUser?.profile?.first_name
+            ? `${authUser.profile.first_name} ${authUser.profile.last_name || ""}`
+            : "Victoria Jackson",
+        },
+      });
+      if (error) throw error;
+      toast.success("Email sent to Dylan");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to send accountability report");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const getRowClass = (overdue: number) => {
+    if (overdue === 0) return "bg-green-500/10";
+    if (overdue <= 3) return "bg-amber-500/10";
+    return "bg-red-500/10";
+  };
+
+  if (isLoading) return <div className="text-zinc-400 p-4">Loading scorecard...</div>;
+
+  return (
+    <div className="space-y-4">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-zinc-300">Team Member</TableHead>
+              <TableHead className="text-zinc-300 text-center">Leads Assigned</TableHead>
+              <TableHead className="text-zinc-300 text-center">Contacted This Week</TableHead>
+              <TableHead className="text-zinc-300 text-center">Follow-Ups Overdue</TableHead>
+              <TableHead className="text-zinc-300 text-center">Stage Movements</TableHead>
+              <TableHead className="text-zinc-300 text-center">Commissions MTD</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {scorecard.map((row) => (
+              <TableRow key={row.name} className={getRowClass(row.followUpsOverdue)}>
+                <TableCell className="font-medium text-zinc-200">{row.name}</TableCell>
+                <TableCell className="text-center text-zinc-300">{row.leadsAssigned}</TableCell>
+                <TableCell className="text-center text-zinc-300">{row.leadsContactedThisWeek}</TableCell>
+                <TableCell className="text-center font-bold">
+                  <span className={row.followUpsOverdue === 0 ? "text-green-400" : row.followUpsOverdue <= 3 ? "text-amber-400" : "text-red-400"}>
+                    {row.followUpsOverdue}
+                  </span>
+                </TableCell>
+                <TableCell className="text-center text-zinc-300">{row.stageMovementsThisWeek}</TableCell>
+                <TableCell className="text-center text-zinc-300">${row.commissionsThisMonth.toFixed(2)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <Button onClick={handleSendReport} disabled={sending} className="bg-accent text-accent-foreground hover:bg-accent/90">
+        <Send className="h-4 w-4 mr-2" />
+        {sending ? "Sending..." : "Send Accountability Report"}
+      </Button>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const { authUser } = useAuth();
   const isOwner = authUser?.roles?.includes("owner") || false;
+  const isManager = authUser?.roles?.includes("manager") || false;
+  const showScorecard = isOwner || isManager;
   const currentRole = getUserRole(authUser?.roles);
 
   // Consolidated KPI data via role-based DB function
@@ -150,7 +320,6 @@ export default function AdminDashboard() {
 
   // Get value for a tile from consolidated data
   const getTileValue = (id: string): { value: string | number; subtitle?: string; pending?: boolean } => {
-    // Special case for payroll_next — needs separate admin_settings query  
     if (id === "payroll_next") {
       const resolved = resolveKpiValue(id, kpiData);
       return resolved;
@@ -226,7 +395,6 @@ export default function AdminDashboard() {
     return tiles.map((tile) => {
       const { value, subtitle, pending } = getTileValue(tile.id);
 
-      // Special handling for payroll_next tile - inline date editor for owner
       if (tile.id === "payroll_next" && isOwner) {
         return (
           <div key={tile.id}>
@@ -293,6 +461,24 @@ export default function AdminDashboard() {
     });
   };
 
+  const kpiContent = (
+    <>
+      {isOwner ? (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={tiles.map((t) => t.id)} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {renderTiles()}
+            </div>
+          </SortableContext>
+        </DndContext>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {renderTiles()}
+        </div>
+      )}
+    </>
+  );
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -325,18 +511,17 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {isOwner ? (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={tiles.map((t) => t.id)} strategy={rectSortingStrategy}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {renderTiles()}
-              </div>
-            </SortableContext>
-          </DndContext>
+        {showScorecard ? (
+          <Tabs defaultValue="kpis">
+            <TabsList>
+              <TabsTrigger value="kpis">KPIs</TabsTrigger>
+              <TabsTrigger value="scorecard">Team Scorecard</TabsTrigger>
+            </TabsList>
+            <TabsContent value="kpis">{kpiContent}</TabsContent>
+            <TabsContent value="scorecard"><TeamScorecard /></TabsContent>
+          </Tabs>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {renderTiles()}
-          </div>
+          kpiContent
         )}
       </div>
     </AdminLayout>
