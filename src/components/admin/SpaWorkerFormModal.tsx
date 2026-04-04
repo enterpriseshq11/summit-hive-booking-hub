@@ -132,7 +132,7 @@ export function SpaWorkerFormModal({ open, onOpenChange, worker }: SpaWorkerForm
                       <Input
                         {...field}
                         className="bg-zinc-800 border-zinc-700 text-white"
-                        placeholder="Lindsey"
+                        placeholder="First name"
                       />
                     </FormControl>
                     <FormMessage />
@@ -168,7 +168,7 @@ export function SpaWorkerFormModal({ open, onOpenChange, worker }: SpaWorkerForm
                     <Input
                       {...field}
                       className="bg-zinc-800 border-zinc-700 text-white"
-                      placeholder="Lindsey"
+                      placeholder="First name"
                     />
                   </FormControl>
                   <p className="text-xs text-zinc-500 mt-1">
@@ -190,7 +190,7 @@ export function SpaWorkerFormModal({ open, onOpenChange, worker }: SpaWorkerForm
                       {...field}
                       type="email"
                       className="bg-zinc-800 border-zinc-700 text-white"
-                      placeholder="lindsey@example.com"
+                      placeholder="name@example.com"
                       disabled={isEditing && !!worker?.user_id}
                     />
                   </FormControl>

@@ -194,7 +194,7 @@ export default function WorkerSignupPage() {
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-sm text-zinc-500">
-              Invites expire 48 hours after being sent. Ask Lindsey or your manager to send a new invite from the admin panel.
+              Invites expire 48 hours after being sent. Ask your manager to send a new invite from the admin panel.
             </p>
           </CardContent>
         </Card>
