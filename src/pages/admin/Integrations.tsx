@@ -99,6 +99,8 @@ export default function AdminIntegrations() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [testing, setTesting] = useState<string | null>(null);
+  const [dnsChecking, setDnsChecking] = useState(false);
+  const [dnsResult, setDnsResult] = useState<{ status: string; checkedAt: string; details?: string } | null>(null);
 
   useEffect(() => { loadAll(); }, []);
 
@@ -110,6 +112,27 @@ export default function AdminIntegrations() {
     setConfigs((c as any) || []);
     setStageWebhooks((s as any) || []);
     setLoading(false);
+  };
+
+  const checkDnsVerification = async () => {
+    setDnsChecking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("check-domain-verification", {
+        body: { domain: "a-zenterpriseshq.com" },
+      });
+      if (error) throw error;
+      setDnsResult({
+        status: data?.verified ? "Verified" : data?.pending ? "Pending" : "Failed",
+        checkedAt: new Date().toISOString(),
+        details: data?.details || data?.message || undefined,
+      });
+      if (data?.verified) toast.success("Domain verified!");
+      else toast.info(data?.message || "Domain not yet verified");
+    } catch (err: any) {
+      setDnsResult({ status: "Error", checkedAt: new Date().toISOString(), details: err.message });
+      toast.error("Check failed: " + err.message);
+    }
+    setDnsChecking(false);
   };
 
   const saveConfig = async (config: GhlConfig) => {
