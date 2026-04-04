@@ -208,6 +208,14 @@ export default function Payroll() {
                                   <FileText className="h-4 w-4 mr-1" />Download PDF
                                 </Button>
                               )}
+                              {run.status === "paid" && !(run as any).pdf_url && (
+                                <>
+                                  <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">PDF Generation Failed</Badge>
+                                  <Button size="sm" variant="outline" onClick={() => handleMarkPaid(run.id)} disabled={pdfGenerating === run.id}>
+                                    <FileText className="h-4 w-4 mr-1" />{pdfGenerating === run.id ? "Retrying..." : "Retry PDF"}
+                                  </Button>
+                                </>
+                              )}
                               {(run.status === "approved" || run.status === "paid") && (
                                 <>
                                   <Button size="sm" variant="ghost" onClick={() => handleExport(run.id, "csv")}>
