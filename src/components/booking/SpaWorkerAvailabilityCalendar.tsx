@@ -193,7 +193,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
       }
 
       // Clean the URL so refreshing doesn't re-trigger toasts.
-      navigate("/book-with-lindsey", { replace: true });
+      navigate("/spa", { replace: true });
     }
 
     if (booking === "cancelled") {
