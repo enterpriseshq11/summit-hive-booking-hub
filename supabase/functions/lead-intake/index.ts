@@ -80,6 +80,7 @@ Deno.serve(async (req) => {
       business_unit,
       first_name, last_name, email, phone,
       source, form_fields,
+      utm_source, utm_medium, utm_campaign, utm_content, utm_term,
     } = body;
 
     if (!business_unit || !first_name || !last_name || !email || !phone) {
