@@ -109,6 +109,7 @@ export default function AdminPricingRules() {
         package_id: form.package_id || null,
         valid_from: form.valid_from || null,
         valid_until: form.valid_until || null,
+        stripe_price_id: form.stripe_price_id || null,
       };
 
       if (editingRule) {
