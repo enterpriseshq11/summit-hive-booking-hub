@@ -33,7 +33,7 @@ const STATUS_COLORS: Record<string, string> = {
   contract_sent: "bg-purple-500/20 text-purple-400",
   deposit_pending: "bg-amber-600/20 text-amber-400",
   booked: "bg-green-500/20 text-green-400",
-  completed: "bg-emerald-600/20 text-emerald-400",
+  won: "bg-emerald-600/20 text-emerald-400",
   lost: "bg-zinc-800/40 text-zinc-500",
 };
 

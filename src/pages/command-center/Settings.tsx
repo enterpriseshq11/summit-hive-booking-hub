@@ -58,7 +58,7 @@ const pipelineStages = [
   { key: "contract_sent", label: "Contract Out", color: "bg-purple-500" },
   { key: "deposit_pending", label: "Deposit Received", color: "bg-amber-600" },
   { key: "booked", label: "Booked", color: "bg-green-500" },
-  { key: "completed", label: "Completed", color: "bg-emerald-600" },
+  { key: "won", label: "Completed", color: "bg-emerald-600" },
   { key: "lost", label: "Lost", color: "bg-zinc-700" },
 ];
 

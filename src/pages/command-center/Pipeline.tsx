@@ -547,7 +547,7 @@ export default function CommandCenterPipeline() {
     new: "New Lead", contact_attempted: "Contact Attempted", responded: "Responded",
     warm_lead: "Warm Lead", hot_lead: "Hot Lead", proposal_sent: "Proposal Sent",
     contract_sent: "Contract Out", deposit_pending: "Deposit Received",
-    booked: "Booked", completed: "Completed", lost: "Lost",
+    booked: "Booked", won: "Completed", completed: "Completed", lost: "Lost",
   };
 
   const fireGhlStageWebhookFromPipeline = useCallback(async (lead: any, previousStage: string, newStage: string) => {
