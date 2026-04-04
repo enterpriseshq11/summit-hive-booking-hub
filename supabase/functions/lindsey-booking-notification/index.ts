@@ -911,7 +911,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
         Request #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}<br>
-        <a href="https://summit-hive-booking-hub.lovable.app/#/admin/approvals">View in Admin Dashboard</a>
+        <a href="${baseUrl}/#/admin/approvals">View in Admin Dashboard</a>
       </p>
     </div>
     <div class="footer">
