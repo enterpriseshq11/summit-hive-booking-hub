@@ -476,3 +476,153 @@ function DocumentTable({
     </Card>
   );
 }
+
+const BUSINESS_UNITS = [
+  { value: "summit", label: "Summit" },
+  { value: "spa", label: "Spa" },
+  { value: "fitness", label: "Fitness" },
+  { value: "coworking", label: "Hive" },
+  { value: "voice_vault", label: "Voice Vault" },
+  { value: "elevated_by_elyse", label: "Elevated by Elyse" },
+  { value: "mobile_homes", label: "Mobile Homes" },
+];
+
+function PandaDocTemplatesTab() {
+  const queryClient = useQueryClient();
+  const { authUser } = useAuth();
+  const [tagTemplateId, setTagTemplateId] = useState<string | null>(null);
+  const [selectedUnit, setSelectedUnit] = useState<string>("");
+
+  const { data: pdTemplates, isLoading } = useQuery({
+    queryKey: ["pandadoc_templates_list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("pandadoc-send", {
+        body: { action: "list_templates" },
+      });
+      if (error) return [];
+      return data?.results || data || [];
+    },
+    staleTime: 300000,
+  });
+
+  const { data: templateTags } = useQuery({
+    queryKey: ["pandadoc_template_tags"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("pandadoc_template_tags").select("*");
+      return (data || []) as { id: string; template_id: string; business_unit: string }[];
+    },
+  });
+
+  const addTag = useMutation({
+    mutationFn: async ({ templateId, unit }: { templateId: string; unit: string }) => {
+      const { error } = await (supabase as any).from("pandadoc_template_tags").insert({
+        template_id: templateId,
+        business_unit: unit,
+        created_by: authUser?.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pandadoc_template_tags"] });
+      toast.success("Tag added");
+      setTagTemplateId(null);
+      setSelectedUnit("");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const removeTag = useMutation({
+    mutationFn: async (tagId: string) => {
+      const { error } = await (supabase as any).from("pandadoc_template_tags").delete().eq("id", tagId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pandadoc_template_tags"] });
+      toast.success("Tag removed");
+    },
+  });
+
+  const getTagsForTemplate = (templateId: string) =>
+    (templateTags || []).filter(t => t.template_id === templateId);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Template Name</TableHead>
+              <TableHead>Business Unit Tags</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {(pdTemplates || []).map((t: any) => {
+              const tags = getTagsForTemplate(t.id);
+              return (
+                <TableRow key={t.id}>
+                  <TableCell>
+                    <div className="font-medium text-white">{t.name}</div>
+                    <div className="text-xs text-zinc-400">ID: {t.id?.slice(-8)}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {tags.map(tag => (
+                        <Badge key={tag.id} variant="secondary" className="text-xs gap-1 cursor-pointer" onClick={() => removeTag.mutate(tag.id)}>
+                          {BUSINESS_UNITS.find(u => u.value === tag.business_unit)?.label || tag.business_unit} ×
+                        </Badge>
+                      ))}
+                      {tags.length === 0 && <span className="text-xs text-zinc-500">No tags</span>}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {tagTemplateId === t.id ? (
+                      <div className="flex items-center gap-2 justify-end">
+                        <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+                          <SelectTrigger className="w-32 h-8 text-xs"><SelectValue placeholder="Unit" /></SelectTrigger>
+                          <SelectContent>
+                            {BUSINESS_UNITS.filter(u => !tags.some(tag => tag.business_unit === u.value)).map(u => (
+                              <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          className="h-8 text-xs"
+                          disabled={!selectedUnit}
+                          onClick={() => addTag.mutate({ templateId: t.id, unit: selectedUnit })}
+                        >
+                          Add
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setTagTemplateId(null)}>Cancel</Button>
+                      </div>
+                    ) : (
+                      <Button variant="ghost" size="sm" onClick={() => { setTagTemplateId(t.id); setSelectedUnit(""); }}>
+                        <Tag className="h-4 w-4 mr-1" /> Tag Unit
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {(!pdTemplates || pdTemplates.length === 0) && (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                  No PandaDoc templates found. Make sure your PandaDoc API key is configured.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
