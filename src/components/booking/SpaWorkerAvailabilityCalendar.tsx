@@ -523,7 +523,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
               totalPaid: breakdown?.totalDue,
               total: price,
             };
-            sessionStorage.setItem(`lindsey_booking_${bookingId}`, JSON.stringify(summary));
+            sessionStorage.setItem(`spa_booking_${bookingId}`, JSON.stringify(summary));
           } catch {
             // ignore
           }
