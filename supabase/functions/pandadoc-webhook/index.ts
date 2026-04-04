@@ -103,7 +103,7 @@ serve(async (req) => {
                     entity_id: lead.id,
                     metadata: {
                       action: ghlRes.ok ? "ghl_webhook_fired" : "ghl_webhook_failed",
-                      message: `GHL webhook ${ghlRes.ok ? "fired" : "FAILED"} — stage moved to Deposit Pending — ${statusText}`,
+                      message: `GHL webhook ${ghlRes.ok ? "fired" : "FAILED"} — stage moved to Deposit Received — ${statusText}`,
                     },
                   });
                 } else {
