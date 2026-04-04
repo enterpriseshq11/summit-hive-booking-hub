@@ -690,8 +690,94 @@ export default function LeadDetailPage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Contract Status - visible when pandadoc_document_id exists */}
+            {(lead as any).pandadoc_document_id && (
+              <Card className="bg-zinc-900 border-zinc-800">
+                <CardHeader><CardTitle className="text-zinc-100 flex items-center gap-2">
+                  <FileSignature className="h-5 w-5 text-amber-500" /> Contract Status
+                </CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400 text-sm">Document ID</span>
+                    <span className="text-zinc-100 font-mono text-xs">...{((lead as any).pandadoc_document_id || "").slice(-8)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400 text-sm">Status</span>
+                    <Badge className={cn("text-xs",
+                      (lead as any).pandadoc_status === "completed" ? "bg-green-500/20 text-green-400" :
+                      (lead as any).pandadoc_status === "declined" ? "bg-red-500/20 text-red-400" :
+                      "bg-blue-500/20 text-blue-400"
+                    )}>
+                      {(lead as any).pandadoc_status === "completed" ? "Signed" :
+                       (lead as any).pandadoc_status === "declined" ? "Declined" : "Sent"}
+                    </Badge>
+                  </div>
+                  {(lead as any).pandadoc_status === "sent" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full border-zinc-700 text-zinc-300"
+                      onClick={() => resendReminder.mutate((lead as any).pandadoc_document_id)}
+                      disabled={resendReminder.isPending}
+                    >
+                      <RotateCw className="h-3.5 w-3.5 mr-1" />
+                      {resendReminder.isPending ? "Sending..." : "Resend Reminder"}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
+
+        {/* Send Contract Modal */}
+        <Dialog open={isContractOpen} onOpenChange={setIsContractOpen}>
+          <DialogContent className="bg-zinc-900 border-zinc-800">
+            <DialogHeader><DialogTitle className="text-zinc-100">Send Contract</DialogTitle></DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label className="text-zinc-300">Template *</Label>
+                <Select value={contractForm.template_id} onValueChange={(v) => setContractForm({ ...contractForm, template_id: v })}>
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-100"><SelectValue placeholder="Select template" /></SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    {(pandadocTemplates || []).map((t: any) => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-zinc-300">Recipient Name</Label>
+                <Input value={contractForm.recipient_name} onChange={(e) => setContractForm({ ...contractForm, recipient_name: e.target.value })} className="bg-zinc-800 border-zinc-700 text-zinc-100" />
+              </div>
+              <div>
+                <Label className="text-zinc-300">Recipient Email</Label>
+                <Input value={contractForm.recipient_email} onChange={(e) => setContractForm({ ...contractForm, recipient_email: e.target.value })} className="bg-zinc-800 border-zinc-700 text-zinc-100" />
+              </div>
+              <div>
+                <Label className="text-zinc-300">Message (optional)</Label>
+                <Textarea
+                  value={contractForm.message}
+                  onChange={(e) => setContractForm({ ...contractForm, message: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-zinc-100"
+                  placeholder="Please review and sign the attached contract at your earliest convenience."
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsContractOpen(false)} className="border-zinc-700 text-zinc-300">Cancel</Button>
+              <Button
+                onClick={() => sendContract.mutate()}
+                disabled={!contractForm.template_id || !contractForm.recipient_email || sendContract.isPending}
+                className="bg-amber-500 hover:bg-amber-600 text-black"
+              >
+                {sendContract.isPending ? "Sending..." : "Send Contract"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
