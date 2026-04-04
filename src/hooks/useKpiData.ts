@@ -283,7 +283,8 @@ export const DYLAN_DEFAULT_TILES: KpiTileConfig[] = [
   { id: "bookings_today", title: "Bookings Today", category: "operations", size: "medium", href: "/admin/schedule" },
   { id: "bookings_week", title: "Bookings This Week", category: "operations", size: "small" },
   { id: "approvals", title: "Pending Approvals", category: "operations", size: "medium", href: "/admin/approvals" },
-  { id: "offices", title: "Open Office Listings", category: "operations", size: "small" },
+  { id: "offices", title: "Open Office Listings", category: "operations", size: "small", href: "/admin/business/hive/office-listings" },
+  { id: "occupancy", title: "Hive Occupancy Rate", category: "operations", size: "small", href: "/admin/business/hive/office-listings" },
   { id: "memberships", title: "Active Memberships", category: "operations", size: "small" },
   // Row 5 - Team
   { id: "comm_pending", title: "Commission Pending", category: "team", size: "medium", href: "/admin/commissions" },
