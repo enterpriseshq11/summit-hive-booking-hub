@@ -38,6 +38,18 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const resend = new Resend(resendApiKey);
+
+    // Dynamic base URL from admin_settings
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const sbClient = createClient(supabaseUrl, serviceKey);
+      const { data: baseUrlSetting } = await sbClient
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
+
     const { applicationId, team, role, applicantEmail, applicantName, applicantPhone, submittedAt }: NotificationRequest = await req.json();
 
     const fromEmail = Deno.env.get("FROM_EMAIL") || "noreply@azenterpriseshq.com";
