@@ -79,7 +79,7 @@ export function useCreateHiveLease() {
 
       await (supabase as any)
         .from("hive_private_offices")
-        .update({ status: "booked" })
+        .update({ status: "leased" })
         .eq("code", input.office_code);
 
       const { data, error } = await (supabase as any)

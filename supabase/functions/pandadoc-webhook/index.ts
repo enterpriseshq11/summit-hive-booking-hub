@@ -1,0 +1,228 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const logStep = (step: string, details?: any) => {
+  const d = details ? ` - ${JSON.stringify(details)}` : "";
+  console.log(`[PANDADOC-WEBHOOK] ${step}${d}`);
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
+  try {
+    const body = await req.json();
+    logStep("Webhook received", { event: body?.event });
+
+    // PandaDoc doesn't support webhook signatures in the traditional sense.
+    // They send a shared key header if configured. Check if available.
+    const webhookKey = Deno.env.get("PANDADOC_WEBHOOK_KEY");
+    const headerKey = req.headers.get("x-pandadoc-signature");
+    if (webhookKey && headerKey && headerKey !== webhookKey) {
+      logStep("WARNING: Webhook signature mismatch - proceeding but flagging");
+    }
+    if (!webhookKey) {
+      logStep("WARNING: PANDADOC_WEBHOOK_KEY not set, requests are unverified");
+    }
+
+    const eventType = body?.event || body?.type || "unknown";
+    const documentId = body?.data?.id || body?.document_id || null;
+
+    // Log every event
+    await supabase.from("pandadoc_webhook_events").insert({
+      event_type: eventType,
+      document_id: documentId,
+      payload: body,
+      processed: false,
+    });
+
+    // Handle document.completed
+    if (eventType === "document_completed" || eventType === "document.completed") {
+      logStep("Document completed", { documentId });
+
+      if (documentId) {
+        // Find lead with this PandaDoc document ID
+        const { data: lead } = await supabase
+          .from("crm_leads")
+          .select("id, lead_name, business_unit, status, assigned_employee_id, pandadoc_status")
+          .eq("pandadoc_document_id", documentId)
+          .maybeSingle();
+
+        if (lead) {
+          // Update pandadoc_status
+          await supabase.from("crm_leads")
+            .update({ pandadoc_status: "completed" })
+            .eq("id", lead.id);
+
+          // Move to deposit_received if currently at contract_out
+          if (lead.status === "contract_out") {
+            await supabase.from("crm_leads")
+              .update({ status: "deposit_received" })
+              .eq("id", lead.id);
+
+            // Fire GHL webhook for stage change
+            try {
+              const ghlUrl = await supabase
+                .from("admin_settings")
+                .select("value")
+                .eq("key", "ghl_webhook_url")
+                .maybeSingle();
+
+              if (ghlUrl?.data?.value) {
+                await fetch(ghlUrl.data.value, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    lead_id: lead.id,
+                    lead_name: lead.lead_name,
+                    business_unit: lead.business_unit,
+                    new_stage_key: "deposit_received",
+                    new_stage_name: "Deposit Received",
+                    trigger: "pandadoc_signed",
+                    timestamp: new Date().toISOString(),
+                  }),
+                });
+              }
+            } catch (e) {
+              logStep("GHL webhook failed", { error: String(e) });
+            }
+          }
+
+          // Log to timeline
+          await supabase.from("crm_activity_events").insert({
+            event_type: "status_change" as any,
+            entity_type: "lead",
+            entity_id: lead.id,
+            entity_name: lead.lead_name,
+            event_category: "document_uploaded",
+            metadata: {
+              action: "contract_signed",
+              pandadoc_document_id: documentId,
+              description: `Contract signed via PandaDoc — all parties have signed`,
+            },
+          });
+
+          // Create alert
+          await supabase.from("crm_alerts").insert({
+            alert_type: "commission_pending",
+            title: `Contract Signed — ${lead.lead_name}`,
+            description: `Contract signed by ${lead.lead_name} — ${lead.business_unit} — ready for deposit`,
+            entity_type: "lead",
+            entity_id: lead.id,
+            severity: "info",
+            target_roles: ["owner", "manager"],
+          });
+
+          // Send notification email to Dylan
+          try {
+            const resendKey = Deno.env.get("RESEND_API_KEY");
+            if (resendKey) {
+              await fetch("https://api.resend.com/emails", {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${resendKey}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  from: "A-Z Command <notifications@azenterpriseshq.com>",
+                  to: ["dylan@a-zenterpriseshq.com"],
+                  reply_to: "dylan@a-zenterpriseshq.com",
+                  subject: `Contract Signed — ${lead.lead_name}`,
+                  html: `
+                    <h2>Contract Signed</h2>
+                    <p><strong>${lead.lead_name}</strong> has signed the contract.</p>
+                    <p>Business Unit: ${lead.business_unit}</p>
+                    <p>PandaDoc Document ID: ${documentId}</p>
+                    <p>Lead is now ready for deposit collection.</p>
+                  `,
+                }),
+              });
+            }
+          } catch (e) {
+            logStep("Email notification failed", { error: String(e) });
+          }
+
+          logStep("Document completed processed for lead", { leadId: lead.id });
+        } else {
+          logStep("No matching lead found for document", { documentId });
+        }
+      }
+    }
+
+    // Handle document.declined
+    if (eventType === "document_declined" || eventType === "document.declined") {
+      logStep("Document declined", { documentId });
+
+      if (documentId) {
+        const { data: lead } = await supabase
+          .from("crm_leads")
+          .select("id, lead_name, business_unit, assigned_employee_id")
+          .eq("pandadoc_document_id", documentId)
+          .maybeSingle();
+
+        if (lead) {
+          await supabase.from("crm_leads")
+            .update({ pandadoc_status: "declined" })
+            .eq("id", lead.id);
+
+          await supabase.from("crm_activity_events").insert({
+            event_type: "status_change" as any,
+            entity_type: "lead",
+            entity_id: lead.id,
+            entity_name: lead.lead_name,
+            event_category: "document_uploaded",
+            metadata: {
+              action: "contract_declined",
+              pandadoc_document_id: documentId,
+              description: `Contract declined via PandaDoc`,
+            },
+          });
+
+          await supabase.from("crm_alerts").insert({
+            alert_type: "follow_up_overdue",
+            title: `Contract Declined — ${lead.lead_name}`,
+            description: `${lead.lead_name} declined the contract — ${lead.business_unit}`,
+            entity_type: "lead",
+            entity_id: lead.id,
+            severity: "warning",
+            target_roles: ["owner", "manager"],
+          });
+
+          logStep("Document declined processed for lead", { leadId: lead.id });
+        }
+      }
+    }
+
+    // Mark as processed
+    if (documentId) {
+      await supabase.from("pandadoc_webhook_events")
+        .update({ processed: true })
+        .eq("document_id", documentId)
+        .eq("event_type", eventType);
+    }
+
+    return new Response(JSON.stringify({ received: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    logStep("ERROR", { message: msg });
+    return new Response(JSON.stringify({ error: msg }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
+  }
+});
