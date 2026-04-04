@@ -10,7 +10,7 @@ const logStep = (step: string, details?: any) => {
   console.log(`[GHL-INBOUND] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
 };
 
-// GHL stage name → internal enum value
+// GHL stage name → internal enum value (crm_lead_status)
 const STAGE_MAP: Record<string, string> = {
   "New Lead": "new",
   "Contact Attempted": "contact_attempted",
@@ -26,6 +26,13 @@ const STAGE_MAP: Record<string, string> = {
   "Completed": "won",
   "Lost": "lost",
 };
+
+// All valid internal stage keys
+const VALID_STAGES = new Set([
+  "new", "contact_attempted", "responded", "warm_lead", "hot_lead",
+  "proposal_sent", "contract_sent", "deposit_pending", "booked",
+  "won", "lost", "follow_up_needed", "no_response",
+]);
 
 // Internal stage key labels
 const STAGE_LABELS: Record<string, string> = {
@@ -89,10 +96,35 @@ serve(async (req) => {
     }
 
     // Map GHL stage to internal stage key
-    const mappedStage = STAGE_MAP[newStageRaw] || newStageRaw.toLowerCase().replace(/\s+/g, "_");
+    const mappedStage = STAGE_MAP[newStageRaw];
+
+    // Handle unrecognized stage names
+    if (!mappedStage || !VALID_STAGES.has(mappedStage)) {
+      logStep("Unrecognized stage name", { raw: newStageRaw, mapped: mappedStage });
+
+      // Log warning to crm_activity_events
+      await supabase.from("crm_activity_events").insert({
+        event_type: "status_change" as any,
+        entity_type: "lead",
+        event_category: "ghl_webhook_failed",
+        metadata: {
+          action: "ghl_inbound_unmapped_stage",
+          description: `GHL inbound webhook received unrecognized stage name: ${newStageRaw} for lead ${email || contactId || "unknown"}`,
+          raw_stage: newStageRaw,
+          contact_id: contactId,
+          email: email,
+        },
+      });
+
+      return new Response(
+        JSON.stringify({ received: true, warning: `Unrecognized stage: ${newStageRaw}` }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+      );
+    }
+
     logStep("Mapped stage", { raw: newStageRaw, mapped: mappedStage });
 
-    // Find matching lead — try ghl_contact_id first, then email
+    // Find matching lead — try ghl_contact_id first, then email (most recent with matching business_unit)
     let lead: any = null;
 
     if (contactId) {
@@ -105,14 +137,30 @@ serve(async (req) => {
     }
 
     if (!lead && email) {
-      const { data } = await supabase
-        .from("crm_leads")
-        .select("id, lead_name, status, business_unit, ghl_sync_in_progress")
-        .eq("email", email)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (data) lead = data;
+      // Try matching by email + business_unit first for precision
+      if (businessUnit) {
+        const { data } = await supabase
+          .from("crm_leads")
+          .select("id, lead_name, status, business_unit, ghl_sync_in_progress")
+          .eq("email", email)
+          .eq("business_unit", businessUnit)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data) lead = data;
+      }
+
+      // Fallback: most recent lead with this email regardless of unit
+      if (!lead) {
+        const { data } = await supabase
+          .from("crm_leads")
+          .select("id, lead_name, status, business_unit, ghl_sync_in_progress")
+          .eq("email", email)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data) lead = data;
+      }
     }
 
     if (!lead) {
