@@ -3,8 +3,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
-
-const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend';
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const UNIT_DISPLAY: Record<string, string> = {
   summit: "The Summit Event Center",
