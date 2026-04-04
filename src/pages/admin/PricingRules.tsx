@@ -58,6 +58,7 @@ export default function AdminPricingRules() {
     valid_from: "",
     valid_until: "",
     is_active: true,
+    stripe_price_id: "",
   });
 
   const [previewBase, setPreviewBase] = useState(100);
