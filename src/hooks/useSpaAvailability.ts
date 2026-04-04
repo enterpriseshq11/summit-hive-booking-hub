@@ -91,7 +91,7 @@ export function useSpaAvailability({ selectedDate, selectedDuration = 60 }: UseS
 
   // Fetch bookings for the next 60 days - ONLY active/blocking statuses
   const { data: bookings } = useQuery({
-    queryKey: ["lindsey-bookings"],
+    queryKey: ["spa-bookings"],
     queryFn: async () => {
       const startDate = format(new Date(), "yyyy-MM-dd");
       const endDate = format(addDays(new Date(), 60), "yyyy-MM-dd");
