@@ -13,12 +13,12 @@ export interface Therapist {
   available: boolean;
 }
 
-// Static fallback for Lindsey (always available as spa_lead)
-const LINDSEY_FALLBACK: Therapist = {
-  id: "lindsey",
+// Static fallback entry (always available as default booking)
+const DEFAULT_BOOKING_ENTRY: Therapist = {
+  id: "default-booking",
   name: "Book Now",
   subtitle: "Licensed Massage Therapist",
-  route: "/book-with-lindsey#availability-calendar",
+  route: "/spa#availability-calendar",
   available: true,
 };
 
