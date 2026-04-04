@@ -161,6 +161,33 @@ Deno.serve(async (req) => {
         if (ghlRes.ok) {
           ghlStatus = "fired";
           ghlResponse = `HTTP ${ghlRes.status}`;
+
+          // Attempt to capture GHL contact ID from response
+          try {
+            const ghlBody = await ghlRes.json();
+            const ghlContactId = ghlBody?.contact_id || ghlBody?.contactId || ghlBody?.id || null;
+            if (ghlContactId && lead?.id) {
+              await supabase.from("crm_leads")
+                .update({ ghl_contact_id: ghlContactId })
+                .eq("id", lead.id);
+
+              await supabase.from("crm_activity_events").insert({
+                event_type: "status_change" as any,
+                entity_type: "lead",
+                entity_id: lead.id,
+                event_category: "lead_updated",
+                metadata: {
+                  action: "ghl_contact_created",
+                  description: `GHL contact created — Contact ID: ${ghlContactId}`,
+                  ghl_contact_id: ghlContactId,
+                },
+              });
+            } else {
+              console.log("GHL response did not contain a contact ID — ghl_contact_id remains null");
+            }
+          } catch (_parseErr) {
+            console.log("Could not parse GHL webhook response for contact ID — ghl_contact_id remains null");
+          }
         } else {
           ghlStatus = "failed";
           ghlResponse = `HTTP ${ghlRes.status}: ${await ghlRes.text()}`;
