@@ -195,12 +195,13 @@ export function useOpsKpis() {
         activeMemberships = 0;
       }
 
-      // Open office listings
+      // Office occupancy
       const { data: offices } = await supabase
         .from("hive_private_offices")
         .select("id, status");
       const totalOffices = offices?.length || 0;
-      const availableOffices = offices?.filter((o: any) => o.status === "available").length || 0;
+      const occupiedOffices = offices?.filter((o: any) => o.status === "booked").length || 0;
+      const availableOffices = totalOffices - occupiedOffices;
 
       return {
         bookingsToday: bookingsToday || 0,
@@ -208,6 +209,9 @@ export function useOpsKpis() {
         pendingApprovals: pendingApprovals || 0,
         activeMemberships: activeMemberships || 0,
         openOffices: `${availableOffices}/${totalOffices}`,
+        occupiedOffices,
+        totalOffices,
+        occupancyRate: totalOffices > 0 ? Math.round((occupiedOffices / totalOffices) * 100) : 0,
       };
     },
     refetchInterval: 60000,
