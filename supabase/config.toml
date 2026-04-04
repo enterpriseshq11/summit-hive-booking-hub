@@ -92,3 +92,9 @@ verify_jwt = false
 
 [functions.check-domain-verification]
 verify_jwt = false
+
+[functions.pandadoc-webhook]
+verify_jwt = false
+
+[functions.pandadoc-send]
+verify_jwt = false
