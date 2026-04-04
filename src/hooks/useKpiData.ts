@@ -195,12 +195,13 @@ export function useOpsKpis() {
         activeMemberships = 0;
       }
 
-      // Open office listings
+      // Office occupancy
       const { data: offices } = await supabase
         .from("hive_private_offices")
         .select("id, status");
       const totalOffices = offices?.length || 0;
-      const availableOffices = offices?.filter((o: any) => o.status === "available").length || 0;
+      const occupiedOffices = offices?.filter((o: any) => o.status === "booked").length || 0;
+      const availableOffices = totalOffices - occupiedOffices;
 
       return {
         bookingsToday: bookingsToday || 0,
@@ -208,6 +209,9 @@ export function useOpsKpis() {
         pendingApprovals: pendingApprovals || 0,
         activeMemberships: activeMemberships || 0,
         openOffices: `${availableOffices}/${totalOffices}`,
+        occupiedOffices,
+        totalOffices,
+        occupancyRate: totalOffices > 0 ? Math.round((occupiedOffices / totalOffices) * 100) : 0,
       };
     },
     refetchInterval: 60000,
@@ -279,7 +283,8 @@ export const DYLAN_DEFAULT_TILES: KpiTileConfig[] = [
   { id: "bookings_today", title: "Bookings Today", category: "operations", size: "medium", href: "/admin/schedule" },
   { id: "bookings_week", title: "Bookings This Week", category: "operations", size: "small" },
   { id: "approvals", title: "Pending Approvals", category: "operations", size: "medium", href: "/admin/approvals" },
-  { id: "offices", title: "Open Office Listings", category: "operations", size: "small" },
+  { id: "offices", title: "Open Office Listings", category: "operations", size: "small", href: "/admin/business/hive/office-listings" },
+  { id: "occupancy", title: "Hive Occupancy Rate", category: "operations", size: "small", href: "/admin/business/hive/office-listings" },
   { id: "memberships", title: "Active Memberships", category: "operations", size: "small" },
   // Row 5 - Team
   { id: "comm_pending", title: "Commission Pending", category: "team", size: "medium", href: "/admin/commissions" },
@@ -296,6 +301,7 @@ export const VICTORIA_TILES: KpiTileConfig[] = [
   { id: "bookings_today", title: "Bookings Today", category: "operations", size: "medium", href: "/admin/schedule" },
   { id: "bookings_week", title: "Bookings This Week", category: "operations", size: "small" },
   { id: "approvals", title: "Pending Approvals", category: "operations", size: "medium", href: "/admin/approvals" },
+  { id: "occupancy", title: "Hive Occupancy Rate", category: "operations", size: "small", href: "/admin/business/hive/office-listings" },
   { id: "pipeline_rate", title: "Pipeline Conversion Rate", category: "leads", size: "small" },
   { id: "leads_hot", title: "Hot Leads No Contact 24h", category: "leads", size: "medium", href: "/admin/pipeline?filter=hot" },
 ];
@@ -331,6 +337,7 @@ export const ROSE_TILES: KpiTileConfig[] = [
   { id: "bookings_today", title: "Bookings Today", category: "operations", size: "medium", href: "/admin/schedule" },
   { id: "bookings_week", title: "Bookings This Week", category: "operations", size: "small" },
   { id: "approvals", title: "Pending Approvals", category: "operations", size: "medium", href: "/admin/approvals" },
+  { id: "occupancy", title: "Hive Occupancy Rate", category: "operations", size: "small", href: "/admin/business/hive/office-listings" },
   { id: "leads_active", title: "Active Leads", category: "leads", size: "medium", href: "/admin/leads" },
   { id: "leads_hot", title: "Hot Leads No Contact 24h", category: "leads", size: "medium" },
   { id: "schedule_gaps", title: "Schedule Gaps This Week", category: "operations", size: "medium" },

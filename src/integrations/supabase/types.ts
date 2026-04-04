@@ -2873,6 +2873,60 @@ export type Database = {
           },
         ]
       }
+      hive_leases: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          lease_end: string | null
+          lease_start: string
+          monthly_rate: number
+          office_code: string
+          payment_method: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tenant_email: string
+          tenant_name: string
+          tenant_phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lease_end?: string | null
+          lease_start: string
+          monthly_rate?: number
+          office_code: string
+          payment_method?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tenant_email: string
+          tenant_name: string
+          tenant_phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lease_end?: string | null
+          lease_start?: string
+          monthly_rate?: number
+          office_code?: string
+          payment_method?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tenant_email?: string
+          tenant_name?: string
+          tenant_phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hive_private_offices: {
         Row: {
           booked_until: string | null

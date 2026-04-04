@@ -88,6 +88,7 @@ import AdminStripeMappingPage from "./pages/admin/StripeMappingPage";
 import AdminCommissionRulesPage from "./pages/admin/CommissionRulesPage";
 import AdminStripeConnectionPage from "./pages/admin/StripeConnectionPage";
 import AdminStripeTransactions from "./pages/admin/StripeTransactions";
+import AdminFitnessMemberships from "./pages/admin/FitnessMemberships";
 import IntakePage from "./pages/intake/IntakePage";
 
 // Command Center / CRM Pages
@@ -249,7 +250,7 @@ function AppInner() {
           <Route path="/admin/business/spa/settings" element={<AdminBusinessSubPage />} />
 
           {/* ── BUSINESSES: Fitness ── */}
-          <Route path="/admin/business/fitness/memberships" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/fitness/memberships" element={<AdminFitnessMemberships />} />
           <Route path="/admin/business/fitness/revenue" element={<AdminBusinessSubPage />} />
           <Route path="/admin/business/fitness/settings" element={<AdminBusinessSubPage />} />
 
