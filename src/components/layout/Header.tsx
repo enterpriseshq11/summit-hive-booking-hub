@@ -52,6 +52,9 @@ const experienceItems = [
   { label: "360 Photo Booth", href: "/360-photo-booth", icon: Camera, description: "Event photo experiences" },
   { label: "Voice Vault", href: "/voice-vault", icon: Mic, description: "Private recording studio" },
   { label: "Book Studio", href: "/book-voice-vault", icon: Mic, description: "Book a recording session" },
+  { label: "Book Spa", href: "/book-spa", icon: Sparkles, description: "Book a spa service" },
+  { label: "Join Fitness", href: "/join-fitness", icon: Dumbbell, description: "Gym memberships" },
+  { label: "Coworking", href: "/the-hive", icon: Building2, description: "Private offices" },
   { label: "Spin & Win", href: "/dopamine-drop", icon: CircleDot, description: "Daily rewards & prizes" },
 ];
 

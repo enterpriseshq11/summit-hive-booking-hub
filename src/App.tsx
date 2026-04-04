@@ -35,6 +35,9 @@ import PhotoBoothLanding from "./pages/PhotoBoothLanding";
 import BookWithWorker from "./pages/BookWithWorker";
 import BookVoiceVault from "./pages/BookVoiceVault";
 import BookSummit from "./pages/BookSummit";
+import BookSpa from "./pages/BookSpa";
+import JoinFitness from "./pages/JoinFitness";
+import TheHive from "./pages/TheHive";
 import NotFound from "./pages/NotFound";
 import RequestService from "./pages/RequestService";
 import Careers from "./pages/Careers";
@@ -90,6 +93,7 @@ import AdminCommissionRulesPage from "./pages/admin/CommissionRulesPage";
 import AdminStripeConnectionPage from "./pages/admin/StripeConnectionPage";
 import AdminStripeTransactions from "./pages/admin/StripeTransactions";
 import AdminFitnessMemberships from "./pages/admin/FitnessMemberships";
+import AdminReports from "./pages/admin/Reports";
 import AdminErrorLog from "./pages/admin/ErrorLog";
 import AdminOnboarding from "./pages/admin/Onboarding";
 import IntakePage from "./pages/intake/IntakePage";
@@ -164,6 +168,9 @@ function AppInner() {
           <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
           <Route path="/book-voice-vault" element={<BookVoiceVault />} />
           <Route path="/book-summit" element={<BookSummit />} />
+          <Route path="/book-spa" element={<BookSpa />} />
+          <Route path="/join-fitness" element={<JoinFitness />} />
+          <Route path="/the-hive" element={<TheHive />} />
 
           {/* Public Intake Forms */}
           <Route path="/intake/:unit" element={<IntakePage />} />
@@ -232,6 +239,7 @@ function AppInner() {
           <Route path="/admin/payroll" element={<CommandCenterPayroll />} />
           <Route path="/admin/commissions" element={<CommandCenterCommissions />} />
           <Route path="/admin/careers" element={<AdminCareerApplications />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
 
           {/* REVENUE */}
           <Route path="/admin/revenue" element={<CommandCenterRevenue />} />
