@@ -1204,6 +1204,14 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
     const resend = new Resend(resendKey);
 
+    // Dynamic base URL from admin_settings
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const { data: baseUrlSetting } = await supabase
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
+
     const {
       booking_id,
       notification_type: raw_notification_type,
