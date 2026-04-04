@@ -55,6 +55,9 @@ export function LeadIntakeForm({ businessUnit, title, description, fields }: Int
     try {
       const { first_name, last_name, email, phone, source, ...formFields } = data;
 
+      // Capture UTM params from URL
+      const params = new URLSearchParams(window.location.search);
+
       const { data: result, error } = await supabase.functions.invoke("lead-intake", {
         body: {
           business_unit: businessUnit,
@@ -64,6 +67,11 @@ export function LeadIntakeForm({ businessUnit, title, description, fields }: Int
           phone,
           source,
           form_fields: formFields,
+          utm_source: params.get("utm_source") || undefined,
+          utm_medium: params.get("utm_medium") || undefined,
+          utm_campaign: params.get("utm_campaign") || undefined,
+          utm_content: params.get("utm_content") || undefined,
+          utm_term: params.get("utm_term") || undefined,
         },
       });
 
