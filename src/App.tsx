@@ -167,6 +167,9 @@ function AppInner() {
           <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
           <Route path="/book-voice-vault" element={<BookVoiceVault />} />
           <Route path="/book-summit" element={<BookSummit />} />
+          <Route path="/book-spa" element={<BookSpa />} />
+          <Route path="/join-fitness" element={<JoinFitness />} />
+          <Route path="/the-hive" element={<TheHive />} />
 
           {/* Public Intake Forms */}
           <Route path="/intake/:unit" element={<IntakePage />} />
