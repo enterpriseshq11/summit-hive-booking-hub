@@ -409,8 +409,8 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
         endDatetime = `${format(selectedDate!, "yyyy-MM-dd")}T${endTime}:00`;
       }
 
-      // Call lindsey-checkout edge function
-      const { data, error } = await supabase.functions.invoke("lindsey-checkout", {
+      // Call create-checkout edge function for spa bookings
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           service_id: selectedService,
           service_name: serviceData?.name || "Massage",
