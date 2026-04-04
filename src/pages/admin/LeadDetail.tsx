@@ -21,7 +21,7 @@ import { toast } from "sonner";
 
 const PIPELINE_STAGES = [
   "new", "contact_attempted", "responded", "warm_lead", "hot_lead",
-  "proposal_sent", "contract_out", "deposit_received", "booked", "completed", "lost",
+  "proposal_sent", "contract_sent", "deposit_pending", "booked", "won", "lost",
 ];
 
 const LOST_REASONS = [
@@ -149,9 +149,13 @@ export default function LeadDetail() {
   const STAGE_LABELS: Record<string, string> = {
     new: "New Lead", contact_attempted: "Contact Attempted", responded: "Responded",
     warm_lead: "Warm Lead", hot_lead: "Hot Lead", proposal_sent: "Proposal Sent",
-    contract_sent: "Contract Sent", deposit_pending: "Deposit Pending",
-    booked: "Booked", completed: "Completed", lost: "Lost",
+    contract_sent: "Contract Out", deposit_pending: "Deposit Received",
+    booked: "Booked", won: "Completed", completed: "Completed", lost: "Lost",
   };
+
+  // Map DB enum value → ghl_pipeline_stage_webhooks.stage_name
+  // The webhook table uses "completed" while the DB enum uses "won"
+  const toWebhookStageName = (dbStage: string) => dbStage === "won" ? "completed" : dbStage;
 
   const fireGhlStageWebhook = async (previousStage: string, newStage: string) => {
     if (!lead) return;
@@ -174,10 +178,11 @@ export default function LeadDetail() {
         return;
       }
 
+      const webhookStageName = toWebhookStageName(newStage);
       const { data: webhookConfig } = await (supabase as any)
         .from("ghl_pipeline_stage_webhooks")
         .select("webhook_url, is_active")
-        .eq("stage_name", newStage)
+        .eq("stage_name", webhookStageName)
         .maybeSingle();
 
       if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {

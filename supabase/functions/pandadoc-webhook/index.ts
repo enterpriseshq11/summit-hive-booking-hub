@@ -88,9 +88,9 @@ serve(async (req) => {
                       lead_name: lead.lead_name,
                       business_unit: lead.business_unit,
                       previous_stage_key: "contract_sent",
-                      previous_stage_name: "Contract Sent",
+                      previous_stage_name: "Contract Out",
                       new_stage_key: "deposit_pending",
-                      new_stage_name: "Deposit Pending",
+                      new_stage_name: "Deposit Received",
                       trigger: "pandadoc_signed",
                       timestamp: new Date().toISOString(),
                     }),
@@ -103,7 +103,7 @@ serve(async (req) => {
                     entity_id: lead.id,
                     metadata: {
                       action: ghlRes.ok ? "ghl_webhook_fired" : "ghl_webhook_failed",
-                      message: `GHL webhook ${ghlRes.ok ? "fired" : "FAILED"} — stage moved to Deposit Pending — ${statusText}`,
+                      message: `GHL webhook ${ghlRes.ok ? "fired" : "FAILED"} — stage moved to Deposit Received — ${statusText}`,
                     },
                   });
                 } else {

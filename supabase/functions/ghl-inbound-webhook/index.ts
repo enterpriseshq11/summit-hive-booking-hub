@@ -10,8 +10,13 @@ const logStep = (step: string, details?: any) => {
   console.log(`[GHL-INBOUND] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
 };
 
-// GHL stage name → internal enum value (crm_lead_status)
+/**
+ * Comprehensive GHL stage name → internal DB enum value mapping.
+ * Handles display labels, internal keys, and case variations.
+ * DB enum uses "won" for Completed; GHL webhook table uses "completed" as stage_name.
+ */
 const STAGE_MAP: Record<string, string> = {
+  // Display labels (what Rose configures in GHL)
   "New Lead": "new",
   "Contact Attempted": "contact_attempted",
   "Responded": "responded",
@@ -25,16 +30,31 @@ const STAGE_MAP: Record<string, string> = {
   "Booked": "booked",
   "Completed": "won",
   "Lost": "lost",
+  // Internal key values (lowercase)
+  "new": "new",
+  "contact_attempted": "contact_attempted",
+  "responded": "responded",
+  "warm_lead": "warm_lead",
+  "hot_lead": "hot_lead",
+  "proposal_sent": "proposal_sent",
+  "contract_sent": "contract_sent",
+  "contract_out": "contract_sent",
+  "deposit_pending": "deposit_pending",
+  "deposit_received": "deposit_pending",
+  "booked": "booked",
+  "completed": "won",
+  "won": "won",
+  "lost": "lost",
 };
 
-// All valid internal stage keys
+// All valid internal stage keys (DB enum values)
 const VALID_STAGES = new Set([
   "new", "contact_attempted", "responded", "warm_lead", "hot_lead",
   "proposal_sent", "contract_sent", "deposit_pending", "booked",
   "won", "lost", "follow_up_needed", "no_response",
 ]);
 
-// Internal stage key labels
+// Internal stage key → display labels
 const STAGE_LABELS: Record<string, string> = {
   new: "New Lead",
   contact_attempted: "Contact Attempted",
@@ -42,8 +62,8 @@ const STAGE_LABELS: Record<string, string> = {
   warm_lead: "Warm Lead",
   hot_lead: "Hot Lead",
   proposal_sent: "Proposal Sent",
-  contract_sent: "Contract Sent",
-  deposit_pending: "Deposit Pending",
+  contract_sent: "Contract Out",
+  deposit_pending: "Deposit Received",
   booked: "Booked",
   won: "Completed",
   lost: "Lost",
@@ -95,14 +115,13 @@ serve(async (req) => {
       });
     }
 
-    // Map GHL stage to internal stage key
-    const mappedStage = STAGE_MAP[newStageRaw];
+    // Map GHL stage to internal stage key (try exact match then trimmed)
+    const mappedStage = STAGE_MAP[newStageRaw] || STAGE_MAP[newStageRaw.trim()];
 
     // Handle unrecognized stage names
     if (!mappedStage || !VALID_STAGES.has(mappedStage)) {
       logStep("Unrecognized stage name", { raw: newStageRaw, mapped: mappedStage });
 
-      // Log warning to crm_activity_events
       await supabase.from("crm_activity_events").insert({
         event_type: "status_change" as any,
         entity_type: "lead",
@@ -124,24 +143,23 @@ serve(async (req) => {
 
     logStep("Mapped stage", { raw: newStageRaw, mapped: mappedStage });
 
-    // Find matching lead — try ghl_contact_id first, then email (most recent with matching business_unit)
+    // Find matching lead — try ghl_contact_id first, then email+business_unit, then email
     let lead: any = null;
 
     if (contactId) {
       const { data } = await supabase
         .from("crm_leads")
-        .select("id, lead_name, status, business_unit, ghl_sync_in_progress")
+        .select("id, lead_name, status, business_unit, ghl_sync_in_progress, ghl_contact_id")
         .eq("ghl_contact_id", contactId)
         .maybeSingle();
       if (data) lead = data;
     }
 
     if (!lead && email) {
-      // Try matching by email + business_unit first for precision
       if (businessUnit) {
         const { data } = await supabase
           .from("crm_leads")
-          .select("id, lead_name, status, business_unit, ghl_sync_in_progress")
+          .select("id, lead_name, status, business_unit, ghl_sync_in_progress, ghl_contact_id")
           .eq("email", email)
           .eq("business_unit", businessUnit)
           .order("created_at", { ascending: false })
@@ -150,11 +168,10 @@ serve(async (req) => {
         if (data) lead = data;
       }
 
-      // Fallback: most recent lead with this email regardless of unit
       if (!lead) {
         const { data } = await supabase
           .from("crm_leads")
-          .select("id, lead_name, status, business_unit, ghl_sync_in_progress")
+          .select("id, lead_name, status, business_unit, ghl_sync_in_progress, ghl_contact_id")
           .eq("email", email)
           .order("created_at", { ascending: false })
           .limit(1)
@@ -192,7 +209,6 @@ serve(async (req) => {
 
     if (updateError) {
       logStep("Failed to update lead stage", { error: updateError.message });
-      // Clear flag
       await supabase.from("crm_leads")
         .update({ ghl_sync_in_progress: false })
         .eq("id", lead.id);

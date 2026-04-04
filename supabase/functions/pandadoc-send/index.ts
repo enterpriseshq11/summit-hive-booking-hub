@@ -129,30 +129,30 @@ serve(async (req) => {
           },
         });
 
-        // Move to contract_out if not already past that stage
+        // Move to contract_sent if not already past that stage
         const preContractStages = ["new", "contact_attempted", "responded", "warm_lead", "hot_lead", "proposal_sent"];
         if (lead && preContractStages.includes(lead.status)) {
           await supabase.from("crm_leads")
-            .update({ status: "contract_out" })
+            .update({ status: "contract_sent" })
             .eq("id", lead_id);
         }
 
-        // Fire GHL webhook
+        // Fire GHL webhook for contract_sent stage
         try {
-          const ghlUrl = await supabase
-            .from("admin_settings")
-            .select("value")
-            .eq("key", "ghl_webhook_url")
+          const { data: webhookConfig } = await supabase
+            .from("ghl_pipeline_stage_webhooks")
+            .select("webhook_url, is_active")
+            .eq("stage_name", "contract_sent")
             .maybeSingle();
 
-          if (ghlUrl?.data?.value) {
-            await fetch(ghlUrl.data.value, {
+          if (webhookConfig?.webhook_url && webhookConfig.is_active) {
+            await fetch(webhookConfig.webhook_url, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 lead_id,
                 lead_name: lead?.lead_name,
-                new_stage_key: "contract_out",
+                new_stage_key: "contract_sent",
                 new_stage_name: "Contract Out",
                 trigger: "pandadoc_contract_sent",
                 timestamp: new Date().toISOString(),
