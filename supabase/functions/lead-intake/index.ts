@@ -80,6 +80,7 @@ Deno.serve(async (req) => {
       business_unit,
       first_name, last_name, email, phone,
       source, form_fields,
+      utm_source, utm_medium, utm_campaign, utm_content, utm_term,
     } = body;
 
     if (!business_unit || !first_name || !last_name || !email || !phone) {
@@ -115,6 +116,11 @@ Deno.serve(async (req) => {
         status: "new",
         temperature: "warm",
         follow_up_due: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        utm_source: utm_source || null,
+        utm_medium: utm_medium || null,
+        utm_campaign: utm_campaign || null,
+        utm_content: utm_content || null,
+        utm_term: utm_term || null,
       })
       .select("id")
       .single();

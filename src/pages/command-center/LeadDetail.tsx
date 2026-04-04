@@ -362,6 +362,32 @@ export default function LeadDetailPage() {
                   </div>
                 </div>
 
+                {/* UTM Source Details */}
+                {((lead as any).utm_source || (lead as any).utm_medium || (lead as any).utm_campaign) && (
+                  <>
+                    <Separator className="bg-zinc-800" />
+                    <details className="group">
+                      <summary className="text-zinc-400 text-xs font-medium cursor-pointer hover:text-zinc-200">Source Details (UTM)</summary>
+                      <div className="grid grid-cols-2 gap-3 mt-2">
+                        {(lead as any).utm_source && <div><Label className="text-zinc-500 text-xs">Source</Label><div className="text-zinc-100 text-sm">{(lead as any).utm_source}</div></div>}
+                        {(lead as any).utm_medium && <div><Label className="text-zinc-500 text-xs">Medium</Label><div className="text-zinc-100 text-sm">{(lead as any).utm_medium}</div></div>}
+                        {(lead as any).utm_campaign && <div><Label className="text-zinc-500 text-xs">Campaign</Label><div className="text-zinc-100 text-sm">{(lead as any).utm_campaign}</div></div>}
+                        {(lead as any).utm_content && <div><Label className="text-zinc-500 text-xs">Content</Label><div className="text-zinc-100 text-sm">{(lead as any).utm_content}</div></div>}
+                        {(lead as any).utm_term && <div><Label className="text-zinc-500 text-xs">Term</Label><div className="text-zinc-100 text-sm">{(lead as any).utm_term}</div></div>}
+                      </div>
+                    </details>
+                  </>
+                )}
+                {!((lead as any).utm_source || (lead as any).utm_medium || (lead as any).utm_campaign) && (
+                  <>
+                    <Separator className="bg-zinc-800" />
+                    <details className="group">
+                      <summary className="text-zinc-500 text-xs cursor-pointer">Source Details (UTM)</summary>
+                      <p className="text-zinc-600 text-xs mt-1">No UTM data captured</p>
+                    </details>
+                  </>
+                )}
+
                 <Separator className="bg-zinc-800" />
 
                 <div className="grid grid-cols-2 gap-4">

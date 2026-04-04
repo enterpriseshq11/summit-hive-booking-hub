@@ -1524,6 +1524,11 @@ export type Database = {
           status: Database["public"]["Enums"]["crm_lead_status"] | null
           temperature: string | null
           updated_at: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
         }
         Insert: {
           assigned_employee_id?: string | null
@@ -1550,6 +1555,11 @@ export type Database = {
           status?: Database["public"]["Enums"]["crm_lead_status"] | null
           temperature?: string | null
           updated_at?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Update: {
           assigned_employee_id?: string | null
@@ -1576,6 +1586,11 @@ export type Database = {
           status?: Database["public"]["Enums"]["crm_lead_status"] | null
           temperature?: string | null
           updated_at?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Relationships: [
           {
@@ -2550,6 +2565,51 @@ export type Database = {
           },
         ]
       }
+      facebook_ad_campaigns: {
+        Row: {
+          campaign_id: string
+          campaign_name: string
+          clicks: number | null
+          cost_per_lead: number | null
+          created_at: string | null
+          date: string
+          id: string
+          impressions: number | null
+          leads: number | null
+          platform: string | null
+          spend: number | null
+          synced_at: string | null
+        }
+        Insert: {
+          campaign_id: string
+          campaign_name: string
+          clicks?: number | null
+          cost_per_lead?: number | null
+          created_at?: string | null
+          date: string
+          id?: string
+          impressions?: number | null
+          leads?: number | null
+          platform?: string | null
+          spend?: number | null
+          synced_at?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          campaign_name?: string
+          clicks?: number | null
+          cost_per_lead?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          impressions?: number | null
+          leads?: number | null
+          platform?: string | null
+          spend?: number | null
+          synced_at?: string | null
+        }
+        Relationships: []
+      }
       ghl_pipeline_stage_webhooks: {
         Row: {
           created_at: string | null
@@ -2837,6 +2897,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      google_ad_campaigns: {
+        Row: {
+          campaign_id: string
+          campaign_name: string
+          clicks: number | null
+          cost_per_lead: number | null
+          created_at: string | null
+          date: string
+          id: string
+          impressions: number | null
+          leads: number | null
+          platform: string | null
+          spend: number | null
+          synced_at: string | null
+        }
+        Insert: {
+          campaign_id: string
+          campaign_name: string
+          clicks?: number | null
+          cost_per_lead?: number | null
+          created_at?: string | null
+          date: string
+          id?: string
+          impressions?: number | null
+          leads?: number | null
+          platform?: string | null
+          spend?: number | null
+          synced_at?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          campaign_name?: string
+          clicks?: number | null
+          cost_per_lead?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          impressions?: number | null
+          leads?: number | null
+          platform?: string | null
+          spend?: number | null
+          synced_at?: string | null
+        }
+        Relationships: []
       }
       guest_passes: {
         Row: {
