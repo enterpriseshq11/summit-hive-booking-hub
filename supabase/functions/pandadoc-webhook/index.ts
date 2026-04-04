@@ -168,7 +168,12 @@ serve(async (req) => {
 
           logStep("Document completed processed for lead", { leadId: lead.id });
         } else {
-          logStep("No matching lead found for document", { documentId });
+          logStep("WARNING: No matching lead found for document", { documentId });
+          // Update webhook event with note about missing lead
+          await supabase.from("pandadoc_webhook_events")
+            .update({ payload: { ...body, _warning: "No matching lead found for this document ID" } })
+            .eq("document_id", documentId)
+            .eq("event_type", eventType);
         }
       }
     }
