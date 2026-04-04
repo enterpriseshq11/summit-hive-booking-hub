@@ -353,7 +353,7 @@ export default function Spa() {
               <div className="grid md:grid-cols-3 gap-0">
                 {/* Photo Column */}
                 <div className="md:col-span-1 bg-accent/5 flex items-center justify-center p-8">
-                  {/* TODO: Replace with Lindsey headshot when available */}
+                  {/* TODO: Replace with therapist headshot when available */}
                   <div className="h-48 w-48 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center border-4 border-accent/30 shadow-gold">
                     <User className="h-24 w-24 text-accent/60" />
                   </div>
@@ -362,7 +362,7 @@ export default function Spa() {
                 {/* Info Column */}
                 <div className="md:col-span-2 p-8">
                   <div className="mb-4">
-                    <h3 className="text-2xl font-bold mb-1">Lindsey</h3>
+                    <h3 className="text-2xl font-bold mb-1">Nasiya</h3>
                     <p className="text-accent font-medium">Licensed Massage Therapist & Recovery Specialist</p>
                     <p className="text-muted-foreground text-sm">Restoration Lounge Lead Therapist</p>
                   </div>
@@ -370,7 +370,7 @@ export default function Spa() {
                   {/* Bio */}
                   <div className="space-y-4 mb-6 text-muted-foreground leading-relaxed">
                     <p>
-                      Lindsey is the heart of The Restoration Lounge. She specializes in results-driven recovery treatments designed to help clients move better, feel better, and perform at their highest level—whether you're an athlete, professional, or simply someone who takes recovery seriously.
+                      Nasiya is the heart of The Restoration Lounge. She specializes in results-driven recovery treatments designed to help clients move better, feel better, and perform at their highest level—whether you're an athlete, professional, or simply someone who takes recovery seriously.
                     </p>
                     <p>
                       Her approach blends clinical expertise with a premium, personalized experience. Every session is intentional, customized, and focused on real outcomes—not cookie-cutter spa treatments.
@@ -391,7 +391,7 @@ export default function Spa() {
                   {/* Trust paragraph */}
                   <div className="p-4 bg-primary/5 rounded-lg border border-border mb-6">
                     <p className="text-sm text-muted-foreground italic">
-                      Clients choose Lindsey because she listens, adapts, and delivers results. This isn't a high-volume spa model—it's focused, hands-on recovery care built around what your body actually needs.
+                      Clients choose Nasiya because she listens, adapts, and delivers results. This isn't a high-volume spa model—it's focused, hands-on recovery care built around what your body actually needs.
                     </p>
                   </div>
 
@@ -401,7 +401,7 @@ export default function Spa() {
                       Book Now
                       <ArrowRight className="h-5 w-5 ml-2" />
                     </Button>
-                    <Button size="lg" variant="outline" onClick={() => setShowPricingModal(true)} className="border-accent text-accent hover:bg-accent/10" data-event="spa_lindsey_pricing_click">
+                    <Button size="lg" variant="outline" onClick={() => setShowPricingModal(true)} className="border-accent text-accent hover:bg-accent/10" data-event="spa_therapist_pricing_click">
                       <DollarSign className="h-5 w-5 mr-2" />
                       View Pricing
                     </Button>
