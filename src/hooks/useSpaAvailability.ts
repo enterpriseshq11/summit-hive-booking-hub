@@ -46,16 +46,16 @@ export interface DayAvailability {
   isWorkingDay: boolean;
 }
 
-interface UseLindseyAvailabilityParams {
+interface UseSpaAvailabilityParams {
   selectedDate?: Date;
   selectedDuration?: number; // in minutes
 }
 
 /**
- * Hook to fetch Lindsey's real-time availability from the database.
+ * Hook to fetch spa worker real-time availability from the database.
  * Checks availability_windows, bookings, and blackout_dates tables.
  */
-export function useLindseyAvailability({ selectedDate, selectedDuration = 60 }: UseLindseyAvailabilityParams) {
+export function useSpaAvailability({ selectedDate, selectedDuration = 60 }: UseSpaAvailabilityParams) {
   const spaBusinessId = "4df48af2-39e4-4bd1-a9b3-963de8ef39d7";
 
   // Fetch provider settings for buffer times
