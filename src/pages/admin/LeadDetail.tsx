@@ -21,7 +21,7 @@ import { toast } from "sonner";
 
 const PIPELINE_STAGES = [
   "new", "contact_attempted", "responded", "warm_lead", "hot_lead",
-  "proposal_sent", "contract_sent", "deposit_pending", "booked", "completed", "lost",
+  "proposal_sent", "contract_sent", "deposit_pending", "booked", "won", "lost",
 ];
 
 const LOST_REASONS = [
