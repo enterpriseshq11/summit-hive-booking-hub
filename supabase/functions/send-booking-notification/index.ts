@@ -703,7 +703,7 @@ function buildStaffConfirmationEmail(booking: Record<string, unknown>, businessT
   const roomName = ((booking.booking_resources as Array<{ resources?: { name?: string } }>)?.[0]?.resources?.name) || "TBD";
 
   const emailKind = typeof (booking as any).email_kind === "string" ? String((booking as any).email_kind) : "BOOKING";
-  const adminLink = typeof (booking as any).admin_link === "string" ? String((booking as any).admin_link) : "https://summit-hive-booking-hub.lovable.app/#/admin/approvals";
+  const adminLink = typeof (booking as any).admin_link === "string" ? String((booking as any).admin_link) : `${baseUrl}/#/admin/approvals`;
   const isRequest = emailKind.toUpperCase() === "REQUEST";
   const badgeText = isRequest ? "📝 NEW REQUEST" : "💳 NEW BOOKING";
   const highlightTitle = isRequest ? "📝 Request Submitted" : "💰 Payment Confirmed";
@@ -1087,7 +1087,7 @@ function buildCancellationEmail(
       <div style="text-align: center; margin: 30px 0;">
         <p><strong>Would you like to reschedule?</strong></p>
         <p>We'd love to see you! Book a new appointment at your convenience.</p>
-        <a href="https://summit-hive-booking-hub.lovable.app" class="cta-button">Book Again</a>
+        <a href="${baseUrl}" class="cta-button">Book Again</a>
       </div>
 
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
@@ -1203,6 +1203,14 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
     const resend = new Resend(resendKey);
+
+    // Dynamic base URL from admin_settings
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const { data: baseUrlSetting } = await supabase
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
 
     const {
       booking_id,
@@ -1578,7 +1586,7 @@ serve(async (req) => {
             const kind = notification_type === "request" ? "Request" : notification_type === "confirmation" ? "Booking" : notification_type === "denied" ? "Request" : "Notification";
             subject = `${kind}: ${brandLabel} — ${booking.guest_name || "Guest"} — ${shortDate} ${timeStr}`;
 
-            const adminLink = `https://summit-hive-booking-hub.lovable.app/#/admin/approvals?id=${booking_id}`;
+            const adminLink = `${baseUrl}/#/admin/approvals?id=${booking_id}`;
             html = buildStaffConfirmationEmail(
               {
                 ...booking,

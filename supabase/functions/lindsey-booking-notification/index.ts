@@ -165,6 +165,14 @@ serve(async (req) => {
     });
     const resend = new Resend(resendKey);
 
+    // Dynamic base URL from admin_settings
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const { data: baseUrlSetting } = await supabase
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
+
     const { booking_id, type, stripe_session_id, stripe_payment_intent, preferred_datetime }: BookingNotificationRequest = await req.json();
     logStep("Request received", { booking_id, type, stripe_session_id, preferred_datetime });
 
@@ -362,7 +370,7 @@ Ref: ${stripeRef}`;
 
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
         Booking #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}<br>
-        <a href="https://summit-hive-booking-hub.lovable.app/#/admin/schedule">View in Admin Dashboard</a>
+        <a href="${baseUrl}/#/admin/schedule">View in Admin Dashboard</a>
       </p>
     </div>
     <div class="footer">
@@ -644,7 +652,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
         Booking #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}<br>
-        <a href="https://summit-hive-booking-hub.lovable.app/#/admin/schedule">View in Admin Dashboard</a>
+        <a href="${baseUrl}/#/admin/schedule">View in Admin Dashboard</a>
       </p>
     </div>
     <div class="footer">
@@ -903,7 +911,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
         Request #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}<br>
-        <a href="https://summit-hive-booking-hub.lovable.app/#/admin/approvals">View in Admin Dashboard</a>
+        <a href="${baseUrl}/#/admin/approvals">View in Admin Dashboard</a>
       </p>
     </div>
     <div class="footer">
@@ -1143,7 +1151,7 @@ Ref: ${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}`;
 
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
         Booking #${booking.booking_number || booking.id.slice(0, 8).toUpperCase()}<br>
-        <a href="https://summit-hive-booking-hub.lovable.app/#/admin/schedule">View in Admin Dashboard</a>
+        <a href="${baseUrl}/#/admin/schedule">View in Admin Dashboard</a>
       </p>
     </div>
     <div class="footer">

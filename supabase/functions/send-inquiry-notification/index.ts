@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -77,6 +78,17 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Dynamic base URL from admin_settings
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const sbClient = createClient(supabaseUrl, serviceKey);
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const { data: baseUrlSetting } = await sbClient
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
+
     const { type, inquiry }: InquiryNotificationRequest = await req.json();
 
     const requestId = crypto.randomUUID();
@@ -312,7 +324,7 @@ const handler = async (req: Request): Promise<Response> => {
         lease_request: '🏢 Office Lease Request',
       };
 
-      const approvalsLink = "https://summit-hive-booking-hub.lovable.app/#/admin/approvals";
+      const approvalsLink = `${baseUrl}/#/admin/approvals`;
 
       const staffEmailResponse = await resend.emails.send({
         from: FROM_EMAIL,

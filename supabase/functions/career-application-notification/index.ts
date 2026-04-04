@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,6 +38,18 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const resend = new Resend(resendApiKey);
+
+    // Dynamic base URL from admin_settings
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const sbClient = createClient(supabaseUrl, serviceKey);
+      const { data: baseUrlSetting } = await sbClient
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
+
     const { applicationId, team, role, applicantEmail, applicantName, applicantPhone, submittedAt }: NotificationRequest = await req.json();
 
     const fromEmail = Deno.env.get("FROM_EMAIL") || "noreply@azenterpriseshq.com";
@@ -140,7 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="margin-top: 24px; padding: 16px; background: #e8f4fd; border-radius: 8px;">
               <p style="margin: 0; color: #333;">
                 <strong>View Full Application:</strong><br>
-                <a href="https://summit-hive-booking-hub.lovable.app/admin/careers?search=${shortId}" style="color: #1a73e8;">
+                <a href="${baseUrl}/admin/careers?search=${shortId}" style="color: #1a73e8;">
                   Open in Admin Dashboard →
                 </a>
               </p>

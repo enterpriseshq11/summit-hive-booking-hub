@@ -207,6 +207,15 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Dynamic base URL from admin_settings
+    const sb = getSupabaseAdmin();
+    let baseUrl = "https://summit-hive-booking-hub.lovable.app";
+    try {
+      const { data: baseUrlSetting } = await sb
+        .from("admin_settings").select("value").eq("key", "base_url").single();
+      if (baseUrlSetting?.value) baseUrl = baseUrlSetting.value;
+    } catch (_) { /* use default */ }
+
     const payload: ClaimPayload = await req.json();
     const { special_id, special_title, business_unit, name, email, phone, message } = payload;
 
@@ -268,7 +277,7 @@ const handler = async (req: Request): Promise<Response> => {
                 
                 ${message ? `<div class="message-box"><strong>Message:</strong><p style="margin: 10px 0 0 0;">${message}</p></div>` : ""}
                 
-                ${bookingId ? `<p style="margin-top: 15px; font-size: 13px; color: #888;">This request is now in <strong>Approvals → Pending</strong>. <a href="https://summit-hive-booking-hub.lovable.app/admin/approvals?id=${bookingId}">Review now</a></p>` : ""}
+                ${bookingId ? `<p style="margin-top: 15px; font-size: 13px; color: #888;">This request is now in <strong>Approvals → Pending</strong>. <a href="${baseUrl}/admin/approvals?id=${bookingId}">Review now</a></p>` : ""}
               </div>
             </div>
           </body>
