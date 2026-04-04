@@ -11,10 +11,11 @@ export const statusLabels: Record<CrmLeadStatus, string> = {
   qualified: "Warm Lead", // legacy fallback
   hot_lead: "Hot Lead",
   proposal_sent: "Proposal Sent",
-  contract_sent: "Contract Sent",
-  deposit_pending: "Deposit Pending",
+  contract_sent: "Contract Out",
+  deposit_pending: "Deposit Received",
   booked: "Booked",
-  won: "Booked", // legacy fallback
+  won: "Completed", // legacy fallback
+  completed: "Completed",
   follow_up_needed: "Follow Up Needed",
   no_response: "No Response",
   lost: "Lost",
@@ -33,12 +34,13 @@ export const statusColors: Record<CrmLeadStatus, string> = {
   deposit_pending: "bg-amber-600/20 text-amber-400 border-amber-600/50",
   booked: "bg-green-500/20 text-green-400 border-green-500/50",
   won: "bg-green-500/20 text-green-400 border-green-500/50",
+  completed: "bg-emerald-600/20 text-emerald-400 border-emerald-600/50",
   follow_up_needed: "bg-yellow-600/20 text-yellow-300 border-yellow-600/50",
   no_response: "bg-zinc-600/20 text-zinc-400 border-zinc-600/50",
   lost: "bg-zinc-800/40 text-zinc-500 border-zinc-700/50",
 };
 
-/** Pipeline stages in display order (excludes legacy values) */
+/** Pipeline stages in display order — canonical 11 stages */
 export const pipelineStages: { status: CrmLeadStatus; label: string; borderColor: string }[] = [
   { status: "new", label: "New Lead", borderColor: "border-zinc-500" },
   { status: "contact_attempted", label: "Contact Attempted", borderColor: "border-yellow-500" },
@@ -46,11 +48,10 @@ export const pipelineStages: { status: CrmLeadStatus; label: string; borderColor
   { status: "warm_lead", label: "Warm Lead", borderColor: "border-orange-400" },
   { status: "hot_lead", label: "Hot Lead", borderColor: "border-red-500" },
   { status: "proposal_sent", label: "Proposal Sent", borderColor: "border-blue-500" },
-  { status: "contract_sent", label: "Contract Sent", borderColor: "border-purple-500" },
-  { status: "deposit_pending", label: "Deposit Pending", borderColor: "border-amber-600" },
+  { status: "contract_sent", label: "Contract Out", borderColor: "border-purple-500" },
+  { status: "deposit_pending", label: "Deposit Received", borderColor: "border-amber-600" },
   { status: "booked", label: "Booked", borderColor: "border-green-500" },
-  { status: "follow_up_needed", label: "Follow Up Needed", borderColor: "border-yellow-600" },
-  { status: "no_response", label: "No Response", borderColor: "border-zinc-600" },
+  { status: "completed", label: "Completed", borderColor: "border-emerald-600" },
   { status: "lost", label: "Lost", borderColor: "border-zinc-700" },
 ];
 
@@ -62,7 +63,7 @@ export const temperatureConfig = {
 
 export type LeadTemperature = keyof typeof temperatureConfig;
 
-/** Status options for select dropdowns (excludes legacy) */
+/** Status options for select dropdowns */
 export const statusSelectOptions = pipelineStages.map((s) => ({
   value: s.status,
   label: s.label,
@@ -77,7 +78,6 @@ export function calculatePriorityScore(lead: {
 }): number {
   let score = 0;
 
-  // Status-based scoring
   switch (lead.status) {
     case "deposit_pending": score += 15; break;
     case "hot_lead": score += 10; break;
@@ -90,20 +90,19 @@ export function calculatePriorityScore(lead: {
     case "no_response": score -= 5; break;
     case "lost": score -= 10; break;
     case "booked": score -= 3; break;
+    case "completed": score -= 5; break;
   }
 
-  // Temperature scoring
   if (lead.temperature === "hot") score += 10;
   else if (lead.temperature === "warm") score += 5;
 
-  // Follow-up due today or overdue
   if (lead.follow_up_due) {
     const due = new Date(lead.follow_up_due);
     const now = new Date();
     const diffHours = (due.getTime() - now.getTime()) / (1000 * 60 * 60);
-    if (diffHours < 0) score += 12; // overdue
-    else if (diffHours < 24) score += 10; // due today
-    else if (diffHours < 72) score += 5; // due soon
+    if (diffHours < 0) score += 12;
+    else if (diffHours < 24) score += 10;
+    else if (diffHours < 72) score += 5;
   }
 
   return score;

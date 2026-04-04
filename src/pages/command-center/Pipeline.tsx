@@ -546,7 +546,7 @@ export default function CommandCenterPipeline() {
   const STAGE_LABELS: Record<string, string> = {
     new: "New Lead", contact_attempted: "Contact Attempted", responded: "Responded",
     warm_lead: "Warm Lead", hot_lead: "Hot Lead", proposal_sent: "Proposal Sent",
-    contract_sent: "Contract Sent", deposit_pending: "Deposit Pending",
+    contract_sent: "Contract Out", deposit_pending: "Deposit Received",
     booked: "Booked", completed: "Completed", lost: "Lost",
   };
 

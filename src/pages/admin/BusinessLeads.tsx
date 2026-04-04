@@ -24,12 +24,17 @@ const UNIT_MAP: Record<string, { businessType: string; label: string; roles: str
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  new: "bg-blue-500/20 text-blue-400",
-  contacted: "bg-yellow-500/20 text-yellow-400",
-  qualified: "bg-green-500/20 text-green-400",
-  proposal_sent: "bg-purple-500/20 text-purple-400",
-  won: "bg-emerald-500/20 text-emerald-400",
-  lost: "bg-red-500/20 text-red-400",
+  new: "bg-zinc-500/20 text-zinc-300",
+  contact_attempted: "bg-yellow-500/20 text-yellow-400",
+  responded: "bg-sky-500/20 text-sky-400",
+  warm_lead: "bg-orange-400/20 text-orange-300",
+  hot_lead: "bg-red-500/20 text-red-400",
+  proposal_sent: "bg-blue-500/20 text-blue-400",
+  contract_sent: "bg-purple-500/20 text-purple-400",
+  deposit_pending: "bg-amber-600/20 text-amber-400",
+  booked: "bg-green-500/20 text-green-400",
+  completed: "bg-emerald-600/20 text-emerald-400",
+  lost: "bg-zinc-800/40 text-zinc-500",
 };
 
 export default function BusinessLeads() {
