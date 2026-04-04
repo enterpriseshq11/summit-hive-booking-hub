@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
           to: [email],
           subject: `${unitName} — Inquiry Confirmation`,
           html: htmlBody,
-          reply_to: "victoria@a-zenterpriseshq.com",
+          reply_to: "dylan@a-zenterpriseshq.com",
         });
 
         if (emailRes.data?.id) {
