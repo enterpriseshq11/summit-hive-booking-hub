@@ -1087,7 +1087,7 @@ function buildCancellationEmail(
       <div style="text-align: center; margin: 30px 0;">
         <p><strong>Would you like to reschedule?</strong></p>
         <p>We'd love to see you! Book a new appointment at your convenience.</p>
-        <a href="https://summit-hive-booking-hub.lovable.app" class="cta-button">Book Again</a>
+        <a href="${baseUrl}" class="cta-button">Book Again</a>
       </div>
 
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
