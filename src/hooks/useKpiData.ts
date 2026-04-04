@@ -301,6 +301,7 @@ export const VICTORIA_TILES: KpiTileConfig[] = [
   { id: "bookings_today", title: "Bookings Today", category: "operations", size: "medium", href: "/admin/schedule" },
   { id: "bookings_week", title: "Bookings This Week", category: "operations", size: "small" },
   { id: "approvals", title: "Pending Approvals", category: "operations", size: "medium", href: "/admin/approvals" },
+  { id: "occupancy", title: "Hive Occupancy Rate", category: "operations", size: "small", href: "/admin/business/hive/office-listings" },
   { id: "pipeline_rate", title: "Pipeline Conversion Rate", category: "leads", size: "small" },
   { id: "leads_hot", title: "Hot Leads No Contact 24h", category: "leads", size: "medium", href: "/admin/pipeline?filter=hot" },
 ];
