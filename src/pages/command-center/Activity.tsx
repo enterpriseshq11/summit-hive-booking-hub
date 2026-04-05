@@ -3,27 +3,21 @@ import { AdminLayout } from "@/components/admin";
 import { useCrmActivity } from "@/hooks/useCrmActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import type { Database } from "@/integrations/supabase/types";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type CrmActivityType = Database["public"]["Enums"]["crm_activity_type"];
 
@@ -53,17 +47,41 @@ const activityTypeLabels: Record<CrmActivityType, { label: string; color: string
 export default function CommandCenterActivity() {
   const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
   const [entityTypeFilter, setEntityTypeFilter] = useState<string>("all");
+  const [actorFilter, setActorFilter] = useState<string>("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Item 37: Team member filter
+  const { data: teamMembers } = useQuery({
+    queryKey: ["activity_team_members"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("id, first_name, last_name").order("first_name");
+      return data || [];
+    },
+  });
 
   const { data: activities, isLoading } = useCrmActivity({
     eventType: eventTypeFilter !== "all" ? (eventTypeFilter as CrmActivityType) : undefined,
     entityType: entityTypeFilter !== "all" ? entityTypeFilter : undefined,
+    actorId: actorFilter !== "all" ? actorFilter : undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
     limit: 200,
   });
+
+  const hasActiveFilters = eventTypeFilter !== "all" || entityTypeFilter !== "all" || actorFilter !== "all" || startDate || endDate;
+
+  const clearFilters = () => {
+    setEventTypeFilter("all");
+    setEntityTypeFilter("all");
+    setActorFilter("all");
+    setStartDate("");
+    setEndDate("");
+  };
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div>
           <h1 className="text-2xl font-bold text-zinc-100">Activity Log</h1>
           <p className="text-zinc-400">Complete audit trail of all system activities</p>
@@ -73,6 +91,21 @@ export default function CommandCenterActivity() {
         <Card className="bg-zinc-900 border-zinc-800">
           <CardContent className="p-4">
             <div className="flex flex-wrap items-center gap-4">
+              {/* Item 37: Team member filter */}
+              <Select value={actorFilter} onValueChange={setActorFilter}>
+                <SelectTrigger className="w-48 bg-zinc-800 border-zinc-700 text-zinc-100">
+                  <SelectValue placeholder="Team Member" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700 max-h-[300px]">
+                  <SelectItem value="all">All Team Members</SelectItem>
+                  {teamMembers?.map((m: any) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.first_name} {m.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
                 <SelectTrigger className="w-48 bg-zinc-800 border-zinc-700 text-zinc-100">
                   <Filter className="h-4 w-4 mr-2" />
@@ -94,6 +127,7 @@ export default function CommandCenterActivity() {
                   <SelectItem value="setting_changed">Setting Changed</SelectItem>
                 </SelectContent>
               </Select>
+
               <Select value={entityTypeFilter} onValueChange={setEntityTypeFilter}>
                 <SelectTrigger className="w-40 bg-zinc-800 border-zinc-700 text-zinc-100">
                   <SelectValue placeholder="Entity Type" />
@@ -106,6 +140,27 @@ export default function CommandCenterActivity() {
                   <SelectItem value="user">Users</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-36 bg-zinc-800 border-zinc-700 text-zinc-100"
+                placeholder="Start date"
+              />
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-36 bg-zinc-800 border-zinc-700 text-zinc-100"
+                placeholder="End date"
+              />
+
+              {hasActiveFilters && (
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-zinc-400 hover:text-white">
+                  <X className="h-4 w-4 mr-1" /> Clear Filters
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -133,7 +188,11 @@ export default function CommandCenterActivity() {
                 ) : activities?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-zinc-500">
-                      No activity found
+                      <div className="flex flex-col items-center gap-2">
+                        <Search className="h-8 w-8 text-zinc-600" />
+                        <p>No activity found</p>
+                        <p className="text-xs text-zinc-600">Activity will appear here as team members use the platform.</p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
