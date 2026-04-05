@@ -8,9 +8,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { RotateCcw, Plus, Save, Send } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { RotateCcw, Plus, Save, Send, Activity } from "lucide-react";
 import { toast } from "sonner";
-import { format, startOfWeek, startOfMonth } from "date-fns";
+import { format, startOfWeek, startOfMonth, subMonths } from "date-fns";
 import { KpiTile } from "@/components/admin/KpiTile";
 import {
   DYLAN_DEFAULT_TILES, VICTORIA_TILES, MARK_TILES, NASIYA_TILES,
@@ -19,6 +21,16 @@ import {
 } from "@/hooks/useKpiData";
 import { useRoleKpis, resolveKpiValue } from "@/hooks/useRoleKpis";
 import { useQuery } from "@tanstack/react-query";
+import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@/lib/utils";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
   type DragEndEvent,
