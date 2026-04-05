@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { RotateCcw, Plus, Save, Send, Activity } from "lucide-react";
+import { RotateCcw, Plus, Save, Send, Activity, RefreshCw, CreditCard, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { format, startOfWeek, startOfMonth, subMonths } from "date-fns";
 import { KpiTile } from "@/components/admin/KpiTile";
@@ -31,6 +31,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 function SortableTile({
   tile, value, subtitle, pendingIntegration, isOwner, onRefresh, onRemove, onResize,
@@ -77,6 +78,14 @@ function getUserRole(roles: string[] | undefined): string | undefined {
   return "manager";
 }
 
+// ── SECTION HEADERS (Item 3) ──
+const SECTION_ORDER: { category: KpiTileConfig["category"]; label: string }[] = [
+  { category: "leads", label: "Lead & Pipeline Health" },
+  { category: "operations", label: "Operations" },
+  { category: "team", label: "Team & Payroll" },
+  { category: "revenue", label: "Revenue Overview" },
+];
+
 // ════════ SCORECARD COMPONENT ════════
 const MANAGED_MEMBERS = [
   { name: "Mark Leugers", email: "mark@a-zenterpriseshq.com" },
@@ -100,13 +109,12 @@ function TeamScorecard() {
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
   const monthStart = startOfMonth(new Date()).toISOString();
 
-  const { data: scorecard = [], isLoading } = useQuery({
+  const { data: scorecard = [], isLoading, dataUpdatedAt, refetch } = useQuery({
     queryKey: ["team_scorecard", weekStart, monthStart],
     queryFn: async () => {
       const rows: ScorecardRow[] = [];
 
       for (const member of MANAGED_MEMBERS) {
-        // Find profile by email
         const { data: profile } = await supabase
           .from("profiles")
           .select("id")
@@ -119,21 +127,18 @@ function TeamScorecard() {
           continue;
         }
 
-        // Leads assigned
         const { count: leadsAssigned } = await supabase
           .from("crm_leads")
           .select("id", { count: "exact", head: true })
           .eq("assigned_employee_id", memberId)
           .not("status", "in", '("won","lost")');
 
-        // Leads contacted this week
         const { count: leadsContacted } = await supabase
           .from("crm_leads")
           .select("id", { count: "exact", head: true })
           .eq("assigned_employee_id", memberId)
           .gte("last_contacted_at", weekStart);
 
-        // Follow-ups overdue
         const { count: overdueCount } = await supabase
           .from("crm_leads")
           .select("id", { count: "exact", head: true })
@@ -141,7 +146,6 @@ function TeamScorecard() {
           .lt("follow_up_due", new Date().toISOString())
           .not("status", "in", '("won","lost")');
 
-        // Stage movements this week
         const { count: stageMovements } = await supabase
           .from("crm_activity_events")
           .select("id", { count: "exact", head: true })
@@ -149,7 +153,6 @@ function TeamScorecard() {
           .eq("event_category", "stage_changed")
           .gte("created_at", weekStart);
 
-        // Commissions this month
         const { data: commissions } = await supabase
           .from("crm_commissions")
           .select("amount")
@@ -202,8 +205,24 @@ function TeamScorecard() {
 
   if (isLoading) return <div className="text-zinc-400 p-4">Loading scorecard...</div>;
 
+  // Item 4: check if all zeros
+  const allZeros = scorecard.every(r =>
+    r.leadsAssigned === 0 && r.leadsContactedThisWeek === 0 && r.followUpsOverdue === 0 &&
+    r.stageMovementsThisWeek === 0 && r.commissionsThisMonth === 0
+  );
+
   return (
     <div className="space-y-4">
+      {/* Item 4: Last refreshed and refresh button */}
+      <div className="flex items-center justify-end gap-2 text-xs text-zinc-500">
+        {dataUpdatedAt > 0 && (
+          <span>Last refreshed: {format(new Date(dataUpdatedAt), "h:mm:ss a")}</span>
+        )}
+        <Button variant="ghost" size="sm" className="h-6 text-zinc-400 hover:text-white" onClick={() => refetch()}>
+          <RefreshCw className="h-3 w-3 mr-1" /> Refresh
+        </Button>
+      </div>
+
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -234,6 +253,16 @@ function TeamScorecard() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Item 4: Empty state message */}
+      {allZeros && (
+        <div className="text-center py-4 px-6 bg-zinc-800/50 rounded-lg border border-zinc-700">
+          <p className="text-sm text-zinc-400">
+            No activity recorded yet. Leads need to be assigned to team members and actions need to be logged for data to appear here.
+          </p>
+        </div>
+      )}
+
       <Button onClick={handleSendReport} disabled={sending} className="bg-accent text-accent-foreground hover:bg-accent/90">
         <Send className="h-4 w-4 mr-2" />
         {sending ? "Sending..." : "Send Accountability Report"}
@@ -243,7 +272,7 @@ function TeamScorecard() {
 }
 
 // ════════ BUSINESS HEALTH SCORE ════════
-interface HealthComponent { label: string; points: number; max: number; explanation: string }
+interface HealthComponent { label: string; points: number; max: number; explanation: string; rawDetail?: string }
 
 function useBusinessHealthScore() {
   return useQuery({
@@ -254,25 +283,21 @@ function useBusinessHealthScore() {
       const lastMonthStart = startOfMonth(subMonths(now, 1)).toISOString();
       const lastMonthEnd = startOfMonth(now).toISOString();
 
-      // Lead velocity
       const { count: leadsThisMonth } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).gte("created_at", thisMonth);
       const { count: leadsLastMonth } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).gte("created_at", lastMonthStart).lt("created_at", lastMonthEnd);
       const leadVelocity = (leadsThisMonth || 0) > (leadsLastMonth || 0) ? 25 : (leadsThisMonth || 0) === (leadsLastMonth || 0) ? 15 : 5;
 
-      // Pipeline conversion
       const { count: totalLeads } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).gte("created_at", thisMonth);
       const { count: convertedLeads } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).gte("created_at", thisMonth).in("status", ["won", "booked"] as any);
       const convRate = totalLeads ? ((convertedLeads || 0) / totalLeads) * 100 : 0;
       const pipelineConversion = convRate > 20 ? 25 : convRate >= 10 ? 15 : 5;
 
-      // Revenue trend
       const { data: revThisMonth } = await supabase.from("crm_revenue_events").select("amount").gte("revenue_date", thisMonth);
       const { data: revLastMonth } = await supabase.from("crm_revenue_events").select("amount").gte("revenue_date", lastMonthStart).lt("revenue_date", lastMonthEnd);
       const revThis = (revThisMonth || []).reduce((s, r) => s + Number(r.amount), 0);
       const revLast = (revLastMonth || []).reduce((s, r) => s + Number(r.amount), 0);
       const revenueTrend = revThis > revLast ? 25 : revThis === revLast ? 15 : 5;
 
-      // Follow-up compliance
       const { count: activeLeads } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).not("status", "in", '("won","lost")');
       const { count: overdueLeads } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).not("status", "in", '("won","lost")').lt("follow_up_due", now.toISOString());
       const compliancePct = activeLeads ? ((1 - (overdueLeads || 0) / activeLeads) * 100) : 100;
@@ -281,13 +306,31 @@ function useBusinessHealthScore() {
       const total = leadVelocity + pipelineConversion + revenueTrend + followUpCompliance;
 
       const components: HealthComponent[] = [
-        { label: "Lead Velocity", points: leadVelocity, max: 25, explanation: `${leadsThisMonth || 0} leads this month vs ${leadsLastMonth || 0} last month` },
+        { label: "Lead Velocity", points: leadVelocity, max: 25, explanation: `${leadsThisMonth || 0} leads this month vs ${leadsLastMonth || 0} last month`, rawDetail: `${overdueLeads || 0} overdue follow-ups` },
         { label: "Pipeline Conversion", points: pipelineConversion, max: 25, explanation: `${convRate.toFixed(1)}% of leads reached booked/won` },
         { label: "Revenue Trend", points: revenueTrend, max: 25, explanation: `$${revThis.toLocaleString()} this month vs $${revLast.toLocaleString()} last month` },
-        { label: "Follow-Up Compliance", points: followUpCompliance, max: 25, explanation: `${compliancePct.toFixed(0)}% of leads have no overdue follow-ups` },
+        { label: "Follow-Up Compliance", points: followUpCompliance, max: 25, explanation: `${compliancePct.toFixed(0)}% of leads have no overdue follow-ups`, rawDetail: `${overdueLeads || 0} overdue follow-ups are dragging your score. Fix these first.` },
       ];
 
-      return { score: total, components, label: total >= 75 ? "Excellent" : total >= 50 ? "Good" : "Needs Attention" };
+      // Item 2: find lowest scoring component for inline insight
+      const lowestComponent = [...components].sort((a, b) => a.points - b.points)[0];
+      let insight = "";
+      if (lowestComponent.label === "Follow-Up Compliance") {
+        insight = `${overdueLeads || 0} overdue follow-ups are dragging your score. Fix these first.`;
+      } else if (lowestComponent.label === "Lead Velocity") {
+        insight = `Lead volume is ${(leadsThisMonth || 0) < (leadsLastMonth || 0) ? "down" : "flat"} vs last month. Boost intake forms.`;
+      } else if (lowestComponent.label === "Pipeline Conversion") {
+        insight = `Only ${convRate.toFixed(0)}% conversion rate. Focus on moving warm leads forward.`;
+      } else {
+        insight = `Revenue is ${revThis < revLast ? "down" : "flat"} vs last month. Close pending deals.`;
+      }
+
+      return {
+        score: total,
+        components,
+        label: total >= 75 ? "Excellent" : total >= 50 ? "Good" : "Needs Attention",
+        insight,
+      };
     },
     refetchInterval: 300_000,
   });
@@ -335,14 +378,10 @@ export default function AdminDashboard() {
   const showScorecard = isOwner || isManager;
   const currentRole = getUserRole(authUser?.roles);
 
-  // Consolidated KPI data via role-based DB function
   const { data: kpiData, refetch: refetchKpis } = useRoleKpis(currentRole);
-
-  // Business Health Score (owner only)
   const { data: healthData } = useBusinessHealthScore();
   const [healthModalOpen, setHealthModalOpen] = useState(false);
 
-  // Determine which tiles to show based on role
   const getDefaultTiles = useCallback((): KpiTileConfig[] => {
     if (!authUser?.roles) return DYLAN_DEFAULT_TILES;
     const roles = authUser.roles;
@@ -361,7 +400,6 @@ export default function AdminDashboard() {
   const [payrollDateOpen, setPayrollDateOpen] = useState(false);
   const [payrollDate, setPayrollDate] = useState<Date | undefined>();
 
-  // Save payroll date
   const savePayrollDate = async (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
     const { error } = await (supabase as any)
@@ -385,7 +423,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Load saved layout for owner
   useEffect(() => {
     if (!isOwner || !authUser?.id) return;
     supabase
@@ -411,19 +448,14 @@ export default function AdminDashboard() {
     toast.success("Dashboard refreshed");
   };
 
-  // Get value for a tile from consolidated data
   const getTileValue = (id: string): { value: string | number; subtitle?: string; pending?: boolean } => {
     if (id === "health_score" && healthData) {
-      return {
-        value: healthData.score,
-        subtitle: healthData.label,
-      };
+      return { value: healthData.score, subtitle: healthData.label };
     }
     if (id === "health_score") return { value: "—", pending: true };
     return resolveKpiValue(id, kpiData);
   };
 
-  // DnD
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -445,16 +477,9 @@ export default function AdminDashboard() {
     if (!authUser?.id) return;
     const { error } = await supabase
       .from("dashboard_layouts")
-      .upsert(
-        { user_id: authUser.id, layout_json: tiles as any, is_default: true },
-        { onConflict: "user_id" }
-      );
-    if (error) {
-      toast.error("Failed to save layout");
-    } else {
-      toast.success("Layout saved");
-      setLayoutDirty(false);
-    }
+      .upsert({ user_id: authUser.id, layout_json: tiles as any, is_default: true }, { onConflict: "user_id" });
+    if (error) toast.error("Failed to save layout");
+    else { toast.success("Layout saved"); setLayoutDirty(false); }
   };
 
   const resetLayout = () => {
@@ -469,124 +494,141 @@ export default function AdminDashboard() {
   };
 
   const resizeTile = (id: string, size: "small" | "medium" | "large") => {
-    setTiles((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, size } : t))
-    );
+    setTiles((prev) => prev.map((t) => (t.id === id ? { ...t, size } : t)));
     setLayoutDirty(true);
   };
 
   const addTile = () => {
     const allTiles = DYLAN_DEFAULT_TILES;
     const missing = allTiles.filter((t) => !tiles.find((x) => x.id === t.id));
-    if (missing.length === 0) {
-      toast.info("All tiles are already on your dashboard");
-      return;
-    }
+    if (missing.length === 0) { toast.info("All tiles are already on your dashboard"); return; }
     setTiles((prev) => [...prev, missing[0]]);
     setLayoutDirty(true);
     toast.success(`Added "${missing[0].title}" tile`);
   };
 
-  const renderTiles = () => {
-    return tiles.map((tile) => {
-      const { value, subtitle, pending } = getTileValue(tile.id);
+  // Item 1: separate pending-integration tiles from live tiles
+  const pendingTiles = tiles.filter(t => {
+    const { pending } = getTileValue(t.id);
+    return pending && t.category === "revenue";
+  });
+  const liveTiles = tiles.filter(t => {
+    const { pending } = getTileValue(t.id);
+    return !(pending && t.category === "revenue");
+  });
 
-      // Health Score tile — clickable for modal
-      if (tile.id === "health_score" && isOwner) {
-        const scoreColor = typeof value === "number"
-          ? value >= 75 ? "text-green-400" : value >= 50 ? "text-amber-400" : "text-red-400"
-          : "text-zinc-400";
-        return (
-          <div key={tile.id} onClick={() => setHealthModalOpen(true)} className="cursor-pointer">
-            {isOwner ? (
-              <SortableTile tile={{ ...tile, title: "Business Health Score" }} value={value} subtitle={subtitle} pendingIntegration={pending} isOwner={isOwner} onRefresh={refetchAll} onRemove={() => removeTile(tile.id)} onResize={(size) => resizeTile(tile.id, size)} />
-            ) : (
-              <KpiTile config={tile} value={value} subtitle={subtitle} pendingIntegration={pending} onRefresh={refetchAll} isOwner={false} />
-            )}
-          </div>
-        );
-      }
+  // Item 3: group live tiles by category with section headers
+  const groupedSections = SECTION_ORDER.map(section => ({
+    ...section,
+    tiles: liveTiles.filter(t => t.category === section.category),
+  })).filter(s => s.tiles.length > 0);
 
-      if (tile.id === "payroll_next" && isOwner) {
-        return (
-          <div key={tile.id}>
-            <Popover open={payrollDateOpen} onOpenChange={setPayrollDateOpen}>
-              <PopoverTrigger asChild>
-                <div className="cursor-pointer">
-                  {isOwner ? (
-                    <SortableTile
-                      tile={tile}
-                      value={value}
-                      subtitle={subtitle ? `${subtitle} — Click to edit` : "Click to set date"}
-                      pendingIntegration={pending}
-                      isOwner={isOwner}
-                      onRefresh={refetchAll}
-                      onRemove={() => removeTile(tile.id)}
-                      onResize={(size) => resizeTile(tile.id, size)}
-                    />
-                  ) : (
-                    <KpiTile config={tile} value={value} subtitle={subtitle} pendingIntegration={pending} onRefresh={refetchAll} isOwner={false} />
-                  )}
-                </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={payrollDate}
-                  onSelect={(date) => { if (date) savePayrollDate(date); }}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        );
-      }
+  const renderSingleTile = (tile: KpiTileConfig) => {
+    const { value, subtitle, pending } = getTileValue(tile.id);
 
-      if (isOwner) {
-        return (
-          <SortableTile
-            key={tile.id}
-            tile={tile}
-            value={value}
-            subtitle={subtitle}
-            pendingIntegration={pending}
-            isOwner={isOwner}
-            onRefresh={refetchAll}
-            onRemove={() => removeTile(tile.id)}
-            onResize={(size) => resizeTile(tile.id, size)}
-          />
-        );
-      }
-
+    if (tile.id === "health_score" && isOwner) {
       return (
-        <KpiTile
-          key={tile.id}
-          config={tile}
-          value={value}
-          subtitle={subtitle}
-          pendingIntegration={pending}
-          onRefresh={refetchAll}
-          isOwner={false}
-        />
+        <div key={tile.id} onClick={() => setHealthModalOpen(true)} className="cursor-pointer">
+          {isOwner ? (
+            <SortableTile tile={{ ...tile, title: "Business Health Score" }} value={value} subtitle={subtitle} pendingIntegration={pending} isOwner={isOwner} onRefresh={refetchAll} onRemove={() => removeTile(tile.id)} onResize={(size) => resizeTile(tile.id, size)} />
+          ) : (
+            <KpiTile config={tile} value={value} subtitle={subtitle} pendingIntegration={pending} onRefresh={refetchAll} isOwner={false} />
+          )}
+          {/* Item 2: inline insight below health score */}
+          {healthData && typeof value === "number" && (
+            <p className={cn("text-xs mt-1 px-1 truncate", value >= 75 ? "text-green-400/70" : value >= 50 ? "text-amber-400/70" : "text-red-400/70")}>
+              {healthData.insight}
+            </p>
+          )}
+        </div>
       );
-    });
+    }
+
+    if (tile.id === "payroll_next" && isOwner) {
+      return (
+        <div key={tile.id}>
+          <Popover open={payrollDateOpen} onOpenChange={setPayrollDateOpen}>
+            <PopoverTrigger asChild>
+              <div className="cursor-pointer">
+                {isOwner ? (
+                  <SortableTile tile={tile} value={value} subtitle={subtitle ? `${subtitle} — Click to edit` : "Click to set date"} pendingIntegration={pending} isOwner={isOwner} onRefresh={refetchAll} onRemove={() => removeTile(tile.id)} onResize={(size) => resizeTile(tile.id, size)} />
+                ) : (
+                  <KpiTile config={tile} value={value} subtitle={subtitle} pendingIntegration={pending} onRefresh={refetchAll} isOwner={false} />
+                )}
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" selected={payrollDate} onSelect={(date) => { if (date) savePayrollDate(date); }} initialFocus className="p-3 pointer-events-auto" />
+            </PopoverContent>
+          </Popover>
+        </div>
+      );
+    }
+
+    if (isOwner) {
+      return (
+        <SortableTile key={tile.id} tile={tile} value={value} subtitle={subtitle} pendingIntegration={pending} isOwner={isOwner} onRefresh={refetchAll} onRemove={() => removeTile(tile.id)} onResize={(size) => resizeTile(tile.id, size)} />
+      );
+    }
+
+    return (
+      <KpiTile key={tile.id} config={tile} value={value} subtitle={subtitle} pendingIntegration={pending} onRefresh={refetchAll} isOwner={false} />
+    );
   };
 
   const kpiContent = (
     <>
       {isOwner ? (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={tiles.map((t) => t.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {renderTiles()}
+          <SortableContext items={liveTiles.map((t) => t.id)} strategy={rectSortingStrategy}>
+            <div className="space-y-6">
+              {/* Item 3: Grouped sections with headers */}
+              {groupedSections.map(section => (
+                <div key={section.category}>
+                  <h3 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-3 px-1">
+                    {section.label}
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {section.tiles.map(renderSingleTile)}
+                  </div>
+                </div>
+              ))}
             </div>
           </SortableContext>
         </DndContext>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {renderTiles()}
+        <div className="space-y-6">
+          {groupedSections.map(section => (
+            <div key={section.category}>
+              <h3 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-3 px-1">
+                {section.label}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {section.tiles.map(renderSingleTile)}
+              </div>
+            </div>
+          ))}
         </div>
+      )}
+
+      {/* Item 1: Collapsed pending revenue tiles at the bottom */}
+      {pendingTiles.length > 0 && (
+        <Card className="mt-6 bg-zinc-900 border-zinc-800 border-l-[3px] border-l-amber-500/50">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-400" />
+              <div>
+                <p className="text-sm font-medium text-zinc-200">Revenue (Pending Stripe Connection)</p>
+                <p className="text-xs text-zinc-500">{pendingTiles.length} revenue tiles awaiting Stripe integration</p>
+              </div>
+            </div>
+            <Link to="/admin/settings/stripe-connection">
+              <Button size="sm" className="bg-amber-500 text-black hover:bg-amber-400">
+                <CreditCard className="h-4 w-4 mr-1" /> Connect Stripe
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       )}
     </>
   );
@@ -636,14 +678,8 @@ export default function AdminDashboard() {
           kpiContent
         )}
 
-        {/* Health Score Modal */}
         {healthData && (
-          <HealthScoreModal
-            open={healthModalOpen}
-            onClose={() => setHealthModalOpen(false)}
-            components={healthData.components}
-            score={healthData.score}
-          />
+          <HealthScoreModal open={healthModalOpen} onClose={() => setHealthModalOpen(false)} components={healthData.components} score={healthData.score} />
         )}
       </div>
     </AdminLayout>
