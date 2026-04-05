@@ -52,7 +52,6 @@ const experienceItems = [
   { label: "Summit Venue", href: "/summit", icon: Building2, description: "Event center & venue" },
   { label: "Spa Info", href: "/spa", icon: Sparkles, description: "Service details" },
   { label: "Fitness Info", href: "/fitness", icon: Dumbbell, description: "Gym & training" },
-  { label: "360 Photo Booth", href: "/360-photo-booth", icon: Camera, description: "Event photo experiences" },
   { label: "Voice Vault", href: "/voice-vault", icon: Mic, description: "Studio info" },
 ];
 
