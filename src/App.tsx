@@ -96,6 +96,10 @@ import AdminFitnessMemberships from "./pages/admin/FitnessMemberships";
 import AdminReports from "./pages/admin/Reports";
 import AdminErrorLog from "./pages/admin/ErrorLog";
 import AdminOnboarding from "./pages/admin/Onboarding";
+import AdminMHConnect from "./pages/admin/MHConnect";
+import AdminCadences from "./pages/admin/Cadences";
+import AdminDeploymentChecklist from "./pages/admin/DeploymentChecklist";
+import AdminPlatformGuide from "./pages/admin/PlatformGuide";
 import IntakePage from "./pages/intake/IntakePage";
 
 // Command Center / CRM Pages
@@ -281,6 +285,7 @@ function AppInner() {
           <Route path="/admin/business/mobile-homes/inventory" element={<AdminMobileHomesInventory />} />
           <Route path="/admin/business/mobile-homes/revenue" element={<AdminBusinessSubPage />} />
           <Route path="/admin/business/mobile-homes/settings" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/mobile-homes/mh-connect" element={<AdminMHConnect />} />
 
           {/* ── BUSINESSES: Elevated by Elyse ── */}
           <Route path="/admin/business/elevated-by-elyse/leads" element={<AdminBusinessLeads />} />
@@ -313,6 +318,9 @@ function AppInner() {
           <Route path="/admin/commissions/rules" element={<AdminCommissionRulesPage />} />
           <Route path="/admin/settings/stripe-connection" element={<AdminStripeConnectionPage />} />
           <Route path="/admin/settings/error-log" element={<AdminErrorLog />} />
+          <Route path="/admin/settings/cadences" element={<AdminCadences />} />
+          <Route path="/admin/settings/deployment-checklist" element={<AdminDeploymentChecklist />} />
+          <Route path="/admin/settings/platform-guide" element={<AdminPlatformGuide />} />
           <Route path="/admin/onboarding" element={<AdminOnboarding />} />
 
           {/* Legacy admin routes */}

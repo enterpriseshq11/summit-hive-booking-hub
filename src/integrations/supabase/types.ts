@@ -792,6 +792,83 @@ export type Database = {
         }
         Relationships: []
       }
+      cadence_scheduled_actions: {
+        Row: {
+          cadence_id: string
+          created_at: string
+          fired: boolean
+          fired_at: string | null
+          id: string
+          lead_id: string
+          scheduled_at: string
+          step_index: number
+        }
+        Insert: {
+          cadence_id: string
+          created_at?: string
+          fired?: boolean
+          fired_at?: string | null
+          id?: string
+          lead_id: string
+          scheduled_at: string
+          step_index?: number
+        }
+        Update: {
+          cadence_id?: string
+          created_at?: string
+          fired?: boolean
+          fired_at?: string | null
+          id?: string
+          lead_id?: string
+          scheduled_at?: string
+          step_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cadence_scheduled_actions_cadence_id_fkey"
+            columns: ["cadence_id"]
+            isOneToOne: false
+            referencedRelation: "cadences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cadences: {
+        Row: {
+          active: boolean
+          business_unit: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          steps: Json
+          trigger_stage: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_unit?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          steps?: Json
+          trigger_stage: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_unit?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          steps?: Json
+          trigger_stage?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       career_application_activity: {
         Row: {
           action: string
@@ -1751,6 +1828,45 @@ export type Database = {
           layout_json?: Json
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      deployment_checklist: {
+        Row: {
+          category: string
+          checked: boolean
+          checked_at: string | null
+          checked_by: string | null
+          created_at: string
+          id: string
+          item_key: string
+          label: string
+          notes: string | null
+          sort_order: number
+        }
+        Insert: {
+          category: string
+          checked?: boolean
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          id?: string
+          item_key: string
+          label: string
+          notes?: string | null
+          sort_order?: number
+        }
+        Update: {
+          category?: string
+          checked?: boolean
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          id?: string
+          item_key?: string
+          label?: string
+          notes?: string | null
+          sort_order?: number
         }
         Relationships: []
       }
