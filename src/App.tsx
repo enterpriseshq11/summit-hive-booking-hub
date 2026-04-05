@@ -285,6 +285,7 @@ function AppInner() {
           <Route path="/admin/business/mobile-homes/inventory" element={<AdminMobileHomesInventory />} />
           <Route path="/admin/business/mobile-homes/revenue" element={<AdminBusinessSubPage />} />
           <Route path="/admin/business/mobile-homes/settings" element={<AdminBusinessSubPage />} />
+          <Route path="/admin/business/mobile-homes/mh-connect" element={<AdminMHConnect />} />
 
           {/* ── BUSINESSES: Elevated by Elyse ── */}
           <Route path="/admin/business/elevated-by-elyse/leads" element={<AdminBusinessLeads />} />
