@@ -105,14 +105,18 @@ function LeadCard({ lead, isDragging, showPriority }: LeadCardProps) {
   const depositOvd = isDepositOverdue(lead);
   const priority = calculatePriorityScore(lead);
 
+  const cardStyle = {
+    ...style,
+    boxShadow: followUpOverdue ? "0 0 8px rgba(239, 68, 68, 0.4)" : undefined,
+  };
+
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={cardStyle}
       className={cn(
         "bg-zinc-800 rounded-lg p-3 cursor-pointer transition-colors relative group",
         isDragging && "opacity-50",
-        // Item 8: overdue gets 3px red left border + glow
         followUpOverdue
           ? "border border-zinc-700 border-l-[3px] border-l-red-500"
           : isNew
@@ -125,11 +129,6 @@ function LeadCard({ lead, isDragging, showPriority }: LeadCardProps) {
           ? "border border-yellow-500/60"
           : "border border-zinc-700 hover:border-amber-500/50"
       )}
-      style={{
-        ...style,
-        // Item 8: red glow for overdue
-        boxShadow: followUpOverdue ? "0 0 8px rgba(239, 68, 68, 0.4)" : undefined,
-      }}
       onClick={() => navigate(`/admin/leads/${lead.id}`)}
     >
       <div className="flex items-start gap-2">
