@@ -31,15 +31,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
-import {
-  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable,
-  rectSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
 function SortableTile({
   tile, value, subtitle, pendingIntegration, isOwner, onRefresh, onRemove, onResize,
