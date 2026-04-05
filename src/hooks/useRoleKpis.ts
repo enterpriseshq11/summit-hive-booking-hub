@@ -102,6 +102,7 @@ export function resolveKpiValue(
     case "cost_per_lead": return { value: d.cost_per_lead ? fmt(d.cost_per_lead) : "—" };
     case "ad_spend_month": return { value: d.ad_spend_month ? fmt(d.ad_spend_month) : "—" };
     case "payroll_next": return { value: d.next_payroll_run_date || "Not Set", subtitle: "Click to set date" };
+    case "health_score": return { value: d.health_score ?? "—", subtitle: d.health_label };
     default: return { value: "—" };
   }
 }

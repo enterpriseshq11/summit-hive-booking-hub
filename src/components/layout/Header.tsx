@@ -108,23 +108,9 @@ export function Header() {
           <span className="text-xl font-bold text-gold-gradient hidden lg:inline">A-Z Enterprises</span>
         </Link>
 
-        {/* Desktop Navigation - 6 Primary Tabs (Book Now, Experiences, Shop, Promotions, Account, Spin & Win) */}
+        {/* Desktop Navigation - Experiences, Shop, Promotions, Account, Careers, Spin & Win */}
         <nav className="hidden md:flex items-center gap-0.5 md:gap-0.5 lg:gap-1 ml-2" aria-label="Primary">
-          {/* 1. Book Now - Direct Link (Primary CTA) */}
-          <Link
-            to="/booking"
-            className={cn(
-              "flex items-center gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-4 py-2 text-xs md:text-xs lg:text-sm font-semibold rounded-md transition-colors",
-              location.pathname === "/booking"
-                ? "bg-accent text-primary"
-                : "bg-accent/20 text-accent hover:bg-accent/30"
-            )}
-          >
-            <CalendarDays className="h-4 w-4" />
-            Book Now
-          </Link>
-
-          {/* 2. Experiences - Dropdown */}
+          {/* 1. Experiences - Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
@@ -318,15 +304,6 @@ export function Header() {
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <nav className="md:hidden border-t border-primary-foreground/10 bg-primary p-4 space-y-1 animate-fade-in max-h-[80vh] overflow-y-auto" aria-label="Mobile">
-          {/* 1. Book Now - Primary CTA */}
-          <Link
-            to="/booking"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-md bg-accent/20 text-accent"
-          >
-            <CalendarDays className="h-5 w-5" />
-            Book Now
-          </Link>
 
           {/* 2. Experiences - Collapsible */}
           <div>

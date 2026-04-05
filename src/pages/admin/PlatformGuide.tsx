@@ -32,6 +32,7 @@ const INTEGRATIONS = [
   { name: "PandaDoc", status: "Configured", desc: "Contract and document signing" },
   { name: "Facebook Ads", status: "Configured", desc: "Ad spend and lead tracking" },
   { name: "Google Ads", status: "Configured", desc: "Ad spend and lead tracking" },
+  { name: "MH Connect", status: "Planned", desc: "Mobile home marketplace platform" },
 ];
 
 const PUBLIC_PAGES = [
@@ -49,6 +50,8 @@ const PUBLIC_PAGES = [
   { label: "Careers", url: "/careers" },
   { label: "Shop", url: "/shop" },
   { label: "VIP", url: "/vip" },
+  { label: "Cadence Builder", url: "/admin/settings/cadences", internal: true },
+  { label: "MH Connect", url: "/admin/business/mobile-homes/mh-connect", internal: true },
 ];
 
 export default function PlatformGuide() {
@@ -64,7 +67,7 @@ export default function PlatformGuide() {
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader><CardTitle className="text-white flex items-center gap-2"><BookOpen className="h-5 w-5 text-amber-400" /> Platform Overview</CardTitle></CardHeader>
           <CardContent>
-            <p className="text-sm text-zinc-300">A-Z Command is the internal operations platform for A-Z Enterprises. It manages leads, bookings, revenue, commissions, team performance, and integrations across all 7 business units. The platform automates Stripe payment processing, GHL pipeline sync, PandaDoc contract workflows, and provides real-time dashboards for every team member.</p>
+            <p className="text-sm text-zinc-300">A-Z Command is the internal operations platform for A-Z Enterprises. It manages leads, bookings, revenue, commissions, team performance, and integrations across all 7 business units. The platform automates Stripe payment processing, GHL pipeline sync, PandaDoc contract workflows, automated follow-up cadences, and provides real-time dashboards for every team member.</p>
           </CardContent>
         </Card>
 
@@ -125,7 +128,7 @@ export default function PlatformGuide() {
                     <p className="text-sm font-medium text-zinc-200">{i.name}</p>
                     <p className="text-xs text-zinc-500">{i.desc}</p>
                   </div>
-                  <Badge className={i.status === "Connected" ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}>
+                  <Badge className={i.status === "Connected" ? "bg-green-500/20 text-green-400" : i.status === "Planned" ? "bg-blue-500/20 text-blue-400" : "bg-amber-500/20 text-amber-400"}>
                     {i.status}
                   </Badge>
                 </div>
