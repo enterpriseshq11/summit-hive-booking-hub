@@ -413,10 +413,13 @@ export default function AdminDashboard() {
 
   // Get value for a tile from consolidated data
   const getTileValue = (id: string): { value: string | number; subtitle?: string; pending?: boolean } => {
-    if (id === "payroll_next") {
-      const resolved = resolveKpiValue(id, kpiData);
-      return resolved;
+    if (id === "health_score" && healthData) {
+      return {
+        value: healthData.score,
+        subtitle: healthData.label,
+      };
     }
+    if (id === "health_score") return { value: "—", pending: true };
     return resolveKpiValue(id, kpiData);
   };
 
