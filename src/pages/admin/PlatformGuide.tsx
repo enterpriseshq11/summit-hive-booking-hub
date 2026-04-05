@@ -32,6 +32,7 @@ const INTEGRATIONS = [
   { name: "PandaDoc", status: "Configured", desc: "Contract and document signing" },
   { name: "Facebook Ads", status: "Configured", desc: "Ad spend and lead tracking" },
   { name: "Google Ads", status: "Configured", desc: "Ad spend and lead tracking" },
+  { name: "MH Connect", status: "Planned", desc: "Mobile home marketplace platform" },
 ];
 
 const PUBLIC_PAGES = [
