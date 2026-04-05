@@ -96,6 +96,10 @@ import AdminFitnessMemberships from "./pages/admin/FitnessMemberships";
 import AdminReports from "./pages/admin/Reports";
 import AdminErrorLog from "./pages/admin/ErrorLog";
 import AdminOnboarding from "./pages/admin/Onboarding";
+import AdminMHConnect from "./pages/admin/MHConnect";
+import AdminCadences from "./pages/admin/Cadences";
+import AdminDeploymentChecklist from "./pages/admin/DeploymentChecklist";
+import AdminPlatformGuide from "./pages/admin/PlatformGuide";
 import IntakePage from "./pages/intake/IntakePage";
 
 // Command Center / CRM Pages
