@@ -67,7 +67,7 @@ export default function PlatformGuide() {
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader><CardTitle className="text-white flex items-center gap-2"><BookOpen className="h-5 w-5 text-amber-400" /> Platform Overview</CardTitle></CardHeader>
           <CardContent>
-            <p className="text-sm text-zinc-300">A-Z Command is the internal operations platform for A-Z Enterprises. It manages leads, bookings, revenue, commissions, team performance, and integrations across all 7 business units. The platform automates Stripe payment processing, GHL pipeline sync, PandaDoc contract workflows, and provides real-time dashboards for every team member.</p>
+            <p className="text-sm text-zinc-300">A-Z Command is the internal operations platform for A-Z Enterprises. It manages leads, bookings, revenue, commissions, team performance, and integrations across all 7 business units. The platform automates Stripe payment processing, GHL pipeline sync, PandaDoc contract workflows, automated follow-up cadences, and provides real-time dashboards for every team member.</p>
           </CardContent>
         </Card>
 
