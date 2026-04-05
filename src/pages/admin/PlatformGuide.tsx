@@ -50,6 +50,8 @@ const PUBLIC_PAGES = [
   { label: "Careers", url: "/careers" },
   { label: "Shop", url: "/shop" },
   { label: "VIP", url: "/vip" },
+  { label: "Cadence Builder", url: "/admin/settings/cadences", internal: true },
+  { label: "MH Connect", url: "/admin/business/mobile-homes/mh-connect", internal: true },
 ];
 
 export default function PlatformGuide() {
