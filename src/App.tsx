@@ -307,7 +307,7 @@ function AppInner() {
           {/* SETTINGS (owner-only — requireOwner guard blocks all non-owners before component mounts) */}
         </Route>
         <Route element={<ProtectedRoute requireOwner />}>
-          <Route path="/admin/settings" element={<CommandCenterSettings />} />
+          <Route path="/admin/settings" element={<AdminSettingsOverview />} />
           <Route path="/admin/settings/users" element={<AdminUsersRoles />} />
           <Route path="/admin/settings/payment" element={<AdminPaymentSettings />} />
           <Route path="/admin/settings/integrations" element={<AdminIntegrations />} />
