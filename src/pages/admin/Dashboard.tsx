@@ -491,6 +491,22 @@ export default function AdminDashboard() {
     return tiles.map((tile) => {
       const { value, subtitle, pending } = getTileValue(tile.id);
 
+      // Health Score tile — clickable for modal
+      if (tile.id === "health_score" && isOwner) {
+        const scoreColor = typeof value === "number"
+          ? value >= 75 ? "text-green-400" : value >= 50 ? "text-amber-400" : "text-red-400"
+          : "text-zinc-400";
+        return (
+          <div key={tile.id} onClick={() => setHealthModalOpen(true)} className="cursor-pointer">
+            {isOwner ? (
+              <SortableTile tile={{ ...tile, title: "Business Health Score" }} value={value} subtitle={subtitle} pendingIntegration={pending} isOwner={isOwner} onRefresh={refetchAll} onRemove={() => removeTile(tile.id)} onResize={(size) => resizeTile(tile.id, size)} />
+            ) : (
+              <KpiTile config={tile} value={value} subtitle={subtitle} pendingIntegration={pending} onRefresh={refetchAll} isOwner={false} />
+            )}
+          </div>
+        );
+      }
+
       if (tile.id === "payroll_next" && isOwner) {
         return (
           <div key={tile.id}>
