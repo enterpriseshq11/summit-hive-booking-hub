@@ -242,6 +242,92 @@ function TeamScorecard() {
   );
 }
 
+// ════════ BUSINESS HEALTH SCORE ════════
+interface HealthComponent { label: string; points: number; max: number; explanation: string }
+
+function useBusinessHealthScore() {
+  return useQuery({
+    queryKey: ["business_health_score"],
+    queryFn: async () => {
+      const now = new Date();
+      const thisMonth = startOfMonth(now).toISOString();
+      const lastMonthStart = startOfMonth(subMonths(now, 1)).toISOString();
+      const lastMonthEnd = startOfMonth(now).toISOString();
+
+      // Lead velocity
+      const { count: leadsThisMonth } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).gte("created_at", thisMonth);
+      const { count: leadsLastMonth } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).gte("created_at", lastMonthStart).lt("created_at", lastMonthEnd);
+      const leadVelocity = (leadsThisMonth || 0) > (leadsLastMonth || 0) ? 25 : (leadsThisMonth || 0) === (leadsLastMonth || 0) ? 15 : 5;
+
+      // Pipeline conversion
+      const { count: totalLeads } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).gte("created_at", thisMonth);
+      const { count: convertedLeads } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).gte("created_at", thisMonth).in("status", ["won", "booked"] as any);
+      const convRate = totalLeads ? ((convertedLeads || 0) / totalLeads) * 100 : 0;
+      const pipelineConversion = convRate > 20 ? 25 : convRate >= 10 ? 15 : 5;
+
+      // Revenue trend
+      const { data: revThisMonth } = await supabase.from("crm_revenue_events").select("amount").gte("revenue_date", thisMonth);
+      const { data: revLastMonth } = await supabase.from("crm_revenue_events").select("amount").gte("revenue_date", lastMonthStart).lt("revenue_date", lastMonthEnd);
+      const revThis = (revThisMonth || []).reduce((s, r) => s + Number(r.amount), 0);
+      const revLast = (revLastMonth || []).reduce((s, r) => s + Number(r.amount), 0);
+      const revenueTrend = revThis > revLast ? 25 : revThis === revLast ? 15 : 5;
+
+      // Follow-up compliance
+      const { count: activeLeads } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).not("status", "in", '("won","lost")');
+      const { count: overdueLeads } = await supabase.from("crm_leads").select("id", { count: "exact", head: true }).not("status", "in", '("won","lost")').lt("follow_up_due", now.toISOString());
+      const compliancePct = activeLeads ? ((1 - (overdueLeads || 0) / activeLeads) * 100) : 100;
+      const followUpCompliance = compliancePct > 80 ? 25 : compliancePct >= 60 ? 15 : 5;
+
+      const total = leadVelocity + pipelineConversion + revenueTrend + followUpCompliance;
+
+      const components: HealthComponent[] = [
+        { label: "Lead Velocity", points: leadVelocity, max: 25, explanation: `${leadsThisMonth || 0} leads this month vs ${leadsLastMonth || 0} last month` },
+        { label: "Pipeline Conversion", points: pipelineConversion, max: 25, explanation: `${convRate.toFixed(1)}% of leads reached booked/won` },
+        { label: "Revenue Trend", points: revenueTrend, max: 25, explanation: `$${revThis.toLocaleString()} this month vs $${revLast.toLocaleString()} last month` },
+        { label: "Follow-Up Compliance", points: followUpCompliance, max: 25, explanation: `${compliancePct.toFixed(0)}% of leads have no overdue follow-ups` },
+      ];
+
+      return { score: total, components, label: total >= 75 ? "Excellent" : total >= 50 ? "Good" : "Needs Attention" };
+    },
+    refetchInterval: 300_000,
+  });
+}
+
+function HealthScoreModal({ open, onClose, components, score }: { open: boolean; onClose: () => void; components: HealthComponent[]; score: number }) {
+  const color = score >= 75 ? "text-green-400" : score >= 50 ? "text-amber-400" : "text-red-400";
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-white flex items-center gap-2">
+            <Activity className="h-5 w-5 text-amber-400" />
+            Business Health Score Breakdown
+          </DialogTitle>
+        </DialogHeader>
+        <div className="text-center mb-4">
+          <span className={cn("text-5xl font-bold", color)}>{score}</span>
+          <span className="text-zinc-500 text-lg"> / 100</span>
+        </div>
+        <div className="space-y-3">
+          {components.map((c) => (
+            <Card key={c.label} className="bg-zinc-800 border-zinc-700">
+              <CardContent className="p-3">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-medium text-zinc-200">{c.label}</span>
+                  <Badge variant="outline" className={cn("text-xs", c.points >= 20 ? "border-green-500/50 text-green-400" : c.points >= 15 ? "border-amber-500/50 text-amber-400" : "border-red-500/50 text-red-400")}>
+                    {c.points}/{c.max}
+                  </Badge>
+                </div>
+                <p className="text-xs text-zinc-500">{c.explanation}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function AdminDashboard() {
   const { authUser } = useAuth();
   const isOwner = authUser?.roles?.includes("owner") || false;
@@ -251,6 +337,10 @@ export default function AdminDashboard() {
 
   // Consolidated KPI data via role-based DB function
   const { data: kpiData, refetch: refetchKpis } = useRoleKpis(currentRole);
+
+  // Business Health Score (owner only)
+  const { data: healthData } = useBusinessHealthScore();
+  const [healthModalOpen, setHealthModalOpen] = useState(false);
 
   // Determine which tiles to show based on role
   const getDefaultTiles = useCallback((): KpiTileConfig[] => {
