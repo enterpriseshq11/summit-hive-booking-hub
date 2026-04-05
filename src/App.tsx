@@ -318,6 +318,9 @@ function AppInner() {
           <Route path="/admin/commissions/rules" element={<AdminCommissionRulesPage />} />
           <Route path="/admin/settings/stripe-connection" element={<AdminStripeConnectionPage />} />
           <Route path="/admin/settings/error-log" element={<AdminErrorLog />} />
+          <Route path="/admin/settings/cadences" element={<AdminCadences />} />
+          <Route path="/admin/settings/deployment-checklist" element={<AdminDeploymentChecklist />} />
+          <Route path="/admin/settings/platform-guide" element={<AdminPlatformGuide />} />
           <Route path="/admin/onboarding" element={<AdminOnboarding />} />
 
           {/* Legacy admin routes */}
