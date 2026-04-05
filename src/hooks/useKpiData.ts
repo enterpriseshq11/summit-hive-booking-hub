@@ -147,6 +147,7 @@ export const DYLAN_DEFAULT_TILES: KpiTileConfig[] = [
   { id: "rev_vault", title: "Voice Vault Revenue", category: "revenue", size: "small" },
   { id: "rev_mobile", title: "Mobile Homes Revenue", category: "revenue", size: "small" },
   { id: "rev_elevated", title: "Elevated by Elyse Revenue", category: "revenue", size: "small" },
+  { id: "health_score", title: "Business Health Score", category: "revenue", size: "medium" },
   { id: "leads_active", title: "Total Active Leads", category: "leads", size: "medium", href: "/admin/leads" },
   { id: "leads_new", title: "New Leads This Week", category: "leads", size: "medium", href: "/admin/leads" },
   { id: "leads_contacted", title: "Leads Contacted Today", category: "leads", size: "small" },

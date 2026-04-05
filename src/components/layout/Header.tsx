@@ -304,15 +304,6 @@ export function Header() {
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <nav className="md:hidden border-t border-primary-foreground/10 bg-primary p-4 space-y-1 animate-fade-in max-h-[80vh] overflow-y-auto" aria-label="Mobile">
-          {/* 1. Book Now - Primary CTA */}
-          <Link
-            to="/booking"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-md bg-accent/20 text-accent"
-          >
-            <CalendarDays className="h-5 w-5" />
-            Book Now
-          </Link>
 
           {/* 2. Experiences - Collapsible */}
           <div>
