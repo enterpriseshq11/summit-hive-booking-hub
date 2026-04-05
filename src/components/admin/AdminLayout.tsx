@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBookingsRealtime } from "@/hooks/useBookingsRealtime";
@@ -9,7 +9,7 @@ import {
   ClipboardList, Package, CalendarX, FileText, Star, Shield, Lightbulb,
   Box, UserCog, Building2, Tag, MessageSquare, Gift, Sparkles, Dumbbell,
   Home, CreditCard, Link2, ScrollText, Briefcase, BarChart3, TrendingUp,
-  Megaphone, Image, Store,
+  Megaphone, Image, Store, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnreadApplicationsCount } from "@/hooks/useCareerApplications";
+import { useQuery } from "@tanstack/react-query";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AdminLayoutProps { children: ReactNode; }
 
@@ -60,7 +62,7 @@ const TEAM_ROLES = ["owner", "manager", "ops_lead"];
 const REVENUE_ROLES = ["owner", "manager", "marketing_lead", "ops_lead", "ads_lead"];
 const MARKETING_ROLES = ["owner", "manager", "marketing_lead", "ads_lead"];
 
-// ─── Navigation configuration matching Dylan's exact spec ───
+// ─── Navigation configuration ───
 const navSections: NavSection[] = [
   {
     label: "Command Center",
@@ -215,6 +217,7 @@ const navSections: NavSection[] = [
     icon: Settings,
     visibleToRoles: OWNER_ONLY,
     items: [
+      { title: "Overview", href: "/admin/settings", icon: Settings, end: true },
       { title: "Users & Roles", href: "/admin/settings/users", icon: UserCog },
       { title: "Payment Settings", href: "/admin/settings/payment", icon: CreditCard },
       { title: "Integrations", href: "/admin/settings/integrations", icon: Link2 },
@@ -229,13 +232,120 @@ function canSeeByRoles(visibleToRoles: string[], userRoles: string[]): boolean {
   return visibleToRoles.some(role => userRoles.includes(role));
 }
 
+// Item 26: Search results component
+function GlobalSearchResults({ query, onClose }: { query: string; onClose: () => void }) {
+  const navigate = useNavigate();
+  const { data: results } = useQuery({
+    queryKey: ["global_search", query],
+    queryFn: async () => {
+      if (query.length < 2) return { leads: [], employees: [], bookings: [] };
+      const q = `%${query}%`;
+      const [leadsRes, employeesRes, bookingsRes] = await Promise.all([
+        supabase.from("crm_leads").select("id, lead_name, business_unit, status").ilike("lead_name", q).limit(5),
+        supabase.from("profiles").select("id, first_name, last_name, email").or(`first_name.ilike.${q},last_name.ilike.${q},email.ilike.${q}`).limit(5),
+        supabase.from("bookings").select("id, booking_number, guest_name, start_datetime, business_id").or(`booking_number.ilike.${q},guest_name.ilike.${q}`).limit(5),
+      ]);
+      return {
+        leads: leadsRes.data || [],
+        employees: employeesRes.data || [],
+        bookings: bookingsRes.data || [],
+      };
+    },
+    enabled: query.length >= 2,
+  });
+
+  if (!results || query.length < 2) return null;
+  const hasResults = results.leads.length > 0 || results.employees.length > 0 || results.bookings.length > 0;
+
+  return (
+    <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+      {!hasResults && (
+        <div className="p-3 text-sm text-zinc-500">No results for "{query}"</div>
+      )}
+      {results.leads.length > 0 && (
+        <div>
+          <div className="px-3 py-1.5 text-xs font-semibold text-zinc-400 bg-zinc-900/50">Leads</div>
+          {results.leads.map((lead: any) => (
+            <button key={lead.id} className="w-full text-left px-3 py-2 hover:bg-zinc-700 flex items-center gap-2" onClick={() => { navigate(`/admin/leads/${lead.id}`); onClose(); }}>
+              <Target className="h-3.5 w-3.5 text-amber-400" />
+              <span className="text-sm text-zinc-200">{lead.lead_name}</span>
+              <Badge variant="outline" className="text-[10px] border-zinc-600 text-zinc-400 ml-auto">{lead.business_unit}</Badge>
+            </button>
+          ))}
+        </div>
+      )}
+      {results.employees.length > 0 && (
+        <div>
+          <div className="px-3 py-1.5 text-xs font-semibold text-zinc-400 bg-zinc-900/50">Employees</div>
+          {results.employees.map((emp: any) => (
+            <button key={emp.id} className="w-full text-left px-3 py-2 hover:bg-zinc-700 flex items-center gap-2" onClick={() => { navigate(`/admin/employees/${emp.id}`); onClose(); }}>
+              <Users className="h-3.5 w-3.5 text-purple-400" />
+              <span className="text-sm text-zinc-200">{emp.first_name} {emp.last_name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {results.bookings.length > 0 && (
+        <div>
+          <div className="px-3 py-1.5 text-xs font-semibold text-zinc-400 bg-zinc-900/50">Bookings</div>
+          {results.bookings.map((b: any) => (
+            <button key={b.id} className="w-full text-left px-3 py-2 hover:bg-zinc-700 flex items-center gap-2" onClick={() => { navigate(`/admin/schedule`); onClose(); }}>
+              <CalendarDays className="h-3.5 w-3.5 text-green-400" />
+              <span className="text-sm text-zinc-200">{b.guest_name || b.booking_number}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Item 32: Mobile bottom navigation bar
+function MobileBottomNav({ unreadAlerts, onMenuOpen }: { unreadAlerts: number; onMenuOpen: () => void }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const items = [
+    { icon: LayoutDashboard, label: "Dashboard", href: "/admin", end: true },
+    { icon: Target, label: "Leads", href: "/admin/leads" },
+    { icon: Kanban, label: "Pipeline", href: "/admin/pipeline" },
+    { icon: Bell, label: "Alerts", href: "/admin/alerts", badge: unreadAlerts },
+    { icon: Menu, label: "Menu", href: "__menu__" },
+  ];
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-zinc-900 border-t border-zinc-800 flex items-center justify-around h-14 safe-area-bottom">
+      {items.map((item) => {
+        const isActive = item.href === "__menu__" ? false : item.end ? location.pathname === item.href : location.pathname.startsWith(item.href);
+        return (
+          <button
+            key={item.label}
+            onClick={() => item.href === "__menu__" ? onMenuOpen() : navigate(item.href)}
+            className={cn("flex flex-col items-center gap-0.5 py-1 px-3 relative", isActive ? "text-amber-400" : "text-zinc-500")}
+          >
+            <item.icon className="h-5 w-5" />
+            {item.badge && item.badge > 0 && (
+              <span className="absolute -top-0.5 right-1.5 h-4 min-w-4 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1">
+                {item.badge > 9 ? "9+" : item.badge}
+              </span>
+            )}
+            <span className="text-[10px]">{item.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function AdminLayout({ children }: AdminLayoutProps) {
   const { authUser, isLoading, isRolesLoaded, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
   const [unreadAlerts, setUnreadAlerts] = useState(0);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({ "Command Center": true });
   const [openSubSections, setOpenSubSections] = useState<Record<string, boolean>>({});
@@ -281,12 +391,25 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   }, [isLoading, isRolesLoaded, authUser, hasAccess, navigate, location]);
 
+  // Item 5: Real-time subscription for unread alerts
   useEffect(() => {
-    if (authUser) {
-      supabase.from("crm_alerts").select("id", { count: "exact", head: true })
-        .eq("is_read", false).eq("is_dismissed", false)
-        .then(({ count }) => setUnreadAlerts(count || 0));
-    }
+    if (!authUser) return;
+    // Initial fetch
+    supabase.from("crm_alerts").select("id", { count: "exact", head: true })
+      .eq("is_read", false).eq("is_dismissed", false)
+      .then(({ count }) => setUnreadAlerts(count || 0));
+
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel("crm_alerts_badge")
+      .on("postgres_changes", { event: "*", schema: "public", table: "crm_alerts" }, () => {
+        supabase.from("crm_alerts").select("id", { count: "exact", head: true })
+          .eq("is_read", false).eq("is_dismissed", false)
+          .then(({ count }) => setUnreadAlerts(count || 0));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [authUser]);
 
   if (isLoading || !isRolesLoaded) {
@@ -311,6 +434,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     return 0;
   };
 
+  // Item 24/25: Determine active section for gold accent
+  const getActiveSection = () => {
+    for (const section of navSections) {
+      if (section.items.some(item => item.end ? location.pathname === item.href : location.pathname.startsWith(item.href))) return section.label;
+      if (section.subSections?.some(sub => sub.items.some(item => location.pathname.startsWith(item.href)))) return section.label;
+    }
+    return "";
+  };
+  const activeSection = getActiveSection();
+
   const renderNavItem = (item: NavItem) => {
     const isActive = item.end
       ? location.pathname === item.href
@@ -324,7 +457,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           className={cn(
             "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm",
             isActive
-              ? "bg-amber-500/15 text-amber-400 font-medium"
+              ? "bg-amber-500/15 text-white font-medium border-l-[3px] border-l-amber-500 -ml-[3px] pl-[calc(0.75rem+3px)]"
               : "text-zinc-300 hover:text-white hover:bg-zinc-800"
           )}
           onClick={() => setMobileOpen(false)}
@@ -334,7 +467,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           {!collapsed && <span>{item.title}</span>}
           {!collapsed && badgeVal > 0 && (
             <Badge variant="destructive" className="ml-auto text-xs h-5 min-w-5 flex items-center justify-center">
-              {badgeVal}
+              {badgeVal > 9 ? "9+" : badgeVal}
             </Badge>
           )}
         </Link>
@@ -351,6 +484,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     if (visibleItems.length === 0 && visibleSubs.length === 0) return null;
 
     const isOpen = openSections[section.label] ?? false;
+    const isSectionActive = activeSection === section.label;
 
     if (collapsed) {
       return (
@@ -367,9 +501,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
     return (
       <div key={section.label} className="mb-1">
+        {/* Item 24: Title case + gold accent on active section */}
         <button
           onClick={() => toggleSection(section.label)}
-          className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold text-zinc-400 uppercase tracking-wider hover:text-zinc-200 transition-colors"
+          className={cn(
+            "w-full flex items-center justify-between px-4 py-2 text-xs font-semibold tracking-wider hover:text-zinc-200 transition-colors",
+            isSectionActive ? "text-amber-400 border-l-2 border-l-amber-500" : "text-zinc-400"
+          )}
         >
           <span className="flex items-center gap-2">
             <section.icon className="h-3.5 w-3.5" />
@@ -435,6 +573,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
+          {/* Close button for mobile sidebar */}
+          <Button
+            variant="ghost" size="icon"
+            className="md:hidden text-zinc-300 hover:text-white"
+            onClick={() => setMobileOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
 
         <nav className="flex-1 overflow-y-auto py-2">
@@ -472,20 +618,31 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <Button variant="ghost" size="icon" className="md:hidden text-zinc-300" onClick={() => setMobileOpen(true)}>
               <Menu className="h-5 w-5" />
             </Button>
+            {/* Item 26: Search with dropdown */}
             <div className="relative hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
               <Input
-                placeholder="Search..."
+                placeholder="Search leads, employees, bookings, revenue..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-64 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                className="pl-9 w-80 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
               />
+              {searchFocused && searchQuery.length >= 2 && (
+                <GlobalSearchResults query={searchQuery} onClose={() => { setSearchQuery(""); setSearchFocused(false); }} />
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Item 5: Bell with real-time badge */}
             <Button variant="ghost" size="icon" className="relative text-zinc-300 hover:text-white" onClick={() => navigate("/admin/alerts")}>
               <Bell className="h-5 w-5" />
-              {unreadAlerts > 0 && <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />}
+              {unreadAlerts > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-5 min-w-5 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1 border-2 border-zinc-900">
+                  {unreadAlerts > 9 ? "9+" : unreadAlerts}
+                </span>
+              )}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -508,8 +665,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </DropdownMenu>
           </div>
         </header>
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-6 overflow-auto pb-20 md:pb-6">{children}</main>
       </div>
+
+      {/* Item 32: Mobile bottom navigation */}
+      <MobileBottomNav unreadAlerts={unreadAlerts} onMenuOpen={() => setMobileOpen(true)} />
     </div>
   );
 }
