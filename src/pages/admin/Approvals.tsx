@@ -48,10 +48,16 @@ function matchesUnit(b: any, unit: BusinessUnit) {
       return t === "coworking" || sb === "hive";
     case "restoration":
       return t === "spa" || sb === "restoration";
-    case "photo_booth":
-      return t === "photo_booth" || sb === "photo_booth";
     case "voice_vault":
       return t === "voice_vault" || sb === "voice_vault";
+    case "elevated_by_elyse":
+      return t === "elevated_by_elyse" || sb === "elevated_by_elyse";
+    case "fitness":
+      return t === "fitness" || sb === "fitness";
+    case "mobile_homes":
+      return t === "mobile_homes" || sb === "mobile_homes";
+    default:
+      return false;
   }
 }
 
