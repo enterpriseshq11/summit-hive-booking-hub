@@ -7,12 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Download, TrendingUp, Users, BarChart3, Calendar } from "lucide-react";
-import { format, startOfMonth, endOfMonth, subDays } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 
 const COLORS = ["#f59e0b", "#3b82f6", "#10b981", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
+
+// Managed team member emails for Victoria's filter
+const MANAGED_EMAILS = [
+  "mark@a-zenterpriseshq.com",
+  "nasiya@a-zenterpriseshq.com",
+  "elyse@a-zenterpriseshq.com",
+];
 
 function exportCsv(filename: string, headers: string[], rows: string[][]) {
   const bom = "\uFEFF";
@@ -30,6 +38,9 @@ export default function AdminReports() {
   const today = new Date();
   const [startDate, setStartDate] = useState(format(startOfMonth(today), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(endOfMonth(today), "yyyy-MM-dd"));
+  const { authUser } = useAuth();
+  const isOwner = authUser?.roles?.includes("owner") || false;
+  const isManager = authUser?.roles?.includes("manager") || false;
 
   // Revenue data
   const { data: revenueData } = useQuery({
@@ -73,16 +84,68 @@ export default function AdminReports() {
     },
   });
 
-  // Team data (commissions)
-  const { data: commissionData } = useQuery({
-    queryKey: ["reports", "commissions", startDate, endDate],
+  // Team data (commissions) — filtered by role
+  const { data: managedProfileIds } = useQuery({
+    queryKey: ["managed_profile_ids", isOwner],
     queryFn: async () => {
+      if (isOwner) return null; // owner sees all
       const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .in("email", MANAGED_EMAILS);
+      return (data || []).map((p) => p.id);
+    },
+  });
+
+  const { data: commissionData } = useQuery({
+    queryKey: ["reports", "commissions", startDate, endDate, managedProfileIds],
+    queryFn: async () => {
+      let query = supabase
         .from("crm_commissions")
         .select("*, employee:profiles!crm_commissions_employee_id_fkey(first_name, last_name)")
         .gte("created_at", startDate)
         .lte("created_at", endDate + "T23:59:59");
+
+      // Manager filter: only show managed team members
+      if (!isOwner && managedProfileIds && managedProfileIds.length > 0) {
+        query = query.in("employee_id", managedProfileIds);
+      }
+
+      const { data } = await query;
       return data || [];
+    },
+  });
+
+  // Average time in stage data
+  const { data: stageTimeData } = useQuery({
+    queryKey: ["reports", "avg_stage_time", startDate, endDate],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("lead_stage_history" as any)
+        .select("stage, entered_at, exited_at")
+        .not("exited_at", "is", null)
+        .gte("entered_at", startDate)
+        .lte("entered_at", endDate + "T23:59:59");
+
+      if (!data || data.length === 0) return [];
+
+      const stageMap: Record<string, { totalHours: number; count: number }> = {};
+      (data as any[]).forEach((row) => {
+        const hours = (new Date(row.exited_at).getTime() - new Date(row.entered_at).getTime()) / (1000 * 60 * 60);
+        if (!stageMap[row.stage]) stageMap[row.stage] = { totalHours: 0, count: 0 };
+        stageMap[row.stage].totalHours += hours;
+        stageMap[row.stage].count++;
+      });
+
+      return Object.entries(stageMap).map(([stage, { totalHours, count }]) => {
+        const avg = totalHours / count;
+        return {
+          stage: stage.replace(/_/g, " "),
+          avgTime: avg > 48 ? `${(avg / 24).toFixed(1)} days` : `${avg.toFixed(1)} hours`,
+          avgHours: avg,
+          count,
+        };
+      }).sort((a, b) => b.avgHours - a.avgHours);
     },
   });
 
@@ -238,18 +301,52 @@ export default function AdminReports() {
                 <ResponsiveContainer><BarChart data={leadsByStage} layout="vertical"><CartesianGrid strokeDasharray="3 3" stroke="#333" /><XAxis type="number" tick={{ fill: "#999", fontSize: 12 }} /><YAxis type="category" dataKey="name" tick={{ fill: "#999", fontSize: 11 }} width={120} /><Tooltip /><Bar dataKey="value" fill="#10b981" radius={[0, 4, 4, 0]} /></BarChart></ResponsiveContainer>
               </CardContent>
             </Card>
+
+            {/* Average Time in Stage */}
+            <Card className="bg-zinc-900 border-zinc-800">
+              <CardHeader><CardTitle className="text-white text-sm">Average Time in Each Stage</CardTitle></CardHeader>
+              <CardContent>
+                {stageTimeData && stageTimeData.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead><tr className="border-b border-zinc-700 text-zinc-400">
+                        <th className="text-left py-2 px-3">Stage</th>
+                        <th className="text-right py-2 px-3">Average Time</th>
+                        <th className="text-right py-2 px-3">Leads Measured</th>
+                      </tr></thead>
+                      <tbody>
+                        {stageTimeData.map((row) => (
+                          <tr key={row.stage} className="border-b border-zinc-800 text-white">
+                            <td className="py-2 px-3 capitalize">{row.stage}</td>
+                            <td className="py-2 px-3 text-right font-mono text-amber-400">{row.avgTime}</td>
+                            <td className="py-2 px-3 text-right text-zinc-400">{row.count}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-zinc-500 text-sm py-4 text-center">No stage transition data available for this period. Data will populate as leads move through stages.</p>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* TEAM TAB */}
           <TabsContent value="team" className="space-y-6">
             <div className="flex justify-between items-center flex-wrap gap-4">
               <DatePicker />
-              <Button variant="outline" size="sm" className="border-zinc-700"
-                onClick={() => exportCsv("team_report.csv", ["Team Member", "Commissions Earned", "Commission Count"],
-                  teamSummary.map((t) => [t.name, String(t.earned.toFixed(2)), String(t.count)])
-                )}>
-                <Download className="w-4 h-4 mr-1" /> Export CSV
-              </Button>
+              <div className="flex items-center gap-2">
+                {!isOwner && isManager && (
+                  <Badge variant="outline" className="text-xs border-zinc-700 text-zinc-400">Showing: Your managed team</Badge>
+                )}
+                <Button variant="outline" size="sm" className="border-zinc-700"
+                  onClick={() => exportCsv("team_report.csv", ["Team Member", "Commissions Earned", "Commission Count"],
+                    teamSummary.map((t) => [t.name, String(t.earned.toFixed(2)), String(t.count)])
+                  )}>
+                  <Download className="w-4 h-4 mr-1" /> Export CSV
+                </Button>
+              </div>
             </div>
             <Card className="bg-zinc-900 border-zinc-800">
               <CardContent className="pt-6">

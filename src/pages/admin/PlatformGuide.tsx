@@ -128,7 +128,7 @@ export default function PlatformGuide() {
                     <p className="text-sm font-medium text-zinc-200">{i.name}</p>
                     <p className="text-xs text-zinc-500">{i.desc}</p>
                   </div>
-                  <Badge className={i.status === "Connected" ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}>
+                  <Badge className={i.status === "Connected" ? "bg-green-500/20 text-green-400" : i.status === "Planned" ? "bg-blue-500/20 text-blue-400" : "bg-amber-500/20 text-amber-400"}>
                     {i.status}
                   </Badge>
                 </div>

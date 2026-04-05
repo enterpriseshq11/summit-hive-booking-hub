@@ -635,6 +635,16 @@ export default function AdminDashboard() {
         ) : (
           kpiContent
         )}
+
+        {/* Health Score Modal */}
+        {healthData && (
+          <HealthScoreModal
+            open={healthModalOpen}
+            onClose={() => setHealthModalOpen(false)}
+            components={healthData.components}
+            score={healthData.score}
+          />
+        )}
       </div>
     </AdminLayout>
   );
