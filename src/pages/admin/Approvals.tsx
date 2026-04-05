@@ -20,15 +20,18 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
 
-type BusinessUnit = "all" | "summit" | "hive" | "restoration" | "photo_booth" | "voice_vault";
+// Item 14: Removed 360 Photo Booth. Added correct business units.
+type BusinessUnit = "all" | "summit" | "hive" | "restoration" | "voice_vault" | "elevated_by_elyse" | "fitness" | "mobile_homes";
 
 const BUSINESS_UNIT_TABS: { value: BusinessUnit; label: string }[] = [
+  { value: "all", label: "All" },
   { value: "summit", label: "The Summit" },
   { value: "hive", label: "The Hive" },
-  { value: "restoration", label: "Restoration" },
-  { value: "photo_booth", label: "360 Photo Booth" },
+  { value: "restoration", label: "Restoration Lounge Spa" },
   { value: "voice_vault", label: "Voice Vault" },
-  { value: "all", label: "All" },
+  { value: "elevated_by_elyse", label: "Elevated by Elyse" },
+  { value: "fitness", label: "A-Z Total Fitness" },
+  { value: "mobile_homes", label: "Mobile Homes" },
 ];
 
 // Spa/Restoration uses different status tabs
