@@ -27,7 +27,7 @@ import {
   ArrowLeft, Phone, Mail, Building2, Calendar, User, Clock,
   DollarSign, FileText, Send, Plus, RefreshCw, TrendingUp,
   Flame, Snowflake, Thermometer, CheckCircle2, Trash2, AlertTriangle,
-  FileSignature, ExternalLink, RotateCw,
+  FileSignature, ExternalLink, RotateCw, MessageSquare,
 } from "lucide-react";
 import { format, formatDistanceToNow, isToday, isPast } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -252,6 +252,21 @@ export default function LeadDetailPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
+        {/* Item 31: Follow-up overdue banner */}
+        {followUpOverdue && lead.follow_up_due && (
+          <div className="bg-amber-500/10 border border-amber-500/40 rounded-lg p-3 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0" />
+              <span className="text-amber-200 text-sm">
+                Follow-up was due {format(new Date(lead.follow_up_due), "PPP")}. Take action now.
+              </span>
+            </div>
+            <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-black flex-shrink-0" onClick={() => logContact.mutate("Phone Call")}>
+              Log Contact
+            </Button>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
@@ -335,7 +350,16 @@ export default function LeadDetailPage() {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-zinc-500 text-xs">Phone</Label>
-                    <div className="flex items-center gap-2 text-zinc-100"><Phone className="h-4 w-4 text-zinc-500" />{lead.phone || "—"}</div>
+                    <div className="flex items-center gap-2 text-zinc-100">
+                      <Phone className="h-4 w-4 text-zinc-500" />{lead.phone || "—"}
+                      {/* Item 29: quick call/text actions */}
+                      {lead.phone && (
+                        <>
+                          <a href={`tel:${lead.phone}`} className="p-1 rounded hover:bg-zinc-700 text-zinc-400 hover:text-amber-400" title="Opens your default phone app"><Phone className="h-4 w-4" /></a>
+                          <a href={`sms:${lead.phone}`} className="p-1 rounded hover:bg-zinc-700 text-zinc-400 hover:text-amber-400" title="Opens your default phone app"><MessageSquare className="h-4 w-4" /></a>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-zinc-500 text-xs">Source</Label>
