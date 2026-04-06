@@ -169,7 +169,12 @@ export default function AdminSpecials() {
         {isLoading ? (
           <div className="text-zinc-400 py-8 text-center">Loading...</div>
         ) : filtered.length === 0 ? (
-          <div className="text-zinc-500 py-12 text-center">No specials found. Click "Add Special" to create one.</div>
+          <div className="flex flex-col items-center justify-center py-16">
+            <Sparkles className="h-12 w-12 text-zinc-600 mb-3" />
+            <p className="font-semibold text-base text-zinc-200">No specials configured yet</p>
+            <p className="text-sm text-zinc-400 mt-1">Create specials to offer limited-time deals and featured services across your businesses.</p>
+            <Button className="mt-4 bg-amber-500 hover:bg-amber-600 text-black" onClick={openNew}><Plus className="h-4 w-4 mr-2" />Create Special</Button>
+          </div>
         ) : (
           <div className="grid gap-4">
             {filtered.map((s) => {

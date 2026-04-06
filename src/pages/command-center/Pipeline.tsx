@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { toast } from "sonner";
 import { AdminLayout } from "@/components/admin";
 import { useCrmLeads, useUpdateCrmLead } from "@/hooks/useCrmLeads";
 import { supabase } from "@/integrations/supabase/client";
@@ -605,6 +606,7 @@ export default function CommandCenterPipeline() {
   const toWebhookStageName = (dbStage: string) => dbStage === "won" ? "completed" : dbStage;
 
   const fireGhlStageWebhookFromPipeline = useCallback(async (lead: any, previousStage: string, newStage: string) => {
+    const { data: { user: ghlUser } } = await supabase.auth.getUser();
     // Check ghl_sync_in_progress to prevent infinite loop
     try {
       const { data: freshLead } = await supabase
@@ -616,6 +618,7 @@ export default function CommandCenterPipeline() {
       if ((freshLead as any)?.ghl_sync_in_progress) {
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
+          actor_id: ghlUser?.id,
           metadata: {
             action: "ghl_webhook_skipped",
             message: `GHL webhook skipped — inbound sync in progress, preventing loop`,
@@ -634,6 +637,7 @@ export default function CommandCenterPipeline() {
       if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
+          actor_id: ghlUser?.id,
           metadata: {
             action: "ghl_webhook_skipped",
             message: `GHL webhook skipped — no URL configured or inactive for ${STAGE_LABELS[newStage] || newStage} stage`,
@@ -667,6 +671,7 @@ export default function CommandCenterPipeline() {
       const statusText = `HTTP ${res.status}`;
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
+        actor_id: ghlUser?.id,
         metadata: {
           action: res.ok ? "ghl_webhook_fired" : "ghl_webhook_failed",
           message: `GHL webhook ${res.ok ? "fired" : "FAILED"} — stage moved to ${STAGE_LABELS[newStage] || newStage} — ${statusText}`,
@@ -687,6 +692,7 @@ export default function CommandCenterPipeline() {
     } catch (err: any) {
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
+        actor_id: ghlUser?.id,
         metadata: {
           action: "ghl_webhook_failed",
           message: `GHL webhook FAILED — stage moved to ${STAGE_LABELS[newStage] || newStage} — Error: ${err.message}`,
@@ -724,13 +730,30 @@ export default function CommandCenterPipeline() {
               ? "warm"
               : undefined;
 
+        // Item 30: Undo toast with delayed GHL webhook
+        let isReverted = false;
         updateLead.mutate({
           id: leadId,
           status: newStatus,
           ...(autoTemp ? { temperature: autoTemp } : {}),
         } as any, {
           onSuccess: () => {
-            fireGhlStageWebhookFromPipeline(lead, previousStage, newStatus);
+            toast(`${lead.lead_name} moved to ${STAGE_LABELS[newStatus] || newStatus}`, {
+              duration: 3000,
+              action: {
+                label: "Undo",
+                onClick: async () => {
+                  isReverted = true;
+                  updateLead.mutate({ id: leadId, status: previousStage } as any);
+                  toast.success("Stage change reverted");
+                },
+              },
+            });
+            setTimeout(() => {
+              if (!isReverted) {
+                fireGhlStageWebhookFromPipeline(lead, previousStage, newStatus);
+              }
+            }, 3100);
           },
         });
       }

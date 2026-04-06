@@ -456,14 +456,24 @@ export default function AdminSchedule() {
                         )}
                       </CardHeader>
                       <CardContent className={viewMode === "week" ? "p-2 space-y-1" : "p-1 space-y-0.5"}>
-                        {dayBookings.slice(0, maxBookingsToShow).map((booking) => (
+                        {dayBookings.slice(0, maxBookingsToShow).map((booking) => {
+                          const bStatus = booking.status || '';
+                          const isPending = bStatus === 'pending';
+                          const isConfirmed = bStatus === 'confirmed';
+                          const isCancelled = bStatus === 'cancelled';
+                          return (
                           <button
                             key={booking.id}
                             onClick={() => setSelectedBooking(booking)}
-                            className={`w-full text-left ${viewMode === "week" ? "p-2" : "p-1"} rounded text-xs transition-colors border ${getStatusColor(booking.status || '')} hover:opacity-80`}
+                            className={`w-full text-left ${viewMode === "week" ? "p-2" : "p-1"} rounded text-xs transition-colors ${
+                              isPending ? "border-2 border-dashed border-amber-500" :
+                              isConfirmed ? "border-2 border-solid border-green-500" :
+                              isCancelled ? "border border-zinc-600 bg-zinc-500/20" :
+                              `border ${getStatusColor(bStatus)}`
+                            } hover:opacity-80`}
                             aria-label={`View booking for ${booking.guest_name || 'Guest'} at ${format(new Date(booking.start_datetime), "h:mm a")}`}
                           >
-                            <div className="font-medium truncate">
+                            <div className={`font-medium truncate ${isCancelled ? 'line-through text-zinc-500' : ''}`}>
                               {booking.guest_name || "Guest"}
                             </div>
                             {viewMode === "week" && (
@@ -472,13 +482,19 @@ export default function AdminSchedule() {
                                   <Clock className="h-3 w-3" />
                                   {format(new Date(booking.start_datetime), "h:mm a")}
                                 </div>
-                                <div className="text-[10px] mt-1 font-medium">
-                                  {getStatusLabel(booking.status || '')}
+                                <div className="mt-1">
+                                  {isPending && <Badge className="text-[10px] bg-amber-500 text-white px-1.5 py-0">Pending</Badge>}
+                                  {isConfirmed && <Badge className="text-[10px] bg-green-500 text-white px-1.5 py-0">Confirmed</Badge>}
+                                  {isCancelled && <Badge className="text-[10px] bg-zinc-500 text-white px-1.5 py-0">Cancelled</Badge>}
+                                  {!isPending && !isConfirmed && !isCancelled && (
+                                    <span className="text-[10px] font-medium">{getStatusLabel(bStatus)}</span>
+                                  )}
                                 </div>
                               </>
                             )}
                           </button>
-                        ))}
+                          );
+                        })}
                         {dayBookings.length > maxBookingsToShow && (
                           <Popover open={moreOpenDayKey === dayKey} onOpenChange={(open) => setMoreOpenDayKey(open ? dayKey : null)}>
                             <PopoverTrigger asChild>

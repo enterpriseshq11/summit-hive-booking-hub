@@ -339,8 +339,11 @@ export default function CareerApplicationsAdmin() {
                     ))}
                   </div>
                 ) : filteredApplications.length === 0 ? (
-                  <div className="text-center py-8 text-zinc-400">
-                    No applications found matching your criteria.
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Users className="h-12 w-12 text-zinc-600 mb-3" />
+                    <p className="font-semibold text-base text-zinc-200">No applications received yet</p>
+                    <p className="text-sm text-zinc-400 mt-1">Applications appear here when candidates apply through your public careers page.</p>
+                    <Button className="mt-4" variant="outline" onClick={() => window.open("/careers", "_blank")}>View Careers Page</Button>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">

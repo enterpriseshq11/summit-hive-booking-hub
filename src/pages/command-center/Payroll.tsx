@@ -12,7 +12,7 @@ import { usePayrollRuns, useCreatePayrollRun, useLockPayrollRun, useApprovePayro
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, addDays, startOfWeek } from "date-fns";
-import { Plus, Lock, CheckCircle, DollarSign, Download, FileJson, Eye, FileText } from "lucide-react";
+import { Plus, Lock, CheckCircle, DollarSign, Download, FileJson, Eye, FileText, CreditCard } from "lucide-react";
 import { toast as sonnerToast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -157,7 +157,12 @@ export default function Payroll() {
                 {isLoading ? (
                   <p className="text-muted-foreground">Loading...</p>
                 ) : payrollRuns.length === 0 ? (
-                  <p className="text-muted-foreground">No payroll runs found.</p>
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <CreditCard className="h-12 w-12 text-muted-foreground mb-3" />
+                    <p className="font-semibold text-base">No payroll runs yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">Create your first payroll run to process team commissions and base pay.</p>
+                    <Button className="mt-4" onClick={() => setCreateOpen(true)}><Plus className="h-4 w-4 mr-2" />Start Payroll Run</Button>
+                  </div>
                 ) : (
                   <Table>
                     <TableHeader>
