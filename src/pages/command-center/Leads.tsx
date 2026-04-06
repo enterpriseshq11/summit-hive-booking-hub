@@ -121,28 +121,37 @@ export default function CommandCenterLeads() {
       toast.error("No leads to export");
       return;
     }
-    const headers = ["Name", "Email", "Phone", "Business Unit", "Source", "Status", "Temperature", "Contact Attempts", "Last Contacted", "Assigned To", "Follow-up", "Created"];
+    // Item 38: full field export
+    const headers = ["Lead ID", "Lead Name", "Email", "Phone", "Business Unit", "Lead Source", "UTM Source", "UTM Medium", "UTM Campaign", "UTM Content", "UTM Term", "Current Stage", "Follow-Up Date", "Assigned To", "Created Date", "Last Activity Date", "Contact Attempts", "Temperature"];
     const rows = filteredLeads.map((lead) => [
+      lead.id,
       lead.lead_name || "",
       lead.email || "",
       lead.phone || "",
       lead.business_unit || "",
       lead.source || "",
+      (lead as any).utm_source || "",
+      (lead as any).utm_medium || "",
+      (lead as any).utm_campaign || "",
+      (lead as any).utm_content || "",
+      (lead as any).utm_term || "",
       lead.status || "new",
-      (lead as any).temperature || "cold",
-      String((lead as any).contact_attempts ?? 0),
-      (lead as any).last_contacted_at ? format(new Date((lead as any).last_contacted_at), "yyyy-MM-dd HH:mm") : "",
-      lead.assigned_employee ? `${lead.assigned_employee.first_name || ""} ${lead.assigned_employee.last_name || ""}`.trim() : "Unassigned",
       lead.follow_up_due ? format(new Date(lead.follow_up_due), "yyyy-MM-dd HH:mm") : "",
+      lead.assigned_employee ? `${lead.assigned_employee.first_name || ""} ${lead.assigned_employee.last_name || ""}`.trim() : "Unassigned",
       lead.created_at ? format(new Date(lead.created_at), "yyyy-MM-dd HH:mm") : "",
+      (lead as any).last_contacted_at ? format(new Date((lead as any).last_contacted_at), "yyyy-MM-dd HH:mm") : "",
+      String((lead as any).contact_attempts ?? 0),
+      (lead as any).temperature || "cold",
     ]);
-    const csvContent = "\uFEFF" + [headers, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\r\n");
+    const csvContent = "\uFEFF" + [headers, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\r\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `leads-export-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success(`Exported ${filteredLeads.length} leads`);
   };
@@ -440,10 +449,12 @@ export default function CommandCenterLeads() {
               </Button>
             ))}
           </div>
-          <Button variant="outline" size="sm" onClick={exportLeadsCSV} className="border-zinc-700 text-zinc-300">
+          <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={exportLeadsCSV} className="border-zinc-700 text-zinc-300" title={`Exports all ${filteredLeads.length} leads with complete field data including UTM tracking and contact history`}>
             <Download className="h-4 w-4 mr-1" />
             Export CSV ({filteredLeads.length})
           </Button>
+          </div>
         </div>
 
         {/* Leads Table */}
@@ -503,10 +514,10 @@ export default function CommandCenterLeads() {
                         />
                       </TableCell>
                       <TableCell>
-                        <div>
+                        <div className="max-h-[60px] overflow-hidden">
                           <div className="font-medium text-zinc-100">{lead.lead_name}</div>
                           {lead.company_name && (
-                            <div className="text-xs text-zinc-500">{lead.company_name}</div>
+                            <div className="text-xs text-zinc-500 overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>{lead.company_name}</div>
                           )}
                         </div>
                       </TableCell>
@@ -573,38 +584,37 @@ export default function CommandCenterLeads() {
                               onClick={() => navigate(`/admin/leads/${lead.id}`)}
                               className="text-zinc-100"
                             >
-                              View Details
+                              View Lead
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-zinc-700" />
+                            {/* Item 12: Assign to Team Member - inline submenu via status updates */}
+                            {employees?.map((emp) => (
+                              <DropdownMenuItem
+                                key={emp.id}
+                                onClick={() => {
+                                  updateLead.mutate({ id: lead.id, assigned_employee_id: emp.id });
+                                }}
+                                className="text-zinc-100 text-xs"
+                              >
+                                Assign → {emp.first_name} {emp.last_name}
+                              </DropdownMenuItem>
+                            ))}
+                            <DropdownMenuSeparator className="bg-zinc-700" />
+                            {statusSelectOptions.map((opt) => (
+                              <DropdownMenuItem
+                                key={opt.value}
+                                onClick={() => updateLead.mutate({ id: lead.id, status: opt.value as any })}
+                                className="text-zinc-100 text-xs"
+                              >
+                                Move → {opt.label}
+                              </DropdownMenuItem>
+                            ))}
+                            <DropdownMenuSeparator className="bg-zinc-700" />
                             <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "contact_attempted" })}
-                              className="text-zinc-100"
-                            >
-                              Mark Contact Attempted
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "responded" })}
-                              className="text-zinc-100"
-                            >
-                              Mark Responded
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "hot_lead" })}
+                              onClick={() => updateLead.mutate({ id: lead.id, status: "lost" as any })}
                               className="text-red-400"
                             >
-                              Mark Hot Lead
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "booked" })}
-                              className="text-green-400"
-                            >
-                              Mark Booked
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "lost" })}
-                              className="text-red-400"
-                            >
-                              Mark Lost
+                              Mark as Lost
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
