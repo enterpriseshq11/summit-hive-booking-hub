@@ -60,6 +60,7 @@ export default function LeadDetail() {
   const [logDuration, setLogDuration] = useState("");
   const [logOutcome, setLogOutcome] = useState("reached");
   const [followUpDate, setFollowUpDate] = useState("");
+  const [syncingGhl, setSyncingGhl] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: lead, isLoading } = useQuery({
@@ -445,7 +446,73 @@ export default function LeadDetail() {
             <Badge className={ghlStatus === "fired" ? "bg-green-500/20 text-green-400" : ghlStatus === "failed" ? "bg-red-500/20 text-red-400" : "bg-yellow-500/20 text-yellow-400"}>
               GHL: {ghlStatus === "fired" ? "Synced" : ghlStatus === "failed" ? "Failed" : "Pending"}
             </Badge>
-            {ghlStatus === "failed" && <Button variant="ghost" size="sm" className="text-red-400"><RefreshCw className="h-3 w-3 mr-1" />Resync</Button>}
+            {/* Item 11: Manual GHL sync — owner/manager only */}
+            {(isOwner || authUser?.roles?.includes("manager")) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-zinc-400 hover:text-amber-400"
+                disabled={syncingGhl}
+                onClick={async () => {
+                  setSyncingGhl(true);
+                  try {
+                    const { data: webhookConfig } = await (supabase as any)
+                      .from("ghl_webhook_config")
+                      .select("webhook_url")
+                      .eq("business_unit", lead.business_unit)
+                      .maybeSingle();
+                    if (!webhookConfig?.webhook_url) {
+                      toast.error("No GHL webhook URL configured for this business unit. Go to Settings to add it.");
+                      setSyncingGhl(false);
+                      return;
+                    }
+                    const payload = {
+                      event: "new_lead",
+                      lead_id: lead.id,
+                      lead_name: lead.lead_name,
+                      email: lead.email,
+                      phone: lead.phone,
+                      business_unit: lead.business_unit,
+                      source: lead.source,
+                      submission_timestamp: new Date().toISOString(),
+                    };
+                    const res = await fetch(webhookConfig.webhook_url, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(payload),
+                    });
+                    if (res.ok) {
+                      toast.success("GHL sync successful");
+                      await supabase.from("crm_activity_events").insert({
+                        event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+                        actor_id: authUser?.id,
+                        entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+                        event_category: "ghl_webhook_fired",
+                        metadata: { action: "manual_ghl_sync", message: `Manual GHL sync triggered by ${authUser?.profile?.first_name} ${authUser?.profile?.last_name} — ${new Date().toISOString()}` },
+                      });
+                    } else {
+                      toast.error(`GHL sync failed: HTTP ${res.status}`, { duration: Infinity });
+                      await supabase.from("crm_activity_events").insert({
+                        event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
+                        actor_id: authUser?.id,
+                        entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+                        event_category: "ghl_webhook_failed",
+                        metadata: { action: "manual_ghl_sync_failed", message: `Manual GHL sync failed — HTTP ${res.status}` },
+                      });
+                    }
+                    queryClient.invalidateQueries({ queryKey: ["lead-detail", id] });
+                    queryClient.invalidateQueries({ queryKey: ["lead-timeline", id] });
+                  } catch (err: any) {
+                    toast.error(`GHL sync failed: ${err.message}`, { duration: Infinity });
+                  } finally {
+                    setSyncingGhl(false);
+                  }
+                }}
+              >
+                {syncingGhl ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
+                Sync to GHL
+              </Button>
+            )}
           </div>
         </div>
 
