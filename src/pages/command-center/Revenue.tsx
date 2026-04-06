@@ -155,6 +155,21 @@ export default function CommandCenterRevenue() {
   return (
     <AdminLayout>
       <div className="space-y-6">
+        {/* Item 36: Zero-state banner */}
+        {!isLoading && totalRevenue === 0 && (
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 flex items-start gap-3">
+            <DollarSign className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-blue-200 font-medium text-sm">No revenue recorded yet</p>
+              <p className="text-blue-300/70 text-sm mt-1">Revenue appears automatically when Stripe payments are processed. You can also record cash and check payments manually.</p>
+              <div className="flex gap-2 mt-3">
+                <Button size="sm" variant="outline" className="border-blue-500/40 text-blue-300 hover:bg-blue-500/10" onClick={() => navigate("/admin/settings/stripe-connection")}>Connect Stripe</Button>
+                {canWrite && <Button size="sm" className="bg-blue-500 hover:bg-blue-600 text-white" onClick={() => setIsCreateOpen(true)}>Record Manual Payment</Button>}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
