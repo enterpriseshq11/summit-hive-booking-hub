@@ -118,12 +118,24 @@ export default function EmployeeDetailPage() {
   const roleColors: Record<string, string> = {
     owner: "bg-amber-500/20 text-amber-400 border-amber-500/50",
     manager: "bg-purple-500/20 text-purple-400 border-purple-500/50",
-    event_coordinator: "bg-blue-500/20 text-blue-400 border-blue-500/50",
+    sales_acquisitions: "bg-indigo-500/20 text-indigo-400 border-indigo-500/50",
     spa_lead: "bg-pink-500/20 text-pink-400 border-pink-500/50",
+    marketing_lead: "bg-orange-500/20 text-orange-400 border-orange-500/50",
+    ops_lead: "bg-teal-500/20 text-teal-400 border-teal-500/50",
+    ads_lead: "bg-violet-500/20 text-violet-400 border-violet-500/50",
+    event_coordinator: "bg-blue-500/20 text-blue-400 border-blue-500/50",
     fitness_lead: "bg-green-500/20 text-green-400 border-green-500/50",
     coworking_manager: "bg-cyan-500/20 text-cyan-400 border-cyan-500/50",
     front_desk: "bg-gray-500/20 text-gray-400 border-gray-500/50",
     read_only: "bg-zinc-500/20 text-zinc-400 border-zinc-500/50",
+  };
+
+  const roleDisplayLabels: Record<string, string> = {
+    owner: "Owner", manager: "Manager", sales_acquisitions: "Sales Acquisitions",
+    spa_lead: "Spa Lead", marketing_lead: "Marketing Lead", ops_lead: "Ops Lead",
+    ads_lead: "Ads Lead", event_coordinator: "Event Coordinator",
+    fitness_lead: "Fitness Lead", coworking_manager: "Coworking Manager",
+    front_desk: "Front Desk", read_only: "Read Only",
   };
 
   return (
@@ -151,7 +163,7 @@ export default function EmployeeDetailPage() {
               </h1>
               <div className="flex items-center gap-3 mt-1">
                 <Badge className={cn("capitalize", roleColors[role || ""] || roleColors.read_only)}>
-                  {role?.replace("_", " ") || "No Role"}
+                  {roleDisplayLabels[role || ""] || role?.replace("_", " ") || "Unassigned"}
                 </Badge>
                 {profile.email && (
                   <span className="flex items-center gap-1 text-sm text-zinc-400">
@@ -260,37 +272,47 @@ export default function EmployeeDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-1">
-                  {activityByDay.map((day, idx) => {
-                    const intensity = day.count / maxActivity;
-                    return (
-                      <div
-                        key={idx}
-                        className={cn(
-                          "w-6 h-6 rounded-sm transition-colors",
-                          day.count === 0
-                            ? "bg-zinc-800"
-                            : intensity < 0.33
-                            ? "bg-amber-500/30"
-                            : intensity < 0.66
-                            ? "bg-amber-500/60"
-                            : "bg-amber-500"
-                        )}
-                        title={`${format(day.date, "MMM d")}: ${day.count} activities`}
-                      />
-                    );
-                  })}
-                </div>
-                <div className="flex items-center justify-between mt-4 text-xs text-zinc-500">
-                  <span>Less</span>
-                  <div className="flex gap-1">
-                    <div className="w-4 h-4 rounded-sm bg-zinc-800" />
-                    <div className="w-4 h-4 rounded-sm bg-amber-500/30" />
-                    <div className="w-4 h-4 rounded-sm bg-amber-500/60" />
-                    <div className="w-4 h-4 rounded-sm bg-amber-500" />
+                {/* Item 18: empty heatmap message */}
+                {activityByDay.every((d) => d.count === 0) ? (
+                  <div className="text-center py-8">
+                    <Activity className="h-10 w-10 text-zinc-700 mx-auto mb-3" />
+                    <p className="text-zinc-500 text-sm">Activity will appear here as this team member uses the platform.</p>
                   </div>
-                  <span>More</span>
-                </div>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap gap-1">
+                      {activityByDay.map((day, idx) => {
+                        const intensity = day.count / maxActivity;
+                        return (
+                          <div
+                            key={idx}
+                            className={cn(
+                              "w-6 h-6 rounded-sm transition-colors",
+                              day.count === 0
+                                ? "bg-zinc-800"
+                                : intensity < 0.33
+                                ? "bg-amber-500/30"
+                                : intensity < 0.66
+                                ? "bg-amber-500/60"
+                                : "bg-amber-500"
+                            )}
+                            title={`${format(day.date, "MMM d")}: ${day.count} actions`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between mt-4 text-xs text-zinc-500">
+                      <span>Less</span>
+                      <div className="flex gap-1">
+                        <div className="w-4 h-4 rounded-sm bg-zinc-800" />
+                        <div className="w-4 h-4 rounded-sm bg-amber-500/30" />
+                        <div className="w-4 h-4 rounded-sm bg-amber-500/60" />
+                        <div className="w-4 h-4 rounded-sm bg-amber-500" />
+                      </div>
+                      <span>More</span>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
