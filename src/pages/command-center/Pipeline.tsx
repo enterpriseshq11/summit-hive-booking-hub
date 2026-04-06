@@ -605,6 +605,7 @@ export default function CommandCenterPipeline() {
   const toWebhookStageName = (dbStage: string) => dbStage === "won" ? "completed" : dbStage;
 
   const fireGhlStageWebhookFromPipeline = useCallback(async (lead: any, previousStage: string, newStage: string) => {
+    const { data: { user: ghlUser } } = await supabase.auth.getUser();
     // Check ghl_sync_in_progress to prevent infinite loop
     try {
       const { data: freshLead } = await supabase
@@ -613,7 +614,6 @@ export default function CommandCenterPipeline() {
         .eq("id", lead.id)
         .maybeSingle();
 
-      const { data: { user } } = await supabase.auth.getUser();
       if ((freshLead as any)?.ghl_sync_in_progress) {
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
