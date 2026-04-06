@@ -1,16 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, RefreshCw, DollarSign, Users, MousePointerClick, Eye, Download } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { TrendingUp, RefreshCw, DollarSign, Users, MousePointerClick, Eye, Download, Info, Copy, AlertTriangle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, startOfMonth, subMonths, subDays } from "date-fns";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { useNavigate } from "react-router-dom";
 
 const CHART_COLORS = ["#f59e0b", "#3b82f6", "#10b981", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
 
@@ -20,7 +23,14 @@ function formatCurrency(v: number) {
 
 export default function AdTracking() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [platformFilter, setPlatformFilter] = useState<string>("all");
+  // Item 23: date range filter
+  const [datePreset, setDatePreset] = useState<string>("this_month");
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
+  // Item 22: credential check modal
+  const [credentialModal, setCredentialModal] = useState<{ open: boolean; platform: string }>({ open: false, platform: "" });
 
   // Facebook campaigns
   const { data: fbCampaigns } = useQuery({
@@ -66,9 +76,15 @@ export default function AdTracking() {
     },
   });
 
-  // Sync mutations
+  // Item 22: check credentials before sync
   const syncFacebook = useMutation({
     mutationFn: async () => {
+      // Check credentials first
+      const { data: creds } = await supabase.from("admin_settings").select("value").eq("key", "facebook_access_token").maybeSingle();
+      if (!creds?.value) {
+        setCredentialModal({ open: true, platform: "Facebook Ads" });
+        throw new Error("Credentials not configured");
+      }
       const { error } = await supabase.functions.invoke("facebook-ads-sync");
       if (error) throw error;
     },
@@ -76,11 +92,16 @@ export default function AdTracking() {
       queryClient.invalidateQueries({ queryKey: ["facebook_ad_campaigns"] });
       toast.success("Facebook Ads synced");
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => { if (e.message !== "Credentials not configured") toast.error(e.message); },
   });
 
   const syncGoogle = useMutation({
     mutationFn: async () => {
+      const { data: creds } = await supabase.from("admin_settings").select("value").eq("key", "google_ads_api_key").maybeSingle();
+      if (!creds?.value) {
+        setCredentialModal({ open: true, platform: "Google Ads" });
+        throw new Error("Credentials not configured");
+      }
       const { error } = await supabase.functions.invoke("google-ads-sync");
       if (error) throw error;
     },
@@ -88,17 +109,35 @@ export default function AdTracking() {
       queryClient.invalidateQueries({ queryKey: ["google_ad_campaigns"] });
       toast.success("Google Ads synced");
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => { if (e.message !== "Credentials not configured") toast.error(e.message); },
   });
+
+  // Item 23: date range logic
+  const getDateRange = () => {
+    const now = new Date();
+    switch (datePreset) {
+      case "this_month": return { start: format(startOfMonth(now), "yyyy-MM-dd"), end: format(now, "yyyy-MM-dd") };
+      case "last_month": { const lm = subMonths(now, 1); return { start: format(startOfMonth(lm), "yyyy-MM-dd"), end: format(new Date(lm.getFullYear(), lm.getMonth() + 1, 0), "yyyy-MM-dd") }; }
+      case "last_30": return { start: format(subDays(now, 30), "yyyy-MM-dd"), end: format(now, "yyyy-MM-dd") };
+      case "last_90": return { start: format(subDays(now, 90), "yyyy-MM-dd"), end: format(now, "yyyy-MM-dd") };
+      case "custom": return { start: customStart, end: customEnd };
+      default: return { start: format(startOfMonth(now), "yyyy-MM-dd"), end: format(now, "yyyy-MM-dd") };
+    }
+  };
+  const dateRange = getDateRange();
 
   const allCampaigns = [
     ...(fbCampaigns || []).map((c: any) => ({ ...c, platform: "facebook" })),
     ...(googleCampaigns || []).map((c: any) => ({ ...c, platform: "google" })),
   ];
 
-  const filtered = platformFilter === "all"
-    ? allCampaigns
-    : allCampaigns.filter(c => c.platform === platformFilter);
+  const filtered = useMemo(() => {
+    let result = platformFilter === "all" ? allCampaigns : allCampaigns.filter(c => c.platform === platformFilter);
+    if (dateRange.start && dateRange.end) {
+      result = result.filter(c => c.date >= dateRange.start && c.date <= dateRange.end);
+    }
+    return result;
+  }, [allCampaigns, platformFilter, dateRange.start, dateRange.end]);
 
   const fbLastSync = fbCampaigns?.[0]?.synced_at;
   const googleLastSync = googleCampaigns?.[0]?.synced_at;
@@ -249,9 +288,28 @@ export default function AdTracking() {
 
         {/* Campaign Performance Table */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
             <h2 className="text-lg font-semibold text-white">Campaign Performance</h2>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Item 23: Date presets */}
+              {["this_month", "last_month", "last_30", "last_90", "custom"].map((preset) => (
+                <Button
+                  key={preset}
+                  variant={datePreset === preset ? "default" : "outline"}
+                  size="sm"
+                  className={datePreset === preset ? "bg-amber-500 text-black hover:bg-amber-600" : "border-zinc-700 text-zinc-400"}
+                  onClick={() => setDatePreset(preset)}
+                >
+                  {preset === "this_month" ? "This Month" : preset === "last_month" ? "Last Month" : preset === "last_30" ? "Last 30 Days" : preset === "last_90" ? "Last 90 Days" : "Custom"}
+                </Button>
+              ))}
+              {datePreset === "custom" && (
+                <div className="flex items-center gap-2">
+                  <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} className="w-36 bg-zinc-800 border-zinc-700 text-zinc-100 h-8 text-xs" />
+                  <span className="text-zinc-500">to</span>
+                  <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} className="w-36 bg-zinc-800 border-zinc-700 text-zinc-100 h-8 text-xs" />
+                </div>
+              )}
               <Select value={platformFilter} onValueChange={setPlatformFilter}>
                 <SelectTrigger className="w-36 bg-zinc-800 border-zinc-700 text-zinc-100">
                   <SelectValue />
@@ -341,7 +399,22 @@ export default function AdTracking() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-zinc-500 text-center py-8">No lead data for this month yet</p>
+                <div className="text-center py-8">
+                  <Info className="h-10 w-10 text-zinc-600 mx-auto mb-3" />
+                  <p className="text-zinc-300 font-medium text-sm mb-2">No lead source data this month yet</p>
+                  <p className="text-zinc-500 text-xs max-w-md mx-auto mb-3">
+                    Lead sources populate automatically when leads come in through your intake forms. To track ad performance, add UTM parameters to your ad links.
+                  </p>
+                  <div className="bg-zinc-800 rounded px-3 py-2 mx-auto max-w-md text-left mb-3">
+                    <code className="text-amber-400 text-xs">yoursite.com/intake/summit?utm_source=facebook&amp;utm_campaign=spring-promo</code>
+                  </div>
+                  <Button size="sm" variant="outline" className="border-zinc-700 text-zinc-300" onClick={() => {
+                    navigator.clipboard.writeText("yoursite.com/intake/summit?utm_source=facebook&utm_campaign=spring-promo");
+                    toast.success("Example URL copied to clipboard");
+                  }}>
+                    <Copy className="h-3.5 w-3.5 mr-1" /> Copy Example URL
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>
