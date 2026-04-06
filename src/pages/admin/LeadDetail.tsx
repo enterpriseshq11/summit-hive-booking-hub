@@ -287,8 +287,35 @@ export default function LeadDetail() {
       event_category: "stage_changed",
       metadata: { previous_stage: previousStage, new_stage: newStage },
     });
-    await fireGhlStageWebhook(previousStage, newStage);
-    toast.success(`Moved to ${newStage.replace(/_/g, " ")}`);
+
+    // Item 30: Undo toast with delayed GHL webhook
+    let isReverted = false;
+    toast(`${lead.lead_name} moved to ${STAGE_LABELS[newStage] || newStage}`, {
+      duration: 3000,
+      action: {
+        label: "Undo",
+        onClick: async () => {
+          isReverted = true;
+          await supabase.from("crm_leads").update({ status: previousStage }).eq("id", id!);
+          await supabase.from("crm_activity_events").insert({
+            event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
+            actor_id: authUser?.id,
+            entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
+            event_category: "stage_changed",
+            metadata: { previous_stage: newStage, new_stage: previousStage, action: "undo_revert" },
+          });
+          queryClient.invalidateQueries({ queryKey: ["lead-detail", id] });
+          queryClient.invalidateQueries({ queryKey: ["lead-timeline", id] });
+          toast.success("Stage change reverted");
+        },
+      },
+    });
+    // Delay GHL webhook to allow undo
+    setTimeout(() => {
+      if (!isReverted) {
+        fireGhlStageWebhook(previousStage, newStage);
+      }
+    }, 3100);
   };
 
   const markAsLost = async () => {
