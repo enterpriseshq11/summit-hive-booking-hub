@@ -211,7 +211,22 @@ export default function MobileHomesInventory() {
               {isLoading ? (
                 <TableRow><TableCell colSpan={9} className="text-center text-zinc-500 py-8">Loading...</TableCell></TableRow>
               ) : items.length === 0 ? (
-                <TableRow><TableCell colSpan={9} className="text-center text-zinc-500 py-8">No properties yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="py-12">
+                  <div className="flex flex-col items-center justify-center">
+                    <Home className="h-12 w-12 text-zinc-600 mb-3" />
+                    <p className="font-semibold text-base text-zinc-200">No properties in inventory yet</p>
+                    <p className="text-sm text-zinc-400 mt-1">Add your first property to track acquisition costs, renovation expenses, and sale profits.</p>
+                    <Button className="mt-4 bg-amber-500 text-black hover:bg-amber-400" onClick={() => {
+                      setEditItem({
+                        id: "", property_address: "", status: "In Renovation", purchase_price: 0,
+                        renovation_cost: 0, renovation_line_items: [], list_price: null, sale_price: null,
+                        gross_profit: null, date_purchased: null, date_listed: null, date_sold: null,
+                        assigned_agent: "Mark Leugers", notes: null,
+                      });
+                      setShowNew(true);
+                    }}><Plus className="h-4 w-4 mr-2" />Add Property</Button>
+                  </div>
+                </TableCell></TableRow>
               ) : items.map((item) => (
                 <TableRow key={item.id} className="border-zinc-800 hover:bg-zinc-800/50 cursor-pointer" onClick={() => setEditItem(item)}>
                   <TableCell className="text-white font-medium">{item.property_address}</TableCell>
