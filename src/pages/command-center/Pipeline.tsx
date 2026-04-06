@@ -105,19 +105,29 @@ function LeadCard({ lead, isDragging, showPriority }: LeadCardProps) {
   const depositOvd = isDepositOverdue(lead);
   const priority = calculatePriorityScore(lead);
 
+  const cardStyle = {
+    ...style,
+    boxShadow: followUpOverdue ? "0 0 8px rgba(239, 68, 68, 0.4)" : undefined,
+  };
+
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={cardStyle}
       className={cn(
-        "bg-zinc-800 border rounded-lg p-3 cursor-pointer hover:border-amber-500/50 transition-colors",
+        "bg-zinc-800 rounded-lg p-3 cursor-pointer transition-colors relative group",
         isDragging && "opacity-50",
-        isNew && "border-amber-500/70 ring-1 ring-amber-500/30",
-        followUpOverdue && "border-red-500/70 ring-1 ring-red-500/30",
-        stalledHot && !followUpOverdue && "border-orange-500/70 ring-1 ring-orange-500/30",
-        depositOvd && !followUpOverdue && "border-purple-500/70 ring-1 ring-purple-500/30",
-        followUpToday && !isNew && !followUpOverdue && "border-yellow-500/60",
-        !isNew && !followUpToday && !followUpOverdue && !stalledHot && !depositOvd && "border-zinc-700"
+        followUpOverdue
+          ? "border border-zinc-700 border-l-[3px] border-l-red-500"
+          : isNew
+          ? "border border-amber-500/70 ring-1 ring-amber-500/30"
+          : stalledHot
+          ? "border border-orange-500/70 ring-1 ring-orange-500/30"
+          : depositOvd
+          ? "border border-purple-500/70 ring-1 ring-purple-500/30"
+          : followUpToday && !isNew
+          ? "border border-yellow-500/60"
+          : "border border-zinc-700 hover:border-amber-500/50"
       )}
       onClick={() => navigate(`/admin/leads/${lead.id}`)}
     >
@@ -186,10 +196,10 @@ function LeadCard({ lead, isDragging, showPriority }: LeadCardProps) {
             )}
           </div>
 
-          {/* Flags */}
+          {/* Flags — Item 8: overdue badge red bg + white text */}
           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
             {followUpOverdue && (
-              <Badge variant="outline" className="text-[10px] border-red-600/50 text-red-400 px-1.5 py-0">
+              <Badge className="text-[10px] bg-red-500 text-white px-1.5 py-0 border-0">
                 Follow Up Overdue
               </Badge>
             )}
@@ -217,6 +227,32 @@ function LeadCard({ lead, isDragging, showPriority }: LeadCardProps) {
             </div>
           )}
         </div>
+      </div>
+      {/* Item 13: Hover action bar */}
+      <div
+        className={cn(
+          "absolute bottom-0 left-0 right-0 h-9 bg-black/70 rounded-b-lg flex items-center justify-evenly transition-opacity",
+          "opacity-0 group-hover:opacity-100",
+          // Touch devices: always show
+          "@[pointer:coarse]:opacity-100"
+        )}
+        style={{ pointerEvents: "auto" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="text-zinc-300 hover:text-amber-400 p-1.5"
+          title="Log Contact"
+          onClick={(e) => { e.stopPropagation(); /* TODO: open log modal */ }}
+        >
+          <Phone className="h-4 w-4" />
+        </button>
+        <button
+          className="text-zinc-300 hover:text-amber-400 p-1.5"
+          title="View Full Detail"
+          onClick={(e) => { e.stopPropagation(); navigate(`/admin/leads/${lead.id}`); }}
+        >
+          <FileText className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
@@ -325,7 +361,7 @@ function TodaysActionsPanel({ leads, tasks }: { leads: any[]; tasks: any[] }) {
 
   const sections = [
     { title: "New Leads (Not Contacted)", items: newNotContacted, color: "border-l-zinc-500", icon: <Target className="h-3.5 w-3.5 text-zinc-400" /> },
-    { title: "Follow Ups Overdue", items: followUpsOverdue, color: "border-l-red-500", icon: <AlertTriangle className="h-3.5 w-3.5 text-red-400" /> },
+    { title: "Follow Ups Overdue", items: followUpsOverdue, color: "border-l-red-500", icon: <AlertTriangle className="h-3.5 w-3.5 text-red-400" />, isOverdue: true },
     { title: "Follow Ups Due Today", items: followUpsToday, color: "border-l-yellow-500", icon: <Clock className="h-3.5 w-3.5 text-yellow-400" /> },
     { title: "Hot Leads (No Contact 24h)", items: hotNotContacted24h, color: "border-l-red-500", icon: <Flame className="h-3.5 w-3.5 text-red-400" /> },
     { title: "Deposit Pending", items: depositPending, color: "border-l-amber-500", icon: <DollarSign className="h-3.5 w-3.5 text-amber-400" /> },
@@ -333,6 +369,10 @@ function TodaysActionsPanel({ leads, tasks }: { leads: any[]; tasks: any[] }) {
   ];
 
   const [expanded, setExpanded] = useState(true);
+
+  // Item 9: overdue count color logic
+  const overdueCount = followUpsOverdue.length;
+  const overdueColor = overdueCount === 0 ? "text-green-500" : overdueCount <= 5 ? "text-amber-500" : "text-red-500";
 
   return (
     <Card className="bg-zinc-900 border-zinc-800">
@@ -347,6 +387,12 @@ function TodaysActionsPanel({ leads, tasks }: { leads: any[]; tasks: any[] }) {
       </CardHeader>
       {expanded && (
         <CardContent className="px-4 pb-4 pt-0 space-y-3">
+          {/* Item 9: Prominent overdue count */}
+          <div className="text-center py-2">
+            <div className={cn("text-[32px] font-bold leading-none", overdueColor)}>{overdueCount}</div>
+            <div className="text-[13px] text-zinc-400 mt-1">Follow Ups Overdue</div>
+          </div>
+          <Separator className="bg-zinc-800" />
           {sections.map((section) => (
             <div key={section.title}>
               <div className="flex items-center gap-2 mb-1.5">
@@ -361,7 +407,11 @@ function TodaysActionsPanel({ leads, tasks }: { leads: any[]; tasks: any[] }) {
                   {section.items.slice(0, 5).map((lead) => (
                     <div
                       key={lead.id}
-                      className={cn("border-l-2 pl-2 py-1 cursor-pointer hover:bg-zinc-800/50 rounded-r", section.color)}
+                      className={cn(
+                        "border-l-2 pl-2 py-1 cursor-pointer hover:bg-zinc-800/50 rounded-r",
+                        // Item 8: red left border for overdue leads in sidebar
+                        (section as any).isOverdue ? "border-l-red-500" : section.color
+                      )}
                       onClick={() => navigate(`/admin/leads/${lead.id}`)}
                     >
                       <div className="text-xs text-zinc-200">{lead.lead_name}</div>
@@ -789,6 +839,9 @@ export default function CommandCenterPipeline() {
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
+              {/* Item 34: mobile scroll hint gradient */}
+              <div className="relative">
+              <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-zinc-950 to-transparent pointer-events-none z-10 md:hidden" />
               <div className="flex gap-3 overflow-x-auto pb-4">
                 {pipelineStages.map((stage) => (
                   <PipelineColumn
@@ -800,6 +853,7 @@ export default function CommandCenterPipeline() {
                     showPriority={sortBy === "priority"}
                   />
                 ))}
+              </div>
               </div>
               <DragOverlay>{activeLead ? <LeadCard lead={activeLead} showPriority={sortBy === "priority"} /> : null}</DragOverlay>
             </DndContext>
