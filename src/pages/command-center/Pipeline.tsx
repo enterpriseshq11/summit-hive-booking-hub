@@ -617,7 +617,7 @@ export default function CommandCenterPipeline() {
       if ((freshLead as any)?.ghl_sync_in_progress) {
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
-          actor_id: user?.id,
+          actor_id: ghlUser?.id,
           metadata: {
             action: "ghl_webhook_skipped",
             message: `GHL webhook skipped — inbound sync in progress, preventing loop`,
@@ -636,7 +636,7 @@ export default function CommandCenterPipeline() {
       if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
-          actor_id: user?.id,
+          actor_id: ghlUser?.id,
           metadata: {
             action: "ghl_webhook_skipped",
             message: `GHL webhook skipped — no URL configured or inactive for ${STAGE_LABELS[newStage] || newStage} stage`,
@@ -670,7 +670,7 @@ export default function CommandCenterPipeline() {
       const statusText = `HTTP ${res.status}`;
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
-        actor_id: user?.id,
+        actor_id: ghlUser?.id,
         metadata: {
           action: res.ok ? "ghl_webhook_fired" : "ghl_webhook_failed",
           message: `GHL webhook ${res.ok ? "fired" : "FAILED"} — stage moved to ${STAGE_LABELS[newStage] || newStage} — ${statusText}`,
@@ -691,7 +691,7 @@ export default function CommandCenterPipeline() {
     } catch (err: any) {
       await supabase.from("crm_activity_events").insert({
         event_type: "lead_updated" as any, entity_type: "lead", entity_id: lead.id,
-        actor_id: user?.id,
+        actor_id: ghlUser?.id,
         metadata: {
           action: "ghl_webhook_failed",
           message: `GHL webhook FAILED — stage moved to ${STAGE_LABELS[newStage] || newStage} — Error: ${err.message}`,
