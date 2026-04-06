@@ -12,7 +12,7 @@ import { usePayrollRuns, useCreatePayrollRun, useLockPayrollRun, useApprovePayro
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, addDays, startOfWeek } from "date-fns";
-import { Plus, Lock, CheckCircle, DollarSign, Download, FileJson, Eye, FileText } from "lucide-react";
+import { Plus, Lock, CheckCircle, DollarSign, Download, FileJson, Eye, FileText, CreditCard } from "lucide-react";
 import { toast as sonnerToast } from "sonner";
 
 const statusColors: Record<string, string> = {
