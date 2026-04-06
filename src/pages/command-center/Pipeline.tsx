@@ -729,13 +729,30 @@ export default function CommandCenterPipeline() {
               ? "warm"
               : undefined;
 
+        // Item 30: Undo toast with delayed GHL webhook
+        let isReverted = false;
         updateLead.mutate({
           id: leadId,
           status: newStatus,
           ...(autoTemp ? { temperature: autoTemp } : {}),
         } as any, {
           onSuccess: () => {
-            fireGhlStageWebhookFromPipeline(lead, previousStage, newStatus);
+            toast(`${lead.lead_name} moved to ${STAGE_LABELS[newStatus] || newStatus}`, {
+              duration: 3000,
+              action: {
+                label: "Undo",
+                onClick: async () => {
+                  isReverted = true;
+                  updateLead.mutate({ id: leadId, status: previousStage } as any);
+                  toast.success("Stage change reverted");
+                },
+              },
+            });
+            setTimeout(() => {
+              if (!isReverted) {
+                fireGhlStageWebhookFromPipeline(lead, previousStage, newStatus);
+              }
+            }, 3100);
           },
         });
       }
