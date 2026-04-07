@@ -225,13 +225,58 @@ serve(async (req) => {
 
     const previousStageLabel = STAGE_LABELS[previousStage] || previousStage;
     const newStageLabel = STAGE_LABELS[newStage] || newStage;
+    const ghlContactId = typeof effectiveLead.ghl_contact_id === "string" && effectiveLead.ghl_contact_id.trim().length > 0
+      ? effectiveLead.ghl_contact_id.trim()
+      : null;
+
+    if (!ghlContactId) {
+      const message = "Lead is missing a linked GHL contact ID. Backfill or relink the contact before syncing stages.";
+
+      await admin.from("crm_activity_events").insert({
+        event_type: "lead_updated",
+        actor_id: user.id,
+        entity_type: "lead",
+        entity_id: effectiveLead.id,
+        entity_name: effectiveLead.lead_name,
+        event_category: "ghl_webhook_failed",
+        metadata: {
+          action: "ghl_webhook_failed",
+          message,
+          previous_stage: previousStage,
+          new_stage: newStage,
+          contact_id: null,
+        },
+      });
+
+      await admin
+        .from("lead_intake_submissions")
+        .update({
+          ghl_webhook_status: "failed",
+          ghl_webhook_response: message,
+          ghl_webhook_fired_at: null,
+        })
+        .eq("lead_id", effectiveLead.id);
+
+      return new Response(JSON.stringify({ success: false, error: message }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const payload = {
       event: "pipeline_stage_changed",
       trigger_source: "a_z_command",
       lead_id: effectiveLead.id,
-      contact_id: effectiveLead.ghl_contact_id,
-      contactId: effectiveLead.ghl_contact_id,
+      id: ghlContactId,
+      contact_id: ghlContactId,
+      contactId: ghlContactId,
+      ghl_contact_id: ghlContactId,
+      contact: {
+        id: ghlContactId,
+        name: effectiveLead.lead_name,
+        email: effectiveLead.email,
+        phone: effectiveLead.phone,
+      },
       lead_name: effectiveLead.lead_name,
       name: effectiveLead.lead_name,
       email: effectiveLead.email,
@@ -248,7 +293,6 @@ serve(async (req) => {
       stage_name: newStageLabel,
       assigned_to: assignedTo,
       source: effectiveLead.source,
-      ghl_contact_id: effectiveLead.ghl_contact_id,
       timestamp: new Date().toISOString(),
     };
 
@@ -260,9 +304,6 @@ serve(async (req) => {
 
     const responseText = await ghlResponse.text();
     const parsedResponse = responseText ? parseMaybeJson(responseText) : `HTTP ${ghlResponse.status}`;
-    const contactId = typeof parsedResponse === "object" && parsedResponse
-      ? (parsedResponse.contact_id || parsedResponse.contactId || parsedResponse.id || null)
-      : null;
     const webhookStatus = getOutboundWebhookStatus(ghlResponse.ok);
 
     const intakeStatusPayload = {
@@ -287,16 +328,6 @@ serve(async (req) => {
       });
     }
 
-    const leadPatch: Record<string, string> = {};
-
-    if (contactId && !effectiveLead.ghl_contact_id) {
-      leadPatch.ghl_contact_id = contactId;
-    }
-
-    if (Object.keys(leadPatch).length > 0) {
-      await admin.from("crm_leads").update(leadPatch).eq("id", effectiveLead.id);
-    }
-
     await admin.from("crm_activity_events").insert({
       event_type: "lead_updated",
       actor_id: user.id,
@@ -311,7 +342,7 @@ serve(async (req) => {
         new_stage: newStage,
         http_status: ghlResponse.status,
         response: parsedResponse,
-        contact_id: effectiveLead.ghl_contact_id,
+        contact_id: ghlContactId,
       },
     });
 
@@ -332,7 +363,7 @@ serve(async (req) => {
       success: ghlResponse.ok,
       status: effectiveLead.status,
       ghlStatus: webhookStatus,
-      contactId,
+      contactId: ghlContactId,
       response: parsedResponse,
     }), {
       status: 200,
