@@ -87,10 +87,10 @@ const FUTURE_INTEGRATION_GROUPS = [
 ];
 
 function StatusBadge({ status }: { status: string | null }) {
-  if (!status || status === "never_fired") return <Badge variant="outline" className="border-zinc-600 text-zinc-500 text-xs">Never Fired</Badge>;
+  if (!status || status === "never_fired") return <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">Never Fired</Badge>;
   if (status === "success" || status === "fired") return <Badge className="bg-green-500/20 text-green-400 text-xs"><CheckCircle className="h-3 w-3 mr-1" />Success</Badge>;
   if (status === "failed") return <Badge className="bg-red-500/20 text-red-400 text-xs"><XCircle className="h-3 w-3 mr-1" />Failed</Badge>;
-  return <Badge variant="outline" className="border-zinc-600 text-zinc-500 text-xs">{status}</Badge>;
+  return <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">{status}</Badge>;
 }
 
 export default function AdminIntegrations() {
@@ -250,7 +250,7 @@ export default function AdminIntegrations() {
                       <h3 className="font-medium text-white">{UNIT_LABELS[config.business_unit] || config.business_unit} — Webhook URL</h3>
                       <div className="flex items-center gap-2">
                         <Switch checked={config.is_active} onCheckedChange={v => updateConfig(config.id, { is_active: v })} />
-                        <span className="text-xs text-zinc-400">{config.is_active ? "Active" : "Disabled"}</span>
+                        <span className="text-xs text-zinc-300">{config.is_active ? "Active" : "Disabled"}</span>
                       </div>
                     </div>
                     <Input value={config.webhook_url || ""} onChange={e => updateConfig(config.id, { webhook_url: e.target.value })} className="bg-zinc-800 border-zinc-700 text-white font-mono text-sm" placeholder="https://services.leadconnectorhq.com/hooks/..." />
@@ -268,8 +268,8 @@ export default function AdminIntegrations() {
                       )}
                       <div className="flex items-center gap-2 ml-auto">
                         <StatusBadge status={config.last_status} />
-                        {config.last_fired_at && (
-                          <span className="text-xs text-zinc-500 flex items-center gap-1">
+                         {config.last_fired_at && (
+                          <span className="text-xs text-zinc-300 flex items-center gap-1">
                             <Clock className="h-3 w-3" /> {format(new Date(config.last_fired_at), "MMM d 'at' h:mm a")}
                           </span>
                         )}
@@ -306,7 +306,7 @@ export default function AdminIntegrations() {
                         <TestTube className="h-3 w-3 mr-1" /> Test
                       </Button>
                       <StatusBadge status={sw.last_status} />
-                      {sw.last_fired_at && <span className="text-xs text-zinc-500 ml-auto">{format(new Date(sw.last_fired_at), "MMM d h:mm a")}</span>}
+                      {sw.last_fired_at && <span className="text-xs text-zinc-300 ml-auto">{format(new Date(sw.last_fired_at), "MMM d h:mm a")}</span>}
                     </div>
                   </div>
                 ))}
