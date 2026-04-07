@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { LeadIntakeForm } from "@/components/booking/LeadIntakeForm";
 import {
   SUMMIT_FIELDS, SPA_FIELDS, FITNESS_FIELDS, HIVE_FIELDS,
-  VOICE_VAULT_FIELDS, ELEVATED_FIELDS,
+  VOICE_VAULT_FIELDS, ELEVATED_FIELDS, MOBILE_HOMES_FIELDS,
 } from "@/config/intakeFormConfigs";
 
 const UNIT_CONFIG: Record<string, {
@@ -67,6 +67,15 @@ const UNIT_CONFIG: Record<string, {
     brandColor: "pink",
     contactPhone: "[ELEVATED_PHONE]",
     contactEmail: "[ELEVATED_EMAIL]",
+  },
+  "mobile-homes": {
+    businessUnit: "mobile_homes",
+    title: "A-Z Mobile Homes",
+    description: "Buy, sell, transport, or renovate. We'll be in touch within 24 hours.",
+    fields: MOBILE_HOMES_FIELDS,
+    brandColor: "emerald",
+    contactPhone: "(419) 738-8811",
+    contactEmail: "dylan@a-zenterpriseshq.com",
   },
 };
 
