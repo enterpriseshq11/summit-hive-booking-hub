@@ -3,7 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 const STAGE_LABELS: Record<string, string> = {
@@ -47,18 +48,27 @@ serve(async (req) => {
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
   if (!supabaseUrl || !serviceRoleKey || !anonKey) {
-    return new Response(JSON.stringify({ success: false, error: "Backend configuration is incomplete" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Backend configuration is incomplete",
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
-    return new Response(JSON.stringify({ success: false, error: "Missing authorization" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: false, error: "Missing authorization" }),
+      {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 
   const userClient = createClient(supabaseUrl, anonKey, {
@@ -77,36 +87,52 @@ serve(async (req) => {
     } = await userClient.auth.getUser();
 
     if (userError || !user) {
-      return new Response(JSON.stringify({ success: false, error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ success: false, error: "Unauthorized" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const body = await req.json().catch(() => ({}));
     const leadId = typeof body?.leadId === "string" ? body.leadId : "";
-    const previousStage = typeof body?.previousStage === "string" ? body.previousStage : "";
+    const previousStage = typeof body?.previousStage === "string"
+      ? body.previousStage
+      : "";
     const newStage = typeof body?.newStage === "string" ? body.newStage : "";
     const skipWebhook = body?.skipWebhook === true;
 
     if (!leadId || !previousStage || !newStage) {
-      return new Response(JSON.stringify({ success: false, error: "leadId, previousStage, and newStage are required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "leadId, previousStage, and newStage are required",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     const { data: lead, error: leadError } = await admin
       .from("crm_leads")
-      .select("id, lead_name, email, phone, business_unit, source, status, assigned_employee_id, ghl_contact_id, ghl_sync_in_progress")
+      .select(
+        "id, lead_name, email, phone, business_unit, source, status, assigned_employee_id, ghl_contact_id, ghl_sync_in_progress",
+      )
       .eq("id", leadId)
       .maybeSingle();
 
     if (leadError || !lead) {
-      return new Response(JSON.stringify({ success: false, error: "Lead not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ success: false, error: "Lead not found" }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     let effectiveLead = lead;
@@ -116,14 +142,22 @@ serve(async (req) => {
         .from("crm_leads")
         .update({ status: newStage })
         .eq("id", leadId)
-        .select("id, lead_name, email, phone, business_unit, source, status, assigned_employee_id, ghl_contact_id, ghl_sync_in_progress")
+        .select(
+          "id, lead_name, email, phone, business_unit, source, status, assigned_employee_id, ghl_contact_id, ghl_sync_in_progress",
+        )
         .maybeSingle();
 
       if (updateError || !updatedLead) {
-        return new Response(JSON.stringify({ success: false, error: updateError?.message || "Lead stage update failed" }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: updateError?.message || "Lead stage update failed",
+          }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
       }
 
       effectiveLead = updatedLead;
@@ -141,10 +175,17 @@ serve(async (req) => {
     }
 
     if (skipWebhook) {
-      return new Response(JSON.stringify({ success: true, status: effectiveLead.status, skippedWebhook: true }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: effectiveLead.status,
+          skippedWebhook: true,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     if (effectiveLead.ghl_sync_in_progress) {
@@ -163,13 +204,23 @@ serve(async (req) => {
         },
       });
 
-      return new Response(JSON.stringify({ success: true, status: effectiveLead.status, skippedWebhook: true, reason: "sync_in_progress" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: effectiveLead.status,
+          skippedWebhook: true,
+          reason: "sync_in_progress",
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
-    const configBusinessUnit = getConfigBusinessUnit(effectiveLead.business_unit);
+    const configBusinessUnit = getConfigBusinessUnit(
+      effectiveLead.business_unit,
+    );
     const { data: webhookConfig } = await admin
       .from("ghl_outbound_webhook_config")
       .select("webhook_url, is_active")
@@ -178,7 +229,9 @@ serve(async (req) => {
       .maybeSingle();
 
     if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {
-      const message = `No active outbound webhook configured for ${STAGE_LABELS[newStage] || newStage}`;
+      const message = `No active outbound webhook configured for ${
+        STAGE_LABELS[newStage] || newStage
+      }`;
 
       await admin.from("crm_activity_events").insert({
         event_type: "lead_updated",
@@ -219,19 +272,69 @@ serve(async (req) => {
         .maybeSingle();
 
       if (assignedProfile) {
-        assignedTo = [assignedProfile.first_name, assignedProfile.last_name].filter(Boolean).join(" ") || null;
+        assignedTo =
+          [assignedProfile.first_name, assignedProfile.last_name].filter(
+            Boolean,
+          ).join(" ") || null;
       }
     }
 
     const previousStageLabel = STAGE_LABELS[previousStage] || previousStage;
     const newStageLabel = STAGE_LABELS[newStage] || newStage;
+    const ghlContactId = typeof effectiveLead.ghl_contact_id === "string" &&
+        effectiveLead.ghl_contact_id.trim().length > 0
+      ? effectiveLead.ghl_contact_id.trim()
+      : null;
+
+    if (!ghlContactId) {
+      const message =
+        "Lead is missing a linked GHL contact ID. Backfill or relink the contact before syncing stages.";
+
+      await admin.from("crm_activity_events").insert({
+        event_type: "lead_updated",
+        actor_id: user.id,
+        entity_type: "lead",
+        entity_id: effectiveLead.id,
+        entity_name: effectiveLead.lead_name,
+        event_category: "ghl_webhook_failed",
+        metadata: {
+          action: "ghl_webhook_failed",
+          message,
+          previous_stage: previousStage,
+          new_stage: newStage,
+          contact_id: null,
+        },
+      });
+
+      await admin
+        .from("lead_intake_submissions")
+        .update({
+          ghl_webhook_status: "failed",
+          ghl_webhook_response: message,
+          ghl_webhook_fired_at: null,
+        })
+        .eq("lead_id", effectiveLead.id);
+
+      return new Response(JSON.stringify({ success: false, error: message }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const payload = {
       event: "pipeline_stage_changed",
       trigger_source: "a_z_command",
       lead_id: effectiveLead.id,
-      contact_id: effectiveLead.ghl_contact_id,
-      contactId: effectiveLead.ghl_contact_id,
+      id: ghlContactId,
+      contact_id: ghlContactId,
+      contactId: ghlContactId,
+      ghl_contact_id: ghlContactId,
+      contact: {
+        id: ghlContactId,
+        name: effectiveLead.lead_name,
+        email: effectiveLead.email,
+        phone: effectiveLead.phone,
+      },
       lead_name: effectiveLead.lead_name,
       name: effectiveLead.lead_name,
       email: effectiveLead.email,
@@ -248,7 +351,6 @@ serve(async (req) => {
       stage_name: newStageLabel,
       assigned_to: assignedTo,
       source: effectiveLead.source,
-      ghl_contact_id: effectiveLead.ghl_contact_id,
       timestamp: new Date().toISOString(),
     };
 
@@ -259,10 +361,9 @@ serve(async (req) => {
     });
 
     const responseText = await ghlResponse.text();
-    const parsedResponse = responseText ? parseMaybeJson(responseText) : `HTTP ${ghlResponse.status}`;
-    const contactId = typeof parsedResponse === "object" && parsedResponse
-      ? (parsedResponse.contact_id || parsedResponse.contactId || parsedResponse.id || null)
-      : null;
+    const parsedResponse = responseText
+      ? parseMaybeJson(responseText)
+      : `HTTP ${ghlResponse.status}`;
     const webhookStatus = getOutboundWebhookStatus(ghlResponse.ok);
 
     const intakeStatusPayload = {
@@ -287,31 +388,25 @@ serve(async (req) => {
       });
     }
 
-    const leadPatch: Record<string, string> = {};
-
-    if (contactId && !effectiveLead.ghl_contact_id) {
-      leadPatch.ghl_contact_id = contactId;
-    }
-
-    if (Object.keys(leadPatch).length > 0) {
-      await admin.from("crm_leads").update(leadPatch).eq("id", effectiveLead.id);
-    }
-
     await admin.from("crm_activity_events").insert({
       event_type: "lead_updated",
       actor_id: user.id,
       entity_type: "lead",
       entity_id: effectiveLead.id,
       entity_name: effectiveLead.lead_name,
-      event_category: ghlResponse.ok ? "ghl_webhook_accepted" : "ghl_webhook_failed",
+      event_category: ghlResponse.ok
+        ? "ghl_webhook_accepted"
+        : "ghl_webhook_failed",
       metadata: {
         action: ghlResponse.ok ? "ghl_webhook_accepted" : "ghl_webhook_failed",
-        message: `GHL webhook ${ghlResponse.ok ? "accepted" : "FAILED"} — ${newStageLabel} — HTTP ${ghlResponse.status}`,
+        message: `GHL webhook ${
+          ghlResponse.ok ? "accepted" : "FAILED"
+        } — ${newStageLabel} — HTTP ${ghlResponse.status}`,
         previous_stage: previousStage,
         new_stage: newStage,
         http_status: ghlResponse.status,
         response: parsedResponse,
-        contact_id: effectiveLead.ghl_contact_id,
+        contact_id: ghlContactId,
       },
     });
 
@@ -319,7 +414,9 @@ serve(async (req) => {
       await admin.from("crm_alerts").insert({
         alert_type: "ghl_webhook_failed",
         title: `GHL webhook failed for ${effectiveLead.lead_name}`,
-        description: `Stage ${STAGE_LABELS[newStage] || newStage} webhook returned HTTP ${ghlResponse.status}`,
+        description: `Stage ${
+          STAGE_LABELS[newStage] || newStage
+        } webhook returned HTTP ${ghlResponse.status}`,
         entity_type: "lead",
         entity_id: effectiveLead.id,
         source_filter: effectiveLead.source || null,
@@ -328,16 +425,19 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({
-      success: ghlResponse.ok,
-      status: effectiveLead.status,
-      ghlStatus: webhookStatus,
-      contactId,
-      response: parsedResponse,
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        success: ghlResponse.ok,
+        status: effectiveLead.status,
+        ghlStatus: webhookStatus,
+        contactId: ghlContactId,
+        response: parsedResponse,
+      }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
 
