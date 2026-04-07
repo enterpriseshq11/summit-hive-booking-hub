@@ -2765,6 +2765,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ghl_outbound_webhook_config: {
+        Row: {
+          business_unit: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          stage_key: string
+          stage_label: string
+          updated_at: string
+          webhook_url: string
+        }
+        Insert: {
+          business_unit?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          stage_key: string
+          stage_label: string
+          updated_at?: string
+          webhook_url: string
+        }
+        Update: {
+          business_unit?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          stage_key?: string
+          stage_label?: string
+          updated_at?: string
+          webhook_url?: string
+        }
+        Relationships: []
+      }
       ghl_pipeline_stage_webhooks: {
         Row: {
           created_at: string | null
