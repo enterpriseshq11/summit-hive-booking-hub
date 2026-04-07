@@ -128,10 +128,10 @@ serve(async (req) => {
               const cd = JSON.parse(createText);
               ghlContactId = cd?.contact?.id || null;
             } catch (_) {}
-          } else if (createRes.status === 422) {
+          } else if (createRes.status === 422 || createRes.status === 400) {
             try {
               const errJson = JSON.parse(createText);
-              ghlContactId = errJson?.contact?.id || errJson?.contactId || null;
+              ghlContactId = errJson?.contact?.id || errJson?.contactId || errJson?.meta?.contactId || null;
             } catch (_) {}
           }
         }
