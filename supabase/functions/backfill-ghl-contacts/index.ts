@@ -40,12 +40,12 @@ serve(async (req) => {
   } catch (_) {}
 
   try {
-    // Fetch all leads missing ghl_contact_id that have an email
     const { data: leads, error } = await supabase
       .from("crm_leads")
       .select("id, lead_name, email, phone, business_unit")
       .is("ghl_contact_id", null)
       .not("email", "is", null)
+      .neq("email", "")
       .order("created_at", { ascending: true })
       .limit(batchLimit);
 
@@ -61,35 +61,47 @@ serve(async (req) => {
     for (const lead of leads) {
       const result: any = { leadId: lead.id, name: lead.lead_name, email: lead.email };
       try {
-        // Step 1: Find or create contact
+        if (!lead.email || lead.email.trim() === "") {
+          result.status = "skipped";
+          result.reason = "No email";
+          results.push(result);
+          continue;
+        }
+
         const nameParts = (lead.lead_name || "").split(" ");
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
 
-        // Search by email
+        // Step 1: Search for contact using lookup endpoint
         let ghlContactId: string | null = null;
-        const searchRes = await fetch(`${GHL_API_BASE}/contacts/search`, {
-          method: "POST",
+
+        const searchUrl = `${GHL_API_BASE}/contacts/?locationId=${ghlLocationId}&query=${encodeURIComponent(lead.email)}`;
+        log("Searching GHL", { url: searchUrl });
+        const searchRes = await fetch(searchUrl, {
+          method: "GET",
           headers: {
             Authorization: `Bearer ${ghlApiKey}`,
             Version: "2021-07-28",
-            "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            locationId: ghlLocationId,
-            filters: [{ field: "email", operator: "eq", value: lead.email }],
-          }),
         });
 
+        const searchText = await searchRes.text();
+        log("Search response", { status: searchRes.status, body: searchText.substring(0, 500) });
+
         if (searchRes.ok) {
-          const sd = await searchRes.json();
-          if (sd?.contacts?.length > 0) {
-            ghlContactId = sd.contacts[0].id;
-          }
+          try {
+            const sd = JSON.parse(searchText);
+            const contacts = sd?.contacts || [];
+            if (contacts.length > 0) {
+              ghlContactId = contacts[0].id;
+              log("Found existing contact", { ghlContactId });
+            }
+          } catch (_) {}
         }
 
         // Create if not found
         if (!ghlContactId) {
+          log("Creating contact", { email: lead.email });
           const createRes = await fetch(`${GHL_API_BASE}/contacts/`, {
             method: "POST",
             headers: {
@@ -108,13 +120,17 @@ serve(async (req) => {
             }),
           });
 
+          const createText = await createRes.text();
+          log("Create response", { status: createRes.status, body: createText.substring(0, 500) });
+
           if (createRes.ok) {
-            const cd = await createRes.json();
-            ghlContactId = cd?.contact?.id || null;
-          } else if (createRes.status === 422) {
-            // Duplicate — try to extract ID
             try {
-              const errJson = await createRes.json();
+              const cd = JSON.parse(createText);
+              ghlContactId = cd?.contact?.id || null;
+            } catch (_) {}
+          } else if (createRes.status === 422) {
+            try {
+              const errJson = JSON.parse(createText);
               ghlContactId = errJson?.contact?.id || errJson?.contactId || null;
             } catch (_) {}
           }
@@ -134,12 +150,9 @@ serve(async (req) => {
         // Step 2: Create opportunity
         const pipelineId = PIPELINE_MAP[lead.business_unit] || PIPELINE_MAP["coworking"];
 
-        // Get first stage of pipeline
         const pipelineRes = await fetch(
           `${GHL_API_BASE}/opportunities/pipelines?locationId=${ghlLocationId}`,
-          {
-            headers: { Authorization: `Bearer ${ghlApiKey}`, Version: "2021-07-28" },
-          }
+          { headers: { Authorization: `Bearer ${ghlApiKey}`, Version: "2021-07-28" } }
         );
 
         let stageId: string | null = null;
@@ -147,9 +160,7 @@ serve(async (req) => {
           const pd = await pipelineRes.json();
           const pipeline = pd?.pipelines?.find((p: any) => p.id === pipelineId);
           if (pipeline?.stages?.length > 0) {
-            const newLeadStage = pipeline.stages.find(
-              (s: any) => s.name?.toLowerCase().includes("new")
-            );
+            const newLeadStage = pipeline.stages.find((s: any) => s.name?.toLowerCase().includes("new"));
             stageId = newLeadStage?.id || pipeline.stages[0].id;
           }
         }
@@ -172,16 +183,14 @@ serve(async (req) => {
               source: "A-Z Command Backfill",
             }),
           });
-
           result.opportunityCreated = oppRes.ok;
           if (!oppRes.ok) {
-            result.oppError = await oppRes.text();
+            result.oppError = (await oppRes.text()).substring(0, 300);
           }
         }
 
         result.status = "success";
 
-        // Log activity
         await supabase.from("crm_activity_events").insert({
           event_type: "lead_updated" as any,
           entity_type: "lead",
@@ -194,8 +203,6 @@ serve(async (req) => {
         result.error = e instanceof Error ? e.message : String(e);
       }
       results.push(result);
-
-      // Rate limit: small delay between leads
       await new Promise((r) => setTimeout(r, 500));
     }
 
@@ -210,8 +217,7 @@ serve(async (req) => {
     const msg = error instanceof Error ? error.message : String(error);
     log("ERROR", { message: msg });
     return new Response(JSON.stringify({ success: false, error: msg }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
