@@ -122,6 +122,17 @@ serve(async (req) => {
       }
 
       effectiveLead = updatedLead;
+
+      // Log stage change activity
+      await admin.from("crm_activity_events").insert({
+        event_type: "lead_status_changed",
+        actor_id: user.id,
+        entity_type: "lead",
+        entity_id: leadId,
+        entity_name: effectiveLead.lead_name,
+        event_category: "stage_changed",
+        metadata: { previous_stage: previousStage, new_stage: newStage },
+      });
     }
 
     if (skipWebhook) {
