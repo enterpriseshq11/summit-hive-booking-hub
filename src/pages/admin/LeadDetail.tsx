@@ -201,43 +201,32 @@ export default function LeadDetail() {
     const newStage = PIPELINE_STAGES[newIdx];
     if (newStage === "lost") { setShowLostDialog(true); return; }
     const previousStage = lead.status || "new";
-    await updateLeadMutation.mutateAsync({ status: newStage });
-    await supabase.from("crm_activity_events").insert({
-      event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
-      actor_id: authUser?.id,
-      entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
-      event_category: "stage_changed",
-      metadata: { previous_stage: previousStage, new_stage: newStage },
-    });
 
-    // Item 30: Undo toast with delayed GHL webhook
-    let isReverted = false;
-    toast(`${lead.lead_name} moved to ${STAGE_LABELS[newStage] || newStage}`, {
-      duration: 3000,
-      action: {
-        label: "Undo",
-        onClick: async () => {
-          isReverted = true;
-          await supabase.from("crm_leads").update({ status: previousStage }).eq("id", id!);
-          await supabase.from("crm_activity_events").insert({
-            event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
-            actor_id: authUser?.id,
-            entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
-            event_category: "stage_changed",
-            metadata: { previous_stage: newStage, new_stage: previousStage, action: "undo_revert" },
-          });
-          queryClient.invalidateQueries({ queryKey: ["lead-detail", id] });
-          queryClient.invalidateQueries({ queryKey: ["lead-timeline", id] });
-          toast.success("Stage change reverted");
+    try {
+      // Use edge function for both DB update and GHL sync (bypasses RLS)
+      await fireGhlStageWebhook(previousStage, newStage);
+
+      // Item 30: Undo toast with delayed finality
+      let isReverted = false;
+      toast(`${lead.lead_name} moved to ${STAGE_LABELS[newStage] || newStage}`, {
+        duration: 3000,
+        action: {
+          label: "Undo",
+          onClick: async () => {
+            isReverted = true;
+            // Revert via edge function too
+            try {
+              await fireGhlStageWebhook(newStage, previousStage);
+              toast.success("Stage change reverted");
+            } catch {
+              toast.error("Failed to revert stage");
+            }
+          },
         },
-      },
-    });
-    // Delay GHL webhook to allow undo
-    setTimeout(() => {
-      if (!isReverted) {
-        fireGhlStageWebhook(previousStage, newStage);
-      }
-    }, 3100);
+      });
+    } catch (err: any) {
+      toast.error("Failed to update stage: " + (err.message || "Unknown error"));
+    }
   };
 
   const markAsLost = async () => {
@@ -606,15 +595,12 @@ export default function LeadDetail() {
                 <Select value={lead.status || "new"} onValueChange={async (v) => {
                   if (v === "lost") { setShowLostDialog(true); } else {
                     const previousStage = lead.status || "new";
-                    await updateLeadMutation.mutateAsync({ status: v });
-                    await supabase.from("crm_activity_events").insert({
-                      event_type: "stage_changed" as any, entity_type: "lead", entity_id: id!,
-                      actor_id: authUser?.id,
-                      entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
-                      metadata: { previous_stage: previousStage, new_stage: v },
-                    });
-                    await fireGhlStageWebhook(previousStage, v);
-                    toast.success(`Moved to ${v.replace(/_/g, " ")}`);
+                    try {
+                      await fireGhlStageWebhook(previousStage, v);
+                      toast.success(`Moved to ${STAGE_LABELS[v] || v.replace(/_/g, " ")}`);
+                    } catch (err: any) {
+                      toast.error("Failed to update stage: " + (err.message || "Unknown error"));
+                    }
                   }
                 }}>
                   <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
