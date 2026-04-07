@@ -602,12 +602,10 @@ export default function CommandCenterPipeline() {
   };
 
   // Map DB enum value → ghl_pipeline_stage_webhooks.stage_name
-  // The webhook table uses "completed" while the DB enum uses "won"
-  const toWebhookStageName = (dbStage: string) => dbStage === "won" ? "completed" : dbStage;
+  const getConfigBusinessUnit = (bu: string) => bu === "mobile_homes" ? "mobile_homes" : "default";
 
   const fireGhlStageWebhookFromPipeline = useCallback(async (lead: any, previousStage: string, newStage: string) => {
     const { data: { user: ghlUser } } = await supabase.auth.getUser();
-    // Check ghl_sync_in_progress to prevent infinite loop
     try {
       const { data: freshLead } = await supabase
         .from("crm_leads")
@@ -627,11 +625,12 @@ export default function CommandCenterPipeline() {
         return;
       }
 
-      const webhookStageName = toWebhookStageName(newStage);
+      const configBU = getConfigBusinessUnit(lead.business_unit);
       const { data: webhookConfig } = await (supabase as any)
-        .from("ghl_pipeline_stage_webhooks")
+        .from("ghl_outbound_webhook_config")
         .select("webhook_url, is_active")
-        .eq("stage_name", webhookStageName)
+        .eq("stage_key", newStage)
+        .eq("business_unit", configBU)
         .maybeSingle();
 
       if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {

@@ -107,7 +107,7 @@ export default function AdminIntegrations() {
   const loadAll = async () => {
     const [{ data: c }, { data: s }] = await Promise.all([
       supabase.from("ghl_webhook_config").select("*").order("business_unit"),
-      supabase.from("ghl_pipeline_stage_webhooks").select("*").order("stage_name"),
+      (supabase as any).from("ghl_outbound_webhook_config").select("*").order("stage_key"),
     ]);
     setConfigs((c as any) || []);
     setStageWebhooks((s as any) || []);
@@ -175,7 +175,7 @@ export default function AdminIntegrations() {
 
   const saveStageWebhook = async (sw: PipelineStageWebhook) => {
     setSaving(sw.id);
-    const { error } = await supabase.from("ghl_pipeline_stage_webhooks")
+    const { error } = await (supabase as any).from("ghl_outbound_webhook_config")
       .update({ webhook_url: sw.webhook_url, is_active: sw.is_active })
       .eq("id", sw.id);
     if (error) toast.error("Failed: " + error.message);
@@ -201,7 +201,7 @@ export default function AdminIntegrations() {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
       });
       const newStatus = res.ok ? "success" : "failed";
-      await supabase.from("ghl_pipeline_stage_webhooks")
+      await (supabase as any).from("ghl_outbound_webhook_config")
         .update({ last_tested_at: new Date().toISOString(), last_fired_at: new Date().toISOString(), last_status: newStatus })
         .eq("id", sw.id);
       if (res.ok) toast.success("Test successful!");
