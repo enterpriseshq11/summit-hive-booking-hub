@@ -584,27 +584,7 @@ serve(async (req) => {
             metadata: { action: "spa_checkout_completed", service_type: serviceType, amount: amountDollars, client_email: clientEmail },
           });
 
-          // Fire GHL webhook
-          try {
-            const { data: ghlConfig } = await supabase
-              .from("ghl_outbound_webhook_config")
-              .select("webhook_url")
-              .eq("stage_key", "booked")
-              .eq("business_unit", "default")
-              .eq("is_active", true)
-              .maybeSingle();
-            if (ghlConfig?.webhook_url) {
-              await fetch(ghlConfig.webhook_url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  lead_name: clientName, email: clientEmail, phone: clientPhone,
-                  business_unit: "spa", new_stage_key: "booked", new_stage_name: "Booked",
-                  service_type: serviceType, amount: amountDollars, timestamp: new Date().toISOString(),
-                }),
-              });
-            }
-          } catch (ghlErr) { logStep("GHL webhook error (spa)", { error: String(ghlErr) }); }
+          // Legacy GHL webhook removed — stage sync now handled via direct API in sync-ghl-stage
 
           // Send notification emails via edge function
           try {
@@ -663,27 +643,7 @@ serve(async (req) => {
             source: "website",
           });
 
-          // Fire GHL webhook
-          try {
-            const { data: ghlConfig } = await supabase
-              .from("ghl_outbound_webhook_config")
-              .select("webhook_url")
-              .eq("stage_key", "booked")
-              .eq("business_unit", "default")
-              .eq("is_active", true)
-              .maybeSingle();
-            if (ghlConfig?.webhook_url) {
-              await fetch(ghlConfig.webhook_url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  lead_name: clientName, email: clientEmail, phone: clientPhone,
-                  business_unit: "fitness", new_stage_key: "booked", new_stage_name: "Booked",
-                  membership_type: membershipType, amount: amountDollars, timestamp: new Date().toISOString(),
-                }),
-              });
-            }
-          } catch (ghlErr) { logStep("GHL webhook error (fitness)", { error: String(ghlErr) }); }
+          // Legacy GHL webhook removed — stage sync now handled via direct API in sync-ghl-stage
 
           // Send notifications
           try {

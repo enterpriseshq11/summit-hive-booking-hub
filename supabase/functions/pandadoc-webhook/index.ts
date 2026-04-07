@@ -69,69 +69,7 @@ serve(async (req) => {
               .update({ status: "deposit_pending" })
               .eq("id", lead.id);
 
-            // Fire GHL webhook for deposit_pending stage
-            if (!lead.ghl_sync_in_progress) {
-              try {
-                const { data: webhookConfig } = await supabase
-                   .from("ghl_outbound_webhook_config")
-                   .select("webhook_url, is_active")
-                   .eq("stage_key", "deposit_pending")
-                   .eq("business_unit", "default")
-                   .maybeSingle();
-
-                if (webhookConfig?.webhook_url && webhookConfig.is_active) {
-                  const ghlRes = await fetch(webhookConfig.webhook_url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      event: "pipeline_stage_changed",
-                      lead_id: lead.id,
-                      lead_name: lead.lead_name,
-                      business_unit: lead.business_unit,
-                      previous_stage_key: "contract_sent",
-                      previous_stage_name: "Contract Out",
-                      new_stage_key: "deposit_pending",
-                      new_stage_name: "Deposit Received",
-                      trigger: "pandadoc_signed",
-                      timestamp: new Date().toISOString(),
-                    }),
-                  });
-
-                  const statusText = `HTTP ${ghlRes.status}`;
-                  await supabase.from("crm_activity_events").insert({
-                    event_type: "lead_updated" as any,
-                    entity_type: "lead",
-                    entity_id: lead.id,
-                    metadata: {
-                      action: ghlRes.ok ? "ghl_webhook_fired" : "ghl_webhook_failed",
-                      message: `GHL webhook ${ghlRes.ok ? "fired" : "FAILED"} — stage moved to Deposit Received — ${statusText}`,
-                    },
-                  });
-                } else {
-                  await supabase.from("crm_activity_events").insert({
-                    event_type: "lead_updated" as any,
-                    entity_type: "lead",
-                    entity_id: lead.id,
-                    metadata: {
-                      action: "ghl_webhook_skipped",
-                      message: "GHL webhook skipped — no URL configured or inactive for deposit_pending stage",
-                    },
-                  });
-                }
-              } catch (e) {
-                logStep("GHL webhook failed", { error: String(e) });
-                await supabase.from("crm_activity_events").insert({
-                  event_type: "lead_updated" as any,
-                  entity_type: "lead",
-                  entity_id: lead.id,
-                  metadata: {
-                    action: "ghl_webhook_failed",
-                    message: `GHL webhook FAILED — Error: ${String(e)}`,
-                  },
-                });
-              }
-            } else {
-              logStep("GHL webhook skipped — ghl_sync_in_progress is true", { leadId: lead.id });
+            // Legacy GHL webhook removed — stage sync now handled via direct API in sync-ghl-stage
             }
           }
 

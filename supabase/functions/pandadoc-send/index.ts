@@ -137,32 +137,7 @@ serve(async (req) => {
             .eq("id", lead_id);
         }
 
-        // Fire GHL webhook for contract_sent stage
-        try {
-          const { data: webhookConfig } = await supabase
-            .from("ghl_outbound_webhook_config")
-            .select("webhook_url, is_active")
-            .eq("stage_key", "contract_sent")
-            .eq("business_unit", "default")
-            .maybeSingle();
-
-          if (webhookConfig?.webhook_url && webhookConfig.is_active) {
-            await fetch(webhookConfig.webhook_url, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                lead_id,
-                lead_name: lead?.lead_name,
-                new_stage_key: "contract_sent",
-                new_stage_name: "Contract Out",
-                trigger: "pandadoc_contract_sent",
-                timestamp: new Date().toISOString(),
-              }),
-            });
-          }
-        } catch (e) {
-          logStep("GHL webhook failed", { error: String(e) });
-        }
+        // Legacy GHL webhook removed — stage sync now handled via direct API in sync-ghl-stage
       }
 
       return new Response(JSON.stringify({ document_id: documentId, status: "sent" }), {
