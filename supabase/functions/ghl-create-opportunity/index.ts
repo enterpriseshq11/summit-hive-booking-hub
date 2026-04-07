@@ -118,6 +118,43 @@ serve(async (req) => {
       );
     }
 
+    // Check if opportunity already exists for this contact in this pipeline
+    const searchRes = await fetch(
+      `${GHL_API}/opportunities/search?location_id=${ghlLocationId}&pipeline_id=${pipelineId}&contact_id=${ghlContactId}`,
+      { headers: { "Authorization": `Bearer ${ghlApiKey}`, "Version": "2021-07-28" } },
+    );
+
+    if (searchRes.ok) {
+      const searchData = await searchRes.json();
+      const existing = (searchData?.opportunities || []).find(
+        (o: any) => o.pipelineId === pipelineId && o.contact?.id === ghlContactId
+      );
+      if (existing) {
+        log("Opportunity already exists, skipping creation", { opportunityId: existing.id, pipelineId });
+        // Log activity
+        await supabase.from("crm_activity_events").insert({
+          event_type: "lead_updated" as any,
+          entity_type: "lead",
+          entity_id: leadId,
+          event_category: "ghl_opportunity_exists",
+          metadata: {
+            action: "ghl_opportunity_already_exists",
+            description: `GHL opportunity already exists — ID: ${existing.id}`,
+            ghl_opportunity_id: existing.id,
+            pipeline_id: pipelineId,
+            business_unit: businessUnit,
+          },
+        });
+        return new Response(
+          JSON.stringify({ success: true, opportunity_id: existing.id, pipeline_id: pipelineId, already_existed: true }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    } else {
+      const errText = await searchRes.text();
+      log("Opportunity search failed, will attempt creation", { status: searchRes.status, error: errText });
+    }
+
     log("Creating opportunity", { ghlContactId, pipelineId, stageId, leadName });
 
     const oppRes = await fetch(`${GHL_API}/opportunities/`, {
@@ -140,6 +177,14 @@ serve(async (req) => {
     const oppText = await oppRes.text();
 
     if (!oppRes.ok) {
+      // Handle duplicate error gracefully
+      if (oppRes.status === 400 && oppText.includes("duplicate")) {
+        log("Duplicate opportunity detected via 400, treating as success", { ghlContactId, pipelineId });
+        return new Response(
+          JSON.stringify({ success: true, already_existed: true, note: "Duplicate detected by GHL" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
       log("Opportunity creation failed", { status: oppRes.status, error: oppText });
       return new Response(
         JSON.stringify({ success: false, error: `GHL opportunity creation failed: ${oppText}` }),
