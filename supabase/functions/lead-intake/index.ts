@@ -198,6 +198,7 @@ Deno.serve(async (req) => {
           headers: ghlHeaders,
           body: JSON.stringify({
             locationId: ghlLocationId,
+            pageLimit: 1,
             filters: [{ field: "email", operator: "eq", value: email }],
           }),
         });
