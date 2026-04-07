@@ -129,12 +129,11 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         pipelineId,
-        stageId,
+        pipelineStageId: stageId,
         locationId: ghlLocationId,
         contactId: ghlContactId,
         name: leadName,
         status: "open",
-        source: "A-Z Command",
       }),
     });
 
