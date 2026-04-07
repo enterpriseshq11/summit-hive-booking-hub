@@ -604,7 +604,18 @@ export default function CommandCenterLeads() {
                             {statusSelectOptions.map((opt) => (
                               <DropdownMenuItem
                                 key={opt.value}
-                                onClick={() => updateLead.mutate({ id: lead.id, status: opt.value as any })}
+                                onClick={() => {
+                                  const prev = lead.status || "new";
+                                  supabase.functions.invoke("sync-ghl-stage", {
+                                    body: { leadId: lead.id, previousStage: prev, newStage: opt.value, skipWebhook: false },
+                                  }).then(({ data, error }) => {
+                                    if (error || !data?.success) {
+                                      toast.error("Failed to update stage");
+                                    } else {
+                                      toast.success(`Moved to ${opt.label}`);
+                                    }
+                                  });
+                                }}
                                 className="text-zinc-100 text-xs"
                               >
                                 Move → {opt.label}
@@ -612,7 +623,18 @@ export default function CommandCenterLeads() {
                             ))}
                             <DropdownMenuSeparator className="bg-zinc-700" />
                             <DropdownMenuItem
-                              onClick={() => updateLead.mutate({ id: lead.id, status: "lost" as any })}
+                              onClick={() => {
+                                const prev = lead.status || "new";
+                                supabase.functions.invoke("sync-ghl-stage", {
+                                  body: { leadId: lead.id, previousStage: prev, newStage: "lost", skipWebhook: false },
+                                }).then(({ data, error }) => {
+                                  if (error || !data?.success) {
+                                    toast.error("Failed to mark as lost");
+                                  } else {
+                                    toast.success("Marked as Lost");
+                                  }
+                                });
+                              }}
                               className="text-red-400"
                             >
                               Mark as Lost
