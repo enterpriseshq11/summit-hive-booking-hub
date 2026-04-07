@@ -168,3 +168,40 @@ export const ELEVATED_FIELDS: FormFieldConfig[] = [
     ],
   },
 ];
+
+export const MOBILE_HOMES_FIELDS: FormFieldConfig[] = [
+  {
+    name: "interest_type", label: "What are you interested in?", type: "select", required: true,
+    options: [
+      { value: "buy_home", label: "Buy a Mobile Home" },
+      { value: "sell_home", label: "Sell a Mobile Home" },
+      { value: "transport", label: "Mobile Home Transport" },
+      { value: "renovation", label: "Renovation Services" },
+      { value: "lot_rental", label: "Lot Rental" },
+      { value: "general_inquiry", label: "General Inquiry" },
+    ],
+  },
+  {
+    name: "timeline", label: "Timeline", type: "select", required: true,
+    options: [
+      { value: "asap", label: "As soon as possible" },
+      { value: "1_month", label: "Within 1 month" },
+      { value: "1_3_months", label: "1-3 months" },
+      { value: "3_6_months", label: "3-6 months" },
+      { value: "just_exploring", label: "Just exploring" },
+    ],
+  },
+  {
+    name: "budget_range", label: "Budget Range", type: "select",
+    options: [
+      { value: "under_10k", label: "Under $10,000" },
+      { value: "10k_25k", label: "$10,000-$25,000" },
+      { value: "25k_50k", label: "$25,000-$50,000" },
+      { value: "50k_75k", label: "$50,000-$75,000" },
+      { value: "75k_plus", label: "$75,000+" },
+      { value: "prefer_not", label: "Prefer Not to Say" },
+    ],
+  },
+  { name: "location", label: "Property Location / City", type: "text", placeholder: "City, State or Address" },
+  { name: "notes", label: "Additional Details", type: "textarea", placeholder: "Tell us about your situation..." },
+];
