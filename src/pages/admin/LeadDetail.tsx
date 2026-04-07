@@ -164,7 +164,11 @@ export default function LeadDetail() {
     booked: "Booked", won: "Completed", completed: "Completed", lost: "Lost",
   };
 
-  const fireGhlStageWebhook = async (previousStage: string, newStage: string) => {
+  const fireGhlStageWebhook = async (
+    previousStage: string,
+    newStage: string,
+    options?: { skipWebhook?: boolean },
+  ) => {
     if (!lead) return;
 
     const { data, error } = await supabase.functions.invoke("sync-ghl-stage", {
@@ -172,6 +176,7 @@ export default function LeadDetail() {
         leadId: lead.id,
         previousStage,
         newStage,
+        skipWebhook: options?.skipWebhook ?? false,
       },
     });
 
