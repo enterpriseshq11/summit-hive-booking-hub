@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/components/admin";
 import { useCrmLeads, useUpdateCrmLead } from "@/hooks/useCrmLeads";
+import { useSyncLeadStage } from "@/hooks/useSyncLeadStage";
 import { supabase } from "@/integrations/supabase/client";
 import { useTodaysTasks, useUpdateLeadTask } from "@/hooks/useCrmLeadTasks";
 import { Badge } from "@/components/ui/badge";
@@ -507,6 +508,7 @@ export default function CommandCenterPipeline() {
   const { data: leads, isLoading } = useCrmLeads();
   const { data: todayTasks } = useTodaysTasks();
   const updateLead = useUpdateCrmLead();
+  const syncStage = useSyncLeadStage();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("priority");
@@ -729,30 +731,14 @@ export default function CommandCenterPipeline() {
               ? "warm"
               : undefined;
 
-        // Item 30: Undo toast with delayed GHL webhook
-        let isReverted = false;
-        updateLead.mutate({
-          id: leadId,
-          status: newStatus,
-          ...(autoTemp ? { temperature: autoTemp } : {}),
-        } as any, {
+        // Use sync-ghl-stage edge function for reliable persistence + GHL sync
+        syncStage.mutate({
+          leadId,
+          previousStage: previousStage || "new",
+          newStage: newStatus,
+        }, {
           onSuccess: () => {
-            toast(`${lead.lead_name} moved to ${STAGE_LABELS[newStatus] || newStatus}`, {
-              duration: 3000,
-              action: {
-                label: "Undo",
-                onClick: async () => {
-                  isReverted = true;
-                  updateLead.mutate({ id: leadId, status: previousStage } as any);
-                  toast.success("Stage change reverted");
-                },
-              },
-            });
-            setTimeout(() => {
-              if (!isReverted) {
-                fireGhlStageWebhookFromPipeline(lead, previousStage, newStatus);
-              }
-            }, 3100);
+            toast.success(`${lead.lead_name} moved to ${STAGE_LABELS[newStatus] || newStatus}`);
           },
         });
       }
