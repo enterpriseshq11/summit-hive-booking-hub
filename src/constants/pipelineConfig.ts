@@ -39,9 +39,8 @@ export const statusColors: Record<CrmLeadStatus, string> = {
 };
 
 /** Pipeline stages in display order — canonical 11 stages
- * NOTE: The DB enum uses "won" for Completed and "completed" is stored in
- * ghl_pipeline_stage_webhooks. The pipeline board maps "won" → "Completed"
- * display label. The GHL webhook table uses "completed" as stage_name.
+ * The DB enum uses "won" for Completed. The outbound webhook config table
+ * (ghl_outbound_webhook_config) uses stage_key matching DB enum values directly.
  */
 export const pipelineStages: { status: CrmLeadStatus; label: string; borderColor: string }[] = [
   { status: "new", label: "New Lead", borderColor: "border-zinc-500" },

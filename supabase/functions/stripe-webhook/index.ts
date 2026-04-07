@@ -587,10 +587,10 @@ serve(async (req) => {
           // Fire GHL webhook
           try {
             const { data: ghlConfig } = await supabase
-              .from("ghl_pipeline_stage_webhooks")
+              .from("ghl_outbound_webhook_config")
               .select("webhook_url")
-              .eq("stage_name", "booked")
-              .eq("business_unit", "spa")
+              .eq("stage_key", "booked")
+              .eq("business_unit", "default")
               .eq("is_active", true)
               .maybeSingle();
             if (ghlConfig?.webhook_url) {
@@ -666,10 +666,10 @@ serve(async (req) => {
           // Fire GHL webhook
           try {
             const { data: ghlConfig } = await supabase
-              .from("ghl_pipeline_stage_webhooks")
+              .from("ghl_outbound_webhook_config")
               .select("webhook_url")
-              .eq("stage_name", "booked")
-              .eq("business_unit", "fitness")
+              .eq("stage_key", "booked")
+              .eq("business_unit", "default")
               .eq("is_active", true)
               .maybeSingle();
             if (ghlConfig?.webhook_url) {

@@ -22,6 +22,7 @@ const businessIcons: Record<BusinessType, React.ComponentType<{
   photo_booth: Building2,
   voice_vault: Building2,
   elevated_by_elyse: Sparkles,
+  mobile_homes: Building2,
 };
 const businessRoutes: Record<BusinessType, string> = {
   summit: "/summit",
@@ -31,6 +32,7 @@ const businessRoutes: Record<BusinessType, string> = {
   photo_booth: "/photo-booth",
   voice_vault: "/voice-vault",
   elevated_by_elyse: "/elevated-by-elyse",
+  mobile_homes: "/admin/business/mobile-homes",
 };
 const businessLabels: Record<BusinessType, string> = {
   summit: "The Summit",
@@ -40,6 +42,7 @@ const businessLabels: Record<BusinessType, string> = {
   photo_booth: "360 Photo Booth",
   voice_vault: "Voice Vault",
   elevated_by_elyse: "Elevated by Elyse",
+  mobile_homes: "A-Z Estates",
 };
 const businessDescriptions: Record<BusinessType, string> = {
   summit: "Premium Event Venue",
@@ -49,6 +52,7 @@ const businessDescriptions: Record<BusinessType, string> = {
   photo_booth: "360 Photo Booth Rental",
   voice_vault: "Podcast Studio",
   elevated_by_elyse: "Styling + Personal Shopping",
+  mobile_homes: "Mobile Home Sales + Renovation",
 };
 
 // BOOKNOW-06: Best For one-liners
@@ -60,6 +64,7 @@ const businessBestFor: Record<BusinessType, string> = {
   photo_booth: "Best for: Weddings, parties, corporate events",
   voice_vault: "Best for: Podcast recording, voiceovers, content creation",
   elevated_by_elyse: "Best for: Bridal styling, event styling, wardrobe edits",
+  mobile_homes: "Best for: Mobile home buyers, investors, renovators",
 };
 const businessTags: Record<BusinessType, string[]> = {
   summit: ["Weddings", "Corporate", "Celebrations"],
@@ -69,6 +74,7 @@ const businessTags: Record<BusinessType, string[]> = {
   photo_booth: ["360", "Events", "Add-on"],
   voice_vault: ["Recording", "Podcasts"],
   elevated_by_elyse: ["Styling", "Bridal", "Fashion"],
+  mobile_homes: ["Sales", "Renovation", "Transport"],
 };
 
 // BOOKNOW-07: Deposit/pricing badges
@@ -102,6 +108,10 @@ const businessBadges: Record<BusinessType, {
   },
   elevated_by_elyse: {
     text: "Consultation required",
+    type: "info"
+  },
+  mobile_homes: {
+    text: "Contact for pricing",
     type: "info"
   }
 };

@@ -154,9 +154,8 @@ export default function LeadDetail() {
     booked: "Booked", won: "Completed", completed: "Completed", lost: "Lost",
   };
 
-  // Map DB enum value → ghl_pipeline_stage_webhooks.stage_name
-  // The webhook table uses "completed" while the DB enum uses "won"
-  const toWebhookStageName = (dbStage: string) => dbStage === "won" ? "completed" : dbStage;
+  // Map lead business_unit to outbound config business_unit
+  const getConfigBusinessUnit = (bu: string) => bu === "mobile_homes" ? "mobile_homes" : "default";
 
   const fireGhlStageWebhook = async (previousStage: string, newStage: string) => {
     if (!lead) return;
@@ -179,11 +178,12 @@ export default function LeadDetail() {
         return;
       }
 
-      const webhookStageName = toWebhookStageName(newStage);
+      const configBU = getConfigBusinessUnit(lead.business_unit);
       const { data: webhookConfig } = await (supabase as any)
-        .from("ghl_pipeline_stage_webhooks")
+        .from("ghl_outbound_webhook_config")
         .select("webhook_url, is_active")
-        .eq("stage_name", webhookStageName)
+        .eq("stage_key", newStage)
+        .eq("business_unit", configBU)
         .maybeSingle();
 
       if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {

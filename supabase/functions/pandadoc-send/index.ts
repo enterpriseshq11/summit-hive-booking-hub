@@ -140,9 +140,10 @@ serve(async (req) => {
         // Fire GHL webhook for contract_sent stage
         try {
           const { data: webhookConfig } = await supabase
-            .from("ghl_pipeline_stage_webhooks")
+            .from("ghl_outbound_webhook_config")
             .select("webhook_url, is_active")
-            .eq("stage_name", "contract_sent")
+            .eq("stage_key", "contract_sent")
+            .eq("business_unit", "default")
             .maybeSingle();
 
           if (webhookConfig?.webhook_url && webhookConfig.is_active) {
