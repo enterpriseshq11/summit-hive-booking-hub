@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/admin";
 import { useCrmLeads, useCreateCrmLead, useUpdateCrmLead, useBulkUpdateLeads, type CrmLeadWithRelations } from "@/hooks/useCrmLeads";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCrmEmployees } from "@/hooks/useCrmEmployees";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
