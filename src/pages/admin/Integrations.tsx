@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -94,6 +95,7 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 export default function AdminIntegrations() {
+  const navigate = useNavigate();
   const [configs, setConfigs] = useState<GhlConfig[]>([]);
   const [stageWebhooks, setStageWebhooks] = useState<PipelineStageWebhook[]>([]);
   const [loading, setLoading] = useState(true);
@@ -378,20 +380,20 @@ export default function AdminIntegrations() {
               <CardContent>
                 <div className="flex items-center justify-between p-4 border border-zinc-700 rounded-lg bg-zinc-800/50">
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <CreditCard className="h-6 w-6 text-purple-400" />
+                    <div className="h-12 w-12 rounded-lg bg-green-500/10 flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-green-400" />
                     </div>
                     <div>
                       <p className="text-white font-medium">Stripe</p>
-                      <Badge className="bg-amber-500/20 text-amber-400 text-xs">Pending Connection — Phase 2</Badge>
+                      <Badge className="bg-green-500/20 text-green-400 text-xs"><CheckCircle className="h-3 w-3 mr-1" />Connected</Badge>
                     </div>
                   </div>
-                  <Button variant="outline" className="border-zinc-700 text-zinc-300" disabled>
-                    Connect Stripe Account
+                  <Button variant="outline" className="border-zinc-600 text-zinc-200 hover:bg-zinc-700" onClick={() => navigate("/admin/settings/stripe-connection")}>
+                    Manage Stripe Settings
                   </Button>
                 </div>
                 <p className="text-zinc-300 text-sm mt-3">
-                  Stripe integration will be wired in Phase 2. Connection status, last sync timestamp, and disconnect/reconnect controls will appear here.
+                  Stripe is connected. Manage webhook configuration, business unit mappings, and transaction logs from the Stripe settings page.
                 </p>
               </CardContent>
             </Card>
