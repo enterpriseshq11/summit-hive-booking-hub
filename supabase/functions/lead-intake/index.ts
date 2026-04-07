@@ -266,6 +266,28 @@ Deno.serve(async (req) => {
           });
 
           console.log("[lead-intake] ghl_contact_id saved to lead", lead.id);
+
+          // Create GHL Opportunity for this contact
+          try {
+            const supabaseFunctionsUrl = `${supabaseUrl}/functions/v1/ghl-create-opportunity`;
+            const oppRes = await fetch(supabaseFunctionsUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${serviceKey}`,
+              },
+              body: JSON.stringify({
+                leadId: lead.id,
+                ghlContactId: ghlContactId,
+                leadName: `${first_name} ${last_name}`,
+                businessUnit: business_unit,
+              }),
+            });
+            const oppData = await oppRes.json();
+            console.log("[lead-intake] GHL opportunity result:", JSON.stringify(oppData));
+          } catch (oppErr) {
+            console.error("[lead-intake] GHL opportunity creation error:", oppErr);
+          }
         } else {
           console.log("[lead-intake] Could not obtain GHL contact ID for lead", lead.id);
         }
