@@ -46,7 +46,8 @@ serve(async (req) => {
       .select("id, lead_name, email, phone, business_unit")
       .is("ghl_contact_id", null)
       .not("email", "is", null)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(batchLimit);
 
     if (error) throw error;
     if (!leads || leads.length === 0) {
