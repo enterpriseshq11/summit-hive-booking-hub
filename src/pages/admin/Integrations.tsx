@@ -87,10 +87,10 @@ const FUTURE_INTEGRATION_GROUPS = [
 ];
 
 function StatusBadge({ status }: { status: string | null }) {
-  if (!status || status === "never_fired") return <Badge variant="outline" className="border-zinc-600 text-zinc-500 text-xs">Never Fired</Badge>;
+  if (!status || status === "never_fired") return <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">Never Fired</Badge>;
   if (status === "success" || status === "fired") return <Badge className="bg-green-500/20 text-green-400 text-xs"><CheckCircle className="h-3 w-3 mr-1" />Success</Badge>;
   if (status === "failed") return <Badge className="bg-red-500/20 text-red-400 text-xs"><XCircle className="h-3 w-3 mr-1" />Failed</Badge>;
-  return <Badge variant="outline" className="border-zinc-600 text-zinc-500 text-xs">{status}</Badge>;
+  return <Badge variant="outline" className="border-zinc-600 text-zinc-300 text-xs">{status}</Badge>;
 }
 
 export default function AdminIntegrations() {
@@ -231,26 +231,26 @@ export default function AdminIntegrations() {
           <p className="text-zinc-400">Configure webhooks, Stripe, and external integrations</p>
         </div>
 
-        {loading ? <p className="text-zinc-500">Loading...</p> : (
+        {loading ? <p className="text-zinc-300">Loading...</p> : (
           <>
             {/* SECTION 1: Lead Intake Webhooks */}
-            <Card className="border-zinc-800">
+            <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
                 <CardTitle className="text-lg text-white flex items-center gap-2">
                   <Link2 className="h-5 w-5 text-amber-400" /> Section 1 — Lead Intake Webhooks
                 </CardTitle>
-                <CardDescription className="text-zinc-400">
+                <CardDescription className="text-zinc-300">
                   Paste your GHL webhook URL for each business unit. When a lead submits an intake form, it fires to both A-Z Command and GHL simultaneously.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {configs.map(config => (
-                  <div key={config.id} className="p-4 border border-zinc-800 rounded-lg space-y-3">
+                  <div key={config.id} className="p-4 border border-zinc-700 rounded-lg bg-zinc-800/50 space-y-3">
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium text-white">{UNIT_LABELS[config.business_unit] || config.business_unit} — Webhook URL</h3>
                       <div className="flex items-center gap-2">
                         <Switch checked={config.is_active} onCheckedChange={v => updateConfig(config.id, { is_active: v })} />
-                        <span className="text-xs text-zinc-400">{config.is_active ? "Active" : "Disabled"}</span>
+                        <span className="text-xs text-zinc-300">{config.is_active ? "Active" : "Disabled"}</span>
                       </div>
                     </div>
                     <Input value={config.webhook_url || ""} onChange={e => updateConfig(config.id, { webhook_url: e.target.value })} className="bg-zinc-800 border-zinc-700 text-white font-mono text-sm" placeholder="https://services.leadconnectorhq.com/hooks/..." />
@@ -268,8 +268,8 @@ export default function AdminIntegrations() {
                       )}
                       <div className="flex items-center gap-2 ml-auto">
                         <StatusBadge status={config.last_status} />
-                        {config.last_fired_at && (
-                          <span className="text-xs text-zinc-500 flex items-center gap-1">
+                         {config.last_fired_at && (
+                          <span className="text-xs text-zinc-300 flex items-center gap-1">
                             <Clock className="h-3 w-3" /> {format(new Date(config.last_fired_at), "MMM d 'at' h:mm a")}
                           </span>
                         )}
@@ -281,18 +281,18 @@ export default function AdminIntegrations() {
             </Card>
 
             {/* SECTION 2: Pipeline Stage Webhooks */}
-            <Card className="border-zinc-800">
+            <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
                 <CardTitle className="text-lg text-white flex items-center gap-2">
                   <Link2 className="h-5 w-5 text-blue-400" /> Section 2 — Pipeline Stage Webhooks
                 </CardTitle>
-                <CardDescription className="text-zinc-400">
+                <CardDescription className="text-zinc-300">
                   Fire to GHL when a lead moves to a specific pipeline stage in A-Z Command.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {stageWebhooks.map(sw => (
-                  <div key={sw.id} className="p-3 border border-zinc-800 rounded-lg space-y-2">
+                  <div key={sw.id} className="p-3 border border-zinc-700 rounded-lg bg-zinc-800/50 space-y-2">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-medium text-white">{STAGE_LABELS[sw.stage_name] || sw.stage_name} — Webhook URL</h3>
                       <Switch checked={sw.is_active} onCheckedChange={v => updateStage(sw.id, { is_active: v })} />
@@ -306,7 +306,7 @@ export default function AdminIntegrations() {
                         <TestTube className="h-3 w-3 mr-1" /> Test
                       </Button>
                       <StatusBadge status={sw.last_status} />
-                      {sw.last_fired_at && <span className="text-xs text-zinc-500 ml-auto">{format(new Date(sw.last_fired_at), "MMM d h:mm a")}</span>}
+                      {sw.last_fired_at && <span className="text-xs text-zinc-300 ml-auto">{format(new Date(sw.last_fired_at), "MMM d h:mm a")}</span>}
                     </div>
                   </div>
                 ))}
@@ -314,21 +314,21 @@ export default function AdminIntegrations() {
             </Card>
 
             {/* SECTION 2.5: Email Domain Verification */}
-            <Card className="border-zinc-800">
+            <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
                 <CardTitle className="text-lg text-white flex items-center gap-2">
                   <Mail className="h-5 w-5 text-emerald-400" /> Email Configuration
                 </CardTitle>
-                <CardDescription className="text-zinc-400">
+                <CardDescription className="text-zinc-300">
                   Verify email domain status for transactional confirmation emails.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-4 border border-zinc-800 rounded-lg space-y-3">
+                <div className="p-4 border border-zinc-700 rounded-lg bg-zinc-800/50 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-white font-medium">a-zenterpriseshq.com</p>
-                      <p className="text-zinc-500 text-sm">Sender domain for all 6 business unit confirmation emails</p>
+                      <p className="text-zinc-300 text-sm">Sender domain for all 6 business unit confirmation emails</p>
                     </div>
                     {dnsResult && (
                       <Badge className={
@@ -369,14 +369,14 @@ export default function AdminIntegrations() {
             </Card>
 
             {/* SECTION 3: Stripe Connection */}
-            <Card className="border-zinc-800">
+            <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
                 <CardTitle className="text-lg text-white flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-green-400" /> Section 3 — Stripe Connection
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between p-4 border border-zinc-800 rounded-lg">
+                <div className="flex items-center justify-between p-4 border border-zinc-700 rounded-lg bg-zinc-800/50">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
                       <CreditCard className="h-6 w-6 text-purple-400" />
@@ -390,33 +390,33 @@ export default function AdminIntegrations() {
                     Connect Stripe Account
                   </Button>
                 </div>
-                <p className="text-zinc-500 text-sm mt-3">
+                <p className="text-zinc-300 text-sm mt-3">
                   Stripe integration will be wired in Phase 2. Connection status, last sync timestamp, and disconnect/reconnect controls will appear here.
                 </p>
               </CardContent>
             </Card>
 
             {/* SECTION 4: Future Integrations */}
-            <Card className="border-zinc-800">
+            <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
                 <CardTitle className="text-lg text-white flex items-center gap-2">
-                  <Construction className="h-5 w-5 text-zinc-400" /> Section 4 — Future Integrations
+                  <Construction className="h-5 w-5 text-zinc-300" /> Section 4 — Future Integrations
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {FUTURE_INTEGRATION_GROUPS.map(group => (
                   <div key={group.label}>
-                    <h3 className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-3">{group.label}</h3>
+                    <h3 className="text-zinc-300 text-xs font-semibold uppercase tracking-wider mb-3">{group.label}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {group.items.map(int => (
-                        <div key={int.name} className="flex items-center justify-between p-3 border border-zinc-800 rounded-lg">
+                        <div key={int.name} className="flex items-center justify-between p-3 border border-zinc-700 rounded-lg bg-zinc-800/50">
                           <div>
                             <p className="text-white text-sm font-medium">{int.name}</p>
-                            <p className="text-zinc-500 text-xs">{int.desc}</p>
+                            <p className="text-zinc-300 text-xs">{int.desc}</p>
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="border-red-500/30 text-red-400 text-xs">Not Connected</Badge>
-                            <Button variant="outline" size="sm" className="border-zinc-700 text-zinc-500" disabled>Connect</Button>
+                            <Button variant="outline" size="sm" className="border-zinc-600 text-zinc-300" disabled>Connect</Button>
                           </div>
                         </div>
                       ))}
