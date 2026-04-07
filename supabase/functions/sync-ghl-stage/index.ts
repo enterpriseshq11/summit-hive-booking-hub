@@ -32,6 +32,11 @@ const parseMaybeJson = (value: string) => {
   }
 };
 
+const getOutboundWebhookStatus = (httpOk: boolean) => {
+  if (!httpOk) return "failed";
+  return "accepted";
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -218,17 +223,29 @@ serve(async (req) => {
       }
     }
 
+    const previousStageLabel = STAGE_LABELS[previousStage] || previousStage;
+    const newStageLabel = STAGE_LABELS[newStage] || newStage;
+
     const payload = {
       event: "pipeline_stage_changed",
+      trigger_source: "a_z_command",
       lead_id: effectiveLead.id,
+      contact_id: effectiveLead.ghl_contact_id,
+      contactId: effectiveLead.ghl_contact_id,
       lead_name: effectiveLead.lead_name,
+      name: effectiveLead.lead_name,
       email: effectiveLead.email,
       phone: effectiveLead.phone,
       business_unit: effectiveLead.business_unit,
+      previous_stage: previousStageLabel,
       previous_stage_key: previousStage,
-      previous_stage_name: STAGE_LABELS[previousStage] || previousStage,
+      previous_stage_name: previousStageLabel,
+      new_stage: newStageLabel,
       new_stage_key: newStage,
-      new_stage_name: STAGE_LABELS[newStage] || newStage,
+      new_stage_name: newStageLabel,
+      stage: newStageLabel,
+      stage_key: newStage,
+      stage_name: newStageLabel,
       assigned_to: assignedTo,
       source: effectiveLead.source,
       ghl_contact_id: effectiveLead.ghl_contact_id,
@@ -246,9 +263,10 @@ serve(async (req) => {
     const contactId = typeof parsedResponse === "object" && parsedResponse
       ? (parsedResponse.contact_id || parsedResponse.contactId || parsedResponse.id || null)
       : null;
+    const webhookStatus = getOutboundWebhookStatus(ghlResponse.ok);
 
     const intakeStatusPayload = {
-      ghl_webhook_status: ghlResponse.ok ? "fired" : "failed",
+      ghl_webhook_status: webhookStatus,
       ghl_webhook_response: parsedResponse,
       ghl_webhook_fired_at: ghlResponse.ok ? new Date().toISOString() : null,
     };
@@ -269,15 +287,15 @@ serve(async (req) => {
       });
     }
 
-    const leadPatch: Record<string, string> = {
-      ghl_last_synced_at: new Date().toISOString(),
-    };
+    const leadPatch: Record<string, string> = {};
 
     if (contactId && !effectiveLead.ghl_contact_id) {
       leadPatch.ghl_contact_id = contactId;
     }
 
-    await admin.from("crm_leads").update(leadPatch).eq("id", effectiveLead.id);
+    if (Object.keys(leadPatch).length > 0) {
+      await admin.from("crm_leads").update(leadPatch).eq("id", effectiveLead.id);
+    }
 
     await admin.from("crm_activity_events").insert({
       event_type: "lead_updated",
@@ -285,14 +303,15 @@ serve(async (req) => {
       entity_type: "lead",
       entity_id: effectiveLead.id,
       entity_name: effectiveLead.lead_name,
-      event_category: ghlResponse.ok ? "ghl_webhook_fired" : "ghl_webhook_failed",
+      event_category: ghlResponse.ok ? "ghl_webhook_accepted" : "ghl_webhook_failed",
       metadata: {
-        action: ghlResponse.ok ? "ghl_webhook_fired" : "ghl_webhook_failed",
-        message: `GHL webhook ${ghlResponse.ok ? "fired" : "FAILED"} — ${STAGE_LABELS[newStage] || newStage} — HTTP ${ghlResponse.status}`,
+        action: ghlResponse.ok ? "ghl_webhook_accepted" : "ghl_webhook_failed",
+        message: `GHL webhook ${ghlResponse.ok ? "accepted" : "FAILED"} — ${newStageLabel} — HTTP ${ghlResponse.status}`,
         previous_stage: previousStage,
         new_stage: newStage,
         http_status: ghlResponse.status,
         response: parsedResponse,
+        contact_id: effectiveLead.ghl_contact_id,
       },
     });
 
@@ -312,7 +331,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: ghlResponse.ok,
       status: effectiveLead.status,
-      ghlStatus: ghlResponse.ok ? "fired" : "failed",
+      ghlStatus: webhookStatus,
       contactId,
       response: parsedResponse,
     }), {

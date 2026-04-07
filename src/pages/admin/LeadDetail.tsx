@@ -353,6 +353,20 @@ export default function LeadDetail() {
     : new Date(lead.follow_up_due).toDateString() === new Date().toDateString() ? "today" : "future"
     : "none";
   const ghlStatus = intakeData?.ghl_webhook_status || "pending";
+  const ghlBadgeClass = ghlStatus === "confirmed"
+    ? "bg-green-500/20 text-green-400"
+    : ghlStatus === "accepted" || ghlStatus === "fired"
+      ? "bg-blue-500/20 text-blue-400"
+      : ghlStatus === "failed"
+        ? "bg-red-500/20 text-red-400"
+        : "bg-yellow-500/20 text-yellow-400";
+  const ghlBadgeLabel = ghlStatus === "confirmed"
+    ? "Synced"
+    : ghlStatus === "accepted" || ghlStatus === "fired"
+      ? "Triggered"
+      : ghlStatus === "failed"
+        ? "Failed"
+        : "Pending";
   const unitColor = UNIT_COLORS[lead.business_unit] || "bg-zinc-500/20 text-zinc-400";
   const currentStageIdx = PIPELINE_STAGES.indexOf(lead.status || "new");
   const assignedMember = teamMembers.find((m: any) => m.id === lead.assigned_employee_id);
@@ -381,8 +395,8 @@ export default function LeadDetail() {
                 Follow-up: {format(new Date(lead.follow_up_due), "MMM d, yyyy")}
               </Badge>
             )}
-            <Badge className={ghlStatus === "fired" ? "bg-green-500/20 text-green-400" : ghlStatus === "failed" ? "bg-red-500/20 text-red-400" : "bg-yellow-500/20 text-yellow-400"}>
-              GHL: {ghlStatus === "fired" ? "Synced" : ghlStatus === "failed" ? "Failed" : "Pending"}
+            <Badge className={ghlBadgeClass}>
+              GHL: {ghlBadgeLabel}
             </Badge>
             {/* Item 11: Manual GHL sync — owner/manager only */}
             {(isOwner || authUser?.roles?.includes("manager")) && (
