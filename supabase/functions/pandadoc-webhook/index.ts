@@ -69,7 +69,7 @@ serve(async (req) => {
               .update({ status: "deposit_pending" })
               .eq("id", lead.id);
 
-            // Fire GHL webhook for deposit_pending stage — query ghl_pipeline_stage_webhooks
+            // Fire GHL webhook for deposit_pending stage
             if (!lead.ghl_sync_in_progress) {
               try {
                 const { data: webhookConfig } = await supabase

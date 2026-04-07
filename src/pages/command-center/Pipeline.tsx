@@ -601,7 +601,7 @@ export default function CommandCenterPipeline() {
     booked: "Booked", won: "Completed", completed: "Completed", lost: "Lost",
   };
 
-  // Map DB enum value → ghl_pipeline_stage_webhooks.stage_name
+  // Map lead business_unit → outbound webhook config business_unit
   const getConfigBusinessUnit = (bu: string) => bu === "mobile_homes" ? "mobile_homes" : "default";
 
   const fireGhlStageWebhookFromPipeline = useCallback(async (lead: any, previousStage: string, newStage: string) => {
