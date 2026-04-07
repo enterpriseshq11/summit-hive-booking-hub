@@ -161,33 +161,8 @@ Deno.serve(async (req) => {
         if (ghlRes.ok) {
           ghlStatus = "fired";
           ghlResponse = `HTTP ${ghlRes.status}`;
-
-          // Attempt to capture GHL contact ID from response
-          try {
-            const ghlBody = await ghlRes.json();
-            const ghlContactId = ghlBody?.contact_id || ghlBody?.contactId || ghlBody?.id || null;
-            if (ghlContactId && lead?.id) {
-              await supabase.from("crm_leads")
-                .update({ ghl_contact_id: ghlContactId })
-                .eq("id", lead.id);
-
-              await supabase.from("crm_activity_events").insert({
-                event_type: "status_change" as any,
-                entity_type: "lead",
-                entity_id: lead.id,
-                event_category: "lead_updated",
-                metadata: {
-                  action: "ghl_contact_created",
-                  description: `GHL contact created — Contact ID: ${ghlContactId}`,
-                  ghl_contact_id: ghlContactId,
-                },
-              });
-            } else {
-              console.log("GHL response did not contain a contact ID — ghl_contact_id remains null");
-            }
-          } catch (_parseErr) {
-            console.log("Could not parse GHL webhook response for contact ID — ghl_contact_id remains null");
-          }
+          // Consume response body to prevent resource leak
+          await ghlRes.text();
         } else {
           ghlStatus = "failed";
           ghlResponse = `HTTP ${ghlRes.status}: ${await ghlRes.text()}`;
@@ -199,6 +174,107 @@ Deno.serve(async (req) => {
     } else {
       ghlStatus = "pending";
       ghlResponse = "No webhook URL configured";
+    }
+
+    // 2b. Find or create GHL contact via API and save ghl_contact_id
+    const ghlApiKey = Deno.env.get("GHL_API_KEY");
+    const ghlLocationId = Deno.env.get("GHL_LOCATION_ID");
+
+    if (ghlApiKey && ghlLocationId && lead?.id) {
+      try {
+        console.log("[lead-intake] Finding/creating GHL contact for", email);
+        const GHL_API = "https://services.leadconnectorhq.com";
+        const ghlHeaders = {
+          "Authorization": `Bearer ${ghlApiKey}`,
+          "Version": "2021-07-28",
+          "Content-Type": "application/json",
+        };
+
+        let ghlContactId: string | null = null;
+
+        // Search by email
+        const searchRes = await fetch(`${GHL_API}/contacts/search`, {
+          method: "POST",
+          headers: ghlHeaders,
+          body: JSON.stringify({
+            locationId: ghlLocationId,
+            filters: [{ field: "email", operator: "eq", value: email }],
+          }),
+        });
+
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          const contacts = searchData?.contacts || [];
+          if (contacts.length > 0) {
+            ghlContactId = contacts[0].id;
+            console.log("[lead-intake] Found existing GHL contact:", ghlContactId);
+          }
+        } else {
+          const errText = await searchRes.text();
+          console.log("[lead-intake] GHL search failed, will create:", errText);
+        }
+
+        // Create if not found
+        if (!ghlContactId) {
+          const createRes = await fetch(`${GHL_API}/contacts/`, {
+            method: "POST",
+            headers: ghlHeaders,
+            body: JSON.stringify({
+              locationId: ghlLocationId,
+              firstName: first_name || "",
+              lastName: last_name || "",
+              email,
+              phone: phone || "",
+              source: "A-Z Command",
+              tags: [business_unit || "general"],
+            }),
+          });
+
+          if (createRes.ok) {
+            const createData = await createRes.json();
+            ghlContactId = createData?.contact?.id || null;
+            console.log("[lead-intake] Created GHL contact:", ghlContactId);
+          } else {
+            const errText = await createRes.text();
+            console.log("[lead-intake] GHL create failed:", errText);
+            // Try to extract ID from 422 duplicate error
+            if (createRes.status === 422) {
+              try {
+                const errJson = JSON.parse(errText);
+                ghlContactId = errJson?.contact?.id || errJson?.contactId || null;
+              } catch (_) { /* ignore */ }
+            }
+          }
+        }
+
+        // Save to lead record
+        if (ghlContactId) {
+          await supabase.from("crm_leads")
+            .update({ ghl_contact_id: ghlContactId })
+            .eq("id", lead.id);
+
+          await supabase.from("crm_activity_events").insert({
+            event_type: "status_change" as any,
+            entity_type: "lead",
+            entity_id: lead.id,
+            event_category: "lead_updated",
+            metadata: {
+              action: "ghl_contact_linked",
+              description: `GHL contact linked via API — ID: ${ghlContactId}`,
+              ghl_contact_id: ghlContactId,
+            },
+          });
+
+          console.log("[lead-intake] ghl_contact_id saved to lead", lead.id);
+        } else {
+          console.log("[lead-intake] Could not obtain GHL contact ID for lead", lead.id);
+        }
+      } catch (ghlErr) {
+        console.error("[lead-intake] GHL find/create error:", ghlErr);
+        // Non-fatal: lead is still created, just missing GHL link
+      }
+    } else {
+      console.log("[lead-intake] GHL API credentials not configured — skipping contact link");
     }
 
     // 3. Send confirmation email via Resend
