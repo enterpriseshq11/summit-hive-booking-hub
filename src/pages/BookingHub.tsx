@@ -109,6 +109,10 @@ const businessBadges: Record<BusinessType, {
   elevated_by_elyse: {
     text: "Consultation required",
     type: "info"
+  },
+  mobile_homes: {
+    text: "Contact for pricing",
+    type: "info"
   }
 };
 export default function BookingHub() {
