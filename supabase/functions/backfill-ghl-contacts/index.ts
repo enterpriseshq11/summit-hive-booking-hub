@@ -33,6 +33,11 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 
   const results: any[] = [];
+  let batchLimit = 10;
+  try {
+    const body = await req.json();
+    if (body?.limit) batchLimit = body.limit;
+  } catch (_) {}
 
   try {
     // Fetch all leads missing ghl_contact_id that have an email
