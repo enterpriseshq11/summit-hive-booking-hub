@@ -70,8 +70,6 @@ serve(async (req) => {
               .eq("id", lead.id);
 
             // Legacy GHL webhook removed — stage sync now handled via direct API in sync-ghl-stage
-            }
-          }
 
           // Log to timeline
           await supabase.from("crm_activity_events").insert({
