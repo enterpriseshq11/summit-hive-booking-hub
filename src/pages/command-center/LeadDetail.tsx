@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin";
 import { useCrmLead, useUpdateCrmLead } from "@/hooks/useCrmLeads";
+import { useSyncLeadStage } from "@/hooks/useSyncLeadStage";
 import { useCrmActivity } from "@/hooks/useCrmActivity";
 import { useCrmRevenue, useCreateCrmRevenue } from "@/hooks/useCrmRevenue";
 import { useCrmCommissions } from "@/hooks/useCrmCommissions";
@@ -114,6 +115,7 @@ export default function LeadDetailPage() {
   const { data: employees } = useCrmEmployees();
   const { data: tasks } = useCrmLeadTasks(id);
   const updateLead = useUpdateCrmLead();
+  const syncStage = useSyncLeadStage();
   const createRevenue = useCreateCrmRevenue();
   const createTask = useCreateLeadTask();
   const updateTask = useUpdateLeadTask();
@@ -417,7 +419,7 @@ export default function LeadDetailPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-zinc-500 text-xs">Status</Label>
-                    <Select value={lead.status || "new"} onValueChange={(v) => updateLead.mutate({ id: lead.id, status: v as CrmLeadStatus })}>
+                    <Select value={lead.status || "new"} onValueChange={(v) => syncStage.mutate({ leadId: lead.id, previousStage: lead.status || "new", newStage: v })}>
                       <SelectTrigger className="mt-1 bg-zinc-800 border-zinc-700 text-zinc-100"><SelectValue /></SelectTrigger>
                       <SelectContent className="bg-zinc-800 border-zinc-700">
                         {statusSelectOptions.map((opt) => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}
