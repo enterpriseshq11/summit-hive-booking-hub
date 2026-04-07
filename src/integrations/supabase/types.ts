@@ -7163,6 +7163,7 @@ export type Database = {
         | "voice_vault"
         | "photo_booth"
         | "elevated_by_elyse"
+        | "mobile_homes"
       career_application_status:
         | "new"
         | "reviewing"
@@ -7492,6 +7493,7 @@ export const Constants = {
         "voice_vault",
         "photo_booth",
         "elevated_by_elyse",
+        "mobile_homes",
       ],
       career_application_status: [
         "new",
