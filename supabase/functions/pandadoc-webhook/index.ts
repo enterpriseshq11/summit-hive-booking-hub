@@ -73,10 +73,11 @@ serve(async (req) => {
             if (!lead.ghl_sync_in_progress) {
               try {
                 const { data: webhookConfig } = await supabase
-                  .from("ghl_pipeline_stage_webhooks")
-                  .select("webhook_url, is_active")
-                  .eq("stage_name", "deposit_pending")
-                  .maybeSingle();
+                   .from("ghl_outbound_webhook_config")
+                   .select("webhook_url, is_active")
+                   .eq("stage_key", "deposit_pending")
+                   .eq("business_unit", "default")
+                   .maybeSingle();
 
                 if (webhookConfig?.webhook_url && webhookConfig.is_active) {
                   const ghlRes = await fetch(webhookConfig.webhook_url, {
