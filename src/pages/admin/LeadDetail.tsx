@@ -138,8 +138,18 @@ export default function LeadDetail() {
 
   const updateLeadMutation = useMutation({
     mutationFn: async (updates: Record<string, any>) => {
-      const { error } = await supabase.from("crm_leads").update(updates).eq("id", id!);
+      const { data: rows, error } = await supabase
+        .from("crm_leads")
+        .update(updates)
+        .eq("id", id!)
+        .select("id, status, assigned_employee_id, follow_up_due, temperature");
+
       if (error) throw error;
+      if (!rows || rows.length === 0) {
+        throw new Error("Lead update was blocked or did not persist");
+      }
+
+      return rows[0];
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lead-detail", id] });
@@ -154,121 +164,28 @@ export default function LeadDetail() {
     booked: "Booked", won: "Completed", completed: "Completed", lost: "Lost",
   };
 
-  // Map lead business_unit to outbound config business_unit
-  const getConfigBusinessUnit = (bu: string) => bu === "mobile_homes" ? "mobile_homes" : "default";
-
   const fireGhlStageWebhook = async (previousStage: string, newStage: string) => {
     if (!lead) return;
-    try {
-      // Check ghl_sync_in_progress to prevent infinite loop
-      const { data: freshLead } = await supabase
-        .from("crm_leads")
-        .select("ghl_sync_in_progress")
-        .eq("id", lead.id)
-        .maybeSingle();
 
-      if ((freshLead as any)?.ghl_sync_in_progress) {
-        await supabase.from("crm_activity_events").insert({
-          event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
-          metadata: {
-            action: "ghl_webhook_skipped",
-            message: `GHL outbound webhook skipped — sync in progress`,
-          },
-        });
-        return;
-      }
+    const { data, error } = await supabase.functions.invoke("sync-ghl-stage", {
+      body: {
+        leadId: lead.id,
+        previousStage,
+        newStage,
+      },
+    });
 
-      const configBU = getConfigBusinessUnit(lead.business_unit);
-      const { data: webhookConfig } = await (supabase as any)
-        .from("ghl_outbound_webhook_config")
-        .select("webhook_url, is_active")
-        .eq("stage_key", newStage)
-        .eq("business_unit", configBU)
-        .maybeSingle();
-
-      if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {
-        await supabase.from("crm_activity_events").insert({
-          event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
-          event_category: "ghl_webhook_fired",
-          metadata: {
-            action: "ghl_webhook_skipped",
-            message: `GHL webhook skipped — no URL configured or inactive for ${STAGE_LABELS[newStage] || newStage} stage`,
-          },
-        });
-        return;
-      }
-
-      const assignedMemberForWebhook = teamMembers.find((m: any) => m.id === lead.assigned_employee_id);
-      const payload = {
-        event: "pipeline_stage_changed",
-        lead_id: lead.id,
-        lead_name: lead.lead_name,
-        email: lead.email,
-        phone: lead.phone,
-        business_unit: lead.business_unit,
-        previous_stage_key: previousStage,
-        previous_stage_name: STAGE_LABELS[previousStage] || previousStage,
-        new_stage_key: newStage,
-        new_stage_name: STAGE_LABELS[newStage] || newStage,
-        assigned_to: assignedMemberForWebhook
-          ? `${assignedMemberForWebhook.first_name} ${assignedMemberForWebhook.last_name}`
-          : null,
-        timestamp: new Date().toISOString(),
-        source: lead.source,
-      };
-
-      const res = await fetch(webhookConfig.webhook_url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const statusText = res.ok ? "success" : "failed";
-      await supabase.from("crm_activity_events").insert({
-        event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
-        event_category: statusText === "success" ? "ghl_webhook_fired" : "ghl_webhook_failed",
-        metadata: {
-          action: statusText === "success" ? "ghl_webhook_fired" : "ghl_webhook_failed",
-          message: `GHL webhook ${statusText === "success" ? "fired" : "FAILED"} — stage moved to ${STAGE_LABELS[newStage] || newStage} — HTTP ${res.status}`,
-          http_status: res.status,
-          stage: newStage,
-        },
-      });
-      // Create alert on webhook failure with source_filter for role-based visibility
-      if (!res.ok) {
-        await supabase.from("crm_alerts").insert({
-          alert_type: "ghl_webhook_failed",
-          title: `GHL webhook failed for ${lead.lead_name}`,
-          description: `Stage ${STAGE_LABELS[newStage] || newStage} webhook returned HTTP ${res.status}`,
-          entity_type: "lead",
-          entity_id: lead.id,
-          source_filter: lead.source || null,
-          severity: "high",
-          target_roles: ["owner", "manager", "operations", "ads_lead"],
-        } as any);
-      }
-    } catch (err) {
-      await supabase.from("crm_activity_events").insert({
-        event_type: "lead_updated" as any, entity_type: "lead", entity_id: id!,
-        event_category: "ghl_webhook_failed",
-        metadata: {
-          action: "ghl_webhook_failed",
-          message: `GHL webhook FAILED — stage moved to ${STAGE_LABELS[newStage] || newStage} — Error: ${String(err)}`,
-          stage: newStage,
-        },
-      });
-      // Create alert on webhook failure with source_filter
-      await supabase.from("crm_alerts").insert({
-        alert_type: "ghl_webhook_failed",
-        title: `GHL webhook failed for ${lead.lead_name}`,
-        description: `Stage ${STAGE_LABELS[newStage] || newStage} webhook error: ${String(err)}`,
-        entity_type: "lead",
-        entity_id: lead.id,
-        source_filter: lead.source || null,
-        severity: "high",
-        target_roles: ["owner", "manager", "operations", "ads_lead"],
-      } as any);
+    if (error) {
+      throw new Error(error.message || "Failed to sync stage to GHL");
     }
+
+    if (!data?.success) {
+      throw new Error(data?.error || "Failed to sync stage to GHL");
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["lead-detail", id] });
+    queryClient.invalidateQueries({ queryKey: ["lead-intake-data", id] });
+    queryClient.invalidateQueries({ queryKey: ["lead-timeline", id] });
   };
 
   const moveStage = async (direction: "next" | "prev") => {
