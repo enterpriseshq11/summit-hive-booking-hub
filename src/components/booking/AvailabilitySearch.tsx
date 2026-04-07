@@ -42,6 +42,7 @@ const servicePlaceholders: Record<BusinessType, string> = {
   photo_booth: "e.g. 360 Rental, Event Add-on",
   voice_vault: "e.g. Podcast Recording",
   elevated_by_elyse: "e.g. Bridal Styling, Wardrobe Edit",
+  mobile_homes: "e.g. Mobile Home Inquiry",
 };
 
 // Expandable overflow slots component

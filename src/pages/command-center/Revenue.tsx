@@ -57,6 +57,7 @@ const businessUnitLabels: Record<BusinessType, string> = {
   photo_booth: "360 Photo Booth",
   voice_vault: "Voice Vault",
   elevated_by_elyse: "Elevated by Elyse",
+  mobile_homes: "A-Z Estates",
 };
 
 const businessUnitColors: Record<BusinessType, string> = {
@@ -67,6 +68,7 @@ const businessUnitColors: Record<BusinessType, string> = {
   photo_booth: "bg-amber-500/20 text-amber-400 border-amber-500/50",
   voice_vault: "bg-accent/20 text-accent border-accent/50",
   elevated_by_elyse: "bg-rose-500/20 text-rose-400 border-rose-500/50",
+  mobile_homes: "bg-orange-500/20 text-orange-400 border-orange-500/50",
 };
 
 function formatCurrency(value: number) {
