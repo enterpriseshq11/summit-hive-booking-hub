@@ -22,21 +22,137 @@ const STAGE_LABELS: Record<string, string> = {
   lost: "Lost",
 };
 
-const getConfigBusinessUnit = (businessUnit: string) =>
-  businessUnit === "mobile_homes" ? "mobile_homes" : "default";
+const GHL_API = "https://services.leadconnectorhq.com";
 
-const parseMaybeJson = (value: string) => {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return value;
+// Map A-Z Command business_unit → GHL Pipeline ID
+const PIPELINE_MAP: Record<string, string> = {
+  coworking: "R39pNfUKfehKhx0gQ22y",
+  summit: "eyLsMGGgEikqtiTsWrSD",
+  elevated_by_elyse: "T9xQFgbvNDWd0SRuL3Bt",
+  spa: "jiTtAKTcMGFcfCDl9vQB",
+  fitness: "hKnG56sPWawRe2Z4E8Sk",
+  photo_booth: "To9CU7VONlcaRPkd9lac",
+  voice_vault: "MLC9I84M2xohkODg92TY",
+};
+
+// Cache: pipelineId → { stageName → stageId }
+const stageCache: Record<string, Record<string, string>> = {};
+
+const log = (step: string, details?: any) =>
+  console.log(`[GHL-SYNC] ${step}${details ? ` — ${JSON.stringify(details)}` : ""}`);
+
+async function getPipelineStages(
+  pipelineId: string,
+  ghlApiKey: string,
+  locationId: string,
+): Promise<Record<string, string>> {
+  if (stageCache[pipelineId]) return stageCache[pipelineId];
+
+  const res = await fetch(
+    `${GHL_API}/opportunities/pipelines?locationId=${locationId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${ghlApiKey}`,
+        Version: "2021-07-28",
+      },
+    },
+  );
+
+  if (!res.ok) {
+    log("Failed to fetch pipelines", { status: res.status });
+    return {};
   }
-};
 
-const getOutboundWebhookStatus = (httpOk: boolean) => {
-  if (!httpOk) return "failed";
-  return "accepted";
-};
+  const data = await res.json();
+  const pipelines = data?.pipelines || [];
+  const pipeline = pipelines.find((p: any) => p.id === pipelineId);
+
+  if (!pipeline) {
+    log("Pipeline not found", { pipelineId });
+    return {};
+  }
+
+  const map: Record<string, string> = {};
+  for (const s of pipeline.stages || []) {
+    // Normalize: "New Lead" → "newlead"
+    const key = (s.name || "").toLowerCase().replace(/\s+/g, "");
+    map[key] = s.id;
+  }
+  stageCache[pipelineId] = map;
+  log("Cached pipeline stages", { pipelineId, stages: Object.keys(map) });
+  return map;
+}
+
+function resolveGhlStageId(
+  stages: Record<string, string>,
+  azStageKey: string,
+): string | null {
+  const label = STAGE_LABELS[azStageKey] || azStageKey;
+  const normalized = label.toLowerCase().replace(/\s+/g, "");
+
+  // Direct match
+  if (stages[normalized]) return stages[normalized];
+
+  // Try the raw key
+  const rawNorm = azStageKey.toLowerCase().replace(/[_\s]+/g, "");
+  if (stages[rawNorm]) return stages[rawNorm];
+
+  // Fallback: partial match
+  for (const [k, v] of Object.entries(stages)) {
+    if (k.includes(normalized) || normalized.includes(k)) return v;
+  }
+
+  return null;
+}
+
+async function findOpportunity(
+  contactId: string,
+  pipelineId: string,
+  ghlApiKey: string,
+  locationId: string,
+): Promise<string | null> {
+  // Search opportunities by contact
+  const url = `${GHL_API}/opportunities/search?location_id=${locationId}&contact_id=${contactId}&pipeline_id=${pipelineId}`;
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${ghlApiKey}`,
+      Version: "2021-07-28",
+    },
+  });
+
+  if (!res.ok) {
+    log("Opportunity search failed", { status: res.status });
+    return null;
+  }
+
+  const data = await res.json();
+  const opps = data?.opportunities || [];
+  if (opps.length > 0) {
+    log("Found opportunity", { id: opps[0].id, pipeline: pipelineId });
+    return opps[0].id;
+  }
+
+  return null;
+}
+
+async function updateOpportunityStage(
+  opportunityId: string,
+  stageId: string,
+  ghlApiKey: string,
+): Promise<{ ok: boolean; status: number; body: string }> {
+  const res = await fetch(`${GHL_API}/opportunities/${opportunityId}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${ghlApiKey}`,
+      Version: "2021-07-28",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pipelineStageId: stageId }),
+  });
+
+  const body = await res.text();
+  return { ok: res.ok, status: res.status, body };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -46,17 +162,20 @@ serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  const ghlApiKey = Deno.env.get("GHL_API_KEY") ?? "";
+  const ghlLocationId = Deno.env.get("GHL_LOCATION_ID") ?? "";
 
   if (!supabaseUrl || !serviceRoleKey || !anonKey) {
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: "Backend configuration is incomplete",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
+      JSON.stringify({ success: false, error: "Backend configuration is incomplete" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+  if (!ghlApiKey || !ghlLocationId) {
+    return new Response(
+      JSON.stringify({ success: false, error: "GHL credentials not configured" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 
@@ -64,10 +183,7 @@ serve(async (req) => {
   if (!authHeader) {
     return new Response(
       JSON.stringify({ success: false, error: "Missing authorization" }),
-      {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 
@@ -81,88 +197,61 @@ serve(async (req) => {
   });
 
   try {
-    const {
-      data: { user },
-      error: userError,
-    } = await userClient.auth.getUser();
-
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
     if (userError || !user) {
       return new Response(
         JSON.stringify({ success: false, error: "Unauthorized" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     const body = await req.json().catch(() => ({}));
     const leadId = typeof body?.leadId === "string" ? body.leadId : "";
-    const previousStage = typeof body?.previousStage === "string"
-      ? body.previousStage
-      : "";
+    const previousStage = typeof body?.previousStage === "string" ? body.previousStage : "";
     const newStage = typeof body?.newStage === "string" ? body.newStage : "";
     const skipWebhook = body?.skipWebhook === true;
 
     if (!leadId || !previousStage || !newStage) {
       return new Response(
-        JSON.stringify({
-          success: false,
-          error: "leadId, previousStage, and newStage are required",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        JSON.stringify({ success: false, error: "leadId, previousStage, and newStage are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
+    // Fetch lead
     const { data: lead, error: leadError } = await admin
       .from("crm_leads")
-      .select(
-        "id, lead_name, email, phone, business_unit, source, status, assigned_employee_id, ghl_contact_id, ghl_sync_in_progress",
-      )
+      .select("id, lead_name, email, phone, business_unit, source, status, assigned_employee_id, ghl_contact_id, ghl_sync_in_progress")
       .eq("id", leadId)
       .maybeSingle();
 
     if (leadError || !lead) {
       return new Response(
         JSON.stringify({ success: false, error: "Lead not found" }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     let effectiveLead = lead;
 
+    // Update stage in DB if needed
     if (lead.status !== newStage) {
       const { data: updatedLead, error: updateError } = await admin
         .from("crm_leads")
         .update({ status: newStage })
         .eq("id", leadId)
-        .select(
-          "id, lead_name, email, phone, business_unit, source, status, assigned_employee_id, ghl_contact_id, ghl_sync_in_progress",
-        )
+        .select("id, lead_name, email, phone, business_unit, source, status, assigned_employee_id, ghl_contact_id, ghl_sync_in_progress")
         .maybeSingle();
 
       if (updateError || !updatedLead) {
         return new Response(
-          JSON.stringify({
-            success: false,
-            error: updateError?.message || "Lead stage update failed",
-          }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          },
+          JSON.stringify({ success: false, error: updateError?.message || "Lead stage update failed" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
       effectiveLead = updatedLead;
 
-      // Log stage change activity
       await admin.from("crm_activity_events").insert({
         event_type: "lead_status_changed",
         actor_id: user.id,
@@ -176,18 +265,12 @@ serve(async (req) => {
 
     if (skipWebhook) {
       return new Response(
-        JSON.stringify({
-          success: true,
-          status: effectiveLead.status,
-          skippedWebhook: true,
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        JSON.stringify({ success: true, status: effectiveLead.status, skippedWebhook: true }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
+    // Skip if inbound sync is in progress
     if (effectiveLead.ghl_sync_in_progress) {
       await admin.from("crm_activity_events").insert({
         event_type: "lead_updated",
@@ -195,66 +278,41 @@ serve(async (req) => {
         entity_type: "lead",
         entity_id: effectiveLead.id,
         entity_name: effectiveLead.lead_name,
-        event_category: "ghl_webhook_skipped",
+        event_category: "ghl_sync_skipped",
         metadata: {
-          action: "ghl_webhook_skipped",
-          message: "GHL outbound webhook skipped — inbound sync in progress",
+          action: "ghl_sync_skipped",
+          message: "GHL sync skipped — inbound sync in progress",
           previous_stage: previousStage,
           new_stage: newStage,
         },
       });
 
       return new Response(
-        JSON.stringify({
-          success: true,
-          status: effectiveLead.status,
-          skippedWebhook: true,
-          reason: "sync_in_progress",
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+        JSON.stringify({ success: true, status: effectiveLead.status, skippedWebhook: true, reason: "sync_in_progress" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    const configBusinessUnit = getConfigBusinessUnit(
-      effectiveLead.business_unit,
-    );
-    const { data: webhookConfig } = await admin
-      .from("ghl_outbound_webhook_config")
-      .select("webhook_url, is_active")
-      .eq("stage_key", newStage)
-      .eq("business_unit", configBusinessUnit)
-      .maybeSingle();
+    // Validate GHL contact ID
+    const ghlContactId =
+      typeof effectiveLead.ghl_contact_id === "string" && effectiveLead.ghl_contact_id.trim().length > 0
+        ? effectiveLead.ghl_contact_id.trim()
+        : null;
 
-    if (!webhookConfig?.webhook_url || !webhookConfig.is_active) {
-      const message = `No active outbound webhook configured for ${
-        STAGE_LABELS[newStage] || newStage
-      }`;
-
+    if (!ghlContactId) {
+      const message = "Lead is missing a linked GHL contact ID. Backfill or relink the contact before syncing stages.";
       await admin.from("crm_activity_events").insert({
         event_type: "lead_updated",
         actor_id: user.id,
         entity_type: "lead",
         entity_id: effectiveLead.id,
         entity_name: effectiveLead.lead_name,
-        event_category: "ghl_webhook_failed",
-        metadata: {
-          action: "ghl_webhook_failed",
-          message,
-          previous_stage: previousStage,
-          new_stage: newStage,
-        },
+        event_category: "ghl_sync_failed",
+        metadata: { action: "ghl_sync_failed", message, previous_stage: previousStage, new_stage: newStage },
       });
 
-      await admin
-        .from("lead_intake_submissions")
-        .update({
-          ghl_webhook_status: "failed",
-          ghl_webhook_response: message,
-          ghl_webhook_fired_at: null,
-        })
+      await admin.from("lead_intake_submissions")
+        .update({ ghl_webhook_status: "failed", ghl_webhook_response: message, ghl_webhook_fired_at: null })
         .eq("lead_id", effectiveLead.id);
 
       return new Response(JSON.stringify({ success: false, error: message }), {
@@ -263,118 +321,162 @@ serve(async (req) => {
       });
     }
 
-    let assignedTo: string | null = null;
-    if (effectiveLead.assigned_employee_id) {
-      const { data: assignedProfile } = await admin
-        .from("profiles")
-        .select("first_name, last_name")
-        .eq("id", effectiveLead.assigned_employee_id)
-        .maybeSingle();
+    // Resolve pipeline
+    const pipelineId = PIPELINE_MAP[effectiveLead.business_unit] || null;
+    if (!pipelineId) {
+      const message = `No GHL pipeline mapped for business unit: ${effectiveLead.business_unit}`;
+      log("No pipeline", { business_unit: effectiveLead.business_unit });
 
-      if (assignedProfile) {
-        assignedTo =
-          [assignedProfile.first_name, assignedProfile.last_name].filter(
-            Boolean,
-          ).join(" ") || null;
+      await admin.from("crm_activity_events").insert({
+        event_type: "lead_updated",
+        actor_id: user.id,
+        entity_type: "lead",
+        entity_id: effectiveLead.id,
+        entity_name: effectiveLead.lead_name,
+        event_category: "ghl_sync_failed",
+        metadata: { action: "ghl_sync_failed", message, previous_stage: previousStage, new_stage: newStage },
+      });
+
+      return new Response(JSON.stringify({ success: false, error: message }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get pipeline stages from GHL
+    const stages = await getPipelineStages(pipelineId, ghlApiKey, ghlLocationId);
+    const targetStageId = resolveGhlStageId(stages, newStage);
+
+    if (!targetStageId) {
+      const message = `Could not resolve GHL stage for "${STAGE_LABELS[newStage] || newStage}" in pipeline ${pipelineId}. Available: ${Object.keys(stages).join(", ")}`;
+      log("Stage not found", { newStage, pipelineId, available: Object.keys(stages) });
+
+      await admin.from("crm_activity_events").insert({
+        event_type: "lead_updated",
+        actor_id: user.id,
+        entity_type: "lead",
+        entity_id: effectiveLead.id,
+        entity_name: effectiveLead.lead_name,
+        event_category: "ghl_sync_failed",
+        metadata: { action: "ghl_sync_failed", message, previous_stage: previousStage, new_stage: newStage },
+      });
+
+      return new Response(JSON.stringify({ success: false, error: message }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Find the opportunity in GHL
+    let opportunityId = await findOpportunity(ghlContactId, pipelineId, ghlApiKey, ghlLocationId);
+
+    if (!opportunityId) {
+      // Auto-create opportunity if missing
+      log("No opportunity found, creating one", { ghlContactId, pipelineId });
+      const createRes = await fetch(`${GHL_API}/opportunities/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ghlApiKey}`,
+          Version: "2021-07-28",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pipelineId,
+          pipelineStageId: targetStageId,
+          locationId: ghlLocationId,
+          contactId: ghlContactId,
+          name: effectiveLead.lead_name,
+          status: "open",
+        }),
+      });
+
+      const createBody = await createRes.text();
+      if (createRes.ok) {
+        try {
+          const parsed = JSON.parse(createBody);
+          opportunityId = parsed?.opportunity?.id || null;
+          log("Created opportunity", { opportunityId });
+        } catch {
+          log("Created opportunity but could not parse response");
+        }
+
+        // If we just created with the correct stage, we're done
+        const syncStatus = createRes.ok ? "accepted" : "failed";
+        await admin.from("lead_intake_submissions")
+          .update({
+            ghl_webhook_status: syncStatus,
+            ghl_webhook_response: `Opportunity created with stage ${STAGE_LABELS[newStage] || newStage}`,
+            ghl_webhook_fired_at: new Date().toISOString(),
+          })
+          .eq("lead_id", effectiveLead.id);
+
+        await admin.from("crm_activity_events").insert({
+          event_type: "lead_updated",
+          actor_id: user.id,
+          entity_type: "lead",
+          entity_id: effectiveLead.id,
+          entity_name: effectiveLead.lead_name,
+          event_category: "ghl_api_synced",
+          metadata: {
+            action: "ghl_opportunity_created_with_stage",
+            message: `Created GHL opportunity at stage "${STAGE_LABELS[newStage] || newStage}"`,
+            opportunity_id: opportunityId,
+            pipeline_id: pipelineId,
+            stage_id: targetStageId,
+            new_stage: newStage,
+            contact_id: ghlContactId,
+          },
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            status: effectiveLead.status,
+            ghlStatus: "synced",
+            method: "api_create",
+            opportunityId,
+            contactId: ghlContactId,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      } else {
+        const message = `Failed to create GHL opportunity: ${createBody}`;
+        log("Opportunity creation failed", { status: createRes.status, body: createBody });
+
+        await admin.from("crm_activity_events").insert({
+          event_type: "lead_updated",
+          actor_id: user.id,
+          entity_type: "lead",
+          entity_id: effectiveLead.id,
+          entity_name: effectiveLead.lead_name,
+          event_category: "ghl_sync_failed",
+          metadata: { action: "ghl_sync_failed", message, http_status: createRes.status },
+        });
+
+        return new Response(JSON.stringify({ success: false, error: message }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
     }
 
-    const previousStageLabel = STAGE_LABELS[previousStage] || previousStage;
-    const newStageLabel = STAGE_LABELS[newStage] || newStage;
-    const ghlContactId = typeof effectiveLead.ghl_contact_id === "string" &&
-        effectiveLead.ghl_contact_id.trim().length > 0
-      ? effectiveLead.ghl_contact_id.trim()
-      : null;
+    // Update the opportunity stage via API
+    log("Updating opportunity stage", { opportunityId, targetStageId, stage: STAGE_LABELS[newStage] });
+    const updateResult = await updateOpportunityStage(opportunityId, targetStageId, ghlApiKey);
 
-    if (!ghlContactId) {
-      const message =
-        "Lead is missing a linked GHL contact ID. Backfill or relink the contact before syncing stages.";
+    const syncStatus = updateResult.ok ? "accepted" : "failed";
+    const syncMessage = updateResult.ok
+      ? `Stage updated to "${STAGE_LABELS[newStage] || newStage}" via API`
+      : `API update failed: HTTP ${updateResult.status} — ${updateResult.body}`;
 
-      await admin.from("crm_activity_events").insert({
-        event_type: "lead_updated",
-        actor_id: user.id,
-        entity_type: "lead",
-        entity_id: effectiveLead.id,
-        entity_name: effectiveLead.lead_name,
-        event_category: "ghl_webhook_failed",
-        metadata: {
-          action: "ghl_webhook_failed",
-          message,
-          previous_stage: previousStage,
-          new_stage: newStage,
-          contact_id: null,
-        },
-      });
-
-      await admin
-        .from("lead_intake_submissions")
-        .update({
-          ghl_webhook_status: "failed",
-          ghl_webhook_response: message,
-          ghl_webhook_fired_at: null,
-        })
-        .eq("lead_id", effectiveLead.id);
-
-      return new Response(JSON.stringify({ success: false, error: message }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const payload = {
-      event: "pipeline_stage_changed",
-      trigger_source: "a_z_command",
-      lead_id: effectiveLead.id,
-      id: ghlContactId,
-      contact_id: ghlContactId,
-      contactId: ghlContactId,
-      ghl_contact_id: ghlContactId,
-      contact: {
-        id: ghlContactId,
-        name: effectiveLead.lead_name,
-        email: effectiveLead.email,
-        phone: effectiveLead.phone,
-      },
-      lead_name: effectiveLead.lead_name,
-      name: effectiveLead.lead_name,
-      email: effectiveLead.email,
-      phone: effectiveLead.phone,
-      business_unit: effectiveLead.business_unit,
-      previous_stage: previousStageLabel,
-      previous_stage_key: previousStage,
-      previous_stage_name: previousStageLabel,
-      new_stage: newStageLabel,
-      new_stage_key: newStage,
-      new_stage_name: newStageLabel,
-      stage: newStageLabel,
-      stage_key: newStage,
-      stage_name: newStageLabel,
-      assigned_to: assignedTo,
-      source: effectiveLead.source,
-      timestamp: new Date().toISOString(),
-    };
-
-    const ghlResponse = await fetch(webhookConfig.webhook_url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const responseText = await ghlResponse.text();
-    const parsedResponse = responseText
-      ? parseMaybeJson(responseText)
-      : `HTTP ${ghlResponse.status}`;
-    const webhookStatus = getOutboundWebhookStatus(ghlResponse.ok);
-
-    const intakeStatusPayload = {
-      ghl_webhook_status: webhookStatus,
-      ghl_webhook_response: parsedResponse,
-      ghl_webhook_fired_at: ghlResponse.ok ? new Date().toISOString() : null,
-    };
-
+    // Update intake submission
     const { data: updatedIntakeRows } = await admin
       .from("lead_intake_submissions")
-      .update(intakeStatusPayload)
+      .update({
+        ghl_webhook_status: syncStatus,
+        ghl_webhook_response: syncMessage,
+        ghl_webhook_fired_at: updateResult.ok ? new Date().toISOString() : null,
+      })
       .eq("lead_id", effectiveLead.id)
       .select("id");
 
@@ -384,39 +486,38 @@ serve(async (req) => {
         form_data: {},
         source: effectiveLead.source || "manual",
         lead_id: effectiveLead.id,
-        ...intakeStatusPayload,
+        ghl_webhook_status: syncStatus,
+        ghl_webhook_response: syncMessage,
+        ghl_webhook_fired_at: updateResult.ok ? new Date().toISOString() : null,
       });
     }
 
+    // Log activity
     await admin.from("crm_activity_events").insert({
       event_type: "lead_updated",
       actor_id: user.id,
       entity_type: "lead",
       entity_id: effectiveLead.id,
       entity_name: effectiveLead.lead_name,
-      event_category: ghlResponse.ok
-        ? "ghl_webhook_accepted"
-        : "ghl_webhook_failed",
+      event_category: updateResult.ok ? "ghl_api_synced" : "ghl_sync_failed",
       metadata: {
-        action: ghlResponse.ok ? "ghl_webhook_accepted" : "ghl_webhook_failed",
-        message: `GHL webhook ${
-          ghlResponse.ok ? "accepted" : "FAILED"
-        } — ${newStageLabel} — HTTP ${ghlResponse.status}`,
+        action: updateResult.ok ? "ghl_stage_updated_via_api" : "ghl_api_update_failed",
+        message: syncMessage,
         previous_stage: previousStage,
         new_stage: newStage,
-        http_status: ghlResponse.status,
-        response: parsedResponse,
+        opportunity_id: opportunityId,
+        pipeline_id: pipelineId,
+        stage_id: targetStageId,
+        http_status: updateResult.status,
         contact_id: ghlContactId,
       },
     });
 
-    if (!ghlResponse.ok) {
+    if (!updateResult.ok) {
       await admin.from("crm_alerts").insert({
-        alert_type: "ghl_webhook_failed",
-        title: `GHL webhook failed for ${effectiveLead.lead_name}`,
-        description: `Stage ${
-          STAGE_LABELS[newStage] || newStage
-        } webhook returned HTTP ${ghlResponse.status}`,
+        alert_type: "ghl_sync_failed",
+        title: `GHL stage sync failed for ${effectiveLead.lead_name}`,
+        description: `Stage "${STAGE_LABELS[newStage] || newStage}" API update returned HTTP ${updateResult.status}`,
         entity_type: "lead",
         entity_id: effectiveLead.id,
         source_filter: effectiveLead.source || null,
@@ -427,16 +528,15 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({
-        success: ghlResponse.ok,
+        success: updateResult.ok,
         status: effectiveLead.status,
-        ghlStatus: webhookStatus,
+        ghlStatus: syncStatus,
+        method: "api_update",
+        opportunityId,
         contactId: ghlContactId,
-        response: parsedResponse,
+        stageId: targetStageId,
       }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
