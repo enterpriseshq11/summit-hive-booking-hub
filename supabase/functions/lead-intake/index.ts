@@ -198,6 +198,7 @@ Deno.serve(async (req) => {
           headers: ghlHeaders,
           body: JSON.stringify({
             locationId: ghlLocationId,
+            pageLimit: 1,
             filters: [{ field: "email", operator: "eq", value: email }],
           }),
         });
@@ -237,11 +238,14 @@ Deno.serve(async (req) => {
           } else {
             const errText = await createRes.text();
             console.log("[lead-intake] GHL create failed:", errText);
-            // Try to extract ID from 422 duplicate error
-            if (createRes.status === 422) {
+            // Try to extract ID from duplicate error (400 or 422)
+            if (createRes.status === 400 || createRes.status === 422) {
               try {
                 const errJson = JSON.parse(errText);
-                ghlContactId = errJson?.contact?.id || errJson?.contactId || null;
+                ghlContactId = errJson?.meta?.contactId || errJson?.contact?.id || errJson?.contactId || null;
+                if (ghlContactId) {
+                  console.log("[lead-intake] Extracted contact ID from duplicate error:", ghlContactId);
+                }
               } catch (_) { /* ignore */ }
             }
           }
