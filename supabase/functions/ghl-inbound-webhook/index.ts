@@ -310,7 +310,26 @@ async function handleStageChanged(supabase: any, body: any) {
   }
 
   if (lead.status === mappedStage) {
-    logStep("Lead already at target stage, skipping", { leadId: lead.id, stage: mappedStage });
+    const syncedAt = new Date().toISOString();
+
+    await supabase.from("crm_leads").update({
+      ghl_sync_in_progress: false,
+      ghl_last_synced_at: syncedAt,
+      ...(contactId && !lead.ghl_contact_id ? { ghl_contact_id: contactId } : {}),
+    }).eq("id", lead.id);
+
+    await supabase.from("lead_intake_submissions").update({
+      ghl_webhook_status: "confirmed",
+      ghl_webhook_response: {
+        source: "ghl_inbound_webhook",
+        confirmation: "stage_already_matched",
+        contact_id: contactId,
+        stage: mappedStage,
+        confirmed_at: syncedAt,
+      },
+    }).eq("lead_id", lead.id);
+
+    logStep("Lead already at target stage, marking outbound sync confirmed", { leadId: lead.id, stage: mappedStage });
     return new Response(
       JSON.stringify({ received: true, skipped: true, reason: "already_at_stage" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
@@ -343,12 +362,24 @@ async function handleStageChanged(supabase: any, body: any) {
     },
   });
 
-  if (contactId && !lead.ghl_contact_id) {
-    await supabase.from("crm_leads").update({ ghl_contact_id: contactId }).eq("id", lead.id);
-  }
+  const syncedAt = new Date().toISOString();
 
-  // Clear sync flag
-  await supabase.from("crm_leads").update({ ghl_sync_in_progress: false }).eq("id", lead.id);
+  await supabase.from("crm_leads").update({
+    ghl_sync_in_progress: false,
+    ghl_last_synced_at: syncedAt,
+    ...(contactId && !lead.ghl_contact_id ? { ghl_contact_id: contactId } : {}),
+  }).eq("id", lead.id);
+
+  await supabase.from("lead_intake_submissions").update({
+    ghl_webhook_status: "confirmed",
+    ghl_webhook_response: {
+      source: "ghl_inbound_webhook",
+      confirmation: "stage_updated",
+      contact_id: contactId,
+      stage: mappedStage,
+      confirmed_at: syncedAt,
+    },
+  }).eq("lead_id", lead.id);
 
   logStep("Lead updated successfully", { leadId: lead.id, newStage: mappedStage });
 
