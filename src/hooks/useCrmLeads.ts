@@ -138,14 +138,15 @@ export function useUpdateCrmLead() {
         .eq("id", id)
         .single();
 
-      const { data, error } = await supabase
+      const { data: rows, error } = await supabase
         .from("crm_leads")
         .update(updates)
         .eq("id", id)
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
+      if (!rows || rows.length === 0) throw new Error("Lead not found or access denied");
+      const data = rows[0];
 
       // Determine event type
       let eventType: Database["public"]["Enums"]["crm_activity_type"] = "lead_updated";
