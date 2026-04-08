@@ -564,8 +564,6 @@ export default function BeautyHaven() {
         </div>
       </section>
 
-      <CheckerDivider />
-
       {/* ═══ REVIEWS ═══ */}
       <section id="reviews" className="hmbh-section">
         <div className="hmbh-container hmbh-container--narrow text-center">
