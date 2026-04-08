@@ -1,3 +1,15 @@
+/**
+ * HIGH MAINTENANCE BEAUTY HAVEN — /beauty-haven
+ *
+ * OPEN ITEMS (pending from team):
+ * 1. Hannah Collins bio photo — upload to Beauty Haven Google Drive folder and replace placeholder in team card
+ * 2. Desiree Brogaard bio photo — same
+ * 3. Hannah hair before/after photos — 3 gallery slots built and waiting, upload to Google Drive Beauty Haven folder
+ * 4. Nail portfolio images from GlossGenius — 9 slots built, images need to be exported and uploaded
+ * 5. Hannah's Square booking URL — once generated, add as additional option alongside phone/email (do NOT replace contact routing)
+ * 6. Facebook reviews — Hannah and Desiree to provide 3-5 review texts each; populate reviews section and remove empty state
+ * 7. Hannah's deposit exact tiers — confirm whether threshold is services under $125 or flat $50; update policy column
+ */
 import { useState, useEffect, useRef } from "react";
 import { SEOHead } from "@/components/seo";
 import { Scissors, Star, X, Plus, Phone, Mail, MapPin, Clock, ExternalLink, Camera } from "lucide-react";
@@ -256,9 +268,9 @@ export default function BeautyHaven() {
           <div className="hmbh-team-grid">
             {/* Hannah */}
             <div className="hmbh-card">
-              <div className="hmbh-photo-placeholder">
+              <div className="hmbh-photo-placeholder border border-dashed border-[#FF0099]/35">
                 <Camera className="w-8 h-8 text-[#FF0099]/40" />
-                <span className="text-sm text-white/40">Photo coming soon — Hannah Collins</span>
+                <span className="text-sm text-white/40">[INSERT PHOTO — Hannah Collins]</span>
               </div>
               <div className="p-6">
                 <h3 className="hmbh-card-name">Hannah Collins</h3>
@@ -285,9 +297,9 @@ export default function BeautyHaven() {
 
             {/* Desiree */}
             <div className="hmbh-card">
-              <div className="hmbh-photo-placeholder">
+              <div className="hmbh-photo-placeholder border border-dashed border-[#FF0099]/35">
                 <Camera className="w-8 h-8 text-[#FF0099]/40" />
-                <span className="text-sm text-white/40">Photo coming soon — Desiree Brogaard</span>
+                <span className="text-sm text-white/40">[INSERT PHOTO — Desiree Brogaard]</span>
               </div>
               <div className="p-6">
                 <h3 className="hmbh-card-name">Desiree Brogaard</h3>
@@ -309,8 +321,6 @@ export default function BeautyHaven() {
           </div>
         </div>
       </section>
-
-      <CheckerDivider />
 
       {/* ═══ HAIR SERVICES ═══ */}
       <section id="hair-by-hannah" className="hmbh-section">
@@ -410,7 +420,12 @@ export default function BeautyHaven() {
             </div>
           ))}
 
-          <p className="text-xs text-white/45 mt-4 sm:hidden italic">Deposits listed per service on the booking page.</p>
+          <p className="text-xs text-white/45 mt-4 sm:hidden italic">
+            Deposits listed per service.{" "}
+            <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="text-[#FF0099] underline underline-offset-2">
+              View full details on the booking page.
+            </a>
+          </p>
 
           <div className="mt-10 text-center">
             <BtnPrimary href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer">Book Nails Online</BtnPrimary>
@@ -549,8 +564,6 @@ export default function BeautyHaven() {
         </div>
       </section>
 
-      <CheckerDivider />
-
       {/* ═══ REVIEWS ═══ */}
       <section id="reviews" className="hmbh-section">
         <div className="hmbh-container hmbh-container--narrow text-center">
@@ -569,6 +582,8 @@ export default function BeautyHaven() {
           </a>
         </div>
       </section>
+
+      <CheckerDivider />
 
       {/* ═══ LOCATION ═══ */}
       <section id="find-us" className="hmbh-section">
