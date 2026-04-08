@@ -1,0 +1,437 @@
+/* ═══════════════════════════════════════════════
+   HIGH MAINTENANCE BEAUTY HAVEN — Design System
+   ═══════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap');
+
+/* ─── Tokens ─── */
+.hmbh-page {
+  --hmbh-black: #0a0a0a;
+  --hmbh-black-soft: #111111;
+  --hmbh-black-card: #1a1a1a;
+  --hmbh-pink: #FF0099;
+  --hmbh-pink-glow: rgba(255, 0, 153, 0.15);
+  --hmbh-pink-border: rgba(255, 0, 153, 0.35);
+  --hmbh-white: #ffffff;
+  --hmbh-white-muted: rgba(255, 255, 255, 0.75);
+  --hmbh-white-dim: rgba(255, 255, 255, 0.45);
+  --hmbh-divider: rgba(255, 255, 255, 0.08);
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+
+  background: var(--hmbh-black);
+  color: var(--hmbh-white-muted);
+  font-family: var(--font-body);
+}
+
+/* ─── Layout ─── */
+.hmbh-section {
+  padding: clamp(4rem, 8vw, 7rem) clamp(1.5rem, 5vw, 6rem);
+}
+
+.hmbh-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.hmbh-container--narrow {
+  max-width: 720px;
+}
+
+/* ─── Typography ─── */
+.hmbh-label {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hmbh-pink);
+  margin-bottom: 0.75rem;
+}
+
+.hmbh-headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 700;
+  color: var(--hmbh-white);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.hmbh-body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--hmbh-white-muted);
+}
+
+/* ─── Hero ─── */
+.hmbh-hero {
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: var(--hmbh-black);
+  background-image:
+    radial-gradient(ellipse 8px 6px at 20% 30%, var(--hmbh-pink) 0%, transparent 100%),
+    radial-gradient(ellipse 6px 9px at 55% 15%, var(--hmbh-pink) 0%, transparent 100%),
+    radial-gradient(ellipse 10px 7px at 80% 60%, var(--hmbh-pink) 0%, transparent 100%),
+    radial-gradient(ellipse 5px 8px at 35% 75%, var(--hmbh-pink) 0%, transparent 100%),
+    radial-gradient(ellipse 7px 5px at 70% 40%, var(--hmbh-pink) 0%, transparent 100%),
+    radial-gradient(ellipse 9px 6px at 10% 65%, var(--hmbh-pink) 0%, transparent 100%),
+    radial-gradient(ellipse 6px 10px at 90% 85%, var(--hmbh-pink) 0%, transparent 100%),
+    radial-gradient(ellipse 8px 5px at 45% 50%, var(--hmbh-pink) 0%, transparent 100%);
+  background-size: 180px 180px;
+  background-repeat: repeat;
+  position: relative;
+}
+
+.hmbh-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hmbh-black);
+  opacity: 0.92;
+}
+
+.hmbh-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.hmbh-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 900;
+  color: var(--hmbh-white);
+  line-height: 1.1;
+  margin: 0.75rem 0;
+}
+
+.hmbh-hero-sub {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  color: var(--hmbh-white-muted);
+  margin-bottom: 2rem;
+}
+
+.hmbh-hero-ctas {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .hmbh-hero-ctas {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hmbh-hero-ctas a {
+    text-align: center;
+  }
+}
+
+/* ─── Fade-in animation ─── */
+@keyframes hmbhFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-hmbh-fade-in > * {
+  opacity: 0;
+  animation: hmbhFadeUp 0.6s ease forwards;
+}
+.animate-hmbh-fade-in > *:nth-child(1) { animation-delay: 0s; }
+.animate-hmbh-fade-in > *:nth-child(2) { animation-delay: 0.1s; }
+.animate-hmbh-fade-in > *:nth-child(3) { animation-delay: 0.2s; }
+.animate-hmbh-fade-in > *:nth-child(4) { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hmbh-fade-in > * {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ─── Buttons ─── */
+.hmbh-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--hmbh-pink);
+  color: var(--hmbh-white);
+  border: none;
+  padding: 0.875rem 2rem;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+.hmbh-btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.hmbh-btn-primary:active { transform: translateY(0); opacity: 1; }
+.hmbh-btn-primary:focus-visible { outline: 2px solid var(--hmbh-pink); outline-offset: 3px; }
+
+.hmbh-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--hmbh-pink);
+  border: 1px solid var(--hmbh-pink-border);
+  padding: 0.875rem 2rem;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.hmbh-btn-secondary:hover { background: var(--hmbh-pink-glow); border-color: var(--hmbh-pink); }
+.hmbh-btn-secondary:focus-visible { outline: 2px solid var(--hmbh-pink); outline-offset: 3px; }
+
+/* ─── Cards ─── */
+.hmbh-card {
+  background: var(--hmbh-black-card);
+  border: 1px solid var(--hmbh-divider);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+.hmbh-card:hover { border-color: var(--hmbh-pink-border); }
+
+.hmbh-card-name {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--hmbh-white);
+}
+
+.hmbh-card-title {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--hmbh-pink);
+  margin-top: 0.25rem;
+}
+
+/* ─── Badge ─── */
+.hmbh-badge {
+  display: inline-block;
+  background: var(--hmbh-pink-glow);
+  color: var(--hmbh-pink);
+  border: 1px solid var(--hmbh-pink-border);
+  padding: 0.25rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ─── Dividers ─── */
+.hmbh-divider-check {
+  height: 12px;
+  background-image: repeating-conic-gradient(
+    rgba(255,255,255,0.06) 0% 25%,
+    transparent 0% 50%
+  );
+  background-size: 12px 12px;
+  margin: 0;
+}
+
+.hmbh-divider-line {
+  height: 1px;
+  background: var(--hmbh-divider);
+}
+
+/* ─── Service tables ─── */
+.hmbh-service-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.hmbh-service-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hmbh-white-dim);
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--hmbh-divider);
+}
+.hmbh-service-table td {
+  padding: 0.875rem 0;
+  border-bottom: 1px solid var(--hmbh-divider);
+  font-size: 1rem;
+  color: var(--hmbh-white-muted);
+  vertical-align: middle;
+}
+.hmbh-service-table tr:last-child td { border-bottom: none; }
+.hmbh-service-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* ─── Category headers ─── */
+.hmbh-category-header {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hmbh-pink);
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--hmbh-pink-border);
+}
+
+.hmbh-policy-header {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hmbh-pink);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ─── Team grid ─── */
+.hmbh-team-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+@media (min-width: 768px) {
+  .hmbh-team-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ─── Photo placeholders ─── */
+.hmbh-photo-placeholder {
+  aspect-ratio: 4/3;
+  background: var(--hmbh-black-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* ─── Gallery ─── */
+.hmbh-gallery-tile {
+  position: relative;
+  aspect-ratio: 1/1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.hmbh-gallery-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--hmbh-black-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.hmbh-gallery-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 0, 153, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.hmbh-gallery-tile:hover .hmbh-gallery-overlay,
+.hmbh-gallery-tile:focus-within .hmbh-gallery-overlay {
+  opacity: 1;
+}
+.hmbh-gallery-tile:focus-visible {
+  outline: 2px solid var(--hmbh-pink);
+  outline-offset: 2px;
+}
+
+/* ─── Map ─── */
+.hmbh-map-filter {
+  filter: invert(90%) hue-rotate(180deg) saturate(0.8);
+}
+
+/* ─── Mobile FAB ─── */
+.hmbh-fab-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.hmbh-fab-main {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hmbh-pink);
+  color: var(--hmbh-white);
+  border: none;
+  border-radius: 100px;
+  padding: 0.875rem 1.25rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255, 0, 153, 0.4);
+  transition: transform 0.2s ease;
+}
+.hmbh-fab-main:hover { transform: scale(1.05); }
+
+.hmbh-fab-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+  animation: hmbhFadeUp 0.2s ease;
+}
+
+.hmbh-fab-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.hmbh-fab-option--primary {
+  background: var(--hmbh-pink);
+  color: var(--hmbh-white);
+}
+
+.hmbh-fab-option--secondary {
+  background: var(--hmbh-black-card);
+  color: var(--hmbh-pink);
+  border: 1px solid var(--hmbh-pink-border);
+}
