@@ -102,6 +102,21 @@ function resolveBusinessUnit(body: any): string {
   return "summit"; // default business unit
 }
 
+function extractLocationId(body: any): string {
+  return (
+    body?.locationId ||
+    body?.location_id ||
+    body?.location?.id ||
+    body?.contact?.locationId ||
+    body?.contact?.location_id ||
+    body?.contact?.location?.id ||
+    body?.opportunity?.locationId ||
+    body?.opportunity?.location_id ||
+    body?.opportunity?.location?.id ||
+    ""
+  );
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -116,21 +131,25 @@ serve(async (req) => {
   try {
     const body = await req.json();
 
-    // Verify shared secret or trusted GHL location
+    // Verify trusted GHL location first, then fall back to secret-based auth
     const secret = Deno.env.get("GHL_INBOUND_WEBHOOK_SECRET");
     const authHeader = req.headers.get("authorization") || "";
     const sigHeader = req.headers.get("x-ghl-signature") || "";
     const querySecret = new URL(req.url).searchParams.get("secret") || "";
-    const locationId = body?.locationId || body?.location_id ||
-      body?.location?.id || body?.contact?.locationId || "";
+    const locationId = extractLocationId(body);
     const isTrustedLocation = locationId === TRUSTED_GHL_LOCATION_ID;
 
-    if (secret) {
+    if (isTrustedLocation) {
+      logStep("Webhook authorized", {
+        auth_mode: "trusted_location",
+        locationId,
+      });
+    } else if (secret) {
       const token = authHeader.replace("Bearer ", "");
       const isSecretMatch = token === secret || sigHeader === secret ||
         querySecret === secret;
 
-      if (!isSecretMatch && !isTrustedLocation) {
+      if (!isSecretMatch) {
         logStep("Unauthorized — secret mismatch");
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -139,7 +158,7 @@ serve(async (req) => {
       }
 
       logStep("Webhook authorized", {
-        auth_mode: isSecretMatch ? "secret" : "trusted_location",
+        auth_mode: "secret",
         locationId: locationId || null,
       });
     } else {
