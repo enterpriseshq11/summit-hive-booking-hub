@@ -17,6 +17,7 @@ import {
   Dumbbell,
   Gift,
   Scissors,
+  CircleDot,
   ShoppingBag,
   User,
   LogOut,
