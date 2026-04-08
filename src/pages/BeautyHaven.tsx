@@ -322,8 +322,6 @@ export default function BeautyHaven() {
         </div>
       </section>
 
-      <CheckerDivider />
-
       {/* ═══ HAIR SERVICES ═══ */}
       <section id="hair-by-hannah" className="hmbh-section">
         <div className="hmbh-container">
