@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "./styles/beauty-haven.css";
 import { initDataEventTracking } from "./lib/analytics";
 
 // eslint-disable-next-line no-console
