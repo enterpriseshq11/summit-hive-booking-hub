@@ -378,6 +378,49 @@ export function Header() {
             )}
           </div>
 
+          {/* Beauty Haven - Collapsible */}
+          <div>
+            <button
+              onClick={() => toggleMobileSection("beautyhaven")}
+              className={cn(
+                "flex items-center justify-between w-full px-4 py-3 text-sm font-medium rounded-md hover:bg-primary-foreground/10",
+                location.pathname === "/beauty-haven" ? "text-[#FF0099]" : "text-primary-foreground/70 hover:text-primary-foreground"
+              )}
+            >
+              <span className="flex items-center gap-3">
+                <Scissors className="h-5 w-5" />
+                Beauty Haven
+              </span>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", expandedMobileSection === "beautyhaven" && "rotate-180")} />
+            </button>
+            {expandedMobileSection === "beautyhaven" && (
+              <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#FF0099]/30 pl-4">
+                <Link
+                  to="/beauty-haven#hair-by-hannah"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                >
+                  <Scissors className="h-4 w-4 text-[#FF0099]" />
+                  <div>
+                    <div>Hair by Hannah</div>
+                    <div className="text-xs text-primary-foreground/50">Color, cuts & styles</div>
+                  </div>
+                </Link>
+                <Link
+                  to="/beauty-haven#nails-by-desiree"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                >
+                  <Sparkles className="h-4 w-4 text-[#FF0099]" />
+                  <div>
+                    <div>Nails by Desiree</div>
+                    <div className="text-xs text-primary-foreground/50">Nail art & sets</div>
+                  </div>
+                </Link>
+              </div>
+            )}
+          </div>
+
           {/* 3. Shop - Collapsible */}
           <div>
             <button
