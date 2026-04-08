@@ -213,7 +213,7 @@ export default function BeautyHaven() {
       <SEOHead
         title="Beauty Haven | A-Z Enterprises"
         description="High Maintenance Beauty Haven — luxury hair color and nail art studio located inside A-Z Enterprises in Wapakoneta, Ohio. Book online or by contact."
-        path="/beauty-haven"
+        canonicalPath="/beauty-haven"
       />
 
       {/* ═══ HERO ═══ */}
