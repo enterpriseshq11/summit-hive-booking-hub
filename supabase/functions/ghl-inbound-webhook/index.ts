@@ -168,7 +168,8 @@ serve(async (req) => {
     }
 
     const event = body?.event || body?.type || "";
-    logStep("Received payload", { event, contact_id: body?.contact_id });
+    const hasNewStage = !!(body?.new_stage);
+    logStep("Received payload", { event, contact_id: body?.contact_id, hasNewStage, keys: Object.keys(body).slice(0, 15) });
 
     // ─── Route by event type ───
     if (
@@ -178,8 +179,26 @@ serve(async (req) => {
       return await handleContactCreated(supabase, body);
     }
 
-    // Default: treat as stage change (backward compatible)
-    return await handleStageChanged(supabase, body);
+    if (
+      event === "contact.stage_changed" || event === "ContactStageUpdate" ||
+      event === "stage_changed" || hasNewStage
+    ) {
+      return await handleStageChanged(supabase, body);
+    }
+
+    // No recognized event AND no new_stage — treat as contact created (GHL workflow webhooks often omit event field)
+    const hasContactData = !!(body?.contact_id || body?.contactId || body?.id || body?.email || body?.phone || body?.name || body?.first_name || body?.firstName);
+    if (hasContactData) {
+      logStep("No event type specified, treating as contact.created based on contact data present");
+      return await handleContactCreated(supabase, body);
+    }
+
+    // Nothing useful
+    logStep("Unrecognized payload — no event, no stage, no contact data");
+    return new Response(
+      JSON.stringify({ received: true, warning: "Unrecognized payload format" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+    );
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
