@@ -78,27 +78,45 @@ const STAGE_LABELS: Record<string, string> = {
   lost: "Lost",
 };
 
-/** Map GHL tags/custom fields to internal business_unit */
+/** Map GHL tags to internal business_unit */
+const TAG_TO_BUSINESS_UNIT: Record<string, string> = {
+  "az-hive": "coworking",
+  "az-summit": "summit",
+  "az-spa": "spa",
+  "az-fitness": "fitness",
+  "az-elevated": "elevated_by_elyse",
+  "az-360-photobooth": "photo_booth",
+  "az-voice-vault": "voice_vault",
+  "mobile homes": "mobile_homes",
+  "a-z estates": "mobile_homes",
+  "az estates": "mobile_homes",
+  "mobile_homes": "mobile_homes",
+};
+
 function resolveBusinessUnit(body: any): string {
-  const tags = (body?.tags || []).map((t: string) => t.toLowerCase());
+  const tags = (body?.tags || []).map((t: string) => t.toLowerCase().trim());
   const buField =
     (body?.business_unit || body?.customField?.business_unit || "")
-      .toLowerCase();
+      .toLowerCase().trim();
 
-  if (
-    tags.includes("mobile homes") || tags.includes("a-z estates") ||
-    tags.includes("mobile_homes") ||
-    buField === "mobile_homes" || buField === "mobile homes" ||
-    buField === "a-z estates"
-  ) {
-    return "mobile_homes";
+  // Check tags first (most reliable from GHL workflows)
+  for (const tag of tags) {
+    if (TAG_TO_BUSINESS_UNIT[tag]) {
+      return TAG_TO_BUSINESS_UNIT[tag];
+    }
+  }
+
+  // Check explicit business_unit field
+  if (buField && TAG_TO_BUSINESS_UNIT[buField]) {
+    return TAG_TO_BUSINESS_UNIT[buField];
   }
   if (
     buField &&
-    ["summit", "spa", "fitness", "coworking", "voice_vault"].includes(buField)
+    ["summit", "spa", "fitness", "coworking", "voice_vault", "elevated_by_elyse", "photo_booth", "mobile_homes"].includes(buField)
   ) {
     return buField;
   }
+
   return "summit"; // default business unit
 }
 
