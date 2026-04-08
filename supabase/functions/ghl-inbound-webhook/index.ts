@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const TRUSTED_GHL_LOCATION_ID = "u13ENqQ110HeXyg36sNv";
+
 const logStep = (step: string, details?: any) => {
   console.log(`[GHL-INBOUND] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
 };
@@ -66,25 +68,36 @@ serve(async (req) => {
   );
 
   try {
-    // Verify shared secret
+    const body = await req.json();
+
+    // Verify shared secret or trusted GHL location
     const secret = Deno.env.get("GHL_INBOUND_WEBHOOK_SECRET");
     const authHeader = req.headers.get("authorization") || "";
     const sigHeader = req.headers.get("x-ghl-signature") || "";
+    const querySecret = new URL(req.url).searchParams.get("secret") || "";
+    const locationId = body?.locationId || body?.location_id || body?.location?.id || body?.contact?.locationId || "";
+    const isTrustedLocation = locationId === TRUSTED_GHL_LOCATION_ID;
 
     if (secret) {
       const token = authHeader.replace("Bearer ", "");
-      if (token !== secret && sigHeader !== secret) {
+      const isSecretMatch = token === secret || sigHeader === secret || querySecret === secret;
+
+      if (!isSecretMatch && !isTrustedLocation) {
         logStep("Unauthorized — secret mismatch");
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 401,
         });
       }
+
+      logStep("Webhook authorized", {
+        auth_mode: isSecretMatch ? "secret" : "trusted_location",
+        locationId: locationId || null,
+      });
     } else {
       logStep("WARNING: GHL_INBOUND_WEBHOOK_SECRET not set — requests are unverified");
     }
 
-    const body = await req.json();
     const event = body?.event || body?.type || "";
     logStep("Received payload", { event, contact_id: body?.contact_id });
 
