@@ -94,13 +94,23 @@ const TAG_TO_BUSINESS_UNIT: Record<string, string> = {
 };
 
 function resolveBusinessUnit(body: any): string {
-  const tags = (body?.tags || []).map((t: string) => t.toLowerCase().trim());
+  const rawTags = body?.tags;
+  const tags = Array.isArray(rawTags)
+    ? rawTags
+    : typeof rawTags === "string"
+      ? rawTags.split(",")
+      : rawTags
+        ? [rawTags]
+        : [];
+  const normalizedTags = tags
+    .map((t: unknown) => String(t).toLowerCase().trim())
+    .filter(Boolean);
   const buField =
     (body?.business_unit || body?.customField?.business_unit || "")
       .toLowerCase().trim();
 
   // Check tags first (most reliable from GHL workflows)
-  for (const tag of tags) {
+  for (const tag of normalizedTags) {
     if (TAG_TO_BUSINESS_UNIT[tag]) {
       return TAG_TO_BUSINESS_UNIT[tag];
     }
