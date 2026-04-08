@@ -147,7 +147,7 @@ export function Header() {
                 size="sm" 
                 className={cn(
                   "gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 text-xs md:text-xs lg:text-sm",
-                  location.pathname === "/beauty-haven"
+                  location.pathname.startsWith("/beauty-haven")
                     ? "text-[#FF0099]"
                     : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                 )}
@@ -159,7 +159,7 @@ export function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 bg-popover z-[60]">
               <DropdownMenuItem asChild>
-                <Link to="/beauty-haven#hair-by-hannah" className="flex items-center gap-3 py-2">
+                <Link to="/beauty-haven/hair" className="flex items-center gap-3 py-2">
                   <Scissors className="h-4 w-4 text-[#FF0099]" />
                   <div>
                     <div className="font-medium">Hair by Hannah</div>
@@ -168,7 +168,7 @@ export function Header() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/beauty-haven#nails-by-desiree" className="flex items-center gap-3 py-2">
+                <Link to="/beauty-haven/nails" className="flex items-center gap-3 py-2">
                   <Sparkles className="h-4 w-4 text-[#FF0099]" />
                   <div>
                     <div className="font-medium">Nails by Desiree</div>
@@ -384,7 +384,7 @@ export function Header() {
               onClick={() => toggleMobileSection("beautyhaven")}
               className={cn(
                 "flex items-center justify-between w-full px-4 py-3 text-sm font-medium rounded-md hover:bg-primary-foreground/10",
-                location.pathname === "/beauty-haven" ? "text-[#FF0099]" : "text-primary-foreground/70 hover:text-primary-foreground"
+                location.pathname.startsWith("/beauty-haven") ? "text-[#FF0099]" : "text-primary-foreground/70 hover:text-primary-foreground"
               )}
             >
               <span className="flex items-center gap-3">
@@ -396,7 +396,7 @@ export function Header() {
             {expandedMobileSection === "beautyhaven" && (
               <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#FF0099]/30 pl-4">
                 <Link
-                  to="/beauty-haven#hair-by-hannah"
+                  to="/beauty-haven/hair"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
                 >
@@ -407,7 +407,7 @@ export function Header() {
                   </div>
                 </Link>
                 <Link
-                  to="/beauty-haven#nails-by-desiree"
+                  to="/beauty-haven/nails"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
                 >
