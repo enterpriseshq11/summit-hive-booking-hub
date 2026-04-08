@@ -46,6 +46,7 @@ import CareersFitness from "./pages/careers/CareersFitness";
 import CareersContracting from "./pages/careers/CareersContracting";
 import WorkerSignup from "./pages/WorkerSignup";
 import AuthCallback from "./pages/AuthCallback";
+import BeautyHaven from "./pages/BeautyHaven";
 
 // Debug
 import AuthDebug from "./pages/__debug/AuthDebug";
@@ -176,6 +177,7 @@ function AppInner() {
           <Route path="/book-spa" element={<BookSpa />} />
           <Route path="/join-fitness" element={<JoinFitness />} />
           <Route path="/the-hive" element={<TheHive />} />
+          <Route path="/beauty-haven" element={<BeautyHaven />} />
 
           {/* Public Intake Forms */}
           <Route path="/intake/:unit" element={<IntakePage />} />
