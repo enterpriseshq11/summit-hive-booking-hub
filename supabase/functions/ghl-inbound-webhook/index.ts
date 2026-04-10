@@ -204,7 +204,15 @@ serve(async (req) => {
       event === "contact.created" || event === "ContactCreate" ||
       event === "contact_created"
     ) {
-      return await handleContactCreated(supabase, body);
+      return await handleContactCreatedOrUpdated(supabase, body);
+    }
+
+    if (
+      event === "contact.updated" || event === "ContactUpdate" ||
+      event === "contact_updated" || event === "contact.tag_added" ||
+      event === "ContactTagUpdate"
+    ) {
+      return await handleContactCreatedOrUpdated(supabase, body);
     }
 
     if (
@@ -214,11 +222,11 @@ serve(async (req) => {
       return await handleStageChanged(supabase, body);
     }
 
-    // No recognized event AND no new_stage — treat as contact created (GHL workflow webhooks often omit event field)
+    // No recognized event AND no new_stage — treat as contact upsert (GHL workflow webhooks often omit event field)
     const hasContactData = !!(body?.contact_id || body?.contactId || body?.id || body?.email || body?.phone || body?.name || body?.first_name || body?.firstName);
     if (hasContactData) {
-      logStep("No event type specified, treating as contact.created based on contact data present");
-      return await handleContactCreated(supabase, body);
+      logStep("No event type specified, treating as contact upsert based on contact data present");
+      return await handleContactCreatedOrUpdated(supabase, body);
     }
 
     // Nothing useful
