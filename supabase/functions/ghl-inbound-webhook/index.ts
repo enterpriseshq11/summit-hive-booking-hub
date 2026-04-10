@@ -256,8 +256,8 @@ serve(async (req) => {
   }
 });
 
-// ─── Handler: contact.created ───
-async function handleContactCreated(supabase: any, body: any) {
+// ─── Handler: contact created or updated (upsert logic) ───
+async function handleContactCreatedOrUpdated(supabase: any, body: any) {
   const contactId = body?.contact_id || body?.id || body?.contactId;
   const firstName = body?.first_name || body?.firstName ||
     body?.name?.split(" ")[0] || "";
@@ -273,7 +273,7 @@ async function handleContactCreated(supabase: any, body: any) {
   const businessUnit = resolveBusinessUnit(body);
 
   if (!fullName && !email && !phone) {
-    logStep("contact.created — no usable contact data");
+    logStep("contact upsert — no usable contact data");
     return new Response(
       JSON.stringify({ received: true, warning: "No usable contact data" }),
       {
@@ -283,65 +283,114 @@ async function handleContactCreated(supabase: any, body: any) {
     );
   }
 
-  // Check for duplicate by ghl_contact_id or email
+  // ─── Find existing lead by ghl_contact_id or email ───
+  let existingLead: any = null;
+
   if (contactId) {
-    const { data: existing } = await supabase
+    const { data } = await supabase
       .from("crm_leads")
-      .select("id")
+      .select("id, lead_name, status, email, phone, business_unit, ghl_contact_id")
       .eq("ghl_contact_id", contactId)
+      .order("created_at", { ascending: true })
+      .limit(1)
       .maybeSingle();
-    if (existing) {
-      logStep("contact.created — duplicate by ghl_contact_id", { contactId });
-      return new Response(
-        JSON.stringify({
-          received: true,
-          skipped: true,
-          reason: "duplicate_contact_id",
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        },
-      );
-    }
+    if (data) existingLead = data;
   }
 
-  if (email) {
-    const { data: existing } = await supabase
+  if (!existingLead && email) {
+    const { data } = await supabase
       .from("crm_leads")
-      .select("id")
+      .select("id, lead_name, status, email, phone, business_unit, ghl_contact_id")
       .eq("email", email)
       .eq("business_unit", businessUnit)
+      .order("created_at", { ascending: true })
+      .limit(1)
       .maybeSingle();
-    if (existing) {
-      // Link ghl_contact_id if we don't have it
-      if (contactId) {
-        await supabase.from("crm_leads")
-          .update({ ghl_contact_id: contactId })
-          .eq("id", existing.id);
-      }
-      logStep("contact.created — duplicate by email", { email, businessUnit });
-      return new Response(
-        JSON.stringify({
-          received: true,
-          skipped: true,
-          reason: "duplicate_email",
-          lead_id: existing.id,
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        },
-      );
-    }
+    if (data) existingLead = data;
   }
 
-  // Map initial stage
-  const mappedStage = STAGE_MAP[stageRaw] || STAGE_MAP[stageRaw?.trim()] ||
-    "new";
+  // ─── UPDATE existing lead ───
+  if (existingLead) {
+    const updates: Record<string, any> = {};
+
+    // Update contact info if changed
+    if (fullName && fullName !== existingLead.lead_name && fullName !== "GHL Contact") {
+      updates.lead_name = fullName;
+    }
+    if (email && email !== existingLead.email) {
+      updates.email = email;
+    }
+    if (phone && phone !== existingLead.phone) {
+      updates.phone = phone;
+    }
+    if (contactId && !existingLead.ghl_contact_id) {
+      updates.ghl_contact_id = contactId;
+    }
+
+    // Update stage if GHL sent one explicitly (not default "new")
+    const mappedStage = STAGE_MAP[stageRaw] || STAGE_MAP[stageRaw?.trim()] || null;
+    if (mappedStage && VALID_STAGES.has(mappedStage) && stageRaw !== "new" && mappedStage !== existingLead.status) {
+      updates.status = mappedStage;
+    }
+
+    // Always update sync timestamp
+    updates.ghl_last_synced_at = new Date().toISOString();
+    updates.ghl_sync_in_progress = false;
+
+    const { error: updateError } = await supabase
+      .from("crm_leads")
+      .update(updates)
+      .eq("id", existingLead.id);
+
+    if (updateError) {
+      logStep("contact upsert — update failed", { error: updateError.message });
+      return new Response(
+        JSON.stringify({ error: "Failed to update lead", details: updateError.message }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+      );
+    }
+
+    // Log activity if meaningful changes were made
+    const meaningfulKeys = Object.keys(updates).filter(k => !["ghl_last_synced_at", "ghl_sync_in_progress", "ghl_contact_id"].includes(k));
+    if (meaningfulKeys.length > 0) {
+      await supabase.from("crm_activity_events").insert({
+        event_type: updates.status ? "lead_status_changed" : "lead_updated",
+        entity_type: "lead",
+        entity_id: existingLead.id,
+        entity_name: updates.lead_name || existingLead.lead_name,
+        event_category: "ghl_inbound_update",
+        metadata: {
+          action: "ghl_inbound_contact_updated",
+          description: `Lead updated via GHL sync${updates.status ? ` — stage changed to ${STAGE_LABELS[updates.status] || updates.status}` : ""}`,
+          ghl_contact_id: contactId,
+          updated_fields: meaningfulKeys,
+          previous_stage: existingLead.status,
+          new_stage: updates.status || existingLead.status,
+        },
+      });
+    }
+
+    logStep("contact upsert — existing lead updated", {
+      leadId: existingLead.id,
+      name: existingLead.lead_name,
+      updatedFields: meaningfulKeys,
+    });
+
+    return new Response(
+      JSON.stringify({
+        received: true,
+        lead_id: existingLead.id,
+        action: "updated",
+        updated_fields: meaningfulKeys,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+    );
+  }
+
+  // ─── CREATE new lead ───
+  const mappedStage = STAGE_MAP[stageRaw] || STAGE_MAP[stageRaw?.trim()] || "new";
   const finalStage = VALID_STAGES.has(mappedStage) ? mappedStage : "new";
 
-  // Map source string to enum
   const SOURCE_MAP: Record<string, string> = {
     "facebook": "social_media",
     "fb": "social_media",
@@ -358,7 +407,6 @@ async function handleContactCreated(supabase: any, body: any) {
   };
   const mappedSource = SOURCE_MAP[source.toLowerCase()] || "other";
 
-  // Create the lead
   const { data: newLead, error: insertError } = await supabase
     .from("crm_leads")
     .insert({
@@ -369,25 +417,19 @@ async function handleContactCreated(supabase: any, body: any) {
       status: finalStage,
       source: mappedSource,
       ghl_contact_id: contactId || null,
+      ghl_last_synced_at: new Date().toISOString(),
     })
     .select("id")
     .single();
 
   if (insertError) {
-    logStep("contact.created — insert failed", { error: insertError.message });
+    logStep("contact upsert — insert failed", { error: insertError.message });
     return new Response(
-      JSON.stringify({
-        error: "Failed to create lead",
-        details: insertError.message,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      },
+      JSON.stringify({ error: "Failed to create lead", details: insertError.message }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
     );
   }
 
-  // Log to timeline
   await supabase.from("crm_activity_events").insert({
     event_type: "status_change" as any,
     entity_type: "lead",
@@ -404,18 +446,15 @@ async function handleContactCreated(supabase: any, body: any) {
     },
   });
 
-  logStep("contact.created — lead created", {
+  logStep("contact upsert — new lead created", {
     leadId: newLead.id,
     name: fullName,
     businessUnit,
   });
 
   return new Response(
-    JSON.stringify({ received: true, lead_id: newLead.id, stage: finalStage }),
-    {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    },
+    JSON.stringify({ received: true, lead_id: newLead.id, action: "created", stage: finalStage }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
   );
 }
 
