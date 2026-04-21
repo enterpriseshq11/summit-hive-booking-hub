@@ -8,6 +8,27 @@ const corsHeaders = {
 
 const GHL_API_BASE = "https://services.leadconnectorhq.com";
 
+// GHL custom field key for "Business Unit" dropdown
+const GHL_BUSINESS_UNIT_FIELD_KEY = "business_interest";
+
+// Map A-Z Command internal business_unit slugs → GHL dropdown option values
+const BUSINESS_UNIT_TO_GHL: Record<string, string> = {
+  summit: "The Summit Event Center",
+  hive: "The Hive Coworking",
+  coworking: "The Hive Coworking",
+  spa: "Restoration Lounge Spa",
+  fitness: "A-Z Total Fitness",
+  photo_booth: "360 Photo Booth",
+  voice_vault: "Voice Vault",
+  elevated_by_elyse: "Elevated by Elyse",
+};
+
+const mapBusinessUnit = (bu?: string | null): string | null => {
+  if (!bu) return null;
+  const key = String(bu).toLowerCase().trim();
+  return BUSINESS_UNIT_TO_GHL[key] || null;
+};
+
 const log = (step: string, details?: any) =>
   console.log(`[GHL-FIND-CREATE] ${step}${details ? ` — ${JSON.stringify(details)}` : ""}`);
 
@@ -80,9 +101,18 @@ serve(async (req) => {
       log("GHL search failed, will try to create", { status: searchRes.status, error: errText });
     }
 
-    // Step 2: If not found, create a new contact
+    const ghlBusinessUnitValue = mapBusinessUnit(businessUnit);
+    if (businessUnit && !ghlBusinessUnitValue) {
+      log("WARN: business_unit not mapped to GHL value", { businessUnit });
+    }
+
+    const customFieldsPayload = ghlBusinessUnitValue
+      ? [{ key: GHL_BUSINESS_UNIT_FIELD_KEY, field_value: ghlBusinessUnitValue }]
+      : [];
+
+    // Step 2: If not found, create a new contact (with Business Unit custom field)
     if (!ghlContactId) {
-      log("Creating new GHL contact", { email, firstName, lastName });
+      log("Creating new GHL contact", { email, firstName, lastName, ghlBusinessUnitValue });
 
       const createRes = await fetch(`${GHL_API_BASE}/contacts/`, {
         method: "POST",
@@ -99,6 +129,7 @@ serve(async (req) => {
           phone: phone || "",
           source: "A-Z Command",
           tags: [businessUnit || "general"],
+          customFields: customFieldsPayload,
         }),
       });
 
@@ -128,6 +159,29 @@ serve(async (req) => {
             { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
           );
         }
+      }
+    }
+
+    // Step 2b: Always push Business Unit to GHL contact (covers both new + existing contacts)
+    if (ghlContactId && customFieldsPayload.length > 0) {
+      try {
+        const updateRes = await fetch(`${GHL_API_BASE}/contacts/${ghlContactId}`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${ghlApiKey}`,
+            "Version": "2021-07-28",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ customFields: customFieldsPayload }),
+        });
+        if (!updateRes.ok) {
+          const errText = await updateRes.text();
+          log("Failed to push Business Unit custom field", { status: updateRes.status, error: errText });
+        } else {
+          log("Pushed Business Unit to GHL contact", { ghlContactId, value: ghlBusinessUnitValue });
+        }
+      } catch (e) {
+        log("Business Unit push threw", { error: e instanceof Error ? e.message : String(e) });
       }
     }
 
