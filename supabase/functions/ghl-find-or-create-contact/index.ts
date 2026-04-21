@@ -162,6 +162,29 @@ serve(async (req) => {
       }
     }
 
+    // Step 2b: Always push Business Unit to GHL contact (covers both new + existing contacts)
+    if (ghlContactId && customFieldsPayload.length > 0) {
+      try {
+        const updateRes = await fetch(`${GHL_API_BASE}/contacts/${ghlContactId}`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${ghlApiKey}`,
+            "Version": "2021-07-28",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ customFields: customFieldsPayload }),
+        });
+        if (!updateRes.ok) {
+          const errText = await updateRes.text();
+          log("Failed to push Business Unit custom field", { status: updateRes.status, error: errText });
+        } else {
+          log("Pushed Business Unit to GHL contact", { ghlContactId, value: ghlBusinessUnitValue });
+        }
+      } catch (e) {
+        log("Business Unit push threw", { error: e instanceof Error ? e.message : String(e) });
+      }
+    }
+
     // Step 3: Save ghl_contact_id back to crm_leads
     const { error: updateError } = await supabase
       .from("crm_leads")
