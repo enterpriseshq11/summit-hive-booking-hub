@@ -101,9 +101,18 @@ serve(async (req) => {
       log("GHL search failed, will try to create", { status: searchRes.status, error: errText });
     }
 
-    // Step 2: If not found, create a new contact
+    const ghlBusinessUnitValue = mapBusinessUnit(businessUnit);
+    if (businessUnit && !ghlBusinessUnitValue) {
+      log("WARN: business_unit not mapped to GHL value", { businessUnit });
+    }
+
+    const customFieldsPayload = ghlBusinessUnitValue
+      ? [{ key: GHL_BUSINESS_UNIT_FIELD_KEY, field_value: ghlBusinessUnitValue }]
+      : [];
+
+    // Step 2: If not found, create a new contact (with Business Unit custom field)
     if (!ghlContactId) {
-      log("Creating new GHL contact", { email, firstName, lastName });
+      log("Creating new GHL contact", { email, firstName, lastName, ghlBusinessUnitValue });
 
       const createRes = await fetch(`${GHL_API_BASE}/contacts/`, {
         method: "POST",
@@ -120,6 +129,7 @@ serve(async (req) => {
           phone: phone || "",
           source: "A-Z Command",
           tags: [businessUnit || "general"],
+          customFields: customFieldsPayload,
         }),
       });
 
