@@ -139,25 +139,41 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* 2. Beauty Haven - Dropdown */}
+          {/* 2. Beauty Haven - Link + Dropdown */}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={cn(
-                  "gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 text-xs md:text-xs lg:text-sm",
-                  location.pathname.startsWith("/beauty-haven")
-                    ? "text-[#FF0099]"
-                    : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                )}
+            <div className={cn(
+              "flex items-center rounded-md",
+              location.pathname.startsWith("/beauty-haven")
+                ? "text-[#FF0099]"
+                : "text-primary-foreground/70 hover:text-primary-foreground"
+            )}>
+              <Link
+                to="/beauty-haven"
+                className="flex items-center gap-1 md:gap-1 lg:gap-1.5 pl-2 md:pl-2 lg:pl-3 pr-1 py-1.5 text-xs md:text-xs lg:text-sm rounded-l-md hover:bg-primary-foreground/10"
               >
                 <Scissors className="h-4 w-4" />
                 <span>Beauty Haven</span>
-                <ChevronDown className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
+              </Link>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open Beauty Haven menu"
+                  className="pr-2 md:pr-2 lg:pr-3 pl-1 py-1.5 rounded-r-md hover:bg-primary-foreground/10"
+                >
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+              </DropdownMenuTrigger>
+            </div>
             <DropdownMenuContent align="start" className="w-56 bg-popover z-[60]">
+              <DropdownMenuItem asChild>
+                <Link to="/beauty-haven" className="flex items-center gap-3 py-2">
+                  <Scissors className="h-4 w-4 text-[#FF0099]" />
+                  <div>
+                    <div className="font-medium">High Maintenance Beauty Haven</div>
+                    <p className="text-xs text-muted-foreground">Main page</p>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/beauty-haven/hair" className="flex items-center gap-3 py-2">
                   <Scissors className="h-4 w-4 text-[#FF0099]" />
