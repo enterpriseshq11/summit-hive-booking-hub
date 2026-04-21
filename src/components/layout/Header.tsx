@@ -412,6 +412,17 @@ export function Header() {
             {expandedMobileSection === "beautyhaven" && (
               <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#FF0099]/30 pl-4">
                 <Link
+                  to="/beauty-haven"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                >
+                  <Scissors className="h-4 w-4 text-[#FF0099]" />
+                  <div>
+                    <div>High Maintenance Beauty Haven</div>
+                    <div className="text-xs text-primary-foreground/50">Main page</div>
+                  </div>
+                </Link>
+                <Link
                   to="/beauty-haven/hair"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 text-sm text-primary-foreground/70 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
