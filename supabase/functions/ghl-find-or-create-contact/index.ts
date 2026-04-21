@@ -8,6 +8,27 @@ const corsHeaders = {
 
 const GHL_API_BASE = "https://services.leadconnectorhq.com";
 
+// GHL custom field key for "Business Unit" dropdown
+const GHL_BUSINESS_UNIT_FIELD_KEY = "business_interest";
+
+// Map A-Z Command internal business_unit slugs → GHL dropdown option values
+const BUSINESS_UNIT_TO_GHL: Record<string, string> = {
+  summit: "The Summit Event Center",
+  hive: "The Hive Coworking",
+  coworking: "The Hive Coworking",
+  spa: "Restoration Lounge Spa",
+  fitness: "A-Z Total Fitness",
+  photo_booth: "360 Photo Booth",
+  voice_vault: "Voice Vault",
+  elevated_by_elyse: "Elevated by Elyse",
+};
+
+const mapBusinessUnit = (bu?: string | null): string | null => {
+  if (!bu) return null;
+  const key = String(bu).toLowerCase().trim();
+  return BUSINESS_UNIT_TO_GHL[key] || null;
+};
+
 const log = (step: string, details?: any) =>
   console.log(`[GHL-FIND-CREATE] ${step}${details ? ` — ${JSON.stringify(details)}` : ""}`);
 
