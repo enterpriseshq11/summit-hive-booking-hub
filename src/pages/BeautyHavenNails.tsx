@@ -172,7 +172,7 @@ export default function BeautyHavenNails() {
       <section id="nail-services" className="hmbh-section">
         <div className="hmbh-container">
           <PinkLabel>Desiree Brogaard</PinkLabel>
-          <SectionHeadline>Nail Services</SectionHeadline>
+          <h2 className="hmbh-headline text-hmbh-pink">Nail Services by Desiree</h2>
           <p className="hmbh-body italic text-sm mb-8">Book online via GlossGenius. All bookings require a deposit. Deposits are applied toward your service total.</p>
 
           {nailServices.map((cat) => (
