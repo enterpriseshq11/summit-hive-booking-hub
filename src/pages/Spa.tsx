@@ -653,42 +653,41 @@ export default function Spa() {
         </div>
       </section>
 
-      {/* Virtual Tour Section - Coming Soon */}
-      <section id="spa-virtual-tour" className="py-14 container">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">Take a Virtual Tour</h2>
-          <p className="text-muted-foreground text-lg">Explore The Restoration Lounge before your visit</p>
-        </div>
-        <Card className="max-w-4xl mx-auto shadow-premium border-border overflow-hidden">
-          <CardContent className="p-0">
-            <div className="aspect-video bg-gradient-to-br from-primary via-primary/95 to-primary/90 flex items-center justify-center relative">
-              {/* Honeycomb pattern overlay */}
-              <div className="absolute inset-0 pointer-events-none opacity-[0.08]" aria-hidden="true">
-                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <pattern id="honeycomb-tour" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
-                    <polygon points="6,0 12,3 12,9 6,12 0,9 0,3" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.3"/>
-                  </pattern>
-                  <rect width="100%" height="100%" fill="url(#honeycomb-tour)" />
-                </svg>
-              </div>
-              
-              {/* Coming Soon Content */}
-              <div className="relative z-10 text-center p-8">
-                <div className="h-20 w-20 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-6 border-2 border-accent/40 shadow-gold">
-                  <Video className="h-10 w-10 text-accent" />
-                </div>
-                <h3 className="text-2xl font-bold text-primary-foreground mb-2">3D Walkthrough Coming Soon</h3>
-                <p className="text-primary-foreground/70 mb-6 max-w-md">
-                  Experience The Restoration Lounge in stunning 360° detail. Explore our private treatment rooms, relaxation areas, and premium amenities.
-                </p>
-                <Button variant="outline" className="border-accent text-accent hover:bg-accent/10" disabled>
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Virtual Tour (Coming Soon)
-                </Button>
-              </div>
+      {/* Virtual Tour Section - Matterport 3D Walkthrough */}
+      <section id="spa-virtual-tour" className="py-16 bg-primary relative overflow-hidden">
+        {/* Subtle gold radial accent to match hero sections */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.06)_0%,transparent_70%)]" aria-hidden="true" />
+        <div className="container relative z-10">
+          <div className="text-center mb-8 max-w-3xl mx-auto">
+            <p className="text-xs md:text-sm font-semibold tracking-[0.25em] text-accent uppercase mb-3">
+              Restoration Lounge
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3 text-primary-foreground">
+              Take a Virtual Tour
+            </h2>
+            <p className="text-primary-foreground/70 text-lg">
+              Walk through the space before you arrive.
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <div className="rounded-xl overflow-hidden border border-accent/30 shadow-gold-lg bg-background">
+              <iframe
+                title="Restoration Lounge Spa — Matterport 3D Virtual Tour"
+                src="https://my.matterport.com/show/?m=J2Hp9xvQc3w"
+                width="100%"
+                height="500"
+                frameBorder="0"
+                allowFullScreen
+                allow="autoplay; fullscreen; web-share; xr-spatial-tracking;"
+                className="block w-full"
+              />
             </div>
-          </CardContent>
-        </Card>
+            <p className="text-center text-xs md:text-sm text-primary-foreground/60 mt-4">
+              Powered by Matterport · 360° Interactive Tour
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Final CTA Section */}
