@@ -262,6 +262,41 @@ export default function Fitness() {
         <div className="hidden md:block absolute bottom-0 left-0 right-0 h-16 bg-background" style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }} aria-hidden="true" />
       </section>
 
+      {/* Virtual Tour - Matterport */}
+      <section className="py-20 bg-primary relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.08)_0%,transparent_70%)]" aria-hidden="true" />
+        <div className="container relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-3">
+              A-Z Total Fitness
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-3">
+              See the Gym
+            </h2>
+            <p className="text-primary-foreground/70 text-lg">
+              Explore the floor before you commit.
+            </p>
+          </div>
+          <div className="max-w-5xl mx-auto">
+            <div className="rounded-xl overflow-hidden border border-accent/30 shadow-gold-lg bg-background">
+              <iframe
+                title="A-Z Total Fitness — Matterport 3D Virtual Tour"
+                src="https://my.matterport.com/show/?m=SxNk289xryw"
+                width="853"
+                height="480"
+                frameBorder="0"
+                allowFullScreen
+                allow="autoplay; fullscreen; web-share; xr-spatial-tracking;"
+                className="block w-full"
+              />
+            </div>
+            <p className="text-center text-xs text-primary-foreground/50 mt-4 tracking-wide">
+              Powered by Matterport · 360° Interactive Tour
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Anchor Chips */}
       <section className="py-6 container border-b border-border">
         <FitnessAnchorChips />
@@ -822,40 +857,6 @@ export default function Fitness() {
         </div>
       </section>
 
-      {/* Virtual Tour - Matterport */}
-      <section className="py-20 bg-primary relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.08)_0%,transparent_70%)]" aria-hidden="true" />
-        <div className="container relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-3">
-              A-Z Total Fitness
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-3">
-              See the Gym
-            </h2>
-            <p className="text-primary-foreground/70 text-lg">
-              Explore the floor before you commit.
-            </p>
-          </div>
-          <div className="max-w-5xl mx-auto">
-            <div className="rounded-xl overflow-hidden border border-accent/30 shadow-gold-lg bg-background">
-              <iframe
-                title="A-Z Total Fitness — Matterport 3D Virtual Tour"
-                src="https://my.matterport.com/show/?m=SxNk289xryw"
-                width="853"
-                height="480"
-                frameBorder="0"
-                allowFullScreen
-                allow="autoplay; fullscreen; web-share; xr-spatial-tracking;"
-                className="block w-full"
-              />
-            </div>
-            <p className="text-center text-xs text-primary-foreground/50 mt-4 tracking-wide">
-              Powered by Matterport · 360° Interactive Tour
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Strong Emotional Close - Final CTA */}
       <section className="py-20 bg-primary relative overflow-hidden">
