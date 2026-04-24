@@ -675,8 +675,8 @@ export default function Spa() {
               <iframe
                 title="Restoration Lounge Spa — Matterport 3D Virtual Tour"
                 src="https://my.matterport.com/show/?m=J2Hp9xvQc3w"
-                width="100%"
-                height="500"
+                width="853"
+                height="480"
                 frameBorder="0"
                 allowFullScreen
                 allow="autoplay; fullscreen; web-share; xr-spatial-tracking;"
