@@ -25,7 +25,8 @@ interface GhlConfig {
 
 interface PipelineStageWebhook {
   id: string;
-  stage_name: string;
+  stage_key: string;
+  stage_label: string | null;
   webhook_url: string | null;
   is_active: boolean;
   last_tested_at: string | null;
