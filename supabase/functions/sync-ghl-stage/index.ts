@@ -526,6 +526,14 @@ serve(async (req) => {
           },
         });
 
+        await firePipelineStageWebhooks(admin, {
+          lead: effectiveLead,
+          previousStage,
+          newStage,
+          contactId: ghlContactId,
+          opportunityId,
+        });
+
         return new Response(
           JSON.stringify({
             success: true,
