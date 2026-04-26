@@ -2772,6 +2772,9 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          last_fired_at: string | null
+          last_status: string | null
+          last_tested_at: string | null
           stage_key: string
           stage_label: string
           updated_at: string
@@ -2783,6 +2786,9 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          last_fired_at?: string | null
+          last_status?: string | null
+          last_tested_at?: string | null
           stage_key: string
           stage_label: string
           updated_at?: string
@@ -2794,6 +2800,9 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          last_fired_at?: string | null
+          last_status?: string | null
+          last_tested_at?: string | null
           stage_key?: string
           stage_label?: string
           updated_at?: string

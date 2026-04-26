@@ -41,6 +41,104 @@ const stageCache: Record<string, Record<string, string>> = {};
 const log = (step: string, details?: any) =>
   console.log(`[GHL-SYNC] ${step}${details ? ` — ${JSON.stringify(details)}` : ""}`);
 
+/**
+ * Fire any active per-stage webhook rows configured in
+ * ghl_outbound_webhook_config for the lead's new stage. POSTs a
+ * pipeline_stage_changed payload and stamps last_fired_at / last_status
+ * so the Integrations UI reflects the most recent attempt.
+ */
+async function firePipelineStageWebhooks(
+  admin: any,
+  params: {
+    lead: any;
+    previousStage: string | null;
+    newStage: string;
+    contactId?: string | null;
+    opportunityId?: string | null;
+  },
+) {
+  const { lead, previousStage, newStage, contactId, opportunityId } = params;
+  try {
+    const { data: rows, error } = await admin
+      .from("ghl_outbound_webhook_config")
+      .select("id, stage_key, stage_label, webhook_url, is_active")
+      .eq("stage_key", newStage)
+      .eq("is_active", true);
+
+    if (error) {
+      log("Outbound webhook config fetch failed", { error: error.message });
+      return;
+    }
+    if (!rows || rows.length === 0) {
+      log("No active outbound webhook configured for stage", { stage: newStage });
+      return;
+    }
+
+    const newStageName = STAGE_LABELS[newStage] || newStage;
+    const previousStageName = previousStage
+      ? STAGE_LABELS[previousStage] || previousStage
+      : null;
+
+    for (const row of rows) {
+      if (!row.webhook_url) continue;
+      const stamp = new Date().toISOString();
+      let status: "success" | "failed" = "failed";
+      let detail = "";
+
+      try {
+        const payload = {
+          event: "pipeline_stage_changed",
+          lead_id: lead.id,
+          lead_name: lead.lead_name,
+          email: lead.email || null,
+          phone: lead.phone || null,
+          business_unit: lead.business_unit || null,
+          previous_stage_key: previousStage,
+          previous_stage_name: previousStageName,
+          new_stage_key: newStage,
+          new_stage_name: newStageName,
+          assigned_to: lead.assigned_to || null,
+          source: lead.source || null,
+          ghl_contact_id: contactId || null,
+          ghl_opportunity_id: opportunityId || null,
+          timestamp: stamp,
+        };
+
+        const res = await fetch(row.webhook_url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        detail = `HTTP ${res.status}`;
+        status = res.ok ? "success" : "failed";
+        // Drain body so the connection releases.
+        try { await res.text(); } catch { /* ignore */ }
+      } catch (e) {
+        detail = e instanceof Error ? e.message : String(e);
+        status = "failed";
+      }
+
+      await admin
+        .from("ghl_outbound_webhook_config")
+        .update({
+          last_fired_at: stamp,
+          last_tested_at: stamp,
+          last_status: status,
+        })
+        .eq("id", row.id);
+
+      log("Outbound webhook fired", {
+        stage: newStage,
+        url_host: (() => { try { return new URL(row.webhook_url).host; } catch { return "?"; } })(),
+        status,
+        detail,
+      });
+    }
+  } catch (e) {
+    log("firePipelineStageWebhooks error", { error: e instanceof Error ? e.message : String(e) });
+  }
+}
+
 async function getPipelineStages(
   pipelineId: string,
   ghlApiKey: string,
@@ -428,6 +526,14 @@ serve(async (req) => {
           },
         });
 
+        await firePipelineStageWebhooks(admin, {
+          lead: effectiveLead,
+          previousStage,
+          newStage,
+          contactId: ghlContactId,
+          opportunityId,
+        });
+
         return new Response(
           JSON.stringify({
             success: true,
@@ -523,6 +629,16 @@ serve(async (req) => {
         source_filter: effectiveLead.source || null,
         severity: "high",
         target_roles: ["owner", "manager", "operations", "ads_lead"],
+      });
+    }
+
+    if (updateResult.ok) {
+      await firePipelineStageWebhooks(admin, {
+        lead: effectiveLead,
+        previousStage,
+        newStage,
+        contactId: ghlContactId,
+        opportunityId,
       });
     }
 
