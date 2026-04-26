@@ -326,7 +326,7 @@ export default function AdminIntegrations() {
                 {stageWebhooks.map(sw => (
                   <div key={sw.id} className="p-3 border border-zinc-700 rounded-lg bg-zinc-800/50 space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-white">{STAGE_LABELS[sw.stage_name] || sw.stage_name} — Webhook URL</h3>
+                      <h3 className="text-sm font-medium text-white">{sw.stage_label || STAGE_LABELS[sw.stage_key] || sw.stage_key} — Webhook URL</h3>
                       <Switch checked={sw.is_active} onCheckedChange={v => updateStage(sw.id, { is_active: v })} />
                     </div>
                     <Input value={sw.webhook_url || ""} onChange={e => updateStage(sw.id, { webhook_url: e.target.value })} className="bg-zinc-800 border-zinc-700 text-white font-mono text-sm" placeholder="https://services.leadconnectorhq.com/hooks/..." />
