@@ -446,8 +446,18 @@ export default function AdminIntegrations() {
                             <p className="text-zinc-300 text-xs">{int.desc}</p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="border-red-500/30 text-red-400 text-xs">Not Connected</Badge>
-                            <Button variant="outline" size="sm" className="border-zinc-600 text-zinc-300" disabled>Connect</Button>
+                            <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-xs">Coming Soon</Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
+                              onClick={() => toast({
+                                title: `${int.name} — Coming Soon`,
+                                description: "This integration is on the roadmap and not yet available to connect. We'll notify you when it's ready.",
+                              })}
+                            >
+                              Request
+                            </Button>
                           </div>
                         </div>
                       ))}
