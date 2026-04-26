@@ -481,9 +481,10 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
 
 // ─── Handler: stage changed ───
 async function handleStageChanged(supabase: any, body: any) {
-  const contactId = body?.contact_id;
+  const contactId = body?.contact_id || body?.contactId;
+  const leadId = body?.lead_id || body?.leadId || body?.az_command_lead_id;
   const email = body?.email;
-  const newStageRaw = body?.new_stage;
+  const newStageRaw = body?.new_stage || body?.stage || body?.stageName;
   const businessUnit = body?.business_unit;
 
   if (!newStageRaw) {
