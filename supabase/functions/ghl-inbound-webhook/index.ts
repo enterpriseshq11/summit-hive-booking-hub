@@ -198,6 +198,8 @@ serve(async (req) => {
     const event = body?.event || body?.type || "";
     const hasNewStage = !!(body?.new_stage);
     logStep("Received payload", { event, contact_id: body?.contact_id, hasNewStage, keys: Object.keys(body).slice(0, 15) });
+    // TEMP: full body dump to diagnose GHL stage-change payload shape
+    logStep("FULL_BODY_DEBUG", { body });
 
     // ─── Route by event type ───
     if (
