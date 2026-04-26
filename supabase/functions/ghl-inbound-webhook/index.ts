@@ -159,6 +159,29 @@ serve(async (req) => {
   try {
     const body = await req.json();
 
+    // ALWAYS log the incoming body + headers so we can debug GHL payload structure
+    logStep("Incoming payload", {
+      body,
+      headers: Object.fromEntries(req.headers.entries()),
+    });
+
+    // Persist raw payload for debugging (best-effort, don't fail if it errors)
+    try {
+      await supabase.from("ghl_inbound_raw_payloads").insert({
+        event_type: body?.event || body?.type || "unknown",
+        contact_id: body?.contact?.id || body?.contactId || null,
+        lead_id: body?.lead_id || body?.leadId || body?.az_command_lead_id ||
+          null,
+        location_id: extractLocationId(body) || null,
+        raw_body: body,
+        headers: Object.fromEntries(req.headers.entries()),
+      });
+    } catch (rawErr) {
+      logStep("Failed to persist raw payload", {
+        error: (rawErr as Error).message,
+      });
+    }
+
     // Verify trusted GHL location first, then fall back to secret-based auth
     const secret = Deno.env.get("GHL_INBOUND_WEBHOOK_SECRET");
     const authHeader = req.headers.get("authorization") || "";
@@ -178,7 +201,12 @@ serve(async (req) => {
         querySecret === secret;
 
       if (!isSecretMatch) {
-        logStep("Unauthorized — secret mismatch");
+        logStep("Unauthorized — secret mismatch (payload still logged above)", {
+          locationId,
+          hasAuthHeader: !!authHeader,
+          hasSigHeader: !!sigHeader,
+          hasQuerySecret: !!querySecret,
+        });
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 401,
