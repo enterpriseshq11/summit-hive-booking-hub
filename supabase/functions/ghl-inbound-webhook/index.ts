@@ -330,9 +330,9 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
       updates.ghl_contact_id = contactId;
     }
 
-    // Update stage if GHL sent one explicitly (not default "new")
+    // Update stage when GHL explicitly sent one (allow "new" as a valid target stage)
     const mappedStage = STAGE_MAP[stageRaw] || STAGE_MAP[stageRaw?.trim()] || null;
-    if (mappedStage && VALID_STAGES.has(mappedStage) && stageRaw !== "new" && mappedStage !== existingLead.status) {
+    if (stageWasExplicit && mappedStage && VALID_STAGES.has(mappedStage) && mappedStage !== existingLead.status) {
       updates.status = mappedStage;
     }
 
