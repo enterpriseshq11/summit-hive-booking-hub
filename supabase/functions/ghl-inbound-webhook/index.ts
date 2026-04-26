@@ -198,6 +198,24 @@ serve(async (req) => {
     const event = body?.event || body?.type || "";
     const hasNewStage = !!(body?.new_stage);
     logStep("Received payload", { event, contact_id: body?.contact_id, hasNewStage, keys: Object.keys(body).slice(0, 15) });
+
+    // Debug: persist raw payload for every inbound GHL request so we can inspect what GHL actually sends
+    try {
+      const headerSnapshot: Record<string, string> = {};
+      for (const [k, v] of req.headers.entries()) {
+        if (["authorization", "cookie", "x-ghl-signature"].includes(k.toLowerCase())) continue;
+        headerSnapshot[k] = v;
+      }
+      await supabase.from("ghl_inbound_raw_payloads").insert({
+        event_type: event || null,
+        contact_id: body?.contact_id || body?.contactId || extractLocationId(body) || null,
+        location_id: extractLocationId(body) || null,
+        raw_body: body,
+        headers: headerSnapshot,
+      });
+    } catch (logErr) {
+      logStep("Failed to persist raw payload (non-fatal)", { error: String(logErr) });
+    }
     // TEMP: full body dump to diagnose GHL stage-change payload shape
     logStep("FULL_BODY_DEBUG", { body });
 
