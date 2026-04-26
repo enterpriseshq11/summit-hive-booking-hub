@@ -103,14 +103,22 @@ export default function AdminIntegrations() {
   const [testing, setTesting] = useState<string | null>(null);
   const [dnsChecking, setDnsChecking] = useState(false);
   const [dnsResult, setDnsResult] = useState<{ status: string; checkedAt: string; details?: string } | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => { loadAll(); }, []);
 
   const loadAll = async () => {
-    const [{ data: c }, { data: s }] = await Promise.all([
+    setLoading(true);
+    setLoadError(null);
+    const [{ data: c, error: configError }, { data: s, error: stageError }] = await Promise.all([
       supabase.from("ghl_webhook_config").select("*").order("business_unit"),
       (supabase as any).from("ghl_outbound_webhook_config").select("*").order("stage_key"),
     ]);
+    if (configError || stageError) {
+      setLoadError(configError?.message || stageError?.message || "Unable to load webhook settings.");
+    } else if ((c?.length || 0) === 0 && (s?.length || 0) === 0) {
+      setLoadError("Your session can’t currently access webhook settings. Sign out and back in, then reload this page.");
+    }
     setConfigs((c as any) || []);
     setStageWebhooks((s as any) || []);
     setLoading(false);
@@ -235,6 +243,17 @@ export default function AdminIntegrations() {
 
         {loading ? <p className="text-zinc-300">Loading...</p> : (
           <>
+            {loadError && (
+              <Card className="border-amber-500/40 bg-amber-500/10">
+                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-amber-100">{loadError}</p>
+                  <Button size="sm" className="bg-amber-500 text-black hover:bg-amber-400" onClick={loadAll}>
+                    <RefreshCw className="h-3 w-3 mr-1" /> Reload Integrations
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             {/* SECTION 1: Lead Intake Webhooks */}
             <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
@@ -246,6 +265,11 @@ export default function AdminIntegrations() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {configs.length === 0 && (
+                  <div className="p-4 border border-zinc-700 rounded-lg bg-zinc-800/50 text-sm text-zinc-300">
+                    No lead intake webhook rows are visible right now.
+                  </div>
+                )}
                 {configs.map(config => (
                   <div key={config.id} className="p-4 border border-zinc-700 rounded-lg bg-zinc-800/50 space-y-3">
                     <div className="flex items-center justify-between">
@@ -293,6 +317,11 @@ export default function AdminIntegrations() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {stageWebhooks.length === 0 && (
+                  <div className="p-4 border border-zinc-700 rounded-lg bg-zinc-800/50 text-sm text-zinc-300">
+                    No pipeline stage webhook rows are visible right now.
+                  </div>
+                )}
                 {stageWebhooks.map(sw => (
                   <div key={sw.id} className="p-3 border border-zinc-700 rounded-lg bg-zinc-800/50 space-y-2">
                     <div className="flex items-center justify-between">
