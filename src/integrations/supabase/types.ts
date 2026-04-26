@@ -2765,6 +2765,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ghl_inbound_raw_payloads: {
+        Row: {
+          contact_id: string | null
+          event_type: string | null
+          headers: Json | null
+          id: string
+          lead_id: string | null
+          location_id: string | null
+          raw_body: Json | null
+          received_at: string
+        }
+        Insert: {
+          contact_id?: string | null
+          event_type?: string | null
+          headers?: Json | null
+          id?: string
+          lead_id?: string | null
+          location_id?: string | null
+          raw_body?: Json | null
+          received_at?: string
+        }
+        Update: {
+          contact_id?: string | null
+          event_type?: string | null
+          headers?: Json | null
+          id?: string
+          lead_id?: string | null
+          location_id?: string | null
+          raw_body?: Json | null
+          received_at?: string
+        }
+        Relationships: []
+      }
       ghl_outbound_webhook_config: {
         Row: {
           business_unit: string
