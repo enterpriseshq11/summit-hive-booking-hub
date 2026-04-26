@@ -17,6 +17,10 @@ const BUSINESS_ADDRESS = "123 Main St, Wapakoneta, OH 45895";
 const BUSINESS_PHONE = "(567) 429-9924";
 const TZ = "America/New_York";
 
+// Module-scope fallback for helper functions outside the request handler.
+// The handler may override its own local `baseUrl` from admin_settings.
+const baseUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://azenterpriseshq.com";
+
 // ============= SECRETS-DRIVEN (NO HARDCODED STAFF EMAILS) =============
 // CRITICAL DOMAIN RULE:
 // - Sender domain: azenterpriseshq.com (no hyphen, verified in Resend)
