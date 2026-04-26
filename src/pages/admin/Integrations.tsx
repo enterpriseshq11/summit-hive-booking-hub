@@ -190,7 +190,7 @@ export default function AdminIntegrations() {
       .update({ webhook_url: sw.webhook_url, is_active: sw.is_active })
       .eq("id", sw.id);
     if (error) toast.error("Failed: " + error.message);
-    else toast.success(`${STAGE_LABELS[sw.stage_name] || sw.stage_name} saved`);
+    else toast.success(`${sw.stage_label || STAGE_LABELS[sw.stage_key] || sw.stage_key} saved`);
     setSaving(null);
   };
 
