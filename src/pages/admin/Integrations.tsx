@@ -451,8 +451,7 @@ export default function AdminIntegrations() {
                               variant="outline"
                               size="sm"
                               className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
-                              onClick={() => toast({
-                                title: `${int.name} — Coming Soon`,
+                              onClick={() => toast.info(`${int.name} — Coming Soon`, {
                                 description: "This integration is on the roadmap and not yet available to connect. We'll notify you when it's ready.",
                               })}
                             >
