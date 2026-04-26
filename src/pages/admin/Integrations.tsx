@@ -25,7 +25,8 @@ interface GhlConfig {
 
 interface PipelineStageWebhook {
   id: string;
-  stage_name: string;
+  stage_key: string;
+  stage_label: string | null;
   webhook_url: string | null;
   is_active: boolean;
   last_tested_at: string | null;
@@ -189,7 +190,7 @@ export default function AdminIntegrations() {
       .update({ webhook_url: sw.webhook_url, is_active: sw.is_active })
       .eq("id", sw.id);
     if (error) toast.error("Failed: " + error.message);
-    else toast.success(`${STAGE_LABELS[sw.stage_name] || sw.stage_name} saved`);
+    else toast.success(`${sw.stage_label || STAGE_LABELS[sw.stage_key] || sw.stage_key} saved`);
     setSaving(null);
   };
 
@@ -197,13 +198,13 @@ export default function AdminIntegrations() {
     if (!sw.webhook_url) { toast.error("No URL configured"); return; }
     setTesting(sw.id);
     try {
-    const stageLabel = STAGE_LABELS[sw.stage_name] || sw.stage_name;
+    const stageLabel = sw.stage_label || STAGE_LABELS[sw.stage_key] || sw.stage_key;
       const payload = {
         event: "pipeline_stage_changed",
         lead_id: "TEST-001", lead_name: "Test Lead", email: "test@a-zenterpriseshq.com",
         phone: "419-000-0000", business_unit: "summit",
         previous_stage_key: "new", previous_stage_name: "New Lead",
-        new_stage_key: sw.stage_name, new_stage_name: stageLabel,
+        new_stage_key: sw.stage_key, new_stage_name: stageLabel,
         assigned_to: "Dylan Legge", timestamp: new Date().toISOString(),
         source: "website",
       };
@@ -325,7 +326,7 @@ export default function AdminIntegrations() {
                 {stageWebhooks.map(sw => (
                   <div key={sw.id} className="p-3 border border-zinc-700 rounded-lg bg-zinc-800/50 space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-white">{STAGE_LABELS[sw.stage_name] || sw.stage_name} — Webhook URL</h3>
+                      <h3 className="text-sm font-medium text-white">{sw.stage_label || STAGE_LABELS[sw.stage_key] || sw.stage_key} — Webhook URL</h3>
                       <Switch checked={sw.is_active} onCheckedChange={v => updateStage(sw.id, { is_active: v })} />
                     </div>
                     <Input value={sw.webhook_url || ""} onChange={e => updateStage(sw.id, { webhook_url: e.target.value })} className="bg-zinc-800 border-zinc-700 text-white font-mono text-sm" placeholder="https://services.leadconnectorhq.com/hooks/..." />
