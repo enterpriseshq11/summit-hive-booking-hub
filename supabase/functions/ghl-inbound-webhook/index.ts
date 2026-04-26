@@ -270,8 +270,9 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
   const email = body?.email || null;
   const phone = body?.phone || null;
   const source = body?.source || body?.lead_source || "ghl";
-  const stageRaw = body?.stage || body?.pipeline_stage || body?.new_stage ||
-    "new";
+  const stageExplicit = body?.stage ?? body?.pipeline_stage ?? body?.new_stage ?? null;
+  const stageRaw = stageExplicit || "new";
+  const stageWasExplicit = stageExplicit !== null && stageExplicit !== undefined && String(stageExplicit).trim() !== "";
   const businessUnit = resolveBusinessUnit(body);
 
   if (!fullName && !email && !phone) {
