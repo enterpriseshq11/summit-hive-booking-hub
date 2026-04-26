@@ -531,10 +531,19 @@ async function handleStageChanged(supabase: any, body: any) {
 
   logStep("Mapped stage", { raw: newStageRaw, mapped: mappedStage });
 
-  // Find matching lead
+  // Find matching lead — prefer A-Z Command Lead ID (direct UUID match)
   let lead: any = null;
 
-  if (contactId) {
+  if (leadId) {
+    const { data } = await supabase.from("crm_leads")
+      .select(
+        "id, lead_name, status, business_unit, ghl_sync_in_progress, ghl_contact_id",
+      )
+      .eq("id", leadId).maybeSingle();
+    if (data) lead = data;
+  }
+
+  if (!lead && contactId) {
     const { data } = await supabase.from("crm_leads")
       .select(
         "id, lead_name, status, business_unit, ghl_sync_in_progress, ghl_contact_id",
