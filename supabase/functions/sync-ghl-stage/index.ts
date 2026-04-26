@@ -632,6 +632,16 @@ serve(async (req) => {
       });
     }
 
+    if (updateResult.ok) {
+      await firePipelineStageWebhooks(admin, {
+        lead: effectiveLead,
+        previousStage,
+        newStage,
+        contactId: ghlContactId,
+        opportunityId,
+      });
+    }
+
     return new Response(
       JSON.stringify({
         success: updateResult.ok,
