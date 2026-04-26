@@ -196,8 +196,9 @@ serve(async (req) => {
     }
 
     const event = body?.event || body?.type || "";
-    const hasNewStage = !!(body?.new_stage);
-    logStep("Received payload", { event, contact_id: body?.contact_id, hasNewStage, keys: Object.keys(body).slice(0, 15) });
+    const hasNewStage = !!(body?.new_stage || body?.stage || body?.stageName);
+    const hasLeadId = !!(body?.lead_id || body?.leadId || body?.az_command_lead_id);
+    logStep("Received payload", { event, contact_id: body?.contact_id, hasNewStage, hasLeadId, keys: Object.keys(body).slice(0, 15) });
 
     // Debug: persist raw payload for every inbound GHL request so we can inspect what GHL actually sends
     try {
