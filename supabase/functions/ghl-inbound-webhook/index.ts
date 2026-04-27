@@ -697,6 +697,12 @@ async function handleStageChanged(supabase: any, body: any) {
 
   if (!lead) {
     logStep("No matching lead found", { contactId, email });
+    await alertAdmins(supabase, {
+      title: "GHL sync failed: no matching lead found",
+      description: `GHL stage-change for ${email || contactId || "unknown contact"} could not be matched to any lead in A-Z Command. The contact may have been deleted or never synced.`,
+      severity: "warning",
+      metadata: { contactId, email, leadId, stage: mappedStage },
+    });
     return new Response(
       JSON.stringify({ received: true, warning: "No matching lead found" }),
       {
