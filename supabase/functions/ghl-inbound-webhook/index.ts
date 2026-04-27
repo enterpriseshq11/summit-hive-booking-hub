@@ -600,6 +600,12 @@ async function handleStageChanged(supabase: any, body: any) {
 
   if (!newStageRaw) {
     logStep("Missing new_stage in payload");
+    await alertAdmins(supabase, {
+      title: "GHL stage-change webhook missing stage",
+      description: "A GHL stage-change webhook arrived without a stage value. Check the GHL workflow configuration.",
+      severity: "warning",
+      metadata: { contactId: body?.contact_id, leadId: body?.lead_id, email: body?.email },
+    });
     return new Response(JSON.stringify({ error: "Missing new_stage" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
