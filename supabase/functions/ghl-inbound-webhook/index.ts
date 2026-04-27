@@ -389,6 +389,12 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
 
   if (!fullName && !email && !phone) {
     logStep("contact upsert — no usable contact data");
+    await alertAdmins(supabase, {
+      title: "GHL inbound webhook: no usable contact data",
+      description: "A GHL webhook arrived with no name, email, or phone. Cannot match or create a lead.",
+      severity: "warning",
+      metadata: { contactId: body?.contact_id || body?.contactId },
+    });
     return new Response(
       JSON.stringify({ received: true, warning: "No usable contact data" }),
       {
