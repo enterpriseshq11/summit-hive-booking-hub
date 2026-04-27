@@ -537,7 +537,7 @@ async function handleStageChanged(supabase: any, body: any) {
   const leadId = body?.lead_id || body?.leadId || body?.az_command_lead_id;
   const email = body?.email;
   const newStageRaw = body?.new_stage || body?.stage || body?.stageName;
-  const businessUnit = body?.business_unit;
+  const businessUnit = resolveBusinessUnit(body);
 
   if (!newStageRaw) {
     logStep("Missing new_stage in payload");
@@ -547,7 +547,7 @@ async function handleStageChanged(supabase: any, body: any) {
     });
   }
 
-  const mappedStage = STAGE_MAP[newStageRaw] || STAGE_MAP[newStageRaw.trim()];
+  const mappedStage = mapStage(newStageRaw);
 
   if (!mappedStage || !VALID_STAGES.has(mappedStage)) {
     logStep("Unrecognized stage name", {
