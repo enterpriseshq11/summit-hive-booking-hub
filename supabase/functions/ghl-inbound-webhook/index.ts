@@ -93,7 +93,45 @@ const TAG_TO_BUSINESS_UNIT: Record<string, string> = {
   "mobile_homes": "mobile_homes",
 };
 
-function resolveBusinessUnit(body: any): string {
+const PIPELINE_TO_BUSINESS_UNIT: Record<string, string> = {
+  R39pNfUKfehKhx0gQ22y: "coworking",
+  eyLsMGGgEikqtiTsWrSD: "summit",
+  T9xQFgbvNDWd0SRuL3Bt: "elevated_by_elyse",
+  jiTtAKTcMGFcfCDl9vQB: "spa",
+  hKnG56sPWawRe2Z4E8Sk: "fitness",
+  To9CU7VONlcaRPkd9lac: "photo_booth",
+  MLC9I84M2xohkODg92TY: "voice_vault",
+};
+
+function normalizeKey(value: unknown): string {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_")
+    .replace(/[^a-z0-9_]/g, "");
+}
+
+function mapStage(rawStage: unknown): string | null {
+  const raw = String(rawStage ?? "").trim();
+  if (!raw) return null;
+  return STAGE_MAP[raw] || STAGE_MAP[normalizeKey(raw)] || null;
+}
+
+function safeHeaderSnapshot(headers: Headers): Record<string, string> {
+  const snapshot: Record<string, string> = {};
+  for (const [key, value] of headers.entries()) {
+    if (["authorization", "cookie", "x-ghl-signature"].includes(key.toLowerCase())) continue;
+    snapshot[key] = value;
+  }
+  return snapshot;
+}
+
+function resolveBusinessUnit(body: any, fallback?: string): string | undefined {
+  const pipelineId = body?.pipelineId || body?.pipeline_id || body?.opportunity?.pipelineId || body?.opportunity?.pipeline_id;
+  if (pipelineId && PIPELINE_TO_BUSINESS_UNIT[pipelineId]) {
+    return PIPELINE_TO_BUSINESS_UNIT[pipelineId];
+  }
+
   const rawTags = body?.tags;
   const tags = Array.isArray(rawTags)
     ? rawTags
@@ -127,7 +165,7 @@ function resolveBusinessUnit(body: any): string {
     return buField;
   }
 
-  return "summit"; // default business unit
+  return fallback;
 }
 
 function extractLocationId(body: any, headers?: Headers): string {
@@ -162,10 +200,12 @@ serve(async (req) => {
   try {
     const body = await req.json();
 
-    // ALWAYS log the incoming body + headers so we can debug GHL payload structure
+    const headerSnapshot = safeHeaderSnapshot(req.headers);
+
+    // ALWAYS log the incoming body + safe headers so we can debug GHL payload structure
     logStep("Incoming payload", {
       body,
-      headers: Object.fromEntries(req.headers.entries()),
+      headers: headerSnapshot,
     });
 
     // Persist raw payload for debugging (best-effort, don't fail if it errors)
@@ -177,7 +217,7 @@ serve(async (req) => {
           null,
         location_id: extractLocationId(body, req.headers) || null,
         raw_body: body,
-        headers: Object.fromEntries(req.headers.entries()),
+        headers: headerSnapshot,
       });
     } catch (rawErr) {
       logStep("Failed to persist raw payload", {
@@ -230,26 +270,6 @@ serve(async (req) => {
     const hasNewStage = !!(body?.new_stage || body?.stage || body?.stageName);
     const hasLeadId = !!(body?.lead_id || body?.leadId || body?.az_command_lead_id);
     logStep("Received payload", { event, contact_id: body?.contact_id, hasNewStage, hasLeadId, keys: Object.keys(body).slice(0, 15) });
-
-    // Debug: persist raw payload for every inbound GHL request so we can inspect what GHL actually sends
-    try {
-      const headerSnapshot: Record<string, string> = {};
-      for (const [k, v] of req.headers.entries()) {
-        if (["authorization", "cookie", "x-ghl-signature"].includes(k.toLowerCase())) continue;
-        headerSnapshot[k] = v;
-      }
-      await supabase.from("ghl_inbound_raw_payloads").insert({
-        event_type: event || null,
-        contact_id: body?.contact_id || body?.contactId || extractLocationId(body, req.headers) || null,
-        location_id: extractLocationId(body, req.headers) || null,
-        raw_body: body,
-        headers: headerSnapshot,
-      });
-    } catch (logErr) {
-      logStep("Failed to persist raw payload (non-fatal)", { error: String(logErr) });
-    }
-    // TEMP: full body dump to diagnose GHL stage-change payload shape
-    logStep("FULL_BODY_DEBUG", { body });
 
     // ─── Route by event type ───
     if (
@@ -323,7 +343,7 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
   const stageExplicit = body?.stage ?? body?.pipeline_stage ?? body?.new_stage ?? null;
   const stageRaw = stageExplicit || "new";
   const stageWasExplicit = stageExplicit !== null && stageExplicit !== undefined && String(stageExplicit).trim() !== "";
-  const businessUnit = resolveBusinessUnit(body);
+  const businessUnit = resolveBusinessUnit(body, "summit") || "summit";
 
   if (!fullName && !email && !phone) {
     logStep("contact upsert — no usable contact data");
@@ -381,7 +401,7 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
     }
 
     // Update stage when GHL explicitly sent one (allow "new" as a valid target stage)
-    const mappedStage = STAGE_MAP[stageRaw] || STAGE_MAP[stageRaw?.trim()] || null;
+    const mappedStage = mapStage(stageRaw);
     if (stageWasExplicit && mappedStage && VALID_STAGES.has(mappedStage) && mappedStage !== existingLead.status) {
       updates.status = mappedStage;
     }
@@ -441,7 +461,7 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
   }
 
   // ─── CREATE new lead ───
-  const mappedStage = STAGE_MAP[stageRaw] || STAGE_MAP[stageRaw?.trim()] || "new";
+  const mappedStage = mapStage(stageRaw) || "new";
   const finalStage = VALID_STAGES.has(mappedStage) ? mappedStage : "new";
 
   const SOURCE_MAP: Record<string, string> = {
@@ -517,7 +537,7 @@ async function handleStageChanged(supabase: any, body: any) {
   const leadId = body?.lead_id || body?.leadId || body?.az_command_lead_id;
   const email = body?.email;
   const newStageRaw = body?.new_stage || body?.stage || body?.stageName;
-  const businessUnit = body?.business_unit;
+  const businessUnit = resolveBusinessUnit(body);
 
   if (!newStageRaw) {
     logStep("Missing new_stage in payload");
@@ -527,7 +547,7 @@ async function handleStageChanged(supabase: any, body: any) {
     });
   }
 
-  const mappedStage = STAGE_MAP[newStageRaw] || STAGE_MAP[newStageRaw.trim()];
+  const mappedStage = mapStage(newStageRaw);
 
   if (!mappedStage || !VALID_STAGES.has(mappedStage)) {
     logStep("Unrecognized stage name", {
