@@ -363,6 +363,13 @@ serve(async (req) => {
       });
     } catch (_) { /* best effort */ }
 
+    await alertAdmins(supabase, {
+      title: "GHL inbound webhook crashed",
+      description: `The GHL inbound webhook threw an unexpected error: ${msg}. Stage updates are NOT syncing until this is resolved.`,
+      severity: "critical",
+      metadata: { error: msg, stack },
+    });
+
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
