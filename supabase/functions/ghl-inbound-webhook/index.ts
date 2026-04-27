@@ -16,6 +16,48 @@ const logStep = (step: string, details?: any) => {
 };
 
 /**
+ * Notify admins (owner + manager) immediately of any GHL sync failure.
+ * Inserts into crm_alerts so it appears in the dashboard bell + alerts page.
+ * Best-effort: never throws — webhook always returns 200 to GHL.
+ */
+async function alertAdmins(
+  supabase: any,
+  opts: {
+    title: string;
+    description: string;
+    severity?: "info" | "warning" | "critical";
+    entity_type?: string;
+    entity_id?: string | null;
+    metadata?: Record<string, any>;
+  },
+) {
+  try {
+    await supabase.from("crm_alerts").insert({
+      alert_type: "ghl_sync_failure",
+      severity: opts.severity || "critical",
+      title: opts.title,
+      description: opts.description,
+      entity_type: opts.entity_type || "lead",
+      entity_id: opts.entity_id || null,
+      target_roles: ["owner", "manager"],
+      source_filter: "ghl_inbound_webhook",
+    });
+    await supabase.from("edge_function_errors").insert({
+      function_name: "ghl-inbound-webhook",
+      error_message: opts.title,
+      stack_trace: null,
+      payload: {
+        description: opts.description,
+        ...(opts.metadata || {}),
+      },
+    });
+    console.error(`[GHL-INBOUND][ADMIN-ALERT] ${opts.title} — ${opts.description}`);
+  } catch (e) {
+    console.error("[GHL-INBOUND] alertAdmins failed:", (e as Error).message);
+  }
+}
+
+/**
  * GHL stage name → internal DB enum value mapping.
  */
 const STAGE_MAP: Record<string, string> = {
@@ -321,6 +363,13 @@ serve(async (req) => {
       });
     } catch (_) { /* best effort */ }
 
+    await alertAdmins(supabase, {
+      title: "GHL inbound webhook crashed",
+      description: `The GHL inbound webhook threw an unexpected error: ${msg}. Stage updates are NOT syncing until this is resolved.`,
+      severity: "critical",
+      metadata: { error: msg, stack },
+    });
+
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
@@ -347,6 +396,12 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
 
   if (!fullName && !email && !phone) {
     logStep("contact upsert — no usable contact data");
+    await alertAdmins(supabase, {
+      title: "GHL inbound webhook: no usable contact data",
+      description: "A GHL webhook arrived with no name, email, or phone. Cannot match or create a lead.",
+      severity: "warning",
+      metadata: { contactId: body?.contact_id || body?.contactId },
+    });
     return new Response(
       JSON.stringify({ received: true, warning: "No usable contact data" }),
       {
@@ -417,6 +472,12 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
 
     if (updateError) {
       logStep("contact upsert — update failed", { error: updateError.message });
+      await alertAdmins(supabase, {
+        title: "GHL sync failed: could not update lead",
+        description: `Lead "${existingLead.lead_name}" could not be updated from GHL. Error: ${updateError.message}`,
+        entity_id: existingLead.id,
+        metadata: { contactId, attempted_updates: updates, error: updateError.message },
+      });
       return new Response(
         JSON.stringify({ error: "Failed to update lead", details: updateError.message }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
@@ -497,6 +558,11 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
 
   if (insertError) {
     logStep("contact upsert — insert failed", { error: insertError.message });
+    await alertAdmins(supabase, {
+      title: "GHL sync failed: could not create new lead",
+      description: `New GHL contact "${fullName || email || phone}" could not be saved as a lead. Error: ${insertError.message}`,
+      metadata: { contactId, email, phone, businessUnit, error: insertError.message },
+    });
     return new Response(
       JSON.stringify({ error: "Failed to create lead", details: insertError.message }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
@@ -541,6 +607,12 @@ async function handleStageChanged(supabase: any, body: any) {
 
   if (!newStageRaw) {
     logStep("Missing new_stage in payload");
+    await alertAdmins(supabase, {
+      title: "GHL stage-change webhook missing stage",
+      description: "A GHL stage-change webhook arrived without a stage value. Check the GHL workflow configuration.",
+      severity: "warning",
+      metadata: { contactId: body?.contact_id, leadId: body?.lead_id, email: body?.email },
+    });
     return new Response(JSON.stringify({ error: "Missing new_stage" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
@@ -568,6 +640,11 @@ async function handleStageChanged(supabase: any, body: any) {
         contact_id: contactId,
         email,
       },
+    });
+    await alertAdmins(supabase, {
+      title: `GHL sync failed: unrecognized stage "${newStageRaw}"`,
+      description: `GHL sent a stage name we don't recognize: "${newStageRaw}". Add it to the STAGE_MAP in the webhook code or rename the stage in GHL.`,
+      metadata: { raw_stage: newStageRaw, contactId, email, leadId },
     });
     return new Response(
       JSON.stringify({
@@ -627,6 +704,12 @@ async function handleStageChanged(supabase: any, body: any) {
 
   if (!lead) {
     logStep("No matching lead found", { contactId, email });
+    await alertAdmins(supabase, {
+      title: "GHL sync failed: no matching lead found",
+      description: `GHL stage-change for ${email || contactId || "unknown contact"} could not be matched to any lead in A-Z Command. The contact may have been deleted or never synced.`,
+      severity: "warning",
+      metadata: { contactId, email, leadId, stage: mappedStage },
+    });
     return new Response(
       JSON.stringify({ received: true, warning: "No matching lead found" }),
       {
@@ -690,6 +773,12 @@ async function handleStageChanged(supabase: any, body: any) {
       "id",
       lead.id,
     );
+    await alertAdmins(supabase, {
+      title: "GHL sync failed: stage update rejected",
+      description: `Could not update lead "${lead.lead_name}" to stage "${mappedStage}". Database error: ${updateError.message}`,
+      entity_id: lead.id,
+      metadata: { contactId, email, attempted_stage: mappedStage, error: updateError.message },
+    });
     return new Response(
       JSON.stringify({ error: "Failed to update lead" }),
       {
