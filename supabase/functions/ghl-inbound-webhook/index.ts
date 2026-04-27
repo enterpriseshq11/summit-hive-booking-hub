@@ -634,6 +634,11 @@ async function handleStageChanged(supabase: any, body: any) {
         email,
       },
     });
+    await alertAdmins(supabase, {
+      title: `GHL sync failed: unrecognized stage "${newStageRaw}"`,
+      description: `GHL sent a stage name we don't recognize: "${newStageRaw}". Add it to the STAGE_MAP in the webhook code or rename the stage in GHL.`,
+      metadata: { raw_stage: newStageRaw, contactId, email, leadId },
+    });
     return new Response(
       JSON.stringify({
         received: true,
