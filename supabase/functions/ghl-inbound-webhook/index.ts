@@ -200,10 +200,12 @@ serve(async (req) => {
   try {
     const body = await req.json();
 
-    // ALWAYS log the incoming body + headers so we can debug GHL payload structure
+    const headerSnapshot = safeHeaderSnapshot(req.headers);
+
+    // ALWAYS log the incoming body + safe headers so we can debug GHL payload structure
     logStep("Incoming payload", {
       body,
-      headers: Object.fromEntries(req.headers.entries()),
+      headers: headerSnapshot,
     });
 
     // Persist raw payload for debugging (best-effort, don't fail if it errors)
@@ -215,7 +217,7 @@ serve(async (req) => {
           null,
         location_id: extractLocationId(body, req.headers) || null,
         raw_body: body,
-        headers: Object.fromEntries(req.headers.entries()),
+        headers: headerSnapshot,
       });
     } catch (rawErr) {
       logStep("Failed to persist raw payload", {
@@ -268,26 +270,6 @@ serve(async (req) => {
     const hasNewStage = !!(body?.new_stage || body?.stage || body?.stageName);
     const hasLeadId = !!(body?.lead_id || body?.leadId || body?.az_command_lead_id);
     logStep("Received payload", { event, contact_id: body?.contact_id, hasNewStage, hasLeadId, keys: Object.keys(body).slice(0, 15) });
-
-    // Debug: persist raw payload for every inbound GHL request so we can inspect what GHL actually sends
-    try {
-      const headerSnapshot: Record<string, string> = {};
-      for (const [k, v] of req.headers.entries()) {
-        if (["authorization", "cookie", "x-ghl-signature"].includes(k.toLowerCase())) continue;
-        headerSnapshot[k] = v;
-      }
-      await supabase.from("ghl_inbound_raw_payloads").insert({
-        event_type: event || null,
-        contact_id: body?.contact_id || body?.contactId || extractLocationId(body, req.headers) || null,
-        location_id: extractLocationId(body, req.headers) || null,
-        raw_body: body,
-        headers: headerSnapshot,
-      });
-    } catch (logErr) {
-      logStep("Failed to persist raw payload (non-fatal)", { error: String(logErr) });
-    }
-    // TEMP: full body dump to diagnose GHL stage-change payload shape
-    logStep("FULL_BODY_DEBUG", { body });
 
     // ─── Route by event type ───
     if (
