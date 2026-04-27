@@ -766,6 +766,12 @@ async function handleStageChanged(supabase: any, body: any) {
       "id",
       lead.id,
     );
+    await alertAdmins(supabase, {
+      title: "GHL sync failed: stage update rejected",
+      description: `Could not update lead "${lead.lead_name}" to stage "${mappedStage}". Database error: ${updateError.message}`,
+      entity_id: lead.id,
+      metadata: { contactId, email, attempted_stage: mappedStage, error: updateError.message },
+    });
     return new Response(
       JSON.stringify({ error: "Failed to update lead" }),
       {
