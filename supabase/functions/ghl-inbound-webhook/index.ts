@@ -465,6 +465,12 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
 
     if (updateError) {
       logStep("contact upsert — update failed", { error: updateError.message });
+      await alertAdmins(supabase, {
+        title: "GHL sync failed: could not update lead",
+        description: `Lead "${existingLead.lead_name}" could not be updated from GHL. Error: ${updateError.message}`,
+        entity_id: existingLead.id,
+        metadata: { contactId, attempted_updates: updates, error: updateError.message },
+      });
       return new Response(
         JSON.stringify({ error: "Failed to update lead", details: updateError.message }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
