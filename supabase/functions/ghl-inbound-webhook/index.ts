@@ -93,7 +93,45 @@ const TAG_TO_BUSINESS_UNIT: Record<string, string> = {
   "mobile_homes": "mobile_homes",
 };
 
-function resolveBusinessUnit(body: any): string {
+const PIPELINE_TO_BUSINESS_UNIT: Record<string, string> = {
+  R39pNfUKfehKhx0gQ22y: "coworking",
+  eyLsMGGgEikqtiTsWrSD: "summit",
+  T9xQFgbvNDWd0SRuL3Bt: "elevated_by_elyse",
+  jiTtAKTcMGFcfCDl9vQB: "spa",
+  hKnG56sPWawRe2Z4E8Sk: "fitness",
+  To9CU7VONlcaRPkd9lac: "photo_booth",
+  MLC9I84M2xohkODg92TY: "voice_vault",
+};
+
+function normalizeKey(value: unknown): string {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_")
+    .replace(/[^a-z0-9_]/g, "");
+}
+
+function mapStage(rawStage: unknown): string | null {
+  const raw = String(rawStage ?? "").trim();
+  if (!raw) return null;
+  return STAGE_MAP[raw] || STAGE_MAP[normalizeKey(raw)] || null;
+}
+
+function safeHeaderSnapshot(headers: Headers): Record<string, string> {
+  const snapshot: Record<string, string> = {};
+  for (const [key, value] of headers.entries()) {
+    if (["authorization", "cookie", "x-ghl-signature"].includes(key.toLowerCase())) continue;
+    snapshot[key] = value;
+  }
+  return snapshot;
+}
+
+function resolveBusinessUnit(body: any, fallback?: string): string | undefined {
+  const pipelineId = body?.pipelineId || body?.pipeline_id || body?.opportunity?.pipelineId || body?.opportunity?.pipeline_id;
+  if (pipelineId && PIPELINE_TO_BUSINESS_UNIT[pipelineId]) {
+    return PIPELINE_TO_BUSINESS_UNIT[pipelineId];
+  }
+
   const rawTags = body?.tags;
   const tags = Array.isArray(rawTags)
     ? rawTags
@@ -127,7 +165,7 @@ function resolveBusinessUnit(body: any): string {
     return buField;
   }
 
-  return "summit"; // default business unit
+  return fallback;
 }
 
 function extractLocationId(body: any, headers?: Headers): string {
