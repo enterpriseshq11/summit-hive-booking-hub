@@ -738,7 +738,7 @@ async function handleStageChanged(supabase: any, body: any) {
         phone,
         business_unit: businessUnit || "general",
         status: mappedStage,
-        source: "ghl",
+        source: "other",
         ghl_contact_id: contactId || null,
         ghl_last_synced_at: new Date().toISOString(),
       })
