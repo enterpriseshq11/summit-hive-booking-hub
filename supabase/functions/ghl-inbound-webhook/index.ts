@@ -703,19 +703,90 @@ async function handleStageChanged(supabase: any, body: any) {
   }
 
   if (!lead) {
-    logStep("No matching lead found", { contactId, email });
-    await alertAdmins(supabase, {
-      title: "GHL sync failed: no matching lead found",
-      description: `GHL stage-change for ${email || contactId || "unknown contact"} could not be matched to any lead in A-Z Command. The contact may have been deleted or never synced.`,
-      severity: "warning",
-      metadata: { contactId, email, leadId, stage: mappedStage },
-    });
-    return new Response(
-      JSON.stringify({ received: true, warning: "No matching lead found" }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
+    // AUTO-CREATE: GHL stage-change arrived for a contact that doesn't exist
+    // in A-Z Command yet (e.g., contact created directly in GHL). Create a
+    // new lead on the fly using whatever contact data the payload provides,
+    // then continue with the stage update.
+    const phone = body?.phone || body?.contact?.phone || null;
+    const firstName = body?.first_name || body?.firstName ||
+      body?.contact?.first_name || body?.contact?.firstName || "";
+    const lastName = body?.last_name || body?.lastName ||
+      body?.contact?.last_name || body?.contact?.lastName || "";
+    const fullName = body?.name || body?.full_name ||
+      body?.contact?.name || `${firstName} ${lastName}`.trim();
+    const resolvedName = fullName || email || phone || "GHL Contact";
+
+    if (!email && !phone && !contactId) {
+      logStep("No matching lead and insufficient data to auto-create", { body });
+      await alertAdmins(supabase, {
+        title: "GHL sync failed: no matching lead and no contact data",
+        description: `GHL stage-change arrived with no email, phone, or contactId — cannot auto-create a lead.`,
+        severity: "warning",
+        metadata: { contactId, email, leadId, stage: mappedStage },
+      });
+      return new Response(
+        JSON.stringify({ received: true, warning: "No matching lead and no contact data" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+      );
+    }
+
+    const { data: createdLead, error: createError } = await supabase
+      .from("crm_leads")
+      .insert({
+        lead_name: resolvedName,
+        email: email || null,
+        phone,
+        business_unit: businessUnit || "general",
+        status: mappedStage,
+        source: "ghl",
+        ghl_contact_id: contactId || null,
+        ghl_last_synced_at: new Date().toISOString(),
+      })
+      .select("id, lead_name, status, business_unit, ghl_contact_id")
+      .single();
+
+    if (createError || !createdLead) {
+      logStep("Auto-create on stage-change failed", { error: createError?.message });
+      await alertAdmins(supabase, {
+        title: "GHL sync failed: could not auto-create lead from stage-change",
+        description: `Stage-change for "${resolvedName}" had no matching lead and auto-create failed: ${createError?.message || "unknown error"}`,
+        metadata: { contactId, email, phone, businessUnit, stage: mappedStage, error: createError?.message },
+      });
+      return new Response(
+        JSON.stringify({ received: true, warning: "No matching lead; auto-create failed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+      );
+    }
+
+    await supabase.from("crm_activity_events").insert({
+      event_type: "status_change" as any,
+      entity_type: "lead",
+      entity_id: createdLead.id,
+      entity_name: createdLead.lead_name,
+      event_category: "lead_created",
+      metadata: {
+        action: "ghl_inbound_auto_created_from_stage_change",
+        description: `Lead auto-created from GHL stage-change webhook — ${resolvedName} (stage: ${mappedStage})`,
+        ghl_contact_id: contactId,
+        business_unit: businessUnit || "general",
+        initial_stage: mappedStage,
       },
+    });
+
+    logStep("Auto-created lead from stage-change", {
+      leadId: createdLead.id,
+      name: resolvedName,
+      stage: mappedStage,
+    });
+
+    return new Response(
+      JSON.stringify({
+        received: true,
+        lead_id: createdLead.id,
+        action: "auto_created_and_staged",
+        stage: mappedStage,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
     );
   }
 
