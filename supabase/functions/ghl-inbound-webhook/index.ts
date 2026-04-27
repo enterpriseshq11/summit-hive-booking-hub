@@ -551,6 +551,11 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
 
   if (insertError) {
     logStep("contact upsert — insert failed", { error: insertError.message });
+    await alertAdmins(supabase, {
+      title: "GHL sync failed: could not create new lead",
+      description: `New GHL contact "${fullName || email || phone}" could not be saved as a lead. Error: ${insertError.message}`,
+      metadata: { contactId, email, phone, businessUnit, error: insertError.message },
+    });
     return new Response(
       JSON.stringify({ error: "Failed to create lead", details: insertError.message }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
