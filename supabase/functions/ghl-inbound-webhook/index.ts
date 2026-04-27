@@ -16,6 +16,48 @@ const logStep = (step: string, details?: any) => {
 };
 
 /**
+ * Notify admins (owner + manager) immediately of any GHL sync failure.
+ * Inserts into crm_alerts so it appears in the dashboard bell + alerts page.
+ * Best-effort: never throws — webhook always returns 200 to GHL.
+ */
+async function alertAdmins(
+  supabase: any,
+  opts: {
+    title: string;
+    description: string;
+    severity?: "info" | "warning" | "critical";
+    entity_type?: string;
+    entity_id?: string | null;
+    metadata?: Record<string, any>;
+  },
+) {
+  try {
+    await supabase.from("crm_alerts").insert({
+      alert_type: "ghl_sync_failure",
+      severity: opts.severity || "critical",
+      title: opts.title,
+      description: opts.description,
+      entity_type: opts.entity_type || "lead",
+      entity_id: opts.entity_id || null,
+      target_roles: ["owner", "manager"],
+      source_filter: "ghl_inbound_webhook",
+    });
+    await supabase.from("edge_function_errors").insert({
+      function_name: "ghl-inbound-webhook",
+      error_message: opts.title,
+      stack_trace: null,
+      payload: {
+        description: opts.description,
+        ...(opts.metadata || {}),
+      },
+    });
+    console.error(`[GHL-INBOUND][ADMIN-ALERT] ${opts.title} — ${opts.description}`);
+  } catch (e) {
+    console.error("[GHL-INBOUND] alertAdmins failed:", (e as Error).message);
+  }
+}
+
+/**
  * GHL stage name → internal DB enum value mapping.
  */
 const STAGE_MAP: Record<string, string> = {
