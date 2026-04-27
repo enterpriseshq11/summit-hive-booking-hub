@@ -343,7 +343,7 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
   const stageExplicit = body?.stage ?? body?.pipeline_stage ?? body?.new_stage ?? null;
   const stageRaw = stageExplicit || "new";
   const stageWasExplicit = stageExplicit !== null && stageExplicit !== undefined && String(stageExplicit).trim() !== "";
-  const businessUnit = resolveBusinessUnit(body);
+  const businessUnit = resolveBusinessUnit(body, "summit") || "summit";
 
   if (!fullName && !email && !phone) {
     logStep("contact upsert — no usable contact data");
@@ -401,7 +401,7 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
     }
 
     // Update stage when GHL explicitly sent one (allow "new" as a valid target stage)
-    const mappedStage = STAGE_MAP[stageRaw] || STAGE_MAP[stageRaw?.trim()] || null;
+    const mappedStage = mapStage(stageRaw);
     if (stageWasExplicit && mappedStage && VALID_STAGES.has(mappedStage) && mappedStage !== existingLead.status) {
       updates.status = mappedStage;
     }
@@ -461,7 +461,7 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
   }
 
   // ─── CREATE new lead ───
-  const mappedStage = STAGE_MAP[stageRaw] || STAGE_MAP[stageRaw?.trim()] || "new";
+  const mappedStage = mapStage(stageRaw) || "new";
   const finalStage = VALID_STAGES.has(mappedStage) ? mappedStage : "new";
 
   const SOURCE_MAP: Record<string, string> = {
