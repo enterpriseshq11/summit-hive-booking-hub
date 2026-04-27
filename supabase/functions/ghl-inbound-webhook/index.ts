@@ -130,7 +130,7 @@ function resolveBusinessUnit(body: any): string {
   return "summit"; // default business unit
 }
 
-function extractLocationId(body: any): string {
+function extractLocationId(body: any, headers?: Headers): string {
   return (
     body?.locationId ||
     body?.location_id ||
@@ -141,6 +141,9 @@ function extractLocationId(body: any): string {
     body?.opportunity?.locationId ||
     body?.opportunity?.location_id ||
     body?.opportunity?.location?.id ||
+    headers?.get("locationid") ||
+    headers?.get("location-id") ||
+    headers?.get("x-ghl-location-id") ||
     ""
   );
 }
@@ -172,7 +175,7 @@ serve(async (req) => {
         contact_id: body?.contact?.id || body?.contactId || null,
         lead_id: body?.lead_id || body?.leadId || body?.az_command_lead_id ||
           null,
-        location_id: extractLocationId(body) || null,
+        location_id: extractLocationId(body, req.headers) || null,
         raw_body: body,
         headers: Object.fromEntries(req.headers.entries()),
       });
@@ -187,7 +190,7 @@ serve(async (req) => {
     const authHeader = req.headers.get("authorization") || "";
     const sigHeader = req.headers.get("x-ghl-signature") || "";
     const querySecret = new URL(req.url).searchParams.get("secret") || "";
-    const locationId = extractLocationId(body);
+    const locationId = extractLocationId(body, req.headers);
     const isTrustedLocation = locationId === TRUSTED_GHL_LOCATION_ID;
 
     if (isTrustedLocation) {
@@ -237,8 +240,8 @@ serve(async (req) => {
       }
       await supabase.from("ghl_inbound_raw_payloads").insert({
         event_type: event || null,
-        contact_id: body?.contact_id || body?.contactId || extractLocationId(body) || null,
-        location_id: extractLocationId(body) || null,
+        contact_id: body?.contact_id || body?.contactId || extractLocationId(body, req.headers) || null,
+        location_id: extractLocationId(body, req.headers) || null,
         raw_body: body,
         headers: headerSnapshot,
       });
