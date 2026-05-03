@@ -366,20 +366,22 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
                   </motion.div>
                 </div>
                 
-                {/* Overlay selector dots */}
-                <div className="flex justify-center gap-2 mt-6">
-                  {overlayExamples.map((_, i) => (
+                {/* Video selector dots */}
+                <div className="flex justify-center gap-3 mt-6">
+                  {SHOWCASE_VIDEOS.map((vid, i) => (
                     <button
                       key={i}
-                      onClick={() => setActiveOverlay(i)}
+                      onClick={() => switchShowcaseVideo(i)}
                       className={cn(
-                        "w-2 h-2 rounded-full transition-all",
-                        i === activeOverlay 
-                          ? "bg-accent w-6" 
-                          : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                        "px-3 py-1 rounded-full text-xs font-medium transition-all border",
+                        i === activeVideo 
+                          ? "bg-accent text-primary border-accent" 
+                          : "bg-transparent text-muted-foreground border-muted-foreground/30 hover:border-accent/50"
                       )}
-                      aria-label={`Show overlay example ${i + 1}`}
-                    />
+                      aria-label={`Show ${vid.label} video`}
+                    >
+                      {vid.label}
+                    </button>
                   ))}
                 </div>
               </motion.div>
