@@ -28,12 +28,30 @@ interface PhotoBooth360SectionProps {
   onRequestBooking: () => void;
 }
 
+const SHOWCASE_VIDEOS = [
+  { src: "/videos/photo-booth-wedding.mp4", label: "Wedding Reception" },
+  { src: "/videos/photo-booth-crowd.mp4", label: "Event Crowd" },
+];
+
 export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360SectionProps) {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [activeOverlay, setActiveOverlay] = useState(0);
+  const [activeVideo, setActiveVideo] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const showcaseVideoRef = useRef<HTMLVideoElement>(null);
+
+  const switchShowcaseVideo = useCallback((index: number) => {
+    setActiveVideo(index);
+    // Reset and play the new video after React re-renders with new src
+    setTimeout(() => {
+      if (showcaseVideoRef.current) {
+        showcaseVideoRef.current.load();
+        showcaseVideoRef.current.play().catch(() => {});
+      }
+    }, 50);
+  }, []);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
 
   // Parallax scroll effects
