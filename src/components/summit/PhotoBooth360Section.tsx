@@ -29,8 +29,9 @@ interface PhotoBooth360SectionProps {
 }
 
 const SHOWCASE_VIDEOS = [
-  { src: "/videos/photo-booth-wedding.mp4", label: "Wedding Reception" },
-  { src: "/videos/photo-booth-crowd.mp4", label: "Event Crowd" },
+  { src: "/videos/photo-booth-stadium.mp4", label: "Stadium Experience" },
+  { src: "/videos/photo-booth-singapore.mp4", label: "Wedding Reception" },
+  { src: "/videos/photo-booth-kids.mp4", label: "Kids Fun Time" },
 ];
 
 export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360SectionProps) {
