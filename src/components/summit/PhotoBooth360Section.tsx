@@ -314,22 +314,16 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
                   
                   <div className="relative bg-gradient-to-br from-primary via-black to-primary rounded-3xl p-1 shadow-2xl">
                     <div className="bg-black rounded-2xl aspect-[9/16] overflow-hidden relative">
-                      {/* Simulated 360 content */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-accent/5" />
-                      
-                      {/* Center rotating element */}
-                      <motion.div 
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                      >
-                        <div className="w-48 h-48 border-2 border-accent/40 rounded-full" />
-                      </motion.div>
-                      
-                      {/* Silhouette placeholder */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <Users className="h-24 w-24 text-primary-foreground/30" />
-                      </div>
+                      {/* Video content */}
+                      <video
+                        ref={showcaseVideoRef}
+                        src={SHOWCASE_VIDEOS[activeVideo].src}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      />
                       
                       {/* Custom Overlay - Animated */}
                       <motion.div 
