@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -28,12 +28,30 @@ interface PhotoBooth360SectionProps {
   onRequestBooking: () => void;
 }
 
+const SHOWCASE_VIDEOS = [
+  { src: "/videos/photo-booth-wedding.mp4", label: "Wedding Reception" },
+  { src: "/videos/photo-booth-crowd.mp4", label: "Event Crowd" },
+];
+
 export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360SectionProps) {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [activeOverlay, setActiveOverlay] = useState(0);
+  const [activeVideo, setActiveVideo] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const showcaseVideoRef = useRef<HTMLVideoElement>(null);
+
+  const switchShowcaseVideo = useCallback((index: number) => {
+    setActiveVideo(index);
+    // Reset and play the new video after React re-renders with new src
+    setTimeout(() => {
+      if (showcaseVideoRef.current) {
+        showcaseVideoRef.current.load();
+        showcaseVideoRef.current.play().catch(() => {});
+      }
+    }, 50);
+  }, []);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
 
   // Parallax scroll effects
@@ -296,22 +314,16 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
                   
                   <div className="relative bg-gradient-to-br from-primary via-black to-primary rounded-3xl p-1 shadow-2xl">
                     <div className="bg-black rounded-2xl aspect-[9/16] overflow-hidden relative">
-                      {/* Simulated 360 content */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-accent/5" />
-                      
-                      {/* Center rotating element */}
-                      <motion.div 
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                      >
-                        <div className="w-48 h-48 border-2 border-accent/40 rounded-full" />
-                      </motion.div>
-                      
-                      {/* Silhouette placeholder */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <Users className="h-24 w-24 text-primary-foreground/30" />
-                      </div>
+                      {/* Video content */}
+                      <video
+                        ref={showcaseVideoRef}
+                        src={SHOWCASE_VIDEOS[activeVideo].src}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      />
                       
                       {/* Custom Overlay - Animated */}
                       <motion.div 
@@ -354,20 +366,22 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
                   </motion.div>
                 </div>
                 
-                {/* Overlay selector dots */}
-                <div className="flex justify-center gap-2 mt-6">
-                  {overlayExamples.map((_, i) => (
+                {/* Video selector dots */}
+                <div className="flex justify-center gap-3 mt-6">
+                  {SHOWCASE_VIDEOS.map((vid, i) => (
                     <button
                       key={i}
-                      onClick={() => setActiveOverlay(i)}
+                      onClick={() => switchShowcaseVideo(i)}
                       className={cn(
-                        "w-2 h-2 rounded-full transition-all",
-                        i === activeOverlay 
-                          ? "bg-accent w-6" 
-                          : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                        "px-3 py-1 rounded-full text-xs font-medium transition-all border",
+                        i === activeVideo 
+                          ? "bg-accent text-primary border-accent" 
+                          : "bg-transparent text-muted-foreground border-muted-foreground/30 hover:border-accent/50"
                       )}
-                      aria-label={`Show overlay example ${i + 1}`}
-                    />
+                      aria-label={`Show ${vid.label} video`}
+                    >
+                      {vid.label}
+                    </button>
                   ))}
                 </div>
               </motion.div>
@@ -572,26 +586,14 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
       <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
         <DialogContent className="max-w-5xl w-full p-0 bg-black border-none overflow-hidden">
           <div className="relative aspect-video bg-black">
-            {/* Placeholder - Replace with actual video when available */}
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary via-black to-primary">
-              <div className="text-center">
-                <motion.div 
-                  className="mb-6"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                >
-                  <div className="w-32 h-32 border-4 border-accent/40 rounded-full flex items-center justify-center">
-                    <Camera className="h-12 w-12 text-accent" />
-                  </div>
-                </motion.div>
-                <p className="text-primary-foreground text-lg font-medium mb-2">
-                  360 Photo Booth Demo Video
-                </p>
-                <p className="text-primary-foreground/60 text-sm">
-                  Coming Soon — Real footage from Summit events
-                </p>
-              </div>
-            </div>
+            <video
+              ref={videoRef}
+              src={SHOWCASE_VIDEOS[0].src}
+              className="w-full h-full object-contain"
+              autoPlay
+              controls
+              playsInline
+            />
             
             {/* Close button */}
             <button
