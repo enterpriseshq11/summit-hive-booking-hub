@@ -586,26 +586,14 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
       <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
         <DialogContent className="max-w-5xl w-full p-0 bg-black border-none overflow-hidden">
           <div className="relative aspect-video bg-black">
-            {/* Placeholder - Replace with actual video when available */}
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary via-black to-primary">
-              <div className="text-center">
-                <motion.div 
-                  className="mb-6"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                >
-                  <div className="w-32 h-32 border-4 border-accent/40 rounded-full flex items-center justify-center">
-                    <Camera className="h-12 w-12 text-accent" />
-                  </div>
-                </motion.div>
-                <p className="text-primary-foreground text-lg font-medium mb-2">
-                  360 Photo Booth Demo Video
-                </p>
-                <p className="text-primary-foreground/60 text-sm">
-                  Coming Soon — Real footage from Summit events
-                </p>
-              </div>
-            </div>
+            <video
+              ref={videoRef}
+              src={SHOWCASE_VIDEOS[0].src}
+              className="w-full h-full object-contain"
+              autoPlay
+              controls
+              playsInline
+            />
             
             {/* Close button */}
             <button
