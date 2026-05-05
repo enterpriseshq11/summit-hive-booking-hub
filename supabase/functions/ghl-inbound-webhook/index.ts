@@ -597,6 +597,9 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
   };
   const mappedSource = SOURCE_MAP[source.toLowerCase()] || "other";
 
+  // Resolve assigned employee from GHL
+  const resolvedAssignee = await resolveAssignedEmployee(supabase, body);
+
   const { data: newLead, error: insertError } = await supabase
     .from("crm_leads")
     .insert({
@@ -608,6 +611,7 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
       source: mappedSource,
       ghl_contact_id: contactId || null,
       ghl_last_synced_at: new Date().toISOString(),
+      ...(resolvedAssignee ? { assigned_employee_id: resolvedAssignee } : {}),
     })
     .select("id")
     .single();
