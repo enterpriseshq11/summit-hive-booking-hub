@@ -266,12 +266,6 @@ export default function Index() {
       {/* Experience Section Header */}
       <section id="experiences" className="pt-24 pb-12 container scroll-mt-20">
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-sm font-semibold text-accent mb-6 opacity-0 animate-fade-in-up" style={{
-          animationDelay: "0.1s"
-        }}>
-            <Sparkles className="h-4 w-4" />
-            Four Unique Experiences
-          </div>
           <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 opacity-0 animate-fade-in-up" style={{
           animationDelay: "0.2s"
         }}>
