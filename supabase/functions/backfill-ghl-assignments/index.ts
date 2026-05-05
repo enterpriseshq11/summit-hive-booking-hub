@@ -27,55 +27,91 @@ serve(async (req) => {
     });
   }
 
-  // Get all profiles for matching
+  // Step 1: Fetch GHL users to build ID → name/email map
+  const usersRes = await fetch(
+    `https://services.leadconnectorhq.com/users/search?companyId=${GHL_LOCATION_ID}&locationId=${GHL_LOCATION_ID}`,
+    {
+      headers: {
+        Authorization: `Bearer ${GHL_API_KEY}`,
+        Version: "2021-07-28",
+      },
+    },
+  );
+
+  // Try location-based user lookup
+  const usersRes2 = await fetch(
+    `https://services.leadconnectorhq.com/users/?locationId=${GHL_LOCATION_ID}`,
+    {
+      headers: {
+        Authorization: `Bearer ${GHL_API_KEY}`,
+        Version: "2021-07-28",
+      },
+    },
+  );
+
+  const usersData = await usersRes.json().catch(() => ({}));
+  const usersData2 = await usersRes2.json().catch(() => ({}));
+
+  // Build GHL user ID → {name, email} map from both responses
+  const ghlUserMap: Record<string, { name: string; email: string }> = {};
+
+  const allUsers = [
+    ...(usersData?.users || []),
+    ...(usersData2?.users || []),
+  ];
+
+  for (const u of allUsers) {
+    const id = u.id || u.userId;
+    if (id) {
+      ghlUserMap[id] = {
+        name: `${u.firstName || u.first_name || ""} ${u.lastName || u.last_name || ""}`.trim(),
+        email: (u.email || "").toLowerCase(),
+      };
+    }
+  }
+
+  // Step 2: Get profiles
   const { data: profiles } = await supabase.from("profiles").select("id, first_name, last_name, email");
   if (!profiles?.length) {
-    return new Response(JSON.stringify({ error: "No profiles found" }), {
+    return new Response(JSON.stringify({ error: "No profiles" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
   }
 
-  // Get unassigned leads with GHL contact IDs
-  const { data: leads, error: leadsErr } = await supabase
+  function matchProfile(ghlUserId: string): { profileId: string; matchedVia: string } | null {
+    const ghlUser = ghlUserMap[ghlUserId];
+    if (!ghlUser) return null;
+
+    // Email match
+    if (ghlUser.email) {
+      const p = profiles!.find((p: any) => p.email?.toLowerCase() === ghlUser.email);
+      if (p) return { profileId: p.id, matchedVia: `email:${ghlUser.email}` };
+    }
+
+    // First name match
+    const firstName = ghlUser.name.split(/\s+/)[0]?.toLowerCase();
+    if (firstName) {
+      const p = profiles!.find((p: any) => p.first_name?.toLowerCase() === firstName);
+      if (p) return { profileId: p.id, matchedVia: `first_name:${firstName}` };
+    }
+
+    return null;
+  }
+
+  // Step 3: Get unassigned leads
+  const { data: leads } = await supabase
     .from("crm_leads")
     .select("id, lead_name, ghl_contact_id")
     .not("ghl_contact_id", "is", null)
     .is("assigned_employee_id", null)
-    .limit(30);
+    .limit(50);
 
-  if (leadsErr || !leads?.length) {
-    return new Response(JSON.stringify({ error: leadsErr?.message || "No leads to backfill" }), {
+  if (!leads?.length) {
+    return new Response(JSON.stringify({ message: "No leads to backfill", ghlUsers: ghlUserMap }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-  }
-
-  function matchProfile(assignedTo: string): string | null {
-    const val = assignedTo.trim().toLowerCase();
-    if (!val) return null;
-
-    // Email match
-    if (val.includes("@")) {
-      const p = profiles!.find((p: any) => p.email?.toLowerCase() === val);
-      if (p) return p.id;
-    }
-
-    // First name match
-    const byFirst = profiles!.find((p: any) => p.first_name?.toLowerCase() === val);
-    if (byFirst) return byFirst.id;
-
-    // Full name match
-    const parts = val.split(/\s+/);
-    if (parts.length >= 2) {
-      const p = profiles!.find((p: any) =>
-        p.first_name?.toLowerCase() === parts[0] &&
-        p.last_name?.toLowerCase() === parts.slice(1).join(" ")
-      );
-      if (p) return p.id;
-    }
-
-    return null;
   }
 
   let updated = 0;
@@ -85,7 +121,6 @@ serve(async (req) => {
 
   for (const lead of leads) {
     try {
-      // Fetch contact from GHL
       const res = await fetch(
         `https://services.leadconnectorhq.com/contacts/${lead.ghl_contact_id}`,
         {
@@ -111,16 +146,21 @@ serve(async (req) => {
         continue;
       }
 
-      const profileId = matchProfile(assignedTo);
-      if (!profileId) {
+      const match = matchProfile(assignedTo);
+      if (!match) {
         skipped++;
-        details.push({ lead: lead.lead_name, status: "no_profile_match", assignedTo });
+        details.push({
+          lead: lead.lead_name,
+          status: "no_profile_match",
+          ghlUserId: assignedTo,
+          ghlUser: ghlUserMap[assignedTo] || "unknown_ghl_user",
+        });
         continue;
       }
 
       const { error: upErr } = await supabase
         .from("crm_leads")
-        .update({ assigned_employee_id: profileId })
+        .update({ assigned_employee_id: match.profileId })
         .eq("id", lead.id);
 
       if (upErr) {
@@ -128,10 +168,9 @@ serve(async (req) => {
         details.push({ lead: lead.lead_name, status: "update_failed", error: upErr.message });
       } else {
         updated++;
-        details.push({ lead: lead.lead_name, status: "assigned", profileId });
+        details.push({ lead: lead.lead_name, status: "assigned", ...match });
       }
 
-      // Rate limit: GHL allows ~100 req/min on v2
       await new Promise((r) => setTimeout(r, 700));
     } catch (e) {
       errors++;
@@ -140,7 +179,7 @@ serve(async (req) => {
   }
 
   return new Response(
-    JSON.stringify({ total: leads.length, updated, skipped, errors, details }),
+    JSON.stringify({ total: leads.length, updated, skipped, errors, ghlUsersFound: Object.keys(ghlUserMap).length, ghlUserMap, details }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
   );
 });
