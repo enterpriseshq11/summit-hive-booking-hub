@@ -68,19 +68,6 @@ const steps = [{
   description: "Everything's ready when you arrive",
   icon: Heart
 }];
-const proofChips = [{
-  icon: Zap,
-  text: "Book in Minutes"
-}, {
-  icon: Clock,
-  text: "Real-Time Availability"
-}, {
-  icon: MapPin,
-  text: "Local Destination"
-}, {
-  icon: Shield,
-  text: "Secure Booking"
-}];
 export default function Index() {
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({
