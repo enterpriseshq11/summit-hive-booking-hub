@@ -5,7 +5,7 @@ import { ArrowRight, CalendarDays, Building2, Sparkles, Dumbbell, MapPin, Phone,
 import { NextAvailableStrip, ExperiencePreviewPanel, SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip, WhatsIncludedStrip, ExampleBookingModal, PreFooterCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
-import azLogoIcon from "@/assets/az-logo-icon.png";
+
 const businesses = [{
   name: "The Summit",
   tagline: "Premium Event Venue",
