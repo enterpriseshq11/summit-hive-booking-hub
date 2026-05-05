@@ -209,10 +209,6 @@ export default function Index() {
           </div>
         </div>
         
-        {/* Angled divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-background" style={{
-        clipPath: "polygon(0 100%, 100% 100%, 100% 0)"
-      }} />
       </section>
 
       {/* Google Map Section */}
