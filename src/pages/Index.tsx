@@ -128,7 +128,7 @@ export default function Index() {
         </div>
         
         <div className="container relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
             {/* Left Column - Content */}
             <div className="text-center lg:text-left space-y-4">
               {/* Main Headline */}
@@ -165,11 +165,9 @@ export default function Index() {
                   FAQ
                 </button>
               </div>
-              
-
 
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 opacity-0 animate-fade-in" style={{
-              animationDelay: "1s"
+              animationDelay: "0.7s"
             }}>
                 <a href={SITE_CONFIG.contact.phoneLink} className="flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors">
                   <Phone className="h-4 w-4" />
@@ -180,26 +178,10 @@ export default function Index() {
                   <span>{SITE_CONFIG.hours.shortDays}</span>
                 </div>
               </div>
-
-              {/* Google Map */}
-              <div className="mt-6 rounded-xl overflow-hidden border border-white/10 max-w-2xl opacity-0 animate-fade-in" style={{ animationDelay: "1.1s" }}>
-                <iframe
-                  title="A-Z Enterprises Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3047.5!2d-84.2005!3d40.5686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x883f5e1a1b1b1b1b%3A0x1b1b1b1b1b1b1b1b!2s10%20W%20Auglaize%20St%2C%20Wapakoneta%2C%20OH%2045895!5e0!3m2!1sen!1sus!4v1700000000000"
-                  width="100%"
-                  height="200"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full"
-                />
-              </div>
-              <p className="text-center lg:text-left text-xs text-white/40 mt-2">10 W Auglaize St, Wapakoneta, Ohio 45895</p>
             </div>
 
             {/* Right Column - Promotions & Quick Access */}
-            <div className="hidden lg:flex flex-col gap-4 opacity-0 animate-fade-in-left self-start mt-[11.75rem]" style={{
+            <div className="hidden lg:flex flex-col gap-4 opacity-0 animate-fade-in-left" style={{
             animationDelay: "0.5s"
           }}>
               {/* Featured Deal Card */}
@@ -238,6 +220,26 @@ export default function Index() {
           </div>
         </div>
         
+      </section>
+
+      {/* Google Map - Full width below hero */}
+      <section className="bg-primary">
+        <div className="container py-6">
+          <div className="rounded-xl overflow-hidden border border-white/10 max-w-4xl mx-auto">
+            <iframe
+              title="A-Z Enterprises Location"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3047.5!2d-84.2005!3d40.5686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x883f5e1a1b1b1b1b%3A0x1b1b1b1b1b1b1b1b!2s10%20W%20Auglaize%20St%2C%20Wapakoneta%2C%20OH%2045895!5e0!3m2!1sen!1sus!4v1700000000000"
+              width="100%"
+              height="250"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="w-full"
+            />
+          </div>
+          <p className="text-center text-xs text-white/40 mt-2">10 W Auglaize St, Wapakoneta, Ohio 45895</p>
+        </div>
       </section>
 
       {/* HOMEPAGE-03: Next Available Strip - With Toggle */}
