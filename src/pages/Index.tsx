@@ -131,23 +131,6 @@ export default function Index() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Column - Content */}
             <div className="text-center lg:text-left space-y-4">
-              {/* Google Map Embed */}
-              <div className="opacity-0 animate-fade-in-down rounded-xl overflow-hidden border border-white/10 w-full max-w-md mx-auto lg:mx-0" style={{
-              animationDelay: "0.05s"
-            }}>
-                <iframe
-                  title="A-Z Enterprises Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3047.5!2d-84.2005!3d40.5686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x883f5e1a1b1b1b1b%3A0x1b1b1b1b1b1b1b1b!2s10%20W%20Auglaize%20St%2C%20Wapakoneta%2C%20OH%2045895!5e0!3m2!1sen!1sus!4v1700000000000"
-                  width="100%"
-                  height="180"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full"
-                />
-              </div>
-              
               {/* Main Headline */}
               <div className="space-y-4">
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]" style={{
@@ -230,6 +213,26 @@ export default function Index() {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-background" style={{
         clipPath: "polygon(0 100%, 100% 100%, 100% 0)"
       }} />
+      </section>
+
+      {/* Google Map Section */}
+      <section className="py-10 bg-primary border-b border-border">
+        <div className="container">
+          <div className="rounded-xl overflow-hidden border border-white/10 max-w-4xl mx-auto">
+            <iframe
+              title="A-Z Enterprises Location"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3047.5!2d-84.2005!3d40.5686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x883f5e1a1b1b1b1b%3A0x1b1b1b1b1b1b1b1b!2s10%20W%20Auglaize%20St%2C%20Wapakoneta%2C%20OH%2045895!5e0!3m2!1sen!1sus!4v1700000000000"
+              width="100%"
+              height="250"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="w-full"
+            />
+          </div>
+          <p className="text-center text-sm text-white/50 mt-3">10 W Auglaize St, Wapakoneta, Ohio 45895</p>
+        </div>
       </section>
 
       {/* HOMEPAGE-03: Next Available Strip - With Toggle */}
