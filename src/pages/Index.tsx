@@ -131,22 +131,21 @@ export default function Index() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Column - Content */}
             <div className="text-center lg:text-left space-y-4">
-              {/* Logo + Location Pill Group - Tight spacing */}
-              <div className="space-y-2 opacity-0 animate-fade-in-down" style={{
+              {/* Google Map Embed */}
+              <div className="opacity-0 animate-fade-in-down rounded-xl overflow-hidden border border-white/10 w-full max-w-md mx-auto lg:mx-0" style={{
               animationDelay: "0.05s"
             }}>
-                {/* Logo Icon */}
-                <div className="flex justify-center lg:justify-start">
-                  <img alt="A-Z Enterprises" className="h-44 w-44 object-contain" src="/lovable-uploads/cf63743c-5431-4ce2-a81a-b629897e880c.png" />
-                </div>
-                
-                {/* Location Badge - Directly under logo */}
-                <div className="flex justify-center lg:justify-start">
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-sm font-medium text-white/90">
-                    <MapPin className="h-4 w-4 text-accent" />
-                    {SITE_CONFIG.location.full} • Local team • Premium experiences
-                  </div>
-                </div>
+                <iframe
+                  title="A-Z Enterprises Location"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3047.5!2d-84.2005!3d40.5686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x883f5e1a1b1b1b1b%3A0x1b1b1b1b1b1b1b1b!2s10%20W%20Auglaize%20St%2C%20Wapakoneta%2C%20OH%2045895!5e0!3m2!1sen!1sus!4v1700000000000"
+                  width="100%"
+                  height="180"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full"
+                />
               </div>
               
               {/* Main Headline */}
