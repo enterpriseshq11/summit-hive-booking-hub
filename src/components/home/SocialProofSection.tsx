@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Shield, RefreshCw, HeartHandshake, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TestimonialsCarousel } from "./TestimonialsCarousel";
+import { TestimonialsCarousel, type TestimonialFilter } from "./TestimonialsCarousel";
 
 const guarantees = [
   {
@@ -22,11 +22,10 @@ const guarantees = [
   },
 ];
 
-const experienceFilters = ["All", "Events", "Coworking", "Spa", "Fitness"] as const;
-type ExperienceFilter = typeof experienceFilters[number];
+const experienceFilters: TestimonialFilter[] = ["All", "Events", "Coworking", "Spa", "Fitness", "Studio", "Photo Booth"];
 
 export function SocialProofSection() {
-  const [activeFilter, setActiveFilter] = useState<ExperienceFilter>("All");
+  const [activeFilter, setActiveFilter] = useState<TestimonialFilter>("All");
 
   return (
     <section className="py-24 bg-background">
@@ -63,12 +62,12 @@ export function SocialProofSection() {
           ))}
         </div>
 
-        {/* Testimonials Carousel */}
+        {/* Testimonials Grid */}
         <div className="mb-20">
           <TestimonialsCarousel filter={activeFilter} />
         </div>
 
-        {/* Trust Strip - Replaces partner logos */}
+        {/* Trust Strip */}
         <div className="mb-16">
           <div className="flex flex-wrap justify-center items-center gap-3 text-sm text-muted-foreground">
             <span className="px-4 py-2 rounded-full bg-muted/50 border font-medium">
@@ -78,7 +77,7 @@ export function SocialProofSection() {
               ✓ High satisfaction
             </span>
             <span className="px-4 py-2 rounded-full bg-muted/50 border font-medium">
-              ✓ 4 experiences under one roof
+              ✓ Multiple services, one location
             </span>
           </div>
         </div>
