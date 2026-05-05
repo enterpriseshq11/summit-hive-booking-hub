@@ -228,6 +228,56 @@ function extractLocationId(body: any, headers?: Headers): string {
   );
 }
 
+/**
+ * Resolve GHL assignedTo into an internal profile ID.
+ * GHL may send assignedTo as a user name or email. We match against profiles.
+ * Returns the profile UUID or null if no match found.
+ */
+async function resolveAssignedEmployee(supabase: any, body: any): Promise<string | null> {
+  // GHL sends assignedTo in various shapes
+  const assignedTo = body?.assignedTo || body?.assigned_to || body?.contact?.assignedTo || body?.opportunity?.assignedTo || null;
+  if (!assignedTo) return null;
+
+  const assignedStr = String(assignedTo).trim().toLowerCase();
+  if (!assignedStr) return null;
+
+  // Try email match first
+  if (assignedStr.includes("@")) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id")
+      .ilike("email", assignedStr)
+      .limit(1)
+      .maybeSingle();
+    if (data) return data.id;
+  }
+
+  // Try first_name match (GHL often sends just first name)
+  const { data: nameMatch } = await supabase
+    .from("profiles")
+    .select("id")
+    .ilike("first_name", assignedStr)
+    .limit(1)
+    .maybeSingle();
+  if (nameMatch) return nameMatch.id;
+
+  // Try full name match ("First Last")
+  const parts = assignedStr.split(/\s+/);
+  if (parts.length >= 2) {
+    const { data: fullMatch } = await supabase
+      .from("profiles")
+      .select("id")
+      .ilike("first_name", parts[0])
+      .ilike("last_name", parts.slice(1).join(" "))
+      .limit(1)
+      .maybeSingle();
+    if (fullMatch) return fullMatch.id;
+  }
+
+  logStep("Could not resolve GHL assignedTo to a profile", { assignedTo });
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
