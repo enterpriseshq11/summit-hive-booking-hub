@@ -238,8 +238,6 @@ export default function Index() {
         
       </section>
 
-      {/* HOMEPAGE-03: Next Available Strip - With Toggle */}
-      <NextAvailableStrip />
 
       {/* Trust Strip - Replaces numeric stats */}
       <section className="py-12 bg-muted/30">
