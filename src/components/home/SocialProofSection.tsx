@@ -68,19 +68,7 @@ export function SocialProofSection() {
         </div>
 
         {/* Trust Strip */}
-        <div className="mb-16">
-          <div className="flex flex-wrap justify-center items-center gap-3 text-sm text-muted-foreground">
-            <span className="px-4 py-2 rounded-full bg-muted/50 border font-medium">
-              ✓ Trusted locally
-            </span>
-            <span className="px-4 py-2 rounded-full bg-muted/50 border font-medium">
-              ✓ High satisfaction
-            </span>
-            <span className="px-4 py-2 rounded-full bg-muted/50 border font-medium">
-              ✓ Multiple services, one location
-            </span>
-          </div>
-        </div>
+
 
         {/* Confidence Cards */}
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
