@@ -183,26 +183,24 @@ export default function Index() {
                 <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up" style={{
                 animationDelay: "0.5s"
               }}>
-                  Book in minutes. Confirm details before payment.
-                  <span className="block mt-1 font-medium text-white/80">Local support when you need it.</span>
+                  One destination. Every experience.
+                  <span className="block mt-1 font-medium text-white/80">All in Wapakoneta.</span>
                 </p>
               </div>
 
-              {/* ========== GROUP A: Experience Pills (Primary Selection) ========== */}
-              <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: "0.55s" }}>
-                <p className="text-sm text-white/50 mb-3 text-center lg:text-left">Pick your experience:</p>
-                <ExperienceQuickSelector />
-              </div>
-              
-              {/* ========== GROUP B: Secondary Anchor Chips (Smaller, Subtle) ========== */}
-              <div className="flex flex-wrap justify-center -ml-30 md:ml-6 lg:-ml-48 gap-2 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
-                <button onClick={() => scrollToSection('availability')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
-                  Availability
+              {/* ========== Pill Buttons ========== */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.55s" }}>
+                <button onClick={() => scrollToSection('availability')} className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white/90 transition-colors">
+                  Check Availability
                 </button>
-                <button onClick={() => scrollToSection('experiences')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
-                  Experiences
+                <button onClick={() => scrollToSection('experiences')} className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white/90 transition-colors">
+                  View Experiences
                 </button>
-                <button onClick={() => scrollToSection('faq')} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/90 transition-colors">
+                <span className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-accent" />
+                  Open 7 Days
+                </span>
+                <button onClick={() => scrollToSection('faq')} className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white/90 transition-colors">
                   FAQ
                 </button>
               </div>
