@@ -128,7 +128,7 @@ export default function Index() {
         </div>
         
         <div className="container relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Column - Content */}
             <div className="text-center lg:text-left space-y-4">
               {/* Main Headline */}
