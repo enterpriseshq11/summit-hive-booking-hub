@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, CalendarDays, Building2, Sparkles, Dumbbell, MapPin, Phone, Clock, Check, Star, Zap, Shield, Heart, ExternalLink } from "lucide-react";
-import { NextAvailableStrip, ExperiencePreviewPanel, SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip, ExperienceQuickSelector, WhatsIncludedStrip, ExampleBookingModal, PreFooterCTA } from "@/components/home";
+import { NextAvailableStrip, ExperiencePreviewPanel, SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip, WhatsIncludedStrip, ExampleBookingModal, PreFooterCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import azLogoIcon from "@/assets/az-logo-icon.png";
