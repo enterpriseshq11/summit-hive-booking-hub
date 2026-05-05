@@ -178,6 +178,22 @@ export default function Index() {
                   <span>{SITE_CONFIG.hours.shortDays}</span>
                 </div>
               </div>
+
+              {/* Google Map */}
+              <div className="mt-2 rounded-xl overflow-hidden border border-white/10 max-w-2xl opacity-0 animate-fade-in" style={{ animationDelay: "0.85s" }}>
+                <iframe
+                  title="A-Z Enterprises Location"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3047.5!2d-84.2005!3d40.5686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x883f5e1a1b1b1b1b%3A0x1b1b1b1b1b1b1b1b!2s10%20W%20Auglaize%20St%2C%20Wapakoneta%2C%20OH%2045895!5e0!3m2!1sen!1sus!4v1700000000000"
+                  width="100%"
+                  height="180"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full"
+                />
+              </div>
+              <p className="text-center lg:text-left text-xs text-white/40 mt-1">10 W Auglaize St, Wapakoneta, Ohio 45895</p>
             </div>
 
             {/* Right Column - Promotions & Quick Access */}
