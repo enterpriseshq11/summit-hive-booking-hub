@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, CalendarDays, Building2, Sparkles, Dumbbell, MapPin, Phone, Clock, Check, Star, Zap, Shield, Heart, ExternalLink } from "lucide-react";
+import { ArrowRight, CalendarDays, Building2, Sparkles, Dumbbell, MapPin, Phone, Clock, Check, Star, Zap, Shield, Heart, ExternalLink, Camera, Mic } from "lucide-react";
 import { NextAvailableStrip, SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip, WhatsIncludedStrip, ExampleBookingModal, PreFooterCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
@@ -46,6 +46,26 @@ const businesses = [{
   icon: Dumbbell,
   href: "/fitness",
   colorClass: "fitness"
+}, {
+  name: "Voice Vault Studio",
+  tagline: "Recording + Podcasting",
+  description: "Professional recording studio for music, podcasts, and voiceovers. Studio-quality sound, easy booking.",
+  bestFor: "Music • Podcasts • Voiceovers",
+  bullets: ["Soundproofed rooms", "Pro-grade equipment", "Hourly booking"],
+  fastFacts: ["Hourly sessions available", "Book same-day or ahead", "Top feature: Pro-grade acoustics"],
+  icon: Mic,
+  href: "/voice-vault",
+  colorClass: "studio"
+}, {
+  name: "360 Photo Booth",
+  tagline: "Immersive Event Add-On",
+  description: "Capture unforgettable moments with our 360 photo booth. Perfect for events, parties, and brand activations.",
+  bestFor: "Parties • Events • Brand Activations",
+  bullets: ["Instant video sharing", "Custom overlays", "On-site setup"],
+  fastFacts: ["Add-on for any event", "Instant digital delivery", "Top feature: Custom branded overlays"],
+  icon: Camera,
+  href: "/photo-booth",
+  colorClass: "photobooth"
 }];
 const steps = [{
   number: "01",
@@ -325,8 +345,7 @@ export default function Index() {
         <div className="text-center mt-12">
           <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-primary font-semibold">
             <Link to="/booking" className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5" />
-              Book Now
+              Explore All Experiences
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
@@ -412,8 +431,7 @@ export default function Index() {
 
             <Button size="lg" className="text-lg px-14 py-7 bg-primary text-primary-foreground font-bold shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300" asChild>
               <Link to="/booking">
-                <CalendarDays className="h-5 w-5 mr-2" />
-                Book Now
+                Explore All Experiences
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Link>
             </Button>
