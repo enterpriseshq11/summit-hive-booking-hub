@@ -511,6 +511,12 @@ async function handleContactCreatedOrUpdated(supabase: any, body: any) {
       updates.status = mappedStage;
     }
 
+    // Sync assigned employee from GHL
+    const resolvedAssignee = await resolveAssignedEmployee(supabase, body);
+    if (resolvedAssignee) {
+      updates.assigned_employee_id = resolvedAssignee;
+    }
+
     // Always update sync timestamp
     updates.ghl_last_synced_at = new Date().toISOString();
     updates.ghl_sync_in_progress = false;
