@@ -63,7 +63,7 @@ export function Header() {
     setExpandedMobileSection(expandedMobileSection === section ? null : section);
   };
 
-  const btnClass = "gap-1.5 lg:gap-2 px-3 lg:px-4 text-sm lg:text-base font-bold text-accent hover:text-accent hover:bg-accent/10 drop-shadow-[0_0_10px_hsl(43,74%,49%,0.6)] hover:drop-shadow-[0_0_16px_hsl(43,74%,49%,0.8)] transition-all [text-shadow:0_0_8px_hsl(43,74%,49%,0.5)]";
+  const btnClass = "gap-1.5 lg:gap-2 px-3 lg:px-4 text-[13px] lg:text-sm font-bold text-accent hover:text-accent hover:bg-accent/10 drop-shadow-[0_0_10px_rgba(255,255,255,0.35)] hover:drop-shadow-[0_0_16px_rgba(255,255,255,0.5)] transition-all [text-shadow:0_0_10px_rgba(255,255,255,0.4),0_0_20px_hsl(43,74%,49%,0.4)]";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground">
