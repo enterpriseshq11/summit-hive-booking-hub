@@ -68,19 +68,6 @@ const steps = [{
   description: "Everything's ready when you arrive",
   icon: Heart
 }];
-const proofChips = [{
-  icon: Zap,
-  text: "Book in Minutes"
-}, {
-  icon: Clock,
-  text: "Real-Time Availability"
-}, {
-  icon: MapPin,
-  text: "Local Destination"
-}, {
-  icon: Shield,
-  text: "Secure Booking"
-}];
 export default function Index() {
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({
@@ -162,15 +149,15 @@ export default function Index() {
                 </div>
               </div>
               
-              {/* Main Headline - Updated copy with tighter line-height */}
+              {/* Main Headline */}
               <div className="space-y-4">
                 <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-bold tracking-tight text-white opacity-0 animate-fade-in-up leading-[1.1]" style={{
                 animationDelay: "0.2s"
               }}>
-                  <span className="block">Wapakoneta's Premium</span>
-                  <span className="block mt-1">Destination for</span>
+                  <span className="block">One destination.</span>
+                  <span className="block mt-1">Every experience.</span>
                   <span className="block mt-1 text-accent">
-                    Events, Work, Wellness & Fitness
+                    All in Wapakoneta.
                   </span>
                 </h1>
                 
@@ -178,29 +165,21 @@ export default function Index() {
                 <div className="hidden lg:block w-24 h-1 bg-gradient-to-r from-accent to-accent/50 opacity-0 animate-fade-in" style={{
                 animationDelay: "0.4s"
               }} />
-                
-                {/* Updated subheadline */}
-                <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto lg:mx-0 leading-relaxed opacity-0 animate-fade-in-up" style={{
-                animationDelay: "0.5s"
-              }}>
-                  One destination. Every experience.
-                  <span className="block mt-1 font-medium text-white/80">All in Wapakoneta.</span>
-                </p>
               </div>
 
-              {/* ========== Pill Buttons ========== */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-3 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.55s" }}>
-                <button onClick={() => scrollToSection('availability')} className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white/90 transition-colors">
+              {/* ========== Pill Buttons (single row) ========== */}
+              <div className="flex flex-nowrap justify-center lg:justify-start gap-3 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.55s" }}>
+                <button onClick={() => scrollToSection('availability')} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white/90 transition-colors whitespace-nowrap">
                   Check Availability
                 </button>
-                <button onClick={() => scrollToSection('experiences')} className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white/90 transition-colors">
+                <button onClick={() => scrollToSection('experiences')} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white/90 transition-colors whitespace-nowrap">
                   View Experiences
                 </button>
-                <span className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 flex items-center gap-1.5">
+                <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 flex items-center gap-1.5 whitespace-nowrap">
                   <Clock className="h-3.5 w-3.5 text-accent" />
                   Open 7 Days
                 </span>
-                <button onClick={() => scrollToSection('faq')} className="px-5 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white/90 transition-colors">
+                <button onClick={() => scrollToSection('faq')} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white/90 transition-colors whitespace-nowrap">
                   FAQ
                 </button>
               </div>
@@ -224,17 +203,6 @@ export default function Index() {
                 </div>
               </div>
 
-              {/* ========== GROUP D: Feature/Trust Chips (Subtle, Last) ========== */}
-              <div className="pt-2 opacity-0 animate-fade-in" style={{ animationDelay: "0.9s" }}>
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center lg:justify-start gap-2">
-                  {proofChips.map((chip, index) => (
-                    <div key={index} className="flex items-center justify-center sm:justify-start gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60">
-                      <chip.icon className="h-3 w-3 text-accent/70" />
-                      <span>{chip.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 opacity-0 animate-fade-in" style={{
               animationDelay: "1s"
