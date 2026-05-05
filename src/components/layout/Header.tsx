@@ -63,7 +63,7 @@ export function Header() {
     setExpandedMobileSection(expandedMobileSection === section ? null : section);
   };
 
-  const btnClass = "gap-1.5 lg:gap-2 px-3 lg:px-4 text-[13px] lg:text-sm font-bold text-accent hover:text-accent hover:bg-accent/10 transition-all";
+  const btnClass = "gap-1.5 lg:gap-2 px-4 lg:px-6 text-sm lg:text-base font-bold text-accent hover:text-accent hover:bg-accent/10 transition-all";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground">
@@ -92,7 +92,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1 lg:gap-2 ml-4" aria-label="Primary">
+        <nav className="hidden md:flex items-center gap-2 lg:gap-4 flex-1 justify-end" aria-label="Primary">
           {/* 1. Experiences Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -157,7 +157,7 @@ export function Header() {
           <Link
             to="/careers"
             className={cn(
-              "flex items-center gap-1.5 lg:gap-2 px-3 lg:px-4 py-2 text-[13px] lg:text-sm font-bold rounded-md transition-all",
+              "flex items-center gap-1.5 lg:gap-2 px-4 lg:px-6 py-2 text-sm lg:text-base font-bold rounded-md transition-all",
               location.pathname.startsWith("/careers")
                 ? "bg-accent/20 text-accent"
                 : "text-accent hover:text-accent hover:bg-accent/10"
