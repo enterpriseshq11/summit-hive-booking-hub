@@ -216,11 +216,42 @@ export default function Index() {
               <p className="text-center lg:text-left text-xs text-white/40 mt-2">10 W Auglaize St, Wapakoneta, Ohio 45895</p>
             </div>
 
-            {/* Right Column - Experience Preview Panel - Aligned with Wapakoneta pill */}
-            <div className="hidden lg:block opacity-0 animate-fade-in-left self-start mt-[11.75rem]" style={{
+            {/* Right Column - Promotions & Quick Access */}
+            <div className="hidden lg:flex flex-col gap-4 opacity-0 animate-fade-in-left self-start mt-[11.75rem]" style={{
             animationDelay: "0.5s"
           }}>
-              <ExperiencePreviewPanel />
+              {/* Featured Deal Card */}
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-6">
+                <span className="inline-block text-xs font-semibold uppercase tracking-wider text-accent mb-3">Featured Deal</span>
+                <h3 className="text-lg font-bold text-white mb-2">Coming Soon</h3>
+                <p className="text-sm text-white/50 mb-4">Check back for our latest promotions and deals.</p>
+                <button disabled className="inline-flex items-center gap-1.5 text-sm font-medium text-white/25 cursor-not-allowed">
+                  View Offer <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Quick Access Links */}
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/60 mb-4">Quick Access</h3>
+                <div className="space-y-3">
+                  <Link to="/summit" className="flex items-center justify-between text-sm text-white/70 hover:text-accent transition-colors group">
+                    <span>Book an Event</span>
+                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                  <Link to="/fitness" className="flex items-center justify-between text-sm text-white/70 hover:text-accent transition-colors group">
+                    <span>Explore Memberships</span>
+                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                  <Link to="/voice-vault" className="flex items-center justify-between text-sm text-white/70 hover:text-accent transition-colors group">
+                    <span>Reserve Studio Time</span>
+                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                  <Link to="/spa" className="flex items-center justify-between text-sm text-white/70 hover:text-accent transition-colors group">
+                    <span>Book a Spa Service</span>
+                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
