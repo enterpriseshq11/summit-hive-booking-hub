@@ -92,7 +92,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-0.5 md:gap-0.5 lg:gap-1 ml-2" aria-label="Primary">
+        <nav className="hidden md:flex items-center gap-1 lg:gap-2 ml-4" aria-label="Primary">
           {/* 1. Experiences Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
