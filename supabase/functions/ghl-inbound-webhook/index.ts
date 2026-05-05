@@ -233,15 +233,18 @@ function extractLocationId(body: any, headers?: Headers): string {
  * GHL may send assignedTo as a user name or email. We match against profiles.
  * Returns the profile UUID or null if no match found.
  */
+// Dylan's profile ID — default owner when GHL assignedTo can't be resolved
+const DYLAN_PROFILE_ID = "cd9ebc80-ea46-4ce1-8fae-5fb5b7d78b54";
+
 async function resolveAssignedEmployee(supabase: any, body: any): Promise<string | null> {
-  // GHL sends assignedTo in various shapes
+  // GHL sends assignedTo in various shapes — usually a GHL user ID string
   const assignedTo = body?.assignedTo || body?.assigned_to || body?.contact?.assignedTo || body?.opportunity?.assignedTo || null;
-  if (!assignedTo) return null;
+  if (!assignedTo) return DYLAN_PROFILE_ID; // Default to Dylan when no assignment
 
   const assignedStr = String(assignedTo).trim().toLowerCase();
-  if (!assignedStr) return null;
+  if (!assignedStr) return DYLAN_PROFILE_ID;
 
-  // Try email match first
+  // Try email match first (in case GHL sends an email)
   if (assignedStr.includes("@")) {
     const { data } = await supabase
       .from("profiles")
@@ -252,7 +255,7 @@ async function resolveAssignedEmployee(supabase: any, body: any): Promise<string
     if (data) return data.id;
   }
 
-  // Try first_name match (GHL often sends just first name)
+  // Try first_name match (GHL sometimes sends just a first name)
   const { data: nameMatch } = await supabase
     .from("profiles")
     .select("id")
@@ -274,8 +277,9 @@ async function resolveAssignedEmployee(supabase: any, body: any): Promise<string
     if (fullMatch) return fullMatch.id;
   }
 
-  logStep("Could not resolve GHL assignedTo to a profile", { assignedTo });
-  return null;
+  // GHL typically sends a GHL user ID (not a name) — default to Dylan
+  logStep("Could not resolve GHL assignedTo to a profile, defaulting to Dylan", { assignedTo });
+  return DYLAN_PROFILE_ID;
 }
 
 serve(async (req) => {
