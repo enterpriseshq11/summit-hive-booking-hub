@@ -157,7 +157,7 @@ export function Header() {
           <Link
             to="/careers"
             className={cn(
-              "flex items-center gap-1.5 lg:gap-2 px-3 lg:px-4 py-2 text-sm lg:text-base font-semibold rounded-md transition-all drop-shadow-[0_0_6px_hsl(43,74%,49%,0.4)]",
+              "flex items-center gap-1.5 lg:gap-2 px-3 lg:px-4 py-2 text-sm lg:text-base font-bold rounded-md transition-all drop-shadow-[0_0_10px_hsl(43,74%,49%,0.6)] hover:drop-shadow-[0_0_16px_hsl(43,74%,49%,0.8)] [text-shadow:0_0_8px_hsl(43,74%,49%,0.5)]",
               location.pathname.startsWith("/careers")
                 ? "bg-accent/20 text-accent"
                 : "text-accent hover:text-accent hover:bg-accent/10"
