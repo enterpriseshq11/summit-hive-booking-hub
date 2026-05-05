@@ -63,7 +63,7 @@ export function Header() {
     setExpandedMobileSection(expandedMobileSection === section ? null : section);
   };
 
-  const btnClass = "gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 text-xs md:text-xs lg:text-sm text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10";
+  const btnClass = "gap-1.5 lg:gap-2 px-3 lg:px-4 text-sm lg:text-base font-semibold text-accent hover:text-accent hover:bg-accent/10 drop-shadow-[0_0_6px_hsl(43,74%,49%,0.4)] transition-all";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-primary text-primary-foreground">
