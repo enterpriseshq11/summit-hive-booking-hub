@@ -42,7 +42,7 @@ serve(async (req) => {
     .select("id, lead_name, ghl_contact_id")
     .not("ghl_contact_id", "is", null)
     .is("assigned_employee_id", null)
-    .limit(200);
+    .limit(30);
 
   if (leadsErr || !leads?.length) {
     return new Response(JSON.stringify({ error: leadsErr?.message || "No leads to backfill" }), {
