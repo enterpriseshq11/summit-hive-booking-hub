@@ -197,23 +197,23 @@ export default function Index() {
             </div>
 
             {/* Right Column - Promotions & Quick Access */}
-            <div className="hidden lg:flex flex-col gap-4 opacity-0 animate-fade-in-left" style={{
+            <div className="hidden lg:flex flex-col gap-3 opacity-0 animate-fade-in-left" style={{
             animationDelay: "0.5s"
           }}>
               {/* Featured Deal Card */}
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-6">
-                <span className="inline-block text-xs font-semibold uppercase tracking-wider text-accent mb-3">Featured Deal</span>
-                <h3 className="text-lg font-bold text-white mb-2">Coming Soon</h3>
-                <p className="text-sm text-white/50 mb-4">Check back for our latest promotions and deals.</p>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-5">
+                <span className="inline-block text-xs font-semibold uppercase tracking-wider text-accent mb-2">Featured Deal</span>
+                <h3 className="text-base font-bold text-white mb-1.5">Coming Soon</h3>
+                <p className="text-sm text-white/50 mb-3">Check back for our latest promotions and deals.</p>
                 <button disabled className="inline-flex items-center gap-1.5 text-sm font-medium text-white/25 cursor-not-allowed">
                   View Offer <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
 
               {/* Quick Access Links */}
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/60 mb-4">Quick Access</h3>
-                <div className="space-y-3">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-5">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/60 mb-3">Quick Access</h3>
+                <div className="space-y-2.5">
                   <Link to="/summit" className="flex items-center justify-between text-sm text-white/70 hover:text-accent transition-colors group">
                     <span>Book an Event</span>
                     <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -236,26 +236,6 @@ export default function Index() {
           </div>
         </div>
         
-      </section>
-
-      {/* Google Map - Full width below hero */}
-      <section className="bg-primary">
-        <div className="container py-6">
-          <div className="rounded-xl overflow-hidden border border-white/10 max-w-4xl mx-auto">
-            <iframe
-              title="A-Z Enterprises Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3047.5!2d-84.2005!3d40.5686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x883f5e1a1b1b1b1b%3A0x1b1b1b1b1b1b1b1b!2s10%20W%20Auglaize%20St%2C%20Wapakoneta%2C%20OH%2045895!5e0!3m2!1sen!1sus!4v1700000000000"
-              width="100%"
-              height="250"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="w-full"
-            />
-          </div>
-          <p className="text-center text-xs text-white/40 mt-2">10 W Auglaize St, Wapakoneta, Ohio 45895</p>
-        </div>
       </section>
 
       {/* HOMEPAGE-03: Next Available Strip - With Toggle */}
