@@ -157,10 +157,10 @@ export function Header() {
           <Link
             to="/careers"
             className={cn(
-              "flex items-center gap-1 md:gap-1 lg:gap-1.5 px-2 md:px-2 lg:px-3 py-2 text-xs md:text-xs lg:text-sm font-medium rounded-md transition-colors",
+              "flex items-center gap-1.5 lg:gap-2 px-3 lg:px-4 py-2 text-sm lg:text-base font-semibold rounded-md transition-all drop-shadow-[0_0_6px_hsl(43,74%,49%,0.4)]",
               location.pathname.startsWith("/careers")
                 ? "bg-accent/20 text-accent"
-                : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                : "text-accent hover:text-accent hover:bg-accent/10"
             )}
           >
             <Briefcase className="h-4 w-4" />
