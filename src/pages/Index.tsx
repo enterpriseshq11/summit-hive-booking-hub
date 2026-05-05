@@ -242,25 +242,22 @@ export default function Index() {
       {/* Trust Strip - Replaces numeric stats */}
       <section className="py-12 bg-muted/30">
         <div className="container">
-          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 max-w-4xl mx-auto text-center">
-            <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto text-center">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Check className="h-5 w-5 text-accent" />
               <span className="font-medium">Trusted locally</span>
             </div>
-            <div className="hidden md:block w-1 h-1 rounded-full bg-muted-foreground/30" />
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Check className="h-5 w-5 text-accent" />
               <span className="font-medium">Bookings every week</span>
             </div>
-            <div className="hidden md:block w-1 h-1 rounded-full bg-muted-foreground/30" />
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Check className="h-5 w-5 text-accent" />
               <span className="font-medium">High satisfaction</span>
             </div>
-            <div className="hidden md:block w-1 h-1 rounded-full bg-muted-foreground/30" />
-            <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Check className="h-5 w-5 text-accent" />
-              <span className="font-medium">4 experiences under one roof</span>
+              <span className="font-medium">Multiple services, one location</span>
             </div>
           </div>
         </div>
