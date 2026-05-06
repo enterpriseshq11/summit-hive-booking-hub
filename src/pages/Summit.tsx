@@ -585,7 +585,7 @@ export default function Summit() {
                   <div className="absolute inset-0 bg-accent/10 blur-2xl rounded-full scale-90" />
                   
                   <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-full border-2 border-accent/30 overflow-hidden">
-                    <img src={victoriaHeadshot} alt="Victoria - Event Coordinator at The Summit" className="w-full h-full object-cover object-[center_20%]" />
+                    <img src={victoriaHeadshot} alt="Victoria - Event Coordinator at The Summit" className="w-full h-full object-cover" style={{ objectPosition: '55% 20%' }} />
                   </div>
                   
                   {/* E³ badge */}
