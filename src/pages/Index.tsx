@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Building2, Sparkles, Dumbbell, Phone, Clock, Check, Camera, Mic, ArrowRight as ArrowRightAlias } from "lucide-react";
+import { ArrowRight, Building2, Sparkles, Dumbbell, Phone, Clock, Check, Camera, Mic } from "lucide-react";
 import { SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip, WhatsIncludedStrip, PreFooterCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
@@ -66,27 +66,6 @@ const businesses = [{
   icon: Camera,
   href: "/photo-booth",
   colorClass: "photobooth"
-}];
-const steps = [{
-  number: "01",
-  title: "Choose Your Experience",
-  description: "Browse venues, spa, gym, or coworking",
-  icon: Star
-}, {
-  number: "02",
-  title: "See Real-Time Availability",
-  description: "Find the perfect time that works for you",
-  icon: CalendarDays
-}, {
-  number: "03",
-  title: "Confirm & Pay Deposit",
-  description: "Secure your spot with transparent pricing",
-  icon: Zap
-}, {
-  number: "04",
-  title: "Show Up — We Handle the Rest",
-  description: "Everything's ready when you arrive",
-  icon: Heart
 }];
 export default function Index() {
   const scrollToSection = (id: string) => {
