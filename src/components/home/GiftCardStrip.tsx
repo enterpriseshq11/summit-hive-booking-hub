@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export function GiftCardStrip() {
   return (
-    <section className="py-12 bg-muted/30 border-y">
+    <section className="py-12 bg-primary text-primary-foreground">
       <div className="container">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 max-w-4xl mx-auto">
           <div className="flex items-center gap-4">

@@ -10,7 +10,7 @@ export function SocialProofSection() {
   const [activeFilter, setActiveFilter] = useState<TestimonialFilter>("All");
 
   return (
-    <section className="pt-24 bg-background">
+    <section className="pt-24 pb-16 bg-background">
       <div className="container">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10">

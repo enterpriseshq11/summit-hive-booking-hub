@@ -243,8 +243,8 @@ export default function Index() {
       <SocialProofSection />
 
       {/* Experience Section Header */}
-      <section id="experiences" className="pb-12 container scroll-mt-20">
-        <div className="text-center max-w-3xl mx-auto">
+      <section id="experiences" className="pt-16 pb-12 scroll-mt-20 bg-primary text-primary-foreground">
+        <div className="text-center max-w-3xl mx-auto container">
           <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 opacity-0 animate-fade-in-up" style={{
           animationDelay: "0.2s"
         }}>
@@ -259,7 +259,7 @@ export default function Index() {
       </section>
 
       {/* HOMEPAGE-04: Business Cards with Fast Facts */}
-      <section className="py-12 pb-16 container">
+      <section className="py-12 pb-16 container bg-primary text-primary-foreground">
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {businesses.map((business, index) => <Link key={business.href} to={business.href} className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl" role="link" aria-label={`Learn more about ${business.name} - ${business.tagline}`}>
               <Card className="relative overflow-hidden border border-border bg-card hover:border-accent/40 transition-all duration-500 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 opacity-0 animate-fade-in-up h-full" style={{
