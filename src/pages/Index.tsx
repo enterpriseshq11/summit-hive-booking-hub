@@ -242,24 +242,23 @@ export default function Index() {
       {/* Social Proof Section - Testimonials, Trust Strip, Guarantees */}
       <SocialProofSection />
 
-      {/* Experience Section Header */}
-      <section id="experiences" className="pt-16 pb-12 scroll-mt-20 bg-primary text-primary-foreground">
-        <div className="text-center max-w-3xl mx-auto container">
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 opacity-0 animate-fade-in-up" style={{
-          animationDelay: "0.2s"
-        }}>
-            One <span className="text-accent">Destination</span>
-          </h2>
-          <p className="text-lg text-muted-foreground opacity-0 animate-fade-in-up" style={{
-          animationDelay: "0.3s"
-        }}>
-            From life's biggest celebrations to everyday wellness, we've got you covered.
-          </p>
-        </div>
-      </section>
+      {/* Experience Section - Dark background */}
+      <section id="experiences" className="pt-16 pb-16 scroll-mt-20 bg-primary">
+        <div className="container">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-primary-foreground opacity-0 animate-fade-in-up" style={{
+            animationDelay: "0.2s"
+          }}>
+              One <span className="text-accent">Destination</span>
+            </h2>
+            <p className="text-lg text-primary-foreground/60 opacity-0 animate-fade-in-up" style={{
+            animationDelay: "0.3s"
+          }}>
+              From life's biggest celebrations to everyday wellness, we've got you covered.
+            </p>
+          </div>
 
-      {/* HOMEPAGE-04: Business Cards with Fast Facts */}
-      <section className="py-12 pb-16 container bg-primary text-primary-foreground">
+        {/* Business Cards */}
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {businesses.map((business, index) => <Link key={business.href} to={business.href} className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl" role="link" aria-label={`Learn more about ${business.name} - ${business.tagline}`}>
               <Card className="relative overflow-hidden border border-border bg-card hover:border-accent/40 transition-all duration-500 hover:shadow-xl hover:shadow-accent/10 hover:-translate-y-1 opacity-0 animate-fade-in-up h-full" style={{
