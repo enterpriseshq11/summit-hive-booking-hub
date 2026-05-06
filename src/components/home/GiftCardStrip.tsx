@@ -12,8 +12,8 @@ export function GiftCardStrip() {
               <Gift className="h-7 w-7 text-accent" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Give the Gift of Experience</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-bold text-lg text-primary-foreground">Give the Gift of Experience</h3>
+              <p className="text-sm text-primary-foreground/60">
                 Perfect for any occasion — events, spa days, fitness, or coworking.
               </p>
             </div>
