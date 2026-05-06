@@ -264,7 +264,7 @@ export default function Index() {
       <SocialProofSection />
 
       {/* Experience Section Header */}
-      <section id="experiences" className="pt-24 pb-12 container scroll-mt-20">
+      <section id="experiences" className="pb-12 container scroll-mt-20">
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 opacity-0 animate-fade-in-up" style={{
           animationDelay: "0.2s"
