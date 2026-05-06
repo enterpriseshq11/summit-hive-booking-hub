@@ -579,7 +579,7 @@ export default function Summit() {
               </div>
               
               {/* Victoria Visual / Placeholder */}
-              <div className="flex justify-center">
+              <div className="flex items-start justify-end">
                 <div className="relative">
                   {/* Gold accent glow */}
                   <div className="absolute inset-0 bg-accent/10 blur-2xl rounded-full scale-90" />
