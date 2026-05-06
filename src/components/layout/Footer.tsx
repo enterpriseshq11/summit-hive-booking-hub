@@ -9,14 +9,23 @@ const footerLinks = {
     label: "The Summit",
     href: "/summit"
   }, {
-    label: "Hive Coworking",
+    label: "The Hive Coworking",
     href: "/coworking"
   }, {
-    label: "Restoration Lounge",
+    label: "Restoration Lounge & Spa",
     href: "/spa"
   }, {
     label: "Total Fitness",
     href: "/fitness"
+  }, {
+    label: "360 Photo Booth",
+    href: "/photo-booth"
+  }, {
+    label: "Voice Vault",
+    href: "/voice-vault"
+  }, {
+    label: "High Maintenance Beauty Haven",
+    href: "/beauty-haven"
   }],
   booking: [{
     label: "Book Now",
