@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, CalendarDays, Building2, Sparkles, Dumbbell, MapPin, Phone, Clock, Check, Star, Zap, Shield, Heart, ExternalLink, Camera, Mic } from "lucide-react";
-import { NextAvailableStrip, SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip, WhatsIncludedStrip, ExampleBookingModal, PreFooterCTA } from "@/components/home";
+import { ArrowRight, Building2, Sparkles, Dumbbell, Phone, Clock, Check, Camera, Mic } from "lucide-react";
+import { SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip, WhatsIncludedStrip, PreFooterCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
 
@@ -66,27 +66,6 @@ const businesses = [{
   icon: Camera,
   href: "/photo-booth",
   colorClass: "photobooth"
-}];
-const steps = [{
-  number: "01",
-  title: "Choose Your Experience",
-  description: "Browse venues, spa, gym, or coworking",
-  icon: Star
-}, {
-  number: "02",
-  title: "See Real-Time Availability",
-  description: "Find the perfect time that works for you",
-  icon: CalendarDays
-}, {
-  number: "03",
-  title: "Confirm & Pay Deposit",
-  description: "Secure your spot with transparent pricing",
-  icon: Zap
-}, {
-  number: "04",
-  title: "Show Up — We Handle the Rest",
-  description: "Everything's ready when you arrive",
-  icon: Heart
 }];
 export default function Index() {
   const scrollToSection = (id: string) => {
@@ -352,136 +331,16 @@ export default function Index() {
       {/* Gift Cards Strip */}
       <GiftCardStrip />
 
-      {/* HOMEPAGE-08: How It Works Section with Example Modal */}
-      <section className="py-28 relative overflow-hidden">
-        {/* Diagonal background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/95" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.08)_0%,transparent_70%)]" />
-        
-        <div className="container relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-semibold text-white mb-6">
-              <Zap className="h-4 w-4 text-accent" />
-              Simple & Seamless
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
-              Book in <span className="text-accent">4 Easy Steps</span>
-            </h2>
-            {/* Example Booking Modal Trigger */}
-            <div className="mt-6">
-              <ExampleBookingModal />
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-            {steps.map((step, index) => <div key={index} className="relative text-center group opacity-0 animate-fade-in-up" style={{
-            animationDelay: `${0.15 * (index + 1)}s`
-          }}>
-                {/* Connector line */}
-                {index < steps.length - 1 && <div className="hidden md:block absolute top-14 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-accent/50 to-accent/20" />}
-                
-                {/* Step card */}
-                <div className="relative inline-flex items-center justify-center w-28 h-28 rounded-3xl bg-white/10 backdrop-blur-sm border border-white/20 mb-6 group-hover:bg-white/20 group-hover:border-accent/50 group-hover:-translate-y-2 transition-all duration-300 shadow-xl">
-                  <step.icon className="h-12 w-12 text-accent" />
-                  <span className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-accent text-primary text-sm font-bold flex items-center justify-center shadow-lg shadow-accent/30">
-                    {step.number}
-                  </span>
-                </div>
-                
-                <h3 className="text-lg font-bold mb-2 text-white">{step.title}</h3>
-                <p className="text-sm text-white/60">{step.description}</p>
-              </div>)}
-          </div>
-        </div>
-        
-        {/* Angled divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-background" style={{
-        clipPath: "polygon(0 100%, 100% 100%, 100% 100%, 0 0)"
-      }} />
-      </section>
 
       {/* HOMEPAGE-07: FAQ Section - Enhanced with high-intent questions */}
       <div id="faq" className="scroll-mt-20">
         <FAQSection />
       </div>
 
-      {/* Final CTA Section - Updated copy */}
-      <section className="relative py-28 overflow-hidden">
-        {/* Premium gold gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-accent via-accent/95 to-accent/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(var(--primary)/0.15)_0%,transparent_50%)]" />
-        
-        {/* Subtle pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
-        
-        <div className="container relative z-10">
-          <div className="max-w-2xl mx-auto text-center text-primary">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
-              Your Next Booking Starts Here.
-            </h2>
-            <p className="text-lg text-primary/70 mb-10 max-w-xl mx-auto">
-              Your event, workspace, treatment, or workout is a few clicks away.
-            </p>
-
-            <Button size="lg" className="text-lg px-14 py-7 bg-primary text-primary-foreground font-bold shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300" asChild>
-              <Link to="/booking">
-                Explore All Experiences
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
 
       {/* HOMEPAGE-10: Pre-Footer CTA Strip */}
       <PreFooterCTA />
 
-      {/* Footer Info - Enhanced contrast and clickable links */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="container">
-          <div className="grid md:grid-cols-3 gap-12 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 mb-4">
-                <MapPin className="h-6 w-6 text-accent" />
-              </div>
-              <h3 className="font-bold mb-3 text-lg">Location</h3>
-              <p className="text-sm text-white/80 leading-relaxed">
-                {SITE_CONFIG.location.full}
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 mb-4">
-                <Phone className="h-6 w-6 text-accent" />
-              </div>
-              <h3 className="font-bold mb-3 text-lg">Contact</h3>
-              <div className="space-y-1">
-                <a href={SITE_CONFIG.contact.phoneLink} className="block text-sm text-white/80 hover:text-accent transition-colors font-medium">
-                  {SITE_CONFIG.contact.phone}
-                </a>
-                <a href={SITE_CONFIG.contact.emailLink} className="block text-sm text-white/80 hover:text-accent transition-colors">
-                  {SITE_CONFIG.contact.email}
-                </a>
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 mb-4">
-                <Clock className="h-6 w-6 text-accent" />
-              </div>
-              <h3 className="font-bold mb-3 text-lg">Hours</h3>
-              <p className="text-sm text-white/80 leading-relaxed">
-                {SITE_CONFIG.hours.days}<br />
-                {SITE_CONFIG.hours.time}
-              </p>
-            </div>
-          </div>
-          
-          <div className="mt-16 pt-8 border-t border-white/10 text-center">
-            <p className="text-sm text-white/50">
-              {SITE_CONFIG.business.copyright}
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Floating Help CTA */}
       <FloatingHelpCTA />
