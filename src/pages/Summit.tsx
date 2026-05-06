@@ -1,4 +1,5 @@
 import { useState } from "react";
+import victoriaHeadshot from "@/assets/victoria-headshot.png";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -583,13 +584,8 @@ export default function Summit() {
                   {/* Gold accent glow */}
                   <div className="absolute inset-0 bg-accent/10 blur-2xl rounded-full scale-90" />
                   
-                  {/* Placeholder silhouette - TODO: Replace with Victoria's headshot when available */}
-                  <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-full bg-gradient-to-br from-accent/20 to-primary-foreground/5 border-2 border-accent/30 flex items-center justify-center overflow-hidden">
-                    <div className="text-center">
-                      <User className="h-24 w-24 text-accent/40 mx-auto mb-3" />
-                      <p className="text-primary-foreground/60 text-sm font-medium">Victoria</p>
-                      <p className="text-primary-foreground/40 text-xs">Event Coordinator</p>
-                    </div>
+                  <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-full border-2 border-accent/30 overflow-hidden">
+                    <img src={victoriaHeadshot} alt="Victoria - Event Coordinator at The Summit" className="w-full h-full object-cover object-top" />
                   </div>
                   
                   {/* E³ badge */}
