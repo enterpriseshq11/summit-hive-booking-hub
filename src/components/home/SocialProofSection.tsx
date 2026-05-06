@@ -49,28 +49,6 @@ export function SocialProofSection() {
           <TestimonialsCarousel filter={activeFilter} />
         </div>
 
-        {/* Trust Strip */}
-
-
-        {/* Confidence Cards */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {guarantees.map((guarantee, index) => (
-            <Card 
-              key={index}
-              className="border-2 hover:border-accent/30 hover:shadow-lg transition-all duration-300 group"
-            >
-              <CardContent className="p-6 text-center">
-                <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-accent/10 mb-4 group-hover:bg-accent/20 group-hover:scale-110 transition-all">
-                  <guarantee.icon className="h-7 w-7 text-accent" />
-                </div>
-                <h3 className="font-bold text-lg mb-2">{guarantee.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {guarantee.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </div>
     </section>
   );
