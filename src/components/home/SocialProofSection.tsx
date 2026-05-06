@@ -1,28 +1,10 @@
 import { useState } from "react";
-import { Shield, RefreshCw, HeartHandshake, Award } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TestimonialsCarousel, type TestimonialFilter } from "./TestimonialsCarousel";
 
-const guarantees = [
-  {
-    icon: Shield,
-    title: "Transparent Process",
-    description: "You'll review everything before payment—no surprises.",
-  },
-  {
-    icon: RefreshCw,
-    title: "Easy Changes",
-    description: "Need to adjust? Contact support to modify your booking.",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Local Support",
-    description: "Real people in Wapakoneta, ready to help you.",
-  },
-];
-
 const experienceFilters: TestimonialFilter[] = ["All", "Events", "Coworking", "Spa", "Fitness", "Studio", "Photo Booth"];
+
 
 export function SocialProofSection() {
   const [activeFilter, setActiveFilter] = useState<TestimonialFilter>("All");
