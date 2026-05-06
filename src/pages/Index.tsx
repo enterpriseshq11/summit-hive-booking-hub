@@ -322,6 +322,7 @@ export default function Index() {
             </Link>
           </Button>
         </div>
+        </div>
       </section>
 
       {/* HOMEPAGE-05: What's Included at A-Z Icon Row */}
