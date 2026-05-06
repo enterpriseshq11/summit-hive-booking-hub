@@ -5,7 +5,7 @@ import { SITE_CONFIG } from "@/config/siteConfig";
 
 export function PreFooterCTA() {
   return (
-    <section className="py-16 bg-gradient-to-br from-muted/50 to-muted/30 border-t">
+    <section className="py-16 bg-gradient-to-br from-accent via-accent/95 to-accent/90 text-primary">
       <div className="container">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
