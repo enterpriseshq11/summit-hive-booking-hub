@@ -3,9 +3,9 @@
 export const SITE_CONFIG = {
   // Contact Information — Front desk / building-level
   contact: {
-    phone: "(567) 429-9924",
-    phoneFormatted: "(567) 429-9924",
-    phoneLink: "tel:+15674299924",
+    phone: "(419) 909-6031",
+    phoneFormatted: "(419) 909-6031",
+    phoneLink: "tel:+14199096031",
     email: "dylan@a-zenterpriseshq.com",
     emailLink: "mailto:dylan@a-zenterpriseshq.com",
   },
