@@ -119,11 +119,11 @@
 .lp-footer { background: #050505; border-top: 1px solid #141414; padding: 28px 60px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
 .lp-footer-left { display: flex; flex-direction: column; gap: 4px; }
 .lp-footer-name { font-size: 12px; font-weight: 700; color: #D4A017; letter-spacing: 0.08em; text-transform: uppercase; }
-.lp-footer-address { font-size: 11px; color: #333; }
+.lp-footer-address { font-size: 11px; color: #fef3c7; }
 .lp-footer-links { display: flex; gap: 20px; }
-.lp-footer-links a { font-size: 11px; color: #333; text-decoration: none; letter-spacing: 0.05em; transition: color 0.2s; }
+.lp-footer-links a { font-size: 11px; color: #fef3c7; text-decoration: none; letter-spacing: 0.05em; transition: color 0.2s; }
 .lp-footer-links a:hover { color: #D4A017; }
-.lp-footer-copy { font-size: 10px; color: #222; }
+.lp-footer-copy { font-size: 10px; color: #fef3c7; }
 
 /* ─── Mobile ─── */
 @media (max-width: 768px) {
