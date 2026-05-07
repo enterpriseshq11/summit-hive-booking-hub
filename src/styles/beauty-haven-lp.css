@@ -1,0 +1,141 @@
+/* ═══════════════════════════════════════════════
+   HIGH MAINTENANCE BEAUTY HAVEN — Landing Page
+   ═══════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap');
+
+.lp-root {
+  background: #0A0A0A;
+  color: #fff;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+}
+
+/* ─── Hero ─── */
+.lp-hero { position: relative; overflow: hidden; min-height: 420px; display: flex; align-items: center; padding: 0 60px; border-bottom: 1px solid #1a1a1a; }
+.lp-hero-bg-accent { position: absolute; right: 0; top: 0; bottom: 0; width: 38%; background: #111; border-left: 2px solid #D4A017; }
+.lp-hero-content { position: relative; z-index: 1; max-width: 55%; }
+.lp-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.lp-eyebrow-line { width: 28px; height: 1px; background: #D4A017; }
+.lp-eyebrow-text { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: #D4A017; }
+.lp-hero h1 { font-size: 44px; font-weight: 800; line-height: 1.08; text-transform: uppercase; color: #fff; letter-spacing: -0.01em; }
+.lp-hero h1 em { color: #D4A017; font-style: normal; }
+.lp-hero-tagline { font-size: 14px; color: #555; margin: 14px 0 28px; letter-spacing: 0.03em; }
+.lp-hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+.lp-badge-gold { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #0A0A0A; background: #D4A017; padding: 5px 12px; border-radius: 2px; }
+.lp-badge-pink { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #fff; background: #E8176A; padding: 5px 12px; border-radius: 2px; }
+.lp-badge-outline { font-size: 9px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #555; border: 1px solid #2a2a2a; padding: 5px 12px; border-radius: 2px; }
+.lp-cta-row { display: flex; gap: 10px; }
+.lp-btn-primary { background: #D4A017; color: #0A0A0A; padding: 12px 22px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; border-radius: 2px; text-decoration: none; display: inline-block; transition: background 0.2s; }
+.lp-btn-primary:hover { background: #F0C040; }
+.lp-btn-pink { background: #E8176A; color: #fff; padding: 12px 22px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; border-radius: 2px; text-decoration: none; display: inline-block; transition: background 0.2s; }
+.lp-btn-pink:hover { background: #ff1f77; }
+
+/* ─── Hero Stats ─── */
+.lp-hero-stats { position: absolute; right: 0; top: 0; bottom: 0; width: 38%; display: flex; flex-direction: column; justify-content: center; padding: 0 44px; gap: 0; z-index: 1; }
+.lp-stat { margin-bottom: 26px; }
+.lp-stat:last-child { margin-bottom: 0; }
+.lp-stat-num { font-size: 36px; font-weight: 800; color: #D4A017; line-height: 1; }
+.lp-stat-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #444; margin-top: 4px; }
+.lp-stat-div { width: 24px; height: 1px; background: #1e1e1e; margin: 20px 0; }
+
+/* ─── About ─── */
+.lp-about { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #141414; }
+.lp-about-text { padding: 48px 60px; border-right: 1px solid #141414; }
+.lp-about-text .section-label { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: #E8176A; margin-bottom: 10px; font-weight: 700; }
+.lp-about-text h2 { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 16px; }
+.lp-about-text p { font-size: 13px; line-height: 1.8; color: #555; }
+.lp-about-details { padding: 48px 60px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+.lp-detail-row { display: flex; align-items: flex-start; gap: 14px; }
+.lp-detail-icon { width: 32px; height: 32px; background: #111; border: 1px solid #1e1e1e; border-radius: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.lp-detail-icon svg { width: 14px; height: 14px; stroke: #D4A017; fill: none; stroke-width: 1.8; }
+.lp-detail-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #444; margin-bottom: 3px; }
+.lp-detail-value { font-size: 13px; color: #aaa; }
+
+/* ─── Artists ─── */
+.lp-artists { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #141414; border-top: 1px solid #141414; }
+.lp-artist { background: #0A0A0A; padding: 36px 48px; display: grid; grid-template-columns: 80px 1fr; gap: 24px; align-items: start; }
+.lp-artist-avatar { width: 80px; height: 80px; background: #1A1A1A; border: 1px solid #222; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
+.lp-artist-avatar svg { width: 28px; height: 28px; stroke: #333; fill: none; stroke-width: 1.5; }
+.lp-artist-spec { position: absolute; bottom: -1px; left: -1px; right: -1px; padding: 3px 6px; font-size: 8px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; text-align: center; }
+.lp-artist-spec.gold { background: #D4A017; color: #0A0A0A; }
+.lp-artist-spec.pink { background: #E8176A; color: #fff; }
+.lp-artist-name { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.lp-artist-role-gold { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #D4A017; margin-bottom: 10px; }
+.lp-artist-role-pink { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #E8176A; margin-bottom: 10px; }
+.lp-artist-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.lp-tag-g { font-size: 9px; color: #D4A017; border: 1px solid rgba(212,160,23,0.27); padding: 3px 8px; border-radius: 2px; background: #1a1a1a; letter-spacing: 0.06em; }
+.lp-tag-p { font-size: 9px; color: #E8176A; border: 1px solid rgba(232,23,106,0.27); padding: 3px 8px; border-radius: 2px; background: #1a1a1a; letter-spacing: 0.06em; }
+.lp-artist-desc { font-size: 12px; line-height: 1.75; color: #555; margin-bottom: 14px; }
+.lp-artist-link-g { font-size: 10px; color: #D4A017; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; text-decoration: none; }
+.lp-artist-link-p { font-size: 10px; color: #E8176A; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; text-decoration: none; }
+
+/* ─── Services ─── */
+.lp-services { border-top: 1px solid #141414; display: grid; grid-template-columns: 1fr 1fr; }
+.lp-svc-col { padding: 48px 60px; }
+.lp-svc-col:first-child { border-right: 1px solid #141414; }
+.lp-svc-col-head { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; padding-bottom: 10px; border-bottom: 2px solid; margin-bottom: 18px; font-weight: 700; }
+.lp-svc-col-head.gold { color: #D4A017; border-color: #D4A017; }
+.lp-svc-col-head.pink { color: #E8176A; border-color: #E8176A; }
+.lp-svc-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid #141414; }
+.lp-svc-item:last-child { border-bottom: none; }
+.lp-svc-name { font-size: 12px; color: #888; }
+.lp-svc-price-g { font-size: 12px; color: #D4A017; font-weight: 600; }
+.lp-svc-price-p { font-size: 12px; color: #E8176A; font-weight: 600; }
+.lp-svc-more { margin-top: 16px; }
+.lp-svc-more a { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; text-decoration: none; }
+.lp-svc-more a.gold { color: #D4A017; }
+.lp-svc-more a.pink { color: #E8176A; }
+
+/* ─── Bridal ─── */
+.lp-bridal { border-top: 1px solid #141414; padding: 48px 60px; background: #050505; }
+.lp-bridal-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 28px; }
+.lp-bridal-head h3 { font-size: 22px; font-weight: 700; color: #fff; }
+.lp-bridal-head .section-label { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: #E8176A; font-weight: 700; }
+.lp-bridal-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; background: #1a1a1a; }
+.lp-bridal-card { background: #0A0A0A; padding: 28px; }
+.lp-bridal-card.feat { background: #0e0508; border-top: 2px solid #E8176A; }
+.lp-bridal-tag { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: #D4A017; margin-bottom: 8px; }
+.lp-bridal-card.feat .lp-bridal-tag { color: #E8176A; }
+.lp-bridal-price { font-size: 38px; font-weight: 800; color: #D4A017; line-height: 1; margin: 4px 0 6px; }
+.lp-bridal-card.feat .lp-bridal-price { color: #E8176A; }
+.lp-bridal-name { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #555; margin-bottom: 10px; }
+.lp-bridal-desc { font-size: 12px; line-height: 1.7; color: #444; margin-bottom: 18px; }
+.lp-bridal-btn { width: 100%; padding: 10px; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; cursor: pointer; border: 1px solid #222; background: transparent; color: #555; border-radius: 2px; transition: all 0.2s; }
+.lp-bridal-btn:hover { border-color: #444; color: #aaa; }
+.lp-bridal-card.feat .lp-bridal-btn { background: #E8176A; color: #fff; border-color: #E8176A; }
+.lp-bridal-card.feat .lp-bridal-btn:hover { background: #ff1f77; }
+
+/* ─── Booking ─── */
+.lp-booking { border-top: 1px solid #141414; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #141414; }
+.lp-booking-col { background: #0A0A0A; padding: 40px 60px; }
+.lp-booking-col h3 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.lp-booking-col .role { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; }
+.lp-booking-col .role.gold { color: #D4A017; }
+.lp-booking-col .role.pink { color: #E8176A; }
+.lp-booking-contact { font-size: 12px; line-height: 1.9; color: #444; margin-bottom: 20px; }
+.lp-booking-contact a { color: #888; text-decoration: none; }
+
+/* ─── Footer ─── */
+.lp-footer { background: #050505; border-top: 1px solid #141414; padding: 28px 60px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.lp-footer-left { display: flex; flex-direction: column; gap: 4px; }
+.lp-footer-name { font-size: 12px; font-weight: 700; color: #D4A017; letter-spacing: 0.08em; text-transform: uppercase; }
+.lp-footer-address { font-size: 11px; color: #333; }
+.lp-footer-links { display: flex; gap: 20px; }
+.lp-footer-links a { font-size: 11px; color: #333; text-decoration: none; letter-spacing: 0.05em; transition: color 0.2s; }
+.lp-footer-links a:hover { color: #D4A017; }
+.lp-footer-copy { font-size: 10px; color: #222; }
+
+/* ─── Mobile ─── */
+@media (max-width: 768px) {
+  .lp-hero { padding: 48px 24px; flex-direction: column; min-height: auto; }
+  .lp-hero-bg-accent, .lp-hero-stats { display: none; }
+  .lp-hero-content { max-width: 100%; }
+  .lp-hero h1 { font-size: 32px; }
+  .lp-about, .lp-services, .lp-booking { grid-template-columns: 1fr; }
+  .lp-about-text, .lp-about-details, .lp-svc-col, .lp-booking-col { padding: 36px 24px; border-right: none; border-bottom: 1px solid #141414; }
+  .lp-artists { grid-template-columns: 1fr; }
+  .lp-artist { padding: 28px 24px; }
+  .lp-bridal { padding: 36px 24px; }
+  .lp-bridal-cards { grid-template-columns: 1fr; }
+  .lp-footer { padding: 24px; flex-direction: column; align-items: flex-start; }
+}
