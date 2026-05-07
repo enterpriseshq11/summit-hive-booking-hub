@@ -24,7 +24,7 @@ export default function BeautyHaven() {
           <h1>
             High<br />Maintenance<br /><em>Beauty Haven</em>
           </h1>
-          <p className="lp-hero-tagline">Hair. Nails. No compromises. — Second Floor, Wapakoneta OH</p>
+          <p className="lp-hero-tagline text-amber-100">Hair. Nails. No compromises. — Second Floor, Wapakoneta OH</p>
           <div className="lp-hero-badges">
             <span className="lp-badge-gold">Hair by Hannah</span>
             <span className="lp-badge-pink">Nails by Desiree</span>
@@ -59,10 +59,10 @@ export default function BeautyHaven() {
         <div className="lp-about-text">
           <div className="section-label text-amber-200">Who We Are</div>
           <h2>Not your average beauty studio.</h2>
-          <p>
+          <p className="text-amber-100">
             High Maintenance Beauty Haven is a luxury hair and nail studio operating on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in vivid color, custom nail art, and the kind of results that make people stop and stare.
           </p>
-          <p style={{ marginTop: "12px" }}>Appointment-based. Portfolio-driven. Unapologetically detail-obsessed.</p>
+          <p className="text-amber-100" style={{ marginTop: "12px" }}>Appointment-based. Portfolio-driven. Unapologetically detail-obsessed.</p>
         </div>
         <div className="lp-about-details">
           <div className="lp-detail-row">
@@ -181,21 +181,21 @@ export default function BeautyHaven() {
             <div className="lp-bridal-tag">Bridal Package</div>
             <div className="lp-bridal-price">$95</div>
             <div className="lp-bridal-name">Soft &amp; Timeless</div>
-            <p className="lp-bridal-desc">Soft shades, delicate florals. Timeless bridal nail art for your perfect day.</p>
+            <p className="lp-bridal-desc text-amber-100">Soft shades, delicate florals. Timeless bridal nail art for your perfect day.</p>
             <button className="lp-bridal-btn">Book This Package</button>
           </div>
           <div className="lp-bridal-card">
             <div className="lp-bridal-tag">Nail &amp; Rejuve Package</div>
             <div className="lp-bridal-price">$100</div>
             <div className="lp-bridal-name">Earn Your Dream Look</div>
-            <p className="lp-bridal-desc">Custom designs for the boldest day of your life. Rejuvenating nail treatment included.</p>
+            <p className="lp-bridal-desc text-amber-100">Custom designs for the boldest day of your life. Rejuvenating nail treatment included.</p>
             <button className="lp-bridal-btn">Book This Package</button>
           </div>
           <div className="lp-bridal-card feat">
             <div className="lp-bridal-tag">★ Most Popular</div>
             <div className="lp-bridal-price">$285</div>
             <div className="lp-bridal-name">Premium Bridal Package</div>
-            <p className="lp-bridal-desc">Full set with handmade press-ons, dazzling details, French tips, and more. Perfect for bridal parties.</p>
+            <p className="lp-bridal-desc text-amber-100">Full set with handmade press-ons, dazzling details, French tips, and more. Perfect for bridal parties.</p>
             <button className="lp-bridal-btn">Book This Package</button>
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function BeautyHaven() {
         <div className="lp-booking-col">
           <h3>Book with Hannah</h3>
           <div className="role gold">Professional Hair Colorist</div>
-          <div className="lp-booking-contact">
+          <div className="lp-booking-contact text-amber-100">
             Phone / Text: <a href="tel:+15678291546">567-829-1546</a><br />
             Email: <a href="mailto:hannah@a-zenterpriseshq.com">hannah@a-zenterpriseshq.com</a><br />
             Hours: Tue–Sat, 9 AM – 6 PM<br />
@@ -217,7 +217,7 @@ export default function BeautyHaven() {
         <div className="lp-booking-col">
           <h3>Book with Desiree</h3>
           <div className="role pink">Nail Artist · Natural Nail Specialist</div>
-          <div className="lp-booking-contact">
+          <div className="lp-booking-contact text-amber-100">
             Book online via booking link<br />
             24-hour advance notice required<br />
             Walk-ins subject to availability<br />
