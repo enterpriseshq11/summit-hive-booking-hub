@@ -57,7 +57,7 @@ export default function BeautyHaven() {
       {/* ═══ ABOUT ═══ */}
       <section className="lp-about">
         <div className="lp-about-text">
-          <div className="section-label">Who We Are</div>
+          <div className="section-label text-amber-200">Who We Are</div>
           <h2>Not your average beauty studio.</h2>
           <p>
             High Maintenance Beauty Haven is a luxury hair and nail studio operating on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in vivid color, custom nail art, and the kind of results that make people stop and stare.
@@ -70,7 +70,7 @@ export default function BeautyHaven() {
               <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
             </div>
             <div>
-              <div className="lp-detail-label">Location</div>
+              <div className="lp-detail-label text-amber-200">Location</div>
               <div className="lp-detail-value">{SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</div>
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function BeautyHaven() {
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
             </div>
             <div>
-              <div className="lp-detail-label">Hours</div>
+              <div className="lp-detail-label text-amber-200">Hours</div>
               <div className="lp-detail-value">Open 7 Days · 6:00 AM – 10:00 PM</div>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function BeautyHaven() {
               <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
             </div>
             <div>
-              <div className="lp-detail-label">Phone</div>
+              <div className="lp-detail-label text-amber-200">Phone</div>
               <div className="lp-detail-value"><a href={SITE_CONFIG.contact.phoneLink} style={{ color: "#aaa", textDecoration: "none" }}>{SITE_CONFIG.contact.phone}</a></div>
             </div>
           </div>
@@ -97,7 +97,7 @@ export default function BeautyHaven() {
               <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
             </div>
             <div>
-              <div className="lp-detail-label">Email</div>
+              <div className="lp-detail-label text-amber-200">Email</div>
               <div className="lp-detail-value"><a href={SITE_CONFIG.contact.emailLink} style={{ color: "#aaa", textDecoration: "none" }}>{SITE_CONFIG.contact.email}</a></div>
             </div>
           </div>
@@ -121,7 +121,7 @@ export default function BeautyHaven() {
               <span className="lp-tag-g">Full Highlights</span>
               <span className="lp-tag-g">Creative Color</span>
             </div>
-            <p className="lp-artist-desc">Colorist and vivid hair specialist. Bold transformations with precision on every appointment. Based in St. Marys, Ohio.</p>
+            <p className="lp-artist-desc text-yellow-50">Colorist and vivid hair specialist. Bold transformations with precision on every appointment. Based in St. Marys, Ohio.</p>
             <a href="/beauty-haven/hair" className="lp-artist-link-g">Book with Hannah →</a>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function BeautyHaven() {
               <span className="lp-tag-p">Nail Art</span>
               <span className="lp-tag-p">Pedicures</span>
             </div>
-            <p className="lp-artist-desc">Maximalist nail artist, five years deep. From structured gel to full Gel-X — clean classic or elaborately over-the-top.</p>
+            <p className="lp-artist-desc text-amber-50">Maximalist nail artist, five years deep. From structured gel to full Gel-X — clean classic or elaborately over-the-top.</p>
             <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="lp-artist-link-p">Book with Desiree →</a>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function BeautyHaven() {
       <section className="lp-bridal">
         <div className="lp-bridal-head">
           <h3>Bridal Collections</h3>
-          <span className="section-label">By Desiree</span>
+          <span className="section-label text-amber-200">By Desiree</span>
         </div>
         <div className="lp-bridal-cards">
           <div className="lp-bridal-card">
