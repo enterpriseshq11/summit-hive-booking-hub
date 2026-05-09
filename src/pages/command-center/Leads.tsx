@@ -432,6 +432,14 @@ export default function CommandCenterLeads() {
                   </SelectContent>
                 </Select>
                 <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDelete.isPending}
+                >
+                  Delete
+                </Button>
+                <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedLeads([])}
