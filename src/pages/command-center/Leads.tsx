@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/admin";
-import { useCrmLeads, useCreateCrmLead, useUpdateCrmLead, useBulkUpdateLeads, type CrmLeadWithRelations } from "@/hooks/useCrmLeads";
+import { useCrmLeads, useCreateCrmLead, useUpdateCrmLead, useBulkUpdateLeads, useBulkDeleteLeads, type CrmLeadWithRelations } from "@/hooks/useCrmLeads";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCrmEmployees } from "@/hooks/useCrmEmployees";
@@ -102,6 +102,7 @@ export default function CommandCenterLeads() {
   const createLead = useCreateCrmLead();
   const updateLead = useUpdateCrmLead();
   const bulkUpdate = useBulkUpdateLeads();
+  const bulkDelete = useBulkDeleteLeads();
 
   const filteredLeads = useMemo(() => {
     if (!leads) return [];
@@ -191,6 +192,13 @@ export default function CommandCenterLeads() {
       ids: selectedLeads,
       updates: { status },
     });
+    setSelectedLeads([]);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedLeads.length === 0) return;
+    if (!confirm(`Permanently delete ${selectedLeads.length} lead(s)? This cannot be undone.`)) return;
+    await bulkDelete.mutateAsync(selectedLeads);
     setSelectedLeads([]);
   };
 
@@ -423,6 +431,14 @@ export default function CommandCenterLeads() {
                     ))}
                   </SelectContent>
                 </Select>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDelete.isPending}
+                >
+                  Delete
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"

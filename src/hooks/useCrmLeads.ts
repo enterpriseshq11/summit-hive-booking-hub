@@ -233,3 +233,29 @@ export function useBulkUpdateLeads() {
     },
   });
 }
+
+export function useBulkDeleteLeads() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from("crm_leads").delete().in("id", ids);
+      if (error) throw error;
+      await supabase.from("crm_activity_events").insert({
+        event_type: "lead_updated",
+        actor_id: user?.id,
+        entity_type: "lead",
+        metadata: { affected_ids: ids, count: ids.length, action: "bulk_delete" },
+      });
+      return ids.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ["crm_leads"] });
+      toast.success(`Deleted ${count} lead${count === 1 ? "" : "s"}`);
+    },
+    onError: (error) => {
+      toast.error("Failed to delete leads: " + error.message);
+    },
+  });
+}
