@@ -186,7 +186,7 @@ export default function Spa() {
       </section>
 
       {/* Services Section */}
-      <section id="spa-services" className="py-14 container">
+      <section id="spa-services" className="py-14 container bg-muted/30">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">Our Services</h2>
           <p className="text-muted-foreground text-lg">All services default to 60 minutes. Upgrade any service to 90 minutes for +$35.</p>
@@ -285,7 +285,7 @@ export default function Spa() {
       </section>
 
       {/* Assisted Stretching Section - Directly under Services */}
-      <section id="spa-stretching" className="py-14 bg-muted/30">
+      <section id="spa-stretching" className="py-14">
         <div className="container">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">ASSISTED STRETCHING</h2>
@@ -321,14 +321,8 @@ export default function Spa() {
 
 
 
-      {/* What's Included section moved below Meet Our Therapist per spec */}
-
-
-      {/* Gradient Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden="true" />
-
-      {/* Amenities Accordion */}
-      <section className="py-14 container">
+      {/* What's Included / Amenities Accordion */}
+      <section className="py-14 container bg-muted/30">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">What's Included</h2>
           <p className="text-muted-foreground text-lg">Premium amenities with every appointment</p>
