@@ -102,6 +102,7 @@ export default function CommandCenterLeads() {
   const createLead = useCreateCrmLead();
   const updateLead = useUpdateCrmLead();
   const bulkUpdate = useBulkUpdateLeads();
+  const bulkDelete = useBulkDeleteLeads();
 
   const filteredLeads = useMemo(() => {
     if (!leads) return [];
