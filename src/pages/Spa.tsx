@@ -596,22 +596,22 @@ export default function Spa() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-14 bg-primary">
+      <section className="py-14 bg-muted/30">
         <div className="container text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-primary-foreground">Ready to Reset Your Body?</h2>
-          <p className="text-primary-foreground/70 mb-6 max-w-2xl mx-auto text-lg">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">Ready to Reset Your Body?</h2>
+          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto text-lg">
             Expert care and premium treatments — book your appointment today.
           </p>
           <div className="flex justify-center">
             <TherapistDropdown />
           </div>
-          <p className="text-sm text-primary-foreground/60 mt-4 max-w-md mx-auto">
+          <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto">
             No obligation • Response within 24 hours • You'll review everything before payment
           </p>
-          <div className="mt-8 pt-6 border-t border-primary-foreground/10 space-y-1">
-            <p className="text-sm text-primary-foreground/80 font-medium">{SITE_CONFIG.divisions.spa.name}</p>
-            <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.spa.suite}</p>
-            <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</p>
+          <div className="mt-8 pt-6 border-t border-border space-y-1">
+            <p className="text-sm text-foreground/80 font-medium">{SITE_CONFIG.divisions.spa.name}</p>
+            <p className="text-sm text-muted-foreground">{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.spa.suite}</p>
+            <p className="text-sm text-muted-foreground">{SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</p>
             <a href={SITE_CONFIG.divisions.spa.phoneLink} className="inline-block text-sm text-accent hover:text-accent/80 transition-colors font-medium mt-1">
               Direct: {SITE_CONFIG.divisions.spa.phone}
             </a>
