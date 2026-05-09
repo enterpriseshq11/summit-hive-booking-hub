@@ -195,6 +195,13 @@ export default function CommandCenterLeads() {
     setSelectedLeads([]);
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedLeads.length === 0) return;
+    if (!confirm(`Permanently delete ${selectedLeads.length} lead(s)? This cannot be undone.`)) return;
+    await bulkDelete.mutateAsync(selectedLeads);
+    setSelectedLeads([]);
+  };
+
   const toggleSelectAll = () => {
     if (selectedLeads.length === (filteredLeads?.length || 0)) {
       setSelectedLeads([]);
