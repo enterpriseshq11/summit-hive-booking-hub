@@ -243,10 +243,10 @@ export function useBulkDeleteLeads() {
       const { error } = await supabase.from("crm_leads").delete().in("id", ids);
       if (error) throw error;
       await supabase.from("crm_activity_events").insert({
-        event_type: "lead_deleted",
+        event_type: "lead_updated",
         actor_id: user?.id,
         entity_type: "lead",
-        metadata: { affected_ids: ids, count: ids.length },
+        metadata: { affected_ids: ids, count: ids.length, action: "bulk_delete" },
       });
       return ids.length;
     },
