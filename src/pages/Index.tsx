@@ -302,6 +302,70 @@ export default function Index() {
             </p>
           </div>
 
+        {/* Featured Landing Zone Card */}
+        <a
+          href="https://thelandingzoneohio.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group block max-w-6xl mx-auto mb-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl"
+          aria-label="The Family Hub Landing Zone - New Coming Soon"
+        >
+          <div className="relative overflow-hidden rounded-xl border-2 border-accent/60 bg-primary p-8 md:p-10 transition-all duration-500 hover:border-accent hover:shadow-gold-lg hover:-translate-y-1">
+            {/* Star field background */}
+            <div className="absolute inset-0 opacity-40" aria-hidden="true">
+              <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="stars" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                    <circle cx="10" cy="12" r="1" fill="hsl(var(--accent))" opacity="0.6" />
+                    <circle cx="35" cy="28" r="0.8" fill="hsl(var(--accent))" opacity="0.4" />
+                    <circle cx="50" cy="8" r="1.2" fill="hsl(var(--accent))" opacity="0.5" />
+                    <circle cx="18" cy="45" r="0.7" fill="white" opacity="0.3" />
+                    <circle cx="45" cy="52" r="0.9" fill="hsl(var(--accent))" opacity="0.35" />
+                    <circle cx="28" cy="5" r="0.6" fill="white" opacity="0.25" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#stars)" />
+              </svg>
+            </div>
+
+            {/* Radial glow behind moon */}
+            <div className="absolute top-1/2 left-8 md:left-12 -translate-y-1/2 w-32 h-32 bg-accent/10 rounded-full blur-3xl" />
+
+            {/* NEW badge */}
+            <div className="absolute top-4 right-4 z-10">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-primary text-xs font-bold uppercase tracking-wider">
+                NEW
+                <span className="w-1 h-1 rounded-full bg-primary/60" />
+                COMING SOON
+              </span>
+            </div>
+
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6">
+              {/* Animated Moon Icon */}
+              <div className="shrink-0 flex h-20 w-20 md:h-24 md:w-24 items-center justify-center rounded-full bg-accent/10 border border-accent/30">
+                <Moon className="h-10 w-10 md:h-12 md:w-12 text-accent animate-[pulse_3s_ease-in-out_infinite]" strokeWidth={1.5} />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-white mb-2">
+                  The Family Hub Landing Zone
+                </h3>
+                <p className="text-base md:text-lg text-white/70 mb-1">
+                  A new family destination coming to downtown Wapakoneta.
+                </p>
+                <p className="text-sm text-accent/80 font-medium">
+                  Part of the A-Z Enterprises family.
+                </p>
+              </div>
+
+              <div className="shrink-0 flex items-center gap-2 text-accent font-semibold group-hover:translate-x-1 transition-transform">
+                <span>Join the Waitlist</span>
+                <ArrowRight className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
+        </a>
+
         {/* Business Cards */}
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {businesses.map((business, index) => <Link key={business.href} to={business.href} className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl" role="link" aria-label={`Learn more about ${business.name} - ${business.tagline}`}>
