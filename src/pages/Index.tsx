@@ -99,7 +99,7 @@ export default function Index() {
           {/* CTA */}
           <div className="mt-10 flex flex-col items-center gap-4">
             <a
-              href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist"
+              href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=homepage_hero"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold rounded-lg bg-accent text-primary hover:bg-accent/90 transition-colors"
@@ -430,7 +430,7 @@ export default function Index() {
 
         {/* Featured Landing Zone Card */}
         <a
-          href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist"
+          href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=featured_card"
           target="_blank"
           rel="noopener noreferrer"
           className="group block max-w-6xl mx-auto mb-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl"
