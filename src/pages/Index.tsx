@@ -77,7 +77,44 @@ export default function Index() {
       {/* ========== LANDING ZONE HERO ========== */}
       <section className="relative py-20 md:py-28 overflow-hidden bg-primary">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
-        
+
+        {/* Twinkling stars */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          {[
+            { top: "12%", left: "8%", size: 2, delay: "0s" },
+            { top: "20%", left: "22%", size: 1, delay: "0.6s" },
+            { top: "8%", left: "38%", size: 1.5, delay: "1.2s" },
+            { top: "28%", left: "55%", size: 1, delay: "0.3s" },
+            { top: "15%", left: "72%", size: 2, delay: "1.8s" },
+            { top: "35%", left: "88%", size: 1.5, delay: "0.9s" },
+            { top: "55%", left: "6%", size: 1, delay: "1.5s" },
+            { top: "70%", left: "18%", size: 2, delay: "0.4s" },
+            { top: "82%", left: "32%", size: 1, delay: "2.1s" },
+            { top: "65%", left: "48%", size: 1.5, delay: "1.1s" },
+            { top: "78%", left: "62%", size: 1, delay: "0.7s" },
+            { top: "60%", left: "78%", size: 2, delay: "1.6s" },
+            { top: "88%", left: "92%", size: 1.5, delay: "0.2s" },
+            { top: "45%", left: "12%", size: 1, delay: "2.4s" },
+            { top: "50%", left: "92%", size: 1.5, delay: "1.9s" },
+            { top: "5%", left: "60%", size: 1, delay: "2.7s" },
+            { top: "92%", left: "50%", size: 2, delay: "0.5s" },
+            { top: "40%", left: "40%", size: 1, delay: "1.3s" },
+          ].map((s, i) => (
+            <span
+              key={i}
+              className="star-twinkle absolute rounded-full bg-accent"
+              style={{
+                top: s.top,
+                left: s.left,
+                width: `${s.size}px`,
+                height: `${s.size}px`,
+                animationDelay: s.delay,
+                boxShadow: `0 0 ${s.size * 4}px hsl(var(--accent))`,
+              }}
+            />
+          ))}
+        </div>
+
         <div className="container relative z-10 text-center">
           {/* Big Moon Icon */}
           <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-accent/10 border border-accent/20">
