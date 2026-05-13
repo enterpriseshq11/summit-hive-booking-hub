@@ -304,7 +304,7 @@ export default function Index() {
 
         {/* Featured Landing Zone Card */}
         <a
-          href="https://thelandingzoneohio.com"
+          href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist"
           target="_blank"
           rel="noopener noreferrer"
           className="group block max-w-6xl mx-auto mb-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-xl"
