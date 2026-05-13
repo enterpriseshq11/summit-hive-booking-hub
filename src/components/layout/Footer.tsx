@@ -56,6 +56,16 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
           <div>
             <h3 className="font-semibold text-accent mb-4">Our Businesses</h3>
             <ul className="space-y-2">
+              <li>
+                <a
+                  href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=footer_link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors"
+                >
+                  🌙 The Family Hub Landing Zone
+                </a>
+              </li>
               {footerLinks.businesses.map(link => <li key={link.href}>
                   <Link to={link.href} className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">
                     {link.label}
@@ -73,16 +83,6 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
                     {link.label}
                   </Link>
                 </li>)}
-              <li>
-                <a
-                  href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=footer_link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors"
-                >
-                  🌙 Family Hub Waitlist
-                </a>
-              </li>
             </ul>
           </div>
 
