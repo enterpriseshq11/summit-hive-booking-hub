@@ -14,13 +14,26 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Skip to content link for keyboard users */}
-      <a 
-        href="#main-content" 
+      <a
+        href="#main-content"
         className="skip-link"
         tabIndex={0}
       >
         Skip to main content
       </a>
+
+      {/* Sticky announcement banner */}
+      <a
+        href="https://thelandingzoneohio.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="sticky top-0 z-[60] block w-full bg-gold py-2 text-center text-sm font-semibold text-primary hover:bg-gold/90 transition-colors"
+      >
+        <span className="inline-flex items-center gap-1.5">
+          🌙 NOW BUILDING → The Family Hub Landing Zone · Coming Soon to Downtown Wapakoneta · Join the Waitlist →
+        </span>
+      </a>
+
       <Header />
       <main id="main-content" className="flex-1" role="main">
         {children ?? <Outlet />}
