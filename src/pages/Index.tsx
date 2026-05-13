@@ -99,7 +99,7 @@ export default function Index() {
           {/* CTA */}
           <div className="mt-10 flex flex-col items-center gap-4">
             <a
-              href="https://thelandingzoneohio.com"
+              href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold rounded-lg bg-accent text-primary hover:bg-accent/90 transition-colors"
