@@ -283,6 +283,132 @@ export default function Index() {
 
 
 
+      {/* ========== LANDING ZONE STORY MINI-SECTION ========== */}
+      <section className="relative overflow-hidden bg-primary py-20 md:py-28">
+        {/* Star field background */}
+        <div className="absolute inset-0 opacity-30 pointer-events-none" aria-hidden="true">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="lz-stars" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+                <circle cx="12" cy="14" r="1" fill="hsl(var(--accent))" opacity="0.6" />
+                <circle cx="48" cy="36" r="0.8" fill="hsl(var(--accent))" opacity="0.4" />
+                <circle cx="68" cy="10" r="1.2" fill="hsl(var(--accent))" opacity="0.5" />
+                <circle cx="22" cy="60" r="0.7" fill="white" opacity="0.3" />
+                <circle cx="58" cy="68" r="0.9" fill="hsl(var(--accent))" opacity="0.35" />
+                <circle cx="36" cy="6" r="0.6" fill="white" opacity="0.25" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#lz-stars)" />
+          </svg>
+        </div>
+
+        {/* Radial gold glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container relative z-10">
+          {/* Heading */}
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 border border-accent/30">
+              <Moon className="h-8 w-8 text-accent animate-[pulse_3s_ease-in-out_infinite]" strokeWidth={1.5} />
+            </div>
+            <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-accent mb-3">
+              Coming 2026 · Downtown Wapakoneta
+            </span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4">
+              The Family Hub <span className="text-accent">Landing Zone</span>
+            </h2>
+            <p className="text-lg text-white/60 max-w-2xl mx-auto">
+              From the first city on the moon to the next chapter for our families.
+            </p>
+          </div>
+
+          {/* Timeline */}
+          <div className="max-w-5xl mx-auto mb-16">
+            <div className="grid md:grid-cols-3 gap-8 md:gap-4 relative">
+              {/* Connecting line - desktop only */}
+              <div className="hidden md:block absolute top-[28px] left-[16.66%] right-[16.66%] h-px bg-gradient-to-r from-accent/20 via-accent/60 to-accent/20" />
+
+              {[
+                { year: "1969", text: "Man lands on the moon. Neil Armstrong walks on lunar soil — and Wapakoneta becomes The First City on the Moon." },
+                { year: "2024", text: "A-Z Enterprises plants its flag in downtown Wapakoneta, building a family of businesses rooted in this hometown." },
+                { year: "2026", text: "The Family Hub Landing Zone opens its doors. A safe place for families to land, gather, and grow." },
+              ].map((item, i) => (
+                <div key={item.year} className="relative text-center">
+                  {/* Dot */}
+                  <div className="relative mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary border-2 border-accent">
+                    <div className="h-3 w-3 rounded-full bg-accent" />
+                  </div>
+                  {/* Year */}
+                  <div className="text-3xl md:text-4xl font-bold text-accent mb-3 tracking-tight">
+                    {item.year}
+                  </div>
+                  {/* Text */}
+                  <p className="text-sm md:text-base text-white/70 leading-relaxed max-w-xs mx-auto">
+                    {item.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Two callouts */}
+          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12">
+            {/* Founding Families */}
+            <div className="relative overflow-hidden rounded-xl border border-accent/30 bg-white/[0.02] backdrop-blur-sm p-6 md:p-8">
+              <div className="flex items-start gap-4">
+                <div className="shrink-0 flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10 border border-accent/30">
+                  <Users className="h-6 w-6 text-accent" />
+                </div>
+                <div>
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-accent/80 mb-1.5">
+                    Limited Spots
+                  </span>
+                  <h3 className="text-xl font-bold text-white mb-2">Founding Families</h3>
+                  <p className="text-sm text-white/60 leading-relaxed">
+                    Be one of our first families. Founding members lock in lifetime perks, early access, and a permanent seat at the table.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3-to-6 Drop-off Window */}
+            <div className="relative overflow-hidden rounded-xl border border-accent/30 bg-white/[0.02] backdrop-blur-sm p-6 md:p-8">
+              <div className="flex items-start gap-4">
+                <div className="shrink-0 flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10 border border-accent/30">
+                  <Clock className="h-6 w-6 text-accent" />
+                </div>
+                <div>
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-accent/80 mb-1.5">
+                    Mon–Fri · 3 PM to 6 PM
+                  </span>
+                  <h3 className="text-xl font-bold text-white mb-2">After-School Drop-off Window</h3>
+                  <p className="text-sm text-white/60 leading-relaxed">
+                    A supervised place for kids to land between school and home. Homework, snacks, activities — and parents get peace of mind.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <a
+              href="https://thelandingzoneohio.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base md:text-lg font-semibold rounded-lg bg-accent text-primary hover:bg-accent/90 transition-all hover:scale-[1.02]"
+            >
+              <Rocket className="h-5 w-5" />
+              Explore The Family Hub
+              <ArrowRight className="h-5 w-5" />
+            </a>
+            <p className="mt-4 text-xs text-white/40">
+              Visit thelandingzoneohio.com to learn more and join the waitlist.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Social Proof Section - Testimonials, Trust Strip, Guarantees */}
       <SocialProofSection />
 
