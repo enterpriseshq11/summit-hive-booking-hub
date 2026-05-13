@@ -167,6 +167,16 @@ export function Header() {
             Careers
           </Link>
 
+          {/* Family Hub Landing Zone — Waitlist CTA */}
+          <a
+            href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=header_button"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-md bg-accent text-primary hover:bg-accent/90 transition-colors"
+          >
+            🌙 Join Waitlist
+          </a>
+
           {/* 4. Account Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
