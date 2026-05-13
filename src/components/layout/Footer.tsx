@@ -73,6 +73,16 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
                     {link.label}
                   </Link>
                 </li>)}
+              <li>
+                <a
+                  href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=footer_link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors"
+                >
+                  🌙 Family Hub Waitlist
+                </a>
+              </li>
             </ul>
           </div>
 

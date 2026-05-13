@@ -280,14 +280,21 @@ export default function Index() {
             <div className="hidden lg:flex flex-col gap-3 opacity-0 animate-fade-in-left" style={{
             animationDelay: "0.5s"
           }}>
-              {/* Featured Deal Card */}
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-5">
-                <span className="inline-block text-xs font-semibold uppercase tracking-wider text-accent mb-2">Featured Deal</span>
-                <h3 className="text-base font-bold text-white mb-1.5">Coming Soon</h3>
-                <p className="text-sm text-white/50 mb-3">Check back for our latest promotions and deals.</p>
-                <button disabled className="inline-flex items-center gap-1.5 text-sm font-medium text-white/25 cursor-not-allowed">
-                  View Offer <ArrowRight className="h-4 w-4" />
-                </button>
+              {/* Featured Deal Card — Family Hub Landing Zone */}
+              <div className="rounded-xl border border-accent/30 bg-gradient-to-br from-accent/[0.08] to-white/[0.02] backdrop-blur-sm p-5">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent mb-2">
+                  <Moon className="h-3.5 w-3.5" /> Now Building
+                </span>
+                <h3 className="text-base font-bold text-white mb-1.5">The Family Hub Landing Zone</h3>
+                <p className="text-sm text-white/60 mb-3">Opening soon in downtown Wapakoneta. Founding families get first access — join the waitlist.</p>
+                <a
+                  href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=featured_card"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors"
+                >
+                  Join the Waitlist <ArrowRight className="h-4 w-4" />
+                </a>
               </div>
 
               {/* Quick Access Links */}
