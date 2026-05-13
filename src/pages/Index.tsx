@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Building2, Sparkles, Dumbbell, Phone, Clock, Check, Camera, Mic, Moon } from "lucide-react";
+import { ArrowRight, Building2, Sparkles, Dumbbell, Phone, Clock, Check, Camera, Mic, Moon, Rocket, Users } from "lucide-react";
 import { SocialProofSection, FAQSection, FloatingHelpCTA, GiftCardStrip, WhatsIncludedStrip, PreFooterCTA } from "@/components/home";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SITE_CONFIG } from "@/config/siteConfig";
