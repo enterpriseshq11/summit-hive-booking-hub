@@ -74,7 +74,52 @@ export default function Index() {
     });
   };
   return <div className="min-h-screen overflow-hidden">
+      {/* ========== LANDING ZONE HERO ========== */}
+      <section className="relative py-20 md:py-28 overflow-hidden bg-primary">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.12)_0%,transparent_60%)]" />
+        
+        <div className="container relative z-10 text-center">
+          {/* Big Moon Icon */}
+          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-accent/10 border border-accent/20">
+            <Moon className="h-10 w-10 text-accent" strokeWidth={1.5} />
+          </div>
+
+          {/* Headline */}
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white max-w-4xl mx-auto leading-[1.1]">
+            We Found the Moon.
+            <br />
+            <span className="text-accent">Now Giving Families a Place to Land.</span>
+          </h1>
+
+          {/* Subhead */}
+          <p className="mt-6 text-lg md:text-xl text-white/60 max-w-2xl mx-auto">
+            The newest addition to A-Z Enterprises — opening soon in downtown Wapakoneta.
+          </p>
+
+          {/* CTA */}
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <a
+              href="https://thelandingzoneohio.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold rounded-lg bg-accent text-primary hover:bg-accent/90 transition-colors"
+            >
+              Join the Waitlist
+              <ArrowRight className="h-5 w-5" />
+            </a>
+
+            <button
+              onClick={() => scrollToSection('experiences')}
+              className="text-sm text-white/50 hover:text-white/80 transition-colors flex items-center gap-1"
+            >
+              Discover all A-Z businesses ↓
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section - Premium Black & Gold */}
+      <section className="relative pt-4 pb-20 md:pt-6 md:pb-28 lg:pt-8 lg:pb-36 overflow-hidden bg-primary">
       <section className="relative pt-4 pb-20 md:pt-6 md:pb-28 lg:pt-8 lg:pb-36 overflow-hidden bg-primary">
         {/* Solid dark background with radial spotlight behind H1 */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/95" />
