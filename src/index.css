@@ -226,6 +226,20 @@
     animation: banner-glow 2.8s ease-in-out infinite;
   }
 
+  /* Marquee scrolling banner */
+  @keyframes banner-marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .banner-marquee-track {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: banner-marquee 30s linear infinite;
+  }
+  .banner-marquee-track:hover {
+    animation-play-state: paused;
+  }
+
   /* Twinkling stars */
   @keyframes twinkle {
     0%, 100% { opacity: 0.15; transform: scale(0.8); }
