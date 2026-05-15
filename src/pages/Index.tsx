@@ -373,7 +373,7 @@ export default function Index() {
               <div className="hidden md:block absolute top-[28px] left-[16.66%] right-[16.66%] h-px bg-gradient-to-r from-accent/20 via-accent/60 to-accent/20" />
 
               {[
-                { year: "1969", text: "Man lands on the moon. Neil Armstrong walks on lunar soil — and Wapakoneta becomes The First City on the Moon." },
+                { year: "1969", text: "57 years ago — Man lands on the moon. Neil Armstrong walks on lunar soil — and Wapakoneta becomes The First City on the Moon." },
                 { year: "2024", text: "A-Z Enterprises plants its flag in downtown Wapakoneta, building a family of businesses rooted in this hometown." },
                 { year: "2026", text: "The Family Hub Landing Zone opens its doors. A safe place for families to land, gather, and grow." },
               ].map((item, i) => (
