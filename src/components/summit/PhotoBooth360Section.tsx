@@ -514,7 +514,7 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
                 No Extra Cost. Just Book.
               </h3>
               <p className="text-xl text-primary-foreground/70 max-w-2xl mx-auto">
-                The 360 Photo Booth experience comes standard with select Summit bookings—
+                The 360 Photo Booth experience comes standard with select Summit bookings.
                 premium value built right into your event.
               </p>
             </div>
