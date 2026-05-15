@@ -106,7 +106,7 @@ export default function IntakePage() {
 
       <LeadIntakeForm
         businessUnit={config.businessUnit}
-        title={`Request Info — ${config.title}`}
+        title={`Request Info. ${config.title}`}
         description={config.description}
         fields={config.fields}
       />

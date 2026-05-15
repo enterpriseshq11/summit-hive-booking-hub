@@ -50,7 +50,7 @@ export function VipLockedModal({ open, onOpenChange, onUpgrade }: VipLockedModal
             <div className="flex items-center gap-2 text-sm">
               <DollarSign className="w-4 h-4 text-primary" />
               <span className="font-medium">VIP is $2.99/mo</span>
-              <span className="text-muted-foreground">—</span>
+              <span className="text-muted-foreground">.</span>
               <span className="text-primary font-semibold">one VIP prize is worth $100+</span>
             </div>
           </div>
@@ -64,7 +64,7 @@ export function VipLockedModal({ open, onOpenChange, onUpgrade }: VipLockedModal
               }}
               data-event="vip_checkout_started"
             >
-              Unlock VIP — $2.99/month
+              Unlock VIP. $2.99/month
             </Button>
             <Button 
               variant="ghost" 

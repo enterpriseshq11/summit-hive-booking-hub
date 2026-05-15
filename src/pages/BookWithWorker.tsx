@@ -213,7 +213,7 @@ export default function BookWithWorker() {
                       </h4>
                       <p className="text-sm text-muted-foreground">
                         <Clock className="h-3 w-3 inline mr-1" />
-                        {service.duration_mins} min — {formatPrice(service)}
+                        {service.duration_mins} min. {formatPrice(service)}
                       </p>
                       {service.description && (
                         <p className="text-xs text-muted-foreground mt-1">{service.description}</p>

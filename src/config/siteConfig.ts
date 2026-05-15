@@ -1,7 +1,7 @@
 // Centralized site configuration - Single source of truth for contact info and business details
 
 export const SITE_CONFIG = {
-  // Contact Information — Front desk / building-level
+  // Contact Information. Front desk / building-level
   contact: {
     phone: "(419) 909-6031",
     phoneFormatted: "(419) 909-6031",

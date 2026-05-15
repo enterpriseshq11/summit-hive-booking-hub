@@ -57,7 +57,7 @@ interface MobileHome {
 }
 
 function formatCurrency(n: number | null): string {
-  if (n == null) return "—";
+  if (n == null) return ". ";
   return `$${n.toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
 }
 
@@ -165,7 +165,7 @@ export default function MobileHomesInventory() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Home className="h-6 w-6 text-amber-400" /> Mobile Homes — Inventory
+              <Home className="h-6 w-6 text-amber-400" /> Mobile Homes. Inventory
             </h1>
           </div>
           <Button className="bg-amber-500 text-black hover:bg-amber-400" onClick={() => {
@@ -238,8 +238,8 @@ export default function MobileHomesInventory() {
                   <TableCell className={`font-medium ${(item.gross_profit || 0) >= 0 ? "text-green-400" : "text-red-400"}`}>
                     {formatCurrency(item.gross_profit)}
                   </TableCell>
-                  <TableCell className="text-zinc-400">{item.assigned_agent || "—"}</TableCell>
-                  <TableCell className="text-zinc-500 text-sm">{item.date_purchased ? format(new Date(item.date_purchased), "MMM d, yyyy") : "—"}</TableCell>
+                  <TableCell className="text-zinc-400">{item.assigned_agent || ". "}</TableCell>
+                  <TableCell className="text-zinc-500 text-sm">{item.date_purchased ? format(new Date(item.date_purchased), "MMM d, yyyy") : ". "}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

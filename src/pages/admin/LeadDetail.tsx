@@ -313,7 +313,7 @@ export default function LeadDetail() {
       file_size_bytes: file.size, uploaded_by: authUser?.id,
     } as any);
     if (dbError) {
-      // DB insert failed — attempt cleanup of orphaned file
+      // DB insert failed. attempt cleanup of orphaned file
       console.error("DB insert failed for document, cleaning up storage:", dbError);
       const { error: cleanupError } = await supabase.storage.from("lead-documents").remove([filePath]);
       // Log to orphaned_files if cleanup also fails
@@ -388,7 +388,7 @@ export default function LeadDetail() {
             <Badge className={ghlBadgeClass}>
               GHL: {ghlBadgeLabel}
             </Badge>
-            {/* Item 11: Manual GHL sync — owner/manager only */}
+            {/* Item 11: Manual GHL sync. owner/manager only */}
             {(isOwner || authUser?.roles?.includes("manager")) && (
               <Button
                 variant="ghost"
@@ -430,7 +430,7 @@ export default function LeadDetail() {
                         actor_id: authUser?.id,
                         entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
                         event_category: "ghl_webhook_fired",
-                        metadata: { action: "manual_ghl_sync", message: `Manual GHL sync triggered by ${authUser?.profile?.first_name} ${authUser?.profile?.last_name} — ${new Date().toISOString()}` },
+                        metadata: { action: "manual_ghl_sync", message: `Manual GHL sync triggered by ${authUser?.profile?.first_name} ${authUser?.profile?.last_name}. ${new Date().toISOString()}` },
                       });
                     } else {
                       toast.error(`GHL sync failed: HTTP ${res.status}`, { duration: Infinity });
@@ -439,7 +439,7 @@ export default function LeadDetail() {
                         actor_id: authUser?.id,
                         entity_name: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name}`,
                         event_category: "ghl_webhook_failed",
-                        metadata: { action: "manual_ghl_sync_failed", message: `Manual GHL sync failed — HTTP ${res.status}` },
+                        metadata: { action: "manual_ghl_sync_failed", message: `Manual GHL sync failed. HTTP ${res.status}` },
                       });
                     }
                     queryClient.invalidateQueries({ queryKey: ["lead-detail", id] });
@@ -466,11 +466,11 @@ export default function LeadDetail() {
               <CardHeader><CardTitle className="text-white text-lg">Contact Information</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-zinc-300"><Mail className="h-4 w-4 text-zinc-500" />{lead.email || "—"}</div>
+                  <div className="flex items-center gap-3 text-zinc-300"><Mail className="h-4 w-4 text-zinc-500" />{lead.email || ". "}</div>
                   {lead.email && <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-400" onClick={() => copyToClipboard(lead.email!)}><Copy className="h-3 w-3" /></Button>}
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-zinc-300"><Phone className="h-4 w-4 text-zinc-500" />{lead.phone || "—"}</div>
+                  <div className="flex items-center gap-3 text-zinc-300"><Phone className="h-4 w-4 text-zinc-500" />{lead.phone || ". "}</div>
                   {lead.phone && <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-400" onClick={() => copyToClipboard(lead.phone!)}><Copy className="h-3 w-3" /></Button>}
                 </div>
                 <div className="flex items-center gap-3 text-zinc-300"><Clock className="h-4 w-4 text-zinc-500" />Created {format(new Date(lead.created_at!), "MMM d, yyyy 'at' h:mm a")}</div>
@@ -568,8 +568,8 @@ export default function LeadDetail() {
                               {event.metadata.method && `Method: ${event.metadata.method}`}
                               {event.metadata.previous_stage && ` ${event.metadata.previous_stage} → ${event.metadata.new_stage}`}
                               {event.metadata.action && ` ${event.metadata.action.replace(/_/g, " ")}`}
-                              {event.metadata.file_name && ` — ${event.metadata.file_name}`}
-                              {event.metadata.note_preview && ` — "${event.metadata.note_preview}"`}
+                              {event.metadata.file_name && `. ${event.metadata.file_name}`}
+                              {event.metadata.note_preview && `. "${event.metadata.note_preview}"`}
                             </p>
                           )}
                           <p className="text-zinc-600 text-xs mt-0.5">{format(new Date(event.created_at), "MMM d 'at' h:mm a")}</p>
@@ -582,7 +582,7 @@ export default function LeadDetail() {
             </Card>
           </div>
 
-          {/* Right column — Actions */}
+          {/* Right column. Actions */}
           <div className="space-y-4">
             {/* Stage Movement */}
             <Card className="bg-zinc-900 border-zinc-800">
@@ -667,7 +667,7 @@ export default function LeadDetail() {
               <CardContent className="p-4 space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-zinc-500">Contact Attempts</span><span className="text-white">{lead.contact_attempts || 0}</span></div>
                 <div className="flex justify-between"><span className="text-zinc-500">Last Contacted</span><span className="text-white">{lead.last_contacted_at ? format(new Date(lead.last_contacted_at), "MMM d") : "Never"}</span></div>
-                <div className="flex justify-between"><span className="text-zinc-500">Temperature</span><span className="text-white capitalize">{lead.temperature || "—"}</span></div>
+                <div className="flex justify-between"><span className="text-zinc-500">Temperature</span><span className="text-white capitalize">{lead.temperature || ". "}</span></div>
               </CardContent>
             </Card>
           </div>

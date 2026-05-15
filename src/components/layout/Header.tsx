@@ -35,7 +35,7 @@ import {
 import { useState } from "react";
 import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
 
-// Experiences dropdown items — grouped by division with subpage
+// Experiences dropdown items. grouped by division with subpage
 const experiencesItems = [
   { heading: "The Summit", icon: CalendarDays, href: "/summit", sub: { label: "Book an Event", href: "/book-summit" } },
   { heading: "The Hive", icon: Building2, href: "/the-hive", sub: { label: "Coworking Space", href: "/the-hive" } },
@@ -167,7 +167,7 @@ export function Header() {
             Careers
           </Link>
 
-          {/* Family Hub Landing Zone — Waitlist CTA */}
+          {/* Family Hub Landing Zone. Waitlist CTA */}
           <a
             href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=header_button"
             target="_blank"

@@ -164,7 +164,7 @@ export default function Phase1Checklist() {
           <Card className="border-green-500/30 bg-green-500/10">
             <CardContent className="p-6 text-center">
               <CheckCircle2 className="h-10 w-10 text-green-400 mx-auto mb-2" />
-              <p className="text-green-300 font-bold text-lg">Phase 1 Complete — All items confirmed by owner</p>
+              <p className="text-green-300 font-bold text-lg">Phase 1 Complete. All items confirmed by owner</p>
               <p className="text-green-400/70 text-sm mt-1">Ready to proceed to Phase 2</p>
             </CardContent>
           </Card>

@@ -66,13 +66,13 @@ function formatEstimate(booking: any) {
   const isRequestOnly = t === "summit";
   const amount = booking?.total_amount;
   if (isRequestOnly && (!Number.isFinite(amount) || amount <= 0)) return "Estimate pending";
-  if (!Number.isFinite(amount)) return "—";
+  if (!Number.isFinite(amount)) return ". ";
   return `$${Number(amount).toFixed(2)}`;
 }
 
 function formatUSD0(amount: any) {
   const n = Number(amount);
-  if (!Number.isFinite(n)) return "—";
+  if (!Number.isFinite(n)) return ". ";
   return `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 }
 
@@ -844,7 +844,7 @@ export default function AdminApprovals() {
                           <p>
                             Deposit/down: <span className="font-medium">{formatUSD0(item.inquiry.deposit_amount)}</span>
                           </p>
-                          <p className="text-xs text-muted-foreground">Request-based — no payment collected now.</p>
+                          <p className="text-xs text-muted-foreground">Request-based. no payment collected now.</p>
                         </div>
                       )}
 
@@ -1029,7 +1029,7 @@ export default function AdminApprovals() {
 
                   <p className="text-sm">
                     {selectedLease
-                      ? `The Hive — Office Lease Request${selectedLease.office_code ? ` (Office ${selectedLease.office_code})` : ""}`
+                      ? `The Hive. Office Lease Request${selectedLease.office_code ? ` (Office ${selectedLease.office_code})` : ""}`
                       : `${selectedBooking.businesses?.name} - ${selectedBooking.bookable_types?.name}`}
                   </p>
                 </div>
@@ -1148,11 +1148,11 @@ export default function AdminApprovals() {
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <Label className="text-xs text-muted-foreground">Business</Label>
-                        <p className="font-medium">{detailItem.booking.businesses?.name || "—"}</p>
+                        <p className="font-medium">{detailItem.booking.businesses?.name || ". "}</p>
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Service</Label>
-                        <p className="font-medium">{detailItem.booking.bookable_types?.name || "—"}</p>
+                        <p className="font-medium">{detailItem.booking.bookable_types?.name || ". "}</p>
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">Date</Label>

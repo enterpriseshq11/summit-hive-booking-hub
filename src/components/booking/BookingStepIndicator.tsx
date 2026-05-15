@@ -13,7 +13,7 @@ const bookingSteps = [
   { 
     step: 2, 
     title: "Select Package", 
-    description: "Select your package — add upgrades later if you want.",
+    description: "Select your package. add upgrades later if you want.",
     icon: CreditCard,
   },
   { 

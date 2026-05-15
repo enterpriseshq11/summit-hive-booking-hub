@@ -103,7 +103,7 @@ export function SummitWaitlistModal({ open, onOpenChange }: SummitWaitlistModalP
         setPreferredDates([]);
       }, 2000);
     } catch (error) {
-      toast.error("Unable to join waitlist — please try again.");
+      toast.error("Unable to join waitlist. please try again.");
     } finally {
       setIsSubmitting(false);
     }

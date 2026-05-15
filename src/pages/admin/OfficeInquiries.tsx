@@ -268,7 +268,7 @@ export default function AdminOfficeInquiries() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Company</label>
-                    <p>{selectedInquiry.company_name || "—"}</p>
+                    <p>{selectedInquiry.company_name || ". "}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground" />

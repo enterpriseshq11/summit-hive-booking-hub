@@ -311,7 +311,7 @@ export function DayAvailabilityModal({
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Calendar className="h-5 w-5 text-accent" />
-            Edit Availability — {format(selectedDate, "EEEE, MMMM d, yyyy")}
+            Edit Availability. {format(selectedDate, "EEEE, MMMM d, yyyy")}
           </DialogTitle>
           <DialogDescription className="text-zinc-400">
             {businessName && <span className="text-accent">{businessName}</span>}
@@ -353,7 +353,7 @@ export function DayAvailabilityModal({
                   <ul className="mt-1 text-amber-200/80 space-y-0.5">
                     {dayBookings.slice(0, 3).map((b: any) => (
                       <li key={b.id}>
-                        {format(new Date(b.start_datetime), "h:mm a")} - {format(new Date(b.end_datetime), "h:mm a")} — {b.guest_name || "Guest"}
+                        {format(new Date(b.start_datetime), "h:mm a")} - {format(new Date(b.end_datetime), "h:mm a")}. {b.guest_name || "Guest"}
                       </li>
                     ))}
                     {dayBookings.length > 3 && (

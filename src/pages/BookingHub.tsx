@@ -288,7 +288,7 @@ export default function BookingHub() {
             
             {/* Trust line - Gold accent */}
             <p className="text-accent font-medium text-sm">
-              Review everything before payment — no surprises.
+              Review everything before payment. no surprises.
             </p>
           </div>
 
@@ -342,7 +342,7 @@ export default function BookingHub() {
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Browse By Business</h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg mb-2">
-            Start with the experience you want — we'll show the best times available.
+            Start with the experience you want. we'll show the best times available.
           </p>
           {/* Helper line */}
           <p className="text-sm text-muted-foreground/70 max-w-lg mx-auto">

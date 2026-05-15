@@ -84,7 +84,7 @@ const studioBenefits = [{
 }, {
   icon: Zap,
   title: "Easy Setup",
-  description: "Walk in and start recording—we handle the tech"
+  description: "Walk in and start recording. we handle the tech"
 }, {
   icon: Users,
   title: "Comfortable Studio",
@@ -400,7 +400,7 @@ export default function VoiceVault() {
                 Your Professional Recording Space
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Located inside The Hive coworking space, Voice Vault is a purpose-built, fully soundproof recording environment. Whether you're launching a podcast, recording interviews, creating voiceovers, or producing professional content — this is your space.
+                Located inside The Hive coworking space, Voice Vault is a purpose-built, fully soundproof recording environment. Whether you're launching a podcast, recording interviews, creating voiceovers, or producing professional content. this is your space.
               </p>
             </div>
             
@@ -511,7 +511,7 @@ export default function VoiceVault() {
               Everything You Need to Create
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Professional-grade equipment and a distraction-free environment — all included.
+              Professional-grade equipment and a distraction-free environment. all included.
             </p>
           </div>
 
@@ -623,7 +623,7 @@ export default function VoiceVault() {
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Podcast Packages — Built for Consistency
+              Podcast Packages. Built for Consistency
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Choose the level of support that fits your style. Both packages are designed to get you publishing regularly.
@@ -676,7 +676,7 @@ export default function VoiceVault() {
                   Voice Vault White Glove
                 </CardTitle>
                 <CardDescription className="text-accent font-medium text-base">
-                  Full production support — we do it all.
+                  Full production support. we do it all.
                 </CardDescription>
               </CardHeader>
               
@@ -935,7 +935,7 @@ export default function VoiceVault() {
               Start Your Podcast Without the Hassle
             </h2>
             <p className="text-lg text-primary-foreground/80 mb-8">
-              Book studio time or choose a package — either way, you'll be creating in no time.
+              Book studio time or choose a package. either way, you'll be creating in no time.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">

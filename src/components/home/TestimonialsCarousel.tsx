@@ -10,7 +10,7 @@ const testimonials = [
     experience: "The Summit",
     category: "Events",
     rating: 5,
-    quote: "Best event space we've ever used. Every detail handled flawlessly — our guests are still talking about it.",
+    quote: "Best event space we've ever used. Every detail handled flawlessly. our guests are still talking about it.",
     tag: "Wedding Reception",
   },
   {
@@ -55,7 +55,7 @@ const testimonials = [
     experience: "Restoration Lounge",
     category: "Spa",
     rating: 5,
-    quote: "No phone tag needed — saw real availability online and booked in under two minutes.",
+    quote: "No phone tag needed. saw real availability online and booked in under two minutes.",
     tag: "Facial Treatment",
   },
   {

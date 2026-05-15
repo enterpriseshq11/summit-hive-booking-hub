@@ -131,7 +131,7 @@ export default function OfficeDetailPage() {
               <div>
                 <span className="font-semibold text-accent">{activePromotion.headline}</span>
                 {activePromotion.description && (
-                  <span className="text-muted-foreground ml-2">— {activePromotion.description}</span>
+                  <span className="text-muted-foreground ml-2">. {activePromotion.description}</span>
                 )}
               </div>
             </div>

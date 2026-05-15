@@ -167,8 +167,8 @@ export default function E3BookingDetails() {
           <CardContent className="grid grid-cols-2 gap-4 text-sm">
             <div><span className="text-muted-foreground">Client</span><p className="font-medium">{b.client_name}</p></div>
             <div><span className="text-muted-foreground">Email</span><p className="font-medium">{b.client_email}</p></div>
-            <div><span className="text-muted-foreground">Phone</span><p className="font-medium">{b.client_phone || "—"}</p></div>
-            <div><span className="text-muted-foreground">Guests</span><p className="font-medium">{b.guest_count || "—"}</p></div>
+            <div><span className="text-muted-foreground">Phone</span><p className="font-medium">{b.client_phone || ". "}</p></div>
+            <div><span className="text-muted-foreground">Guests</span><p className="font-medium">{b.guest_count || ". "}</p></div>
             <div className="flex items-start gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div>
@@ -180,17 +180,17 @@ export default function E3BookingDetails() {
               <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div>
                 <span className="text-muted-foreground">Time Block</span>
-                <p className="font-medium">{b.e3_time_blocks?.name || "—"}</p>
+                <p className="font-medium">{b.e3_time_blocks?.name || ". "}</p>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <Building2 className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div>
                 <span className="text-muted-foreground">Halls</span>
-                <p className="font-medium">{hallNames.join(", ") || "—"}</p>
+                <p className="font-medium">{hallNames.join(", ") || ". "}</p>
               </div>
             </div>
-            <div><span className="text-muted-foreground">Type</span><p className="font-medium">{b.event_type || "—"}</p></div>
+            <div><span className="text-muted-foreground">Type</span><p className="font-medium">{b.event_type || ". "}</p></div>
             <div><span className="text-muted-foreground">Alcohol</span><p className="font-medium">{b.has_alcohol ? "Yes" : "No"}</p></div>
           </CardContent>
         </Card>

@@ -58,7 +58,7 @@ export default function BusinessSubPage() {
         <div className="flex items-center gap-3 mb-2">
           <Badge variant="outline" className={unitColor}>{unitLabel}</Badge>
         </div>
-        <h1 className="text-2xl font-bold text-white mb-2">{unitLabel} — {pageLabel}</h1>
+        <h1 className="text-2xl font-bold text-white mb-2">{unitLabel}. {pageLabel}</h1>
         <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-sm px-4 py-1">
           Coming in Phase 2
         </Badge>

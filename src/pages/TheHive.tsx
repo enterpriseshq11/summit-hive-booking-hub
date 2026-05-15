@@ -32,7 +32,7 @@ export default function TheHive() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="The Hive Co-Working Space — Private Offices in Wapakoneta" description="Rent a private office at The Hive by A-Z. Affordable coworking and private offices in Wapakoneta, Ohio." />
+      <SEOHead title="The Hive Co-Working Space. Private Offices in Wapakoneta" description="Rent a private office at The Hive by A-Z. Affordable coworking and private offices in Wapakoneta, Ohio." />
 
       {/* Hero */}
       <section className="bg-primary text-primary-foreground py-16 px-4">
@@ -56,8 +56,8 @@ export default function TheHive() {
       {!isLoading && (
         <div className={`py-3 px-4 text-center text-sm font-semibold ${availableCount > 0 ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}>
           {availableCount > 0
-            ? `${availableCount} office${availableCount !== 1 ? "s" : ""} available right now — secure yours today`
-            : "All offices are currently leased — join our waitlist"}
+            ? `${availableCount} office${availableCount !== 1 ? "s" : ""} available right now. secure yours today`
+            : "All offices are currently leased. join our waitlist"}
         </div>
       )}
 

@@ -130,7 +130,7 @@ export default function Index() {
 
           {/* Subhead */}
           <p className="mt-6 text-lg md:text-xl text-white/60 max-w-2xl mx-auto">
-            The newest addition to A-Z Enterprises — opening soon in downtown Wapakoneta.
+            The newest addition to A-Z Enterprises. opening soon in downtown Wapakoneta.
           </p>
 
           {/* CTA */}
@@ -280,13 +280,13 @@ export default function Index() {
             <div className="hidden lg:flex flex-col gap-3 opacity-0 animate-fade-in-left" style={{
             animationDelay: "0.5s"
           }}>
-              {/* Featured Deal Card — Family Hub Landing Zone */}
+              {/* Featured Deal Card. Family Hub Landing Zone */}
               <div className="rounded-xl border border-accent/30 bg-gradient-to-br from-accent/[0.08] to-white/[0.02] backdrop-blur-sm p-5">
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent mb-2">
                   <Moon className="h-3.5 w-3.5" /> Now Building
                 </span>
                 <h3 className="text-base font-bold text-white mb-1.5">The Family Hub Landing Zone</h3>
-                <p className="text-sm text-white/60 mb-3">Opening soon in downtown Wapakoneta. Founding families get first access — join the waitlist.</p>
+                <p className="text-sm text-white/60 mb-3">Opening soon in downtown Wapakoneta. Founding families get first access. join the waitlist.</p>
                 <a
                   href="https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=featured_card"
                   target="_blank"
@@ -373,7 +373,7 @@ export default function Index() {
               <div className="hidden md:block absolute top-[28px] left-[16.66%] right-[16.66%] h-px bg-gradient-to-r from-accent/20 via-accent/60 to-accent/20" />
 
               {[
-                { year: "1969", text: "57 years ago — Man lands on the moon. Neil Armstrong walks on lunar soil — and Wapakoneta becomes The First City on the Moon." },
+                { year: "1969", text: "57 years ago. Man lands on the moon. Neil Armstrong walks on lunar soil. and Wapakoneta becomes The First City on the Moon." },
                 { year: "2024", text: "A-Z Enterprises plants its flag in downtown Wapakoneta, building a family of businesses rooted in this hometown." },
                 { year: "2026", text: "The Family Hub Landing Zone opens its doors. A safe place for families to land, gather, and grow." },
               ].map((item, i) => (
@@ -427,7 +427,7 @@ export default function Index() {
                   </span>
                   <h3 className="text-xl font-bold text-white mb-2">After-School Drop-off Window</h3>
                   <p className="text-sm text-white/60 leading-relaxed">
-                    A supervised place for kids to land between school and home. Homework, snacks, activities — and parents get peace of mind.
+                    A supervised place for kids to land between school and home. Homework, snacks, activities. and parents get peace of mind.
                   </p>
                 </div>
               </div>

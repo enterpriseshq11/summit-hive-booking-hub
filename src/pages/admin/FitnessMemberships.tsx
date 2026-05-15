@@ -171,7 +171,7 @@ export default function FitnessMemberships() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">${Number(m.monthly_amount).toFixed(2)}</TableCell>
-                      <TableCell>{m.next_billing_date ? format(new Date(m.next_billing_date), "MMM d, yyyy") : "—"}</TableCell>
+                      <TableCell>{m.next_billing_date ? format(new Date(m.next_billing_date), "MMM d, yyyy") : ". "}</TableCell>
                       <TableCell>
                         <Button size="sm" variant="ghost" onClick={() => setDetailMember(m)}>
                           <Eye className="h-4 w-4" />
@@ -232,15 +232,15 @@ export default function FitnessMemberships() {
                 <div className="space-y-6 mt-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div><Label className="text-muted-foreground">Email</Label><p>{detailMember.email}</p></div>
-                    <div><Label className="text-muted-foreground">Phone</Label><p>{detailMember.phone || "—"}</p></div>
+                    <div><Label className="text-muted-foreground">Phone</Label><p>{detailMember.phone || ". "}</p></div>
                     <div><Label className="text-muted-foreground">Type</Label><p>{detailMember.membership_type}</p></div>
                     <div><Label className="text-muted-foreground">Monthly Amount</Label><p>${Number(detailMember.monthly_amount).toFixed(2)}</p></div>
                     <div><Label className="text-muted-foreground">Start Date</Label><p>{format(new Date(detailMember.start_date), "MMM d, yyyy")}</p></div>
-                    <div><Label className="text-muted-foreground">Next Billing</Label><p>{detailMember.next_billing_date ? format(new Date(detailMember.next_billing_date), "MMM d, yyyy") : "—"}</p></div>
+                    <div><Label className="text-muted-foreground">Next Billing</Label><p>{detailMember.next_billing_date ? format(new Date(detailMember.next_billing_date), "MMM d, yyyy") : ". "}</p></div>
                     <div><Label className="text-muted-foreground">Status</Label>
                       <Badge className={statusConfig[detailMember.status]?.color || ""}>{statusConfig[detailMember.status]?.label || detailMember.status}</Badge>
                     </div>
-                    <div><Label className="text-muted-foreground">Stripe Customer</Label><p className="text-xs font-mono">{detailMember.stripe_customer_id || "—"}</p></div>
+                    <div><Label className="text-muted-foreground">Stripe Customer</Label><p className="text-xs font-mono">{detailMember.stripe_customer_id || ". "}</p></div>
                   </div>
 
                   <div className="flex gap-2 pt-4 border-t">

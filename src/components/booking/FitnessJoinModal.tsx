@@ -106,7 +106,7 @@ export function FitnessJoinModal({ open, onOpenChange, preselectedPlan = null }:
           </div>
           <DialogTitle className="text-2xl">Start Your Membership</DialogTitle>
           <DialogDescription>
-            Tell us about your goals — we'll confirm your membership and schedule your orientation within 24 hours.
+            Tell us about your goals. we'll confirm your membership and schedule your orientation within 24 hours.
           </DialogDescription>
         </DialogHeader>
 

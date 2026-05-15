@@ -132,7 +132,7 @@ export default function AdminReviews() {
 
   const avgRating = allReviews.length > 0 
     ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(1)
-    : "—";
+    : ". ";
 
   return (
     <AdminLayout>

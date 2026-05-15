@@ -314,7 +314,7 @@ export function SummitRequestModal({
         businessId: business?.id,
       });
       const message = formatSubmitError(error);
-      toast.error("Unable to submit — please try again.", {
+      toast.error("Unable to submit. please try again.", {
         description: message?.slice(0, 280) || "If this continues, please contact us directly.",
       });
     } finally {
@@ -339,7 +339,7 @@ export function SummitRequestModal({
         <DialogHeader>
           <DialogTitle className="text-2xl">Request Your Event</DialogTitle>
           <DialogDescription id="summit-request-description">
-            Tell us about your vision — we'll respond within 24 hours with a tailored proposal.
+            Tell us about your vision. we'll respond within 24 hours with a tailored proposal.
           </DialogDescription>
         </DialogHeader>
 
@@ -720,7 +720,7 @@ export function SummitRequestModal({
                 )}
               </Button>
               <p className="text-xs text-muted-foreground text-center mt-3">
-                No obligation — review everything before you commit.
+                No obligation. review everything before you commit.
               </p>
             </div>
           </form>

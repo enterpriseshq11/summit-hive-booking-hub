@@ -84,7 +84,7 @@ export default function AdminReports() {
     },
   });
 
-  // Team data (commissions) — filtered by role
+  // Team data (commissions). filtered by role
   const { data: managedProfileIds } = useQuery({
     queryKey: ["managed_profile_ids", isOwner],
     queryFn: async () => {

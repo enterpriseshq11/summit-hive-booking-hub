@@ -206,7 +206,7 @@ export default function GiftCards() {
           </h1>
           {/* A1: Improved subtitle contrast */}
           <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto mb-3 font-medium">
-            The easiest way to gift fitness, recovery, and unforgettable experiences—delivered instantly and redeemable across A-Z.
+            The easiest way to gift fitness, recovery, and unforgettable experiences. delivered instantly and redeemable across A-Z.
           </p>
           {/* A3: Subline text */}
           <p className="text-base text-primary-foreground/70 max-w-xl mx-auto mb-8 flex items-center justify-center gap-2">
@@ -394,7 +394,7 @@ export default function GiftCards() {
           {/* F3: Tagline */}
           <p className="text-accent font-medium text-center mb-2">One card. Every experience.</p>
           <p className="text-muted-foreground text-center mb-12">
-            Use it at any A-Z location—choose where it fits best.
+            Use it at any A-Z location. choose where it fits best.
           </p>
           {/* F2: Increased spacing */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -473,7 +473,7 @@ export default function GiftCards() {
               { 
                 step: "3", 
                 title: "Deliver Instantly", 
-                desc: "Gift card is delivered immediately via email—ready to use.",
+                desc: "Gift card is delivered immediately via email. ready to use.",
                 subdesc: "They'll have it in seconds.",
                 icon: Mail 
               },

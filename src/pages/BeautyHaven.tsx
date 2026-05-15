@@ -8,8 +8,8 @@ export default function BeautyHaven() {
   return (
     <div className="lp-root">
       <SEOHead
-        title="High Maintenance Beauty Haven — A-Z Enterprises"
-        description="High Maintenance Beauty Haven LLC — luxury hair color and nail art studio on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Book with Hannah or Desiree."
+        title="High Maintenance Beauty Haven. A-Z Enterprises"
+        description="High Maintenance Beauty Haven LLC. luxury hair color and nail art studio on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Book with Hannah or Desiree."
         canonicalPath="/beauty-haven"
       />
 
@@ -24,7 +24,7 @@ export default function BeautyHaven() {
           <h1>
             High<br />Maintenance<br /><em>Beauty Haven</em>
           </h1>
-          <p className="lp-hero-tagline text-amber-100">Hair. Nails. No compromises. — Second Floor, Wapakoneta OH</p>
+          <p className="lp-hero-tagline text-amber-100">Hair. Nails. No compromises.. Second Floor, Wapakoneta OH</p>
           <div className="lp-hero-badges">
             <span className="lp-badge-gold">Hair by Hannah</span>
             <span className="lp-badge-pink">Nails by Desiree</span>
@@ -32,8 +32,8 @@ export default function BeautyHaven() {
             <span className="lp-badge-outline">Open 7 Days</span>
           </div>
           <div className="lp-cta-row">
-            <a href="/beauty-haven/hair" className="lp-btn-primary">Book Hair — Hannah</a>
-            <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="lp-btn-pink">Book Nails — Desiree</a>
+            <a href="/beauty-haven/hair" className="lp-btn-primary">Book Hair. Hannah</a>
+            <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="lp-btn-pink">Book Nails. Desiree</a>
           </div>
         </div>
         <div className="lp-hero-stats">
@@ -140,7 +140,7 @@ export default function BeautyHaven() {
               <span className="lp-tag-p">Nail Art</span>
               <span className="lp-tag-p">Pedicures</span>
             </div>
-            <p className="lp-artist-desc text-amber-50">Maximalist nail artist, five years deep. From structured gel to full Gel-X — clean classic or elaborately over-the-top.</p>
+            <p className="lp-artist-desc text-amber-50">Maximalist nail artist, five years deep. From structured gel to full Gel-X. clean classic or elaborately over-the-top.</p>
             <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="lp-artist-link-p">Book with Desiree →</a>
           </div>
         </div>
@@ -149,7 +149,7 @@ export default function BeautyHaven() {
       {/* ═══ SERVICES ═══ */}
       <section className="lp-services">
         <div className="lp-svc-col">
-          <div className="lp-svc-col-head gold">Hannah — Hair Services</div>
+          <div className="lp-svc-col-head gold">Hannah. Hair Services</div>
           <div className="lp-svc-item"><span className="lp-svc-name">All Over Color</span><span className="lp-svc-price-g">$100</span></div>
           <div className="lp-svc-item"><span className="lp-svc-name">Balayage with Toner</span><span className="lp-svc-price-g">$190</span></div>
           <div className="lp-svc-item"><span className="lp-svc-name">Full Highlight</span><span className="lp-svc-price-g">$150</span></div>
@@ -159,7 +159,7 @@ export default function BeautyHaven() {
           <div className="lp-svc-more"><a href="/beauty-haven/hair" className="gold">View all hair services →</a></div>
         </div>
         <div className="lp-svc-col">
-          <div className="lp-svc-col-head pink">Desiree — Nail Services</div>
+          <div className="lp-svc-col-head pink">Desiree. Nail Services</div>
           <div className="lp-svc-item"><span className="lp-svc-name">Classic Gel-X Set</span><span className="lp-svc-price-p">$97</span></div>
           <div className="lp-svc-item"><span className="lp-svc-name">Standard Gel-X Set</span><span className="lp-svc-price-p">$113</span></div>
           <div className="lp-svc-item"><span className="lp-svc-name">Classic Acrylic Set</span><span className="lp-svc-price-p">$85</span></div>

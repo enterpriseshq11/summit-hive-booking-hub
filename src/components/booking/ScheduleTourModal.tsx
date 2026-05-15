@@ -138,7 +138,7 @@ export function ScheduleTourModal({ open, onOpenChange, businessType = "coworkin
             Schedule a Tour
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            See the space in person or virtually — we'll confirm a time that works.
+            See the space in person or virtually. we'll confirm a time that works.
           </p>
         </DialogHeader>
 

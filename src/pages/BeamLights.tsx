@@ -20,7 +20,7 @@ const benefits = [
   {
     icon: Eye,
     title: "Maximum Visibility",
-    description: "Engineered optics that cut through any condition—rain, fog, or pitch black."
+    description: "Engineered optics that cut through any condition. rain, fog, or pitch black."
   },
   {
     icon: Shield,
@@ -105,7 +105,7 @@ export default function BeamLights() {
               </p>
               <p>
                 So we built something better. BEEAM Lights are designed from the ground up for 
-                people who depend on their gear—professionals, adventurers, and anyone who 
+                people who depend on their gear. professionals, adventurers, and anyone who 
                 refuses to be left in the dark.
               </p>
               <p className="text-foreground font-medium">
@@ -239,7 +239,7 @@ export default function BeamLights() {
               "The only lighting I trust in my space. BEEAM delivers when it matters."
             </blockquote>
             <p className="text-muted-foreground">
-              — Verified Customer
+             . Verified Customer
             </p>
           </div>
         </div>

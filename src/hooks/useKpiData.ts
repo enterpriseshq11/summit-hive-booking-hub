@@ -185,7 +185,7 @@ export const MARK_TILES: KpiTileConfig[] = [
   { id: "leads_overdue", title: "Overdue Follow-Ups", category: "leads", size: "medium", href: "/admin/leads?filter=overdue" },
   { id: "comm_pending", title: "My Commission Pending", category: "team", size: "medium" },
   { id: "comm_paid", title: "Commission Paid This Month", category: "team", size: "medium" },
-  { id: "leads_new", title: "New Leads — Summit & Mobile", category: "leads", size: "medium" },
+  { id: "leads_new", title: "New Leads. Summit & Mobile", category: "leads", size: "medium" },
 ];
 
 export const NASIYA_TILES: KpiTileConfig[] = [

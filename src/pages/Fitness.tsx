@@ -43,7 +43,7 @@ export default function Fitness() {
       type: "essential" as const,
       badge: "Best for Beginners",
       features: [
-        "24/7 gym access — train on your schedule",
+        "24/7 gym access. train on your schedule",
         "Full equipment floor access",
         "Locker room & shower facilities",
         "Free equipment orientation session"
@@ -280,7 +280,7 @@ export default function Fitness() {
           <div className="max-w-5xl mx-auto">
             <div className="rounded-xl overflow-hidden border border-accent/30 shadow-gold-lg bg-background">
               <iframe
-                title="A-Z Total Fitness — Matterport 3D Virtual Tour"
+                title="A-Z Total Fitness. Matterport 3D Virtual Tour"
                 src="https://my.matterport.com/show/?m=SxNk289xryw"
                 width="853"
                 height="480"
@@ -323,7 +323,7 @@ export default function Fitness() {
                 <Flame className="h-5 w-5 text-accent" />
                 <span className="font-semibold text-foreground">High demand</span>
               </div>
-              <span className="text-muted-foreground">— orientations scheduled within 24 hours</span>
+              <span className="text-muted-foreground">. Orientations scheduled within 24 hours</span>
             </div>
             
             {/* Reassurance line */}
@@ -370,7 +370,7 @@ export default function Fitness() {
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">Membership Options</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Find the membership that fits your goals — all plans include 24/7 access and expert support.
+            Find the membership that fits your goals. all plans include 24/7 access and expert support.
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-10">
@@ -669,7 +669,7 @@ export default function Fitness() {
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">How It Works</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Getting started is simple — we'll guide you every step of the way.
+              Getting started is simple. we'll guide you every step of the way.
             </p>
           </div>
           <div className="max-w-2xl mx-auto">
@@ -678,7 +678,7 @@ export default function Fitness() {
               <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-accent/30" aria-hidden="true" />
               
               {[
-                { step: "1", title: "Choose Your Membership", description: "Select the plan that matches your fitness goals. No commitment — review everything before payment.", icon: Target },
+                { step: "1", title: "Choose Your Membership", description: "Select the plan that matches your fitness goals. No commitment. review everything before payment.", icon: Target },
                 { step: "2", title: "Complete Your Profile", description: "Tell us about yourself so we can personalize your experience and schedule your free orientation.", icon: Calendar },
                 { step: "3", title: "Start Training", description: "Get oriented with our facility, meet the team, and begin your transformation with full support.", icon: Flame }
               ].map((item) => (
@@ -695,7 +695,7 @@ export default function Fitness() {
             </div>
             <div className="text-center mt-8 p-4 bg-accent/5 rounded-lg border border-accent/20">
               <p className="text-sm text-muted-foreground">
-                <span className="text-accent font-medium">No obligation.</span> Cancel anytime — no contracts, no hidden fees.
+                <span className="text-accent font-medium">No obligation.</span> Cancel anytime. no contracts, no hidden fees.
               </p>
             </div>
           </div>
@@ -812,7 +812,7 @@ export default function Fitness() {
                     <span className="text-left font-semibold">How do I get started?</span>
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground pb-4">
-                    Click "Join Now" to begin. You'll select your membership, complete a brief profile, and schedule your free orientation. Our team will guide you through everything — no experience required.
+                    Click "Join Now" to begin. You'll select your membership, complete a brief profile, and schedule your free orientation. Our team will guide you through everything. no experience required.
                   </AccordionContent>
                 </AccordionItem>
                 
@@ -830,7 +830,7 @@ export default function Fitness() {
                     <span className="text-left font-semibold">What classes are available?</span>
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground pb-4">
-                    We offer strength training, HIIT, yoga, cycling, and more. Performance and Elite members have unlimited class access. Check our schedule for current offerings — new classes added regularly.
+                    We offer strength training, HIIT, yoga, cycling, and more. Performance and Elite members have unlimited class access. Check our schedule for current offerings. new classes added regularly.
                   </AccordionContent>
                 </AccordionItem>
                 
@@ -848,7 +848,7 @@ export default function Fitness() {
                     <span className="text-left font-semibold">How does pricing work?</span>
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground pb-4">
-                    Pricing varies based on service type, appointment length, and selected enhancements. You'll review everything before payment—no commitment required.
+                    Pricing varies based on service type, appointment length, and selected enhancements. You'll review everything before payment. no commitment required.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -870,7 +870,7 @@ export default function Fitness() {
               This isn't just a gym. It's where habits change.
             </h2>
             <p className="text-primary-foreground/70 mb-8 text-lg leading-relaxed">
-              Start with a plan that fits your life — and a team that keeps you moving forward.
+              Start with a plan that fits your life. and a team that keeps you moving forward.
             </p>
             
             {/* CTA Buttons */}

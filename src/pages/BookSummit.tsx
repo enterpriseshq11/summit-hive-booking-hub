@@ -217,7 +217,7 @@ export default function BookSummit() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-background">
-        <SEOHead title="Inquiry Submitted — The Summit Event Center" description="Your event inquiry has been submitted." />
+        <SEOHead title="Inquiry Submitted. The Summit Event Center" description="Your event inquiry has been submitted." />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-6">
           <CheckCircle className="w-16 h-16 text-accent mx-auto" />
           <h1 className="text-3xl font-bold text-foreground">Inquiry Submitted</h1>
@@ -231,7 +231,7 @@ export default function BookSummit() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Book The Summit Event Center — A-Z Enterprises" description="Plan your next event at The Summit Event Center in Wapakoneta, Ohio." />
+      <SEOHead title="Book The Summit Event Center. A-Z Enterprises" description="Plan your next event at The Summit Event Center in Wapakoneta, Ohio." />
 
       <section className="bg-primary text-primary-foreground py-16 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-4">

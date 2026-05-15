@@ -103,7 +103,7 @@ export function ProtectedRoute({
 
   if (requireOwner && !isOwner) {
     // Import toast dynamically to show access denied
-    import("sonner").then(({ toast }) => toast.error("Access Denied — You do not have permission to view this page."));
+    import("sonner").then(({ toast }) => toast.error("Access Denied. You do not have permission to view this page."));
     return <Navigate to="/admin" replace />;
   }
 

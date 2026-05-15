@@ -87,7 +87,7 @@ export default function E3Commissions() {
           <div className="space-y-3">
             {(commissions as any[]).map((c: any) => {
               const booking = c.e3_bookings;
-              const halls = booking?.e3_booking_halls?.map((h: any) => h.e3_halls?.name).filter(Boolean).join(", ") || "—";
+              const halls = booking?.e3_booking_halls?.map((h: any) => h.e3_halls?.name).filter(Boolean).join(", ") || ". ";
 
               return (
                 <Card key={c.id} className="border-border/50">
@@ -99,13 +99,13 @@ export default function E3Commissions() {
                           <Badge variant="outline" className={statusColors[c.status]}>
                             {c.status}
                           </Badge>
-                          <span className="font-semibold text-sm">{booking?.client_name || "—"}</span>
+                          <span className="font-semibold text-sm">{booking?.client_name || ". "}</span>
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {booking?.event_date ? format(new Date(booking.event_date), "MMM d, yyyy") : "—"}
-                          {" · "}{booking?.e3_time_blocks?.name || "—"}
+                          {booking?.event_date ? format(new Date(booking.event_date), "MMM d, yyyy") : ". "}
+                          {" · "}{booking?.e3_time_blocks?.name || ". "}
                           {" · "}{halls}
-                          {" · "}{booking?.e3_venues?.name || "—"}
+                          {" · "}{booking?.e3_venues?.name || ". "}
                         </div>
                         <div className="flex gap-4 mt-2 text-sm">
                           <div>

@@ -64,7 +64,7 @@ function formatMoneyOrEstimate(b: any) {
   const isSummit = t === "summit";
   const amount = b?.total_amount;
   if (isSummit && (!Number.isFinite(amount) || amount <= 0)) return "Estimate pending";
-  if (!Number.isFinite(amount)) return "—";
+  if (!Number.isFinite(amount)) return ". ";
   return `$${Number(amount).toFixed(2)}`;
 }
 
@@ -279,7 +279,7 @@ export default function AdminSchedule() {
       if (error) throw error;
 
       if (data?.webhook_sent) {
-        toast.success(`Status updated to "${spaStatusValue}" — GHL webhook sent`);
+        toast.success(`Status updated to "${spaStatusValue}". GHL webhook sent`);
       } else {
         toast.success(`Status updated to "${spaStatusValue}"`);
         if (data?.reason) {

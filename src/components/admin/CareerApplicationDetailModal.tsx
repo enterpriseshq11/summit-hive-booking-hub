@@ -235,7 +235,7 @@ export function CareerApplicationDetailModal({
                         `A-Z Enterprises Application – ${application.role} – ${applicant.firstName} ${applicant.lastName}`
                       );
                       const body = encodeURIComponent(
-                        `Hi ${applicant.firstName},\n\nThanks for applying for ${application.role} at A-Z Enterprises.\n\nWe'd like to set up a quick call/interview. What times work best for you?\n\n— A-Z Enterprises Team`
+                        `Hi ${applicant.firstName},\n\nThanks for applying for ${application.role} at A-Z Enterprises.\n\nWe'd like to set up a quick call/interview. What times work best for you?\n\n. A-Z Enterprises Team`
                       );
                       return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(applicant.email)}&su=${subject}&body=${body}`;
                     })()}

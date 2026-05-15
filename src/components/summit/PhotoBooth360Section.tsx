@@ -403,7 +403,7 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
                   </h3>
                   <p className="text-lg text-muted-foreground">
                     Every 360 video features custom overlays personalized for your event. 
-                    From birthday messages to wedding monograms to corporate logos—your branding 
+                    From birthday messages to wedding monograms to corporate logos. your branding 
                     is captured in every unforgettable moment.
                   </p>
                 </div>
@@ -431,7 +431,7 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
                 </div>
                 
                 <p className="text-sm text-muted-foreground italic">
-                  Customization is included at no extra cost—just tell us your vision.
+                  Customization is included at no extra cost. just tell us your vision.
                 </p>
               </motion.div>
             </div>
@@ -514,7 +514,7 @@ export default function PhotoBooth360Section({ onRequestBooking }: PhotoBooth360
                 No Extra Cost. Just Book.
               </h3>
               <p className="text-xl text-primary-foreground/70 max-w-2xl mx-auto">
-                The 360 Photo Booth experience comes standard with select Summit bookings—
+                The 360 Photo Booth experience comes standard with select Summit bookings.
                 premium value built right into your event.
               </p>
             </div>

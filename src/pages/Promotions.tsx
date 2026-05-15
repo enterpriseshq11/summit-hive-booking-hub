@@ -33,7 +33,7 @@ const HOW_IT_WORKS = [
 
 const TESTIMONIALS = [
   {
-    quote: "The office bundle gave me access to everything I needed—gym, spa credits, and event discounts. Worth every penny.",
+    quote: "The office bundle gave me access to everything I needed. gym, spa credits, and event discounts. Worth every penny.",
     author: "Executive Member",
     role: "Summit Office Leaseholder"
   },
@@ -289,7 +289,7 @@ export default function Promotions() {
               {activeTab === "spa" && "Recovery, relaxation, and wellness bundles for optimal self-care."}
               {activeTab === "fitness" && "Training packages and gym membership enhancements."}
               {activeTab === "bundles" && "High-value packages that combine multiple businesses for maximum savings."}
-              {activeTab === "limited" && "Time-sensitive offers—available for a limited window only."}
+              {activeTab === "limited" && "Time-sensitive offers. available for a limited window only."}
             </p>
           </div>
 
