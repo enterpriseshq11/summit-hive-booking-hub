@@ -64,7 +64,7 @@ export function VipLockedModal({ open, onOpenChange, onUpgrade }: VipLockedModal
               }}
               data-event="vip_checkout_started"
             >
-              Unlock VIP — $2.99/month
+              Unlock VIP. $2.99/month
             </Button>
             <Button 
               variant="ghost" 

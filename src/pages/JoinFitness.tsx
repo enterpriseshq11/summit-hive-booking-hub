@@ -155,7 +155,7 @@ export default function JoinFitness() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-background">
-        <SEOHead title="Welcome — A-Z Total Fitness" description="Your membership signup is complete." />
+        <SEOHead title="Welcome. A-Z Total Fitness" description="Your membership signup is complete." />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-6">
           <CheckCircle className="w-16 h-16 text-accent mx-auto" />
           <h1 className="text-3xl font-bold text-foreground">Welcome to A-Z Total Fitness!</h1>
@@ -168,7 +168,7 @@ export default function JoinFitness() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Join A-Z Total Fitness — Gym Memberships in Wapakoneta" description="Join A-Z Total Fitness. Monthly memberships from $49/month. Full gym access, classes, and personal training." />
+      <SEOHead title="Join A-Z Total Fitness. Gym Memberships in Wapakoneta" description="Join A-Z Total Fitness. Monthly memberships from $49/month. Full gym access, classes, and personal training." />
 
       <section className="bg-primary text-primary-foreground py-16 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-4">
@@ -231,7 +231,7 @@ export default function JoinFitness() {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Dumbbell className="w-5 h-5 text-accent" /> Complete Signup</CardTitle>
-              <CardDescription>{tier?.name} — ${tier?.price}/{tier?.interval}</CardDescription>
+              <CardDescription>{tier?.name}. ${tier?.price}/{tier?.interval}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">

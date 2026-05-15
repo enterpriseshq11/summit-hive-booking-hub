@@ -123,7 +123,7 @@ export default function CommandCenterCommissions() {
           action: "commission_rejected",
           reason,
           rejected_by_name: userName,
-          description: `${userName} rejected commission for ${empName} — Reason: ${reason}`,
+          description: `${userName} rejected commission for ${empName}. Reason: ${reason}`,
         },
       });
       return data;
@@ -167,7 +167,7 @@ export default function CommandCenterCommissions() {
         metadata: {
           action: "commission_reopened",
           reopened_by_name: userName,
-          description: `${userName} reopened commission for ${empName} — returned to Pending Approval`,
+          description: `${userName} reopened commission for ${empName}. returned to Pending Approval`,
         },
       });
       return data;
@@ -175,7 +175,7 @@ export default function CommandCenterCommissions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["crm_commissions"] });
       queryClient.invalidateQueries({ queryKey: ["crm_commission_stats"] });
-      toast.success("Commission reopened — moved to Pending Approval");
+      toast.success("Commission reopened. moved to Pending Approval");
       setReopenConfirmOpen(false);
       setReopenTarget(null);
     },
@@ -242,15 +242,15 @@ export default function CommandCenterCommissions() {
               </TableCell>
               <TableCell className="text-zinc-400 text-sm">
                 {showRejectedCols
-                  ? (comm.rejected_at ? format(new Date(comm.rejected_at), "MMM d, yyyy h:mm a") : "—")
-                  : (comm.created_at ? format(new Date(comm.created_at), "MMM d, yyyy") : "—")}
+                  ? (comm.rejected_at ? format(new Date(comm.rejected_at), "MMM d, yyyy h:mm a") : ". ")
+                  : (comm.created_at ? format(new Date(comm.created_at), "MMM d, yyyy") : ". ")}
               </TableCell>
               <TableCell className="text-zinc-400 text-sm max-w-[200px]">
                 {showRejectedCols
-                  ? <span className="text-red-400 text-xs">{comm.rejection_reason || "—"}</span>
+                  ? <span className="text-red-400 text-xs">{comm.rejection_reason || ". "}</span>
                   : (comm.approved_by_profile
                     ? `${comm.approved_by_profile.first_name} ${comm.approved_by_profile.last_name}`
-                    : "—")}
+                    : ". ")}
               </TableCell>
               <TableCell>
                 <DropdownMenu>
@@ -480,7 +480,7 @@ export default function CommandCenterCommissions() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-400 text-sm">Source</span>
-                    <span className="text-zinc-300 text-sm capitalize">{rejectTarget.revenue_event?.business_unit || "—"}</span>
+                    <span className="text-zinc-300 text-sm capitalize">{rejectTarget.revenue_event?.business_unit || ". "}</span>
                   </div>
                 </div>
                 <div>

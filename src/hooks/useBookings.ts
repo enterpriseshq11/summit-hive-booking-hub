@@ -178,7 +178,7 @@ export function useUpdateBookingStatus() {
             },
           });
         } catch {
-          // non-blocking — toast already shown below
+          // non-blocking. toast already shown below
         }
       }
 

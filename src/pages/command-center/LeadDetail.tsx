@@ -348,12 +348,12 @@ export default function LeadDetailPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <Label className="text-zinc-500 text-xs">Email</Label>
-                    <div className="flex items-center gap-2 text-zinc-100"><Mail className="h-4 w-4 text-zinc-500" />{lead.email || "—"}</div>
+                    <div className="flex items-center gap-2 text-zinc-100"><Mail className="h-4 w-4 text-zinc-500" />{lead.email || ". "}</div>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-zinc-500 text-xs">Phone</Label>
                     <div className="flex items-center gap-2 text-zinc-100">
-                      <Phone className="h-4 w-4 text-zinc-500" />{lead.phone || "—"}
+                      <Phone className="h-4 w-4 text-zinc-500" />{lead.phone || ". "}
                       {/* Item 29: quick call/text actions */}
                       {lead.phone && (
                         <>
@@ -365,7 +365,7 @@ export default function LeadDetailPage() {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-zinc-500 text-xs">Source</Label>
-                    <div className="text-zinc-100">{sourceLabels[lead.source || ""] || lead.source || "—"}</div>
+                    <div className="text-zinc-100">{sourceLabels[lead.source || ""] || lead.source || ". "}</div>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-zinc-500 text-xs">Business Unit</Label>
@@ -375,7 +375,7 @@ export default function LeadDetailPage() {
                     <Label className="text-zinc-500 text-xs">Created</Label>
                     <div className="flex items-center gap-2 text-zinc-100">
                       <Calendar className="h-4 w-4 text-zinc-500" />
-                      {lead.created_at ? format(new Date(lead.created_at), "PPP") : "—"}
+                      {lead.created_at ? format(new Date(lead.created_at), "PPP") : ". "}
                     </div>
                   </div>
                   <div className="space-y-1">

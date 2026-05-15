@@ -24,10 +24,10 @@ const workspaceTypes = [
 ];
 
 const officeOptions = [
-  { value: "P1", label: "P1 — Premium (1st floor)" },
-  { value: "P2", label: "P2 — Premium (1st floor)" },
-  { value: "S1", label: "S1 — Private Office (2nd floor)" },
-  { value: "S2", label: "S2 — Private Office (2nd floor)" },
+  { value: "P1", label: "P1. Premium (1st floor)" },
+  { value: "P2", label: "P2. Premium (1st floor)" },
+  { value: "S1", label: "S1. Private Office (2nd floor)" },
+  { value: "S2", label: "S2. Private Office (2nd floor)" },
 ];
 
 const leaseTermOptions = [
@@ -161,7 +161,7 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
         messageLines.push(`Monthly: ${formatUSD(pricing!.monthly)}`);
         messageLines.push(`Term Total: ${formatUSD(pricing!.termTotal)}`);
         messageLines.push(`Deposit/Down: ${formatUSD(pricing!.deposit)}`);
-        messageLines.push(`Request-based — no payment collected now.`);
+        messageLines.push(`Request-based. no payment collected now.`);
       }
       messageLines.push(`Move-in: ${formData.moveInTimeframe}`);
       messageLines.push(`Seats: ${formData.seats}`);
@@ -339,7 +339,7 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
             Request Your Workspace
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Tell us what you need — we'll confirm options within 24 hours.
+            Tell us what you need. we'll confirm options within 24 hours.
           </p>
         </DialogHeader>
 
@@ -424,7 +424,7 @@ export function CoworkingRequestModal({ open, onOpenChange, preselectedType, pre
                        <div className="text-right font-medium">{formatUSD(pricing.deposit)}</div>
                     </div>
                     <p className="text-xs text-muted-foreground mt-3">
-                      Request-based — no payment collected now.
+                      Request-based. no payment collected now.
                     </p>
                   </div>
                 );

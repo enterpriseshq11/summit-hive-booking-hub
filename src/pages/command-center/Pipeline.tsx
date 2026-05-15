@@ -198,7 +198,7 @@ function LeadCard({ lead, isDragging, showPriority }: LeadCardProps) {
             )}
           </div>
 
-          {/* Flags — Item 8: overdue badge red bg + white text */}
+          {/* Flags. Item 8: overdue badge red bg + white text */}
           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
             {followUpOverdue && (
               <Badge className="text-[10px] bg-red-500 text-white px-1.5 py-0 border-0">
@@ -303,7 +303,7 @@ function ConversionDashboard({ leads }: { leads: any[] }) {
   const deposits = getCount("deposit_pending") + getCount("booked");
   const booked = getCount("booked");
 
-  const rate = (num: number, den: number) => den > 0 ? `${Math.round((num / den) * 100)}%` : "—";
+  const rate = (num: number, den: number) => den > 0 ? `${Math.round((num / den) * 100)}%` : ". ";
 
   const stats = [
     { label: "Total Leads", value: total, color: "text-zinc-300" },
@@ -603,7 +603,7 @@ export default function CommandCenterPipeline() {
     booked: "Booked", won: "Completed", completed: "Completed", lost: "Lost",
   };
 
-  // Legacy webhook function removed — all GHL sync now uses direct API via sync-ghl-stage edge function
+  // Legacy webhook function removed. all GHL sync now uses direct API via sync-ghl-stage edge function
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;

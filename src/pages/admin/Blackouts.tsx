@@ -285,7 +285,7 @@ export default function AdminBlackouts() {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm text-zinc-400">
-                          {blackout.reason || "—"}
+                          {blackout.reason || ". "}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -349,7 +349,7 @@ export default function AdminBlackouts() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm">{blackout.reason || "—"}</span>
+                          <span className="text-sm">{blackout.reason || ". "}</span>
                         </TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" onClick={() => handleDelete(blackout)}>

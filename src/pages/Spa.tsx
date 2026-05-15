@@ -118,7 +118,7 @@ export default function Spa() {
                 Expert Care. Premium Experience.
               </p>
               <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl">
-                Professional recovery, massage therapy, and wellness treatments—professionally delivered by our licensed therapists.
+                Professional recovery, massage therapy, and wellness treatments. professionally delivered by our licensed therapists.
               </p>
               
               {/* Hero CTAs */}
@@ -222,7 +222,7 @@ export default function Spa() {
                     <span className="text-sm text-muted-foreground ml-1">/ 60 min</span>
                   </div>
                   <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                    90 min — ${svc.price + 35}
+                    90 min. ${svc.price + 35}
                   </div>
                 </div>
               </CardContent>
@@ -420,7 +420,7 @@ export default function Spa() {
             {[{
             step: 1,
             title: "Select Your Service",
-            desc: "Choose massage, recovery, or wellness — tell us your preferences and goals.",
+            desc: "Choose massage, recovery, or wellness. tell us your preferences and goals.",
             icon: Sparkles
           }, {
             step: 2,
@@ -445,7 +445,7 @@ export default function Spa() {
           
           <div className="text-center mt-8 p-4 bg-accent/5 rounded-lg border border-accent/20">
             <p className="text-sm text-muted-foreground">
-              <span className="text-accent font-medium">No obligation.</span> You'll review everything before payment — no commitment required.
+              <span className="text-accent font-medium">No obligation.</span> You'll review everything before payment. no commitment required.
             </p>
           </div>
         </div>
@@ -540,7 +540,7 @@ export default function Spa() {
                     <span className="font-semibold">How does pricing work?</span>
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground pb-4">
-                    Pricing varies based on service type, appointment length, and selected enhancements. You'll review everything before payment—no commitment required.
+                    Pricing varies based on service type, appointment length, and selected enhancements. You'll review everything before payment. no commitment required.
                   </AccordionContent>
                 </AccordionItem>
                 
@@ -549,7 +549,7 @@ export default function Spa() {
                     <span className="font-semibold">What's your cancellation policy?</span>
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground pb-4">
-                    We understand plans change. You can modify or cancel with advance notice. Full policy details are provided when you book—no hidden fees.
+                    We understand plans change. You can modify or cancel with advance notice. Full policy details are provided when you book. no hidden fees.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -578,7 +578,7 @@ export default function Spa() {
           <div className="max-w-5xl mx-auto">
             <div className="rounded-xl overflow-hidden border border-accent/30 shadow-gold-lg bg-background">
               <iframe
-                title="Restoration Lounge Spa — Matterport 3D Virtual Tour"
+                title="Restoration Lounge Spa. Matterport 3D Virtual Tour"
                 src="https://my.matterport.com/show/?m=J2Hp9xvQc3w"
                 width="853"
                 height="480"
@@ -600,7 +600,7 @@ export default function Spa() {
         <div className="container text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">Ready to Reset Your Body?</h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto text-lg">
-            Expert care and premium treatments — book your appointment today.
+            Expert care and premium treatments. book your appointment today.
           </p>
           <div className="flex justify-center">
             <TherapistDropdown />
@@ -671,10 +671,10 @@ export default function Spa() {
           <div className="pt-3 border-t mt-2">
             <h4 className="font-semibold text-sm mb-2">Packages</h4>
             <div className="space-y-1 text-sm text-muted-foreground">
-              <p>4 Massages — $345 (1 add-on)</p>
-              <p>6 Massages — $520 (3 add-ons)</p>
-              <p>8 Massages — $690 (3 add-ons, 1 cupping, 1 hot stone)</p>
-              <p>10 Massages — $850 (3 add-ons, 2 cupping, 2 hot stone)</p>
+              <p>4 Massages. $345 (1 add-on)</p>
+              <p>6 Massages. $520 (3 add-ons)</p>
+              <p>8 Massages. $690 (3 add-ons, 1 cupping, 1 hot stone)</p>
+              <p>10 Massages. $850 (3 add-ons, 2 cupping, 2 hot stone)</p>
             </div>
           </div>
           <div className="pt-3 border-t">

@@ -231,7 +231,7 @@ export default function StripeTransactions() {
                     <TableRow key={txn.id} className="border-zinc-800 hover:bg-zinc-800/50 cursor-pointer"
                       onClick={() => openDetail(txn)}>
                       <TableCell className="text-zinc-300">
-                        {txn.stripe_created_at ? format(new Date(txn.stripe_created_at), "MMM d, yyyy h:mm a") : "—"}
+                        {txn.stripe_created_at ? format(new Date(txn.stripe_created_at), "MMM d, yyyy h:mm a") : ". "}
                       </TableCell>
                       <TableCell className="text-zinc-100 font-medium">{formatCurrency(txn.amount)}</TableCell>
                       <TableCell>
@@ -239,7 +239,7 @@ export default function StripeTransactions() {
                           {txn.business_unit || "unmapped"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-zinc-300 capitalize">{txn.payment_method_type || "—"}</TableCell>
+                      <TableCell className="text-zinc-300 capitalize">{txn.payment_method_type || ". "}</TableCell>
                       <TableCell>
                         <Badge className={txn.status === "succeeded" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}>
                           {txn.status}
@@ -299,15 +299,15 @@ export default function StripeTransactions() {
                   </div>
                   <div>
                     <Label className="text-zinc-500 text-xs">Payment Method</Label>
-                    <p className="text-zinc-100 capitalize">{selectedTxn.payment_method_type || "—"}</p>
+                    <p className="text-zinc-100 capitalize">{selectedTxn.payment_method_type || ". "}</p>
                   </div>
                   <div>
                     <Label className="text-zinc-500 text-xs">Customer Email</Label>
-                    <p className="text-zinc-100">{selectedTxn.customer_email || "—"}</p>
+                    <p className="text-zinc-100">{selectedTxn.customer_email || ". "}</p>
                   </div>
                   <div>
                     <Label className="text-zinc-500 text-xs">Customer Name</Label>
-                    <p className="text-zinc-100">{selectedTxn.customer_name || "—"}</p>
+                    <p className="text-zinc-100">{selectedTxn.customer_name || ". "}</p>
                   </div>
                   <div className="col-span-2">
                     <Label className="text-zinc-500 text-xs">Payment Intent ID</Label>

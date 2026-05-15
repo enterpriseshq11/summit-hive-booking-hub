@@ -376,7 +376,7 @@ export default function AdminLeadsWaitlists() {
                       <TableRow key={entry.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-lg">#{entry.position || "—"}</span>
+                            <span className="font-mono text-lg">#{entry.position || ". "}</span>
                             {entry.is_vip && (
                               <Badge variant="outline" className="text-yellow-600 border-yellow-600">
                                 <Crown className="h-3 w-3 mr-1" />

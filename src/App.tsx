@@ -310,7 +310,7 @@ function AppInner() {
           <Route path="/admin/dopamine-drop" element={<AdminDopamineDrop />} />
           <Route path="/admin/ad-tracking" element={<AdminAdTracking />} />
 
-          {/* SETTINGS (owner-only — requireOwner guard blocks all non-owners before component mounts) */}
+          {/* SETTINGS (owner-only. requireOwner guard blocks all non-owners before component mounts) */}
         </Route>
         <Route element={<ProtectedRoute requireOwner />}>
           <Route path="/admin/settings" element={<AdminSettingsOverview />} />

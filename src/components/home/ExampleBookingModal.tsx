@@ -27,7 +27,7 @@ const steps = [
   },
   {
     number: 4,
-    title: "Show Up — We Handle the Rest",
+    title: "Show Up. We Handle the Rest",
     description: "Everything's ready when you arrive. Our team handles setup, coordination, and cleanup.",
     example: "Example: On December 14th, Sarah arrives to a fully prepared venue. Perfect party!",
     icon: Heart,

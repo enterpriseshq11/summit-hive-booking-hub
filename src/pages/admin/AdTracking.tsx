@@ -230,7 +230,7 @@ export default function AdTracking() {
                 <MousePointerClick className="h-4 w-4" /> Avg Cost Per Lead
               </div>
               <p className="text-2xl font-bold text-white">
-                {totalLeadsMonth > 0 ? formatCurrency(totalSpendMonth / totalLeadsMonth) : "—"}
+                {totalLeadsMonth > 0 ? formatCurrency(totalSpendMonth / totalLeadsMonth) : ". "}
               </p>
             </CardContent>
           </Card>
@@ -362,7 +362,7 @@ export default function AdTracking() {
                       <TableCell className="text-zinc-300 text-right">{(c.clicks || 0).toLocaleString()}</TableCell>
                       <TableCell className="text-zinc-300 text-right">{c.leads || 0}</TableCell>
                       <TableCell className="text-zinc-100 text-right">
-                        {c.cost_per_lead ? formatCurrency(Number(c.cost_per_lead)) : "—"}
+                        {c.cost_per_lead ? formatCurrency(Number(c.cost_per_lead)) : ". "}
                       </TableCell>
                     </TableRow>
                   ))

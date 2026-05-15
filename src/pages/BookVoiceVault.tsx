@@ -72,7 +72,7 @@ export default function BookVoiceVault() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-background">
-        <SEOHead title="Inquiry Submitted — Voice Vault Studio" description="Your studio booking inquiry has been submitted." />
+        <SEOHead title="Inquiry Submitted. Voice Vault Studio" description="Your studio booking inquiry has been submitted." />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-6">
           <CheckCircle className="w-16 h-16 text-accent mx-auto" />
           <h1 className="text-3xl font-bold text-foreground">Inquiry Submitted</h1>
@@ -87,7 +87,7 @@ export default function BookVoiceVault() {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Book Voice Vault Studio — A-Z Enterprises"
+        title="Book Voice Vault Studio. A-Z Enterprises"
         description="Book a recording session at Voice Vault Studio in Wapakoneta, Ohio. Professional podcasting, music production, and content creation."
       />
 

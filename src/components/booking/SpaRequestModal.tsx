@@ -103,7 +103,7 @@ export function SpaRequestModal({ open, onOpenChange, preselectedService = null 
           </div>
           <DialogTitle className="text-2xl">Request a Service</DialogTitle>
           <DialogDescription>
-            Tell us what you're looking for — we'll confirm availability and options within 24 hours.
+            Tell us what you're looking for. we'll confirm availability and options within 24 hours.
           </DialogDescription>
         </DialogHeader>
 

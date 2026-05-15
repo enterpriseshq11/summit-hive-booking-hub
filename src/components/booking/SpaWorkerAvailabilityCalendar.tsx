@@ -52,7 +52,7 @@ interface Service {
   isFree?: boolean;
 }
 
-// Default services — updated menu with 60 min base + 90 min (+$35) upgrade
+// Default services. updated menu with 60 min base + 90 min (+$35) upgrade
 const DEFAULT_SERVICES: Service[] = [
   { id: "scalp-stimulation", name: "Scalp Stimulation", description: "Targeted scalp therapy to promote relaxation and circulation.", icon: Sparkles, options: [{ duration: 60, price: 45, label: "60 min" }, { duration: 90, price: 80, label: "90 min" }] },
   { id: "infrared-sauna", name: "Infrared Sauna", description: "Deep-penetrating heat therapy for detox and recovery.", icon: Flame, options: [{ duration: 60, price: 45, label: "60 min" }, { duration: 90, price: 80, label: "90 min" }] },
@@ -259,7 +259,7 @@ export function SpaWorkerAvailabilityCalendar({ onBookingComplete, workerId, wor
     }
     
     if (isRequestMode) {
-      // Skip calendar/time — go directly to contact/request form
+      // Skip calendar/time. go directly to contact/request form
       setStep("contact");
     } else {
       setStep("calendar");

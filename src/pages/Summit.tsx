@@ -123,7 +123,7 @@ export default function Summit() {
     showAskLink: true
   }, {
     question: "How does pricing work?",
-    answer: "Pricing varies based on event type, guest count, and selected services. You'll receive a personalized proposal after consultation—no commitment required.",
+    answer: "Pricing varies based on event type, guest count, and selected services. You'll receive a personalized proposal after consultation. no commitment required.",
     showAskLink: true
   }, {
     question: "What is your cancellation policy?",
@@ -196,7 +196,7 @@ export default function Summit() {
                   Elevate Every Event
                 </p>
                 <p className="text-lg md:text-xl text-primary-foreground/70 max-w-xl mx-auto lg:mx-0">
-                  A premium venue designed for unforgettable experiences—from private celebrations to large-scale events.
+                  A premium venue designed for unforgettable experiences. from private celebrations to large-scale events.
                 </p>
               </div>
               
@@ -236,7 +236,7 @@ export default function Summit() {
               <div className="flex items-center gap-2 justify-center lg:justify-start">
                 <CheckCircle className="h-5 w-5 text-accent" />
                 <p className="text-primary-foreground/60 text-sm">
-                  No obligation — request a proposal and review everything before you commit.
+                  No obligation. request a proposal and review everything before you commit.
                 </p>
               </div>
 
@@ -373,7 +373,7 @@ export default function Summit() {
               <h2 className="text-3xl md:text-4xl font-bold text-black">The E<sup className="text-accent text-lg md:text-xl">3</sup> Experience</h2>
             </div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              The Summit is built on the E³ standard—an elevated approach to space, service, and execution that transforms events into experiences.
+              The Summit is built on the E³ standard. an elevated approach to space, service, and execution that transforms events into experiences.
             </p>
             
             {/* E³ Pillars */}
@@ -493,7 +493,7 @@ export default function Summit() {
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Event Types</h2>
-            <p className="text-muted-foreground text-lg">Choose a starting point — Victoria will tailor everything around your vision.</p>
+            <p className="text-muted-foreground text-lg">Choose a starting point. Victoria will tailor everything around your vision.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {eventTypes.map((type) => {
@@ -551,7 +551,7 @@ export default function Summit() {
                 
                 <div className="space-y-4 text-primary-foreground/80 mb-8">
                   <p>
-                    Victoria is your direct point of contact for hosting events at The Summit. She works closely with clients to plan, coordinate, and execute events of all sizes—ensuring every detail aligns with the vision, scale, and experience you expect from a premium venue.
+                    Victoria is your direct point of contact for hosting events at The Summit. She works closely with clients to plan, coordinate, and execute events of all sizes. ensuring every detail aligns with the vision, scale, and experience you expect from a premium venue.
                   </p>
                   <p>
                     From first inquiry to event day execution, Victoria makes the booking process seamless, professional, and stress-free.
@@ -710,7 +710,7 @@ export default function Summit() {
           <div className="max-w-2xl mx-auto text-center">
             
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">
-              Get a tailored proposal — Victoria will reply within 24 hours.
+              Get a tailored proposal. Victoria will reply within 24 hours.
             </h2>
             <p className="text-primary-foreground/70 text-lg mb-8">
               Share your vision and let us create something unforgettable.
@@ -722,7 +722,7 @@ export default function Summit() {
               <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
             
-            <p className="text-primary-foreground/60 text-sm">No obligation — review everything before you commit.</p>
+            <p className="text-primary-foreground/60 text-sm">No obligation. review everything before you commit.</p>
             <div className="mt-8 pt-6 border-t border-primary-foreground/10 space-y-1">
               <p className="text-sm text-primary-foreground/80 font-medium">{SITE_CONFIG.divisions.summit.name}</p>
               <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.summit.suite}</p>

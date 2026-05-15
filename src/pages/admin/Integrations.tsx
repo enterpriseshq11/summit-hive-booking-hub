@@ -231,7 +231,7 @@ export default function AdminIntegrations() {
     setStageWebhooks(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
 
   const resyncFailed = async (businessUnit: string) => {
-    toast.info(`Resync triggered for ${UNIT_LABELS[businessUnit] || businessUnit} — check activity log`);
+    toast.info(`Resync triggered for ${UNIT_LABELS[businessUnit] || businessUnit}. check activity log`);
   };
 
   return (
@@ -259,7 +259,7 @@ export default function AdminIntegrations() {
             <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
                 <CardTitle className="text-lg text-white flex items-center gap-2">
-                  <Link2 className="h-5 w-5 text-amber-400" /> Section 1 — Lead Intake Webhooks
+                  <Link2 className="h-5 w-5 text-amber-400" /> Section 1. Lead Intake Webhooks
                 </CardTitle>
                 <CardDescription className="text-zinc-300">
                   Paste your GHL webhook URL for each business unit. When a lead submits an intake form, it fires to both A-Z Command and GHL simultaneously.
@@ -274,7 +274,7 @@ export default function AdminIntegrations() {
                 {configs.map(config => (
                   <div key={config.id} className="p-4 border border-zinc-700 rounded-lg bg-zinc-800/50 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-medium text-white">{UNIT_LABELS[config.business_unit] || config.business_unit} — Webhook URL</h3>
+                      <h3 className="font-medium text-white">{UNIT_LABELS[config.business_unit] || config.business_unit}. Webhook URL</h3>
                       <div className="flex items-center gap-2">
                         <Switch checked={config.is_active} onCheckedChange={v => updateConfig(config.id, { is_active: v })} />
                         <span className="text-xs text-zinc-300">{config.is_active ? "Active" : "Disabled"}</span>
@@ -311,7 +311,7 @@ export default function AdminIntegrations() {
             <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
                 <CardTitle className="text-lg text-white flex items-center gap-2">
-                  <Link2 className="h-5 w-5 text-blue-400" /> Section 2 — Pipeline Stage Webhooks
+                  <Link2 className="h-5 w-5 text-blue-400" /> Section 2. Pipeline Stage Webhooks
                 </CardTitle>
                 <CardDescription className="text-zinc-300">
                   Fire to GHL when a lead moves to a specific pipeline stage in A-Z Command.
@@ -326,7 +326,7 @@ export default function AdminIntegrations() {
                 {stageWebhooks.map(sw => (
                   <div key={sw.id} className="p-3 border border-zinc-700 rounded-lg bg-zinc-800/50 space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-white">{sw.stage_label || STAGE_LABELS[sw.stage_key] || sw.stage_key} — Webhook URL</h3>
+                      <h3 className="text-sm font-medium text-white">{sw.stage_label || STAGE_LABELS[sw.stage_key] || sw.stage_key}. Webhook URL</h3>
                       <Switch checked={sw.is_active} onCheckedChange={v => updateStage(sw.id, { is_active: v })} />
                     </div>
                     <Input value={sw.webhook_url || ""} onChange={e => updateStage(sw.id, { webhook_url: e.target.value })} className="bg-zinc-800 border-zinc-700 text-white font-mono text-sm" placeholder="https://services.leadconnectorhq.com/hooks/..." />
@@ -404,7 +404,7 @@ export default function AdminIntegrations() {
             <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
                 <CardTitle className="text-lg text-white flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-green-400" /> Section 3 — Stripe Connection
+                  <CreditCard className="h-5 w-5 text-green-400" /> Section 3. Stripe Connection
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -432,7 +432,7 @@ export default function AdminIntegrations() {
             <Card className="border-zinc-700 bg-zinc-900">
               <CardHeader>
                 <CardTitle className="text-lg text-white flex items-center gap-2">
-                  <Construction className="h-5 w-5 text-zinc-300" /> Section 4 — Future Integrations
+                  <Construction className="h-5 w-5 text-zinc-300" /> Section 4. Future Integrations
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -452,7 +452,7 @@ export default function AdminIntegrations() {
                               variant="outline"
                               size="sm"
                               className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
-                              onClick={() => toast.info(`${int.name} — Coming Soon`, {
+                              onClick={() => toast.info(`${int.name}. Coming Soon`, {
                                 description: "This integration is on the roadmap and not yet available to connect. We'll notify you when it's ready.",
                               })}
                             >

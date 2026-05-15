@@ -82,7 +82,7 @@ export default function BusinessLeads() {
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
               <Target className="h-6 w-6 text-amber-400" />
-              {config.label} — Leads
+              {config.label}. Leads
             </h1>
             <p className="text-zinc-400">{filtered.length} leads found</p>
           </div>
@@ -148,7 +148,7 @@ export default function BusinessLeads() {
                         {(lead.status || "new").replace(/_/g, " ")}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-zinc-400 text-sm">{lead.source?.replace(/_/g, " ") || "—"}</TableCell>
+                    <TableCell className="text-zinc-400 text-sm">{lead.source?.replace(/_/g, " ") || ". "}</TableCell>
                     <TableCell>
                       {lead.follow_up_due ? (
                         <span className={
@@ -158,7 +158,7 @@ export default function BusinessLeads() {
                         }>
                           {format(new Date(lead.follow_up_due), "MMM d")}
                         </span>
-                      ) : "—"}
+                      ) : ". "}
                     </TableCell>
                     <TableCell className="text-zinc-500 text-sm">
                       {format(new Date(lead.created_at), "MMM d, yyyy")}

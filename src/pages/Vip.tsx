@@ -19,7 +19,7 @@ const VIP_PERKS = [
   {
     icon: Zap,
     title: "2 Spins Per Day",
-    description: "Double your daily chances to win — free users only get 1 spin"
+    description: "Double your daily chances to win. free users only get 1 spin"
   },
   {
     icon: Trophy,
@@ -39,7 +39,7 @@ const VIP_PERKS = [
   {
     icon: Shield,
     title: "Cancel Anytime",
-    description: "No commitment — cancel your subscription whenever you want"
+    description: "No commitment. cancel your subscription whenever you want"
   }
 ];
 
@@ -101,7 +101,7 @@ export default function Vip() {
                 data-event="vip_checkout_started"
               >
                 <Crown className="w-5 h-5 mr-2" />
-                Join VIP — $2.99/month
+                Join VIP. $2.99/month
               </Button>
               <p className="text-sm text-zinc-400">Cancel anytime. No long-term commitment.</p>
             </div>
@@ -222,7 +222,7 @@ export default function Vip() {
               onClick={handleSubscribe}
             >
               <Crown className="w-5 h-5 mr-2" />
-              Join VIP — $2.99/month
+              Join VIP. $2.99/month
             </Button>
           </div>
         </section>

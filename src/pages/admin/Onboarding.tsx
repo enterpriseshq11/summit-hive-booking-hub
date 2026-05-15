@@ -21,11 +21,11 @@ const ROLE_DESCRIPTIONS: Record<string, { title: string; description: string }> 
     description: "You manage leads across all business units with full access to Summit and Mobile Homes. Your dashboard shows your assigned leads, pipeline stage breakdown, overdue follow-ups, and your commissions. Use the pipeline board to move leads through stages.",
   },
   spa_lead: {
-    title: "Lead Massage Therapist — Restoration Lounge",
+    title: "Lead Massage Therapist. Restoration Lounge",
     description: "You manage your daily schedule, view spa bookings, and track your commissions. Your calendar and availability are visible to clients for online booking. You have access to spa-specific data and can manage your service catalog.",
   },
   marketing_lead: {
-    title: "Head of Marketing — Elevated by Elyse",
+    title: "Head of Marketing. Elevated by Elyse",
     description: "You manage promotions, lead sources, and the Elevated by Elyse business unit. Your dashboard shows total leads this week, leads by source, pipeline conversion rate, and Elevated by Elyse revenue. Revenue data across other units is view-only.",
   },
   ops_lead: {

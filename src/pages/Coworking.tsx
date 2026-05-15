@@ -67,7 +67,7 @@ export default function Coworking() {
     { 
       name: "Dedicated Desk", 
       icon: Briefcase,
-      tagline: "Your reserved desk in a high-performing environment — show up and get to work.",
+      tagline: "Your reserved desk in a high-performing environment. show up and get to work.",
       bestFor: "Best Value",
       benefits: [
         "Reserved spot in collaborative space",
@@ -78,7 +78,7 @@ export default function Coworking() {
     { 
       name: "Day Pass", 
       icon: Zap,
-      tagline: "Work here for the day — faster Wi-Fi, quieter space, better results.",
+      tagline: "Work here for the day. faster Wi-Fi, quieter space, better results.",
       bestFor: "Most Flexible",
       benefits: [
         "Flexible access on your schedule",
@@ -89,14 +89,14 @@ export default function Coworking() {
   ];
 
   const whyTheHiveCards = [
-    { icon: Zap, title: "Flexibility", copy: "Work on your terms. Scale up or down as your needs change—no rigid contracts." },
+    { icon: Zap, title: "Flexibility", copy: "Work on your terms. Scale up or down as your needs change. no rigid contracts." },
     { icon: Users, title: "Community", copy: "Surround yourself with driven professionals. Collaboration happens naturally here." },
     { icon: Shield, title: "Productivity", copy: "Purpose-built environments that eliminate distractions and amplify your output." },
     { icon: Heart, title: "Convenience", copy: "Everything handled for you. Just show up, plug in, and get to work." }
   ];
 
   const processSteps = [
-    { icon: MessageSquare, title: "Request Your Workspace", description: "Tell us what you need. Private office, dedicated desk, or flexible access—we'll take it from there." },
+    { icon: MessageSquare, title: "Request Your Workspace", description: "Tell us what you need. Private office, dedicated desk, or flexible access. we'll take it from there." },
     { icon: CalendarCheck, title: "We Confirm Options", description: "We'll review availability and send you a personalized proposal. You'll review everything before payment." },
     { icon: Rocket, title: "Start Working", description: "Once confirmed, you're in. No obligation to proceed until you're ready." }
   ];
@@ -111,7 +111,7 @@ export default function Coworking() {
     { question: "How does requesting a workspace work?", answer: "Simply click 'Request Workspace' and tell us what you're looking for. We'll review your request and get back to you within 24 hours with availability and options. There's no commitment until you decide to proceed." },
     { question: "Do I have to commit right away?", answer: "Not at all. You'll receive a personalized proposal first, and you can take your time to decide. There's no obligation until you're ready to move forward. You'll review everything before any payment is required." },
     { question: "What about guests and meeting room access?", answer: "All members can bring guests and book meeting rooms. Private office members get priority booking, while dedicated desk and day pass holders have standard access. Guest policies vary by membership type." },
-    { question: "How does pricing work?", answer: "Pricing varies based on workspace type and selected services. You'll receive a personalized proposal after consultation—no commitment required." },
+    { question: "How does pricing work?", answer: "Pricing varies based on workspace type and selected services. You'll receive a personalized proposal after consultation. no commitment required." },
     { question: "What if I need to cancel or change my plan?", answer: "We understand needs change. Our team will work with you on transitions. Specific terms depend on your agreement type and will be clearly outlined in your proposal." }
   ];
 
@@ -177,7 +177,7 @@ export default function Coworking() {
                   Private Offices & Flexible Workspaces in Wapakoneta
                 </h1>
                 <p className="text-lg text-primary-foreground/70 max-w-xl">
-                  Private offices, dedicated desks, and day passes — request access in under 2 minutes.
+                  Private offices, dedicated desks, and day passes. request access in under 2 minutes.
                 </p>
               </div>
               
@@ -345,7 +345,7 @@ export default function Coworking() {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Workspace Options</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-6">
-            Choose your setup — all options include high-speed Wi-Fi, coffee bar access, and a professional environment.
+            Choose your setup. all options include high-speed Wi-Fi, coffee bar access, and a professional environment.
           </p>
           <Button asChild variant="outline" className="gap-2">
             <a href="/#/coworking/offices">
@@ -549,7 +549,7 @@ export default function Coworking() {
       <section className="py-20 bg-primary">
         <div className="container text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">
-            Get Access to The Hive — We'll Confirm Options Within 24 Hours
+            Get Access to The Hive. We'll Confirm Options Within 24 Hours
           </h2>
           <Button 
             size="lg"

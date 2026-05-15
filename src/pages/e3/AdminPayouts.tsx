@@ -28,7 +28,7 @@ function CommissionRow({ c, selected, onToggle, showApprove, showPay }: any) {
   const pay = useE3PayCommission();
   const booking = c.e3_bookings;
   const coord = c.e3_coordinators;
-  const halls = booking?.e3_booking_halls?.map((h: any) => h.e3_halls?.name).filter(Boolean).join(", ") || "—";
+  const halls = booking?.e3_booking_halls?.map((h: any) => h.e3_halls?.name).filter(Boolean).join(", ") || ". ";
 
   return (
     <Card className="border-border/50">
@@ -54,10 +54,10 @@ function CommissionRow({ c, selected, onToggle, showApprove, showPay }: any) {
               )}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              {booking?.event_date ? format(new Date(booking.event_date), "MMM d, yyyy") : "—"}
-              {" · "}{booking?.e3_time_blocks?.name || "—"}
+              {booking?.event_date ? format(new Date(booking.event_date), "MMM d, yyyy") : ". "}
+              {" · "}{booking?.e3_time_blocks?.name || ". "}
               {" · "}{halls}
-              {" · "}{booking?.e3_venues?.name || "—"}
+              {" · "}{booking?.e3_venues?.name || ". "}
             </div>
             <div className="flex items-center gap-4 mt-2 text-sm">
               <div>

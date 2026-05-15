@@ -38,7 +38,7 @@ export const statusColors: Record<CrmLeadStatus, string> = {
   lost: "bg-zinc-800/40 text-zinc-500 border-zinc-700/50",
 };
 
-/** Pipeline stages in display order — canonical 11 stages
+/** Pipeline stages in display order. canonical 11 stages
  * The DB enum uses "won" for Completed. The outbound webhook config table
  * (ghl_outbound_webhook_config) uses stage_key matching DB enum values directly.
  */

@@ -55,7 +55,7 @@ export default function E3MyEvents() {
         ) : (
           <div className="space-y-3">
             {bookings.map((b: any) => {
-              const hallNames = b.e3_booking_halls?.map((bh: any) => bh.e3_halls?.name).filter(Boolean).join(", ") || "—";
+              const hallNames = b.e3_booking_halls?.map((bh: any) => bh.e3_halls?.name).filter(Boolean).join(", ") || ". ";
               const deadline = b.booking_state === "red_hold" && b.expires_at
                 ? formatDistanceToNow(new Date(b.expires_at), { addSuffix: true })
                 : b.booking_state === "yellow_contract" && b.deposit_due_at
@@ -77,7 +77,7 @@ export default function E3MyEvents() {
                         </Badge>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {format(new Date(b.event_date), "MMM d, yyyy")} · {b.e3_time_blocks?.name || "—"} · {hallNames}
+                        {format(new Date(b.event_date), "MMM d, yyyy")} · {b.e3_time_blocks?.name || ". "} · {hallNames}
                       </div>
                       {deadline && (
                         <div className="text-xs text-destructive mt-1">

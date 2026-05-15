@@ -62,10 +62,10 @@ export default function E3AdminDeposits() {
         ) : (
           <div className="space-y-4">
             {(bookings as any[]).map((b: any) => {
-              const hallNames = b.e3_booking_halls?.map((bh: any) => bh.e3_halls?.name).filter(Boolean).join(", ") || "—";
+              const hallNames = b.e3_booking_halls?.map((bh: any) => bh.e3_halls?.name).filter(Boolean).join(", ") || ". ";
               const timeLeft = b.deposit_due_at
                 ? formatDistanceToNow(new Date(b.deposit_due_at), { addSuffix: true })
-                : "—";
+                : ". ";
               const isOverdue = b.deposit_due_at && new Date(b.deposit_due_at) < new Date();
 
               // Document completeness
@@ -80,7 +80,7 @@ export default function E3AdminDeposits() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold">{b.client_name}</span>
-                          <span className="text-xs text-muted-foreground">by {b.e3_coordinators?.name || "—"}</span>
+                          <span className="text-xs text-muted-foreground">by {b.e3_coordinators?.name || ". "}</span>
                         </div>
                         <div className="text-sm text-muted-foreground mb-1">
                           {format(new Date(b.event_date), "MMM d, yyyy")} · {b.e3_time_blocks?.name} · {hallNames}

@@ -68,7 +68,7 @@ export default function DeploymentChecklist() {
       // Send notification email via Resend
       const completedItems = (items as any[]).filter(i => i.checked).map(i => ({
         label: i.label,
-        completed_at: i.checked_at ? format(new Date(i.checked_at), "MMM d, yyyy h:mm a") : "—",
+        completed_at: i.checked_at ? format(new Date(i.checked_at), "MMM d, yyyy h:mm a") : ". ",
       }));
 
       const htmlBody = `
@@ -133,7 +133,7 @@ export default function DeploymentChecklist() {
             </div>
             <div className="flex items-center justify-between">
               <p className="text-sm text-zinc-400">
-                {allChecked ? "All items complete — ready to go live!" : `${totalItems - totalChecked} items remaining`}
+                {allChecked ? "All items complete. ready to go live!" : `${totalItems - totalChecked} items remaining`}
               </p>
               <Button
                 disabled={!allChecked}

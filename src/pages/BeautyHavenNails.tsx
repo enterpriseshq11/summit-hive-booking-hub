@@ -1,5 +1,5 @@
 /**
- * NAILS BY DESIREE — /beauty-haven/nails
+ * NAILS BY DESIREE. /beauty-haven/nails
  * Zero hair services, zero Hannah contact info. Everything routes to GlossGenius.
  */
 import { Link } from "react-router-dom";
@@ -72,18 +72,18 @@ const nailServices = [
     category: "Custom Services",
     items: [
       { name: "Freestyle / Custom Set", duration: "4 hr", price: "$100", deposit: "$25" },
-      { name: "Custom Press-On Nails", duration: "1 hr", price: "$20", deposit: "—" },
+      { name: "Custom Press-On Nails", duration: "1 hr", price: "$20", deposit: ". " },
     ],
   },
   {
     category: "Add-Ons & Extras",
     items: [
-      { name: "Polish Change", duration: "1 hr", price: "$20", deposit: "—" },
-      { name: "Reshape", duration: "15 min", price: "$5", deposit: "—" },
+      { name: "Polish Change", duration: "1 hr", price: "$20", deposit: ". " },
+      { name: "Reshape", duration: "15 min", price: "$5", deposit: ". " },
       { name: "Repair", duration: "30 min", price: "$10", deposit: "$5" },
       { name: "Removal", duration: "20 min", price: "$20", deposit: "$5" },
-      { name: "Early Riser / After Hours Fee", duration: "—", price: "$20", deposit: "$10" },
-      { name: "Length Upgrade (Long to XL)", duration: "—", price: "$10", deposit: "—" },
+      { name: "Early Riser / After Hours Fee", duration: ". ", price: "$20", deposit: "$10" },
+      { name: "Length Upgrade (Long to XL)", duration: ". ", price: "$10", deposit: ". " },
     ],
   },
 ];
@@ -146,7 +146,7 @@ export default function BeautyHavenNails() {
           <div className="grid lg:grid-cols-[1fr_2fr] gap-8 items-start">
             <div className="hmbh-photo-placeholder border border-dashed border-[#FF0099]/35 rounded-xl">
               <Camera className="w-8 h-8 text-[#FF0099]/40" />
-              <span className="text-sm text-white/40">[INSERT PHOTO — Desiree Brogaard]</span>
+              <span className="text-sm text-white/40">[INSERT PHOTO. Desiree Brogaard]</span>
             </div>
             <div>
               <PinkLabel>Nail Services</PinkLabel>
@@ -157,7 +157,7 @@ export default function BeautyHavenNails() {
               </div>
               <p className="hmbh-body text-sm max-w-2xl">
                 Desiree is a maximalist nail artist with five years of experience, rooted in Coldwater, Ohio, and passionate about natural nail health.
-                She specializes in intricate, highly detailed nail art — from structured gel to full Gel-X and acrylic sets — and brings that same energy to every set
+                She specializes in intricate, highly detailed nail art. from structured gel to full Gel-X and acrylic sets. and brings that same energy to every set
                 whether it's clean and classic or elaborately over-the-top. For Desiree, success is measured in sets she's proud of.
               </p>
               <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="hmbh-btn-primary mt-6 inline-block">Book Desiree Now</a>
@@ -347,7 +347,7 @@ export default function BeautyHavenNails() {
         </div>
       </section>
 
-      {/* ═══ MOBILE FAB — simplified for Desiree ═══ */}
+      {/* ═══ MOBILE FAB. simplified for Desiree ═══ */}
       <div className="hmbh-fab-container lg:hidden">
         <a
           href={GLOSSGENIUS_URL}

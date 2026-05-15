@@ -192,7 +192,7 @@ export function SpecialClaimForm({ specialId, specialTitle, businessUnit }: Spec
                   <SelectContent className="bg-background z-50">
                     {durations.map((d) => (
                       <SelectItem key={d.duration} value={d.duration}>
-                        {d.duration} — {d.price}
+                        {d.duration}. {d.price}
                       </SelectItem>
                     ))}
                   </SelectContent>

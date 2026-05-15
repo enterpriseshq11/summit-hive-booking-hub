@@ -51,7 +51,7 @@ export default function AdminAuditLog() {
   };
 
   const formatJson = (json: any) => {
-    if (!json) return "—";
+    if (!json) return ". ";
     try {
       return JSON.stringify(json, null, 2);
     } catch {
@@ -293,7 +293,7 @@ export default function AdminAuditLog() {
                   </div>
                   <div>
                     <Label className="text-muted-foreground">Entity ID</Label>
-                    <div className="font-mono text-sm">{selectedEntry.entity_id || "—"}</div>
+                    <div className="font-mono text-sm">{selectedEntry.entity_id || ". "}</div>
                   </div>
                 </div>
                 

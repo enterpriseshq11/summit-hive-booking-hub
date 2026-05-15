@@ -452,7 +452,7 @@ export default function AdminDashboard() {
     if (id === "health_score" && healthData) {
       return { value: healthData.score, subtitle: healthData.label };
     }
-    if (id === "health_score") return { value: "—", pending: true };
+    if (id === "health_score") return { value: ". ", pending: true };
     return resolveKpiValue(id, kpiData);
   };
 
@@ -551,7 +551,7 @@ export default function AdminDashboard() {
             <PopoverTrigger asChild>
               <div className="cursor-pointer">
                 {isOwner ? (
-                  <SortableTile tile={tile} value={value} subtitle={subtitle ? `${subtitle} — Click to edit` : "Click to set date"} pendingIntegration={pending} isOwner={isOwner} onRefresh={refetchAll} onRemove={() => removeTile(tile.id)} onResize={(size) => resizeTile(tile.id, size)} />
+                  <SortableTile tile={tile} value={value} subtitle={subtitle ? `${subtitle}. Click to edit` : "Click to set date"} pendingIntegration={pending} isOwner={isOwner} onRefresh={refetchAll} onRemove={() => removeTile(tile.id)} onResize={(size) => resizeTile(tile.id, size)} />
                 ) : (
                   <KpiTile config={tile} value={value} subtitle={subtitle} pendingIntegration={pending} onRefresh={refetchAll} isOwner={false} />
                 )}

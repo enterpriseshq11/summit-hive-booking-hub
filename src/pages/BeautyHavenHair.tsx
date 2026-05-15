@@ -1,5 +1,5 @@
 /**
- * HAIR BY HANNAH — /beauty-haven/hair
+ * HAIR BY HANNAH. /beauty-haven/hair
  * Zero GlossGenius references. Zero nail content. Hannah's page entirely.
  */
 import { Link } from "react-router-dom";
@@ -97,7 +97,7 @@ export default function BeautyHavenHair() {
             {/* Photo */}
             <div className="hmbh-photo-placeholder border border-dashed border-[#FF0099]/35 rounded-xl">
               <Camera className="w-8 h-8 text-[#FF0099]/40" />
-              <span className="text-sm text-white/40">[INSERT PHOTO — Hannah Collins]</span>
+              <span className="text-sm text-white/40">[INSERT PHOTO. Hannah Collins]</span>
             </div>
             {/* Info */}
             <div>
@@ -129,7 +129,7 @@ export default function BeautyHavenHair() {
         <div className="hmbh-container">
           <PinkLabel>Hannah Collins</PinkLabel>
           <SectionHeadline>Hair Services</SectionHeadline>
-          <p className="hmbh-body italic text-sm mb-8">Appointments by contact only — call, text, or DM to schedule.</p>
+          <p className="hmbh-body italic text-sm mb-8">Appointments by contact only. call, text, or DM to schedule.</p>
 
           {hairServices.map((cat) => (
             <div key={cat.category}>
@@ -227,7 +227,7 @@ export default function BeautyHavenHair() {
         </div>
       </section>
 
-      {/* ═══ MOBILE FAB — simplified for Hannah ═══ */}
+      {/* ═══ MOBILE FAB. simplified for Hannah ═══ */}
       <div className="hmbh-fab-container lg:hidden">
         <a
           href="tel:5678251546"

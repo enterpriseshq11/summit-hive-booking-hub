@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Role-based KPI hook — calls the correct consolidated DB function per role.
+ * Role-based KPI hook. calls the correct consolidated DB function per role.
  */
 export function useRoleKpis(role: string | undefined) {
   const fnName = getRpcName(role);
@@ -50,7 +50,7 @@ export function resolveKpiValue(
   id: string,
   d: Record<string, any> | null | undefined
 ): { value: string | number; subtitle?: string; pending?: boolean } {
-  if (!d) return { value: "—", pending: true };
+  if (!d) return { value: ". ", pending: true };
   const fmt = (n: number) => `$${(n || 0).toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
 
   switch (id) {
@@ -97,12 +97,12 @@ export function resolveKpiValue(
     case "schedule_gaps": return { value: d.schedule_gaps_week ?? 0, subtitle: "Days with no bookings" };
     case "pipeline_breakdown": {
       const pb = d.pipeline_stage_breakdown ?? {};
-      return { value: Object.entries(pb).map(([k, v]) => `${k}: ${v}`).join(", ") || "—" };
+      return { value: Object.entries(pb).map(([k, v]) => `${k}: ${v}`).join(", ") || ". " };
     }
-    case "cost_per_lead": return { value: d.cost_per_lead ? fmt(d.cost_per_lead) : "—" };
-    case "ad_spend_month": return { value: d.ad_spend_month ? fmt(d.ad_spend_month) : "—" };
+    case "cost_per_lead": return { value: d.cost_per_lead ? fmt(d.cost_per_lead) : ". " };
+    case "ad_spend_month": return { value: d.ad_spend_month ? fmt(d.ad_spend_month) : ". " };
     case "payroll_next": return { value: d.next_payroll_run_date || "Not Set", subtitle: "Click to set date" };
-    case "health_score": return { value: d.health_score ?? "—", subtitle: d.health_label };
-    default: return { value: "—" };
+    case "health_score": return { value: d.health_score ?? ". ", subtitle: d.health_label };
+    default: return { value: ". " };
   }
 }

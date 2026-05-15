@@ -218,7 +218,7 @@ export function HiveOfficeCards({ onRequestOffice }: Props) {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Request-based — no payment collected now.
+        Request-based. no payment collected now.
       </p>
 
       {/* P1 Photo Gallery Modal */}

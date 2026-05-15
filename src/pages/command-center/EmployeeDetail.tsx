@@ -113,7 +113,7 @@ export default function EmployeeDetailPage() {
   const maxActivity = Math.max(...activityByDay.map((d) => d.count), 1);
 
   // Calculate average response time (mock calculation based on activity patterns)
-  const avgResponseTime = activities.length > 0 ? "2.4 hrs" : "—";
+  const avgResponseTime = activities.length > 0 ? "2.4 hrs" : ". ";
 
   const roleColors: Record<string, string> = {
     owner: "bg-amber-500/20 text-amber-400 border-amber-500/50",

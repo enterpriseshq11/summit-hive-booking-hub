@@ -130,7 +130,7 @@ export default function CommandCenterRevenue() {
       event_category: "revenue_manual_entry",
       metadata: {
         action: "manual_revenue_recorded",
-        message: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name} manually recorded $${newRevenue.amount} for ${newRevenue.business_unit} — method: ${newRevenue.payment_method}`,
+        message: `${authUser?.profile?.first_name} ${authUser?.profile?.last_name} manually recorded $${newRevenue.amount} for ${newRevenue.business_unit}. method: ${newRevenue.payment_method}`,
         payment_method: newRevenue.payment_method,
       },
     });
@@ -457,7 +457,7 @@ export default function CommandCenterRevenue() {
                           <Calendar className="h-4 w-4 text-zinc-500" />
                           {rev.revenue_date
                             ? format(new Date(rev.revenue_date), "MMM d, yyyy")
-                            : "—"}
+                            : ". "}
                         </div>
                       </TableCell>
                       <TableCell className="text-zinc-100 font-medium">
@@ -469,12 +469,12 @@ export default function CommandCenterRevenue() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-zinc-300 max-w-[200px] truncate">
-                        {rev.description || "—"}
+                        {rev.description || ". "}
                       </TableCell>
                       <TableCell className="text-zinc-300">
                         {rev.employee_attributed
                           ? `${rev.employee_attributed.first_name} ${rev.employee_attributed.last_name}`
-                          : "—"}
+                          : ". "}
                       </TableCell>
                       <TableCell>
                         {rev.lead ? (
@@ -490,13 +490,13 @@ export default function CommandCenterRevenue() {
                             <ExternalLink className="h-3 w-3 ml-1" />
                           </Button>
                         ) : (
-                          "—"
+                          ". "
                         )}
                       </TableCell>
                       <TableCell className="text-zinc-400 text-sm">
                         {rev.recorded_by_profile
                           ? `${rev.recorded_by_profile.first_name} ${rev.recorded_by_profile.last_name}`
-                          : "—"}
+                          : ". "}
                       </TableCell>
                     </TableRow>
                   ))

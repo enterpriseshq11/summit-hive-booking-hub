@@ -179,7 +179,7 @@ export default function BookSpa() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-background">
-        <SEOHead title="Booking Requested — Restoration Lounge Spa" description="Your spa booking request has been submitted." />
+        <SEOHead title="Booking Requested. Restoration Lounge Spa" description="Your spa booking request has been submitted." />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-6">
           <CheckCircle className="w-16 h-16 text-accent mx-auto" />
           <h1 className="text-3xl font-bold text-foreground">Booking Request Submitted</h1>
@@ -193,13 +193,13 @@ export default function BookSpa() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Book a Spa Service — Restoration Lounge Spa" description="Book a massage or spa treatment at the Restoration Lounge Spa in Wapakoneta, Ohio." />
+      <SEOHead title="Book a Spa Service. Restoration Lounge Spa" description="Book a massage or spa treatment at the Restoration Lounge Spa in Wapakoneta, Ohio." />
 
       <section className="bg-primary text-primary-foreground py-16 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <Badge className="bg-accent text-accent-foreground">Now Accepting Bookings</Badge>
           <h1 className="text-4xl md:text-5xl font-bold">Book a Spa Service</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Restoration Lounge Spa — Professional massage and wellness treatments.</p>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Restoration Lounge Spa. Professional massage and wellness treatments.</p>
           <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> 10 W Auglaize St, Suite A, Wapakoneta, OH</span>
             <span className="flex items-center gap-1"><Phone className="w-4 h-4" /> {SITE_CONFIG.contact.phone}</span>
@@ -283,7 +283,7 @@ export default function BookSpa() {
 
               {service && (
                 <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
-                  <p className="font-semibold text-foreground">Selected: {service.name} — {service.duration}</p>
+                  <p className="font-semibold text-foreground">Selected: {service.name}. {service.duration}</p>
                   <p className="text-2xl font-bold text-accent">${service.price}</p>
                   <p className="text-xs text-muted-foreground">Paid in full at time of booking</p>
                 </div>
@@ -295,7 +295,7 @@ export default function BookSpa() {
                 {canPayOnline ? (
                   <Button onClick={handlePayAndBook} className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={isSubmitting || !selectedService} size="lg">
                     <CreditCard className="w-4 h-4 mr-2" />
-                    {isSubmitting ? "Processing..." : `Book & Pay Now${service ? ` — $${service.price}` : ""}`}
+                    {isSubmitting ? "Processing..." : `Book & Pay Now${service ? `. $${service.price}` : ""}`}
                   </Button>
                 ) : service ? (
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-center text-sm text-amber-600">
