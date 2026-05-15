@@ -323,7 +323,7 @@ export default function Fitness() {
                 <Flame className="h-5 w-5 text-accent" />
                 <span className="font-semibold text-foreground">High demand</span>
               </div>
-              <span className="text-muted-foreground">— orientations scheduled within 24 hours</span>
+              <span className="text-muted-foreground">. Orientations scheduled within 24 hours</span>
             </div>
             
             {/* Reassurance line */}
