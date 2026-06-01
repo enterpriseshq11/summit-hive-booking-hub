@@ -185,6 +185,40 @@ export default function BeautyHaven() {
         </div>
       </section>
 
+      {/* ═══ NOW HIRING ═══ */}
+      <section className="lp-hiring">
+        <div className="lp-hiring-head">
+          <h3>Now Hiring</h3>
+          <span className="section-label text-amber-200">Wapakoneta, OH</span>
+        </div>
+        <div className="lp-hiring-cards">
+          <div className="lp-hiring-card">
+            <h4>Nail Technician</h4>
+            <div className="role">Booth Rental Available</div>
+            <p>Join High Maintenance Beauty Haven. We are looking for a licensed nail tech who takes pride in clean work and client relationships.</p>
+            <ul>
+              <li>Licensed and insured</li>
+              <li>Experienced with gel, acrylics, or nail art</li>
+              <li>Client-focused and reliable</li>
+              <li>Booth rental or commission structure</li>
+            </ul>
+            <a href={SITE_CONFIG.contact.emailLink} className="lp-hiring-btn">Apply Now</a>
+          </div>
+          <div className="lp-hiring-card">
+            <h4>Hairdresser / Hairstylist</h4>
+            <div className="role">Booth Rental Available</div>
+            <p>We are building out our hair services and need a skilled stylist to bring cuts, color, and styling to our clients.</p>
+            <ul>
+              <li>Licensed cosmetologist</li>
+              <li>Comfortable with cuts, color, and styling</li>
+              <li>Professional and punctual</li>
+              <li>Booth rental or commission structure</li>
+            </ul>
+            <a href={SITE_CONFIG.contact.emailLink} className="lp-hiring-btn">Apply Now</a>
+          </div>
+        </div>
+      </section>
+
       {/* ═══ FOOTER ═══ */}
       <footer className="lp-footer">
         <div className="lp-footer-left">
