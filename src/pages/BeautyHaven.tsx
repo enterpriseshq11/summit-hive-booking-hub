@@ -207,7 +207,7 @@ export default function BeautyHaven() {
           <div className="lp-hiring-card">
             <h4>Hairdresser / Hairstylist</h4>
             <div className="role">Booth Rental Available</div>
-            <p>We are building out our hair services and need a skilled stylist to bring cuts, color, and styling to our clients.</p>
+            <p className="text-slate-50">We are building out our hair services and need a skilled stylist to bring cuts, color, and styling to our clients.</p>
             <ul>
               <li>Licensed cosmetologist</li>
               <li>Comfortable with cuts, color, and styling</li>
