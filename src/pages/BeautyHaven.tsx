@@ -196,7 +196,7 @@ export default function BeautyHaven() {
             <h4>Nail Technician</h4>
             <div className="role">Booth Rental Available</div>
             <p className="text-slate-50">Join High Maintenance Beauty Haven. We are looking for a licensed nail tech who takes pride in clean work and client relationships.</p>
-            <ul>
+            <ul className="text-orange-200">
               <li>Licensed and insured</li>
               <li>Experienced with gel, acrylics, or nail art</li>
               <li>Client-focused and reliable</li>
@@ -208,7 +208,7 @@ export default function BeautyHaven() {
             <h4>Hairdresser / Hairstylist</h4>
             <div className="role">Booth Rental Available</div>
             <p className="text-slate-50">We are building out our hair services and need a skilled stylist to bring cuts, color, and styling to our clients.</p>
-            <ul>
+            <ul className="text-orange-200">
               <li>Licensed cosmetologist</li>
               <li>Comfortable with cuts, color, and styling</li>
               <li>Professional and punctual</li>
