@@ -126,7 +126,7 @@
 }
 
 /* ─── Booking ─── */
-.lp-booking { border-top: 1px solid #141414; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #141414; }
+.lp-booking { border-top: 1px solid #141414; display: grid; grid-template-columns: 1fr; gap: 2px; background: #141414; }
 .lp-booking-col { background: #0A0A0A; padding: 40px 60px; }
 .lp-booking-col h3 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; }
 .lp-booking-col .role { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; }
