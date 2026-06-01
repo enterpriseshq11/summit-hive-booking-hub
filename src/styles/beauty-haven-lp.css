@@ -105,6 +105,26 @@
 .lp-bridal-card.feat .lp-bridal-btn { background: #E8176A; color: #fff; border-color: #E8176A; }
 .lp-bridal-card.feat .lp-bridal-btn:hover { background: #ff1f77; }
 
+/* ─── Now Hiring ─── */
+.lp-hiring { border-top: 1px solid #141414; padding: 48px 60px; background: #0A0A0A; }
+.lp-hiring-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 24px; }
+.lp-hiring-head h3 { font-size: 22px; font-weight: 700; color: #fff; }
+.lp-hiring-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; background: #1a1a1a; }
+.lp-hiring-card { background: #0A0A0A; padding: 32px; }
+.lp-hiring-card h4 { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; margin-bottom: 4px; }
+.lp-hiring-card .role { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #E8176A; margin-bottom: 12px; }
+.lp-hiring-card p { font-size: 12px; line-height: 1.7; color: #555; margin-bottom: 16px; }
+.lp-hiring-card ul { list-style: none; padding: 0; margin: 0 0 16px; }
+.lp-hiring-card li { font-size: 12px; color: #888; padding: 4px 0; border-bottom: 0.5px solid #141414; }
+.lp-hiring-card li:last-child { border-bottom: none; }
+.lp-hiring-btn { display: inline-block; padding: 10px 20px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; cursor: pointer; border: 1px solid #222; background: transparent; color: #555; border-radius: 2px; transition: all 0.2s; text-decoration: none; }
+.lp-hiring-btn:hover { border-color: #E8176A; color: #E8176A; }
+@media (max-width: 768px) {
+  .lp-hiring { padding: 36px 24px; }
+  .lp-hiring-cards { grid-template-columns: 1fr; }
+  .lp-hiring-card { padding: 24px; }
+}
+
 /* ─── Booking ─── */
 .lp-booking { border-top: 1px solid #141414; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #141414; }
 .lp-booking-col { background: #0A0A0A; padding: 40px 60px; }
