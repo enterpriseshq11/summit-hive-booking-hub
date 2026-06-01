@@ -208,7 +208,7 @@ export default function BeautyHaven() {
             <h4>Hairdresser / Hairstylist</h4>
             <div className="role">Booth Rental Available</div>
             <p className="text-slate-50">We are building out our hair services and need a skilled stylist to bring cuts, color, and styling to our clients.</p>
-            <ul>
+            <ul className="text-orange-200">
               <li>Licensed cosmetologist</li>
               <li>Comfortable with cuts, color, and styling</li>
               <li>Professional and punctual</li>
