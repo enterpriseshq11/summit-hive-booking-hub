@@ -9,7 +9,7 @@ export default function BeautyHaven() {
     <div className="lp-root">
       <SEOHead
         title="High Maintenance Beauty Haven. A-Z Enterprises"
-        description="High Maintenance Beauty Haven LLC. luxury nail art studio on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Book with Desiree."
+        description="High Maintenance Beauty Haven LLC. full nails and hair spa on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Owned by Desiree."
         canonicalPath="/beauty-haven"
       />
 
@@ -24,7 +24,7 @@ export default function BeautyHaven() {
           <h1>
             High<br />Maintenance<br /><em>Beauty Haven</em>
           </h1>
-          <p className="lp-hero-tagline text-amber-100">Nails. No compromises.. Second Floor, Wapakoneta OH</p>
+          <p className="lp-hero-tagline text-amber-100">Full Nails &amp; Hair Spa. Second Floor, Wapakoneta OH</p>
           <div className="lp-hero-badges">
             <span className="lp-badge-pink">Nails by Desiree</span>
             <span className="lp-badge-outline">Appointment Only</span>
@@ -58,7 +58,7 @@ export default function BeautyHaven() {
           <div className="section-label text-amber-200">Who We Are</div>
           <h2>Not your average beauty studio.</h2>
           <p className="text-amber-100">
-            High Maintenance Beauty Haven is a luxury nail studio operating on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in custom nail art and the kind of results that make people stop and stare.
+            High Maintenance Beauty Haven is a full nails and hair spa owned and operated by Desiree on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in custom nail art, hair services, and the kind of results that make people stop and stare.
           </p>
           <p className="text-amber-100" style={{ marginTop: "12px" }}>Appointment-based. Portfolio-driven. Unapologetically detail-obsessed.</p>
         </div>
@@ -112,7 +112,7 @@ export default function BeautyHaven() {
           </div>
           <div>
             <div className="lp-artist-name">Desiree Brogaard</div>
-            <div className="lp-artist-role-pink">Nail Artist · Natural Nail Specialist</div>
+            <div className="lp-artist-role-pink">Owner · Nail Artist · Natural Nail Specialist</div>
             <div className="lp-artist-tags">
               <span className="lp-tag-p">Gel-X</span>
               <span className="lp-tag-p">Acrylic Sets</span>
