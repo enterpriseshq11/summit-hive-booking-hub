@@ -9,7 +9,7 @@ export default function BeautyHaven() {
     <div className="lp-root">
       <SEOHead
         title="High Maintenance Beauty Haven. A-Z Enterprises"
-        description="High Maintenance Beauty Haven LLC. luxury hair color and nail art studio on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Book with Hannah or Desiree."
+        description="High Maintenance Beauty Haven LLC. luxury nail art studio on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Book with Desiree."
         canonicalPath="/beauty-haven"
       />
 
@@ -24,22 +24,20 @@ export default function BeautyHaven() {
           <h1>
             High<br />Maintenance<br /><em>Beauty Haven</em>
           </h1>
-          <p className="lp-hero-tagline text-amber-100">Hair. Nails. No compromises.. Second Floor, Wapakoneta OH</p>
+          <p className="lp-hero-tagline text-amber-100">Nails. No compromises.. Second Floor, Wapakoneta OH</p>
           <div className="lp-hero-badges">
-            <span className="lp-badge-gold">Hair by Hannah</span>
             <span className="lp-badge-pink">Nails by Desiree</span>
             <span className="lp-badge-outline">Appointment Only</span>
             <span className="lp-badge-outline">Open 7 Days</span>
           </div>
           <div className="lp-cta-row">
-            <a href="/beauty-haven/hair" className="lp-btn-primary">Book Hair. Hannah</a>
             <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="lp-btn-pink">Book Nails. Desiree</a>
           </div>
         </div>
         <div className="lp-hero-stats">
           <div className="lp-stat">
-            <div className="lp-stat-num">2</div>
-            <div className="lp-stat-label">Resident Artists</div>
+            <div className="lp-stat-num">1</div>
+            <div className="lp-stat-label">Resident Artist</div>
           </div>
           <div className="lp-stat-div" />
           <div className="lp-stat">
@@ -60,7 +58,7 @@ export default function BeautyHaven() {
           <div className="section-label text-amber-200">Who We Are</div>
           <h2>Not your average beauty studio.</h2>
           <p className="text-amber-100">
-            High Maintenance Beauty Haven is a luxury hair and nail studio operating on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in vivid color, custom nail art, and the kind of results that make people stop and stare.
+            High Maintenance Beauty Haven is a luxury nail studio operating on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in custom nail art and the kind of results that make people stop and stare.
           </p>
           <p className="text-amber-100" style={{ marginTop: "12px" }}>Appointment-based. Portfolio-driven. Unapologetically detail-obsessed.</p>
         </div>
@@ -104,27 +102,8 @@ export default function BeautyHaven() {
         </div>
       </section>
 
-      {/* ═══ ARTISTS ═══ */}
+      {/* ═══ ARTIST ═══ */}
       <section className="lp-artists">
-        {/* Hannah */}
-        <div className="lp-artist">
-          <div className="lp-artist-avatar">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-            <div className="lp-artist-spec gold">Hair</div>
-          </div>
-          <div>
-            <div className="lp-artist-name">Hannah Collins</div>
-            <div className="lp-artist-role-gold">Professional Hair Colorist</div>
-            <div className="lp-artist-tags">
-              <span className="lp-tag-g">Vivid Color</span>
-              <span className="lp-tag-g">Balayage</span>
-              <span className="lp-tag-g">Full Highlights</span>
-              <span className="lp-tag-g">Creative Color</span>
-            </div>
-            <p className="lp-artist-desc text-yellow-50">Colorist and vivid hair specialist. Bold transformations with precision on every appointment. Based in St. Marys, Ohio.</p>
-            <a href="/beauty-haven/hair" className="lp-artist-link-g">Book with Hannah →</a>
-          </div>
-        </div>
         {/* Desiree */}
         <div className="lp-artist">
           <div className="lp-artist-avatar">
@@ -148,16 +127,6 @@ export default function BeautyHaven() {
 
       {/* ═══ SERVICES ═══ */}
       <section className="lp-services">
-        <div className="lp-svc-col">
-          <div className="lp-svc-col-head gold">Hannah. Hair Services</div>
-          <div className="lp-svc-item"><span className="lp-svc-name">All Over Color</span><span className="lp-svc-price-g">$100</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Balayage with Toner</span><span className="lp-svc-price-g">$190</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Full Highlight</span><span className="lp-svc-price-g">$150</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Freestyle Vivid Color</span><span className="lp-svc-price-g">$200</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Hair Cut, Wash &amp; Style Out</span><span className="lp-svc-price-g">$50</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Spiral Perm</span><span className="lp-svc-price-g">$125</span></div>
-          <div className="lp-svc-more"><a href="/beauty-haven/hair" className="gold">View all hair services →</a></div>
-        </div>
         <div className="lp-svc-col">
           <div className="lp-svc-col-head pink">Desiree. Nail Services</div>
           <div className="lp-svc-item"><span className="lp-svc-name">Classic Gel-X Set</span><span className="lp-svc-price-p">$97</span></div>
@@ -203,17 +172,6 @@ export default function BeautyHaven() {
 
       {/* ═══ BOOKING ═══ */}
       <section className="lp-booking">
-        <div className="lp-booking-col">
-          <h3>Book with Hannah</h3>
-          <div className="role gold">Professional Hair Colorist</div>
-          <div className="lp-booking-contact text-amber-100">
-            Phone / Text: <a href="tel:+15678291546">567-829-1546</a><br />
-            Email: <a href="mailto:hannah@a-zenterpriseshq.com">hannah@a-zenterpriseshq.com</a><br />
-            Hours: Tue–Sat, 9 AM – 6 PM<br />
-            Appointment only · Deposit required
-          </div>
-          <a href="/beauty-haven/hair" className="lp-btn-primary">Contact Hannah to Book</a>
-        </div>
         <div className="lp-booking-col">
           <h3>Book with Desiree</h3>
           <div className="role pink">Nail Artist · Natural Nail Specialist</div>

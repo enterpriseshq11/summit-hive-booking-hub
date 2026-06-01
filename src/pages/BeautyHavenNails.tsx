@@ -1,6 +1,6 @@
 /**
  * NAILS BY DESIREE. /beauty-haven/nails
- * Zero hair services, zero Hannah contact info. Everything routes to GlossGenius.
+ * Zero hair services. Everything routes to GlossGenius.
  */
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/seo";
