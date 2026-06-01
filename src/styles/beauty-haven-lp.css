@@ -117,8 +117,8 @@
 .lp-hiring-card ul { list-style: none; padding: 0; margin: 0 0 16px; }
 .lp-hiring-card li { font-size: 12px; color: #888; padding: 4px 0; border-bottom: 0.5px solid #141414; }
 .lp-hiring-card li:last-child { border-bottom: none; }
-.lp-hiring-btn { display: inline-block; padding: 10px 20px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; cursor: pointer; border: 1px solid #222; background: transparent; color: #555; border-radius: 2px; transition: all 0.2s; text-decoration: none; }
-.lp-hiring-btn:hover { border-color: #E8176A; color: #E8176A; }
+.lp-hiring-btn { display: inline-block; padding: 10px 20px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; cursor: pointer; border: 1px solid #E8176A; background: #E8176A; color: #fff; border-radius: 2px; transition: all 0.2s; text-decoration: none; }
+.lp-hiring-btn:hover { background: #fff; color: #E8176A; border-color: #fff; }
 @media (max-width: 768px) {
   .lp-hiring { padding: 36px 24px; }
   .lp-hiring-cards { grid-template-columns: 1fr; }
