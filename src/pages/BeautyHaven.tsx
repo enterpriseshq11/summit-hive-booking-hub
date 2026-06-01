@@ -24,7 +24,7 @@ export default function BeautyHaven() {
           <h1>
             High<br />Maintenance<br /><em>Beauty Haven</em>
           </h1>
-          <p className="lp-hero-tagline text-amber-100">Nails. No compromises.. Second Floor, Wapakoneta OH</p>
+          <p className="lp-hero-tagline text-amber-100">Full Nails &amp; Hair Spa. Second Floor, Wapakoneta OH</p>
           <div className="lp-hero-badges">
             <span className="lp-badge-pink">Nails by Desiree</span>
             <span className="lp-badge-outline">Appointment Only</span>
