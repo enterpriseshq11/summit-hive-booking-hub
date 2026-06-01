@@ -130,7 +130,7 @@ export default function Index() {
 
           {/* Subhead */}
           <p className="mt-6 text-lg md:text-xl text-white/60 max-w-2xl mx-auto">
-            The newest addition to A-Z Enterprises. <span className="font-bold">OPENING SOON</span> in downtown Wapakoneta.
+            The newest addition to A-Z Enterprises. <span className="font-bold text-slate-50">OPENING SOON</span> in downtown Wapakoneta.
           </p>
 
           {/* CTA */}
