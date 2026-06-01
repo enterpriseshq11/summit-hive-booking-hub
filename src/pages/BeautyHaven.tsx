@@ -195,7 +195,7 @@ export default function BeautyHaven() {
           <div className="lp-hiring-card">
             <h4>Nail Technician</h4>
             <div className="role">Booth Rental Available</div>
-            <p>Join High Maintenance Beauty Haven. We are looking for a licensed nail tech who takes pride in clean work and client relationships.</p>
+            <p className="text-slate-50">Join High Maintenance Beauty Haven. We are looking for a licensed nail tech who takes pride in clean work and client relationships.</p>
             <ul>
               <li>Licensed and insured</li>
               <li>Experienced with gel, acrylics, or nail art</li>
