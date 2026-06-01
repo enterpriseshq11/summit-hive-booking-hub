@@ -70,7 +70,7 @@
 .lp-artist-link-p { font-size: 10px; color: #E8176A; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; text-decoration: none; }
 
 /* ─── Services ─── */
-.lp-services { border-top: 1px solid #141414; display: grid; grid-template-columns: 1fr 1fr; }
+.lp-services { border-top: 1px solid #141414; display: grid; grid-template-columns: 1fr; }
 .lp-svc-col { padding: 48px 60px; }
 .lp-svc-col:first-child { border-right: 1px solid #141414; }
 .lp-svc-col-head { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; padding-bottom: 10px; border-bottom: 2px solid; margin-bottom: 18px; font-weight: 700; }
