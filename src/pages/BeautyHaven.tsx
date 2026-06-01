@@ -58,7 +58,7 @@ export default function BeautyHaven() {
           <div className="section-label text-amber-200">Who We Are</div>
           <h2>Not your average beauty studio.</h2>
           <p className="text-amber-100">
-            High Maintenance Beauty Haven is a luxury nail studio operating on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in custom nail art and the kind of results that make people stop and stare.
+            High Maintenance Beauty Haven is a full nails and hair spa owned and operated by Desiree on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in custom nail art, hair services, and the kind of results that make people stop and stare.
           </p>
           <p className="text-amber-100" style={{ marginTop: "12px" }}>Appointment-based. Portfolio-driven. Unapologetically detail-obsessed.</p>
         </div>
