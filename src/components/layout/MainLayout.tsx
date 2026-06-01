@@ -24,7 +24,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Sticky announcement banner */}
       <a
-        href="https://go.thelandingzoneohio.com/the-family-hub-landing-zone---reserve-your-membership-page?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=sticky_banner"
+        href="https://go.thelandingzoneohio.com/TFHLZ-Reserve-Your-Membership"
         target="_blank"
         rel="noopener noreferrer"
         className="sticky top-0 z-[60] block w-full overflow-hidden bg-gold py-2 text-sm font-semibold text-primary hover:bg-gold/90 transition-colors animate-banner-glow"

@@ -169,7 +169,7 @@ export function Header() {
 
           {/* Family Hub Landing Zone. Waitlist CTA */}
           <a
-            href="https://go.thelandingzoneohio.com/the-family-hub-landing-zone---reserve-your-membership-page?utm_source=azenterprises&utm_medium=website&utm_campaign=landing_zone_waitlist&utm_content=header_button"
+            href="https://go.thelandingzoneohio.com/TFHLZ-Reserve-Your-Membership"
             target="_blank"
             rel="noopener noreferrer"
             className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-md bg-accent text-primary hover:bg-accent/90 transition-colors"
