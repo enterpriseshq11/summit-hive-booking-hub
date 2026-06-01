@@ -112,7 +112,7 @@ export default function BeautyHaven() {
           </div>
           <div>
             <div className="lp-artist-name">Desiree Brogaard</div>
-            <div className="lp-artist-role-pink">Nail Artist · Natural Nail Specialist</div>
+            <div className="lp-artist-role-pink">Owner · Nail Artist · Natural Nail Specialist</div>
             <div className="lp-artist-tags">
               <span className="lp-tag-p">Gel-X</span>
               <span className="lp-tag-p">Acrylic Sets</span>
