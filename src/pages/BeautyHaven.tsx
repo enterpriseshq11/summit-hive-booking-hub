@@ -9,7 +9,7 @@ export default function BeautyHaven() {
     <div className="lp-root">
       <SEOHead
         title="High Maintenance Beauty Haven. A-Z Enterprises"
-        description="High Maintenance Beauty Haven LLC. luxury nail art studio on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Book with Desiree."
+        description="High Maintenance Beauty Haven LLC. full nails and hair spa on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Owned by Desiree."
         canonicalPath="/beauty-haven"
       />
 
