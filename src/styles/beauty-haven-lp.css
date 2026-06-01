@@ -52,7 +52,7 @@
 .lp-detail-value { font-size: 13px; color: #aaa; }
 
 /* ─── Artists ─── */
-.lp-artists { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #141414; border-top: 1px solid #141414; }
+.lp-artists { display: grid; grid-template-columns: 1fr; gap: 2px; background: #141414; border-top: 1px solid #141414; }
 .lp-artist { background: #0A0A0A; padding: 36px 48px; display: grid; grid-template-columns: 80px 1fr; gap: 24px; align-items: start; }
 .lp-artist-avatar { width: 80px; height: 80px; background: #1A1A1A; border: 1px solid #222; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
 .lp-artist-avatar svg { width: 28px; height: 28px; stroke: #333; fill: none; stroke-width: 1.5; }
