@@ -47,7 +47,6 @@ import CareersContracting from "./pages/careers/CareersContracting";
 import WorkerSignup from "./pages/WorkerSignup";
 import AuthCallback from "./pages/AuthCallback";
 import BeautyHaven from "./pages/BeautyHaven";
-import BeautyHavenHair from "./pages/BeautyHavenHair";
 import BeautyHavenNails from "./pages/BeautyHavenNails";
 
 // Debug
@@ -180,7 +179,6 @@ function AppInner() {
           <Route path="/join-fitness" element={<JoinFitness />} />
           <Route path="/the-hive" element={<TheHive />} />
           <Route path="/beauty-haven" element={<BeautyHaven />} />
-          <Route path="/beauty-haven/hair" element={<BeautyHavenHair />} />
           <Route path="/beauty-haven/nails" element={<BeautyHavenNails />} />
 
           {/* Public Intake Forms */}
