@@ -593,25 +593,21 @@ export default function Summit() {
         </div>
       </div>
 
-      {/* Final CTA */}
+      {/* Final CTA - Family Hub Transition */}
       <section className="py-20 bg-primary">
         <div className="container">
           <div className="max-w-2xl mx-auto text-center">
-            
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent text-primary text-xs font-bold uppercase tracking-wider mb-6">
+              <Sparkles className="h-4 w-4" />
+              Coming Soon
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">
-              Get a tailored proposal. Victoria will reply within 24 hours.
+              The Family Hub Landing Zone is on the way.
             </h2>
-            <p className="text-primary-foreground/70 text-lg mb-8">
-              Share your vision and let us create something unforgettable.
+            <p className="text-primary-foreground/70 text-lg mb-6">
+              The entire Summit building is being converted into a brand-new Family Hub Landing Zone for the Wapakoneta community. New event bookings are paused while we transform the space.
             </p>
-            
-            <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all mb-4" data-event="summit_final_cta_click">
-              <CalendarDays className="h-5 w-5 mr-2" />
-              Book with Victoria
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-            
-            <p className="text-primary-foreground/60 text-sm">No obligation. review everything before you commit.</p>
+            <p className="text-primary-foreground/60 text-sm">More details and a grand reveal coming soon.</p>
             <div className="mt-8 pt-6 border-t border-primary-foreground/10 space-y-1">
               <p className="text-sm text-primary-foreground/80 font-medium">{SITE_CONFIG.divisions.summit.name}</p>
               <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.summit.suite}</p>
@@ -624,14 +620,11 @@ export default function Summit() {
         </div>
       </section>
 
-      {/* Modals */}
+      {/* Modals retained for any internal links but no public CTAs trigger them */}
       <SummitRequestModal open={showRequestModal} onOpenChange={setShowRequestModal} prefillEventType={selectedEventType} prefillQuestion={prefillQuestion} />
       <SummitWaitlistModal open={showWaitlistModal} onOpenChange={setShowWaitlistModal} />
       <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Summit Specials" specials={summitSpecials} onSpecialAction={() => setShowRequestModal(true)} />
-      <SpecialsPopup storageKey="summit" headline="Want to see our current Summit specials?" onViewSpecials={() => setShowSpecials(true)} hasSpecials={summitSpecials.length > 0} />
 
-      {/* Sticky Mobile CTA */}
-      <StickyMobileSummitCTA onRequestClick={() => setShowRequestModal(true)} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
