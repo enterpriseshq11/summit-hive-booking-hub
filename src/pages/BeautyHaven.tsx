@@ -8,8 +8,8 @@ export default function BeautyHaven() {
   return (
     <div className="lp-root">
       <SEOHead
-        title="High Maintenance Beauty Haven. A-Z Enterprises"
-        description="High Maintenance Beauty Haven LLC. full nails and hair spa on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Owned by Desiree."
+        title="High Maintenance Co. | A-Z Enterprises"
+        description="High Maintenance Co. full nails and hair spa on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Owned by Desiree."
         canonicalPath="/beauty-haven"
       />
 
@@ -22,7 +22,7 @@ export default function BeautyHaven() {
             <span className="lp-eyebrow-text">A-Z Enterprises · Health &amp; Wellness</span>
           </div>
           <h1>
-            High<br />Maintenance<br /><em>Beauty Haven</em>
+            High<br />Maintenance<br /><em>Co.</em>
           </h1>
           <p className="lp-hero-tagline text-amber-100">Full Nails &amp; Hair Spa. Second Floor, Wapakoneta OH</p>
           <div className="lp-hero-meta">
@@ -76,7 +76,7 @@ export default function BeautyHaven() {
           <div className="section-label text-amber-200">Who We Are</div>
           <h2>Not your average beauty studio.</h2>
           <p className="text-amber-100">
-            High Maintenance Beauty Haven is a full nails and hair spa owned and operated by Desiree on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in custom nail art, hair services, and the kind of results that make people stop and stare.
+            High Maintenance Co. is a full nails and hair spa owned and operated by Desiree on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in custom nail art, hair services, and the kind of results that make people stop and stare.
           </p>
           <p className="text-amber-100" style={{ marginTop: "12px" }}>Appointment-based. Portfolio-driven. Unapologetically detail-obsessed.</p>
         </div>
@@ -175,7 +175,7 @@ export default function BeautyHaven() {
           <div className="lp-hiring-card">
             <h4>Nail Technician</h4>
             <div className="role text-orange-100">Booth Rental Available</div>
-            <p className="text-slate-50">Join High Maintenance Beauty Haven. We are looking for a licensed nail tech who takes pride in clean work and client relationships.</p>
+            <p className="text-slate-50">Join High Maintenance Co. We are looking for a licensed nail tech who takes pride in clean work and client relationships.</p>
             <ul className="text-accent">
               <li>Licensed and insured</li>
               <li>Experienced with gel, acrylics, or nail art</li>
@@ -202,7 +202,7 @@ export default function BeautyHaven() {
       {/* ═══ FOOTER ═══ */}
       <footer className="lp-footer">
         <div className="lp-footer-left">
-          <div className="lp-footer-name">High Maintenance Beauty Haven</div>
+          <div className="lp-footer-name">High Maintenance Co.</div>
           <div className="lp-footer-address">{SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</div>
         </div>
         <div className="lp-footer-links">
