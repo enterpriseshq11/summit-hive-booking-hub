@@ -127,7 +127,7 @@ export default function BeautyHavenNails() {
     <div className="hmbh-page">
       <SEOHead
         title="Nails by Desiree | Beauty Haven | A-Z Enterprises"
-        description="Nail art and services by Desiree Brogaard at High Maintenance Beauty Haven. Gel-X, acrylics, pedicures, bridal packages. Book online."
+        description="Nail art and services by Desiree Brogaard at High Maintenance Co. Gel-X, acrylics, pedicures, bridal packages. Book online."
         canonicalPath="/beauty-haven/nails"
       />
 
