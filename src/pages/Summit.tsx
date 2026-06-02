@@ -395,20 +395,14 @@ export default function Summit() {
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {eventTypes.map((type) => {
             const Icon = type.icon;
-            return <Card key={type.name} className={cn("hover:shadow-premium-hover hover:border-accent/40 transition-all duration-300 shadow-premium group cursor-pointer", "focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2")} onClick={() => handleEventTypeClick(type.id)} role="button" tabIndex={0} onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleEventTypeClick(type.id);
-              }
-            }} data-event="summit_event_type_click">
+            return <Card key={type.name} className="shadow-premium border-border/50">
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-3 group-hover:bg-accent/20 transition-colors">
+                      <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-3">
                         <Icon className="h-6 w-6 text-accent" aria-hidden="true" />
                       </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
                     </div>
-                    <CardTitle className="text-xl group-hover:text-accent transition-colors">{type.name}</CardTitle>
+                    <CardTitle className="text-xl">{type.name}</CardTitle>
                     <p className="text-sm text-accent font-medium">{type.tagline}</p>
                   </CardHeader>
                   <CardContent>
