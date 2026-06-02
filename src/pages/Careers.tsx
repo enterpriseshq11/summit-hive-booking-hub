@@ -1,6 +1,6 @@
 import { SEOHead } from "@/components/seo";
 import { Link } from "react-router-dom";
-import { Building2, Dumbbell, Sparkles, Wrench, ArrowRight, MapPin } from "lucide-react";
+import { Building2, Dumbbell, Sparkles, Wrench, Scissors, ArrowRight, MapPin } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
