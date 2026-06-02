@@ -57,6 +57,19 @@ export default function BeautyHaven() {
         </div>
       </section>
 
+      {/* ═══ HIRING BANNER ═══ */}
+      <section className="lp-hiring-banner">
+        <div className="lp-hiring-banner-inner">
+          <div className="lp-hiring-banner-left">
+            <span className="lp-hiring-banner-pulse" />
+            <span className="lp-hiring-banner-title">We Are Hiring</span>
+            <span className="lp-hiring-banner-div" />
+            <span className="lp-hiring-banner-desc">Nail Tech &amp; Hair Stylist · Booth Rental Available</span>
+          </div>
+          <a href="#hiring" className="lp-hiring-banner-link">View Openings →</a>
+        </div>
+      </section>
+
       {/* ═══ ABOUT ═══ */}
       <section className="lp-about">
         <div className="lp-about-text">
