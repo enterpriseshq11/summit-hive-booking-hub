@@ -27,7 +27,7 @@ const teamCards: {
     title: "High Maintenance Co.",
     description: "Join our beauty team as a hair stylist / hairdresser or nail tech.",
     icon: Scissors,
-    href: "/careers/high-maintenance",
+    href: "/beauty-haven#hiring",
     color: "bg-fuchsia-500/10 text-fuchsia-500",
   },
   {
