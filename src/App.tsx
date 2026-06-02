@@ -193,6 +193,8 @@ function AppInner() {
           <Route path="/careers/fitness/:role" element={<CareersFitness />} />
           <Route path="/careers/contracting" element={<CareersContracting />} />
           <Route path="/careers/contracting/:role" element={<CareersContracting />} />
+          <Route path="/careers/high-maintenance" element={<CareersHighMaintenance />} />
+          <Route path="/careers/high-maintenance/:role" element={<CareersHighMaintenance />} />
 
           {/* Protected customer */}
           <Route element={<ProtectedRoute />}>
