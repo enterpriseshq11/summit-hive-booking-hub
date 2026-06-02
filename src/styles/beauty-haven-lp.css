@@ -19,7 +19,7 @@
 .lp-eyebrow-text { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: #D4A017; }
 .lp-hero h1 { font-size: 44px; font-weight: 800; line-height: 1.08; text-transform: uppercase; color: #fff; letter-spacing: -0.01em; }
 .lp-hero h1 em { color: #D4A017; font-style: normal; }
-.lp-hero-tagline { font-size: 14px; color: #555; margin: 14px 0 10px; letter-spacing: 0.03em; }
+.lp-hero-tagline { font-size: 14px; color: #b8ad96; margin: 14px 0 10px; letter-spacing: 0.03em; }
 .lp-hero-meta { display: flex; align-items: center; gap: 12px; font-size: 12px; color: #e0e0e0; margin-bottom: 22px; flex-wrap: wrap; font-weight: 500; }
 .lp-hero-meta-div { width: 4px; height: 4px; background: #D4A017; border-radius: 50%; flex-shrink: 0; }
 .lp-hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
@@ -37,7 +37,7 @@
 .lp-stat { margin-bottom: 26px; }
 .lp-stat:last-child { margin-bottom: 0; }
 .lp-stat-num { font-size: 36px; font-weight: 800; color: #D4A017; line-height: 1; }
-.lp-stat-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #444; margin-top: 4px; }
+.lp-stat-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #9a8f7a; margin-top: 4px; }
 .lp-stat-div { width: 24px; height: 1px; background: #1e1e1e; margin: 20px 0; }
 
 /* ─── About ─── */
@@ -45,12 +45,12 @@
 .lp-about-text { padding: 48px 60px; border-right: 1px solid #141414; }
 .lp-about-text .section-label { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: #E8176A; margin-bottom: 10px; font-weight: 700; }
 .lp-about-text h2 { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 16px; }
-.lp-about-text p { font-size: 13px; line-height: 1.8; color: #555; }
+.lp-about-text p { font-size: 13px; line-height: 1.8; color: #b8ad96; }
 .lp-about-details { padding: 48px 60px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
 .lp-detail-row { display: flex; align-items: flex-start; gap: 14px; }
 .lp-detail-icon { width: 32px; height: 32px; background: #111; border: 1px solid #1e1e1e; border-radius: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .lp-detail-icon svg { width: 14px; height: 14px; stroke: #D4A017; fill: none; stroke-width: 1.8; }
-.lp-detail-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #444; margin-bottom: 3px; }
+.lp-detail-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #9a8f7a; margin-bottom: 3px; }
 .lp-detail-value { font-size: 13px; color: #aaa; }
 
 /* ─── Artists ─── */
@@ -67,7 +67,7 @@
 .lp-artist-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
 .lp-tag-g { font-size: 9px; color: #D4A017; border: 1px solid rgba(212,160,23,0.27); padding: 3px 8px; border-radius: 2px; background: #1a1a1a; letter-spacing: 0.06em; }
 .lp-tag-p { font-size: 9px; color: #E8176A; border: 1px solid rgba(232,23,106,0.27); padding: 3px 8px; border-radius: 2px; background: #1a1a1a; letter-spacing: 0.06em; }
-.lp-artist-desc { font-size: 12px; line-height: 1.75; color: #555; margin-bottom: 14px; }
+.lp-artist-desc { font-size: 12px; line-height: 1.75; color: #b8ad96; margin-bottom: 14px; }
 .lp-artist-link-g { font-size: 10px; color: #D4A017; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; text-decoration: none; }
 .lp-artist-link-p { font-size: 10px; color: #E8176A; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; text-decoration: none; }
 
@@ -100,10 +100,10 @@
 .lp-bridal-card.feat .lp-bridal-tag { color: #E8176A; }
 .lp-bridal-price { font-size: 38px; font-weight: 800; color: #D4A017; line-height: 1; margin: 4px 0 6px; }
 .lp-bridal-card.feat .lp-bridal-price { color: #E8176A; }
-.lp-bridal-name { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #555; margin-bottom: 10px; }
-.lp-bridal-desc { font-size: 12px; line-height: 1.7; color: #444; margin-bottom: 18px; }
-.lp-bridal-btn { width: 100%; padding: 10px; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; cursor: pointer; border: 1px solid #222; background: transparent; color: #555; border-radius: 2px; transition: all 0.2s; }
-.lp-bridal-btn:hover { border-color: #444; color: #aaa; }
+.lp-bridal-name { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #b8ad96; margin-bottom: 10px; }
+.lp-bridal-desc { font-size: 12px; line-height: 1.7; color: #9a8f7a; margin-bottom: 18px; }
+.lp-bridal-btn { width: 100%; padding: 10px; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; cursor: pointer; border: 1px solid #222; background: transparent; color: #b8ad96; border-radius: 2px; transition: all 0.2s; }
+.lp-bridal-btn:hover { border-color: #9a8f7a; color: #aaa; }
 .lp-bridal-card.feat .lp-bridal-btn { background: #E8176A; color: #fff; border-color: #E8176A; }
 .lp-bridal-card.feat .lp-bridal-btn:hover { background: #ff1f77; }
 
@@ -115,9 +115,9 @@
 .lp-hiring-card { background: #0A0A0A; padding: 32px; }
 .lp-hiring-card h4 { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; margin-bottom: 4px; }
 .lp-hiring-card .role { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #E8176A; margin-bottom: 12px; }
-.lp-hiring-card p { font-size: 12px; line-height: 1.7; color: #555; margin-bottom: 16px; }
+.lp-hiring-card p { font-size: 12px; line-height: 1.7; color: #b8ad96; margin-bottom: 16px; }
 .lp-hiring-card ul { list-style: none; padding: 0; margin: 0 0 16px; }
-.lp-hiring-card li { font-size: 12px; color: #888; padding: 4px 0; border-bottom: 0.5px solid #141414; }
+.lp-hiring-card li { font-size: 12px; color: #b8ad96; padding: 4px 0; border-bottom: 0.5px solid #141414; }
 .lp-hiring-card li:last-child { border-bottom: none; }
 .lp-hiring-btn { display: inline-block; padding: 10px 20px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; cursor: pointer; border: 1px solid #E8176A; background: #E8176A; color: #fff; border-radius: 2px; transition: all 0.2s; text-decoration: none; }
 .lp-hiring-btn:hover { background: #fff; color: #E8176A; border-color: #fff; }
@@ -134,8 +134,8 @@
 .lp-booking-col .role { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; }
 .lp-booking-col .role.gold { color: #D4A017; }
 .lp-booking-col .role.pink { color: #E8176A; }
-.lp-booking-contact { font-size: 12px; line-height: 1.9; color: #444; margin-bottom: 20px; }
-.lp-booking-contact a { color: #888; text-decoration: none; }
+.lp-booking-contact { font-size: 12px; line-height: 1.9; color: #9a8f7a; margin-bottom: 20px; }
+.lp-booking-contact a { color: #b8ad96; text-decoration: none; }
 
 /* ─── Footer ─── */
 .lp-footer { background: #050505; border-top: 1px solid #141414; padding: 28px 60px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; }
