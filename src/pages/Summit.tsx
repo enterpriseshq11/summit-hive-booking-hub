@@ -200,43 +200,17 @@ export default function Summit() {
                 </p>
               </div>
               
-              {/* Hero CTA Row - centered on mobile/tablet, left-aligned on desktop */}
-                <div className="flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                  <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary" data-event="summit_request_open">
-                    <CalendarDays className="h-5 w-5 mr-2" />
-                    Book with Victoria
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
-
-                  <SpecialsButton onClick={() => setShowSpecials(true)} label="Summit Specials" />
-
-                  {/* Trust Chip */}
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/5 border border-primary-foreground/20 rounded-full text-sm font-medium text-primary-foreground/70" aria-label="Response within 24 hours">
-                    <Clock className="h-4 w-4 text-accent" aria-hidden="true" />
-                    Response within 24 hours
-                  </div>
+              {/* Family Hub Transition Notice */}
+              <div className="rounded-xl border-2 border-accent/40 bg-accent/10 backdrop-blur-sm p-6 max-w-2xl mx-auto lg:mx-0 text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-primary text-xs font-bold uppercase tracking-wider mb-3">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Big Announcement
                 </div>
-
-                {/* Request Contact Input */}
-                <div className="max-w-md mx-auto lg:mx-0">
-                  <Label htmlFor="contact-input" className="text-sm text-primary-foreground/70 mb-2 block">
-                    Request a Booking (Optional)
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input id="contact-input" type="text" placeholder="Enter your email or phone number" value={contactInput} onChange={(e) => setContactInput(e.target.value)} className="bg-primary-foreground/5 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-accent" />
-                    <Button variant="outline" onClick={() => setShowRequestModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold">
-                      Send
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trust Line */}
-              <div className="flex items-center gap-2 justify-center lg:justify-start">
-                <CheckCircle className="h-5 w-5 text-accent" />
-                <p className="text-primary-foreground/60 text-sm">
-                  No obligation. request a proposal and review everything before you commit.
+                <h2 className="text-2xl md:text-3xl font-bold text-primary-foreground mb-3">
+                  The Summit is becoming the Family Hub Landing Zone.
+                </h2>
+                <p className="text-primary-foreground/80 text-base md:text-lg leading-relaxed">
+                  We are converting the entire building into a brand-new Family Hub Landing Zone for the Wapakoneta community. New event bookings are paused while we transform the space. More details coming soon.
                 </p>
               </div>
 
@@ -250,10 +224,6 @@ export default function Summit() {
                   <Phone className="h-4 w-4 text-accent" aria-hidden="true" />
                   <span>{SITE_CONFIG.divisions.summit.phone}</span>
                 </a>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-accent" aria-hidden="true" />
-                  <span>Up to 300 guests</span>
-                </div>
               </div>
             </div>
 
@@ -274,95 +244,22 @@ export default function Summit() {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      {/* Under-hero booking module (request-only per spec) */}
-      <UnderHeroBookingCard
-      title="Request Your Date"
-      icon={<CalendarDays className="h-5 w-5 text-accent" />}
-      description="Choose an event type and preferred time. Victoria will confirm options within 24 hours.">
-
-        <div className="grid gap-6">
-          <div className="grid sm:grid-cols-3 gap-3">
-            {eventTypes.map((t) =>
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setSelectedEventType(t.id)}
-            className={cn(
-              "text-left rounded-lg border p-4 transition-colors",
-              selectedEventType === t.id ?
-              "border-accent bg-accent/5" :
-              "border-border hover:border-accent/50"
-            )}>
-
-                <div className="flex items-center gap-2 font-semibold">
-                  <t.icon className="h-4 w-4 text-accent" />
-                  {t.name}
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">{t.tagline}</p>
-              </button>
-          )}
+      {/* Family Hub Landing Zone Transition Notice (replaces booking module) */}
+      <section className="py-12 container">
+        <div className="max-w-3xl mx-auto rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/10 via-accent/5 to-transparent p-8 md:p-10 text-center shadow-gold">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent text-primary text-xs font-bold uppercase tracking-wider mb-4">
+            <Sparkles className="h-4 w-4" />
+            Building Transition
           </div>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="summit-preferred-date">Preferred Date</Label>
-              <Input
-              id="summit-preferred-date"
-              type="date"
-              value={preferredDate}
-              onChange={(e) => setPreferredDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]} />
-
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="summit-preferred-time">Preferred Start Time</Label>
-              <Input
-              id="summit-preferred-time"
-              type="time"
-              value={preferredStartTime}
-              onChange={(e) => setPreferredStartTime(e.target.value)} />
-
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-            className="bg-accent hover:bg-accent/90 text-primary font-semibold"
-            onClick={() => {
-              const extras = [
-              selectedEventType ? `Event type: ${selectedEventType}` : null,
-              preferredDate ? `Preferred date: ${preferredDate}` : null,
-              preferredStartTime ? `Preferred start: ${preferredStartTime}` : null].
-
-              filter(Boolean).
-              join(" | ");
-
-              if (extras) setPrefillQuestion(extras);
-              setShowRequestModal(true);
-            }}>
-
-              Book with Victoria
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-            <Button
-            variant="outline"
-            onClick={() => setShowWaitlistModal(true)}
-            className="border-accent/30 text-accent hover:bg-accent/10">
-
-              Notify Me
-            </Button>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            This is a request. You’ll review the proposal before any payment is required.
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">
+            The entire building is becoming the Family Hub Landing Zone.
+          </h2>
+          <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
+            We are pausing new Summit event bookings while we convert the space into a brand-new Family Hub Landing Zone for the Wapakoneta community. Stay tuned for the grand reveal.
           </p>
         </div>
-      </UnderHeroBookingCard>
-
-      {/* Anchor Chips - Positioned after hero */}
-      <section className="py-6 container">
-        <SummitAnchorChips />
       </section>
+
 
       {/* The E³ Experience Section */}
       <section className="py-16 bg-muted/30">
@@ -406,8 +303,8 @@ export default function Summit() {
         </div>
       </div>
 
-      {/* 360 Photo Booth Experience - Signature Feature */}
-      <PhotoBooth360Section onRequestBooking={() => setShowRequestModal(true)} />
+      {/* 360 Photo Booth Experience - Standalone rental (routes to its own page) */}
+      <PhotoBooth360Section onRequestBooking={() => navigate("/360-photo-booth")} />
 
       {/* Venue Overview */}
       <section id="highlights" className="py-20 container">
@@ -498,20 +395,14 @@ export default function Summit() {
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {eventTypes.map((type) => {
             const Icon = type.icon;
-            return <Card key={type.name} className={cn("hover:shadow-premium-hover hover:border-accent/40 transition-all duration-300 shadow-premium group cursor-pointer", "focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2")} onClick={() => handleEventTypeClick(type.id)} role="button" tabIndex={0} onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleEventTypeClick(type.id);
-              }
-            }} data-event="summit_event_type_click">
+            return <Card key={type.name} className="shadow-premium border-border/50">
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-3 group-hover:bg-accent/20 transition-colors">
+                      <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-3">
                         <Icon className="h-6 w-6 text-accent" aria-hidden="true" />
                       </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
                     </div>
-                    <CardTitle className="text-xl group-hover:text-accent transition-colors">{type.name}</CardTitle>
+                    <CardTitle className="text-xl">{type.name}</CardTitle>
                     <p className="text-sm text-accent font-medium">{type.tagline}</p>
                   </CardHeader>
                   <CardContent>
@@ -566,15 +457,12 @@ export default function Summit() {
                     </div>)}
                 </div>
                 
-                {/* CTAs */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="summit_victoria_cta_click">
-                    <CalendarDays className="h-5 w-5 mr-2" />
-                    Book with Victoria
-                  </Button>
-                  <Button size="lg" variant="outline" onClick={() => setShowRequestModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold">
-                    Request Event Info
-                  </Button>
+                {/* Transition Notice (replaces CTAs) */}
+                <div className="rounded-lg border border-accent/40 bg-primary-foreground/5 p-5 text-left">
+                  <p className="text-accent text-xs font-bold uppercase tracking-wider mb-2">New event bookings paused</p>
+                  <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                    Victoria is helping us transition the entire building into the new Family Hub Landing Zone. New Summit event bookings are on hold while we make the change.
+                  </p>
                 </div>
               </div>
               
@@ -627,15 +515,10 @@ export default function Summit() {
             </div>
           </div>
 
-          {/* No obligation microcopy */}
-          <p className="text-center text-muted-foreground text-sm mt-10 mb-6">No obligation to proceed</p>
-
-          <div className="text-center">
-            <Button onClick={() => setShowRequestModal(true)} size="lg" className="bg-accent hover:bg-accent/90 text-primary font-semibold shadow-gold" data-event="summit_process_cta_click">
-              Book with Victoria
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
+          {/* Transition notice (replaces final timeline CTA) */}
+          <p className="text-center text-muted-foreground text-sm mt-10">
+            New event bookings are paused. The building is being converted into the Family Hub Landing Zone.
+          </p>
         </div>
       </section>
 
@@ -704,25 +587,21 @@ export default function Summit() {
         </div>
       </div>
 
-      {/* Final CTA */}
+      {/* Final CTA - Family Hub Transition */}
       <section className="py-20 bg-primary">
         <div className="container">
           <div className="max-w-2xl mx-auto text-center">
-            
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent text-primary text-xs font-bold uppercase tracking-wider mb-6">
+              <Sparkles className="h-4 w-4" />
+              Coming Soon
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-primary-foreground">
-              Get a tailored proposal. Victoria will reply within 24 hours.
+              The Family Hub Landing Zone is on the way.
             </h2>
-            <p className="text-primary-foreground/70 text-lg mb-8">
-              Share your vision and let us create something unforgettable.
+            <p className="text-primary-foreground/70 text-lg mb-6">
+              The entire Summit building is being converted into a brand-new Family Hub Landing Zone for the Wapakoneta community. New event bookings are paused while we transform the space.
             </p>
-            
-            <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all mb-4" data-event="summit_final_cta_click">
-              <CalendarDays className="h-5 w-5 mr-2" />
-              Book with Victoria
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-            
-            <p className="text-primary-foreground/60 text-sm">No obligation. review everything before you commit.</p>
+            <p className="text-primary-foreground/60 text-sm">More details and a grand reveal coming soon.</p>
             <div className="mt-8 pt-6 border-t border-primary-foreground/10 space-y-1">
               <p className="text-sm text-primary-foreground/80 font-medium">{SITE_CONFIG.divisions.summit.name}</p>
               <p className="text-sm text-primary-foreground/60">{SITE_CONFIG.location.street}, {SITE_CONFIG.divisions.summit.suite}</p>
@@ -735,14 +614,11 @@ export default function Summit() {
         </div>
       </section>
 
-      {/* Modals */}
+      {/* Modals retained for any internal links but no public CTAs trigger them */}
       <SummitRequestModal open={showRequestModal} onOpenChange={setShowRequestModal} prefillEventType={selectedEventType} prefillQuestion={prefillQuestion} />
       <SummitWaitlistModal open={showWaitlistModal} onOpenChange={setShowWaitlistModal} />
       <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Summit Specials" specials={summitSpecials} onSpecialAction={() => setShowRequestModal(true)} />
-      <SpecialsPopup storageKey="summit" headline="Want to see our current Summit specials?" onViewSpecials={() => setShowSpecials(true)} hasSpecials={summitSpecials.length > 0} />
 
-      {/* Sticky Mobile CTA */}
-      <StickyMobileSummitCTA onRequestClick={() => setShowRequestModal(true)} />
 
       {/* Scroll to Top Button */}
       <ScrollToTopButton />
