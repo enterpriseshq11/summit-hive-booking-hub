@@ -106,7 +106,7 @@ export default function BeautyHaven() {
       </section>
 
       {/* ═══ SERVICES ═══ */}
-      <section className="lp-services">
+      <section className="lp-services lp-light">
         <div className="lp-svc-col">
           <div className="lp-svc-col-head pink">Desiree. Nail Services</div>
           <div className="lp-svc-item"><span className="lp-svc-name">Classic Gel-X Set</span><span className="lp-svc-price-p">$97</span></div>
