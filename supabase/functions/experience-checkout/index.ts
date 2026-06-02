@@ -187,8 +187,29 @@ serve(async (req) => {
         return jsonResponse(400, { error: "Bookable type does not belong to requested business" });
       }
 
-      total = Number(passedTotalAmount);
-      productName = `${biz.name} - ${duration_hours} Hour${duration_hours > 1 ? "s" : ""} @ $${hourly_rate}/hr`;
+      // SECURITY: never trust client-supplied total. Recompute server-side
+      // from validated inputs and enforce sane bounds.
+      const hours = Number(duration_hours);
+      const rate = Number(hourly_rate);
+      if (!Number.isFinite(hours) || hours < 1 || hours > 24) {
+        return jsonResponse(400, { error: "Invalid duration_hours (must be 1-24)" });
+      }
+      if (!Number.isFinite(rate) || rate < 1 || rate > 10000) {
+        return jsonResponse(400, { error: "Invalid hourly_rate" });
+      }
+      const serverTotal = Math.round(hours * rate * 100) / 100;
+      if (serverTotal < 10) {
+        return jsonResponse(400, { error: "Total below minimum charge" });
+      }
+      // If client passed a total, require it to match server computation.
+      if (passedTotalAmount !== undefined) {
+        const claimed = Number(passedTotalAmount);
+        if (!Number.isFinite(claimed) || Math.abs(claimed - serverTotal) > 0.5) {
+          return jsonResponse(400, { error: "total_amount does not match server-computed price" });
+        }
+      }
+      total = serverTotal;
+      productName = `${biz.name} - ${hours} Hour${hours > 1 ? "s" : ""} @ $${rate}/hr`;
     } else {
       // Package-based pricing mode (legacy)
       if (!package_id) {
