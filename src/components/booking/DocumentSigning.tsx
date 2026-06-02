@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { FileText, Check, AlertCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import DOMPurify from "dompurify";
 
 interface DocumentTemplate {
   id: string;
@@ -187,7 +188,9 @@ export function DocumentSigning({
                           <ScrollArea className="h-[300px] border rounded-lg p-4">
                             <div
                               className="prose prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{ __html: doc.content }}
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(doc.content || "", { USE_PROFILES: { html: true } }),
+                              }}
                             />
                           </ScrollArea>
 
