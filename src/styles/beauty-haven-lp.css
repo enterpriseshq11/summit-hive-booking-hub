@@ -33,7 +33,7 @@
 .lp-btn-pink:hover { background: #ff1f77; }
 
 /* ─── Hero Stats ─── */
-.lp-hero-stats { position: absolute; right: 0; top: 0; bottom: 0; width: 38%; display: flex; flex-direction: column; justify-content: center; padding: 0 44px; gap: 0; z-index: 1; }
+.lp-hero-stats { position: absolute; right: 0; top: 0; bottom: 0; width: 25%; display: flex; flex-direction: column; justify-content: center; padding: 0 36px; gap: 0; z-index: 1; }
 .lp-stat { margin-bottom: 26px; }
 .lp-stat:last-child { margin-bottom: 0; }
 .lp-stat-num { font-size: 36px; font-weight: 800; color: #D4A017; line-height: 1; }
