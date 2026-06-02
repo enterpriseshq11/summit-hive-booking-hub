@@ -182,7 +182,7 @@ export default function BeautyHaven() {
               <li>Client-focused and reliable</li>
               <li>Booth rental or commission structure</li>
             </ul>
-            <a href={SITE_CONFIG.contact.emailLink} className="lp-hiring-btn">Apply Now</a>
+            <a href="https://go.azenterpriseshq.com/nail-technician-application" target="_blank" rel="noopener noreferrer" className="lp-hiring-btn">Apply Now</a>
           </div>
           <div className="lp-hiring-card">
             <h4>Hairdresser / Hairstylist</h4>
@@ -194,7 +194,7 @@ export default function BeautyHaven() {
               <li>Professional and punctual</li>
               <li>Booth rental or commission structure</li>
             </ul>
-            <a href={SITE_CONFIG.contact.emailLink} className="lp-hiring-btn">Apply Now</a>
+            <a href="https://go.azenterpriseshq.com/hair-dresser-application" target="_blank" rel="noopener noreferrer" className="lp-hiring-btn">Apply Now</a>
           </div>
         </div>
       </section>
