@@ -186,7 +186,7 @@ export default function BeautyHaven() {
       </section>
 
       {/* ═══ NOW HIRING ═══ */}
-      <section className="lp-hiring">
+      <section id="hiring" className="lp-hiring">
         <div className="lp-hiring-head">
           <h3>Now Hiring</h3>
           <span className="section-label text-amber-200">Wapakoneta, OH</span>
