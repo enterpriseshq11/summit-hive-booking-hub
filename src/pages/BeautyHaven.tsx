@@ -71,7 +71,7 @@ export default function BeautyHaven() {
       </section>
 
       {/* ═══ ABOUT ═══ */}
-      <section className="lp-about">
+      <section className="lp-about lp-light">
         <div className="lp-about-text">
           <div className="section-label text-amber-200">Who We Are</div>
           <h2>Not your average beauty studio.</h2>
@@ -106,7 +106,7 @@ export default function BeautyHaven() {
       </section>
 
       {/* ═══ SERVICES ═══ */}
-      <section className="lp-services">
+      <section className="lp-services lp-light">
         <div className="lp-svc-col">
           <div className="lp-svc-col-head pink">Desiree. Nail Services</div>
           <div className="lp-svc-item"><span className="lp-svc-name">Classic Gel-X Set</span><span className="lp-svc-price-p">$97</span></div>
@@ -151,7 +151,7 @@ export default function BeautyHaven() {
       </section>
 
       {/* ═══ BOOKING ═══ */}
-      <section className="lp-booking">
+      <section className="lp-booking lp-light">
         <div className="lp-booking-col">
           <h3>Book with Desiree</h3>
           <div className="role pink">Nail Artist · Natural Nail Specialist</div>
