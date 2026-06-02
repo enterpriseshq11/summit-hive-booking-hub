@@ -24,7 +24,7 @@ const footerLinks = {
     label: "Voice Vault",
     href: "/voice-vault"
   }, {
-    label: "High Maintenance Beauty Haven",
+    label: "High Maintenance Co.",
     href: "/beauty-haven"
   }],
   booking: [{
