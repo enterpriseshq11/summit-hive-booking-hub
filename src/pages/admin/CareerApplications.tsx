@@ -45,12 +45,14 @@ const teamColors: Record<CareerTeam, string> = {
   spa: "bg-pink-500/20 text-pink-300 border-pink-500/30",
   fitness: "bg-green-500/20 text-green-300 border-green-500/30",
   contracting: "bg-orange-500/20 text-orange-300 border-orange-500/30",
+  high_maintenance: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
 };
 
 const teamLabels: Record<CareerTeam, string> = {
   spa: "Spa",
   fitness: "Fitness",
   contracting: "Contracting",
+  high_maintenance: "High Maintenance Co.",
 };
 
 const spaRoles = [

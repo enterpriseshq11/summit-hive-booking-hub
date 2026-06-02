@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export type CareerTeam = "spa" | "contracting" | "fitness";
+export type CareerTeam = "spa" | "contracting" | "fitness" | "high_maintenance";
 export type CareerApplicationStatus = "new" | "reviewing" | "interview" | "offer" | "hired" | "rejected";
 
 export interface CareerApplicant {

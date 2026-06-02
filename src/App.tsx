@@ -44,6 +44,7 @@ import Careers from "./pages/Careers";
 import CareersSpa from "./pages/careers/CareersSpa";
 import CareersFitness from "./pages/careers/CareersFitness";
 import CareersContracting from "./pages/careers/CareersContracting";
+import CareersHighMaintenance from "./pages/careers/CareersHighMaintenance";
 import WorkerSignup from "./pages/WorkerSignup";
 import AuthCallback from "./pages/AuthCallback";
 import BeautyHaven from "./pages/BeautyHaven";
@@ -192,6 +193,8 @@ function AppInner() {
           <Route path="/careers/fitness/:role" element={<CareersFitness />} />
           <Route path="/careers/contracting" element={<CareersContracting />} />
           <Route path="/careers/contracting/:role" element={<CareersContracting />} />
+          <Route path="/careers/high-maintenance" element={<CareersHighMaintenance />} />
+          <Route path="/careers/high-maintenance/:role" element={<CareersHighMaintenance />} />
 
           {/* Protected customer */}
           <Route element={<ProtectedRoute />}>

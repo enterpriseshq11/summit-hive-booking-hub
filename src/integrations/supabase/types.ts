@@ -7213,7 +7213,7 @@ export type Database = {
         | "offer"
         | "hired"
         | "rejected"
-      career_team: "spa" | "contracting" | "fitness"
+      career_team: "spa" | "contracting" | "fitness" | "high_maintenance"
       claim_status:
         | "pending"
         | "verified"
@@ -7545,7 +7545,7 @@ export const Constants = {
         "hired",
         "rejected",
       ],
-      career_team: ["spa", "contracting", "fitness"],
+      career_team: ["spa", "contracting", "fitness", "high_maintenance"],
       claim_status: [
         "pending",
         "verified",
