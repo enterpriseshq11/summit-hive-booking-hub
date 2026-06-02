@@ -203,7 +203,7 @@ export default function BeautyHaven() {
       <footer className="lp-footer">
         <div className="lp-footer-left">
           <div className="lp-footer-name">High Maintenance Beauty Haven</div>
-          <div className="lp-footer-address">{SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip} · {SITE_CONFIG.contact.phone}</div>
+          <div className="lp-footer-address">{SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</div>
         </div>
         <div className="lp-footer-links">
           <a href="/">Full Site</a>
