@@ -39,7 +39,7 @@ import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
 const experiencesItems = [
   { heading: "The Summit", icon: CalendarDays, href: "/summit", sub: null },
   { heading: "The Hive", icon: Building2, href: "/the-hive", sub: { label: "Coworking Space", href: "/the-hive" } },
-  { heading: "360 Photo Booth", icon: Camera, href: "/360-photo-booth", sub: { label: "Book a Session", href: "/book-360" } },
+  { heading: "360 Photo Booth", icon: Camera, href: "/360-photo-booth", sub: { label: "Book a Rental", href: "/book-360" } },
   { heading: "Voice Vault", icon: Mic, href: "/voice-vault", sub: { label: "Book Studio Time", href: "/book-voice-vault" } },
 ];
 
