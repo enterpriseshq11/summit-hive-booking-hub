@@ -19,7 +19,9 @@
 .lp-eyebrow-text { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: #D4A017; }
 .lp-hero h1 { font-size: 44px; font-weight: 800; line-height: 1.08; text-transform: uppercase; color: #fff; letter-spacing: -0.01em; }
 .lp-hero h1 em { color: #D4A017; font-style: normal; }
-.lp-hero-tagline { font-size: 14px; color: #555; margin: 14px 0 28px; letter-spacing: 0.03em; }
+.lp-hero-tagline { font-size: 14px; color: #555; margin: 14px 0 10px; letter-spacing: 0.03em; }
+.lp-hero-meta { display: flex; align-items: center; gap: 12px; font-size: 11px; color: #777; margin-bottom: 22px; flex-wrap: wrap; }
+.lp-hero-meta-div { width: 4px; height: 4px; background: #D4A017; border-radius: 50%; flex-shrink: 0; }
 .lp-hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
 .lp-badge-gold { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #0A0A0A; background: #D4A017; padding: 5px 12px; border-radius: 2px; }
 .lp-badge-pink { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #fff; background: #E8176A; padding: 5px 12px; border-radius: 2px; }
