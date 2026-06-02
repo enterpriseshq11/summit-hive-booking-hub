@@ -758,7 +758,7 @@ export function PhotoBoothBookingWizard({
             </h3>
             <p className="text-muted-foreground">
               {isRequestMode
-                ? "Our team will reach out to confirm availability and schedule your session."
+                ? "Our team will reach out to confirm availability and schedule your rental."
                 : "Your 360 Photo Booth rental has been scheduled."}
             </p>
           </div>
