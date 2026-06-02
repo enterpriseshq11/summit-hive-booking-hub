@@ -27,7 +27,7 @@ const teamCards: {
     title: "High Maintenance Co.",
     description: "Join our beauty team as a hair stylist / hairdresser or nail tech.",
     icon: Scissors,
-    href: "/careers/high-maintenance",
+    href: "/beauty-haven#hiring",
     color: "bg-fuchsia-500/10 text-fuchsia-500",
   },
   {
@@ -147,10 +147,17 @@ export default function Careers() {
                   </CardHeader>
                   <CardContent>
                     <Button asChild className="w-full group-hover:bg-accent group-hover:text-primary">
-                      <Link to={team.href}>
-                        Apply Now
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Link>
+                      {team.href.startsWith("http") ? (
+                        <a href={team.href} target="_blank" rel="noopener noreferrer">
+                          Apply Now
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </a>
+                      ) : (
+                        <Link to={team.href}>
+                          Apply Now
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Link>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
@@ -202,10 +209,17 @@ export default function Careers() {
                         )}
                       </div>
                       <Button asChild className="shrink-0">
-                        <Link to={opening.apply_route || `/careers/${opening.team}`}>
-                          Apply
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Link>
+                        {opening.apply_route?.startsWith("http") ? (
+                          <a href={opening.apply_route} target="_blank" rel="noopener noreferrer">
+                            Apply
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </a>
+                        ) : (
+                          <Link to={opening.apply_route || `/careers/${opening.team}`}>
+                            Apply
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Link>
+                        )}
                       </Button>
                     </div>
                   </CardContent>
