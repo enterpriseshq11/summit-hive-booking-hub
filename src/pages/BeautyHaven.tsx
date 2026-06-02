@@ -151,7 +151,7 @@ export default function BeautyHaven() {
       </section>
 
       {/* ═══ BOOKING ═══ */}
-      <section className="lp-booking">
+      <section className="lp-booking lp-light">
         <div className="lp-booking-col">
           <h3>Book with Desiree</h3>
           <div className="role pink">Nail Artist · Natural Nail Specialist</div>
