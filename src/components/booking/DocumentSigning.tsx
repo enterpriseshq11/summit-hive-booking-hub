@@ -188,7 +188,9 @@ export function DocumentSigning({
                           <ScrollArea className="h-[300px] border rounded-lg p-4">
                             <div
                               className="prose prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{ __html: doc.content }}
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(doc.content || "", { USE_PROFILES: { html: true } }),
+                              }}
                             />
                           </ScrollArea>
 
