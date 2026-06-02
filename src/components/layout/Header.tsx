@@ -283,13 +283,15 @@ export function Header() {
                       <item.icon className="h-4 w-4 text-accent" />
                       {item.heading}
                     </Link>
-                    <Link
-                      to={item.sub.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2 pl-10 text-sm text-primary-foreground/50 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
-                    >
-                      {item.sub.label}
-                    </Link>
+                    {item.sub && (
+                      <Link
+                        to={item.sub.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2 pl-10 text-sm text-primary-foreground/50 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                      >
+                        {item.sub.label}
+                      </Link>
+                    )}
                   </div>
                 ))}
               </div>
