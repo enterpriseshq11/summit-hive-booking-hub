@@ -25,6 +25,11 @@ export default function BeautyHaven() {
             High<br />Maintenance<br /><em>Beauty Haven</em>
           </h1>
           <p className="lp-hero-tagline text-amber-100">Full Nails &amp; Hair Spa. Second Floor, Wapakoneta OH</p>
+          <div className="lp-hero-meta">
+            <span>{SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</span>
+            <span className="lp-hero-meta-div" />
+            <span>Open 7 Days · 6:00 AM – 10:00 PM</span>
+          </div>
           <div className="lp-hero-badges">
             <span className="lp-badge-pink">Nails by Desiree</span>
             <span className="lp-badge-outline">Appointment Only</span>
@@ -63,24 +68,6 @@ export default function BeautyHaven() {
           <p className="text-amber-100" style={{ marginTop: "12px" }}>Appointment-based. Portfolio-driven. Unapologetically detail-obsessed.</p>
         </div>
         <div className="lp-about-details">
-          <div className="lp-detail-row">
-            <div className="lp-detail-icon">
-              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-            </div>
-            <div>
-              <div className="lp-detail-label text-amber-200">Location</div>
-              <div className="lp-detail-value">{SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</div>
-            </div>
-          </div>
-          <div className="lp-detail-row">
-            <div className="lp-detail-icon">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-            </div>
-            <div>
-              <div className="lp-detail-label text-amber-200">Hours</div>
-              <div className="lp-detail-value">Open 7 Days · 6:00 AM – 10:00 PM</div>
-            </div>
-          </div>
           <div className="lp-detail-row">
             <div className="lp-detail-icon">
               <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
