@@ -613,7 +613,6 @@ export default function Summit() {
       {/* Modals retained for any internal links but no public CTAs trigger them */}
       <SummitRequestModal open={showRequestModal} onOpenChange={setShowRequestModal} prefillEventType={selectedEventType} prefillQuestion={prefillQuestion} />
       <SummitWaitlistModal open={showWaitlistModal} onOpenChange={setShowWaitlistModal} />
-      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Summit Specials" specials={summitSpecials} onSpecialAction={() => setShowRequestModal(true)} />
 
 
       {/* Scroll to Top Button */}
