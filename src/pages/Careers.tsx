@@ -209,10 +209,17 @@ export default function Careers() {
                         )}
                       </div>
                       <Button asChild className="shrink-0">
-                        <Link to={opening.apply_route || `/careers/${opening.team}`}>
-                          Apply
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Link>
+                        {opening.apply_route?.startsWith("http") ? (
+                          <a href={opening.apply_route} target="_blank" rel="noopener noreferrer">
+                            Apply
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </a>
+                        ) : (
+                          <Link to={opening.apply_route || `/careers/${opening.team}`}>
+                            Apply
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Link>
+                        )}
                       </Button>
                     </div>
                   </CardContent>
