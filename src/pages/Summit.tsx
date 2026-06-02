@@ -521,15 +521,10 @@ export default function Summit() {
             </div>
           </div>
 
-          {/* No obligation microcopy */}
-          <p className="text-center text-muted-foreground text-sm mt-10 mb-6">No obligation to proceed</p>
-
-          <div className="text-center">
-            <Button onClick={() => setShowRequestModal(true)} size="lg" className="bg-accent hover:bg-accent/90 text-primary font-semibold shadow-gold" data-event="summit_process_cta_click">
-              Book with Victoria
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
+          {/* Transition notice (replaces final timeline CTA) */}
+          <p className="text-center text-muted-foreground text-sm mt-10">
+            New event bookings are paused. The building is being converted into the Family Hub Landing Zone.
+          </p>
         </div>
       </section>
 
