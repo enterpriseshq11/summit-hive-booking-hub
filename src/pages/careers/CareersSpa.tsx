@@ -37,7 +37,7 @@ export default function CareersSpa() {
     <>
       <SEOHead
         title="Spa Careers | Restoration Lounge by A-Z Enterprises"
-        description="Join our spa team at Restoration Lounge. We're hiring massage therapists, yoga instructors, estheticians, and more in Wapakoneta, Ohio."
+        description="Join our spa team at Restoration Lounge. We're hiring massage therapists, yoga instructors, estheticians, hair stylists, and more in Wapakoneta, Ohio."
       />
       <div className="min-h-screen bg-background">
         {/* Header */}
