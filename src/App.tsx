@@ -44,6 +44,7 @@ import Careers from "./pages/Careers";
 import CareersSpa from "./pages/careers/CareersSpa";
 import CareersFitness from "./pages/careers/CareersFitness";
 import CareersContracting from "./pages/careers/CareersContracting";
+import CareersHighMaintenance from "./pages/careers/CareersHighMaintenance";
 import WorkerSignup from "./pages/WorkerSignup";
 import AuthCallback from "./pages/AuthCallback";
 import BeautyHaven from "./pages/BeautyHaven";
