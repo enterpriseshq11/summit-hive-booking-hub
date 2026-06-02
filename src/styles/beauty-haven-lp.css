@@ -245,3 +245,30 @@
   .lp-bridal-cards { grid-template-columns: 1fr; }
   .lp-footer { padding: 24px; flex-direction: column; align-items: flex-start; }
 }
+
+/* ─── Light Section Variant (alternating) ─── */
+.lp-light {
+  background: #f7f3ec !important;
+  border-top: 1px solid #e8dfd0 !important;
+  color: #1a1410;
+}
+.lp-light.lp-about .lp-about-text { border-right-color: #e8dfd0; }
+.lp-light h2, .lp-light h3, .lp-light h4 { color: #1a1410 !important; }
+.lp-light p, .lp-light .lp-svc-name, .lp-light .lp-booking-contact { color: #4a3f33 !important; }
+.lp-light .text-amber-100, .lp-light .text-amber-50, .lp-light .text-amber-200 { color: #4a3f33 !important; }
+.lp-light .section-label { color: #E8176A !important; }
+
+/* About light */
+.lp-light.lp-about .lp-about-text { background: #f7f3ec; }
+
+/* Services light */
+.lp-light.lp-services .lp-svc-col { background: #f7f3ec; }
+.lp-light.lp-services .lp-svc-col:first-child { border-right-color: #e8dfd0; }
+.lp-light.lp-services .lp-svc-item { border-bottom-color: #e8dfd0; }
+.lp-light.lp-services .lp-svc-name { color: #1a1410 !important; }
+
+/* Booking light */
+.lp-light.lp-booking { background: #e8dfd0 !important; }
+.lp-light.lp-booking .lp-booking-col { background: #f7f3ec; }
+.lp-light.lp-booking .lp-booking-contact { color: #4a3f33 !important; }
+
