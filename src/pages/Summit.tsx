@@ -17,8 +17,6 @@ import summitLogo from "@/assets/summit-logo.png";
 import e3Logo from "@/assets/e3-logo.png";
 import PhotoBooth360Section from "@/components/summit/PhotoBooth360Section";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
-import { SpecialsButton, SpecialsPopup, SpecialsModal } from "@/components/specials";
-import { usePublicSpecials } from "@/hooks/useSpecials";
 
 export default function Summit() {
   const navigate = useNavigate();
@@ -27,8 +25,6 @@ export default function Summit() {
   } = useBusinessByType("summit");
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
-  const [showSpecials, setShowSpecials] = useState(false);
-  const { data: summitSpecials = [] } = usePublicSpecials("summit");
   const [selectedEventType, setSelectedEventType] = useState<string | undefined>();
   const [prefillQuestion, setPrefillQuestion] = useState<string | undefined>();
   const [expandedHighlight, setExpandedHighlight] = useState<string | null>(null);
@@ -617,7 +613,6 @@ export default function Summit() {
       {/* Modals retained for any internal links but no public CTAs trigger them */}
       <SummitRequestModal open={showRequestModal} onOpenChange={setShowRequestModal} prefillEventType={selectedEventType} prefillQuestion={prefillQuestion} />
       <SummitWaitlistModal open={showWaitlistModal} onOpenChange={setShowWaitlistModal} />
-      <SpecialsModal open={showSpecials} onOpenChange={setShowSpecials} title="Summit Specials" specials={summitSpecials} onSpecialAction={() => setShowRequestModal(true)} />
 
 
       {/* Scroll to Top Button */}
