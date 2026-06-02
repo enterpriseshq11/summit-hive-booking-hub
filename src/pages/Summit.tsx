@@ -200,43 +200,17 @@ export default function Summit() {
                 </p>
               </div>
               
-              {/* Hero CTA Row - centered on mobile/tablet, left-aligned on desktop */}
-                <div className="flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                  <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary" data-event="summit_request_open">
-                    <CalendarDays className="h-5 w-5 mr-2" />
-                    Book with Victoria
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
-
-                  <SpecialsButton onClick={() => setShowSpecials(true)} label="Summit Specials" />
-
-                  {/* Trust Chip */}
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-foreground/5 border border-primary-foreground/20 rounded-full text-sm font-medium text-primary-foreground/70" aria-label="Response within 24 hours">
-                    <Clock className="h-4 w-4 text-accent" aria-hidden="true" />
-                    Response within 24 hours
-                  </div>
+              {/* Family Hub Transition Notice */}
+              <div className="rounded-xl border-2 border-accent/40 bg-accent/10 backdrop-blur-sm p-6 max-w-2xl mx-auto lg:mx-0 text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-primary text-xs font-bold uppercase tracking-wider mb-3">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Big Announcement
                 </div>
-
-                {/* Request Contact Input */}
-                <div className="max-w-md mx-auto lg:mx-0">
-                  <Label htmlFor="contact-input" className="text-sm text-primary-foreground/70 mb-2 block">
-                    Request a Booking (Optional)
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input id="contact-input" type="text" placeholder="Enter your email or phone number" value={contactInput} onChange={(e) => setContactInput(e.target.value)} className="bg-primary-foreground/5 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 focus:border-accent" />
-                    <Button variant="outline" onClick={() => setShowRequestModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold">
-                      Send
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trust Line */}
-              <div className="flex items-center gap-2 justify-center lg:justify-start">
-                <CheckCircle className="h-5 w-5 text-accent" />
-                <p className="text-primary-foreground/60 text-sm">
-                  No obligation. request a proposal and review everything before you commit.
+                <h2 className="text-2xl md:text-3xl font-bold text-primary-foreground mb-3">
+                  The Summit is becoming the Family Hub Landing Zone.
+                </h2>
+                <p className="text-primary-foreground/80 text-base md:text-lg leading-relaxed">
+                  We are converting the entire building into a brand-new Family Hub Landing Zone for the Wapakoneta community. New event bookings are paused while we transform the space. More details coming soon.
                 </p>
               </div>
 
@@ -250,10 +224,6 @@ export default function Summit() {
                   <Phone className="h-4 w-4 text-accent" aria-hidden="true" />
                   <span>{SITE_CONFIG.divisions.summit.phone}</span>
                 </a>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-accent" aria-hidden="true" />
-                  <span>Up to 300 guests</span>
-                </div>
               </div>
             </div>
 
