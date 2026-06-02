@@ -17,8 +17,6 @@ import summitLogo from "@/assets/summit-logo.png";
 import e3Logo from "@/assets/e3-logo.png";
 import PhotoBooth360Section from "@/components/summit/PhotoBooth360Section";
 import { UnderHeroBookingCard } from "@/components/booking/UnderHeroBookingCard";
-import { SpecialsButton, SpecialsPopup, SpecialsModal } from "@/components/specials";
-import { usePublicSpecials } from "@/hooks/useSpecials";
 
 export default function Summit() {
   const navigate = useNavigate();
