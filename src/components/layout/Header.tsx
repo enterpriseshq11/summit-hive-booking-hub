@@ -112,11 +112,13 @@ export function Header() {
                       <div className="font-medium">{item.heading}</div>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={item.sub.href} className="flex items-center gap-3 py-1.5 pl-11">
-                      <div className="text-sm text-muted-foreground hover:text-foreground">{item.sub.label}</div>
-                    </Link>
-                  </DropdownMenuItem>
+                  {item.sub && (
+                    <DropdownMenuItem asChild>
+                      <Link to={item.sub.href} className="flex items-center gap-3 py-1.5 pl-11">
+                        <div className="text-sm text-muted-foreground hover:text-foreground">{item.sub.label}</div>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                 </div>
               ))}
             </DropdownMenuContent>
