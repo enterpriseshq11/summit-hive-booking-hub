@@ -303,8 +303,8 @@ export default function Summit() {
         </div>
       </div>
 
-      {/* 360 Photo Booth Experience - Signature Feature */}
-      <PhotoBooth360Section onRequestBooking={() => setShowRequestModal(true)} />
+      {/* 360 Photo Booth Experience - Standalone rental (routes to its own page) */}
+      <PhotoBooth360Section onRequestBooking={() => navigate("/360-photo-booth")} />
 
       {/* Venue Overview */}
       <section id="highlights" className="py-20 container">
