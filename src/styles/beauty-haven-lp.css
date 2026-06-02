@@ -148,16 +148,88 @@
 .lp-footer-copy { font-size: 10px; color: #fef3c7; }
 
 /* ─── Hiring Banner ─── */
-.lp-hiring-banner { background: #0e0508; border-top: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; padding: 16px 60px; }
-.lp-hiring-banner-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-.lp-hiring-banner-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.lp-hiring-banner-pulse { display: inline-block; width: 8px; height: 8px; background: #E8176A; border-radius: 50%; animation: lp-pulse 1.5s infinite; flex-shrink: 0; }
-@keyframes lp-pulse { 0% { box-shadow: 0 0 0 0 rgba(232,23,106,0.5); } 70% { box-shadow: 0 0 0 8px rgba(232,23,106,0); } 100% { box-shadow: 0 0 0 0 rgba(232,23,106,0); } }
-.lp-hiring-banner-title { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #E8176A; }
-.lp-hiring-banner-div { width: 3px; height: 3px; background: #D4A017; border-radius: 50%; flex-shrink: 0; }
-.lp-hiring-banner-desc { font-size: 12px; color: #b8ad96; }
-.lp-hiring-banner-link { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #D4A017; text-decoration: none; transition: color 0.2s; }
-.lp-hiring-banner-link:hover { color: #fff; }
+.lp-hiring-banner {
+  background: #0e0508;
+  border-top: 2px solid #E8176A;
+  border-bottom: 2px solid #E8176A;
+  padding: 32px 60px;
+  position: relative;
+}
+.lp-hiring-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(232,23,106,0.06);
+  pointer-events: none;
+}
+.lp-hiring-banner-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  position: relative;
+}
+.lp-hiring-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.lp-hiring-banner-pulse {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: #E8176A;
+  border-radius: 50%;
+  animation: lp-pulse 1.5s infinite;
+  flex-shrink: 0;
+}
+@keyframes lp-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(232,23,106,0.5); }
+  70% { box-shadow: 0 0 0 14px rgba(232,23,106,0); }
+  100% { box-shadow: 0 0 0 0 rgba(232,23,106,0); }
+}
+.lp-hiring-banner-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #E8176A;
+}
+.lp-hiring-banner-div {
+  width: 5px;
+  height: 5px;
+  background: #D4A017;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.lp-hiring-banner-desc {
+  font-size: 15px;
+  color: #b8ad96;
+}
+.lp-hiring-banner-link {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #D4A017;
+  text-decoration: none;
+  transition: color 0.2s, border-color 0.2s;
+  border: 1px solid rgba(212,160,23,0.35);
+  padding: 12px 28px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.lp-hiring-banner-link:hover {
+  color: #fff;
+  border-color: #D4A017;
+}
+@media (max-width: 768px) {
+  .lp-hiring-banner { padding: 28px 24px; }
+  .lp-hiring-banner-title { font-size: 16px; }
+  .lp-hiring-banner-desc { font-size: 13px; }
+}
 
 /* ─── Mobile ─── */
 @media (max-width: 768px) {
