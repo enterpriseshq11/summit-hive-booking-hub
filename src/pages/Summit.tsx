@@ -463,15 +463,12 @@ export default function Summit() {
                     </div>)}
                 </div>
                 
-                {/* CTAs */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <Button size="lg" onClick={() => setShowRequestModal(true)} className="bg-accent hover:bg-accent/90 text-primary font-bold shadow-gold hover:shadow-gold-lg transition-all" data-event="summit_victoria_cta_click">
-                    <CalendarDays className="h-5 w-5 mr-2" />
-                    Book with Victoria
-                  </Button>
-                  <Button size="lg" variant="outline" onClick={() => setShowRequestModal(true)} className="border-accent text-accent bg-accent/10 hover:bg-accent/20 font-semibold">
-                    Request Event Info
-                  </Button>
+                {/* Transition Notice (replaces CTAs) */}
+                <div className="rounded-lg border border-accent/40 bg-primary-foreground/5 p-5 text-left">
+                  <p className="text-accent text-xs font-bold uppercase tracking-wider mb-2">New event bookings paused</p>
+                  <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                    Victoria is helping us transition the entire building into the new Family Hub Landing Zone. New Summit event bookings are on hold while we make the change.
+                  </p>
                 </div>
               </div>
               
