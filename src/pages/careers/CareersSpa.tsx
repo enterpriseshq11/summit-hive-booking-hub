@@ -12,6 +12,7 @@ const SPA_ROLES = [
   { value: "Pilates Instructor", label: "Pilates Instructor" },
   { value: "Esthetician", label: "Esthetician" },
   { value: "Nail Tech", label: "Nail Tech" },
+  { value: "Hair Stylist", label: "Hair Stylist / Hairdresser" },
   { value: "Front Desk", label: "Front Desk / Guest Services" },
   { value: "Spa Attendant", label: "Spa Attendant" },
   { value: "Other", label: "Other" },
@@ -24,6 +25,7 @@ const ROLE_SLUG_MAP: Record<string, string> = {
   "pilates-instructor": "Pilates Instructor",
   "esthetician": "Esthetician",
   "nail-tech": "Nail Tech",
+  "hair-stylist": "Hair Stylist",
   "front-desk": "Front Desk",
 };
 
@@ -35,7 +37,7 @@ export default function CareersSpa() {
     <>
       <SEOHead
         title="Spa Careers | Restoration Lounge by A-Z Enterprises"
-        description="Join our spa team at Restoration Lounge. We're hiring massage therapists, yoga instructors, estheticians, and more in Wapakoneta, Ohio."
+        description="Join our spa team at Restoration Lounge. We're hiring massage therapists, yoga instructors, estheticians, hair stylists, and more in Wapakoneta, Ohio."
       />
       <div className="min-h-screen bg-background">
         {/* Header */}
