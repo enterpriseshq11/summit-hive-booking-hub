@@ -25,6 +25,11 @@ export default function BeautyHaven() {
             High<br />Maintenance<br /><em>Beauty Haven</em>
           </h1>
           <p className="lp-hero-tagline text-amber-100">Full Nails &amp; Hair Spa. Second Floor, Wapakoneta OH</p>
+          <div className="lp-hero-meta">
+            <span>{SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</span>
+            <span className="lp-hero-meta-div" />
+            <span>Open 7 Days · 6:00 AM – 10:00 PM</span>
+          </div>
           <div className="lp-hero-badges">
             <span className="lp-badge-pink">Nails by Desiree</span>
             <span className="lp-badge-outline">Appointment Only</span>
