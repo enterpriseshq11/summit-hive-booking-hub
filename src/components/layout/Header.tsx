@@ -47,7 +47,7 @@ const experiencesItems = [
 const healthItems = [
   { heading: "Restoration Lounge & Spa", icon: Sparkles, href: "/spa", sub: { label: "Book a Spa Service", href: "/book-spa" } },
   { heading: "Total Fitness", icon: Dumbbell, href: "/fitness", sub: { label: "Explore Memberships", href: "/join-fitness" } },
-  { heading: "Beauty Haven", icon: Scissors, href: "/beauty-haven", sub: null },
+  { heading: "High Maintenance Co.", icon: Scissors, href: "/beauty-haven", sub: null },
 ];
 
 export function Header() {
