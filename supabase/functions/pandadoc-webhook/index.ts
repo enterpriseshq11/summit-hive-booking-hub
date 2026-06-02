@@ -28,11 +28,19 @@ serve(async (req) => {
 
     const webhookKey = Deno.env.get("PANDADOC_WEBHOOK_KEY");
     const headerKey = req.headers.get("x-pandadoc-signature");
-    if (webhookKey && headerKey && headerKey !== webhookKey) {
-      logStep("WARNING: Webhook signature mismatch - proceeding but flagging");
-    }
     if (!webhookKey) {
-      logStep("WARNING: PANDADOC_WEBHOOK_KEY not set, requests are unverified");
+      logStep("ERROR: PANDADOC_WEBHOOK_KEY not set, refusing request");
+      return new Response(JSON.stringify({ error: "Webhook not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!headerKey || headerKey !== webhookKey) {
+      logStep("Webhook signature mismatch - rejecting");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const eventType = body?.event || body?.type || "unknown";
