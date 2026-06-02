@@ -71,7 +71,7 @@ export default function BeautyHaven() {
       </section>
 
       {/* ═══ ABOUT ═══ */}
-      <section className="lp-about">
+      <section className="lp-about lp-light">
         <div className="lp-about-text">
           <div className="section-label text-amber-200">Who We Are</div>
           <h2>Not your average beauty studio.</h2>
