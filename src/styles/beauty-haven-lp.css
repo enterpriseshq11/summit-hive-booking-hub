@@ -41,8 +41,8 @@
 .lp-stat-div { width: 24px; height: 1px; background: #1e1e1e; margin: 20px 0; }
 
 /* ─── About ─── */
-.lp-about { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #141414; }
-.lp-about-text { padding: 48px 60px; border-right: 1px solid #141414; }
+.lp-about { display: grid; grid-template-columns: 1fr; border-top: 1px solid #141414; }
+.lp-about-text { padding: 48px 60px; text-align: center; }
 .lp-about-text .section-label { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: #E8176A; margin-bottom: 10px; font-weight: 700; }
 .lp-about-text h2 { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 16px; }
 .lp-about-text p { font-size: 13px; line-height: 1.8; color: #b8ad96; }
@@ -129,7 +129,7 @@
 
 /* ─── Booking ─── */
 .lp-booking { border-top: 1px solid #141414; display: grid; grid-template-columns: 1fr; gap: 2px; background: #141414; }
-.lp-booking-col { background: #0A0A0A; padding: 40px 60px; }
+.lp-booking-col { background: #0A0A0A; padding: 40px 60px; text-align: center; }
 .lp-booking-col h3 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; }
 .lp-booking-col .role { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; }
 .lp-booking-col .role.gold { color: #D4A017; }
