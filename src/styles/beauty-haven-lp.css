@@ -12,8 +12,8 @@
 
 /* ─── Hero ─── */
 .lp-hero { position: relative; overflow: hidden; min-height: 420px; display: flex; align-items: center; padding: 0 60px; border-bottom: 1px solid #1a1a1a; }
-.lp-hero-bg-accent { position: absolute; right: 0; top: 0; bottom: 0; width: 38%; background: #111; border-left: 2px solid #D4A017; }
-.lp-hero-content { position: relative; z-index: 1; max-width: 55%; }
+.lp-hero-bg-accent { position: absolute; right: 0; top: 0; bottom: 0; width: 25%; background: #111; border-left: 2px solid #D4A017; }
+.lp-hero-content { position: relative; z-index: 1; max-width: 72%; }
 .lp-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
 .lp-eyebrow-line { width: 28px; height: 1px; background: #D4A017; }
 .lp-eyebrow-text { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: #D4A017; }
