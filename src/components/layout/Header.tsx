@@ -112,11 +112,13 @@ export function Header() {
                       <div className="font-medium">{item.heading}</div>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to={item.sub.href} className="flex items-center gap-3 py-1.5 pl-11">
-                      <div className="text-sm text-muted-foreground hover:text-foreground">{item.sub.label}</div>
-                    </Link>
-                  </DropdownMenuItem>
+                  {item.sub && (
+                    <DropdownMenuItem asChild>
+                      <Link to={item.sub.href} className="flex items-center gap-3 py-1.5 pl-11">
+                        <div className="text-sm text-muted-foreground hover:text-foreground">{item.sub.label}</div>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                 </div>
               ))}
             </DropdownMenuContent>
@@ -281,13 +283,15 @@ export function Header() {
                       <item.icon className="h-4 w-4 text-accent" />
                       {item.heading}
                     </Link>
-                    <Link
-                      to={item.sub.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2 pl-10 text-sm text-primary-foreground/50 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
-                    >
-                      {item.sub.label}
-                    </Link>
+                    {item.sub && (
+                      <Link
+                        to={item.sub.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2 pl-10 text-sm text-primary-foreground/50 hover:text-primary-foreground rounded-md hover:bg-primary-foreground/10"
+                      >
+                        {item.sub.label}
+                      </Link>
+                    )}
                   </div>
                 ))}
               </div>
