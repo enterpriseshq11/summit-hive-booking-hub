@@ -17,10 +17,18 @@ const teamCards: {
   {
     team: "spa",
     title: "A-Z Restoration (Spa)",
-    description: "Join our wellness team as a massage therapist, yoga instructor, esthetician, hair stylist, or front desk specialist.",
+    description: "Join our wellness team as a massage therapist, yoga instructor, esthetician, or front desk specialist.",
     icon: Sparkles,
     href: "/careers/spa",
     color: "bg-purple-500/10 text-purple-500",
+  },
+  {
+    team: "high_maintenance" as CareerTeam,
+    title: "High Maintenance Co.",
+    description: "Join our beauty team as a hair stylist / hairdresser or nail tech.",
+    icon: Scissors,
+    href: "/careers/high-maintenance",
+    color: "bg-fuchsia-500/10 text-fuchsia-500",
   },
   {
     team: "fitness",
