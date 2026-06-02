@@ -25,7 +25,7 @@
 .lp-hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
 .lp-badge-gold { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #0A0A0A; background: #D4A017; padding: 5px 12px; border-radius: 2px; }
 .lp-badge-pink { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #fff; background: #E8176A; padding: 5px 12px; border-radius: 2px; }
-.lp-badge-outline { font-size: 9px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #555; border: 1px solid #2a2a2a; padding: 5px 12px; border-radius: 2px; }
+.lp-badge-outline { font-size: 9px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: #ccc; border: 1px solid #444; padding: 5px 12px; border-radius: 2px; }
 .lp-cta-row { display: flex; gap: 10px; }
 .lp-btn-primary { background: #D4A017; color: #0A0A0A; padding: 12px 22px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; border-radius: 2px; text-decoration: none; display: inline-block; transition: background 0.2s; }
 .lp-btn-primary:hover { background: #F0C040; }
