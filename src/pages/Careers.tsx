@@ -1,8 +1,21 @@
 import { SEOHead } from "@/components/seo";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  MapPin,
+  Heart,
+  Scissors,
+  Sparkles,
+  Eye,
+  Dumbbell,
+  Wrench,
+  Home,
+  Calendar,
+  Coins,
+  Users,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 
 type Category = "Beauty & spa" | "Fitness" | "Contracting" | "Cleaning";
 
@@ -12,6 +25,7 @@ type Role = {
   location: string;
   description: string;
   applyUrl: string;
+  icon: LucideIcon;
 };
 
 const ROLES: Role[] = [
@@ -21,7 +35,8 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Join our wellness team. Multiple modalities welcome. License a plus but not required.",
-    applyUrl: "#",
+    applyUrl: "https://go.azenterpriseshq.com/massage-therapist-application",
+    icon: Heart,
   },
   {
     title: "Hairstylist",
@@ -29,21 +44,24 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Bring your clients or start fresh. Booth rent and commission options available.",
-    applyUrl: "#",
+    applyUrl: "https://go.azenterpriseshq.com/hair-dresser-application",
+    icon: Scissors,
   },
   {
     title: "Nail technician",
     category: "Beauty & spa",
     location: "Wapakoneta, OH",
     description: "Manicures, pedicures, nail art — all specialties welcome.",
-    applyUrl: "#",
+    applyUrl: "https://go.azenterpriseshq.com/nail-technician-application",
+    icon: Sparkles,
   },
   {
     title: "Esthetician",
     category: "Beauty & spa",
     location: "Wapakoneta, OH",
     description: "Skincare, facials, and more. Flexible compensation available.",
-    applyUrl: "#",
+    applyUrl: "https://go.azenterpriseshq.com/esthetician-application",
+    icon: Eye,
   },
   {
     title: "Personal trainer",
@@ -51,7 +69,8 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Help members hit their goals. Certification a plus. Gym-based role.",
-    applyUrl: "#",
+    applyUrl: "https://go.azenterpriseshq.com/personal-trainer-application",
+    icon: Dumbbell,
   },
   {
     title: "Contractor",
@@ -59,7 +78,8 @@ const ROLES: Role[] = [
     location: "Pikeville, KY",
     description:
       "Skilled trade and general contracting work. Own tools and transportation required.",
-    applyUrl: "#",
+    applyUrl: "https://go.azenterpriseshq.com/contractor-application",
+    icon: Wrench,
   },
   {
     title: "Cleaner — homes & Airbnbs",
@@ -67,7 +87,8 @@ const ROLES: Role[] = [
     location: "Pikeville, KY",
     description:
       "Residential and Airbnb turnover cleaning. Steady local work for reliable crews.",
-    applyUrl: "#",
+    applyUrl: "https://go.azenterpriseshq.com/cleaner-application",
+    icon: Home,
   },
 ];
 
@@ -90,18 +111,22 @@ const WHY_CARDS = [
   {
     title: "Flexible scheduling",
     body: "Full-time, part-time, and contract positions available.",
+    icon: Calendar,
   },
   {
     title: "Competitive pay",
     body: "Employee pay, commission, or booth/chair rent — your choice.",
+    icon: Coins,
   },
   {
     title: "Community first",
     body: "We hire locally and invest in the people on our team.",
+    icon: Users,
   },
   {
     title: "Room to grow",
     body: "We're expanding — and we promote from within.",
+    icon: TrendingUp,
   },
 ];
 
@@ -124,33 +149,36 @@ export default function Careers() {
       />
       <div className="min-h-screen bg-background">
         {/* Hero */}
-        <section style={{ backgroundColor: "#1a1a1a" }} className="py-20">
+        <section
+          style={{ backgroundColor: "#1a1a1a" }}
+          className="py-16 md:py-20"
+        >
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
               <p
-                className="uppercase tracking-widest text-sm font-semibold mb-4"
+                className="uppercase tracking-widest text-xs font-medium mb-3"
                 style={{ color: "#C9982A" }}
               >
                 Now hiring
               </p>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+              <h1 className="text-3xl md:text-5xl font-semibold mb-5 text-white leading-tight">
                 Build your career with A-Z Enterprises
               </h1>
-              <p className="text-lg md:text-xl text-white/80 mb-8">
+              <p className="text-base md:text-lg text-white/70 mb-8 max-w-xl mx-auto">
                 Join a growing team rooted in Wapakoneta and Pikeville. We value
                 reliability, skill, and people who take pride in their work.
               </p>
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex flex-wrap justify-center gap-3">
                 <button
                   onClick={scrollToRoles}
-                  className="px-6 py-3 rounded-md font-semibold transition-opacity hover:opacity-90"
+                  className="px-6 py-3 rounded-md font-medium text-sm transition-opacity hover:opacity-90"
                   style={{ backgroundColor: "#C9982A", color: "#1a1a1a" }}
                 >
                   View open positions
                 </button>
                 <Link
                   to="/about"
-                  className="px-6 py-3 rounded-md font-semibold border-2 border-white text-white hover:bg-white hover:text-[#1a1a1a] transition-colors"
+                  className="px-6 py-3 rounded-md font-medium text-sm border border-white/30 text-white hover:bg-white/10 transition-colors"
                 >
                   Learn about us
                 </Link>
@@ -160,42 +188,47 @@ export default function Careers() {
         </section>
 
         {/* Why join us */}
-        <section className="py-16 container">
-          <h2 className="text-3xl font-bold text-center mb-12">Why join us</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {WHY_CARDS.map((c) => (
-              <div
-                key={c.title}
-                className="rounded-lg border bg-card p-6 shadow-sm"
-              >
-                <h3 className="font-semibold text-lg mb-2">{c.title}</h3>
-                <p className="text-muted-foreground text-sm">{c.body}</p>
-              </div>
-            ))}
+        <section className="py-14 container">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {WHY_CARDS.map((c) => {
+              const Icon = c.icon;
+              return (
+                <div
+                  key={c.title}
+                  className="rounded-lg border bg-card p-5"
+                >
+                  <Icon
+                    className="h-5 w-5 mb-3"
+                    style={{ color: "#C9982A" }}
+                  />
+                  <h3 className="font-medium text-sm mb-1">{c.title}</h3>
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    {c.body}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </section>
 
         {/* Open positions */}
-        <section id="open-positions" className="py-16 bg-muted/30">
-          <div className="container">
-            <h2 className="text-3xl font-bold text-center mb-2">
-              Open positions
-            </h2>
-            <p className="text-center text-muted-foreground mb-8">
-              {ROLES.length} roles
+        <section id="open-positions" className="pb-16">
+          <div className="container max-w-5xl">
+            <p className="uppercase tracking-wider text-xs font-medium text-muted-foreground mb-4">
+              Open positions — {ROLES.length} roles
             </p>
 
-            <div className="flex flex-wrap justify-center gap-2 mb-10">
+            <div className="flex flex-wrap gap-2 mb-6">
               {FILTERS.map((f) => {
                 const active = filter === f;
                 return (
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                    className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                       active
                         ? "bg-foreground text-background border-foreground"
-                        : "bg-background text-foreground border-border hover:bg-muted"
+                        : "bg-background text-muted-foreground border-border hover:bg-muted"
                     }`}
                   >
                     {f}
@@ -204,46 +237,51 @@ export default function Careers() {
               })}
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4 max-w-5xl mx-auto">
+            <div className="space-y-3">
               {visibleRoles.map((role) => {
                 const style = CATEGORY_STYLES[role.category];
+                const Icon = role.icon;
                 return (
                   <div
                     key={role.title}
-                    className="rounded-lg border bg-card p-6 shadow-sm flex flex-col"
+                    className="rounded-lg border bg-card p-4 md:p-5 flex items-center gap-4"
                   >
-                    <div className="mb-3">
-                      <span
-                        className="inline-block text-xs font-semibold px-3 py-1 rounded-full"
-                        style={{
-                          backgroundColor: style.bg,
-                          color: style.text,
-                        }}
-                      >
-                        {role.category}
-                      </span>
+                    <div
+                      className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: style.bg, color: style.text }}
+                    >
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <h3 className="text-xl font-bold mb-2">{role.title}</h3>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
-                      <MapPin className="h-4 w-4" />
-                      <span>{role.location}</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm mb-1">{role.title}</h3>
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span
+                          className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                          style={{
+                            backgroundColor: style.bg,
+                            color: style.text,
+                          }}
+                        >
+                          {role.category}
+                        </span>
+                        <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {role.location}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed hidden sm:block">
+                        {role.description}
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-5 flex-1">
-                      {role.description}
-                    </p>
-                    <Button
-                      asChild
-                      className="self-start"
+                    <a
+                      href={role.applyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 rounded-md text-xs font-medium whitespace-nowrap flex-shrink-0 hover:opacity-90 transition-opacity"
                       style={{ backgroundColor: "#1a1a1a", color: "#fff" }}
                     >
-                      <a
-                        href={role.applyUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Apply →
-                      </a>
-                    </Button>
+                      Apply →
+                    </a>
                   </div>
                 );
               })}
@@ -252,16 +290,19 @@ export default function Careers() {
         </section>
 
         {/* Bottom CTA */}
-        <section style={{ backgroundColor: "#1a1a1a" }} className="py-16">
-          <div className="container text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
+        <section
+          style={{ backgroundColor: "#1a1a1a" }}
+          className="py-14"
+        >
+          <div className="container text-center max-w-2xl">
+            <h2 className="text-2xl md:text-3xl font-semibold text-white mb-3">
               Ready to apply?
             </h2>
-            <p className="text-white/80 max-w-2xl mx-auto mb-4">
+            <p className="text-white/70 text-sm mb-5">
               Click any role above to go directly to the application form. Takes
               about 5 minutes.
             </p>
-            <p style={{ color: "#C9982A" }} className="font-medium">
+            <p style={{ color: "#C9982A" }} className="text-sm font-medium">
               For general inquiries only: careers@a-zenterpriseshq.com
             </p>
           </div>
