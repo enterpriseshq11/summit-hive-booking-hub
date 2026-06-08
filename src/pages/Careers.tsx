@@ -9,7 +9,9 @@ import {
   Eye,
   Dumbbell,
   Wrench,
+  Hammer,
   Home,
+  Building,
   Calendar,
   Coins,
   Users,
@@ -89,6 +91,33 @@ const ROLES: Role[] = [
       "Residential and Airbnb turnover cleaning. Steady local work for reliable crews.",
     applyUrl: "https://go.azenterpriseshq.com/cleaner-application",
     icon: Home,
+  },
+  {
+    title: "Contractor — General/Handyman",
+    category: "Contracting",
+    location: "Wapakoneta, OH",
+    description:
+      "Ongoing interior renovation, repairs, and buildout projects at our downtown commercial building.",
+    applyUrl: "#",
+    icon: Wrench,
+  },
+  {
+    title: "Contractor — Carpenter/Builder",
+    category: "Contracting",
+    location: "Wapakoneta, OH",
+    description:
+      "Shed builds and structural buildout projects. Build it right and build it fast.",
+    applyUrl: "#",
+    icon: Hammer,
+  },
+  {
+    title: "Cleaner — Commercial Building",
+    category: "Cleaning",
+    location: "Wapakoneta, OH",
+    description:
+      "Recurring cleaning for our spa, fitness area, event center, and family venue in downtown Wapakoneta.",
+    applyUrl: "#",
+    icon: Building,
   },
 ];
 
