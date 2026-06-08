@@ -1,252 +1,269 @@
 import { SEOHead } from "@/components/seo";
 import { Link } from "react-router-dom";
-import { Building2, Dumbbell, Sparkles, Wrench, Scissors, ArrowRight, MapPin } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useCareerOpenings, CareerTeam } from "@/hooks/useCareerApplications";
 
-const teamCards: {
-  team: CareerTeam;
+type Category = "Beauty & spa" | "Fitness" | "Contracting" | "Cleaning";
+
+type Role = {
   title: string;
+  category: Category;
+  location: string;
   description: string;
-  icon: React.ElementType;
-  href: string;
-  color: string;
-}[] = [
+  applyUrl: string;
+};
+
+const ROLES: Role[] = [
   {
-    team: "spa",
-    title: "A-Z Restoration (Spa)",
-    description: "Join our wellness team as a massage therapist, yoga instructor, esthetician, or front desk specialist.",
-    icon: Sparkles,
-    href: "/careers/spa",
-    color: "bg-purple-500/10 text-purple-500",
+    title: "Massage therapist",
+    category: "Beauty & spa",
+    location: "Wapakoneta, OH",
+    description:
+      "Join our wellness team. Multiple modalities welcome. License a plus but not required.",
+    applyUrl: "#",
   },
   {
-    team: "high_maintenance" as CareerTeam,
-    title: "High Maintenance Co.",
-    description: "Join our beauty team as a hair stylist / hairdresser or nail tech.",
-    icon: Scissors,
-    href: "/beauty-haven#hiring",
-    color: "bg-fuchsia-500/10 text-fuchsia-500",
+    title: "Hairstylist",
+    category: "Beauty & spa",
+    location: "Wapakoneta, OH",
+    description:
+      "Bring your clients or start fresh. Booth rent and commission options available.",
+    applyUrl: "#",
   },
   {
-    team: "fitness",
-    title: "A-Z Total Fitness",
-    description: "Help members achieve their fitness goals as a personal trainer, coach, or group fitness instructor.",
-    icon: Dumbbell,
-    href: "/careers/fitness",
-    color: "bg-orange-500/10 text-orange-500",
+    title: "Nail technician",
+    category: "Beauty & spa",
+    location: "Wapakoneta, OH",
+    description: "Manicures, pedicures, nail art — all specialties welcome.",
+    applyUrl: "#",
   },
   {
-    team: "contracting",
-    title: "A-Z Contracting",
-    description: "Join our contractor network for residential and commercial projects across Northwest Ohio.",
-    icon: Wrench,
-    href: "/careers/contracting",
-    color: "bg-blue-500/10 text-blue-500",
+    title: "Esthetician",
+    category: "Beauty & spa",
+    location: "Wapakoneta, OH",
+    description: "Skincare, facials, and more. Flexible compensation available.",
+    applyUrl: "#",
+  },
+  {
+    title: "Personal trainer",
+    category: "Fitness",
+    location: "Wapakoneta, OH",
+    description:
+      "Help members hit their goals. Certification a plus. Gym-based role.",
+    applyUrl: "#",
+  },
+  {
+    title: "Contractor",
+    category: "Contracting",
+    location: "Pikeville, KY",
+    description:
+      "Skilled trade and general contracting work. Own tools and transportation required.",
+    applyUrl: "#",
+  },
+  {
+    title: "Cleaner — homes & Airbnbs",
+    category: "Cleaning",
+    location: "Pikeville, KY",
+    description:
+      "Residential and Airbnb turnover cleaning. Steady local work for reliable crews.",
+    applyUrl: "#",
+  },
+];
+
+const CATEGORY_STYLES: Record<Category, { bg: string; text: string }> = {
+  "Beauty & spa": { bg: "#FBEAF0", text: "#72243E" },
+  Fitness: { bg: "#E1F5EE", text: "#085041" },
+  Contracting: { bg: "#FAEEDA", text: "#633806" },
+  Cleaning: { bg: "#E6F1FB", text: "#0C447C" },
+};
+
+const FILTERS: ("All" | Category)[] = [
+  "All",
+  "Beauty & spa",
+  "Fitness",
+  "Contracting",
+  "Cleaning",
+];
+
+const WHY_CARDS = [
+  {
+    title: "Flexible scheduling",
+    body: "Full-time, part-time, and contract positions available.",
+  },
+  {
+    title: "Competitive pay",
+    body: "Employee pay, commission, or booth/chair rent — your choice.",
+  },
+  {
+    title: "Community first",
+    body: "We hire locally and invest in the people on our team.",
+  },
+  {
+    title: "Room to grow",
+    body: "We're expanding — and we promote from within.",
   },
 ];
 
 export default function Careers() {
-  const { data: openings = [], isLoading } = useCareerOpenings();
+  const [filter, setFilter] = useState<"All" | Category>("All");
+  const visibleRoles =
+    filter === "All" ? ROLES : ROLES.filter((r) => r.category === filter);
+
+  const scrollToRoles = () => {
+    document
+      .getElementById("open-positions")
+      ?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <>
       <SEOHead
         title="Careers at A-Z Enterprises | Join Our Team"
-        description="Explore career opportunities at A-Z Enterprises. Join our spa, fitness, or contracting teams in Wapakoneta, Ohio."
+        description="Now hiring in Wapakoneta, OH and Pikeville, KY. Explore open positions across beauty & spa, fitness, contracting, and cleaning."
       />
       <div className="min-h-screen bg-background">
-        {/* Hero Section */}
-        <section className="relative py-20 bg-gradient-to-b from-primary/5 to-background">
+        {/* Hero */}
+        <section style={{ backgroundColor: "#1a1a1a" }} className="py-20">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
-              <Badge variant="outline" className="mb-4">
-                <Building2 className="h-3 w-3 mr-1" />
-                Now Hiring
-              </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Build Your Career With<br />
-                A-Z<br />
-                Enterprises
+              <p
+                className="uppercase tracking-widest text-sm font-semibold mb-4"
+                style={{ color: "#C9982A" }}
+              >
+                Now hiring
+              </p>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+                Build your career with A-Z Enterprises
               </h1>
-              <p className="text-xl text-muted-foreground mb-8">
-                Join a growing team that values excellence, community, and personal growth. 
-                We're looking for passionate individuals to help us deliver exceptional experiences.
+              <p className="text-lg md:text-xl text-white/80 mb-8">
+                Join a growing team rooted in Wapakoneta and Pikeville. We value
+                reliability, skill, and people who take pride in their work.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Button size="lg" asChild>
-                  <a href="#choose-your-team" onClick={(e) => { e.preventDefault(); document.getElementById('choose-your-team')?.scrollIntoView({ behavior: 'smooth' }); }}>
-                    Choose Your Team
-                  </a>
-                </Button>
-                <Button asChild size="lg">
-                  <a href="#open-positions" onClick={(e) => { e.preventDefault(); document.getElementById('open-positions')?.scrollIntoView({ behavior: 'smooth' }); }}>
-                    View Open Positions
-                  </a>
-                </Button>
+                <button
+                  onClick={scrollToRoles}
+                  className="px-6 py-3 rounded-md font-semibold transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "#C9982A", color: "#1a1a1a" }}
+                >
+                  View open positions
+                </button>
+                <Link
+                  to="/about"
+                  className="px-6 py-3 rounded-md font-semibold border-2 border-white text-white hover:bg-white hover:text-[#1a1a1a] transition-colors"
+                >
+                  Learn about us
+                </Link>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Why Join Us */}
+        {/* Why join us */}
         <section className="py-16 container">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Join A-Z Enterprises?</h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Flexible Scheduling</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  We work with your schedule. Full-time, part-time, and contract positions available.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Competitive Pay</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Earn what you deserve with competitive rates, tips, and commission opportunities.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Growth Opportunities</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Build your career with training, mentorship, and advancement paths within our businesses.
-                </p>
-              </CardContent>
-            </Card>
+          <h2 className="text-3xl font-bold text-center mb-12">Why join us</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {WHY_CARDS.map((c) => (
+              <div
+                key={c.title}
+                className="rounded-lg border bg-card p-6 shadow-sm"
+              >
+                <h3 className="font-semibold text-lg mb-2">{c.title}</h3>
+                <p className="text-muted-foreground text-sm">{c.body}</p>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Choose a Team */}
-        <section id="choose-your-team" className="py-16 bg-muted/30">
+        {/* Open positions */}
+        <section id="open-positions" className="py-16 bg-muted/30">
           <div className="container">
-            <h2 className="text-3xl font-bold text-center mb-4">Choose Your Team</h2>
-            <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Select the team that best fits your skills and passion. Each has unique opportunities and benefits.
+            <h2 className="text-3xl font-bold text-center mb-2">
+              Open positions
+            </h2>
+            <p className="text-center text-muted-foreground mb-8">
+              {ROLES.length} roles
             </p>
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {teamCards.map((team) => (
-                <Card key={team.team} className="group hover:shadow-lg transition-all">
-                  <CardHeader>
-                    <div className={`w-12 h-12 rounded-lg ${team.color} flex items-center justify-center mb-4`}>
-                      <team.icon className="h-6 w-6" />
+
+            <div className="flex flex-wrap justify-center gap-2 mb-10">
+              {FILTERS.map((f) => {
+                const active = filter === f;
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                      active
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-background text-foreground border-border hover:bg-muted"
+                    }`}
+                  >
+                    {f}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4 max-w-5xl mx-auto">
+              {visibleRoles.map((role) => {
+                const style = CATEGORY_STYLES[role.category];
+                return (
+                  <div
+                    key={role.title}
+                    className="rounded-lg border bg-card p-6 shadow-sm flex flex-col"
+                  >
+                    <div className="mb-3">
+                      <span
+                        className="inline-block text-xs font-semibold px-3 py-1 rounded-full"
+                        style={{
+                          backgroundColor: style.bg,
+                          color: style.text,
+                        }}
+                      >
+                        {role.category}
+                      </span>
                     </div>
-                    <CardTitle>{team.title}</CardTitle>
-                    <CardDescription>{team.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button asChild className="w-full group-hover:bg-accent group-hover:text-primary">
-                      {team.href.startsWith("http") ? (
-                        <a href={team.href} target="_blank" rel="noopener noreferrer">
-                          Apply Now
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </a>
-                      ) : (
-                        <Link to={team.href}>
-                          Apply Now
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Link>
-                      )}
+                    <h3 className="text-xl font-bold mb-2">{role.title}</h3>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+                      <MapPin className="h-4 w-4" />
+                      <span>{role.location}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-5 flex-1">
+                      {role.description}
+                    </p>
+                    <Button
+                      asChild
+                      className="self-start"
+                      style={{ backgroundColor: "#1a1a1a", color: "#fff" }}
+                    >
+                      <a
+                        href={role.applyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Apply →
+                      </a>
                     </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        {/* Open Positions */}
-        <section id="open-positions" className="py-16 container">
-          <h2 className="text-3xl font-bold text-center mb-4">Open Positions</h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Click on any position to go directly to the application form with your role pre-selected.
-          </p>
-          
-          {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">Loading positions...</div>
-          ) : openings.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">No specific positions posted right now.</p>
-              <p className="text-sm text-muted-foreground">
-                But we're always looking for talent! Choose a team above to submit a general application.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 max-w-4xl mx-auto">
-              {openings.map((opening) => (
-                <Card key={opening.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="capitalize">
-                            {opening.team}
-                          </Badge>
-                          <Badge variant="secondary">1099</Badge>
-                        </div>
-                        <h3 className="text-xl font-semibold mb-2">{opening.role}</h3>
-                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                          {opening.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              {opening.location}
-                            </span>
-                          )}
-                        </div>
-                        {opening.description && (
-                          <p className="text-sm text-muted-foreground mt-2">{opening.description}</p>
-                        )}
-                      </div>
-                      <Button asChild className="shrink-0">
-                        {opening.apply_route?.startsWith("http") ? (
-                          <a href={opening.apply_route} target="_blank" rel="noopener noreferrer">
-                            Apply
-                            <ArrowRight className="h-4 w-4 ml-2" />
-                          </a>
-                        ) : (
-                          <Link to={opening.apply_route || `/careers/${opening.team}`}>
-                            Apply
-                            <ArrowRight className="h-4 w-4 ml-2" />
-                          </Link>
-                        )}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-16 bg-primary text-primary-foreground">
+        {/* Bottom CTA */}
+        <section style={{ backgroundColor: "#1a1a1a" }} className="py-16">
           <div className="container text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to Join Our Team?</h2>
-            <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              Take the first step toward a rewarding career. Our application process is quick and easy.
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Ready to apply?
+            </h2>
+            <p className="text-white/80 max-w-2xl mx-auto mb-4">
+              Click any role above to go directly to the application form. Takes
+              about 5 minutes.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button variant="secondary" size="lg" asChild>
-                <Link to="/careers/spa">Apply to Spa</Link>
-              </Button>
-              <Button variant="secondary" size="lg" asChild>
-                <Link to="/careers/fitness">Apply to Fitness</Link>
-              </Button>
-              <Button variant="secondary" size="lg" asChild>
-                <Link to="/careers/contracting">Apply to Contracting</Link>
-              </Button>
-            </div>
+            <p style={{ color: "#C9982A" }} className="font-medium">
+              For general inquiries only: careers@a-zenterpriseshq.com
+            </p>
           </div>
         </section>
       </div>
