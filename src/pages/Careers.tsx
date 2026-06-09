@@ -175,7 +175,7 @@ export default function Careers() {
                 Build your career with A-Z Enterprises
               </h1>
               <p className="text-base md:text-lg text-white/70 mb-8 max-w-xl mx-auto">
-                Join a growing team rooted in Wapakoneta and Pikeville. We value
+                Join a growing team rooted in Wapakoneta, OH. We value
                 reliability, skill, and people who take pride in their work.
               </p>
               <div className="flex flex-wrap justify-center gap-3">
