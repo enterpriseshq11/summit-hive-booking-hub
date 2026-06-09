@@ -37,7 +37,7 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Join our wellness team. Multiple modalities welcome. License a plus but not required.",
-    applyUrl: "https://go.azenterpriseshq.com/massage-therapist-application",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/vzud34CnRZN0Et5EzIXn",
     icon: Heart,
   },
   {
