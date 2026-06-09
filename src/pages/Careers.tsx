@@ -155,7 +155,7 @@ export default function Careers() {
     <>
       <SEOHead
         title="Careers at A-Z Enterprises | Join Our Team"
-        description="Now hiring in Wapakoneta, OH and Pikeville, KY. Explore open positions across beauty & spa, fitness, contracting, and cleaning."
+        description="Now hiring in Wapakoneta, OH. Explore open positions across beauty & spa, fitness, contracting, and cleaning."
       />
       <div className="min-h-screen bg-background">
         {/* Hero */}
