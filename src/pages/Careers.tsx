@@ -10,7 +10,6 @@ import {
   Dumbbell,
   Wrench,
   Hammer,
-  Home,
   Building,
   Calendar,
   Coins,
@@ -73,24 +72,6 @@ const ROLES: Role[] = [
       "Help members hit their goals. Certification a plus. Gym-based role.",
     applyUrl: "https://api.leadconnectorhq.com/widget/form/uf4C0ELWQwLZ9z0GvVAU",
     icon: Dumbbell,
-  },
-  {
-    title: "Contractor",
-    category: "Contracting",
-    location: "Pikeville, KY",
-    description:
-      "Skilled trade and general contracting work. Own tools and transportation required.",
-    applyUrl: "https://go.azenterpriseshq.com/contractor-application",
-    icon: Wrench,
-  },
-  {
-    title: "Cleaner — homes & Airbnbs",
-    category: "Cleaning",
-    location: "Pikeville, KY",
-    description:
-      "Residential and Airbnb turnover cleaning. Steady local work for reliable crews.",
-    applyUrl: "https://go.azenterpriseshq.com/cleaner-application",
-    icon: Home,
   },
   {
     title: "Contractor — General/Handyman",
@@ -174,7 +155,7 @@ export default function Careers() {
     <>
       <SEOHead
         title="Careers at A-Z Enterprises | Join Our Team"
-        description="Now hiring in Wapakoneta, OH and Pikeville, KY. Explore open positions across beauty & spa, fitness, contracting, and cleaning."
+        description="Now hiring in Wapakoneta, OH. Explore open positions across beauty & spa, fitness, contracting, and cleaning."
       />
       <div className="min-h-screen bg-background">
         {/* Hero */}
@@ -194,7 +175,7 @@ export default function Careers() {
                 Build your career with A-Z Enterprises
               </h1>
               <p className="text-base md:text-lg text-white/70 mb-8 max-w-xl mx-auto">
-                Join a growing team rooted in Wapakoneta and Pikeville. We value
+                Join a growing team rooted in Wapakoneta, OH. We value
                 reliability, skill, and people who take pride in their work.
               </p>
               <div className="flex flex-wrap justify-center gap-3">
@@ -266,55 +247,81 @@ export default function Careers() {
               })}
             </div>
 
-            <div className="space-y-3">
+            <div className="grid sm:grid-cols-2 gap-4">
               {visibleRoles.map((role) => {
                 const style = CATEGORY_STYLES[role.category];
                 const Icon = role.icon;
                 return (
                   <div
                     key={role.title}
-                    className="rounded-lg border bg-card p-4 md:p-5 flex items-center gap-4"
+                    className="group relative rounded-xl border-2 bg-card p-5 md:p-6 flex flex-col transition-all hover:-translate-y-1 hover:shadow-lg"
+                    style={{ borderColor: "transparent" }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.borderColor = "#C9982A")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.borderColor = "transparent")
+                    }
                   >
+                    <span
+                      className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider"
+                      style={{ color: "#C9982A" }}
+                    >
+                      <span className="relative flex h-2 w-2">
+                        <span
+                          className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                          style={{ backgroundColor: "#C9982A" }}
+                        />
+                        <span
+                          className="relative inline-flex rounded-full h-2 w-2"
+                          style={{ backgroundColor: "#C9982A" }}
+                        />
+                      </span>
+                      Hiring now
+                    </span>
+
                     <div
-                      className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
+                      className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
                       style={{ backgroundColor: style.bg, color: style.text }}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-6 w-6" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm mb-1">{role.title}</h3>
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span
-                          className="text-[11px] font-medium px-2 py-0.5 rounded-full"
-                          style={{
-                            backgroundColor: style.bg,
-                            color: style.text,
-                          }}
-                        >
-                          {role.category}
-                        </span>
-                        <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {role.location}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed hidden sm:block">
-                        {role.description}
-                      </p>
+
+                    <h3 className="font-semibold text-base md:text-lg mb-2">
+                      {role.title}
+                    </h3>
+
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <span
+                        className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: style.bg, color: style.text }}
+                      >
+                        {role.category}
+                      </span>
+                      <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {role.location}
+                      </span>
                     </div>
+
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">
+                      {role.description}
+                    </p>
+
                     <a
                       href={role.applyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-md text-xs font-medium whitespace-nowrap flex-shrink-0 hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: "#1a1a1a", color: "#fff" }}
+                      className="inline-flex items-center justify-center px-4 py-2.5 rounded-md text-sm font-semibold transition-opacity hover:opacity-90 self-start"
+                      style={{ backgroundColor: "#C9982A", color: "#1a1a1a" }}
                     >
-                      Apply →
+                      Apply now →
                     </a>
                   </div>
                 );
               })}
             </div>
+
           </div>
         </section>
 
