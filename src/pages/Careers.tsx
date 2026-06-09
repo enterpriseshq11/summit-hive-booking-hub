@@ -62,7 +62,7 @@ const ROLES: Role[] = [
     category: "Beauty & spa",
     location: "Wapakoneta, OH",
     description: "Skincare, facials, and more. Flexible compensation available.",
-    applyUrl: "https://go.azenterpriseshq.com/esthetician-application",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/5G6IoLO1DEaulhZWu7W7",
     icon: Eye,
   },
   {
