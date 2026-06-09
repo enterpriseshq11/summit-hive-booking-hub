@@ -10,7 +10,6 @@ import {
   Dumbbell,
   Wrench,
   Hammer,
-  Home,
   Building,
   Calendar,
   Coins,
