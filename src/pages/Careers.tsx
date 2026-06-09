@@ -37,7 +37,7 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Join our wellness team. Multiple modalities welcome. License a plus but not required.",
-    applyUrl: "https://go.azenterpriseshq.com/massage-therapist-application",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/vzud34CnRZN0Et5EzIXn",
     icon: Heart,
   },
   {
@@ -62,7 +62,7 @@ const ROLES: Role[] = [
     category: "Beauty & spa",
     location: "Wapakoneta, OH",
     description: "Skincare, facials, and more. Flexible compensation available.",
-    applyUrl: "https://go.azenterpriseshq.com/esthetician-application",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/5G6IoLO1DEaulhZWu7W7",
     icon: Eye,
   },
   {
@@ -71,7 +71,7 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Help members hit their goals. Certification a plus. Gym-based role.",
-    applyUrl: "https://go.azenterpriseshq.com/personal-trainer-application",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/uf4C0ELWQwLZ9z0GvVAU",
     icon: Dumbbell,
   },
   {
@@ -98,7 +98,7 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Ongoing interior renovation, repairs, and buildout projects at our downtown commercial building.",
-    applyUrl: "#",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/4xI7soLG4AqiftN9Wb6T",
     icon: Wrench,
   },
   {
@@ -107,7 +107,7 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Shed builds and structural buildout projects. Build it right and build it fast.",
-    applyUrl: "#",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/19geuaAqObd5fN2YLoLb",
     icon: Hammer,
   },
   {
@@ -116,7 +116,7 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Recurring cleaning for our spa, fitness area, event center, and family venue in downtown Wapakoneta.",
-    applyUrl: "#",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/rkdNaRaeKStqV1Hbh4z6",
     icon: Building,
   },
 ];
