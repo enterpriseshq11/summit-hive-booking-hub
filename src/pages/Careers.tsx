@@ -71,7 +71,7 @@ const ROLES: Role[] = [
     location: "Wapakoneta, OH",
     description:
       "Help members hit their goals. Certification a plus. Gym-based role.",
-    applyUrl: "https://go.azenterpriseshq.com/personal-trainer-application",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/uf4C0ELWQwLZ9z0GvVAU",
     icon: Dumbbell,
   },
   {
