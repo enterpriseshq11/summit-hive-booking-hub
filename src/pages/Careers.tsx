@@ -75,24 +75,6 @@ const ROLES: Role[] = [
     icon: Dumbbell,
   },
   {
-    title: "Contractor",
-    category: "Contracting",
-    location: "Pikeville, KY",
-    description:
-      "Skilled trade and general contracting work. Own tools and transportation required.",
-    applyUrl: "https://go.azenterpriseshq.com/contractor-application",
-    icon: Wrench,
-  },
-  {
-    title: "Cleaner — homes & Airbnbs",
-    category: "Cleaning",
-    location: "Pikeville, KY",
-    description:
-      "Residential and Airbnb turnover cleaning. Steady local work for reliable crews.",
-    applyUrl: "https://go.azenterpriseshq.com/cleaner-application",
-    icon: Home,
-  },
-  {
     title: "Contractor — General/Handyman",
     category: "Contracting",
     location: "Wapakoneta, OH",
