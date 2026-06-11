@@ -280,6 +280,25 @@ export default function Index() {
             <div className="hidden lg:flex flex-col gap-3 opacity-0 animate-fade-in-left" style={{
             animationDelay: "0.5s"
           }}>
+              {/* Now Hiring Card */}
+              <Link
+                to="/careers"
+                className="group rounded-xl border-2 border-emerald-400/40 bg-gradient-to-br from-emerald-500/20 via-emerald-400/10 to-accent/10 backdrop-blur-sm p-5 hover:border-emerald-400/70 hover:-translate-y-0.5 transition-all shadow-lg shadow-emerald-500/10"
+              >
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300 mb-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                  </span>
+                  Now Hiring
+                </span>
+                <h3 className="text-base font-bold text-white mb-1.5">Multiple Positions Open</h3>
+                <p className="text-sm text-white/70 mb-3">Beauty & spa, fitness, contracting, and cleaning roles available in Wapakoneta. Apply today.</p>
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-300 group-hover:text-emerald-200 transition-colors">
+                  View Open Roles <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </Link>
+
               {/* Featured Deal Card. Family Hub Landing Zone */}
               <div className="rounded-xl border border-accent/30 bg-gradient-to-br from-accent/[0.08] to-white/[0.02] backdrop-blur-sm p-5">
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent mb-2">
