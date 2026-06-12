@@ -15,10 +15,11 @@ import {
   Coins,
   Users,
   TrendingUp,
+  Baby,
   type LucideIcon,
 } from "lucide-react";
 
-type Category = "Beauty & spa" | "Fitness" | "Contracting" | "Cleaning";
+type Category = "Beauty & spa" | "Fitness" | "Contracting" | "Cleaning" | "Childcare";
 
 type Role = {
   title: string;
