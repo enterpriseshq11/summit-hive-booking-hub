@@ -269,29 +269,42 @@ export default function Careers() {
                   <div
                     key={role.title}
                     className="group relative rounded-xl border-2 bg-card p-5 md:p-6 flex flex-col transition-all hover:-translate-y-1 hover:shadow-lg"
-                    style={{ borderColor: "transparent" }}
+                    style={{
+                      borderColor: role.urgent ? "#DC2626" : "transparent",
+                      boxShadow: role.urgent
+                        ? "0 0 0 4px rgba(220,38,38,0.12)"
+                        : undefined,
+                    }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.borderColor = "#C9982A")
+                      (e.currentTarget.style.borderColor = role.urgent
+                        ? "#DC2626"
+                        : "#C9982A")
                     }
                     onMouseLeave={(e) =>
-                      (e.currentTarget.style.borderColor = "transparent")
+                      (e.currentTarget.style.borderColor = role.urgent
+                        ? "#DC2626"
+                        : "transparent")
                     }
                   >
                     <span
                       className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider"
-                      style={{ color: "#C9982A" }}
+                      style={{ color: role.urgent ? "#DC2626" : "#C9982A" }}
                     >
                       <span className="relative flex h-2 w-2">
                         <span
                           className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                          style={{ backgroundColor: "#C9982A" }}
+                          style={{
+                            backgroundColor: role.urgent ? "#DC2626" : "#C9982A",
+                          }}
                         />
                         <span
                           className="relative inline-flex rounded-full h-2 w-2"
-                          style={{ backgroundColor: "#C9982A" }}
+                          style={{
+                            backgroundColor: role.urgent ? "#DC2626" : "#C9982A",
+                          }}
                         />
                       </span>
-                      Hiring now
+                      {role.urgent ? "Urgent — Hiring now" : "Hiring now"}
                     </span>
 
                     <div
