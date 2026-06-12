@@ -15,10 +15,11 @@ import {
   Coins,
   Users,
   TrendingUp,
+  Baby,
   type LucideIcon,
 } from "lucide-react";
 
-type Category = "Beauty & spa" | "Fitness" | "Contracting" | "Cleaning";
+type Category = "Beauty & spa" | "Fitness" | "Contracting" | "Cleaning" | "Childcare";
 
 type Role = {
   title: string;
@@ -27,9 +28,20 @@ type Role = {
   description: string;
   applyUrl: string;
   icon: LucideIcon;
+  urgent?: boolean;
 };
 
 const ROLES: Role[] = [
+  {
+    title: "Licensed Childcare Staff",
+    category: "Childcare",
+    location: "Wapakoneta, OH",
+    description:
+      "Help launch The Family Hub Landing Zone. Ohio childcare licensing/credentials required. Immediate need — apply today.",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/fz0nmdpCG1NfYUiVRocE",
+    icon: Baby,
+    urgent: true,
+  },
   {
     title: "Massage therapist",
     category: "Beauty & spa",
@@ -107,10 +119,12 @@ const CATEGORY_STYLES: Record<Category, { bg: string; text: string }> = {
   Fitness: { bg: "#E1F5EE", text: "#085041" },
   Contracting: { bg: "#FAEEDA", text: "#633806" },
   Cleaning: { bg: "#E6F1FB", text: "#0C447C" },
+  Childcare: { bg: "#FEE2E2", text: "#991B1B" },
 };
 
 const FILTERS: ("All" | Category)[] = [
   "All",
+  "Childcare",
   "Beauty & spa",
   "Fitness",
   "Contracting",
@@ -255,29 +269,42 @@ export default function Careers() {
                   <div
                     key={role.title}
                     className="group relative rounded-xl border-2 bg-card p-5 md:p-6 flex flex-col transition-all hover:-translate-y-1 hover:shadow-lg"
-                    style={{ borderColor: "transparent" }}
+                    style={{
+                      borderColor: role.urgent ? "#DC2626" : "transparent",
+                      boxShadow: role.urgent
+                        ? "0 0 0 4px rgba(220,38,38,0.12)"
+                        : undefined,
+                    }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.borderColor = "#C9982A")
+                      (e.currentTarget.style.borderColor = role.urgent
+                        ? "#DC2626"
+                        : "#C9982A")
                     }
                     onMouseLeave={(e) =>
-                      (e.currentTarget.style.borderColor = "transparent")
+                      (e.currentTarget.style.borderColor = role.urgent
+                        ? "#DC2626"
+                        : "transparent")
                     }
                   >
                     <span
                       className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider"
-                      style={{ color: "#C9982A" }}
+                      style={{ color: role.urgent ? "#DC2626" : "#C9982A" }}
                     >
                       <span className="relative flex h-2 w-2">
                         <span
                           className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                          style={{ backgroundColor: "#C9982A" }}
+                          style={{
+                            backgroundColor: role.urgent ? "#DC2626" : "#C9982A",
+                          }}
                         />
                         <span
                           className="relative inline-flex rounded-full h-2 w-2"
-                          style={{ backgroundColor: "#C9982A" }}
+                          style={{
+                            backgroundColor: role.urgent ? "#DC2626" : "#C9982A",
+                          }}
                         />
                       </span>
-                      Hiring now
+                      {role.urgent ? "Urgent — Hiring now" : "Hiring now"}
                     </span>
 
                     <div
