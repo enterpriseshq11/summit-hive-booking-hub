@@ -119,10 +119,12 @@ const CATEGORY_STYLES: Record<Category, { bg: string; text: string }> = {
   Fitness: { bg: "#E1F5EE", text: "#085041" },
   Contracting: { bg: "#FAEEDA", text: "#633806" },
   Cleaning: { bg: "#E6F1FB", text: "#0C447C" },
+  Childcare: { bg: "#FEE2E2", text: "#991B1B" },
 };
 
 const FILTERS: ("All" | Category)[] = [
   "All",
+  "Childcare",
   "Beauty & spa",
   "Fitness",
   "Contracting",
