@@ -28,9 +28,20 @@ type Role = {
   description: string;
   applyUrl: string;
   icon: LucideIcon;
+  urgent?: boolean;
 };
 
 const ROLES: Role[] = [
+  {
+    title: "Licensed Childcare Staff",
+    category: "Childcare",
+    location: "Wapakoneta, OH",
+    description:
+      "Help launch The Family Hub Landing Zone. Ohio childcare licensing/credentials required. Immediate need — apply today.",
+    applyUrl: "https://api.leadconnectorhq.com/widget/form/fz0nmdpCG1NfYUiVRocE",
+    icon: Baby,
+    urgent: true,
+  },
   {
     title: "Massage therapist",
     category: "Beauty & spa",
