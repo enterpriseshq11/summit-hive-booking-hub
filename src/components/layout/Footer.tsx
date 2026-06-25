@@ -73,8 +73,14 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
                     {link.label}
                   </Link>
                 </li>)}
+              {footerLinks.external.map(link => <li key={link.href}>
+                  <a href={link.href} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                    {link.label}
+                  </a>
+                </li>)}
             </ul>
           </div>
+
 
           {/* Booking */}
           <div>
