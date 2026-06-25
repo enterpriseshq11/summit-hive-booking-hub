@@ -31,6 +31,8 @@ import {
   LogIn,
   Briefcase,
   Heart,
+  Moon,
+  Home as HomeIcon,
 } from "lucide-react";
 import { useState } from "react";
 import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
