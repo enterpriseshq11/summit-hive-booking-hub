@@ -12,6 +12,7 @@ import { lazy, Suspense } from "react";
 
 // Pages
 import Index from "./pages/Index";
+import FamilyHub from "./pages/FamilyHub";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import BookingHub from "./pages/BookingHub";
@@ -158,6 +159,7 @@ function AppInner() {
           <Route path="/booking" element={<BookingHub />} />
           <Route path="/summit" element={<Summit />} />
           <Route path="/coworking" element={<Coworking />} />
+          <Route path="/family-hub" element={<FamilyHub />} />
           <Route path="/coworking/offices" element={<OfficeListingsHub />} />
           <Route path="/coworking/offices/:slug" element={<OfficeDetailPage />} />
           <Route path="/spa" element={<Spa />} />
