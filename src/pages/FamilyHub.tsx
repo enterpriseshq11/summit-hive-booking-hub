@@ -2,7 +2,7 @@ import { ArrowRight, Moon, Rocket, Users, Clock } from "lucide-react";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { SEOHead } from "@/components/seo";
 
-const WAITLIST_URL = "https://go.thelandingzoneohio.com/TFHLZ-Reserve-Your-Membership";
+const WAITLIST_URL = "https://go.thelandingzoneohio.com/join-the-family-hub-landing-zone-waitlist";
 const SITE_URL = "https://thelandingzoneohio.com";
 
 export default function FamilyHub() {
