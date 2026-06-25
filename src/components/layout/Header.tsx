@@ -157,7 +157,20 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* 3. Careers - Direct Link */}
+          {/* 3. Mobile Home Management - External */}
+          <a
+            href="https://a-zconnecthq.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "flex items-center gap-1.5 lg:gap-2 px-4 lg:px-6 py-2 text-sm lg:text-base font-bold rounded-md transition-all text-accent hover:text-accent hover:bg-accent/10"
+            )}
+          >
+            <HomeIcon className="h-4 w-4" />
+            Mobile Homes
+          </a>
+
+          {/* 4. Careers - Direct Link */}
           <Link
             to="/careers"
             className={cn(
@@ -170,6 +183,8 @@ export function Header() {
             <Briefcase className="h-4 w-4" />
             Careers
           </Link>
+
+
 
           {/* Family Hub Landing Zone. Waitlist CTA */}
           <a
