@@ -6,26 +6,27 @@ import { BUILD_TIMESTAMP_UTC } from "@/lib/build";
 import { SITE_CONFIG } from "@/config/siteConfig";
 const footerLinks = {
   businesses: [{
-    label: "The Summit",
-    href: "/summit"
-  }, {
-    label: "The Hive Coworking",
-    href: "/coworking"
-  }, {
-    label: "Restoration Lounge & Spa",
-    href: "/spa"
-  }, {
-    label: "Total Fitness",
+    label: "A-Z Total Fitness",
     href: "/fitness"
-  }, {
-    label: "360 Photo Booth",
-    href: "/photo-booth"
-  }, {
-    label: "Voice Vault",
-    href: "/voice-vault"
   }, {
     label: "High Maintenance Co.",
     href: "/beauty-haven"
+  }, {
+    label: "The Hive Co-working Space",
+    href: "/the-hive"
+  }, {
+    label: "The Voice Vault",
+    href: "/book-voice-vault"
+  }, {
+    label: "The 360 Photo Booth",
+    href: "/360-photo-booth/book"
+  }, {
+    label: "Elevated by Elyse",
+    href: "/shop/elevated-by-elyse"
+  }],
+  external: [{
+    label: "A-Z Mobile Home Management",
+    href: "https://a-zconnecthq.com"
   }],
   booking: [{
     label: "Book Now",
@@ -38,6 +39,7 @@ const footerLinks = {
     href: "/account"
   }]
 };
+
 export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
   return <footer className="border-t border-border bg-primary text-primary-foreground" ref={ref}>
       <div className="container py-12">
