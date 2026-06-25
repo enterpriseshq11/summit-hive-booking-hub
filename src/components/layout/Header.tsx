@@ -345,7 +345,19 @@ export function Header() {
             )}
           </div>
 
-          {/* 3. Careers - Direct Link */}
+          {/* Mobile Homes - External */}
+          <a
+            href="https://a-zconnecthq.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+          >
+            <HomeIcon className="h-5 w-5" />
+            Mobile Homes
+          </a>
+
+          {/* Careers - Direct Link */}
           <Link
             to="/careers"
             onClick={() => setMobileMenuOpen(false)}
@@ -359,6 +371,7 @@ export function Header() {
             <Briefcase className="h-5 w-5" />
             Careers
           </Link>
+
 
           {/* 4. Account - Collapsible */}
           <div>
