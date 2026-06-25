@@ -35,19 +35,19 @@ import {
 import { useState } from "react";
 import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
 
-// Experiences dropdown items. grouped by division with subpage
+// Experiences dropdown items
 const experiencesItems = [
-  { heading: "The Summit", icon: CalendarDays, href: "/summit", sub: null },
-  { heading: "The Hive", icon: Building2, href: "/the-hive", sub: { label: "Coworking Space", href: "/the-hive" } },
-  { heading: "360 Photo Booth", icon: Camera, href: "/360-photo-booth", sub: { label: "Book a Rental", href: "/book-360" } },
-  { heading: "Voice Vault", icon: Mic, href: "/voice-vault", sub: { label: "Book Studio Time", href: "/book-voice-vault" } },
+  { heading: "The Hive Co-working Space", icon: Building2, href: "/the-hive", sub: null },
+  { heading: "The Voice Vault", icon: Mic, href: "/voice-vault", sub: { label: "Book Studio Time", href: "/book-voice-vault" } },
+  { heading: "The 360 Photo Booth", icon: Camera, href: "/360-photo-booth", sub: { label: "Book a Rental", href: "/360-photo-booth/book" } },
+  { heading: "The Family Hub Landing Zone", icon: Moon, href: "/family-hub", sub: null },
 ];
 
 // Health & Wellness dropdown items
 const healthItems = [
-  { heading: "Restoration Lounge & Spa", icon: Sparkles, href: "/spa", sub: { label: "Book a Spa Service", href: "/book-spa" } },
-  { heading: "Total Fitness", icon: Dumbbell, href: "/fitness", sub: { label: "Explore Memberships", href: "/join-fitness" } },
+  { heading: "A-Z Total Fitness", icon: Dumbbell, href: "/fitness", sub: { label: "Personal Training & Classes", href: "/fitness" } },
   { heading: "High Maintenance Co.", icon: Scissors, href: "/beauty-haven", sub: null },
+  { heading: "Elevated by Elyse", icon: Sparkles, href: "/shop/elevated-by-elyse", sub: null },
 ];
 
 export function Header() {
