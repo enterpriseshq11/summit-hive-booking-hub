@@ -31,23 +31,25 @@ import {
   LogIn,
   Briefcase,
   Heart,
+  Moon,
+  Home as HomeIcon,
 } from "lucide-react";
 import { useState } from "react";
 import azLogoIcon from "@/assets/az-monogram-transparent-tightest.png";
 
-// Experiences dropdown items. grouped by division with subpage
+// Experiences dropdown items
 const experiencesItems = [
-  { heading: "The Summit", icon: CalendarDays, href: "/summit", sub: null },
-  { heading: "The Hive", icon: Building2, href: "/the-hive", sub: { label: "Coworking Space", href: "/the-hive" } },
-  { heading: "360 Photo Booth", icon: Camera, href: "/360-photo-booth", sub: { label: "Book a Rental", href: "/book-360" } },
-  { heading: "Voice Vault", icon: Mic, href: "/voice-vault", sub: { label: "Book Studio Time", href: "/book-voice-vault" } },
+  { heading: "The Hive Co-working Space", icon: Building2, href: "/the-hive", sub: null },
+  { heading: "The Voice Vault", icon: Mic, href: "/voice-vault", sub: { label: "Book Studio Time", href: "/book-voice-vault" } },
+  { heading: "The 360 Photo Booth", icon: Camera, href: "/360-photo-booth", sub: { label: "Book a Rental", href: "/360-photo-booth/book" } },
+  { heading: "The Family Hub Landing Zone", icon: Moon, href: "/family-hub", sub: null },
 ];
 
 // Health & Wellness dropdown items
 const healthItems = [
-  { heading: "Restoration Lounge & Spa", icon: Sparkles, href: "/spa", sub: { label: "Book a Spa Service", href: "/book-spa" } },
-  { heading: "Total Fitness", icon: Dumbbell, href: "/fitness", sub: { label: "Explore Memberships", href: "/join-fitness" } },
+  { heading: "A-Z Total Fitness", icon: Dumbbell, href: "/fitness", sub: { label: "Personal Training & Classes", href: "/fitness" } },
   { heading: "High Maintenance Co.", icon: Scissors, href: "/beauty-haven", sub: null },
+  { heading: "Elevated by Elyse", icon: Sparkles, href: "/shop/elevated-by-elyse", sub: null },
 ];
 
 export function Header() {
@@ -155,7 +157,20 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* 3. Careers - Direct Link */}
+          {/* 3. Mobile Home Management - External */}
+          <a
+            href="https://a-zconnecthq.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "flex items-center gap-1.5 lg:gap-2 px-4 lg:px-6 py-2 text-sm lg:text-base font-bold rounded-md transition-all text-accent hover:text-accent hover:bg-accent/10"
+            )}
+          >
+            <HomeIcon className="h-4 w-4" />
+            Mobile Homes
+          </a>
+
+          {/* 4. Careers - Direct Link */}
           <Link
             to="/careers"
             className={cn(
@@ -169,15 +184,8 @@ export function Header() {
             Careers
           </Link>
 
-          {/* Family Hub Landing Zone. Waitlist CTA */}
-          <a
-            href="https://go.thelandingzoneohio.com/TFHLZ-Reserve-Your-Membership"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden lg:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-md bg-accent text-primary hover:bg-accent/90 transition-colors"
-          >
-            🌙 Join Waitlist
-          </a>
+
+
 
           {/* 4. Account Dropdown */}
           <DropdownMenu>
@@ -337,7 +345,19 @@ export function Header() {
             )}
           </div>
 
-          {/* 3. Careers - Direct Link */}
+          {/* Mobile Homes - External */}
+          <a
+            href="https://a-zconnecthq.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+          >
+            <HomeIcon className="h-5 w-5" />
+            Mobile Homes
+          </a>
+
+          {/* Careers - Direct Link */}
           <Link
             to="/careers"
             onClick={() => setMobileMenuOpen(false)}
@@ -351,6 +371,7 @@ export function Header() {
             <Briefcase className="h-5 w-5" />
             Careers
           </Link>
+
 
           {/* 4. Account - Collapsible */}
           <div>
