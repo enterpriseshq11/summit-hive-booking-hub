@@ -32,7 +32,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         <div className="banner-marquee-track">
           {Array.from({ length: 2 }).map((_, i) => (
             <span key={i} className="inline-flex items-center gap-1.5 px-8 shrink-0" aria-hidden={i === 1 ? "true" : undefined}>
-              🌙 NOW BUILDING → The Family Hub Landing Zone · Coming Soon to Downtown Wapakoneta · Join the Waitlist →
+              🎉 GRAND OPENING → The Family Hub Landing Zone · Ribbon Cutting July 25 at 1 PM · Downtown Wapakoneta · Join Us →
             </span>
           ))}
         </div>
