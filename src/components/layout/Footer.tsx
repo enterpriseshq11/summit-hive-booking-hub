@@ -6,7 +6,7 @@ import { BUILD_TIMESTAMP_UTC } from "@/lib/build";
 import { SITE_CONFIG } from "@/config/siteConfig";
 const footerLinks = {
   businesses: [{
-    label: "A-Z Total Fitness",
+    label: "Zero Gravity Fitness",
     href: "/fitness"
   }, {
     label: "Afterglow Salon & Spa",
