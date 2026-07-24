@@ -60,7 +60,7 @@ export const Footer = forwardRef<HTMLElement>(function Footer(_, ref) {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="https://go.thelandingzoneohio.com/TFHLZ-Reserve-Your-Membership"
+                  href="https://thelandingzonewapak.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors"
