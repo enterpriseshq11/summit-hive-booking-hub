@@ -98,8 +98,8 @@ export default function BeautyHaven() {
           <div className="flex flex-wrap gap-4">
             <a
               href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              
+              
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-primary font-bold shadow-[0_0_30px_hsl(var(--accent)/0.4)] hover:shadow-[0_0_50px_hsl(var(--accent)/0.6)] transition-all"
             >
               <Calendar className="h-5 w-5" />
@@ -177,8 +177,8 @@ export default function BeautyHaven() {
               </ul>
               <a
                 href={BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                
+                
                 className="inline-flex items-center gap-2 text-accent font-semibold hover:gap-3 transition-all"
               >
                 Book {s.title}
@@ -269,8 +269,8 @@ export default function BeautyHaven() {
             </p>
             <a
               href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              
+              
               className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-primary font-bold shadow-[0_0_30px_hsl(var(--accent)/0.4)] hover:shadow-[0_0_60px_hsl(var(--accent)/0.6)] transition-all"
             >
               Book Now
@@ -332,7 +332,7 @@ export default function BeautyHaven() {
           </div>
           <div className="flex items-center gap-6">
             <Link to="/" className="hover:text-accent transition-colors">A-Z Enterprises</Link>
-            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
+            <a href={BOOKING_URL}  className="hover:text-accent transition-colors">
               Book
             </a>
             <a href="#hiring" className="hover:text-accent transition-colors">Stylists</a>
