@@ -1,7 +1,18 @@
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/seo";
 import { SITE_CONFIG } from "@/config/siteConfig";
-import { Sparkles, Scissors, Calendar, MapPin, Clock, ArrowRight, Star } from "lucide-react";
+import {
+  Sparkles,
+  Scissors,
+  Calendar,
+  MapPin,
+  Clock,
+  ArrowRight,
+  Star,
+  Heart,
+  Gift,
+  ShieldCheck,
+} from "lucide-react";
 
 const BOOKING_URL = "https://highmaintenancebh.glossgenius.com/book";
 const NAIL_APPLY_URL = "https://go.azenterpriseshq.com/nail-technician-application";
@@ -9,21 +20,19 @@ const HAIR_APPLY_URL = "https://go.azenterpriseshq.com/hair-dresser-application"
 
 /**
  * Afterglow Salon & Spa
- * Tenant of A-Z Enterprises / The Family Hub Landing Zone.
- * Palette: black + gold, with subtle neon-cyan highlights.
+ * Customer-first landing page. Booth-rental info is a small strip at the bottom.
  */
 export default function BeautyHaven() {
   return (
     <div className="min-h-screen bg-[#0b0b0b] text-white selection:bg-accent/40">
       <SEOHead
-        title="Afterglow Salon & Spa | A-Z Enterprises"
-        description="Afterglow Salon & Spa — hair, nails and glow-up services inside A-Z Enterprises at The Family Hub Landing Zone in Wapakoneta, Ohio. Booth rentals available."
+        title="Afterglow Salon & Spa | Book Hair, Nails & Spa in Wapakoneta"
+        description="Book hair, nails, facials and spa services at Afterglow Salon & Spa inside The Family Hub Landing Zone in Wapakoneta, Ohio. Appointments 7 days a week."
         canonicalPath="/beauty-haven"
       />
 
       {/* ═══ HERO ═══ */}
       <section className="relative overflow-hidden border-b border-accent/20">
-        {/* Honeycomb wash */}
         <div className="absolute inset-0 opacity-[0.08] pointer-events-none" aria-hidden>
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
             <pattern id="afterglow-honey" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
@@ -32,7 +41,6 @@ export default function BeautyHaven() {
             <rect width="100%" height="100%" fill="url(#afterglow-honey)" />
           </svg>
         </div>
-        {/* Neon glow */}
         <div
           className="absolute -top-40 -left-40 h-[420px] w-[420px] rounded-full blur-3xl opacity-40 pointer-events-none"
           style={{ background: "radial-gradient(circle, #00E5FF 0%, transparent 70%)" }}
@@ -67,22 +75,23 @@ export default function BeautyHaven() {
           </h1>
 
           <p className="max-w-2xl text-lg md:text-xl text-white/70 mb-8">
-            The glow-up floor of the Family Hub. Hair, nails, and quiet-luxury spa moments —
-            styled by independent pros who take pride in their chairs.
+            Hair, nails and spa services in a calm, gold-lit chair — one flight above the
+            Family Hub Landing Zone. Drop the kids at the playground, take an hour for
+            yourself, and walk out glowing.
           </p>
 
           <div className="flex flex-wrap gap-3 mb-10">
             <span className="px-3 py-1 rounded-full text-xs uppercase tracking-widest bg-accent text-primary font-semibold">
-              Now Open
+              Now Booking
             </span>
             <span className="px-3 py-1 rounded-full text-xs uppercase tracking-widest border border-accent/50 text-accent">
-              Appointment Only
+              Appointment Only · 7 Days
             </span>
             <span
               className="px-3 py-1 rounded-full text-xs uppercase tracking-widest border"
               style={{ borderColor: "#00E5FF66", color: "#00E5FF" }}
             >
-              Booth Rentals Available
+              Gift Cards Available
             </span>
           </div>
 
@@ -97,11 +106,11 @@ export default function BeautyHaven() {
               Book an Appointment
             </a>
             <a
-              href="#hiring"
+              href="#services"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-white/20 text-white hover:border-accent/60 hover:text-accent transition-colors"
             >
-              <Scissors className="h-5 w-5" />
-              Rent a Booth
+              <Sparkles className="h-5 w-5" />
+              View Services
             </a>
           </div>
 
@@ -119,135 +128,195 @@ export default function BeautyHaven() {
         </div>
       </section>
 
-      {/* ═══ ABOUT ═══ */}
-      <section className="container py-20">
-        <div className="grid md:grid-cols-2 gap-12 items-start">
-          <div>
-            <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Who we are</div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              A calm, gold-lit chair inside the busiest building in town.
-            </h2>
-            <p className="text-white/70 leading-relaxed mb-4">
-              Afterglow is the salon and spa floor of A-Z Enterprises — tucked one flight above
-              the Family Hub Landing Zone. Drop the kids at the playground, take an hour for
-              yourself, and walk out lit from the inside.
-            </p>
-            <p className="text-white/70 leading-relaxed">
-              We're building a roster of independent stylists, nail artists and estheticians who
-              work by appointment. No walk-in chaos. No pressure. Just a clean room, a good
-              chair, and someone who actually cares about the outcome.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-accent/25 bg-black/40 p-8">
-            <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Services on deck</div>
-            <ul className="space-y-4">
-              {[
-                { icon: Scissors, title: "Hair", desc: "Cuts, color, blowouts, event styling." },
-                { icon: Sparkles, title: "Nails", desc: "Gel-X, acrylics, pedicures, custom art." },
-                { icon: Star, title: "Spa", desc: "Facials, waxing, brow and lash services." },
-              ].map((s) => (
-                <li key={s.title} className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center flex-shrink-0">
-                    <s.icon className="h-5 w-5 text-accent" />
-                  </div>
-                  <div>
-                    <div className="font-semibold">{s.title}</div>
-                    <div className="text-sm text-white/60">{s.desc}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 text-xs text-white/40">
-              Service menu &amp; pricing set by each independent artist. Book online to see
-              what's currently offered.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ BOOK ═══ */}
-      <section className="border-y border-accent/20 bg-gradient-to-b from-black to-[#0b0b0b]">
-        <div className="container py-20 text-center">
-          <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Book online</div>
-          <h3 className="text-3xl md:text-4xl font-bold mb-4">Reserve your chair.</h3>
-          <p className="max-w-xl mx-auto text-white/70 mb-8">
-            Same-day openings when we've got 'em. Deposit required to hold your slot.
+      {/* ═══ SERVICES ═══ */}
+      <section id="services" className="container py-20">
+        <div className="max-w-2xl mb-12">
+          <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">What we do</div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Services on the menu.
+          </h2>
+          <p className="text-white/70">
+            Pricing and availability set by each artist. Pick a service, pick a time, and
+            we'll take care of the rest.
           </p>
-          <a
-            href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-primary font-bold shadow-[0_0_30px_hsl(var(--accent)/0.4)] hover:shadow-[0_0_60px_hsl(var(--accent)/0.6)] transition-all"
-          >
-            Book Now
-            <ArrowRight className="h-5 w-5" />
-          </a>
-        </div>
-      </section>
-
-      {/* ═══ HIRING ═══ */}
-      <section id="hiring" className="container py-20">
-        <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
-          <div>
-            <div className="text-xs uppercase tracking-[0.3em] mb-2" style={{ color: "#00E5FF" }}>
-              Now hiring
-            </div>
-            <h3 className="text-3xl md:text-4xl font-bold">Rent a booth at Afterglow.</h3>
-          </div>
-          <span className="text-sm text-white/50">Wapakoneta, OH</span>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
           {[
             {
-              title: "Nail Technician",
-              desc:
-                "Bring your book. We provide the room, the lighting, and the walk-through traffic from the Family Hub upstairs.",
-              bullets: ["Licensed & insured", "Gel, acrylic or nail art", "Booth rental or commission"],
-              href: NAIL_APPLY_URL,
+              icon: Scissors,
+              title: "Hair",
+              items: ["Cuts & trims", "Color & highlights", "Blowouts", "Event & bridal styling"],
             },
             {
-              title: "Hair Stylist",
-              desc:
-                "Cuts, color, styling — build your clientele in a clean, calm chair with steady foot traffic from the building.",
-              bullets: ["Licensed cosmetologist", "Cut, color & styling", "Booth rental or commission"],
-              href: HAIR_APPLY_URL,
+              icon: Sparkles,
+              title: "Nails",
+              items: ["Gel-X & acrylics", "Manicures", "Pedicures", "Custom nail art"],
             },
-          ].map((role) => (
+            {
+              icon: Star,
+              title: "Spa",
+              items: ["Facials", "Waxing", "Brow shaping & tint", "Lash lift & extensions"],
+            },
+          ].map((s) => (
             <div
-              key={role.title}
-              className="group relative rounded-2xl border border-white/10 bg-black/40 p-8 hover:border-accent/50 transition-colors"
+              key={s.title}
+              className="rounded-2xl border border-white/10 bg-black/40 p-8 hover:border-accent/50 transition-colors"
             >
-              <div
-                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity"
-                style={{ boxShadow: "0 0 40px hsl(var(--accent) / 0.15) inset" }}
-                aria-hidden
-              />
-              <h4 className="text-2xl font-bold mb-2">{role.title}</h4>
-              <div className="text-sm mb-4" style={{ color: "#00E5FF" }}>
-                Booth Rental Available
+              <div className="h-12 w-12 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center mb-5">
+                <s.icon className="h-6 w-6 text-accent" />
               </div>
-              <p className="text-white/70 mb-6">{role.desc}</p>
-              <ul className="space-y-2 mb-8">
-                {role.bullets.map((b) => (
-                  <li key={b} className="flex items-center gap-2 text-sm text-white/70">
+              <h3 className="text-2xl font-bold mb-4">{s.title}</h3>
+              <ul className="space-y-2 mb-6">
+                {s.items.map((i) => (
+                  <li key={i} className="flex items-center gap-2 text-white/70">
                     <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                    {b}
+                    {i}
                   </li>
                 ))}
               </ul>
               <a
-                href={role.href}
+                href={BOOKING_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-primary font-semibold hover:shadow-[0_0_30px_hsl(var(--accent)/0.5)] transition-all"
+                className="inline-flex items-center gap-2 text-accent font-semibold hover:gap-3 transition-all"
               >
-                Apply Now
+                Book {s.title}
                 <ArrowRight className="h-4 w-4" />
               </a>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ═══ WHY AFTERGLOW ═══ */}
+      <section className="border-y border-accent/20 bg-gradient-to-b from-black to-[#0b0b0b]">
+        <div className="container py-20">
+          <div className="text-center mb-14">
+            <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Why Afterglow</div>
+            <h2 className="text-3xl md:text-4xl font-bold">
+              A quieter kind of salon.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-6">
+            {[
+              {
+                icon: Heart,
+                title: "Kids downstairs",
+                desc: "Family Hub Landing Zone is one floor below. Drop off, glow up.",
+              },
+              {
+                icon: Clock,
+                title: "On time, every time",
+                desc: "Appointment-only means no waiting rooms and no walk-in chaos.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "Licensed pros",
+                desc: "Every stylist and tech is licensed, insured and vetted.",
+              },
+              {
+                icon: Gift,
+                title: "Gift cards",
+                desc: "The easiest 'thank you' or birthday gift in Wapakoneta.",
+              },
+            ].map((f) => (
+              <div key={f.title} className="text-center md:text-left">
+                <div className="h-11 w-11 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center mb-4 mx-auto md:mx-0">
+                  <f.icon className="h-5 w-5 text-accent" />
+                </div>
+                <div className="font-semibold text-lg mb-2">{f.title}</div>
+                <p className="text-sm text-white/60">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ HOW IT WORKS ═══ */}
+      <section className="container py-20">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">How to book</div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Three steps to your chair.
+            </h2>
+            <ol className="space-y-6">
+              {[
+                { n: "1", t: "Pick a service", d: "Hair, nails or spa — browse what's live on the booking page." },
+                { n: "2", t: "Choose your time", d: "Same-day slots when we have them. Deposit holds your spot." },
+                { n: "3", t: "Show up & glow up", d: "Second floor of A-Z Enterprises, above the Family Hub." },
+              ].map((step) => (
+                <li key={step.n} className="flex gap-5">
+                  <div className="h-10 w-10 rounded-full border border-accent text-accent flex items-center justify-center font-bold flex-shrink-0">
+                    {step.n}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-lg">{step.t}</div>
+                    <div className="text-white/60">{step.d}</div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="rounded-2xl border border-accent/25 bg-black/40 p-8 md:p-10 text-center">
+            <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Book online</div>
+            <h3 className="text-3xl md:text-4xl font-bold mb-4">Reserve your chair.</h3>
+            <p className="text-white/70 mb-8">
+              Same-day openings when we've got 'em. Deposit required to hold your slot.
+            </p>
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-primary font-bold shadow-[0_0_30px_hsl(var(--accent)/0.4)] hover:shadow-[0_0_60px_hsl(var(--accent)/0.6)] transition-all"
+            >
+              Book Now
+              <ArrowRight className="h-5 w-5" />
+            </a>
+            <div className="mt-6 text-xs text-white/40">
+              Prefer to talk to a person? Call {SITE_CONFIG.contact.phone}.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ STYLIST STRIP (small, at the end) ═══ */}
+      <section id="hiring" className="border-t border-white/10 bg-black">
+        <div className="container py-10">
+          <div className="rounded-xl border border-white/10 bg-black/60 p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.3em] mb-1" style={{ color: "#00E5FF" }}>
+                For stylists & nail techs
+              </div>
+              <div className="font-semibold text-white">
+                Licensed pro? We rent chairs at Afterglow.
+              </div>
+              <p className="text-sm text-white/50 mt-1">
+                Steady walk-through traffic from the Family Hub. Booth rental or commission.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={HAIR_APPLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/20 text-white hover:border-accent hover:text-accent transition-colors text-sm"
+              >
+                Hair Stylist
+              </a>
+              <a
+                href={NAIL_APPLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/20 text-white hover:border-accent hover:text-accent transition-colors text-sm"
+              >
+                Nail Technician
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -266,7 +335,7 @@ export default function BeautyHaven() {
             <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
               Book
             </a>
-            <a href="#hiring" className="hover:text-accent transition-colors">Careers</a>
+            <a href="#hiring" className="hover:text-accent transition-colors">Stylists</a>
           </div>
           <div>{SITE_CONFIG.business.copyright}</div>
         </div>
