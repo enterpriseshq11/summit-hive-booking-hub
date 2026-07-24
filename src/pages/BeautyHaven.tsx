@@ -277,7 +277,7 @@ export default function BeautyHaven() {
               <ArrowRight className="h-5 w-5" />
             </a>
             <div className="mt-6 text-xs text-white/40">
-              Prefer to talk to a person? Call {SITE_CONFIG.business.phoneDisplay}.
+              Prefer to talk to a person? Call {SITE_CONFIG.location.phone}.
             </div>
           </div>
         </div>
