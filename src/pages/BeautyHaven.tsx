@@ -14,7 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-const BOOKING_URL = "https://highmaintenancebh.glossgenius.com/book";
+const BOOKING_URL = SITE_CONFIG.contact.phoneLink;
 const NAIL_APPLY_URL = "https://go.azenterpriseshq.com/nail-technician-application";
 const HAIR_APPLY_URL = "https://go.azenterpriseshq.com/hair-dresser-application";
 
