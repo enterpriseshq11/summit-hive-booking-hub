@@ -48,7 +48,7 @@ const experiencesItems = [
 // Health & Wellness dropdown items
 const healthItems = [
   { heading: "A-Z Total Fitness", icon: Dumbbell, href: "/fitness", sub: { label: "Personal Training & Classes", href: "/fitness" } },
-  { heading: "High Maintenance Co.", icon: Scissors, href: "/beauty-haven", sub: null },
+  { heading: "Afterglow Salon & Spa", icon: Scissors, href: "/beauty-haven", sub: null },
   { heading: "Elevated by Elyse", icon: Sparkles, href: "/shop/elevated-by-elyse", sub: null },
 ];
 
