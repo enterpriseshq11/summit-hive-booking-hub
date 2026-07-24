@@ -34,8 +34,8 @@ const TILES: Tile[] = [
     icon: Dumbbell,
   },
   {
-    name: "High Maintenance Co.",
-    description: "", // Rose pulls from owner before publish
+    name: "Afterglow Salon & Spa",
+    description: "Hair, nails, and glow-up services inside the building.",
     cta: "Book Now",
     href: "/beauty-haven",
     icon: Scissors,

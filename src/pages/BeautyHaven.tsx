@@ -1,216 +1,275 @@
+import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/seo";
 import { SITE_CONFIG } from "@/config/siteConfig";
-import "@/styles/beauty-haven-lp.css";
+import { Sparkles, Scissors, Calendar, MapPin, Clock, ArrowRight, Star } from "lucide-react";
 
-const GLOSSGENIUS_URL = "https://highmaintenancebh.glossgenius.com/book";
+const BOOKING_URL = "https://highmaintenancebh.glossgenius.com/book";
+const NAIL_APPLY_URL = "https://go.azenterpriseshq.com/nail-technician-application";
+const HAIR_APPLY_URL = "https://go.azenterpriseshq.com/hair-dresser-application";
 
+/**
+ * Afterglow Salon & Spa
+ * Tenant of A-Z Enterprises / The Family Hub Landing Zone.
+ * Palette: black + gold, with subtle neon-cyan highlights.
+ */
 export default function BeautyHaven() {
   return (
-    <div className="lp-root">
+    <div className="min-h-screen bg-[#0b0b0b] text-white selection:bg-accent/40">
       <SEOHead
-        title="High Maintenance Co. | A-Z Enterprises"
-        description="High Maintenance Co. full nails and hair spa on the second floor of A-Z Enterprises in Wapakoneta, Ohio. Owned by Desiree."
+        title="Afterglow Salon & Spa | A-Z Enterprises"
+        description="Afterglow Salon & Spa — hair, nails and glow-up services inside A-Z Enterprises at The Family Hub Landing Zone in Wapakoneta, Ohio. Booth rentals available."
         canonicalPath="/beauty-haven"
       />
 
       {/* ═══ HERO ═══ */}
-      <section className="lp-hero">
-        <div className="lp-hero-bg-accent" />
-        <div className="lp-hero-content">
-          <div className="lp-eyebrow">
-            <span className="lp-eyebrow-line" />
-            <span className="lp-eyebrow-text">A-Z Enterprises · Health &amp; Wellness</span>
-          </div>
-          <h1>
-            High<br />Maintenance<br /><em>Co.</em>
-          </h1>
-          <p className="lp-hero-tagline text-amber-100">Full Nails &amp; Hair Spa. Second Floor, Wapakoneta OH</p>
-          <div className="lp-hero-meta">
-            <span>{SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</span>
-            <span className="lp-hero-meta-div" />
-            <span>Open 7 Days · 6:00 AM – 10:00 PM</span>
-          </div>
-          <div className="lp-hero-badges">
-            <span className="lp-badge-pink">Nails by Desiree</span>
-            <span className="lp-badge-outline">Appointment Only</span>
-            <span className="lp-badge-outline">Open 7 Days</span>
-          </div>
-          <div className="lp-cta-row">
-            <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="lp-btn-pink">Book Nails. Desiree</a>
-          </div>
+      <section className="relative overflow-hidden border-b border-accent/20">
+        {/* Honeycomb wash */}
+        <div className="absolute inset-0 opacity-[0.08] pointer-events-none" aria-hidden>
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+            <pattern id="afterglow-honey" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
+              <polygon points="6,0 12,3 12,9 6,12 0,9 0,3" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.3" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#afterglow-honey)" />
+          </svg>
         </div>
-        <div className="lp-hero-stats">
-          <div className="lp-stat">
-            <div className="lp-stat-num">1</div>
-            <div className="lp-stat-label">Resident Artist</div>
-          </div>
-          <div className="lp-stat-div" />
-          <div className="lp-stat">
-            <div className="lp-stat-num">5★</div>
-            <div className="lp-stat-label">Client Reviews</div>
-          </div>
-          <div className="lp-stat-div" />
-          <div className="lp-stat">
-            <div className="lp-stat-num">Appt</div>
-            <div className="lp-stat-label">By Appointment Only</div>
-          </div>
-        </div>
-      </section>
+        {/* Neon glow */}
+        <div
+          className="absolute -top-40 -left-40 h-[420px] w-[420px] rounded-full blur-3xl opacity-40 pointer-events-none"
+          style={{ background: "radial-gradient(circle, #00E5FF 0%, transparent 70%)" }}
+          aria-hidden
+        />
+        <div
+          className="absolute -bottom-32 -right-32 h-[520px] w-[520px] rounded-full blur-3xl opacity-30 pointer-events-none"
+          style={{ background: "radial-gradient(circle, hsl(var(--accent)) 0%, transparent 70%)" }}
+          aria-hidden
+        />
 
-      {/* ═══ HIRING BANNER ═══ */}
-      <section className="lp-hiring-banner">
-        <div className="lp-hiring-banner-inner">
-          <div className="lp-hiring-banner-left">
-            <span className="lp-hiring-banner-pulse" />
-            <span className="lp-hiring-banner-title">We Are Hiring</span>
-            <span className="lp-hiring-banner-div" />
-            <span className="lp-hiring-banner-desc">Nail Tech &amp; Hair Stylist · Booth Rental Available</span>
+        <div className="container relative z-10 py-20 md:py-28">
+          <div className="inline-flex items-center gap-2 mb-6">
+            <span className="h-px w-8 bg-accent" />
+            <span className="text-xs tracking-[0.3em] uppercase text-accent">
+              A-Z Enterprises · Family Hub Landing Zone
+            </span>
           </div>
-          <a href="#hiring" className="lp-hiring-banner-link">View Openings →</a>
+
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95] mb-6">
+            <span className="block text-white">Afterglow</span>
+            <span
+              className="block italic"
+              style={{
+                background: "linear-gradient(90deg, hsl(var(--accent)) 0%, #00E5FF 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Salon &amp; Spa
+            </span>
+          </h1>
+
+          <p className="max-w-2xl text-lg md:text-xl text-white/70 mb-8">
+            The glow-up floor of the Family Hub. Hair, nails, and quiet-luxury spa moments —
+            styled by independent pros who take pride in their chairs.
+          </p>
+
+          <div className="flex flex-wrap gap-3 mb-10">
+            <span className="px-3 py-1 rounded-full text-xs uppercase tracking-widest bg-accent text-primary font-semibold">
+              Now Open
+            </span>
+            <span className="px-3 py-1 rounded-full text-xs uppercase tracking-widest border border-accent/50 text-accent">
+              Appointment Only
+            </span>
+            <span
+              className="px-3 py-1 rounded-full text-xs uppercase tracking-widest border"
+              style={{ borderColor: "#00E5FF66", color: "#00E5FF" }}
+            >
+              Booth Rentals Available
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-primary font-bold shadow-[0_0_30px_hsl(var(--accent)/0.4)] hover:shadow-[0_0_50px_hsl(var(--accent)/0.6)] transition-all"
+            >
+              <Calendar className="h-5 w-5" />
+              Book an Appointment
+            </a>
+            <a
+              href="#hiring"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-white/20 text-white hover:border-accent/60 hover:text-accent transition-colors"
+            >
+              <Scissors className="h-5 w-5" />
+              Rent a Booth
+            </a>
+          </div>
+
+          <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/60">
+            <span className="inline-flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-accent" />
+              {SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city},{" "}
+              {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <Clock className="h-4 w-4 text-accent" />
+              By appointment · 7 days a week
+            </span>
+          </div>
         </div>
       </section>
 
       {/* ═══ ABOUT ═══ */}
-      <section className="lp-about lp-light">
-        <div className="lp-about-text">
-          <div className="section-label text-amber-200">Who We Are</div>
-          <h2>Not your average beauty studio.</h2>
-          <p className="text-amber-100">
-            High Maintenance Co. is a full nails and hair spa owned and operated by Desiree on the second floor of A-Z Enterprises in Wapakoneta, Ohio. We specialize in custom nail art, hair services, and the kind of results that make people stop and stare.
-          </p>
-          <p className="text-amber-100" style={{ marginTop: "12px" }}>Appointment-based. Portfolio-driven. Unapologetically detail-obsessed.</p>
-        </div>
-      </section>
-
-      {/* ═══ ARTIST ═══ */}
-      <section className="lp-artists">
-        {/* Desiree */}
-        <div className="lp-artist">
-          <div className="lp-artist-avatar">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-            <div className="lp-artist-spec pink">Nails</div>
-          </div>
+      <section className="container py-20">
+        <div className="grid md:grid-cols-2 gap-12 items-start">
           <div>
-            <div className="lp-artist-name">Desiree Brogaard</div>
-            <div className="lp-artist-role-pink">Owner · Nail Artist · Natural Nail Specialist</div>
-            <div className="lp-artist-tags">
-              <span className="lp-tag-p">Gel-X</span>
-              <span className="lp-tag-p">Acrylic Sets</span>
-              <span className="lp-tag-p">Nail Art</span>
-              <span className="lp-tag-p">Pedicures</span>
+            <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Who we are</div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              A calm, gold-lit chair inside the busiest building in town.
+            </h2>
+            <p className="text-white/70 leading-relaxed mb-4">
+              Afterglow is the salon and spa floor of A-Z Enterprises — tucked one flight above
+              the Family Hub Landing Zone. Drop the kids at the playground, take an hour for
+              yourself, and walk out lit from the inside.
+            </p>
+            <p className="text-white/70 leading-relaxed">
+              We're building a roster of independent stylists, nail artists and estheticians who
+              work by appointment. No walk-in chaos. No pressure. Just a clean room, a good
+              chair, and someone who actually cares about the outcome.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-accent/25 bg-black/40 p-8">
+            <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Services on deck</div>
+            <ul className="space-y-4">
+              {[
+                { icon: Scissors, title: "Hair", desc: "Cuts, color, blowouts, event styling." },
+                { icon: Sparkles, title: "Nails", desc: "Gel-X, acrylics, pedicures, custom art." },
+                { icon: Star, title: "Spa", desc: "Facials, waxing, brow and lash services." },
+              ].map((s) => (
+                <li key={s.title} className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center flex-shrink-0">
+                    <s.icon className="h-5 w-5 text-accent" />
+                  </div>
+                  <div>
+                    <div className="font-semibold">{s.title}</div>
+                    <div className="text-sm text-white/60">{s.desc}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-xs text-white/40">
+              Service menu &amp; pricing set by each independent artist. Book online to see
+              what's currently offered.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ BOOK ═══ */}
+      <section className="border-y border-accent/20 bg-gradient-to-b from-black to-[#0b0b0b]">
+        <div className="container py-20 text-center">
+          <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Book online</div>
+          <h3 className="text-3xl md:text-4xl font-bold mb-4">Reserve your chair.</h3>
+          <p className="max-w-xl mx-auto text-white/70 mb-8">
+            Same-day openings when we've got 'em. Deposit required to hold your slot.
+          </p>
+          <a
+            href={BOOKING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-primary font-bold shadow-[0_0_30px_hsl(var(--accent)/0.4)] hover:shadow-[0_0_60px_hsl(var(--accent)/0.6)] transition-all"
+          >
+            Book Now
+            <ArrowRight className="h-5 w-5" />
+          </a>
+        </div>
+      </section>
+
+      {/* ═══ HIRING ═══ */}
+      <section id="hiring" className="container py-20">
+        <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
+          <div>
+            <div className="text-xs uppercase tracking-[0.3em] mb-2" style={{ color: "#00E5FF" }}>
+              Now hiring
             </div>
-            <p className="lp-artist-desc text-amber-50">Maximalist nail artist, five years deep. From structured gel to full Gel-X. clean classic or elaborately over-the-top.</p>
-            <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="lp-artist-link-p">Book with Desiree →</a>
+            <h3 className="text-3xl md:text-4xl font-bold">Rent a booth at Afterglow.</h3>
           </div>
+          <span className="text-sm text-white/50">Wapakoneta, OH</span>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {[
+            {
+              title: "Nail Technician",
+              desc:
+                "Bring your book. We provide the room, the lighting, and the walk-through traffic from the Family Hub upstairs.",
+              bullets: ["Licensed & insured", "Gel, acrylic or nail art", "Booth rental or commission"],
+              href: NAIL_APPLY_URL,
+            },
+            {
+              title: "Hair Stylist",
+              desc:
+                "Cuts, color, styling — build your clientele in a clean, calm chair with steady foot traffic from the building.",
+              bullets: ["Licensed cosmetologist", "Cut, color & styling", "Booth rental or commission"],
+              href: HAIR_APPLY_URL,
+            },
+          ].map((role) => (
+            <div
+              key={role.title}
+              className="group relative rounded-2xl border border-white/10 bg-black/40 p-8 hover:border-accent/50 transition-colors"
+            >
+              <div
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity"
+                style={{ boxShadow: "0 0 40px hsl(var(--accent) / 0.15) inset" }}
+                aria-hidden
+              />
+              <h4 className="text-2xl font-bold mb-2">{role.title}</h4>
+              <div className="text-sm mb-4" style={{ color: "#00E5FF" }}>
+                Booth Rental Available
+              </div>
+              <p className="text-white/70 mb-6">{role.desc}</p>
+              <ul className="space-y-2 mb-8">
+                {role.bullets.map((b) => (
+                  <li key={b} className="flex items-center gap-2 text-sm text-white/70">
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                    {b}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href={role.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-primary font-semibold hover:shadow-[0_0_30px_hsl(var(--accent)/0.5)] transition-all"
+              >
+                Apply Now
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ═══ SERVICES ═══ */}
-      <section className="lp-services lp-light">
-        <div className="lp-svc-col">
-          <div className="lp-svc-col-head pink">Desiree. Nail Services</div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Classic Gel-X Set</span><span className="lp-svc-price-p">$97</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Standard Gel-X Set</span><span className="lp-svc-price-p">$113</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Classic Acrylic Set</span><span className="lp-svc-price-p">$85</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Luxury Pedi Combo</span><span className="lp-svc-price-p">$95</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Custom Designs</span><span className="lp-svc-price-p">$25+</span></div>
-          <div className="lp-svc-item"><span className="lp-svc-name">Classic Pedi</span><span className="lp-svc-price-p">$45</span></div>
-          <div className="lp-svc-more"><a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="pink">View all nail services →</a></div>
-        </div>
-      </section>
-
-      {/* ═══ BRIDAL ═══ */}
-      <section className="lp-bridal">
-        <div className="lp-bridal-head">
-          <h3>Bridal Collections</h3>
-          <span className="section-label text-amber-200">By Desiree</span>
-        </div>
-        <div className="lp-bridal-cards">
-          <div className="lp-bridal-card">
-            <div className="lp-bridal-tag">Bridal Package</div>
-            <div className="lp-bridal-price">$95</div>
-            <div className="lp-bridal-name">Soft &amp; Timeless</div>
-            <p className="lp-bridal-desc text-amber-100">Soft shades, delicate florals. Timeless bridal nail art for your perfect day.</p>
-            <button className="lp-bridal-btn">Book This Package</button>
+      {/* ═══ FOOTER STRIP ═══ */}
+      <footer className="border-t border-accent/20 bg-black">
+        <div className="container py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/50">
+          <div>
+            <div className="font-semibold text-white">Afterglow Salon &amp; Spa</div>
+            <div>
+              {SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city},{" "}
+              {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}
+            </div>
           </div>
-          <div className="lp-bridal-card">
-            <div className="lp-bridal-tag">Nail &amp; Rejuve Package</div>
-            <div className="lp-bridal-price">$100</div>
-            <div className="lp-bridal-name">Earn Your Dream Look</div>
-            <p className="lp-bridal-desc text-amber-100">Custom designs for the boldest day of your life. Rejuvenating nail treatment included.</p>
-            <button className="lp-bridal-btn">Book This Package</button>
+          <div className="flex items-center gap-6">
+            <Link to="/" className="hover:text-accent transition-colors">A-Z Enterprises</Link>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
+              Book
+            </a>
+            <a href="#hiring" className="hover:text-accent transition-colors">Careers</a>
           </div>
-          <div className="lp-bridal-card feat">
-            <div className="lp-bridal-tag">★ Most Popular</div>
-            <div className="lp-bridal-price">$285</div>
-            <div className="lp-bridal-name">Premium Bridal Package</div>
-            <p className="lp-bridal-desc text-amber-100">Full set with handmade press-ons, dazzling details, French tips, and more. Perfect for bridal parties.</p>
-            <button className="lp-bridal-btn">Book This Package</button>
-          </div>
+          <div>{SITE_CONFIG.business.copyright}</div>
         </div>
-      </section>
-
-      {/* ═══ BOOKING ═══ */}
-      <section className="lp-booking lp-light">
-        <div className="lp-booking-col">
-          <h3>Book with Desiree</h3>
-          <div className="role pink">Nail Artist · Natural Nail Specialist</div>
-          <div className="lp-booking-contact text-amber-100">
-            Book online via booking link<br />
-            24-hour advance notice required<br />
-            Walk-ins subject to availability<br />
-            Appointment only · Deposit required
-          </div>
-          <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer" className="lp-btn-pink">Book Nails Online</a>
-        </div>
-      </section>
-
-      {/* ═══ NOW HIRING ═══ */}
-      <section id="hiring" className="lp-hiring">
-        <div className="lp-hiring-head">
-          <h3>Now Hiring</h3>
-          <span className="section-label text-amber-200">Wapakoneta, OH</span>
-        </div>
-        <div className="lp-hiring-cards">
-          <div className="lp-hiring-card">
-            <h4>Nail Technician</h4>
-            <div className="role text-orange-100">Booth Rental Available</div>
-            <p className="text-slate-50">Join High Maintenance Co. We are looking for a licensed nail tech who takes pride in clean work and client relationships.</p>
-            <ul className="text-accent">
-              <li>Licensed and insured</li>
-              <li>Experienced with gel, acrylics, or nail art</li>
-              <li>Client-focused and reliable</li>
-              <li>Booth rental or commission structure</li>
-            </ul>
-            <a href="https://go.azenterpriseshq.com/nail-technician-application" target="_blank" rel="noopener noreferrer" className="lp-hiring-btn">Apply Now</a>
-          </div>
-          <div className="lp-hiring-card">
-            <h4>Hairdresser / Hairstylist</h4>
-            <div className="role text-orange-100">Booth Rental Available</div>
-            <p className="text-slate-50">We are building out our hair services and need a skilled stylist to bring cuts, color, and styling to our clients.</p>
-            <ul className="text-accent">
-              <li>Licensed cosmetologist</li>
-              <li>Comfortable with cuts, color, and styling</li>
-              <li>Professional and punctual</li>
-              <li>Booth rental or commission structure</li>
-            </ul>
-            <a href="https://go.azenterpriseshq.com/hair-dresser-application" target="_blank" rel="noopener noreferrer" className="lp-hiring-btn">Apply Now</a>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ FOOTER ═══ */}
-      <footer className="lp-footer">
-        <div className="lp-footer-left">
-          <div className="lp-footer-name">High Maintenance Co.</div>
-          <div className="lp-footer-address">{SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city}, {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}</div>
-        </div>
-        <div className="lp-footer-links">
-          <a href="/">Full Site</a>
-          <a href={GLOSSGENIUS_URL} target="_blank" rel="noopener noreferrer">Book Now</a>
-          <a href="/">A-Z Enterprises</a>
-        </div>
-        <div className="lp-footer-copy">{SITE_CONFIG.business.copyright}</div>
       </footer>
     </div>
   );
