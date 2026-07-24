@@ -27,10 +27,11 @@ type Tile = {
 
 const TILES: Tile[] = [
   {
-    name: "A-Z Total Fitness",
-    description: "Personal training and classes.",
+    name: "Zero Gravity Fitness",
+    description: "Private, appointment-only strength and training studio.",
     cta: "Learn More",
-    href: "/fitness",
+    href: "https://thelandingzonewapak.com/zero-gravity",
+    external: true,
     icon: Dumbbell,
   },
   {
