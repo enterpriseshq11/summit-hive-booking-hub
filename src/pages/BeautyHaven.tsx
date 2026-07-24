@@ -301,16 +301,16 @@ export default function BeautyHaven() {
             <div className="flex flex-wrap gap-3">
               <a
                 href={HAIR_APPLY_URL}
-                
-                
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/20 text-white hover:border-accent hover:text-accent transition-colors text-sm"
               >
                 Hair Stylist
               </a>
               <a
                 href={NAIL_APPLY_URL}
-                
-                
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/20 text-white hover:border-accent hover:text-accent transition-colors text-sm"
               >
                 Nail Technician
