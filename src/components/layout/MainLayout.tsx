@@ -22,7 +22,17 @@ export function MainLayout({ children }: MainLayoutProps) {
         Skip to main content
       </a>
 
-      {/* Grand opening banner removed after July 25 event */}
+      {/* Opening announcement banner */}
+      <a
+        href="https://thelandingzonewapak.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block bg-accent text-primary text-center text-sm font-semibold py-2 px-4 hover:opacity-90 transition-opacity"
+      >
+        The Family Hub Landing Zone opens August 1st. We pushed the date back while safety inspections are approved. See hours and passes →
+      </a>
+
+
 
 
       <Header />
