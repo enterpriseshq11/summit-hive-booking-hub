@@ -23,8 +23,8 @@ export default function CareersHighMaintenance() {
   return (
     <>
       <SEOHead
-        title="Careers at High Maintenance Co. | A-Z Enterprises"
-        description="Join High Maintenance Co. — now hiring hair stylists and nail techs in Wapakoneta, Ohio."
+        title="Careers at The Spa | A-Z Enterprises"
+        description="Join The Spa — now hiring hair stylists and nail techs in Wapakoneta, Ohio."
       />
       <div className="min-h-screen bg-background">
         <section className="py-12 bg-gradient-to-b from-fuchsia-500/10 to-background">
@@ -36,12 +36,12 @@ export default function CareersHighMaintenance() {
               </Link>
             </Button>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-lg bg-fuchsia-500/10 flex items-center justify-center">
-                <Scissors className="h-6 w-6 text-fuchsia-500" />
+              <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Scissors className="h-6 w-6 text-accent" />
               </div>
               <div>
-                <Badge variant="outline" className="mb-1">High Maintenance Co.</Badge>
-                <h1 className="text-3xl font-bold">High Maintenance Co.</h1>
+                <Badge variant="outline" className="mb-1">The Spa</Badge>
+                <h1 className="text-3xl font-bold">The Spa</h1>
               </div>
             </div>
             <p className="text-muted-foreground max-w-2xl">
@@ -54,7 +54,7 @@ export default function CareersHighMaintenance() {
         <section className="py-12 container">
           <CareerApplicationWizard
             team="high_maintenance"
-            teamName="High Maintenance Co."
+            teamName="The Spa"
             roles={ROLES}
             preSelectedRole={preSelectedRole}
           />

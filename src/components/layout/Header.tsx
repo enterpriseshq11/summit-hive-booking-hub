@@ -48,7 +48,7 @@ const experiencesItems = [
 // Health & Wellness dropdown items
 const healthItems = [
   { heading: "Zero Gravity Fitness", icon: Dumbbell, href: "/fitness", sub: null },
-  { heading: "Afterglow Salon & Spa", icon: Scissors, href: "/beauty-haven", sub: null },
+  { heading: "The Spa", icon: Scissors, href: "/beauty-haven", sub: null },
   { heading: "Elevated by Elyse", icon: Sparkles, href: "/shop/elevated-by-elyse", sub: null },
 ];
 

@@ -19,15 +19,15 @@ const NAIL_APPLY_URL = "https://go.azenterpriseshq.com/nail-technician-applicati
 const HAIR_APPLY_URL = "https://go.azenterpriseshq.com/hair-dresser-application";
 
 /**
- * Afterglow Salon & Spa
+ * The Spa
  * Customer-first landing page. Booth-rental info is a small strip at the bottom.
  */
 export default function BeautyHaven() {
   return (
     <div className="min-h-screen bg-[#0b0b0b] text-white selection:bg-accent/40">
       <SEOHead
-        title="Afterglow Salon & Spa | Book Hair, Nails & Spa in Wapakoneta"
-        description="Book hair, nails, facials and spa services at Afterglow Salon & Spa inside The Family Hub Landing Zone in Wapakoneta, Ohio. Appointments 7 days a week."
+        title="The Spa | Book Hair, Nails & Spa in Wapakoneta"
+        description="Book hair, nails, facials and spa services at The Spa inside The Family Hub Landing Zone in Wapakoneta, Ohio. Appointments 7 days a week."
         canonicalPath="/beauty-haven"
       />
 
@@ -35,10 +35,10 @@ export default function BeautyHaven() {
       <section className="relative overflow-hidden border-b border-accent/20">
         <div className="absolute inset-0 opacity-[0.08] pointer-events-none" aria-hidden>
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-            <pattern id="afterglow-honey" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
+            <pattern id="spa-honey" x="0" y="0" width="12" height="10.39" patternUnits="userSpaceOnUse">
               <polygon points="6,0 12,3 12,9 6,12 0,9 0,3" fill="none" stroke="hsl(var(--accent))" strokeWidth="0.3" />
             </pattern>
-            <rect width="100%" height="100%" fill="url(#afterglow-honey)" />
+            <rect width="100%" height="100%" fill="url(#spa-honey)" />
           </svg>
         </div>
         <div
@@ -61,7 +61,7 @@ export default function BeautyHaven() {
           </div>
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95] mb-6">
-            <span className="block text-white">Afterglow</span>
+            <span className="block text-white">The Spa</span>
             <span
               className="block italic"
               style={{
@@ -70,7 +70,7 @@ export default function BeautyHaven() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Salon &amp; Spa
+              Hair, Nails &amp; Glow
             </span>
           </h1>
 
@@ -189,11 +189,11 @@ export default function BeautyHaven() {
         </div>
       </section>
 
-      {/* ═══ WHY AFTERGLOW ═══ */}
+      {/* ═══ WHY THE SPA ═══ */}
       <section className="border-y border-accent/20 bg-gradient-to-b from-black to-[#0b0b0b]">
         <div className="container py-20">
           <div className="text-center mb-14">
-            <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Why Afterglow</div>
+            <div className="text-xs uppercase tracking-[0.3em] text-accent mb-4">Why The Spa</div>
             <h2 className="text-3xl md:text-4xl font-bold">
               A quieter kind of salon.
             </h2>
@@ -292,7 +292,7 @@ export default function BeautyHaven() {
                 For stylists & nail techs
               </div>
               <div className="font-semibold text-white">
-                Licensed pro? We rent chairs at Afterglow.
+                Licensed pro? We rent chairs at The Spa.
               </div>
               <p className="text-sm text-white/50 mt-1">
                 Steady walk-through traffic from the Family Hub. Booth rental or commission.
@@ -324,7 +324,7 @@ export default function BeautyHaven() {
       <footer className="border-t border-accent/20 bg-black">
         <div className="container py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/50">
           <div>
-            <div className="font-semibold text-white">Afterglow Salon &amp; Spa</div>
+            <div className="font-semibold text-white">The Spa</div>
             <div>
               {SITE_CONFIG.location.street}, 2nd Floor · {SITE_CONFIG.location.city},{" "}
               {SITE_CONFIG.location.stateAbbr} {SITE_CONFIG.location.zip}
