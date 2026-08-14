@@ -9,7 +9,7 @@ const footerLinks = {
     label: "Zero Gravity Fitness",
     href: "/fitness"
   }, {
-    label: "Afterglow Salon & Spa",
+    label: "The Spa",
     href: "/beauty-haven"
   }, {
     label: "The Hive Co-working Space",

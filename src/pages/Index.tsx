@@ -35,7 +35,7 @@ const TILES: Tile[] = [
     icon: Dumbbell,
   },
   {
-    name: "Afterglow Salon & Spa",
+    name: "The Spa",
     description: "Hair, nails, and glow-up services inside the building.",
     cta: "Book Now",
     href: "/beauty-haven",
