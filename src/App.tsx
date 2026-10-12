@@ -2,142 +2,138 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout, ProtectedRoute } from "@/components/layout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { lazy, Suspense } from "react";
+import { PageLoader } from "@/components/PageLoader";
 
 // Pages
-import Index from "./pages/Index";
-import FamilyHub from "./pages/FamilyHub";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import BookingHub from "./pages/BookingHub";
-import Login from "./pages/Login";
-import Account from "./pages/Account";
-import Summit from "./pages/Summit";
-import Coworking from "./pages/Coworking";
-import Spa from "./pages/Spa";
-import Fitness from "./pages/Fitness";
-import GiftCards from "./pages/GiftCards";
-import Promotions from "./pages/Promotions";
-import DopamineDrop from "./pages/DopamineDrop";
-import Vip from "./pages/Vip";
-import DopamineDropTerms from "./pages/DopamineDropTerms";
-import Shop from "./pages/Shop";
-import ElevatedByElyse from "./pages/shop/ElevatedByElyse";
-import BeamLights from "./pages/BeamLights";
-import VoiceVault from "./pages/VoiceVault";
-import PhotoBooth from "./pages/PhotoBooth";
-import PhotoBoothLanding from "./pages/PhotoBoothLanding";
-import BookWithWorker from "./pages/BookWithWorker";
-import BookVoiceVault from "./pages/BookVoiceVault";
-import BookSummit from "./pages/BookSummit";
-import BookSpa from "./pages/BookSpa";
-import JoinFitness from "./pages/JoinFitness";
-import TheHive from "./pages/TheHive";
+import HomePage from "./pages/HomePage";
+import BuildHere from "./pages/BuildHere";
+import About from "./pages/About";
+import SpaHolding from "./pages/SpaHolding";
+const FamilyHub = lazy(() => import("./pages/FamilyHub"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const BookingHub = lazy(() => import("./pages/BookingHub"));
+const Login = lazy(() => import("./pages/Login"));
+const Account = lazy(() => import("./pages/Account"));
+const Coworking = lazy(() => import("./pages/Coworking"));
+const Fitness = lazy(() => import("./pages/Fitness"));
+const GiftCards = lazy(() => import("./pages/GiftCards"));
+const Promotions = lazy(() => import("./pages/Promotions"));
+const DopamineDrop = lazy(() => import("./pages/DopamineDrop"));
+const Vip = lazy(() => import("./pages/Vip"));
+const DopamineDropTerms = lazy(() => import("./pages/DopamineDropTerms"));
+const Shop = lazy(() => import("./pages/Shop"));
+const ElevatedByElyse = lazy(() => import("./pages/shop/ElevatedByElyse"));
+const BeamLights = lazy(() => import("./pages/BeamLights"));
+const VoiceVault = lazy(() => import("./pages/VoiceVault"));
+const PhotoBooth = lazy(() => import("./pages/PhotoBooth"));
+const PhotoBoothLanding = lazy(() => import("./pages/PhotoBoothLanding"));
+const BookWithWorker = lazy(() => import("./pages/BookWithWorker"));
+const BookVoiceVault = lazy(() => import("./pages/BookVoiceVault"));
+const JoinFitness = lazy(() => import("./pages/JoinFitness"));
+const TheHive = lazy(() => import("./pages/TheHive"));
 import NotFound from "./pages/NotFound";
-import RequestService from "./pages/RequestService";
-import Careers from "./pages/Careers";
-import CareersSpa from "./pages/careers/CareersSpa";
-import CareersFitness from "./pages/careers/CareersFitness";
-import CareersContracting from "./pages/careers/CareersContracting";
-import CareersHighMaintenance from "./pages/careers/CareersHighMaintenance";
-import WorkerSignup from "./pages/WorkerSignup";
-import AuthCallback from "./pages/AuthCallback";
-import BeautyHaven from "./pages/BeautyHaven";
-import BeautyHavenNails from "./pages/BeautyHavenNails";
+const RequestService = lazy(() => import("./pages/RequestService"));
+const Careers = lazy(() => import("./pages/Careers"));
+const CareersFitness = lazy(() => import("./pages/careers/CareersFitness"));
+const CareersContracting = lazy(() => import("./pages/careers/CareersContracting"));
+const WorkerSignup = lazy(() => import("./pages/WorkerSignup"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 
 // Debug
-import AuthDebug from "./pages/__debug/AuthDebug";
-import DebugPing from "./pages/__debug/Ping";
+const AuthDebug = lazy(() => import("./pages/__debug/AuthDebug"));
+const DebugPing = lazy(() => import("./pages/__debug/Ping"));
 
 // Admin Pages
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminSchedule from "./pages/admin/Schedule";
-import AdminApprovals from "./pages/admin/Approvals";
-import AdminResources from "./pages/admin/Resources";
-import AdminPackages from "./pages/admin/Packages";
-import AdminPricingRules from "./pages/admin/PricingRules";
-import AdminBlackouts from "./pages/admin/Blackouts";
-import AdminDocuments from "./pages/admin/Documents";
-import AdminReviews from "./pages/admin/Reviews";
-import AdminLeadsWaitlists from "./pages/admin/LeadsWaitlists";
-import AdminUsersRoles from "./pages/admin/UsersRoles";
-import AdminAuditLog from "./pages/admin/AuditLog";
-import AdminAssumptions from "./pages/admin/Assumptions";
-import AdminIntegrations from "./pages/admin/Integrations";
-import AdminPromotions from "./pages/admin/Promotions";
-import AdminDopamineDrop from "./pages/admin/DopamineDrop";
-import AdminVoiceVault from "./pages/admin/VoiceVault";
-import AdminOfficeListings from "./pages/admin/OfficeListings";
-import AdminOfficePhotos from "./pages/admin/OfficePhotos";
-import AdminOfficePromotions from "./pages/admin/OfficePromotions";
-import AdminOfficeInquiries from "./pages/admin/OfficeInquiries";
-import AdminProviderSchedule from "./pages/admin/ProviderSchedule";
-import AdminPaymentSettings from "./pages/admin/PaymentSettings";
-import AdminCareerApplications from "./pages/admin/CareerApplications";
-import AdminSpaWorkers from "./pages/admin/SpaWorkers";
-import AdminWorkerCalendars from "./pages/admin/WorkerCalendars";
-import AdminGHLWebhookTest from "./pages/admin/GHLWebhookTest";
-import AdminSpecials from "./pages/admin/Specials";
-import AdminAdTracking from "./pages/admin/AdTracking";
-import AdminMobileHomesInventory from "./pages/admin/MobileHomesInventory";
-import AdminBusinessLeads from "./pages/admin/BusinessLeads";
-import AdminBusinessSubPage from "./pages/admin/BusinessSubPage";
-import AdminLeadDetail from "./pages/admin/LeadDetail";
-import AdminAlertsPage from "./pages/admin/AlertsPage";
-import AdminOrphanedFiles from "./pages/admin/OrphanedFiles";
-import AdminPhase1Checklist from "./pages/admin/Phase1Checklist";
-import AdminStripeMappingPage from "./pages/admin/StripeMappingPage";
-import AdminCommissionRulesPage from "./pages/admin/CommissionRulesPage";
-import AdminStripeConnectionPage from "./pages/admin/StripeConnectionPage";
-import AdminStripeTransactions from "./pages/admin/StripeTransactions";
-import AdminFitnessMemberships from "./pages/admin/FitnessMemberships";
-import AdminReports from "./pages/admin/Reports";
-import AdminErrorLog from "./pages/admin/ErrorLog";
-import AdminOnboarding from "./pages/admin/Onboarding";
-import AdminMHConnect from "./pages/admin/MHConnect";
-import AdminCadences from "./pages/admin/Cadences";
-import AdminDeploymentChecklist from "./pages/admin/DeploymentChecklist";
-import AdminPlatformGuide from "./pages/admin/PlatformGuide";
-import AdminSettingsOverview from "./pages/admin/SettingsOverview";
-import IntakePage from "./pages/intake/IntakePage";
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AdminSchedule = lazy(() => import("./pages/admin/Schedule"));
+const AdminApprovals = lazy(() => import("./pages/admin/Approvals"));
+const AdminResources = lazy(() => import("./pages/admin/Resources"));
+const AdminPackages = lazy(() => import("./pages/admin/Packages"));
+const AdminPricingRules = lazy(() => import("./pages/admin/PricingRules"));
+const AdminBlackouts = lazy(() => import("./pages/admin/Blackouts"));
+const AdminDocuments = lazy(() => import("./pages/admin/Documents"));
+const AdminReviews = lazy(() => import("./pages/admin/Reviews"));
+const AdminLeadsWaitlists = lazy(() => import("./pages/admin/LeadsWaitlists"));
+const AdminUsersRoles = lazy(() => import("./pages/admin/UsersRoles"));
+const AdminAuditLog = lazy(() => import("./pages/admin/AuditLog"));
+const AdminAssumptions = lazy(() => import("./pages/admin/Assumptions"));
+const AdminIntegrations = lazy(() => import("./pages/admin/Integrations"));
+const AdminPromotions = lazy(() => import("./pages/admin/Promotions"));
+const AdminDopamineDrop = lazy(() => import("./pages/admin/DopamineDrop"));
+const AdminVoiceVault = lazy(() => import("./pages/admin/VoiceVault"));
+const AdminOfficeListings = lazy(() => import("./pages/admin/OfficeListings"));
+const AdminOfficePhotos = lazy(() => import("./pages/admin/OfficePhotos"));
+const AdminOfficePromotions = lazy(() => import("./pages/admin/OfficePromotions"));
+const AdminOfficeInquiries = lazy(() => import("./pages/admin/OfficeInquiries"));
+const AdminProviderSchedule = lazy(() => import("./pages/admin/ProviderSchedule"));
+const AdminPaymentSettings = lazy(() => import("./pages/admin/PaymentSettings"));
+const AdminCareerApplications = lazy(() => import("./pages/admin/CareerApplications"));
+const AdminSpaWorkers = lazy(() => import("./pages/admin/SpaWorkers"));
+const AdminWorkerCalendars = lazy(() => import("./pages/admin/WorkerCalendars"));
+const AdminGHLWebhookTest = lazy(() => import("./pages/admin/GHLWebhookTest"));
+const AdminSpecials = lazy(() => import("./pages/admin/Specials"));
+const AdminAdTracking = lazy(() => import("./pages/admin/AdTracking"));
+const AdminMobileHomesInventory = lazy(() => import("./pages/admin/MobileHomesInventory"));
+const AdminBusinessLeads = lazy(() => import("./pages/admin/BusinessLeads"));
+const AdminBusinessSubPage = lazy(() => import("./pages/admin/BusinessSubPage"));
+const AdminLeadDetail = lazy(() => import("./pages/admin/LeadDetail"));
+const AdminAlertsPage = lazy(() => import("./pages/admin/AlertsPage"));
+const AdminOrphanedFiles = lazy(() => import("./pages/admin/OrphanedFiles"));
+const AdminPhase1Checklist = lazy(() => import("./pages/admin/Phase1Checklist"));
+const AdminStripeMappingPage = lazy(() => import("./pages/admin/StripeMappingPage"));
+const AdminCommissionRulesPage = lazy(() => import("./pages/admin/CommissionRulesPage"));
+const AdminStripeConnectionPage = lazy(() => import("./pages/admin/StripeConnectionPage"));
+const AdminStripeTransactions = lazy(() => import("./pages/admin/StripeTransactions"));
+const AdminFitnessMemberships = lazy(() => import("./pages/admin/FitnessMemberships"));
+const AdminReports = lazy(() => import("./pages/admin/Reports"));
+const AdminErrorLog = lazy(() => import("./pages/admin/ErrorLog"));
+const AdminOnboarding = lazy(() => import("./pages/admin/Onboarding"));
+const AdminMHConnect = lazy(() => import("./pages/admin/MHConnect"));
+const AdminCadences = lazy(() => import("./pages/admin/Cadences"));
+const AdminDeploymentChecklist = lazy(() => import("./pages/admin/DeploymentChecklist"));
+const AdminPlatformGuide = lazy(() => import("./pages/admin/PlatformGuide"));
+const AdminSettingsOverview = lazy(() => import("./pages/admin/SettingsOverview"));
+const IntakePage = lazy(() => import("./pages/intake/IntakePage"));
 
 // Command Center / CRM Pages
-import CommandCenterLeads from "./pages/command-center/Leads";
-import CommandCenterLeadDetail from "./pages/command-center/LeadDetail";
-import CommandCenterPipeline from "./pages/command-center/Pipeline";
-import CommandCenterEmployees from "./pages/command-center/Employees";
-import CommandCenterEmployeeDetail from "./pages/command-center/EmployeeDetail";
-import CommandCenterActivity from "./pages/command-center/Activity";
-import CommandCenterAlerts from "./pages/command-center/Alerts";
-import CommandCenterRevenue from "./pages/command-center/Revenue";
-import CommandCenterCommissions from "./pages/command-center/Commissions";
-import CommandCenterSettings from "./pages/command-center/Settings";
-import CommandCenterPayroll from "./pages/command-center/Payroll";
+const CommandCenterLeads = lazy(() => import("./pages/command-center/Leads"));
+const CommandCenterLeadDetail = lazy(() => import("./pages/command-center/LeadDetail"));
+const CommandCenterPipeline = lazy(() => import("./pages/command-center/Pipeline"));
+const CommandCenterEmployees = lazy(() => import("./pages/command-center/Employees"));
+const CommandCenterEmployeeDetail = lazy(() => import("./pages/command-center/EmployeeDetail"));
+const CommandCenterActivity = lazy(() => import("./pages/command-center/Activity"));
+const CommandCenterAlerts = lazy(() => import("./pages/command-center/Alerts"));
+const CommandCenterRevenue = lazy(() => import("./pages/command-center/Revenue"));
+const CommandCenterCommissions = lazy(() => import("./pages/command-center/Commissions"));
+const CommandCenterSettings = lazy(() => import("./pages/command-center/Settings"));
+const CommandCenterPayroll = lazy(() => import("./pages/command-center/Payroll"));
 
 // Public Coworking
-import OfficeListingsHub from "./pages/coworking/OfficeListingsHub";
-import OfficeDetailPage from "./pages/coworking/OfficeDetailPage";
+const OfficeListingsHub = lazy(() => import("./pages/coworking/OfficeListingsHub"));
+const OfficeDetailPage = lazy(() => import("./pages/coworking/OfficeDetailPage"));
 
 // E3
-import E3Dashboard from "./pages/e3/Dashboard";
-import E3SubmitEvent from "./pages/e3/SubmitEvent";
-import E3MyEvents from "./pages/e3/MyEvents";
-import E3BookingDetails from "./pages/e3/BookingDetails";
-import E3Calendar from "./pages/e3/Calendar";
-import E3AdminDeposits from "./pages/e3/AdminDeposits";
-import E3AdminBlackouts from "./pages/e3/AdminBlackouts";
-import E3AdminPayouts from "./pages/e3/AdminPayouts";
-import E3AdminReports from "./pages/e3/AdminReports";
-import E3AdminAudit from "./pages/e3/AdminAudit";
-import E3AdminHealth from "./pages/e3/AdminHealth";
-import E3AdminCoordinators from "./pages/e3/AdminCoordinators";
-import E3Commissions from "./pages/e3/Commissions";
+const E3Dashboard = lazy(() => import("./pages/e3/Dashboard"));
+const E3SubmitEvent = lazy(() => import("./pages/e3/SubmitEvent"));
+const E3MyEvents = lazy(() => import("./pages/e3/MyEvents"));
+const E3BookingDetails = lazy(() => import("./pages/e3/BookingDetails"));
+const E3Calendar = lazy(() => import("./pages/e3/Calendar"));
+const E3AdminDeposits = lazy(() => import("./pages/e3/AdminDeposits"));
+const E3AdminBlackouts = lazy(() => import("./pages/e3/AdminBlackouts"));
+const E3AdminPayouts = lazy(() => import("./pages/e3/AdminPayouts"));
+const E3AdminReports = lazy(() => import("./pages/e3/AdminReports"));
+const E3AdminAudit = lazy(() => import("./pages/e3/AdminAudit"));
+const E3AdminHealth = lazy(() => import("./pages/e3/AdminHealth"));
+const E3AdminCoordinators = lazy(() => import("./pages/e3/AdminCoordinators"));
+const E3Commissions = lazy(() => import("./pages/e3/Commissions"));
 
 const queryClient = new QueryClient();
 
@@ -145,6 +141,7 @@ function AppInner() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Debug */}
         <Route path="/__debug/auth" element={<AuthDebug />} />
@@ -152,17 +149,20 @@ function AppInner() {
 
         {/* Public routes */}
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/build" element={<BuildHere />} />
+          <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/request-service" element={<RequestService />} />
           <Route path="/booking" element={<BookingHub />} />
-          <Route path="/summit" element={<Summit />} />
+          {/* Retired routes. Old page files stay in the repo, unreferenced. */}
+          <Route path="/summit" element={<Navigate to="/" replace />} />
           <Route path="/coworking" element={<Coworking />} />
           <Route path="/family-hub" element={<FamilyHub />} />
           <Route path="/coworking/offices" element={<OfficeListingsHub />} />
           <Route path="/coworking/offices/:slug" element={<OfficeDetailPage />} />
-          <Route path="/spa" element={<Spa />} />
+          <Route path="/spa" element={<SpaHolding />} />
           <Route path="/book-with/:slug" element={<BookWithWorker />} />
           <Route path="/fitness" element={<Fitness />} />
           <Route path="/gift-cards" element={<GiftCards />} />
@@ -177,26 +177,26 @@ function AppInner() {
           <Route path="/360-photo-booth" element={<PhotoBooth />} />
           <Route path="/360-photo-booth/book" element={<PhotoBoothLanding />} />
           <Route path="/book-voice-vault" element={<BookVoiceVault />} />
-          <Route path="/book-summit" element={<BookSummit />} />
-          <Route path="/book-spa" element={<BookSpa />} />
+          <Route path="/book-summit" element={<Navigate to="/" replace />} />
+          <Route path="/book-spa" element={<Navigate to="/spa" replace />} />
           <Route path="/join-fitness" element={<JoinFitness />} />
           <Route path="/the-hive" element={<TheHive />} />
-          <Route path="/beauty-haven" element={<BeautyHaven />} />
-          <Route path="/beauty-haven/nails" element={<BeautyHavenNails />} />
+          <Route path="/beauty-haven" element={<Navigate to="/spa" replace />} />
+          <Route path="/beauty-haven/nails" element={<Navigate to="/spa" replace />} />
 
           {/* Public Intake Forms */}
           <Route path="/intake/:unit" element={<IntakePage />} />
 
           {/* Careers */}
           <Route path="/careers" element={<Careers />} />
-          <Route path="/careers/spa" element={<CareersSpa />} />
-          <Route path="/careers/spa/:role" element={<CareersSpa />} />
+          <Route path="/careers/spa" element={<Navigate to="/careers" replace />} />
+          <Route path="/careers/spa/:role" element={<Navigate to="/careers" replace />} />
           <Route path="/careers/fitness" element={<CareersFitness />} />
           <Route path="/careers/fitness/:role" element={<CareersFitness />} />
           <Route path="/careers/contracting" element={<CareersContracting />} />
           <Route path="/careers/contracting/:role" element={<CareersContracting />} />
-          <Route path="/careers/high-maintenance" element={<CareersHighMaintenance />} />
-          <Route path="/careers/high-maintenance/:role" element={<CareersHighMaintenance />} />
+          <Route path="/careers/high-maintenance" element={<Navigate to="/careers" replace />} />
+          <Route path="/careers/high-maintenance/:role" element={<Navigate to="/careers" replace />} />
 
           {/* Protected customer */}
           <Route element={<ProtectedRoute />}>
@@ -362,6 +362,7 @@ function AppInner() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

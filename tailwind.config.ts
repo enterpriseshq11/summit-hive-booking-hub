@@ -21,6 +21,9 @@ export default {
 			fontFamily: {
 				sans: ["Inter", "system-ui", "sans-serif"],
 				display: ["Inter", "system-ui", "sans-serif"],
+				azd: ['"Big Shoulders Display"', "Oswald", "Impact", "sans-serif"],
+				azs: ['"Instrument Sans"', "system-ui", "sans-serif"],
+				azi: ["Fraunces", "Georgia", "serif"],
 			},
 			colors: {
 				border: "hsl(var(--border))",
@@ -85,6 +88,23 @@ export default {
 				coworking: "hsl(var(--coworking))",
 				spa: "hsl(var(--spa))",
 				fitness: "hsl(var(--fitness))",
+				// A-Z public site brand (scoped names, does not touch shared tokens)
+				az: {
+					ink: "#0C0B09",
+					ink2: "#110F0B",
+					ink3: "#16130E",
+					gold: "#E3A83A",
+					goldlight: "#F4D489",
+					golddark: "#7E5210",
+					paper: "#F3EDE2",
+					paper2: "#FBF8F2",
+					paperline: "#DCD2C0",
+					body: "#D8CFBF",
+					soft: "#CFC6B6",
+					muted: "#A39886",
+					onpaper: "#3E372E",
+					onpapermuted: "#5E554A",
+				},
 			},
 			borderRadius: {
 				lg: "var(--radius)",

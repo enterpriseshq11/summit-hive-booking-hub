@@ -1,4 +1,5 @@
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
+import { SITE_CONFIG } from "@/config/siteConfig";
 import { LeadIntakeForm } from "@/components/booking/LeadIntakeForm";
 import {
   SUMMIT_FIELDS, SPA_FIELDS, FITNESS_FIELDS, HIVE_FIELDS,
@@ -20,8 +21,8 @@ const UNIT_CONFIG: Record<string, {
     description: "Tell us about your event and we'll get back to you within 24 hours.",
     fields: SUMMIT_FIELDS,
     brandColor: "amber",
-    contactPhone: "[SUMMIT_PHONE]",
-    contactEmail: "[SUMMIT_EMAIL]",
+    contactPhone: SITE_CONFIG.contact.phone,
+    contactEmail: SITE_CONFIG.contact.email,
   },
   spa: {
     businessUnit: "spa",
@@ -29,35 +30,35 @@ const UNIT_CONFIG: Record<string, {
     description: "Book your spa experience. We'll confirm your appointment within 24 hours.",
     fields: SPA_FIELDS,
     brandColor: "purple",
-    contactPhone: "[SPA_PHONE]",
-    contactEmail: "[SPA_EMAIL]",
+    contactPhone: SITE_CONFIG.contact.phone,
+    contactEmail: SITE_CONFIG.contact.email,
   },
   fitness: {
     businessUnit: "fitness",
-    title: "A-Z Total Fitness",
+    title: "Zero Gravity Fitness",
     description: "Start your fitness journey. We'll reach out within 24 hours.",
     fields: FITNESS_FIELDS,
     brandColor: "green",
-    contactPhone: "[FITNESS_PHONE]",
-    contactEmail: "[FITNESS_EMAIL]",
+    contactPhone: SITE_CONFIG.contact.phone,
+    contactEmail: SITE_CONFIG.contact.email,
   },
   hive: {
     businessUnit: "coworking",
-    title: "The Hive by A-Z",
+    title: "The Hive Coworking",
     description: "Find your perfect workspace. We'll contact you within 24 hours.",
     fields: HIVE_FIELDS,
     brandColor: "blue",
-    contactPhone: "[HIVE_PHONE]",
-    contactEmail: "[HIVE_EMAIL]",
+    contactPhone: SITE_CONFIG.contact.phone,
+    contactEmail: SITE_CONFIG.contact.email,
   },
   "voice-vault": {
     businessUnit: "voice_vault",
-    title: "Voice Vault Studio",
+    title: "Voice Vault Recording Studio",
     description: "Book your studio session. We'll confirm within 24 hours.",
     fields: VOICE_VAULT_FIELDS,
     brandColor: "red",
-    contactPhone: "[VOICEVAULT_PHONE]",
-    contactEmail: "[VOICEVAULT_EMAIL]",
+    contactPhone: SITE_CONFIG.contact.phone,
+    contactEmail: SITE_CONFIG.contact.email,
   },
   "elevated-by-elyse": {
     businessUnit: "elevated_by_elyse",
@@ -65,22 +66,26 @@ const UNIT_CONFIG: Record<string, {
     description: "Elevate your style. We'll be in touch within 24 hours.",
     fields: ELEVATED_FIELDS,
     brandColor: "pink",
-    contactPhone: "[ELEVATED_PHONE]",
-    contactEmail: "[ELEVATED_EMAIL]",
+    contactPhone: SITE_CONFIG.contact.phone,
+    contactEmail: SITE_CONFIG.contact.email,
   },
   "mobile-homes": {
     businessUnit: "mobile_homes",
-    title: "A-Z Mobile Homes",
+    title: "A-Z Mobile Home Enterprises",
     description: "Buy, sell, transport, or renovate. We'll be in touch within 24 hours.",
     fields: MOBILE_HOMES_FIELDS,
     brandColor: "emerald",
-    contactPhone: "(419) 738-8811",
-    contactEmail: "dylan@a-zenterpriseshq.com",
+    contactPhone: SITE_CONFIG.contact.phone,
+    contactEmail: SITE_CONFIG.contact.email,
   },
 };
 
 export default function IntakePage() {
   const { unit } = useParams<{ unit: string }>();
+  // Retired units send people somewhere useful instead of a dead form.
+  if (unit === "summit") return <Navigate to="/" replace />;
+  if (unit === "spa") return <Navigate to="/spa" replace />;
+
   const config = unit ? UNIT_CONFIG[unit] : null;
 
   if (!config) {
@@ -106,7 +111,7 @@ export default function IntakePage() {
 
       <LeadIntakeForm
         businessUnit={config.businessUnit}
-        title={`Request Info. ${config.title}`}
+        title={`Request info: ${config.title}`}
         description={config.description}
         fields={config.fields}
       />
@@ -114,7 +119,6 @@ export default function IntakePage() {
       <div className="max-w-2xl mx-auto mt-6 text-center text-zinc-500 text-sm space-y-1">
         <p>Questions? Call us at {config.contactPhone} or email {config.contactEmail}</p>
         <p>10 W Auglaize St, Wapakoneta, Ohio 45895</p>
-        <p>Open 6:00 AM – 10:00 PM, 7 days a week</p>
       </div>
     </div>
   );

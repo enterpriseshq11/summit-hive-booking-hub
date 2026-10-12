@@ -3,10 +3,6 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import {
   MapPin,
-  Heart,
-  Scissors,
-  Sparkles,
-  Eye,
   Dumbbell,
   Wrench,
   Hammer,
@@ -19,7 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-type Category = "Beauty & spa" | "Fitness" | "Contracting" | "Cleaning" | "Childcare";
+type Category = "Fitness" | "Contracting" | "Cleaning" | "Childcare";
 
 type Role = {
   title: string;
@@ -37,56 +33,22 @@ const ROLES: Role[] = [
     category: "Childcare",
     location: "Wapakoneta, OH",
     description:
-      "Help launch The Family Hub Landing Zone. Ohio childcare licensing/credentials required. Immediate need — apply today.",
+      "Help launch The Family Hub Landing Zone. Ohio childcare credentials required.",
     applyUrl: "https://api.leadconnectorhq.com/widget/form/fz0nmdpCG1NfYUiVRocE",
     icon: Baby,
     urgent: true,
   },
   {
-    title: "Massage therapist",
-    category: "Beauty & spa",
-    location: "Wapakoneta, OH",
-    description:
-      "Join our wellness team. Multiple modalities welcome. License a plus but not required.",
-    applyUrl: "https://api.leadconnectorhq.com/widget/form/vzud34CnRZN0Et5EzIXn",
-    icon: Heart,
-  },
-  {
-    title: "Hairstylist",
-    category: "Beauty & spa",
-    location: "Wapakoneta, OH",
-    description:
-      "Bring your clients or start fresh. Booth rent and commission options available.",
-    applyUrl: "https://go.azenterpriseshq.com/hair-dresser-application",
-    icon: Scissors,
-  },
-  {
-    title: "Nail technician",
-    category: "Beauty & spa",
-    location: "Wapakoneta, OH",
-    description: "Manicures, pedicures, nail art — all specialties welcome.",
-    applyUrl: "https://go.azenterpriseshq.com/nail-technician-application",
-    icon: Sparkles,
-  },
-  {
-    title: "Esthetician",
-    category: "Beauty & spa",
-    location: "Wapakoneta, OH",
-    description: "Skincare, facials, and more. Flexible compensation available.",
-    applyUrl: "https://api.leadconnectorhq.com/widget/form/5G6IoLO1DEaulhZWu7W7",
-    icon: Eye,
-  },
-  {
-    title: "Personal trainer",
+    title: "Personal trainer, independent",
     category: "Fitness",
     location: "Wapakoneta, OH",
     description:
-      "Help members hit their goals. Certification a plus. Gym-based role.",
-    applyUrl: "https://api.leadconnectorhq.com/widget/form/uf4C0ELWQwLZ9z0GvVAU",
+      "Run your own training business inside our building. Bring your clients to the Zero Gravity Fitness floor.",
+    applyUrl: "/build",
     icon: Dumbbell,
   },
   {
-    title: "Contractor — General/Handyman",
+    title: "Contractor, general and handyman",
     category: "Contracting",
     location: "Wapakoneta, OH",
     description:
@@ -95,7 +57,7 @@ const ROLES: Role[] = [
     icon: Wrench,
   },
   {
-    title: "Contractor — Carpenter/Builder",
+    title: "Contractor, carpenter and builder",
     category: "Contracting",
     location: "Wapakoneta, OH",
     description:
@@ -104,18 +66,17 @@ const ROLES: Role[] = [
     icon: Hammer,
   },
   {
-    title: "Cleaner — Commercial Building",
+    title: "Cleaner, commercial building",
     category: "Cleaning",
     location: "Wapakoneta, OH",
     description:
-      "Recurring cleaning for our spa, fitness area, event center, and family venue in downtown Wapakoneta.",
+      "Recurring cleaning for our downtown commercial building.",
     applyUrl: "https://api.leadconnectorhq.com/widget/form/rkdNaRaeKStqV1Hbh4z6",
     icon: Building,
   },
 ];
 
 const CATEGORY_STYLES: Record<Category, { bg: string; text: string }> = {
-  "Beauty & spa": { bg: "#FBEAF0", text: "#72243E" },
   Fitness: { bg: "#E1F5EE", text: "#085041" },
   Contracting: { bg: "#FAEEDA", text: "#633806" },
   Cleaning: { bg: "#E6F1FB", text: "#0C447C" },
@@ -125,7 +86,6 @@ const CATEGORY_STYLES: Record<Category, { bg: string; text: string }> = {
 const FILTERS: ("All" | Category)[] = [
   "All",
   "Childcare",
-  "Beauty & spa",
   "Fitness",
   "Contracting",
   "Cleaning",
@@ -139,7 +99,7 @@ const WHY_CARDS = [
   },
   {
     title: "Competitive pay",
-    body: "Employee pay, commission, or booth/chair rent — your choice.",
+    body: "Employee pay, commission, or contract, depending on the role.",
     icon: Coins,
   },
   {
@@ -149,7 +109,7 @@ const WHY_CARDS = [
   },
   {
     title: "Room to grow",
-    body: "We're expanding — and we promote from within.",
+    body: "We are growing, and we promote from within.",
     icon: TrendingUp,
   },
 ];
@@ -169,7 +129,7 @@ export default function Careers() {
     <>
       <SEOHead
         title="Careers at A-Z Enterprises | Join Our Team"
-        description="Now hiring in Wapakoneta, OH. Explore open positions across beauty & spa, fitness, contracting, and cleaning."
+        description="Open roles in Wapakoneta, OH across childcare, fitness, contracting, and cleaning at A-Z Enterprises."
       />
       <div className="min-h-screen bg-background">
         {/* Hero */}
@@ -183,7 +143,7 @@ export default function Careers() {
                 className="uppercase tracking-widest text-xs font-medium mb-3"
                 style={{ color: "#C9982A" }}
               >
-                Now hiring
+                Careers
               </p>
               <h1 className="text-3xl md:text-5xl font-semibold mb-5 text-white leading-tight">
                 Build your career with A-Z Enterprises
@@ -239,7 +199,7 @@ export default function Careers() {
         <section id="open-positions" className="pb-16">
           <div className="container max-w-5xl">
             <p className="uppercase tracking-wider text-xs font-medium text-muted-foreground mb-4">
-              Open positions — {ROLES.length} roles
+              Open positions: {ROLES.length} roles
             </p>
 
             <div className="flex flex-wrap gap-2 mb-6">
@@ -304,7 +264,7 @@ export default function Careers() {
                           }}
                         />
                       </span>
-                      {role.urgent ? "Urgent — Hiring now" : "Hiring now"}
+                      {role.urgent ? "Priority role" : "Taking applications"}
                     </span>
 
                     <div
@@ -337,12 +297,12 @@ export default function Careers() {
 
                     <a
                       href={role.applyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      target={role.applyUrl.startsWith("/") ? undefined : "_blank"}
+                      rel={role.applyUrl.startsWith("/") ? undefined : "noopener noreferrer"}
                       className="inline-flex items-center justify-center px-4 py-2.5 rounded-md text-sm font-semibold transition-opacity hover:opacity-90 self-start"
                       style={{ backgroundColor: "#C9982A", color: "#1a1a1a" }}
                     >
-                      Apply now →
+                      {role.applyUrl.startsWith("/") ? "Build it here →" : "Apply now →"}
                     </a>
                   </div>
                 );

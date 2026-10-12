@@ -1,7 +1,8 @@
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
+import { PageLoader } from "@/components/PageLoader";
 import { Outlet } from "react-router-dom";
-import { Header } from "./Header";
-import { Footer } from "./Footer";
+import { AzHeader } from "@/components/az/AzHeader";
+import { AzFooter } from "@/components/az/AzFooter";
 import { useBookingsRealtime } from "@/hooks/useBookingsRealtime";
 
 interface MainLayoutProps {
@@ -21,16 +22,11 @@ export function MainLayout({ children }: MainLayoutProps) {
       >
         Skip to main content
       </a>
-
-
-
-
-
-      <Header />
+      <AzHeader />
       <main id="main-content" className="flex-1" role="main">
-        {children ?? <Outlet />}
+        <Suspense fallback={<PageLoader />}>{children ?? <Outlet />}</Suspense>
       </main>
-      <Footer />
+      <AzFooter />
     </div>
   );
 }

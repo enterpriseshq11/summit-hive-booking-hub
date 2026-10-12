@@ -11,7 +11,7 @@ interface SEOHeadProps {
 }
 
 const SITE_NAME = 'A-Z Enterprises';
-const BASE_URL = 'https://summit-hive-booking-hub.lovable.app';
+const BASE_URL = 'https://azenterpriseshq.com';
 const DEFAULT_IMAGE = 'https://storage.googleapis.com/gpt-engineer-file-uploads/x1s1h5VC7lUIw9juXAA6RyWcS0o2/social-images/social-1767638102399-Enterprise Logo.jpg';
 
 /**
@@ -28,7 +28,7 @@ export function SEOHead({
   jsonLd,
 }: SEOHeadProps) {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
-  const canonicalUrl = canonicalPath ? `${BASE_URL}/#${canonicalPath}` : undefined;
+  const canonicalUrl = canonicalPath ? `${BASE_URL}${canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`}` : undefined;
 
   return (
     <Helmet>

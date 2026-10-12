@@ -20,19 +20,19 @@ export default function TheHive() {
       name: "Standard Private Office",
       code: "S",
       price: offices?.find((o) => o.code.startsWith("S"))?.monthly_rate ?? 350,
-      features: ["Lockable private office", "Furnished desk and chair", "24/7 building access", "WiFi included", "Shared conference room"],
+      features: ["Lockable private office", "Furnished desk and chair", "Building access", "WiFi included", "Shared conference room"],
     },
     {
       name: "Premium Executive Suite",
       code: "P",
       price: offices?.find((o) => o.code.startsWith("P"))?.monthly_rate ?? 550,
-      features: ["Larger private office", "Premium furnishings", "24/7 building access", "WiFi included", "Priority conference room", "Dedicated parking spot"],
+      features: ["Larger private office", "Premium furnishings", "Building access", "WiFi included", "Priority conference room"],
     },
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="The Hive Co-Working Space. Private Offices in Wapakoneta" description="Rent a private office at The Hive by A-Z. Affordable coworking and private offices in Wapakoneta, Ohio." />
+      <SEOHead title="The Hive Coworking | Private Offices in Downtown Wapakoneta" description="Private offices and shared workspace at The Hive Coworking, inside 10 W. Auglaize St. in downtown Wapakoneta, Ohio." canonicalPath="/the-hive" />
 
       {/* Hero */}
       <section className="bg-primary text-primary-foreground py-16 px-4">
@@ -40,13 +40,13 @@ export default function TheHive() {
           <Badge className="bg-accent text-accent-foreground">
             {isLoading ? "Loading..." : `${availableCount} of ${totalCount} Offices Available`}
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold">The Hive Co-Working Space</h1>
+          <h1 className="text-4xl md:text-5xl font-bold">The Hive Coworking</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Professional private offices and coworking space in the heart of Wapakoneta.
           </p>
           <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {SITE_CONFIG.location.street}, Suite D</span>
-            <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> 24/7 Access</span>
+            <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> Building access</span>
             <span className="flex items-center gap-1"><Phone className="w-4 h-4" /> {SITE_CONFIG.contact.phone}</span>
           </div>
         </div>
@@ -56,8 +56,8 @@ export default function TheHive() {
       {!isLoading && (
         <div className={`py-3 px-4 text-center text-sm font-semibold ${availableCount > 0 ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}>
           {availableCount > 0
-            ? `${availableCount} office${availableCount !== 1 ? "s" : ""} available right now. secure yours today`
-            : "All offices are currently leased. join our waitlist"}
+            ? `${availableCount} office${availableCount !== 1 ? "s" : ""} available right now. Ask for a tour.`
+            : "All offices are currently leased. Join the waitlist."}
         </div>
       )}
 
@@ -106,7 +106,7 @@ export default function TheHive() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: Building2, title: "Professional Space", desc: "Dedicated offices in a modern building" },
-              { icon: Clock, title: "24/7 Access", desc: "Work on your schedule with round-the-clock access" },
+              { icon: Clock, title: "Building Access", desc: "Get in and get to work. Access details come with your office." },
               { icon: Users, title: "Community", desc: "Network with other professionals in the building" },
               { icon: CalendarDays, title: "Flexible Terms", desc: "Month-to-month leases with no long commitments" },
             ].map((item) => (

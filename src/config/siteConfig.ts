@@ -12,31 +12,31 @@ export const SITE_CONFIG = {
   // Division-specific contact (suite addresses + direct lines)
   divisions: {
     spa: {
-      name: "Restoration Lounge Spa",
+      name: "The Spa",
       suite: "Suite A",
       phone: "(419) 909-6031",
       phoneLink: "tel:+14199096031",
     },
     fitness: {
-      name: "A-Z Total Fitness",
+      name: "Zero Gravity Fitness",
       suite: "Suite B",
       phone: "(419) 909-6031",
       phoneLink: "tel:+14199096031",
     },
     summit: {
-      name: "The Summit Event Center",
+      name: "The Summit Event Center", // retired, not used on any public page
       suite: "Suite C",
       phone: "(419) 909-6031",
       phoneLink: "tel:+14199096031",
     },
     coworking: {
-      name: "The Hive Co-Working Space",
+      name: "The Hive Coworking",
       suite: "Suite D",
       phone: "(419) 909-6031",
       phoneLink: "tel:+14199096031",
     },
     voiceVault: {
-      name: "Voice Vault Podcast Studio",
+      name: "Voice Vault Recording Studio",
       suite: "Suite Z",
       phone: "(419) 909-6031",
       phoneLink: "tel:+14199096031",
@@ -54,18 +54,18 @@ export const SITE_CONFIG = {
     zip: "45895",
   },
   
-  // Operating Hours
+  // Operating Hours. Each business carries its own hours. Nothing building-wide is published.
   hours: {
-    days: "7 Days a Week",
-    time: "6:00 AM – 10:00 PM",
-    range: "7 days a week, 6:00 AM – 10:00 PM",
-    shortDays: "Open 7 Days",
+    days: "Call for hours",
+    time: "Call for hours",
+    range: "Hours vary by business. Call for hours.",
+    shortDays: "Call for hours",
   },
   
   // Business Info
   business: {
     name: "A-Z Enterprises",
-    tagline: "One Call, We Handle It All",
+    tagline: "Built by a family. Built for downtown Wapak.",
     copyright: `© ${new Date().getFullYear()} A-Z Enterprises. All rights reserved.`,
   },
   

@@ -1,0 +1,18 @@
+/* A-Z Enterprises public site brand. Scoped helpers only, shared tokens untouched. */
+@font-face{font-family:"Big Shoulders Display";src:url("/fonts/big-shoulders-display-latin-800-normal.woff2") format("woff2");font-weight:800;font-style:normal;font-display:swap}
+@font-face{font-family:"Big Shoulders Display";src:url("/fonts/big-shoulders-display-latin-900-normal.woff2") format("woff2");font-weight:900;font-style:normal;font-display:swap}
+@font-face{font-family:"Fraunces";src:url("/fonts/fraunces-latin-400-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Fraunces";src:url("/fonts/fraunces-latin-500-italic.woff2") format("woff2");font-weight:500;font-style:italic;font-display:swap}
+@font-face{font-family:"Instrument Sans";src:url("/fonts/instrument-sans-latin-400-normal.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Instrument Sans";src:url("/fonts/instrument-sans-latin-500-normal.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Instrument Sans";src:url("/fonts/instrument-sans-latin-600-normal.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
+
+.az-site{background:#0C0B09;color:#F3EDE2;font-family:"Instrument Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.az-display{font-family:"Big Shoulders Display",Oswald,Impact,sans-serif;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:.005em}
+.az-eyebrow{font-family:"Instrument Sans",system-ui,sans-serif;font-weight:600;font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:#E3A83A}
+.az-spectrum-bg{background:linear-gradient(90deg,#FF3D8B,#A45CFF,#2FA8FF,#2FD68A,#FFC53D,#FF7A2F)}
+.az-spectrum-text{background:linear-gradient(90deg,#FF5C9E,#B57AFF,#4DB6FF,#3FE09A,#FFD15C,#FF8A47);-webkit-background-clip:text;background-clip:text;color:transparent}
+.az-site a:focus-visible,.az-site button:focus-visible,.az-site input:focus-visible,.az-site select:focus-visible,.az-site textarea:focus-visible{outline:2px solid #F4D489;outline-offset:3px}
+.az-reveal{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.az-reveal.is-in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.az-reveal{opacity:1;transform:none;transition:none}}
