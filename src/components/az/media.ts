@@ -7,6 +7,6 @@ export const MEDIA = {
 
 export const FAMILY_HUB_URL = "https://thelandingzonewapak.com";
 export const ZERO_GRAVITY_URL = "https://thelandingzonewapak.com/zero-gravity";
-export const MH_CONNECT_URL = "https://mhconnecthomes.com";
+export const AZ_ESTATES_URL = "https://a-zestates.com";
 export const SITE_URL = "https://azenterpriseshq.com";
 export const OG_IMAGE = `${SITE_URL}/media/az-the-building-poster.jpg`;

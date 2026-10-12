@@ -5,7 +5,7 @@ import { SEOHead } from "@/components/seo";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import { AzVideo, AI_LINE } from "@/components/az/AzVideo";
 import { Reveal } from "@/components/az/Reveal";
-import { MEDIA, FAMILY_HUB_URL, ZERO_GRAVITY_URL, MH_CONNECT_URL, SITE_URL, OG_IMAGE } from "@/components/az/media";
+import { MEDIA, FAMILY_HUB_URL, ZERO_GRAVITY_URL, AZ_ESTATES_URL, SITE_URL, OG_IMAGE } from "@/components/az/media";
 
 const btnPrimary =
   "inline-flex min-h-[54px] items-center justify-center gap-2 rounded-md bg-az-gold px-7 text-[17px] font-semibold text-az-ink transition-colors hover:bg-az-goldlight";
@@ -34,7 +34,7 @@ const BUSINESSES: Biz[] = [
   { tag: "Second floor", name: "Voice Vault Recording Studio", text: "Book studio time for your podcast, voiceover, or music.", cta: "Book studio time", to: "/book-voice-vault" },
   { tag: "Ground floor · The Vault", name: "Elevated by Elyse", text: "The gift shop inside The Vault. Opens with The Family Hub Landing Zone.", cta: "Learn more", to: "/shop/elevated-by-elyse" },
   { tag: "In the works", name: "The Spa", text: "Sauna and tanning. No bookings yet. Leave your info and we will tell you when it is ready.", cta: "Get notified", to: "/spa", variant: "dashed" },
-  { tag: "Ohio and Kentucky", name: "A-Z Mobile Home Enterprises", text: "Mobile homes bought, renovated, and sold across Ohio and Kentucky.", cta: "See homes on MH Connect", href: MH_CONNECT_URL },
+  { tag: "Ohio and Kentucky", name: "A-Z Mobile Home Enterprises", text: "Mobile homes bought, renovated, and sold across Ohio and Kentucky.", cta: "Visit A-Z Estates", href: AZ_ESTATES_URL },
 ];
 
 const jsonLd = {
