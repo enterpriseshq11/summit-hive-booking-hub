@@ -23,7 +23,7 @@ const BookingHub = lazy(() => import("./pages/BookingHub"));
 const Login = lazy(() => import("./pages/Login"));
 const Account = lazy(() => import("./pages/Account"));
 const Coworking = lazy(() => import("./pages/Coworking"));
-const Fitness = lazy(() => import("./pages/Fitness"));
+const GymPage = lazy(() => import("./pages/GymPage"));
 const GiftCards = lazy(() => import("./pages/GiftCards"));
 const Promotions = lazy(() => import("./pages/Promotions"));
 const DopamineDrop = lazy(() => import("./pages/DopamineDrop"));
@@ -152,6 +152,8 @@ function AppInner() {
           <Route path="/" element={<HomePage />} />
           <Route path="/build" element={<BuildHere />} />
           <Route path="/about" element={<About />} />
+          <Route path="/gym" element={<GymPage />} />
+          <Route path="/zero-gravity" element={<Navigate to="/gym" replace />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/request-service" element={<RequestService />} />
@@ -164,7 +166,7 @@ function AppInner() {
           <Route path="/coworking/offices/:slug" element={<OfficeDetailPage />} />
           <Route path="/spa" element={<SpaHolding />} />
           <Route path="/book-with/:slug" element={<BookWithWorker />} />
-          <Route path="/fitness" element={<Fitness />} />
+          <Route path="/fitness" element={<Navigate to="/gym" replace />} />
           <Route path="/gift-cards" element={<GiftCards />} />
           <Route path="/promotions" element={<Promotions />} />
           <Route path="/dopamine-drop" element={<DopamineDrop />} />

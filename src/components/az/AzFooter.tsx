@@ -35,6 +35,7 @@ export function AzFooter() {
           </div>
           <div>
             <div className={head}>Company</div>
+            <Link to="/gym" className={link}>Zero Gravity Fitness</Link>
             <Link to="/build" className={link}>Build Here</Link>
             <Link to="/about" className={link}>About</Link>
             <Link to="/careers" className={link}>Careers</Link>

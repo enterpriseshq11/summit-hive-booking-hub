@@ -5,7 +5,7 @@ import { SEOHead } from "@/components/seo";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import { AzVideo, AI_LINE } from "@/components/az/AzVideo";
 import { Reveal } from "@/components/az/Reveal";
-import { MEDIA, FAMILY_HUB_URL, ZERO_GRAVITY_URL, AZ_ESTATES_URL, SITE_URL, OG_IMAGE } from "@/components/az/media";
+import { MEDIA, FAMILY_HUB_URL, AZ_ESTATES_URL, SITE_URL, OG_IMAGE } from "@/components/az/media";
 
 const btnPrimary =
   "inline-flex min-h-[54px] items-center justify-center gap-2 rounded-md bg-az-gold px-7 text-[17px] font-semibold text-az-ink transition-colors hover:bg-az-goldlight";
@@ -20,20 +20,20 @@ const FLOORS = [
 ];
 
 const LANES = [
-  { icon: Dumbbell, title: "Personal trainers", text: "Train your clients inside Zero Gravity Fitness, a private, appointment-only floor. You run your book. We run the building." },
+  { icon: Dumbbell, title: "Personal trainers", text: "Train your clients inside Zero Gravity Fitness on the ground floor. You run your book. We run the building." },
   { icon: Building2, title: "Offices and suites", text: "Private offices at The Hive Coworking, from one desk to a full suite.", link: { to: "/the-hive", label: "See what is open" } },
-  { icon: Leaf, title: "Wellness and services", text: "Sauna and tanning are in the works. Licensed in wellness or a service families use? Let us talk." },
+  { icon: Leaf, title: "Wellness and services", text: "Tanning is in the works. Licensed in wellness or a service families use? Let us talk." },
   { icon: Users, title: "Classes and partners", text: "Run a class or a program for kids. Sponsor a room. Partner with us on something good for downtown." },
 ];
 
 type Biz = { tag: string; name: string; text: string; cta: string; href?: string; to?: string; variant?: "anchor" | "dashed" };
 const BUSINESSES: Biz[] = [
   { tag: "The anchor · Floors G, 1, 2", name: "The Family Hub Landing Zone", text: "Family venue for every age. Get on the list to hear first.", cta: "Visit thelandingzonewapak.com", href: FAMILY_HUB_URL, variant: "anchor" },
-  { tag: "Ground floor", name: "Zero Gravity Fitness", text: "Private, appointment-only training floor.", cta: "Learn more", href: ZERO_GRAVITY_URL },
+  { tag: "Ground floor", name: "Zero Gravity Fitness", text: "The gym in the building. Work out while your kids play, or come on your own.", cta: "See how it works", to: "/gym" },
   { tag: "Second floor", name: "The Hive Coworking", text: "Private offices and shared workspace downtown.", cta: "See open offices", to: "/the-hive" },
   { tag: "Second floor", name: "Voice Vault Recording Studio", text: "Book studio time for your podcast, voiceover, or music.", cta: "Book studio time", to: "/book-voice-vault" },
   { tag: "Ground floor · The Vault", name: "Elevated by Elyse", text: "The gift shop inside The Vault. Opens with The Family Hub Landing Zone.", cta: "Learn more", to: "/shop/elevated-by-elyse" },
-  { tag: "In the works", name: "The Spa", text: "Sauna and tanning. No bookings yet. Leave your info and we will tell you when it is ready.", cta: "Get notified", to: "/spa", variant: "dashed" },
+  { tag: "In the works", name: "The Spa", text: "Tanning is in the works. The infrared sauna comes with every gym pass. Leave your info and we will tell you when tanning is ready.", cta: "Get notified", to: "/spa", variant: "dashed" },
   { tag: "Ohio and Kentucky", name: "A-Z Mobile Home Enterprises", text: "Mobile homes bought, renovated, and sold across Ohio and Kentucky.", cta: "Visit A-Z Estates", href: AZ_ESTATES_URL },
 ];
 
@@ -225,6 +225,53 @@ export default function HomePage() {
             <a href={FAMILY_HUB_URL} target="_blank" rel="noopener noreferrer" className={`${btnGhost} mt-6 w-full whitespace-nowrap px-5 text-[15px]`}>
               Visit The Family Hub Landing Zone <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
             </a>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* THE GYM */}
+      <section id="gym" className="scroll-mt-20 py-24 md:py-32">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-14 px-5 md:px-6 lg:flex-row lg:items-center">
+          <Reveal className="min-w-0 lg:flex-[0.9]">
+            <p className="az-eyebrow mb-5">Zero Gravity Fitness · Ground floor</p>
+            <h2 className="az-display text-[56px] md:text-[96px]">
+              They play.
+              <br />
+              <span className="text-az-gold">You train.</span>
+            </h2>
+            <p className="mt-6 text-[19px] leading-[1.65] text-az-body">
+              The gym in this building is built for parents. During child watch, add the gym to your kid's day pass for $4 and watch them on the gym TV while you work out. Here on your own? $9 gets you the gym, the infrared sauna, and the second floor.
+            </p>
+            <ul className="mt-7 flex flex-wrap gap-2.5" aria-label="Gym prices">
+              {[
+                ["$4", "with your kids"],
+                ["$9", "day pass"],
+                ["$65", "a month"],
+                ["$89", "a month, 24/7"],
+              ].map(([amt, what]) => (
+                <li key={what} className="inline-flex items-baseline gap-2 rounded-full border border-[rgba(227,168,58,0.4)] px-4 py-2">
+                  <span className="az-display text-[24px] leading-none text-az-gold">{amt}</span>
+                  <span className="text-[14px] text-az-soft">{what}</span>
+                </li>
+              ))}
+            </ul>
+            <Link to="/gym" className={`${btnPrimary} mt-8`}>
+              See how the gym works <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </Link>
+          </Reveal>
+          <Reveal className="min-w-0 lg:flex-[1.3]" delay={120}>
+            <figure>
+              <div className="overflow-hidden rounded-[10px] border border-[rgba(227,168,58,0.3)] bg-az-ink">
+                <AzVideo
+                  src={MEDIA.gym.src}
+                  webm={MEDIA.gym.webm}
+                  poster={MEDIA.gym.poster}
+                  label="Animated film: how the gym works from 5 to 9 PM. Kid day pass, add The Window, add the gym for $4, watch the kids on the gym TV. On your own: $9 gym day pass, or memberships at $65 and $89 a month."
+                  className="block aspect-video w-full object-cover"
+                />
+              </div>
+              <figcaption className="mt-3 text-[13px] text-az-muted">{AI_LINE}</figcaption>
+            </figure>
           </Reveal>
         </div>
       </section>

@@ -1,12 +1,12 @@
 import { FormEvent, useId, useState } from "react";
 import { SITE_CONFIG } from "@/config/siteConfig";
 import {
-  CONSENT_TEXT,
+  GYM_OPTIONS,
   InquiryErrors,
   InquiryKind,
   LANES,
-  SPA_CONSENT_TEXT,
   START_WINDOWS,
+  consentTextFor,
   submitInquiry,
   validateInquiry,
 } from "@/lib/buildingInquiry";
@@ -76,7 +76,9 @@ export function InquiryForm({ kind, submitLabel }: InquiryFormProps) {
         <p className="mt-4 text-[18px] leading-relaxed text-az-onpaper">
           {kind === "build"
             ? "A real person from A-Z will call you. Thank you for thinking about building here."
-            : "We will reach out when The Spa is ready. Thank you."}
+            : kind === "gym"
+              ? "You are on the list for Zero Gravity Fitness. A real person from A-Z will reach out."
+              : "We will reach out when The Spa is ready. Thank you."}
         </p>
       </div>
     );
@@ -96,7 +98,7 @@ export function InquiryForm({ kind, submitLabel }: InquiryFormProps) {
       noValidate
       onSubmit={onSubmit}
       className="relative grid gap-5 rounded-xl border border-az-paperline bg-az-paper2 p-6 sm:grid-cols-2 md:p-9"
-      aria-label={kind === "build" ? "Tell us what you want to build" : "Tell me when The Spa is ready"}
+      aria-label={kind === "build" ? "Tell us what you want to build" : kind === "gym" ? "Get on the gym list" : "Tell me when The Spa is ready"}
     >
       <div className="flex flex-col gap-2">
         <label className="text-[14px] font-semibold text-az-ink" htmlFor={id("fullName")}>Full name</label>
@@ -112,7 +114,23 @@ export function InquiryForm({ kind, submitLabel }: InquiryFormProps) {
             onChange={(e) => set("businessName")(e.target.value)} maxLength={120} />
           {err("businessName")}
         </div>
-      ) : (
+      ) : kind === "spa" ? (
+        <div className="flex flex-col gap-2">
+          <label className="text-[14px] font-semibold text-az-ink" htmlFor={id("email")}>Email</label>
+          <input id={id("email")} type="email" className={`${inputBase} ${border("email")}`} autoComplete="email" value={values.email}
+            onChange={(e) => set("email")(e.target.value)} aria-invalid={!!errors.email} aria-describedby={described("email")} />
+          {err("email")}
+        </div>
+      ) : null}
+
+      <div className="flex flex-col gap-2">
+        <label className="text-[14px] font-semibold text-az-ink" htmlFor={id("phone")}>{kind === "spa" ? "Mobile phone (optional)" : "Mobile phone"}</label>
+        <input id={id("phone")} type="tel" inputMode="tel" className={`${inputBase} ${border("phone")}`} autoComplete="tel" value={values.phone}
+          onChange={(e) => set("phone")(e.target.value)} aria-invalid={!!errors.phone} aria-describedby={described("phone")} />
+        {err("phone")}
+      </div>
+
+      {kind !== "spa" && (
         <div className="flex flex-col gap-2">
           <label className="text-[14px] font-semibold text-az-ink" htmlFor={id("email")}>Email</label>
           <input id={id("email")} type="email" className={`${inputBase} ${border("email")}`} autoComplete="email" value={values.email}
@@ -121,19 +139,17 @@ export function InquiryForm({ kind, submitLabel }: InquiryFormProps) {
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        <label className="text-[14px] font-semibold text-az-ink" htmlFor={id("phone")}>{kind === "build" ? "Mobile phone" : "Mobile phone (optional)"}</label>
-        <input id={id("phone")} type="tel" inputMode="tel" className={`${inputBase} ${border("phone")}`} autoComplete="tel" value={values.phone}
-          onChange={(e) => set("phone")(e.target.value)} aria-invalid={!!errors.phone} aria-describedby={described("phone")} />
-        {err("phone")}
-      </div>
-
-      {kind === "build" && (
+      {kind === "gym" && (
         <div className="flex flex-col gap-2">
-          <label className="text-[14px] font-semibold text-az-ink" htmlFor={id("email")}>Email</label>
-          <input id={id("email")} type="email" className={`${inputBase} ${border("email")}`} autoComplete="email" value={values.email}
-            onChange={(e) => set("email")(e.target.value)} aria-invalid={!!errors.email} aria-describedby={described("email")} />
-          {err("email")}
+          <label className="text-[14px] font-semibold text-az-ink" htmlFor={id("lane")}>Which one fits you?</label>
+          <select id={id("lane")} className={`${inputBase} ${border("lane")}`} value={values.lane}
+            onChange={(e) => set("lane")(e.target.value)} aria-invalid={!!errors.lane} aria-describedby={described("lane")}>
+            <option value="">Pick one</option>
+            {GYM_OPTIONS.map((g) => (
+              <option key={g.value} value={g.value}>{g.label}</option>
+            ))}
+          </select>
+          {err("lane")}
         </div>
       )}
 
@@ -181,7 +197,7 @@ export function InquiryForm({ kind, submitLabel }: InquiryFormProps) {
         <label htmlFor={id("consent")} className="flex items-start gap-3 text-[14px] leading-relaxed text-az-onpaper">
           <input id={id("consent")} type="checkbox" className="mt-0.5 h-[22px] w-[22px] shrink-0 accent-[#0C0B09]" checked={values.consent}
             onChange={(e) => set("consent")(e.target.checked)} aria-invalid={!!errors.consent} aria-describedby={described("consent")} />
-          <span>{kind === "build" ? CONSENT_TEXT : SPA_CONSENT_TEXT}</span>
+          <span>{consentTextFor(kind)}</span>
         </label>
         <div className="mt-2">{err("consent")}</div>
       </div>
@@ -189,7 +205,7 @@ export function InquiryForm({ kind, submitLabel }: InquiryFormProps) {
       <div className="flex flex-col gap-3 sm:col-span-2">
         <button type="submit" disabled={status === "sending"}
           className="inline-flex min-h-[54px] w-full items-center justify-center rounded-md bg-az-ink px-8 text-[17px] font-semibold text-az-goldlight transition-opacity hover:opacity-90 disabled:opacity-60 sm:w-auto sm:self-start">
-          {status === "sending" ? "Sending" : submitLabel ?? (kind === "build" ? "Send it" : "Tell me when it is ready")}
+          {status === "sending" ? "Sending" : submitLabel ?? (kind === "build" ? "Send it" : kind === "gym" ? "Put me on the list" : "Tell me when it is ready")}
         </button>
         {status === "failed" && (
           <p role="alert" className="text-[15px] font-medium text-[#A3261B]">

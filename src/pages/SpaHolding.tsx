@@ -4,13 +4,13 @@ import { SEOHead } from "@/components/seo";
 import { InquiryForm } from "@/components/az/InquiryForm";
 import { OG_IMAGE } from "@/components/az/media";
 
-/** /spa while sauna and tanning are in the works. No prices, no services, no booking. */
+/** /spa while tanning is in the works. The infrared sauna now comes with the gym (/gym). No prices, no services, no booking. */
 export default function SpaHolding() {
   return (
     <div className="az-site overflow-x-hidden">
       <SEOHead
         title="The Spa at 10 W. Auglaize | A-Z Enterprises"
-        description="Sauna and tanning are in the works at 10 W. Auglaize St. in downtown Wapakoneta. Leave your info and we will tell you when it is ready."
+        description="Tanning is in the works at 10 W. Auglaize St. in downtown Wapakoneta. The infrared sauna comes with every Zero Gravity Fitness pass and membership."
         canonicalPath="/spa"
         image={OG_IMAGE}
       />
@@ -19,7 +19,13 @@ export default function SpaHolding() {
           <p className="az-eyebrow mb-6">In the works</p>
           <h1 className="az-display text-[72px] sm:text-[96px] lg:text-[128px]">The Spa</h1>
           <p className="mt-6 max-w-[640px] text-[20px] leading-relaxed text-az-body">
-            Sauna and tanning are in the works at 10 W. Auglaize. No bookings yet. Leave your info and we will tell you when it is ready.
+            Tanning is in the works at 10 W. Auglaize. No bookings yet. Leave your info and we will tell you when it is ready.
+          </p>
+          <p className="mt-5 max-w-[640px] text-[18px] leading-relaxed text-az-soft">
+            Looking for the infrared sauna? It comes with every Zero Gravity Fitness pass and membership.{" "}
+            <Link to="/gym" className="inline-flex items-center gap-1 font-semibold text-az-goldlight underline underline-offset-4">
+              See the gym <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
           </p>
         </div>
       </section>

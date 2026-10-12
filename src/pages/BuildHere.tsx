@@ -8,7 +8,7 @@ import { MEDIA, OG_IMAGE } from "@/components/az/media";
 const WAYS = [
   { n: "01", title: "Personal trainers", text: "Train your clients on the Zero Gravity Fitness floor. Your clients, your book, our building." },
   { n: "02", title: "Offices and suites", text: "A private office at The Hive Coworking, or a suite for a growing team." },
-  { n: "03", title: "Wellness and services", text: "Licensed pros and services that families use. Sauna and tanning space is in the works." },
+  { n: "03", title: "Wellness and services", text: "Licensed pros and services that families use. Tanning space is in the works." },
   { n: "04", title: "Classes and programs", text: "Teach a class, run a camp, or bring a program for kids into the building." },
   { n: "05", title: "Your idea", text: "Partner, sponsor, shop, or something we have not thought of. Pitch us.", dashed: true },
 ];

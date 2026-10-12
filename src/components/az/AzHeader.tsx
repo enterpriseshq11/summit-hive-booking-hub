@@ -16,6 +16,7 @@ export function AzWordmark({ size = "md" }: { size?: "md" | "lg" }) {
 
 const NAV = [
   { label: "The Building", to: "/#building" },
+  { label: "The Gym", to: "/gym" },
   { label: "The Family Hub Landing Zone", href: FAMILY_HUB_URL },
   { label: "Businesses", to: "/#businesses" },
   { label: "About", to: "/about" },
