@@ -148,7 +148,7 @@ export default function HomePage() {
       <section className="border-y border-[rgba(227,168,58,0.18)] bg-az-ink2">
         <div className="mx-auto grid max-w-[1280px] gap-8 px-5 py-10 sm:grid-cols-2 md:px-6 lg:grid-cols-4">
           {[
-            ["24,000", "square feet in the heart of        downtown Wapak"],
+            ["24,000", "square feet in the heart of \ndowntown Wapak"],
             ["4 FLOORS", "and an elevator to every one of them"],
             ["1 ANCHOR", "a family venue running through three floors"],
             ["FAMILY-RUN", "you deal with the people who own the building"],
