@@ -233,14 +233,14 @@ export default function HomePage() {
       <section id="gym" className="scroll-mt-20 py-24 md:py-32">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-14 px-5 md:px-6 lg:flex-row lg:items-center">
           <Reveal className="min-w-0 lg:flex-[0.9]">
-            <p className="az-eyebrow mb-5">Zero Gravity Fitness · Ground floor</p>
+            <p className="az-eyebrow mb-5">Zero Gravity Fitness</p>
             <h2 className="az-display text-[56px] md:text-[96px]">
               They play.
               <br />
               <span className="text-az-gold">You train.</span>
             </h2>
             <p className="mt-6 text-[19px] leading-[1.65] text-az-body">
-              The gym in this building is built for parents. During child watch, add the gym to your kid's day pass for $4 and watch them on the gym TV while you work out. Here on your own? $9 gets you the gym, the infrared sauna, and the second floor.
+              A real gym in this building, built for parents. Racks, free weights, machines, and cardio. During child watch, add the gym to your kid's day pass for $4 and watch them on the gym TV while you work out. Here on your own? $9 gets you the gym, the infrared sauna, and the second floor.
             </p>
             <ul className="mt-7 flex flex-wrap gap-2.5" aria-label="Gym prices">
               {[
@@ -263,14 +263,14 @@ export default function HomePage() {
             <figure>
               <div className="overflow-hidden rounded-[10px] border border-[rgba(227,168,58,0.3)] bg-az-ink">
                 <AzVideo
-                  src={MEDIA.gym.src}
-                  webm={MEDIA.gym.webm}
-                  poster={MEDIA.gym.poster}
-                  label="Animated film: how the gym works from 5 to 9 PM. Kid day pass, add The Window, add the gym for $4, watch the kids on the gym TV. On your own: $9 gym day pass, or memberships at $65 and $89 a month."
+                  src={MEDIA.gymReal.src}
+                  webm={MEDIA.gymReal.webm}
+                  poster={MEDIA.gymReal.poster}
+                  label="Real footage walking through Zero Gravity Fitness: power racks, free weights, machines, and cardio under honeycomb LED lights."
                   className="block aspect-video w-full object-cover"
                 />
               </div>
-              <figcaption className="mt-3 text-[13px] text-az-muted">{AI_LINE}</figcaption>
+              <figcaption className="mt-3 text-[13px] text-az-muted">Real footage from inside Zero Gravity Fitness.</figcaption>
             </figure>
           </Reveal>
         </div>

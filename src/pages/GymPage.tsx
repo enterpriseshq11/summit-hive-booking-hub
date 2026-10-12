@@ -4,13 +4,35 @@ import { SEOHead } from "@/components/seo";
 import { AzVideo, AI_LINE } from "@/components/az/AzVideo";
 import { Reveal } from "@/components/az/Reveal";
 import { InquiryForm } from "@/components/az/InquiryForm";
-import { MEDIA, FAMILY_HUB_URL, GYM_OG_IMAGE, GYM_TV_IMAGE, SITE_URL } from "@/components/az/media";
+import { MEDIA, FAMILY_HUB_URL, GYM_OG_IMAGE, GYM_PHOTOS, SITE_URL } from "@/components/az/media";
 
 /**
  * /gym, Zero Gravity Fitness.
  * Display copy only. Nothing on this page sells, charges, or books. The only write is the
  * gym list form, which inserts one row into leads and sends nothing to anyone.
+ * Real photos and real footage are captioned as real. The animated explainer carries the AI line.
  */
+
+const REAL_LINE = "Real footage from inside Zero Gravity Fitness.";
+
+const GALLERY = [
+  { src: GYM_PHOTOS.wide, alt: "The gym floor: red power racks, benches, and plate-loaded machines along a mirrored wall under honeycomb LED lights", w: 1290, h: 751, cls: "col-span-2 row-span-2" },
+  { src: GYM_PHOTOS.lights, alt: "Honeycomb LED lights over benches, a power rack, a heavy bag, and a window looking outside", w: 900, h: 1200, cls: "row-span-2" },
+  { src: GYM_PHOTOS.racks, alt: "A Smith machine with cable pulleys next to red power racks and mirrors", w: 900, h: 506, cls: "" },
+  { src: GYM_PHOTOS.brick, alt: "A wall-mounted red rack and leg machines along a white brick wall", w: 900, h: 506, cls: "" },
+  { src: GYM_PHOTOS.bag, alt: "A heavy bag on a stand beside mirrors, with benches and racks behind it", w: 900, h: 506, cls: "" },
+  { src: GYM_PHOTOS.floor, alt: "Wide view of treadmills, pull-up and dip towers, benches, and racks down the length of the gym", w: 1600, h: 900, cls: "col-span-2" },
+  { src: GYM_PHOTOS.legs, alt: "The leg press and hack squat sled with the dumbbell area and windows behind it", w: 1600, h: 900, cls: "" },
+];
+
+const EQUIPMENT = [
+  { title: "Power racks", text: "Red power racks and half racks for squats, bench, and pull-ups." },
+  { title: "Smith machine and cables", text: "A Smith machine with cable pulleys for presses, rows, and pulldowns." },
+  { title: "Free weights", text: "Olympic bars, bumper and iron plates, a hex bar, a full dumbbell rack, and kettlebells." },
+  { title: "Plate-loaded machines", text: "A leg press and hack squat sled, plus a plate-loaded chest press." },
+  { title: "Benches and stations", text: "Adjustable benches, leg extension and curl, back extension, and pull-up and dip towers." },
+  { title: "Cardio and conditioning", text: "Treadmills, bikes, battle ropes, bands, slam balls, and a heavy bag." },
+];
 
 const STEPS = [
   { n: "1", title: "Get your kid a day pass.", text: "Every kid gets their own pass. Day passes live on The Family Hub Landing Zone site." },
@@ -28,13 +50,15 @@ const BENEFITS = [
 
 const RULES = [
   "You stay in the building the whole time. The Window is never drop-off.",
+  "Matched tag check-in. Only the adult holding the matching tag picks up.",
+  "One staff member for every 6 kids.",
   "The Window is for kids 3 and up who are potty trained. Staff do not change diapers.",
   "The gym is for adults 18 and up, with a signed waiver.",
   "The Window runs Wednesday to Sunday, 5 to 9 PM, and Saturday mornings, 10 AM to 1 PM.",
 ];
 
 const INCLUDED = [
-  { title: "Zero Gravity Fitness", text: "The gym floor on the ground level." },
+  { title: "Zero Gravity Fitness", text: "The full gym floor." },
   { title: "Infrared sauna", text: "Finish your workout with heat." },
   { title: "The Gaming Room", text: "Second floor." },
   { title: "The Hive Coworking", text: "Second floor. Bring the laptop." },
@@ -49,6 +73,7 @@ const PLANS = [
 
 const FAQ = [
   { q: "Do I need a kid's pass to use the gym?", a: "No. With your kids during child watch, the gym is $4 on top of their day pass. On your own, it is the $9 gym day pass or a membership." },
+  { q: "I have a Family Hub Landing Zone membership. Do I pay for the gym?", a: "No. Members get the gym and The Window free on every visit." },
   { q: "Can I leave the building while my kids are in The Window?", a: "No. You stay in the building the whole time. That is the rule, every time." },
   { q: "What comes with the $9 day pass?", a: "The gym, the infrared sauna, and the second floor: the Gaming Room, The Hive coworking space, and the Voice Vault podcast room." },
   { q: "What is the difference between the two memberships?", a: "Same access to everything. $65 a month gets you in from 7 AM to 9 PM. $89 a month gets you in any hour, 24/7." },
@@ -72,6 +97,10 @@ const jsonLd = {
   },
 };
 
+const FILM_LABEL =
+  "Film: how the gym works from 5 to 9 PM. Real footage of the gym, then kid day pass, add The Window, add the gym for $4, watch the kids on the gym TV. On your own: $9 gym day pass, or memberships at $65 and $89 a month.";
+const REAL_LABEL = "Real footage walking through Zero Gravity Fitness: power racks, free weights, machines, and cardio under honeycomb LED lights.";
+
 const btnPrimary =
   "inline-flex min-h-[54px] items-center justify-center gap-2 rounded-md bg-az-gold px-7 text-[17px] font-semibold text-az-ink transition-colors hover:bg-az-goldlight";
 const btnGhost =
@@ -84,54 +113,54 @@ export default function GymPage() {
     <div className="az-site overflow-x-hidden">
       <SEOHead
         title="Zero Gravity Fitness | Work Out While Your Kids Play | Wapakoneta"
-        description="The gym at 10 W. Auglaize St. Add the gym to your kid's day pass for $4 during child watch, or come on your own: $9 day pass with the infrared sauna, or memberships at $65 and $89 a month."
+        description="The gym at 10 W. Auglaize St. Racks, free weights, machines, and cardio. Add the gym to your kid's day pass for $4 during child watch, or come on your own: $9 day pass with the infrared sauna, or memberships at $65 and $89 a month."
         canonicalPath="/gym"
         image={GYM_OG_IMAGE}
         jsonLd={jsonLd}
       />
 
-      {/* HERO */}
+      {/* HERO, real footage */}
       <section className="py-16 md:py-24">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-12 px-5 md:px-6 lg:flex-row lg:items-center">
           <div className="min-w-0 lg:flex-[0.9]">
-            <p className="az-eyebrow mb-6">Zero Gravity Fitness · Ground floor</p>
+            <p className="az-eyebrow mb-6">Zero Gravity Fitness · 10 W. Auglaize St.</p>
             <h1 className="az-display text-[64px] sm:text-[88px] lg:text-[80px] xl:text-[112px]">
               They play.
               <br />
               <span className="text-az-gold">You train.</span>
             </h1>
             <p className="mt-7 max-w-[560px] text-[19px] leading-relaxed text-az-body md:text-[20px]">
-              Zero Gravity Fitness is the gym on the ground floor of 10 W. Auglaize, under the same roof as The Family Hub Landing Zone. Bring the kids, add The Window, and get your workout in while staff watch them play. Here on your own? The gym is yours too.
+              Zero Gravity Fitness is a real gym under the same roof as The Family Hub Landing Zone. Racks, free weights, machines, and cardio. Bring the kids, add The Window, and get your workout in while staff watch them play. Here on your own? The gym is yours too.
             </p>
             <div className="mt-9 flex flex-col gap-3.5 sm:flex-row lg:flex-col xl:flex-row">
               <button type="button" onClick={() => scrollTo("join")} className={`${btnPrimary} whitespace-nowrap`}>
                 Get on the gym list <ArrowDown className="h-5 w-5" aria-hidden="true" />
               </button>
-              <button type="button" onClick={() => scrollTo("prices")} className={`${btnGhost} whitespace-nowrap`}>
-                See the prices
+              <button type="button" onClick={() => scrollTo("inside")} className={`${btnGhost} whitespace-nowrap`}>
+                See inside the gym
               </button>
             </div>
           </div>
           <figure className="min-w-0 lg:flex-[1.25]">
-            <div className="mx-auto max-w-[400px] overflow-hidden rounded-[10px] border border-[rgba(227,168,58,0.3)] bg-az-ink md:hidden">
+            <div className="overflow-hidden rounded-[10px] border border-[rgba(227,168,58,0.3)] bg-az-ink md:hidden">
               <AzVideo
-                src={MEDIA.gymVertical.src}
-                webm={MEDIA.gymVertical.webm}
-                poster={MEDIA.gymVertical.poster}
-                label="Animated film: how the gym works from 5 to 9 PM. Kid day pass, add The Window, add the gym for $4, watch the kids on the gym TV. On your own: $9 gym day pass, or memberships at $65 and $89 a month."
-                className="block aspect-[9/16] w-full object-cover"
+                src={MEDIA.gymRealVertical.src}
+                webm={MEDIA.gymRealVertical.webm}
+                poster={MEDIA.gymRealVertical.poster}
+                label={REAL_LABEL}
+                className="block aspect-[4/5] w-full object-cover"
               />
             </div>
             <div className="hidden overflow-hidden rounded-[10px] border border-[rgba(227,168,58,0.3)] bg-az-ink md:block">
               <AzVideo
-                src={MEDIA.gym.src}
-                webm={MEDIA.gym.webm}
-                poster={MEDIA.gym.poster}
-                label="Animated film: how the gym works from 5 to 9 PM. Kid day pass, add The Window, add the gym for $4, watch the kids on the gym TV. On your own: $9 gym day pass, or memberships at $65 and $89 a month."
+                src={MEDIA.gymReal.src}
+                webm={MEDIA.gymReal.webm}
+                poster={MEDIA.gymReal.poster}
+                label={REAL_LABEL}
                 className="block aspect-video w-full object-cover"
               />
             </div>
-            <figcaption className="mt-3 text-center text-[13px] text-az-muted md:text-left">{AI_LINE}</figcaption>
+            <figcaption className="mt-3 text-[13px] text-az-muted">{REAL_LINE}</figcaption>
           </figure>
         </div>
       </section>
@@ -151,7 +180,7 @@ export default function GymPage() {
                 <span className="az-display text-[96px] leading-[0.85] text-az-gold md:text-[120px]">$4</span>
                 <span className="text-[18px] text-az-soft">gym add-on</span>
               </p>
-              <p className="mt-4 text-[17px] leading-relaxed text-az-body">Added to your kid's day pass and The Window. They play upstairs with staff watching. You train downstairs and watch them on the gym TV.</p>
+              <p className="mt-4 text-[17px] leading-relaxed text-az-body">Added to your kid's day pass and The Window. They play upstairs with staff watching. You train downstairs and watch them on the gym TV. Family Hub Landing Zone members get the gym free.</p>
               <button type="button" onClick={() => scrollTo("night")} className="mt-6 inline-flex items-center gap-1.5 font-semibold text-az-goldlight">
                 How the night works <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -171,14 +200,80 @@ export default function GymPage() {
         </div>
       </section>
 
-      {/* HOW THE NIGHT WORKS */}
-      <section id="night" className="scroll-mt-20 py-20 md:py-28">
+      {/* INSIDE THE GYM, real photos and equipment */}
+      <section id="inside" className="scroll-mt-20 py-20 md:py-28">
         <div className="mx-auto max-w-[1280px] px-5 md:px-6">
-          <Reveal>
-            <p className="az-eyebrow mb-5">With your kids · 5 to 9 PM</p>
-            <h2 className="az-display mb-12 text-[48px] md:text-[80px]">How the night works</h2>
+          <Reveal className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="az-eyebrow mb-5">Inside Zero Gravity Fitness</p>
+              <h2 className="az-display text-[52px] md:text-[88px]">This is the gym.</h2>
+            </div>
+            <p className="max-w-[520px] text-[18px] leading-[1.65] text-az-body">
+              Racks, free weights, machines, and cardio under the honeycomb lights. Mirrors on the walls, rubber on the floor, and windows that let the daylight in.
+            </p>
           </Reveal>
-          <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+          <figure className="mt-12">
+            <div className="grid auto-rows-[150px] grid-flow-dense grid-cols-2 gap-3 sm:auto-rows-[200px] lg:auto-rows-[230px] lg:grid-cols-4 lg:gap-4">
+              {GALLERY.map((g, i) => (
+                <Reveal key={g.src} delay={(i % 4) * 60} className={`overflow-hidden rounded-[10px] bg-az-ink3 ${g.cls}`}>
+                  <img
+                    src={g.src}
+                    alt={g.alt}
+                    width={g.w}
+                    height={g.h}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.03]"
+                  />
+                </Reveal>
+              ))}
+            </div>
+            <figcaption className="mt-3 text-[13px] text-az-muted">Real photos of Zero Gravity Fitness at 10 W. Auglaize St.</figcaption>
+          </figure>
+
+          <div className="mt-16">
+            <p className="az-eyebrow mb-6">What is on the floor</p>
+            <ul className="grid gap-x-10 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
+              {EQUIPMENT.map((e, i) => (
+                <Reveal as="li" key={e.title} delay={(i % 3) * 70} className="border-t border-[rgba(227,168,58,0.3)] pt-5">
+                  <span className="block text-[21px] font-semibold text-az-paper">{e.title}</span>
+                  <span className="mt-1.5 block text-[16px] leading-relaxed text-az-soft">{e.text}</span>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW THE NIGHT WORKS, explainer film */}
+      <section id="night" className="scroll-mt-20 border-y border-[rgba(227,168,58,0.18)] bg-az-ink2 py-20 md:py-28">
+        <div className="mx-auto max-w-[1280px] px-5 md:px-6">
+          <Reveal className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="az-eyebrow mb-5">With your kids · 5 to 9 PM</p>
+              <h2 className="az-display text-[48px] md:text-[80px]">How the night works</h2>
+            </div>
+            <p className="max-w-[460px] text-[18px] leading-[1.65] text-az-body">Watch the 50-second version, or read the four steps below.</p>
+          </Reveal>
+
+          <figure className="mt-10">
+            <div className="mx-auto max-w-[400px] overflow-hidden rounded-[10px] border border-[rgba(227,168,58,0.3)] bg-az-ink md:hidden">
+              <AzVideo
+                src={MEDIA.gymVertical.src}
+                webm={MEDIA.gymVertical.webm}
+                poster={MEDIA.gymVertical.poster}
+                label={FILM_LABEL}
+                className="block aspect-[9/16] w-full object-cover"
+              />
+            </div>
+            <div className="hidden overflow-hidden rounded-[10px] border border-[rgba(227,168,58,0.3)] bg-az-ink md:block">
+              <AzVideo src={MEDIA.gym.src} webm={MEDIA.gym.webm} poster={MEDIA.gym.poster} label={FILM_LABEL} className="block aspect-video w-full object-cover" />
+            </div>
+            <figcaption className="mt-3 text-center text-[13px] text-az-muted md:text-left">Gym scenes are real footage. {AI_LINE}</figcaption>
+          </figure>
+
+          <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
               <Reveal as="li" key={s.n} delay={i * 80} className="relative overflow-hidden rounded-[10px] border border-[rgba(227,168,58,0.25)] bg-az-ink3 p-7">
                 {s.spectrum && <span className="az-spectrum-bg absolute inset-x-0 top-0 h-1" aria-hidden="true" />}
@@ -197,8 +292,8 @@ export default function GymPage() {
         </div>
       </section>
 
-      {/* THE GYM TV */}
-      <section className="border-y border-[rgba(227,168,58,0.18)] bg-az-ink2 py-20 md:py-28">
+      {/* THE GYM TV, real photo */}
+      <section className="py-20 md:py-28">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-12 px-5 md:px-6 lg:flex-row lg:items-center">
           <Reveal className="min-w-0 lg:flex-1">
             <p className="az-eyebrow mb-5">Eyes on them the whole time</p>
@@ -208,28 +303,28 @@ export default function GymPage() {
               <span className="text-az-gold">from the gym.</span>
             </h2>
             <p className="mt-6 max-w-[560px] text-[19px] leading-[1.65] text-az-body">
-              The play floor is live on the TV in the gym during child watch. Look up between sets and there they are. No guessing, no checking your phone, no cutting the workout short.
+              That is the TV on the gym wall. During child watch, the play floor runs live on it. Look up between sets and there they are. No guessing, no checking your phone, no cutting the workout short.
             </p>
           </Reveal>
           <Reveal className="min-w-0 lg:flex-[1.15]" delay={120}>
             <figure>
               <img
-                src={GYM_TV_IMAGE}
-                alt="Illustration of the gym TV showing the play floor live, with kids on the slide, the soft play blocks, and the ball pit"
-                className="block w-full rounded-[10px] border border-[rgba(227,168,58,0.3)]"
+                src={GYM_PHOTOS.tv}
+                alt="The TV mounted on the gym wall next to the water station, with benches, plates, and the window behind"
+                className="block aspect-[16/9] w-full rounded-[10px] border border-[rgba(227,168,58,0.3)] object-cover"
                 loading="lazy"
                 decoding="async"
-                width={1200}
-                height={840}
+                width={900}
+                height={506}
               />
-              <figcaption className="mt-3 text-[13px] text-az-muted">Illustration. {AI_LINE}</figcaption>
+              <figcaption className="mt-3 text-[13px] text-az-muted">Real photo. The gym TV and water station.</figcaption>
             </figure>
           </Reveal>
         </div>
       </section>
 
-      {/* BENEFITS */}
-      <section className="py-20 md:py-28">
+      {/* BENEFITS AND RULES */}
+      <section className="border-t border-[rgba(227,168,58,0.18)] bg-az-ink2 py-20 md:py-28">
         <div className="mx-auto max-w-[1280px] px-5 md:px-6">
           <Reveal>
             <p className="az-eyebrow mb-5">Why it works for parents</p>
@@ -312,7 +407,7 @@ export default function GymPage() {
           </Reveal>
 
           <p className="mt-8 text-[17px] text-az-onpaper">
-            With your kids during child watch, the gym is a <b className="font-semibold text-az-ink">$4 add-on</b> to their day pass.
+            With your kids during child watch, the gym is a <b className="font-semibold text-az-ink">$4 add-on</b> to their day pass. Family Hub Landing Zone members get it free.
           </p>
         </div>
       </section>
