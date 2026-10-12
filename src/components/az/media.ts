@@ -6,6 +6,8 @@ export const MEDIA = {
   gym: { src: "/media/az-gym-night.mp4", webm: "/media/az-gym-night.webm", poster: "/media/az-gym-night-poster.jpg" },
   gymVertical: { src: "/media/az-gym-night-vertical.mp4", webm: "/media/az-gym-night-vertical.webm", poster: "/media/az-gym-night-vertical-poster.jpg" },
   gymReal: { src: "/media/az-gym-real.mp4", webm: "/media/az-gym-real.webm", poster: "/media/az-gym-real-poster.jpg" },
+  /** Real walkthrough with Dylan's original music. Click to play, sound on. */
+  gymWalkthrough: { src: "/media/az-gym-walkthrough.mp4", webm: "/media/az-gym-walkthrough.webm", poster: "/media/az-gym-walkthrough-poster.jpg" },
   gymRealVertical: { src: "/media/az-gym-real-vertical.mp4", webm: "/media/az-gym-real-vertical.webm", poster: "/media/az-gym-real-vertical-poster.jpg" },
 } as const;
 

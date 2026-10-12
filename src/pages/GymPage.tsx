@@ -246,6 +246,37 @@ export default function GymPage() {
         </div>
       </section>
 
+      {/* WALKTHROUGH, real footage with sound */}
+      <section id="walkthrough" className="scroll-mt-20 border-t border-[rgba(227,168,58,0.18)] py-20 md:py-28">
+        <div className="mx-auto max-w-[1280px] px-5 md:px-6">
+          <Reveal className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="az-eyebrow mb-5">Real footage · Sound on</p>
+              <h2 className="az-display text-[48px] md:text-[80px]">Take the walkthrough.</h2>
+            </div>
+            <p className="max-w-[480px] text-[18px] leading-[1.65] text-az-body">
+              Thirty-eight seconds. The gym first, then the rooms where the kids play while you train. Turn your sound up.
+            </p>
+          </Reveal>
+          <figure className="mt-10">
+            <div className="overflow-hidden rounded-[10px] border border-[rgba(227,168,58,0.3)] bg-az-ink">
+              <video
+                className="block aspect-video w-full bg-az-ink object-cover"
+                controls
+                playsInline
+                preload="none"
+                poster={MEDIA.gymWalkthrough.poster}
+                aria-label="Walkthrough video with music: Zero Gravity Fitness, then the sand pit, the build room, and the art room of The Family Hub Landing Zone"
+              >
+                <source src={MEDIA.gymWalkthrough.src} type="video/mp4" />
+                <source src={MEDIA.gymWalkthrough.webm} type="video/webm" />
+              </video>
+            </div>
+            <figcaption className="mt-3 text-[13px] text-az-muted">Real footage of Zero Gravity Fitness and The Family Hub Landing Zone. Original music.</figcaption>
+          </figure>
+        </div>
+      </section>
+
       {/* HOW THE NIGHT WORKS, explainer film */}
       <section id="night" className="scroll-mt-20 border-y border-[rgba(227,168,58,0.18)] bg-az-ink2 py-20 md:py-28">
         <div className="mx-auto max-w-[1280px] px-5 md:px-6">
